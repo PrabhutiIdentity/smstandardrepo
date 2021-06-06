@@ -1,0 +1,207 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentSearchListModel
+@section IncludeCss
+{
+    <title>Students Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+
+            <div class="col-md-12">
+                @using (Html.BeginForm("SearchStudents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-8 class-section">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <span style="color:white;">Search Student</span>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <input type="text" name="SearchText" class="form-control" placeholder="Search by StudentID/Student Name/Roll/SRNo/FamilyID/Aadhar No/Father Name" value="@Model.SearchText" />
+                                </div>
+                                <div class="col-md-2 padding-L" style="padding-left: 10px;">
+                                    <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 9%">Photo</th>
+                                    <th style="width: 19%">Student Details</th>
+                                    <th style="width: 19%">Parent's </th>
+                                    <th style="width: 12%">DOB</th>
+                                    @*<th style="width: 10%">Aadhar Number</th>*@
+                                    <th style="width: 11%">Contact</th>
+                                    <th style="width: 10%">Class/Section</th>
+                                    <th style="width: 15%">Address</th>
+                                    <th style="width: 5%">View</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StudentSearchModel c in Model.Students)
+                                {
+                            <tr>
+
+                                <td>
+                                    <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                </td>
+                                <td>
+                                    Name : @c.Name <br />
+                                    SID : @c.StudentSID  <br />
+                                    SR. No. :@c.SchoolUID<br />
+                                    Roll No. :@c.RollNo<br />
+                                    SSSID :@c.SSSID
+                                </td>
+
+                                <td>
+                                    F Name: @c.FatherName<br />
+                                    M Name: @c.MotherName<br />
+                                    G Name: @c.GuardianName <br />
+                                    Family ID: @c.FamilyID
+                                </td>
+                                @*<td>@c.BloodGroup</td>*@
+                                <td>@c.DOB.ToString("dd MMM, yyyy")</td>
+                                @*<td>
+                                    @c.AadharCardNo
+                                </td>*@
+                                <td>
+                                    F :  @c.FatherMobileNo<br />
+                                    M :  @c.MotherMobileNo <br />
+                                    G :  @c.GuardianMobileNo
+                                </td>
+                                <td>
+                                    @c.ClassName / @c.SectionName
+                                </td>
+                                <td>
+                                    @c.MiniAddress
+                                </td>
+                                <td>
+                                    <div class="row" style="margin-right: 10px;">
+                                        <div class="col-md-6">
+                                            <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            @*@using (Html.BeginForm("DeleteStudent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                            {
+                                                <input type="hidden" name="ClassID" value="@c.ClassID" />
+                                                <input type="hidden" name="SectionID" value="@c.SectionID" />
+                                                <input type="hidden" name="StudentID" value="@c.StudentID" />
+                                                <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link">Delete</button>
+                                            }*@
+                                        </div>
+                                    </div>
+
+
+
+                                </td>
+                            </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+
+    <script>
+
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function DeleteStudent(sender) {
+            return confirm('Do you really want to delete Student!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+}
+<!-- /.content -->

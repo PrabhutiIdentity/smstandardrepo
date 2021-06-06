@@ -1,0 +1,371 @@
+﻿
+@{
+    ViewBag.Title = "Admission";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentModel
+<style>
+    .form-control[readonly] {
+        background-color: #fefefe !important;
+    }
+
+    .innerBanner:after {
+        position: static !important;
+    }
+
+    #tcdiv .summerfield-form {
+        position: relative;
+        bottom: -15px !important;
+    }
+
+    #tcdiv .admi-form {
+        text-align: center;
+        margin: 25px 0 0 0;
+    }
+
+
+        #tcdiv .admi-form a {
+            width: 100%;
+            border-radius: 0;
+            font-size: 20px;
+            padding: 10px 0;
+            width: 250px;
+        }
+</style>
+<link href="@Url.Content("~/Content/TC.css")" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/css/bootstrap-datepicker.min.css" />
+<div class="innerBanner">
+    <div class="container">
+        @using (Html.BeginForm("GetTC", "Home", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmTC" }))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <h2>Transfer Certificate</h2>
+                </div>
+                <div class="col-md-2">
+                    <label>Session</label>
+                    <select class="form-control" name="SessionID" id="ddlSessions">
+                        @foreach (var b in Model.Sessions)
+                        {
+                            <option branchid="@b.Extra2" value="@b.ID" @(Model.SessionID == b.ID ? "selected" : "") @(b.Extra2 == Model.SBranchID.ToString() ? "" : "style=display:none")>@b.Name @(b.Extra1 == "1" ? "(Active)" : "")</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label>Birth Date <small>(MM//yyyy)</small> </label>
+                    <input type="date" name="DOB" class="form-control" value="@Model.DOB.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-2">
+                    <label>SR NO </label>
+                    <input type="date" name="SchoolUID" class="form-control" value="@Model.SchoolUID" />
+                </div>
+                <div class="col-md-3">
+                    <label>Student Name*</label>
+                    <input type="text" name="StudentName" required class="form-control" value="@Model.StudentName" />
+                </div>
+                <div class="col-md-2" style="padding-top: 23px;">
+                    <a class="btn btn-warning" href="javascript:void(0);" onclick="$('#frmTC').submit();">Search TC</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+@if (Model.TCDetails != null)
+{
+    <div id="tcdiv">
+        <div id="tcwrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="chm-head" style="margin:0 auto;">
+                            <div class="row" style="text-align:center; margin:0 0 15px 0;">
+                                <div class="col-md-3 tcdisplay">
+                                    <div class="tc-img">
+                                        <img src="images/logo.png" alt="logo" class="img-responsive" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6 tcdisplay">
+                                    <div class="summerfield-form">
+                                        <h1>ST. JOSEPH'S SCHOOL</h1>
+                                        <p>Barhalganj P.O., Gorakhpur, U.P. - 273402</p>
+                                        <p style="text-transform:capitalize; font-size:13px;">स्थानांतरण प्रमाण पत्र / Transfer Certificate</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 tcdisplay">
+                                    <div class="tc-img">
+                                        <img src="images/logo.png" alt="logo" class="img-responsive" />
+                                    </div>
+                                </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12" style="padding:0 10px;">
+                                    <div class="chm-form01">
+                                        <form class="form-inline">
+
+                                            <div class="row" style="margin:0;">
+                                                <!--col-md-3 start--->
+                                                <div class="col-md-3 tcdisplay form-group">
+                                                    <label for="name"><b>विद्यालय सं./</b>School No.</label>
+                                                    <input type="text" class="form-control chm-input02" id="name" readonly>
+                                                </div>
+                                                <div class="col-md-3 tcdisplay form-group">
+                                                    <label for="name"><b>पुस्तक नं./</b>Book No.</label>
+                                                    <input type="text" class="form-control chm-input07" id="name" readonly>
+                                                </div>
+                                                <div class="col-md-3 tcdisplay form-group">
+                                                    <label for="name"><b>क्र.सं./</b>S.R No.</label>
+                                                    <input type="text" class="form-control chm-input08 " id="name" readonly value="@Model..StudentID">
+                                                </div>
+                                                <div class="col-md-3 tcdisplay form-group">
+                                                    <label for="name"><b>प्रवेश सं./</b>Admission No.</label>
+                                                    <input type="text" class="form-control chm-input10" id="name" readonly value="@Model.Student.SchoolUID">
+                                                </div>
+                                                <!--col-md-3 end--->
+                                            </div>
+
+                                            <!--col-md-4 start-->
+                                            <div class="col-md-4 tcdisplay form-group">
+                                                <label for="name">Affiliation No.</label>
+                                                <input type="text" class="form-control chm-input12" id="name" readonly>
+                                            </div>
+                                            <div class="col-md-4 tcdisplay form-group" style="margin:0 0 0 -60px;">
+                                                <label for="name">Renewed upto</label>
+                                                <input type="text" class="form-control chm-input13" id="name" readonly>
+                                            </div>
+                                            <div class="col-md-4 tcdisplay form-group pull-right" style="margin:0 0 0 -45px;">
+                                                <label for="name">StatusofSchool:Sec/Sr.Secondary</label>
+                                                <!--<input type="text" class="form-control chm-input08 " id="name">-->
+                                            </div>
+                                            <!--col-md-4 end-->
+
+                                            <div class="col-md-12 form-group">
+                                                <label for="name">Secondary Registration No. of the candidate (in case Class - IX to XII)</label>
+                                                <input type="text" class="form-control chm-input22 " id="name">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="name"><b>विद्यार्थी का नाम/</b>Name of the Pupil</label>
+                                                <input type="text" class="form-control chm-input01" id="name" readonly value="@Model.Student.Name">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="wopd"><b>माता का नाम/</b>Mother's Name</label>
+                                                <input type="text" class="form-control chm-input06" id="wopd" readonly value="@Model.Student.MotherName">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="con"><b>पिता का नाम/</b>Father's Name</label>
+                                                <input type="text" class="form-control chm-input03" id="con" readonly value="@Model..FatherName">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="email"><b>राष्ट्रीयता/</b>Nationality</label>
+                                                <input type="email" class="form-control chm-input04" id="name" readonly value="@Model.Student.NationalityText">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या अनु.जाति/ज.जा./पिछङा वर्ग से संबन्धित है</b></p>
+                                                @{
+                                                    string CategoryText = "";
+                                                    if (Model.Student.Category == 2)
+                                                    {
+                                                        CategoryText = "SC";
+                                                    }
+                                                    else if (Model.Student.Category == 3)
+                                                    { CategoryText = "ST"; }
+                                                    else if (Model.Student.Category == 4)
+                                                    { CategoryText = "OBC"; }
+                                                    else
+                                                    {
+                                                        CategoryText = "No";
+                                                    }
+
+                                                }
+                                                <label for="add">Whether the pupil belongs to SC/ST/OBC Category</label>
+                                                <input type="text" class="form-control chm-input11" id="add" readonly value="@CategoryText">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>प्रवेश पुस्तिका के अनुसार जन्मतिथि/</b>Date of birth according to the Admission Register</label>
+                                                <input type="text" class="form-control chm-input05" id="pstcode" readonly value="@Model.Student.DOB.ToString("dd/MM/yyyy")">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode">(<b>शब्दों में/</b>in words)</label>
+                                                <input type="text" class="form-control chm-input15" id="pstcode" readonly value="@SMEnterprise.Repository.CommonUsage.DateToText(Model.Student.DOB, false, true)">>
+                                            </div>
+
+                                            <div class="col-md-12 form-group">
+                                                <!--<p><b></b></p>-->
+                                                <label for="pstcode"><b>क्या विद्यार्थी का परीक्षा परिणाम अनुत्तीर्ण है?/</b>Whether the student is failed:</label>
+                                                <input type="text" class="form-control chm-input16" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>प्रस्तावित विषय/</b>Subjects offered</label>
+                                                @{
+
+                                                    var sCounter = 1;
+                                                    foreach (var s in Model.Subjects)
+                                                    {
+
+                                                        <input type="text" class="form-control chm-input17" id="pstcode" value="@sCounter. @s">
+                                                        <label for="pstcode">@sCounter. @s</label>
+                                                        sCounter++;
+                                                    }
+                                                }
+
+                                                <input type="text" class="form-control chm-input17" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <!--<p> </p>-->
+                                                <label for="pstcode"><b>पिछली कक्षा जिसमे विद्यार्थी अध्ययनरत था: (अंको में)/</b>Class in which the pupil last studied (in words)</label>
+                                                <input type="text" class="form-control chm-input23" id="pstcode" readonly value="@Model.Student.ClassName">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>पिछले विद्यालय /बोर्ड परीक्षा एवं परिणाम/</b>School/Board Annual examination last taken with result</label>
+                                                <input type="text" class="form-control chm-input25" id="pstcode" readonly value="@Model.TCDetails.SCBLastExamName @Model.TCDetails.SCBLastExamResult">>
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <!--<p></p>-->
+                                                <label for="pstcode"><b>क्या उच्च कक्षा में पदोन्नति का अधिकारी है :/</b>Whether qualified for promotion to the next higher class:</label>
+                                                <input type="text" class="form-control chm-input26" id="pstcode" readonly value="@(Model.TCDetails.IsSCBLastExamPassed==1?"Yes":"")">>
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यार्थी ने विद्यालय की सभी देय राशि का भुगतान कर दिया है :</b></p>
+                                                <label for="pstcode">Whether the pupil has paid all dues to the Vidyalaya</label>
+                                                <input type="text" class="form-control chm-input27" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यार्थी का कोई शुल्क रियायत प्रदान की गई थी यदि हाँ, तो उसकी प्रकृति:</b></p>
+                                                <label for="pstcode">Whether the pupil was in receipt of any fee concession if so the nature of such concession:</label>
+                                                <input type="text" class="form-control chm-input28" id="pstcode" readonly value="@Model.TCDetails.Concession">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यार्थी ऐन.सी.सी. कैडेट/स्काउट है ? विवरण दे</b></p>
+                                                <label for="pstcode">Whether the pupil is NCC Cadet/Boy Scout/Girl Guide(give details)</label>
+                                                <input type="text" class="form-control chm-input29" id="pstcode" readonly value="@(Model.TCDetails.IsNCC==0?"No":"Yes "+Model.TCDetails.NCCDetails)">>
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>विद्यालय से विद्यार्थी के नाम काटे जाने की तिथि :</b></p>
+                                                <label for="pstcode">Date on which pupils' name was struck off the rolls of the Vidyalaya</label>
+                                                <input type="text" class="form-control chm-input30" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>विद्यालय छोड़ने का कारण/</b>Reason for leaving the School</label>
+                                                <input type="text" class="form-control chm-input31" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>अंतिम तिथि तक उपस्थितियों की कुल संख्या/</b>No.of meetings upto date</label>
+                                                <input type="text" class="form-control chm-input32" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>विद्यार्थी की विद्यालय दिवसों की कुल उपस्थितियाँ /</b>No.of school days the pupil attended</label>
+                                                <input type="text" class="form-control chm-input33" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>सामान्य आचरण /</b>General Conduct</label>
+                                                <input type="text" class="form-control chm-input34" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यालय सरकारी /अल्प संख्यक /स्वतंत्र श्रेणी में आता है :</b></p>
+                                                <label for="pstcode">Whether school is under Govt./Minority/independent category:</label>
+                                                <input type="text" class="form-control chm-input35" id="pstcode">
+                                            </div>
+
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>कोई अन्य टिप्पणी/</b>Any other remarks:</label>
+                                                <input type="text" class="form-control chm-input36" id="pstcode">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>प्रमाण-पत्र जारी करने की तिथि/</b>Date of issue of certificate</label>
+                                                <input type="text" class="form-control chm-input37" id="pstcode">
+                                            </div>
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="admi-form">
+                    <a href="javascript:void(0);" class="btn btn-info" onclick="PrintTC()">Print</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+
+    <div id="tcwrapper">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="chm-head">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h2>Transfer Certificate Is Not generated, kindly contact office.</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+@section layoutbottom{}
+@section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+    <script>
+        function BranchChanged(sender) {
+            var BranchID = $(sender).val();
+            var isset = 0;
+            $("#ddlSessions > option").each(function (index) {
+                if ($(this).attr('branchid') != BranchID) {
+                    $(this).css('display', 'none');
+                    $(this).removeAttr('selected');
+                }
+                else {
+                    $(this).css('display', '');
+                    if (isset == 0) {
+                        $(this).attr('selected', 'selected');
+                        isset = 1;
+                    }
+                }
+            });
+        }
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                daysOfWeekDisabled: [0, 6]
+            });
+        });
+
+        function PrintTC() {
+            var nDiv = $('#tcdiv').html();
+
+            var contents = nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<link href="/Content/TC.css" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+
+}

@@ -1,0 +1,347 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Assignment Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+@model SMEnterprise.Models.AssignmentPageModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .thumbImage {
+        max-width: 235px;
+        max-height: 250px;
+    }
+
+    *html .thumbImage {
+        width: expression((this.width/this.height)>=1?250:'auto');
+        height: expression((this.width/this.height)<1?250:'auto');
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Assignment Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Assignment Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    @using (Html.BeginForm("Assignments", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+    {
+    <div class="row">
+        <div class="col-md-2 form-group">
+            <label>Search For</label>
+            <select class="form-control" name="SType" onchange="SearchTypeChanged(this);">
+                <option value="0" @(0 == Model.SType ? "selected" : "")>Teacher</option>
+                <option value="1" @(1 == Model.SType ? "selected" : "")>Class/Section</option>
+            </select>
+        </div>
+        <div class="col-md-2 form-group">
+            <label>From Date</label>
+            <input type="date" class="form-control" name="FromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2 form-group">
+            <label>To Date</label>
+            <input type="date" class="form-control" name="EndDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+        </div>
+        <div class="col-md-2 form-group classsection" style="@(0 == Model.SType ? "display:none" : "")">
+            <label>Class</label>
+            <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                @foreach (var s in Model.Classes)
+                {
+                    <option value="@s.ID" @(s.ID == Model.ClassID ? "selected" : "")>@s.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 form-group classsection" style="@(0 == Model.SType ? "display:none" : "")">
+            <label>Section</label>
+            <select class="form-control" name="SectionID" id="ddlSection">
+                @foreach (var s in Model.Sections)
+                {
+                    <option value="@s.ID" @(s.ID == Model.SectionID ? "selected" : "")>@s.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 form-group teacher" style="@(1 == Model.SType ? "display:none" : "")">
+            <label>Teacher</label>
+            <select class="form-control" name="TeacherID" id="ddlSection">
+                @foreach (var s in Model.Teachers)
+                {
+                    <option value="@s.ID" @(s.ID == Model.TeacherID ? "selected" : "")>@s.Name</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2 form-group">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+    }
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>@(0 == Model.SType ? "Class/Section" : "Teacher")</th>
+                                <th>Title</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Type</th>
+                                <th>Grace</th>
+                                @*<th>#SUBMS</th>*@
+                                <th>Option</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (AssignmentModel c in Model.Assignments)
+                            {
+                                <tr>
+
+                                    <td id="tdEdetails">
+                                        @c.EDetail
+                                    </td>
+                                    <td id="tdETitle">
+                                        @c.Title
+                                    </td>
+                                    <td>
+                                        <input type="hidden" id="hdnChapterID" value="@c.ChapterID" />
+                                        <input type="hidden" id="hdnAssignmentID" value="@c.ID" />
+                                        <input type="hidden" id="hdnTopicID" value="@c.TopicID" />
+                                        <input type="hidden" id="hdnTaskType" value="@c.TaskType" />
+                                        <input type="hidden" id="hdnStartDate" value="@c.StartDate.ToString("dd MMM, yyyy")" />
+                                        <input type="hidden" id="hdnEndDate" value="@c.EndDate.ToString("dd MMM, yyyy")" />
+                                        <input type="hidden" id="hdnDescription" value="@c.Detail" />
+                                        <input type="hidden" id="hdnAttachments" value="@c.Attachments" />
+                                        @c.StartDate.ToString("dd MMM,yy")
+                                    </td>
+
+                                    <td>
+                                        @c.EndDate.ToString("dd MMM,yy")
+                                    </td>
+                                    <td>
+                                        @{
+                                            if (c.TaskType == 0)
+                                            {
+                                                <ss>Home Work</ss>
+                                            }
+                                            else if (c.TaskType == 1)
+                                            {
+                                                <ss>
+                                                    Assignment
+                                                </ss>
+                                            }
+                                            else
+                                            {
+                                                <ss>Project</ss>
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        @c.GracedDays
+                                    </td>
+                                    @*<td>
+                                        @c.Submissions
+                                       
+                                    </td>*@
+                                    <td>
+                                        <a href="javascript:void(0);" onclick="ViewDetails(this);" class="btn btn-link Closed">View</a>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</section>
+@section pageBottom{
+    <div id="mdlViewAssignmemt" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Assignment Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="mbImages">
+                        <div class="col-md-12">
+                            <span id="spnEDetail">1St Section A</span>
+                        </div>
+                        <div class="col-md-12">
+                            <span id="spnETitle">1St Section A</span>
+                        </div>
+                        <div class="col-md-12">
+                            <span id="spnEDescription">1St Section A</span>
+                        </div>
+
+                        <div class="col-md-12">
+                            <span>Attachments</span>
+                            <table class="table">
+                                <tbody id="dvAttchaments"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+
+    function DownloadAttachment(ID, AttName) {
+        var curUrl = window.location.href;
+        var ind = curUrl.indexOf("Admin");
+        var BaseUrl = curUrl.substring(0, ind);
+        var link = BaseUrl + 'Attachments/Assignments/' + ID + '_' + AttName;
+        var a = $("<a>")
+            .attr("href", link)
+            .attr("download", AttName)
+            .appendTo("body");
+
+        a[0].click();
+
+        a.remove();
+    }
+    function ViewDetails(sender) {
+        $('#spnEDetail').html($(sender).closest('tr').find('#tdEdetails').html() + ' From: ' + $(sender).closest('tr').find('#hdnStartDate').val() + ' To: ' + $(sender).closest('tr').find('#hdnEndDate').val());
+        $('#spnETitle').html($(sender).closest('tr').find('#tdETitle').html());
+        $('#spnEDescription').html($(sender).closest('tr').find('#hdnDescription').html());
+        var Atts = $(sender).closest('tr').find('#hdnAttachments').val();
+        $("#dvAttchaments").html('');
+        var arrAtts = Atts.split(';');
+        var lstAssignments = '';
+        if (Atts != '') {
+            for (var ai = 0; ai < arrAtts.length; ai++) {
+                lstAssignments = lstAssignments + '<tr id="trAtt_' + ai + '">';
+                lstAssignments = lstAssignments + '<td>' + arrAtts[ai] + '</td>';
+
+                var fName = "'" + arrAtts[ai] + "'";
+                var fDeleName = "'" + arrAtts[ai] + "'";
+                lstAssignments = lstAssignments + '<td><a href="javascript:void(0);" onclick="DownloadAttachment(' + $(sender).closest('tr').find('#hdnAssignmentID').val() + ',' + fName + ');"><i class="fa fa-download"></i><a></td>';
+               
+                lstAssignments = lstAssignments + '</tr>';
+            }
+            $("#dvAttchaments").append(lstAssignments);
+        }
+
+        $('#mdlViewAssignmemt').modal('toggle');
+    }
+    function SearchTypeChanged(sender) {
+        if ($(sender).val() == 0) {
+            $('.classsection').css('display', 'none');
+            $('.teacher').css('display', '');
+        }
+        else {
+            $('.classsection').css('display', '');
+            $('.teacher').css('display', 'none');
+        }
+    }
+    function ClassChanged(sender) {
+        $('.se-pre-con').css('display', '');
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlSection').html('');
+                    $('#ddlSection').html('<option value="0">--Select--</option>');
+                    $('#ddlSection').append(html);
+
+                    $('.se-pre-con').css('display', 'none');
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+
+   $(function () {
+        $("#tblCategory").DataTable();
+    });
+   
+    function ViewImages(sender, BlackBoardID) {
+
+        $('#mbImages').html('<div class="col-md-12">Loading Please wait....</div>');
+        $('#mdlImages').modal('toggle');
+        $('.se-pre-con').css('display', '');
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetBlackBoardImages/" + BlackBoardID,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    $('#mbImages').html('');
+                    if (data.length == 0) {
+                        $('#mbImages').html('<div class="col-md-12">No Images</div>');
+                    }
+                    for (var i = 0; i < data.length; i++) {
+                        var dv = '<div class="col-md-6">' +
+                            '<img src = "/Images/Blackboard/' + data[i].BlackBoardID + '_' + data[i].Photo+'" class="thumbImageMain" />' +
+                            ' <p>' + data[i].Detail+'</p></div>';
+                        $('#mbImages').append(dv);
+                    }
+                    $('.se-pre-con').css('display', 'none');
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+</script>
+<!-- /.content -->

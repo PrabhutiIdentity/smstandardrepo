@@ -1,0 +1,331 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.ClassGenderCategoryCountPageModel
+@section IncludeCss
+{
+    <title>Class wise Student List based on Category and Gender</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("ClassCategoryGenderStudents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (var el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2">Class</th>
+                                    <th colspan="3" style="text-align:center;">General</th>
+                                    <th colspan="3" style="text-align:center;">OBC</th>
+                                    <th colspan="3" style="text-align:center;">SC</th>
+                                    <th colspan="3" style="text-align:center;">ST</th>
+                                    <th colspan="3" style="text-align:center;">Other</th>
+                                </tr>
+                                <tr>
+                                    <th>Boy</th>
+                                    <th>Girl</th>
+                                    <th>Total</th>
+                                    <th>Boy</th>
+                                    <th>Girl</th>
+                                    <th>Total</th>
+                                    <th>Boy</th>
+                                    <th>Girl</th>
+                                    <th>Total</th>
+                                    <th>Boy</th>
+                                    <th>Girl</th>
+                                    <th>Total</th>
+                                    <th>Boy</th>
+                                    <th>Girl</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                <tbody>
+                                    @foreach (var c in Model.Classes)
+                                    {
+                                        <tr>
+
+                                            <td>
+                                                @c.ClassName
+                                            </td>
+                                            <td>
+                                                if(@Model.SBranchID=1)
+
+
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0 && r.Category == 1).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1 && r.Category == 1).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 1).Sum(it => it.Students)
+                                            </td>
+
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0 && r.Category == 4).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1 && r.Category == 4).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 4).Sum(it => it.Students)
+                                            </td>
+
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0 && r.Category == 2).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1 && r.Category == 2).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 2).Sum(it => it.Students)
+                                            </td>
+
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0 && r.Category == 3).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1 && r.Category == 3).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 3).Sum(it => it.Students)
+                                            </td>
+
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0 && r.Category == 5).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1 && r.Category == 5).Sum(it => it.Students)
+                                            </td>
+                                            <td>
+                                                @Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 5).Sum(it => it.Students)
+                                            </td>
+                                        </tr>
+
+                                        count++;
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr style="font-weight: 900;">
+
+                                        <td>
+                                            Total
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 0 && r.Category == 1).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 1 && r.Category == 1).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Category == 1).Sum(it => it.Students)
+                                        </td>
+
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 0 && r.Category == 4).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 1 && r.Category == 4).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Category == 4).Sum(it => it.Students)
+                                        </td>
+
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 0 && r.Category == 2).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 1 && r.Category == 2).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Category == 2).Sum(it => it.Students)
+                                        </td>
+
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 0 && r.Category == 3).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 1 && r.Category == 3).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Category == 3).Sum(it => it.Students)
+                                        </td>
+
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 0 && r.Category == 5).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Gender == 1 && r.Category == 5).Sum(it => it.Students)
+                                        </td>
+                                        <td>
+                                            @Model.Data.Where(r => r.Category == 5).Sum(it => it.Students)
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+
+        $(function () {
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+                        "pageLength": 20,
+
+                        bSort: true,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+        });
+        function DeleteStudent(sender) {
+            return confirm('Do you really want to delete Student!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+    }
+    <!-- /.content -->

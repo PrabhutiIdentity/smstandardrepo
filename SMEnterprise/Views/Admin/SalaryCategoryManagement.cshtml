@@ -1,0 +1,311 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/bootstrap-colorpicker.min.css")">
+    <title>Salary Head Management</title>
+}
+@model SalaryCategoryPageModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Salary Category Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Salary Category Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 20%">Name</th>
+                                @*<th style="width: 20%">Color</th>*@
+                                <th style="width: 20%">Occurance</th>
+                                <th>Type</th>
+                                <th>Attendance</th>
+                                <th style="width: 15%">Edit/Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbdSalaryCategories">
+                            @{
+                                int count = 0;
+                                foreach (SalaryCategoryModel c in Model.SalaryTypes)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @(count + 1)
+                                            <input type="hidden" name="ID" id="hdnSalaryTypeID" value="@c.TypeID" />
+                                            <input type="hidden" name="ID" id="hdnAttendanceType" value="@c.AttendanceType" />
+                                            <input type="hidden" name="ID" id="hdnMinDays" value="@c.MinDays" />
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="ID" id="hdnSalaryTypeName" value="@c.TypeName" />
+                                            @c.TypeName
+                                        </td>
+                                        <td>
+                                            <input type="hidden" id="hdnIsDeduction" value="@c.IsDeduction" />
+                                            <input type="hidden" id="hdnSalaryTypeApplicable" value="@c.TypeApplicable" />
+                                            <input type="hidden" id="hdnSalaryMonths" value="@c.Months" />
+                                            @c.TypeApplicableName<br />
+                                            <small id="spnMonthNames"></small>
+                                        </td>
+                                        <td>
+                                            @(c.IsDeduction == 0 ? "Pay" : "Deduction")
+                                        </td>
+                                        @if (c.AttendanceType == 0)
+                                        {
+                                            <td>Depend on Attendance</td>
+                                        }
+                                        else if (c.AttendanceType == 1)
+                                        {
+                                            <td>Independ of Attendance</td>
+                                        }
+                                        else
+                                        {
+                                            <td>Paid if present atleast <b>@c.MinDays</b> Days</td>
+                                        }
+                                        <td>
+                                            <div class="btn-group">
+                                                <a class="btn btn-link" onclick="EditSalaryCategory(this)">Edit</a>
+                                                @using (Html.BeginForm("UpdateSalaryType", "Admin", FormMethod.Post, 
+                                                    new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <input type="hidden" name="TypeID" value="@c.TypeID" />
+                                                    <button onclick="return SalaryTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" 
+                                                            value="Edit">Delete</button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="6">
+                                    <a class="btn btn-link pull-right" onclick="AddSalaryCategory(this)">Add Salary Category</a>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section pageBottom{
+    <div id="mdlEditSalaryCategory" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Salary Category</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" action="/admin/UpdateSalaryType">
+                        <div class="box-body row">
+                            <div class="form-group col-md-12">
+                                <input type="hidden" name="Months" id="hdnMonths" />
+                                <input type="hidden" name="TypeID" id="hdnEditSalaryTypeID" />
+                                <label for="txtSchemeTitle">Salary Category Title</label>
+                                <input type="text" required name="TypeName" class="form-control" id="txtSalaryTypeName" placeholder="Enter Salary Category Name">
+                            </div>
+                            @*<div class="form-group" id="divChartColor">
+                                    <label for="txtSchemeTitle">Chart Color</label>
+                                    <div class="input-group my-colorpicker2">
+                                        <input type="text" class="form-control" id="txtSalaryTypeColor" onchange='$("#hdnSalaryTypeColor").val($(this).val())' value="">
+                                        <div class="input-group-addon">
+                                            <i></i>
+                                        </div>
+                                        <input type="hidden" id="hdnSalaryTypeColor" name="ChartColor" value="" />
+                                    </div>
+                                </div>*@
+                            <div class="form-group col-md-6">
+                                <label for="ddlIsDeduction">Salary Type</label>
+                                <select class="form-control" id="ddlIsDeduction" name="IsDeduction">
+                                    <option value="0">Payable</option>
+                                    <option value="1">Deduction</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="txtSchemeTitle">Salary Applicable</label>
+                                <select class="form-control" id="ddlSalaryTypeApplicable" name="TypeApplicable" onchange="SalaryAplicableChanged(this);">
+                                    @foreach (var fta in Model.SalaryApplicableTypes)
+                                    {
+                                        <option value="@fta.ID">@fta.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label for="ddlIsDeduction">Attendance Dependancy</label>
+                                <select class="form-control" id="ddlAttendanceType" name="AttendanceType" onchange="AttendanceTypeChanged(this);">
+                                    <option value="0">Depend on Attendance</option>
+                                    <option value="1">Independ of Attendance</option>
+                                    <option value="2">Applicable if minimum present</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6" id="dvMinDays" style="display:none;">
+                                <label for="txtSchemeTitle">Minimum Days Present for eligible</label>
+                                <input type="number" step="1" required name="MinDays" class="form-control" id="txtMinDays" placeholder="Enter Minumum days Present">
+                            </div>
+                            <div class="form-group col-md-12" id="divSalaryMonths" style="display:none;">
+                                <label for="exampleInputPassword1">Salary Months</label>
+                                <div class="row EMonthsList">
+                                    @for (var mon = 1; mon <= 12; mon++)
+                                    {
+                                        <div class="col-md-4">
+                                            <input type="checkbox" value="@mon" id="chkMonth_@mon" class="minimal class-checkbox">@((new DateTime(2019, mon, 1)).ToString("MMMM"))
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary pull-right" onclick="return SaveSalaryCategory();">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/bootstrap-colorpicker.min.js")"></script>
+    <script>
+        function AttendanceTypeChanged(sender) {
+            if ($(sender).val() == 2) {
+                $('#dvMinDays').css('display', '');
+            }
+            else {
+                $('#dvMinDays').css('display', 'none');
+            }
+        }
+        var monthList = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+        function AddSalaryCategory() {
+            $('#hdnMonths').val('');
+            $('#ddlIsDeduction').val(0);
+            $('#hdnEditSalaryTypeID').val(0);
+            $('#txtSalaryTypeName').val('');
+            $('#ddlSalaryTypeApplicable').val(1);
+            $('#txtMinDays').val(0);
+            $('#ddlAttendanceType').val(0);
+            $('#ddlAttendanceType').trigger('change');
+            $('#ddlSalaryTypeApplicable').trigger('change');
+            $(".EMonthsList").find('.class-checkbox').each(function () {
+                $(this).removeAttr('checked');
+            });
+            $('#mdlEditSalaryCategory').modal('toggle');
+        }
+        function EditSalaryCategory(sender) {
+            var cls = $(sender).closest('tr').find('#hdnSalaryMonths').val().split(",");
+            $('#hdnMonths').val($(sender).closest('tr').find('#hdnSalaryMonths').val());
+            $('#hdnEditSalaryTypeID').val($(sender).closest('tr').find('#hdnSalaryTypeID').val());
+            $('#txtSalaryTypeName').val($(sender).closest('tr').find('#hdnSalaryTypeName').val());
+            $('#ddlIsDeduction').val($(sender).closest('tr').find('#hdnIsDeduction').val());
+            $('#ddlSalaryTypeApplicable').val($(sender).closest('tr').find('#hdnSalaryTypeApplicable').val());
+            $('#ddlSalaryTypeApplicable').trigger('change');
+            $('#txtMinDays').val($(sender).closest('tr').find('#hdnMinDays').val());
+            $('#ddlAttendanceType').val($(sender).closest('tr').find('#hdnAttendanceType').val());
+            $('#ddlAttendanceType').trigger('change');
+            $(".EMonthsList").find('.class-checkbox').each(function () {
+                if ($.inArray($(this).val(), cls) != -1) {
+                    $(this).attr('checked', 'checked');
+                }
+                else {
+                    $(this).removeAttr('checked');
+                }
+            });
+            $('#mdlEditSalaryCategory').modal('toggle');
+        }
+        function SalaryAplicableChanged(sender) {
+            if ($(sender).val() == 9) {
+                $('#divSalaryMonths').css('display', '');
+            }
+            else {
+                $('#divSalaryMonths').css('display', 'none');
+            }
+        }
+        $(function () {
+            $('#tbdSalaryCategories').find('tr').each(function () {
+                console.log($(this).find('#hdnSalaryTypeApplicable').val());
+                if ($(this).find('#hdnSalaryTypeApplicable').val() == 9) {
+                    var months = '';
+                    var cls = $(this).find('#hdnSalaryMonths').val().split(",");
+                    console.log(cls);
+                    $.each(cls, function (i, month) {
+                        if (months != '') {
+                            months = months + ',';
+                        }
+                        months = months + monthList[month - 1];
+                    });
+                    $(this).find('#spnMonthNames').html(' (' + months + ')');
+                }
+            });
+            $("#tblCategory").DataTable({
+                "ordering": false
+            });
+            $('#liSalaryTypeManagement').closest('ul').closest('li').addClass('active');
+            $('#liSalaryTypeManagement').addClass('active');
+            $(".my-colorpicker2").colorpicker();
+        });
+        function SalaryTypeDelete(sender) {
+            if (confirm('Are you sure you wish to delete this Salary Category?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        function SaveSalaryCategory(sender) {
+            if ($(sender).closest('tr').find('#txtSalaryTypeName').val() == "") {
+                alert("Plese Fill Required Details!!!!");
+                return false;
+            }
+            else {
+                var months = '';
+                $(".EMonthsList").find('.class-checkbox').each(function () {
+                    if ($(this).is(':checked') == true) {
+                        if (months != '') {
+                            months = months + ',';
+                        }
+                        months = months + $(this).val();
+                    }
+                });
+                $('#hdnMonths').val(months);
+                //$(sender).closest('td').find('#hdnSalaryTypeColor').val($(sender).closest('tr').find('#txtSalaryTypeColor').val());
+                return true;
+            }
+        }
+    </script>
+}
+<!-- /.content -->

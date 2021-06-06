@@ -1,0 +1,252 @@
+﻿@model SMEnterprise.Models.HolidayDetailModel
+@using (Html.BeginForm("UpdateHoliday", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+{
+    <div class="box box-danger">
+        <div class="box-header">
+            <h3 class="box-title">Holiday Details</h3>
+        </div>
+        <div class="box-body">
+            <input type="hidden" id="hdnHolidayID" name="HolidayID" value="@Model.Holiday.HolidayID" />
+            <input type="hidden" id="hdnHolidayType" name="HolidayType" value="@Model.Holiday.HolidayType" />
+            <input type="hidden" id="hdnDayDuration" name="DayDuration" value="@Model.Holiday.DayDuration" />
+            <input type="hidden" id="hdnClassesIncluded" name="Classes" value="@Model.Holiday.Classes" />
+            <input type="hidden" id="hdnAssociatedIDs" name="AssociatedIDs" value="@Model.Holiday.AssociatedIDs" />
+            <div class="row" style="margin-left:0px;margin-right:0px;">
+                <div class="form-group">
+                    <label>Title</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" onkeyup="TitleChanged(this)" name="Title" id="txtHolidayTitle" value="@Model.Holiday.Title">
+                        <div class="input-group-addon">
+                            <span><ss id="ssTitleCharCount">@(Model.Holiday.Title == null ? 0 : Model.Holiday.Title.Length)</ss>/120</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-3">
+                    <label>Holiday Type</label>
+                    <div class="input-group">
+                        <label style="margin-left: 10px;padding-top: 3px;">
+                            <input type="radio" name="HolidayType" class="flat-red" id="rbHolidayType1" @(Model.Holiday.HolidayType == 0 ? "checked" : "")>
+                            National
+                        </label>
+                        <label style="margin-left: 10px;">
+                            <input type="radio" name="HolidayType" class="flat-red" id="rbHolidayType2" @(Model.Holiday.HolidayType == 1 ? "checked" : "")>
+                            Local
+                        </label>
+
+                    </div>
+                </div>
+                <div class="form-group col-md-5">
+                    <label>Duration</label>
+                    <div class="input-group">
+                        <label style="margin-left: 10px;padding-top: 3px;">
+                            <input type="radio" name="DayDuration" class="flat-red" id="rbHolidayDur1" @(Model.Holiday.DayDuration == 1 ? "checked" : "")>
+                            Full Day
+                        </label>
+                        <label style="margin-left: 10px;">
+                            <input type="radio" name="DayDuration" class="flat-red" id="rbHolidayDur2" @(Model.Holiday.DayDuration == 2 ? "checked" : "")>
+                            First Half
+                        </label>
+                        <label style="margin-left: 10px;">
+                            <input type="radio" name="DayDuration" class="flat-red" id="rbHolidayDur3" @(Model.Holiday.DayDuration == 3 ? "checked" : "")>
+                            Second Half
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="input-group">
+                                <label>Status</label>
+                                <label class="switch switch-green" style="padding-top: 3px;">
+                                    @if (Model.Holiday.Status == 1)
+                                    {
+                                        <input type="checkbox" class="switch-input" Checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="switch-input">
+                                    }
+                                    <span class="switch-label" onclick='$(this).closest("label").find("#hdnHolidayEditStatus").val($(this).closest("label").find("#hdnHolidayEditStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                    <span onclick='$(this).closest("label").find("#hdnHolidayEditStatus").val($(this).closest("label").find("#hdnHolidayEditStatus").val() == "0" ? "1" : "0");' class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" id="hdnHolidayEditStatus" name="Status" value="@Model.Holiday.Status" />
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Employees?</label>
+                            <div class="input-group">
+                                <label class="switch switch-green" style="padding-top: 3px;">
+                                    @if (Model.Holiday.IsEmployee == 1)
+                                    {
+                                        <input type="checkbox" class="switch-input" Checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="switch-input">
+                                    }
+                                    <span class="switch-label" onclick='IsEmployeeClicked(this);' data-on="Yes" data-off="No"></span>
+                                    <span class="switch-handle" onclick='IsEmployeeClicked(this);' id="shTranding"></span>
+                                    <input type="hidden" id="hdnHolidayEditIsEmployee" name="IsEmployee" value="@Model.Holiday.IsEmployee" />
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label>Students?</label>
+                            <div class="input-group">
+                                <label class="switch switch-green" style="padding-top: 3px;">
+                                    @if (Model.Holiday.IsStudents == 1)
+                                    {
+                                        <input type="checkbox" class="switch-input" Checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="switch-input">
+                                    }
+                                    <span class="switch-label" onclick='IsStudentClicked(this);' data-on="Yes" data-off="No"></span>
+                                    <span class="switch-handle" onclick='IsStudentClicked(this);' id="shTranding"></span>
+                                    <input type="hidden" id="hdnHolidayEditIsStudents" name="IsStudents" value="@Model.Holiday.IsStudents" />
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <script>
+                    $('input[type="radio"].flat-red').iCheck({
+                        checkboxClass: 'icheckbox_flat-blue',
+                        radioClass: 'iradio_flat-blue'
+                    });
+                </script>
+            </div>
+            <div class="row" style="margin-left:0px;margin-right:0px;@(Model.Holiday.IsStudents == 1 ? "" : "display:none;")" id="dvClasses">
+                <div class="form-group">
+                    <label>Classes</label>
+                    <div class="input-group" style="width: 100%;">
+                        <select class="form-control select2" multiple="multiple" name="Classes" data-placeholder="Select Classes" id="ddlClasses" style="width: 100%;">
+                            @{
+                                if (Model.Holiday.Classes == null)
+                                {
+                                    Model.Holiday.Classes = "";
+                                }
+                                string[] classlist = Model.Holiday.Classes.Split(",".ToCharArray());
+                                if (classlist.Contains("0"))
+                                {
+                                    <option value="0" selected>All Classes</option>
+
+                                    foreach (var g in Model.Classes)
+                                    {
+                                        <option value="@g.ClassID">@g.ClassName</option>
+                                    }
+                                }
+                                else
+                                {
+
+                                    <option value="0">All Classes</option>
+                                    foreach (var g in Model.Classes)
+                                    {
+                                        <option value="@g.ClassID" @(classlist.Contains(g.ClassID.ToString()) ? "selected" : "")>@g.ClassName</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <script>
+                            $("#ddlClasses").select2();
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="row" style="margin-left:0px;margin-right:0px;@(Model.Holiday.IsEmployee == 1 ? "" : "display:none;")" id="dvEmployeeTypes">
+                <div class="form-group">
+                    <div class="input-group" style="width: 100%;">
+                        <label>EmployeeTypes</label>
+                        <select class="form-control select2" multiple="multiple" name="AssociatedIDs" data-placeholder="Select EmployeeTypes" id="ddlAssociateIDs" style="width: 100%;">
+                            @{
+                                if (Model.Holiday.AssociatedIDs == null)
+                                {
+                                    Model.Holiday.AssociatedIDs = "";
+                                }
+                                string[] eTypelist = Model.Holiday.AssociatedIDs.Split(",".ToCharArray());
+                                if (eTypelist.Contains("0"))
+                                {
+                                    <option value="0" selected>All Employees</option>
+
+                                    foreach (var g in Model.EmployeeTypes)
+                                    {
+                                        <option value="@g.EmployeeTypeID">@g.EmployeeTypeName</option>
+                                    }
+                                }
+                                else
+                                {
+
+                                    <option value="0">All Employees</option>
+                                    foreach (var g in Model.EmployeeTypes)
+                                    {
+                                        <option value="@g.EmployeeTypeID" @(eTypelist.Contains(g.EmployeeTypeID.ToString()) ? "selected" : "")>@g.EmployeeTypeName</option>
+                                    }
+                                }
+                            }
+                        </select>
+                        <script>
+                            $("#ddlClasses").select2();
+                            $("#ddlAssociateIDs").select2();
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <span>Start Date</span>
+                        </div>
+                        <input type="date" id="txtHStartDate" name="StartDate" class="form-control" value="@Convert.ToDateTime(Model.Holiday.StartDate).ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+                <div class="form-group col-md-4">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <span>End Date</span>
+                        </div>
+                        <input type="date" id="txtHEndDate" name="EndDate" class="form-control" value="@Convert.ToDateTime(Model.Holiday.EndDate).ToString("yyyy-MM-dd")" />
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <textarea rows="5" class="form-control" style="resize: none;" name="HolidayDescription">@Model.Holiday.HolidayDescription</textarea>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <button href="javascript:void(0);" class="btn btn-info pull-right" onclick="return SaveHoliday(this);">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script>
+    function IsEmployeeClicked(sender) {
+        var cval = $(sender).closest("label").find("#hdnHolidayEditIsEmployee").val();
+        $(sender).closest("label").find("#hdnHolidayEditIsEmployee").val(cval == "0" ? "1" : "0");
+        if (cval == 0) {
+            $('#dvEmployeeTypes').css('display', '');
+        }
+        else {
+            $('#dvEmployeeTypes').css('display', 'none');
+        }
+    }
+    function IsStudentClicked(sender) {
+        var cval = $(sender).closest("label").find("#hdnHolidayEditIsStudents").val();
+        $(sender).closest("label").find("#hdnHolidayEditIsStudents").val(cval == "0" ? "1" : "0");
+        if (cval == 0) {
+            $('#dvClasses').css('display', '');
+        }
+        else {
+            $('#dvClasses').css('display', 'none');
+        }
+    }
+</script>

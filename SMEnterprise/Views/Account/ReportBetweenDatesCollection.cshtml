@@ -1,0 +1,252 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model CollectionReportModel
+@section IncludeCss
+{
+    <title>Date Range  Collection Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Date Range Collection Report
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Account/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Date Range  Collection Report</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="">
+                <div class="box-header">
+                    @using (Html.BeginForm("ReportBetweenDatesCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-5 text-right">Payment Mode :</label>
+                                        <div class="col-md-7">
+                                            <select class="form-control" ID="ddlMainSessions" name="PaymentMode">
+                                                <option value="-1">--All Modes--</option>
+                                                @foreach (PaymentModeModel e in Model.PaymentModes)
+                                                {
+                                                    <option value="@e.PaymentModeID" @(e.PaymentModeID == Model.PaymentMode ? "Selected" : "")>@e.PaymentModeName </option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+                                            <label class="col-md-4 text-right padding-R">From : </label>
+                                            <div class="col-md-8 padding-L" style="padding-left: 10px;">
+
+                                                <input id="FromDate" type="date" class="form-control" name="FromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
+                                                <input type="hidden" name="PaymentMode" value="-1" />
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+                                            <label class="col-md-3 text-right padding-R">To : </label>
+                                            <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                                <input id="ToDate" type="date" class="form-control" name="ToDate" value="@Model.ToDate.ToString("yyyy-MM-dd")" />
+                                                <input type="hidden" name="ReportType" value="3" />
+                                                <input type="hidden" name="PaymentMode" value="-1" />
+
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="PaymentsTable" class="table table-striped payments">
+                        <thead>
+                            <tr>
+                                <th style="width:15%">Payee</th>
+                                <th style="width:15%">Session</th>
+                                <th style="width:25%">Details</th>
+                                <th style="width:15%">Date</th>
+                                <th style="width:15%">Collected By</th>
+                                <th style="width:15%">Amount</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            decimal TotalPayment = 0;
+                            foreach (FeePaymentModel c in Model.Report)
+                            {
+                                var PayMode = "";
+                                TotalPayment = TotalPayment + c.PaymentAmount;
+                                <tr>
+
+                                    <td>
+                                        @c.Name<br />
+                                        @c.ClassName / @c.SectionName
+                                    </td>
+                                    <td>
+                                        @c.SessionName
+                                    </td>
+                                    <td>
+                                        @if (c.PaymentMode == 0)
+                                        {
+                                            PayMode = "Cash Payment";
+                                        }
+                                        else if (c.PaymentMode == 1)
+                                        {
+                                            PayMode = "Cheque Payment";
+                                        }
+                                        else if (c.PaymentMode == 2)
+                                        {
+                                            PayMode = "NEFT Payment";
+                                        }
+                                        else if (c.PaymentMode == 2)
+                                        {
+                                            PayMode = "Other Payment";
+                                        }
+                                        @PayMode<br />
+                                        @c.PayMonths
+                                    </td>
+                                    <td>
+                                        @c.PaymentDate.ToString("dd MMM, yyyy")
+                                    </td>
+                                    <td>
+                                        @c.CollectedBy
+                                    </td>
+                                    <td>
+                                        <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                        <tfoot>
+                            <tr style="background-color: #606d73;color: white;">
+                                <td colspan="5">
+                                    <b> Total Collection</b>
+                                </td>
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+@section scripts
+{
+
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+    $(document).ready(function () {
+     var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy")';
+      var repname ='@PermissionManager.GetLoggedInUser().Description' +' Date Range  Collection Report : From ' + $('#FromDate').val() + ' To :' + $('#ToDate').val().ToString("dd/MM/yyyy");
+        var handleDataTableButtons = function () {
+            if ($("#PaymentsTable").length) {
+                $("#PaymentsTable").DataTable({
+                    bPaginate: false,
+                    dom: "Bfrtip",
+                    buttons: [
+                      {
+                           extend: "copy",
+                                className: "btn-sm",
+                                text: '<i class="far fa-copy"></i> Copy',
+                                message: printdate,
+                                title: repname ,
+    footer:true
+                      },
+                      {
+                           extend: "csv",
+                                 className: "btn-sm",
+
+                                text: '<i class="fas fa-file-csv"></i> CSV',
+                                message: printdate,
+                                title: repname,
+    footer:true
+                      },
+                      {
+                           extend: "excel",
+                                className: "btn-sm",
+                                text: '<i class=""fa fa-table fainfo" aria-hidden="true""></i> Excel',
+                                message: printdate,
+                                title: repname,
+    footer:true
+                      },
+                      {
+                          extend: "pdfHtml5",
+                                className: "btn btn-dark rounded-0",
+                                text: '<i class="fa fa-file-pdf-o"></i> Pdf',
+                                message: printdate,
+                                title: repname,
+    footer:true
+                      },
+                      {
+                           extend: "print",
+                                 className: "btn btn-dark rounded-0",
+                                 text: '<i class="fa fa-print"></i> Print',
+                                 message: printdate,
+                                 title: repname,
+    footer:true
+                      },
+                    ],
+                    responsive: true
+                });
+            }
+        };
+
+        TableManageButtons = function () {
+            "use strict";
+            return {
+                init: function () {
+                    handleDataTableButtons();
+                }
+            };
+        }();
+
+        TableManageButtons.init();
+    });
+    $(function () {
+        $('#liReportBetweenDatesCollection').closest('ul').closest('li').addClass('active');
+        $('#liReportBetweenDatesCollection').addClass('active');
+
+    });
+    </script>
+}
+<!-- /.content -->

@@ -1,0 +1,84 @@
+﻿<div class="row" style="background-color:white;margin-left: 10px;margin-right: 10px;padding-top: 10px;padding-bottom: 10px;">
+@using (Html.BeginForm("UpdateFeeDiscountRequest", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSubmitDiscountRequest" }))
+{
+    <div class="col-md-8" style="text-align:center;">
+        <h4> Request Discount for @Model.StudentName for @SMEnterprise.Repository.CommonUsage.MonthNames[Model.FeeMonth - 1], @Model.FeeYear</h4>
+        <input type="hidden" name="DiscRequestID" value="@Model.DiscRequestID" />
+    </div>
+    <div class="col-md-4">
+        <div class="switch-toggle switch-3 switch-candy">
+            <input id="on" name="Status1" type="radio"  @(Model.Status == 1 ? "checked" : "") @(Model.Status==1?"disabled":"")>
+            <label for="on" value="1" onclick="ChangeStatus(this)">Approved</label>
+
+            <input id="na" name="Status1" type="radio" @(Model.Status == 0 ? "checked" : "") @(Model.Status==1?"disabled":"")>
+            <label for="na"  value="0" onclick="ChangeStatus(this)">Pending</label>
+
+            <input id="off" name="Status1" type="radio" @(Model.Status == 2 ? "checked" : "") @(Model.Status==1?"disabled":"")>
+            <label for="off" value="2" onclick="ChangeStatus(this)">Rejected</label>
+            <a></a>
+        </div>
+        <input type="hidden" name="Status" id="hdnStatus" value="@Model.Status" />
+    </div>
+    <div class="col-md-12">
+        <table class="table">
+            <thead style="font-weight: 800;">
+                <tr>
+                    <td>Fee Type</td>
+                    <td>Fee Amount</td>
+                    <td>Requested Discount</td>
+                    <td>Approved Discount</td>
+                </tr>
+            </thead>
+            @{
+                var count = 0;
+                decimal TotalAmount = 0;
+                decimal TotalReqDiscount = 0;
+                decimal TotalAppDiscount = 0;
+                <tbody>
+
+                    @foreach (SMEnterprise.Models.FeeDiscountRequestDetails d in Model.Details)
+                    {
+                        TotalAmount = TotalAmount + d.NetApplicablePayment;
+                        TotalReqDiscount = TotalReqDiscount + d.Amount;
+                        TotalAppDiscount = TotalAppDiscount + (d.ApprovedAmount == -1 ? d.Amount : d.ApprovedAmount);
+                        <tr>
+                            <td>@d.FeeTypeName</td>
+                            <td>@d.NetApplicablePayment</td>
+                            <td>
+                                <input type="hidden" name="Details[@count].FeeTypeID" value="@d.FeeTypeID" />
+                                <input type="hidden" name="Details[@count].DiscDetailID" value="@d.DiscDetailID" />
+                                @d.Amount
+                            </td>
+                            <td>                                
+                            <input type="number" step="0.01" min="0" class="form-control" name="Details[@count].ApprovedAmount" value="@(d.ApprovedAmount==-1?d.Amount:d.ApprovedAmount)" /></td>
+                        </tr>
+                        count++;
+                    }
+
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>Total</td>
+                        <td>@TotalAmount</td>
+                        <td>@TotalReqDiscount</td>
+                        <td>@TotalAppDiscount</td>
+                    </tr>
+                </tfoot>
+            }
+        </table>
+    </div>
+    <div class="col-md-12">
+        <label>Remark</label>
+        <textarea class="form-control" style="resize:none;width:100%" readonly rows="3">@Model.Remark</textarea>
+    </div>
+
+        <div class="col-md-12">
+            <label>Directors Remark</label>
+            <textarea class="form-control"  style="resize:none;width:100%" name="DirectorRemark" rows="3">@Model.DirectorRemark</textarea>
+        </div>
+        
+        <div class="col-md-12">
+            <button type="submit" @(Model.Status==1?"disabled":"") class="btn btn-success pull-right">Update</button>
+        </div>
+                }
+</div>

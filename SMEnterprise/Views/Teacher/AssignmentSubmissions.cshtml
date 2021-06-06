@@ -1,0 +1,142 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+@model SMEnterprise.Models.AssignmentSubmissionListPage
+@section IncludeCss
+{
+    <title>Assignment Submissions</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div>
+
+    <div class="row std-mng-head col-md-12">
+        <div class="col-md-12 class-section">
+            <div class="row" style="color:white;text-align: center;">
+
+                @Model.ClassName > @Model.SectionName > @Model.SubjectName > @Model.ChapterName > @Model.TopicName <br />
+                @Model.AssignmentTitle
+
+            </div>
+        </div>
+    </div>
+    <div class="x_panel">
+
+        <div class="x_content">
+            <table id="tblCategory" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 10%">Photo</th>
+                        <th style="width: 20%">Name</th>
+                        <th style="width: 15%">Submission Date</th>
+                        <th style="width: 10%">Grade</th>
+                        <th style="width: 15%">Status</th>
+                        <th style="width: 15%">Attachments</th>
+                        <th style="width: 15%">View</th>
+                    </tr>
+                </thead>
+                @{
+                    int count = 0;
+                    foreach (AssignmentSubmissionModel c in Model.Submissions)
+                    {
+                        <tr>
+
+                            <td>
+                                <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                            </td>
+                            <td>
+                                @c.StudentName
+                            </td>
+
+                            <td>
+                                @c.SubmissionDate.ToString("dd, MMM yyyy")
+                            </td>
+                            <td>
+                                @(c.Grade == "" ? "Not Given" : c.Grade)
+                            </td>
+                            <td>
+                                @(c.Status == 0 ? "Incomplete" : c.Status == 1 ? "Partial" : c.Status == 2 ? "Complete" : "Reviewed")
+                            </td>
+                            <td>
+                                @(c.Attachments!=""?"Yes":"No")
+                            </td>
+                            <td>
+                                <a href="/Teacher/AssignmentSubmissionDetail/@c.AssResponseID" target="_blank">View</a>
+                            </td>
+                        </tr>
+
+                        count++;
+                    }
+
+
+                }
+            </table>
+
+        </div>
+
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
+
+    <script>
+
+
+
+        $(function () {
+
+            var table = $('#tblCategory').DataTable({
+                "bPaginate": false,
+                "retrieve": true
+            });
+
+        });
+
+    </script>
+}
+<!-- /.content -->

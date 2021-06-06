@@ -1,0 +1,783 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var sBranchStateID = SMEnterprise.Models.PermissionManager.GetLoggedInUser().StateID;
+}
+@model SMEnterprise.Models.StockTransaferMasterModel
+@section IncludeCss
+{
+    <title>Stock Details</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .ui-pnotify {
+        position: absolute;
+        left: 0px;
+        right: 36px;
+        margin: 0px auto;
+        width: 40%;
+        top: 36px;
+        cursor: auto;
+    }
+
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    .RedText {
+        color: red;
+    }
+
+    .fileContainer {
+        overflow: hidden;
+        position: relative;
+    }
+
+        .fileContainer [type=file] {
+            cursor: inherit;
+            display: block;
+            font-size: 999px;
+            filter: alpha(opacity=0);
+            min-height: 100%;
+            min-width: 100%;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            text-align: right;
+            top: 0;
+        }
+
+    .BillImageBox {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        margin-left: 5px;
+        border-radius: 5px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row std-mng-head">
+                    <div class="col-md-12 class-section">
+                        <div class="row" style="color:white;">
+                            <div class="col-md-8">
+                                Transaction Details
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="x_panel">
+                    @using (Html.BeginForm("SaveStock", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                    {
+                        if (Model.STID == 0)
+                        {
+                            Model.Status = 1;
+                            Model.TrDate = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+                        }
+                        <div class="x_content">
+                            <div class="row BkRow">
+                                <div class="col-md-3">
+                                    <label>Transaction Type</label>
+                                    <input type="hidden" name="STID" value="@Model.STID" />
+                                    <select class="form-control" name="TrType" id="ddlTrType" onchange="TrTypeChanged(this);">
+                                        <option value="0" @(0 == Model.TrType ? "selected" : "")>Purchase</option>
+                                        <option value="1" @(1 == Model.TrType ? "selected" : "")>Sale</option>
+                                        <option value="2" @(2 == Model.TrType ? "selected" : "")>Allocate (No Sale)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3" id="dvRecieverTypes" style="@(Model.TrType==0?"display:none":"")">
+                                    <label>Reciever Type</label>
+                                    <select class="form-control" name="RefType" id="ddlRefTypes" onchange="RefTypeChanged(this);">
+                                        <option value="0" @(0 == Model.RefType ? "selected" : "")>Student</option>
+                                        <option value="1" @(1 == Model.RefType ? "selected" : "")>Employee</option>
+                                    </select>
+                                    <input type="hidden" name="RefID" value="@Model.RefID" id="hdnRefID" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Transaction Date</label>
+                                    <input type="date" class="form-control" id="txtTrDate" name="TrDate" value="@Model.TrDate.ToString("yyyy-MM-dd")" onchange="StockDateChanged(this)" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Status</label>
+                                    <select class="form-control" name="Status">
+                                        <option value="1" @(1 == Model.Status ? "selected" : "")>Valid</option>
+                                        <option value="0" @(0 == Model.Status ? "selected" : "")>Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Remark</label>
+                                    <input type="text" class="form-control" required name="Remark" value="@Model.Remark" />
+                                </div>
+
+                            </div>
+                            <div class="row BkRow" id="dvStudentRefType" style="@(Model.TrType==1 && Model.RefType==0?"":"display:none")">
+                                <div class="col-md-3 student">
+                                    <label>Session</label>
+                                    <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#ddlSection').trigger('change');">
+                                        @foreach (var sess in Model.Sessions)
+                                        {
+                                            <option value="@sess.ID" @(sess.ID == Model.SessionID ? "selected" : "")>@sess.Name @(sess.Extra1 == "1" ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3 student">
+                                    <label>Class</label>
+                                    <select class="form-control" id="ddlClasses" name="ClassID" onchange="ClassChanged(this);">
+                                        @foreach (var sess in Model.Classes)
+                                        {
+                                            <option value="@sess.ID" @(sess.ID == Model.ClassID ? "selected" : "")>@sess.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3 student">
+                                    <label>Section</label>
+                                    <select class="form-control" name="SectionID" id="ddlSection" onchange="SectionChanged(this);">
+                                        @foreach (var sess in Model.Sections)
+                                        {
+                                            <option value="@sess.ID" @(sess.ID == Model.SectionID ? "selected" : "")>@sess.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3 student">
+                                    <label>Student</label>
+                                    <select class="form-control" id="ddlStudents">
+                                        @foreach (var sess in Model.Students)
+                                        {
+                                            <option value="@sess.ID" @(sess.ID == Model.RefID ? "selected" : "")>@sess.Name @sess.Extra1</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="row BkRow" id="dvEmployeeRefType" style="@(Model.TrType==1 && Model.RefType==1?"":"display:none")">
+                                <div class="col-md-3 student">
+                                    <label>Employee Category</label>
+                                    <select class="form-control" name="EmployeeTypeID" id="ddlEmployeeTypes" onchange="EmployeeTypeChanged(this)">
+                                        @foreach (var sess in Model.EmployeeTypes)
+                                        {
+                                            <option value="@sess.ID" @(sess.ID == Model.EmployeeTypeID ? "selected" : "")>@sess.Name </option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-9 student">
+                                    <label>Employee</label>
+                                    <select class="form-control" name="RefID" id="ddlEmployees">
+                                        @foreach (var sess in Model.Classes)
+                                        {
+                                            <option value="@sess.ID" @(sess.ID == Model.ClassID ? "selected" : "")>@sess.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row BkRow" id="dvVendorRefType" style="@(Model.TrType!=0?"display:none":"")">
+                                <div class="col-md-6 student">
+                                    <label>Vendor</label>
+                                    <select class="form-control" name="VendorID" id="ddlVendors">
+                                        @foreach (var sess in Model.Vendors)
+                                        {
+                                            <option stateid="@sess.StateID" value="@sess.VendorID" @(sess.VendorID == Model.VendorID ? "selected" : "")>@sess.CompanyName </option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row BkRow">
+                                <div class="col-md-12">
+                                    <label>Stock Details</label>
+                                    <div class="row" style="margin-left: 0px;margin-right: 0px;">
+                                        <table class="table table-striped jambo_table bulk_action">
+                                            <thead>
+                                                <tr class="headings">
+                                                    <th style="width:30%">Product</th>
+                                                    <th style="width:15%">Quantity</th>
+                                                    <th class="costfield" style="width:15%;@(Model.TrType==2?"display:none;":"")">MRP</th>
+                                                    <th class="costfield" style="width:15%;@(Model.TrType==2?"display:none;":"")">Price</th>
+                                                    <th class="costfield" style="width:15%;@(Model.TrType==2?"display:none;":"")">GST <small>(SGST/CGST/IGST)</small></th>
+                                                    <th class="costfield" style="width:15%;@(Model.TrType==2?"display:none;":"")">Net Amount</th>
+                                                    <th style="width:20%">Remove</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody style="background-color: white;" id="tblExpDetails">
+                                                @{
+
+                                                    int counter = 0;
+                                                    foreach (StockTransaferDetailModel d in Model.Details)
+                                                    {
+                                                        <tr class="trStockItem">
+                                                            <td>
+                                                                <input type="hidden" id="hdnSTDID" name="Details[@counter].STDID" value="@d.STDID" />
+                                                                <input type="hidden" id="hdnProductID" name="Details[@counter].ProductID" value="@d.ProductID" />
+                                                                <input type="hidden" id="hdnQuantity" name="Details[@counter].Quantity" value="@d.Quantity" />
+                                                                <input type="hidden" id="hdnMRP" name="Details[@counter].MRP" value="@d.MRP" />
+                                                                <input type="hidden" id="hdnSGST" name="Details[@counter].SGST" value="@d.SGST" />
+                                                                <input type="hidden" id="hdnCGST" name="Details[@counter].CGST" value="@d.CGST" />
+                                                                <input type="hidden" id="hdnIGST" name="Details[@counter].IGST" value="@d.IGST" />
+                                                                <input type="hidden" id="hdnCost" name="Details[@counter].Cost" value="@d.Cost" />
+                                                                <input type="hidden" id="hdnOpType" name="Details[@counter].OpType" value="1" />
+                                                                @d.ProductName
+                                                            </td>
+                                                            <td>
+                                                                @d.Quantity
+                                                            </td>
+                                                            <td class="costfield" style="@(Model.TrType==2?"display:none;":"")">@d.MRP.ToString("0.00")</td>
+                                                            <td class="costfield" style="@(Model.TrType==2?"display:none;":"")">@d.Cost.ToString("0.00")</td>
+                                                            <td class="costfield" style="@(Model.TrType==2?"display:none;":"")">
+                                                                @d.SGST.ToString("0.0")%/ @d.CGST.ToString("0.0")%/ @d.IGST.ToString("0.0")%
+                                                            </td>
+                                                            <td class="costfield" style="@(Model.TrType==2?"display:none;":"")">
+                                                                @((d.Cost * d.Quantity + d.Cost*d.Quantity*(d.SGST+d.CGST+d.IGST)/100).ToString("0.0"))
+
+                                                            </td>
+                                                            <td>
+                                                                <a href="javascript:void(0);" onclick="RemoveStockDetail(this);" class="btn btn-danger">Remove</a>
+                                                            </td>
+                                                        </tr>
+                                                        counter++;
+                                                    }
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row" style="margin-left: 0px;margin-right: 0px;">
+                                        <a href="javascript:void(0);" onclick="AddNewStockDetail(this);" class="btn btn-dark pull-right">Add New Stock Item</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row BkRow">
+                                <div class="col-md-12">
+                                    <input type="submit" onclick="return BeforeSaveStock();" class="btn btn-block btn-info pull-right" value="Save" />
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+</div>
+<div id="divAddProduct" style="display:none;">
+    <div class="row add-product">
+        <div class="col-md-12" style="text-align:center">
+            <label style="text-align:center">Add Product</label>
+        </div>
+        <div class="col-md-12">
+            <label>Product</label>
+            <input type="hidden" id="hdnSTDID" value="" />
+            <select class="form-control" name="ProductID" id="ddlProductID" onchange="ProductChanged(this);">
+                @foreach (var p in Model.Products)
+                {
+                    <option value="@p.ProductID" available="@p.Available" mrp="@p.MRP" sgst="@p.SGST" cgst="@p.CGST" igst="@p.IGST" qty="@p.Quantity" cost="@p.Price">@p.Name (@p.Price)</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-12">
+            <label>GST</label>
+            <label id="lblGSTDetails">SGST : </label>
+            <input type="hidden" id="hdnESGST" />
+            <input type="hidden" id="hdnECGST" />
+            <input type="hidden" id="hdnEIGST" />
+        </div>
+        <div class="col-md-4">
+            <label>Quantity</label>
+            <input type="number" class="form-control" id="txtQuantity" name="Quantity" value="1" />
+        </div>
+        <div class="col-md-4 costfield">
+            <label>MRP</label>
+            <input type="text" class="form-control" id="txtEMRP" name="MRP" value="" />
+        </div>
+        <div class="col-md-4 costfield">
+            <label id="lblPrice">Price</label>
+            <input type="text" class="form-control" id="txtEPrice" name="Price" value="" />
+        </div>
+        <div class="col-md-12">
+            <input type="button" class="btn btn-warning pull-left" onclick="CloseForm(this)" value="Close" />
+            <input type="button" class="btn btn-primary pull-right" onclick="AddProduct(this)" value="Add" />
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script>
+        var isEmployeeLoaded = false;
+        var isStudentLoaded = false;
+        var isVendorLoaded = false;
+        function TrTypeChanged(sender) {
+            if ($(sender).val() == 0) {
+                $('#dvRecieverTypes').css('display', 'none');
+                $('#dvStudentRefType').css('display', 'none');
+                $('#dvEmployeeRefType').css('display', 'none');
+                $('#dvVendorRefType').css('display', '');
+                $('#lblPrice').html('Purchase Price');
+                $('.costfield').css('display', '');
+            }
+            else {
+                if ($(sender).val() == 2) {
+                    $('.costfield').css('display', 'none');
+                }
+                else {
+                     $('.costfield').css('display', '');
+                }
+                $('#lblPrice').html('Selling Price');
+                $('#dvRecieverTypes').css('display', '');
+                $('#dvVendorRefType').css('display', 'none');
+                if ($('#ddlRefTypes').val() == 0) {
+                    LoadStudentsForStock();
+                    $('#dvStudentRefType').css('display', '');
+                    $('#dvEmployeeRefType').css('display', 'none');
+                }
+                else {
+                    LoadEmployeesForStock(0);
+                    $('#dvStudentRefType').css('display', 'none');
+                    $('#dvEmployeeRefType').css('display', '');
+                }
+            }
+        }
+        function RefTypeChanged(sender) {
+             if ($('#ddlRefTypes').val() == 0) {
+                    LoadStudentsForStock();
+                    $('#dvStudentRefType').css('display', '');
+                    $('#dvEmployeeRefType').css('display', 'none');
+                }
+                else {
+                    var ET = $('#ddlEmployeeTypes').val();
+                    LoadEmployeesForStock(ET);
+                    $('#dvStudentRefType').css('display', 'none');
+                    $('#dvEmployeeRefType').css('display', '');
+                }
+        }
+        function EmployeeTypeChanged() {
+            var ET = $('#ddlEmployeeTypes').val();
+            LoadEmployeesForStock(ET);
+        }
+        function AddProduct(sender) {
+            var trtype = $('#ddlTrType').val();
+            var mrp = $(sender).closest('.row').find('#txtEMRP').val();
+            var sgst = $(sender).closest('.row').find('#hdnESGST').val();
+            var cgst = $(sender).closest('.row').find('#hdnECGST').val();
+            var igst = $(sender).closest('.row').find('#hdnEIGST').val();
+            var ctr = $('#tblExpDetails').find('tr').length;
+            var stdid = $(sender).closest('.row').find('#hdnSTDID').val();
+            var Qty = parseInt($(sender).closest('.row').find('#txtQuantity').val());
+            var PID = $(sender).closest('.row').find('#ddlProductID').val();
+            var price = parseFloat($(sender).closest('.row').find('#txtEPrice').val());
+            var cost = price;
+            var netamount = cost * Qty + cost * Qty * (parseFloat(sgst) + parseFloat(cgst) + parseFloat(igst)) / 100;
+            console.log(netamount);
+            var PName = $(sender).closest('.row').find('#ddlProductID option:selected').html().trim();
+            if (Qty <= 0) {
+                ShowNotification('Error', "Kindly Specify Quantity", "error");
+            }
+            else {
+                var tr = '<tr class="trStockItem">';
+                tr = tr + '<td>';
+                tr = tr + '    <input type="hidden" id="hdnSTDID" name="Details[' + ctr + '].STDID" value="' + stdid + '">';
+                tr = tr + '    <input type="hidden" id="hdnProductID" name="Details[' + ctr + '].ProductID" value="' + PID + '">';
+                tr = tr + '    <input type="hidden" id="hdnOpType" name="Details[' + ctr + '].OpType" value="1">';
+                tr = tr + '    <input type="hidden" id="hdnCost" name="Details[' + ctr + '].Cost" value="' + cost + '">';
+                tr = tr + '    <input type="hidden" id="hdnQuantity" name="Details[' + ctr + '].Quantity" value="' + Qty + '">';
+                tr = tr + '    <input type="hidden" id="hdnMRP" name="Details[' + ctr + '].MRP" value="' + mrp + '">';
+                tr = tr + '    <input type="hidden" id="hdnSGST" name="Details[' + ctr + '].SGST" value="' + sgst + '">';
+                tr = tr + '    <input type="hidden" id="hdnCGST" name="Details[' + ctr + '].CGST" value="' + cgst + '">';
+                tr = tr + '    <input type="hidden" id="hdnIGST" name="Details[' + ctr + '].IGST" value="' + igst + '">';
+                tr = tr + '   ' + PName + '';
+                tr = tr + '</td>';
+                tr = tr + '<td>';
+                tr = tr + Qty;
+                tr = tr + '</td>';
+                tr = tr + '<td class="costfield" style="' + (trtype==2?"display:none;":"") + '">';
+                tr = tr + mrp;
+                tr = tr + '</td>';
+                tr = tr + '<td class="costfield" style="' + (trtype==2?"display:none;":"") + '">';
+                tr = tr + cost;
+                tr = tr + '</td>';
+                tr = tr + '<td class="costfield" style="' + (trtype == 2 ? "display:none;" : "") + '">';
+                tr = tr + sgst+'%/'+cgst+'%/'+igst+'%';
+                tr = tr + '</td>';
+                tr = tr + '<td class="costfield" style="' + (trtype == 2 ? "display:none;" : "") + '">';
+                tr = tr + parseFloat(netamount).toFixed(2);
+                tr = tr + '</td>';
+                tr = tr + '<td>';
+                tr = tr + '    <a href="javascript:void(0);" onclick="RemoveStockDetail(this);" class="btn btn-danger">Remove</a>';
+                tr = tr + '</td>';
+                tr = tr + '</tr>';
+
+                $('#tblExpDetails').append(tr);
+                EditSessionForm.remove();
+            }
+
+        }
+        function CloseForm(sender) {
+            EditSessionForm.remove();
+        }
+        function StockDateChanged(sender) {
+
+            if ($('#hdnCurrentDate').val() < $(sender).val()) {
+                ShowNotification('Error', "Can't add Stock of date greater then Current Date", "error");
+                $(sender).val($('#hdnCurrentDate').val());
+            }
+        }
+        function RemoveStockDetail(sender) {
+            if ($(sender).hasClass('btn-danger')) {
+                $(sender).closest('tr').css('background-color', 'red');
+                $(sender).closest('tr').find('#hdnOpType').val(-1);
+                $(sender).removeClass('btn-danger').addClass('btn-success');
+                $(sender).html('Undo');
+            }
+            else {
+                $(sender).closest('tr').css('background-color', 'white');
+                $(sender).closest('tr').find('#hdnOpType').val(0);
+                $(sender).removeClass('btn-success').addClass('btn-danger');
+                $(sender).html('Remove');
+
+            }
+        }
+        function BeforeSaveStock() {
+            if ($('#txtStockDate').val() == '') {
+                ShowNotification('Error', "Kindly Specify Date for Stock Transaction", "error");
+                return false;
+            }
+            if ($('#tblExpDetails tr').length == 0) {
+                ShowNotification('Stock Detail', 'Kindly add atleast one Product', 'error');
+                return false;
+            }
+            else {
+              if ($('#ddlTrType').val() == 0) {
+                  $('#hdnRefID').val($('#ddlVendors').val());
+            }
+            else {
+                if ($('#ddlRefTypes').val() == 0) {
+                   $('#hdnRefID').val($('#ddlStudents').val());
+                }
+                else {
+                    $('#hdnRefID').val($('#ddlEmployees').val());
+                }
+            }
+                var Retvariable = true;
+
+                return Retvariable;
+            }
+        }
+        var EditSessionForm;
+        function ProductChanged(sender) {
+            console.log($(sender).closest('.add-product').find("#ddlProductID option:selected").attr('sgst'));
+            $(sender).closest('.add-product').find("#txtEMRP").val($(sender).closest('.add-product').find("#ddlProductID option:selected").attr('mrp'));
+            $(sender).closest('.add-product').find("#txtEPrice").val($(sender).closest('.add-product').find("#ddlProductID option:selected").attr('cost'));
+            var Qty = $(sender).closest('.add-product').find("#ddlProductID option:selected").attr('qty');
+            var Available = $(sender).closest('.add-product').find("#ddlProductID option:selected").attr('available');
+            var vendorState = @sBranchStateID;
+             var SGST = 0;
+            var CGST = 0;
+            var IGST = 0;
+            if ($('#ddlTrType').val() == 0) {
+               vendorState= $("#ddlVendors option:selected").attr('stateid');
+            }
+            if (vendorState ==@sBranchStateID) {
+               SGST = $(sender).closest('.add-product').find("#ddlProductID option:selected").attr('sgst');
+               CGST = $(sender).closest('.add-product').find("#ddlProductID option:selected").attr('cgst');
+               IGST = 0;
+            }
+            else {
+                SGST = 0;
+                CGST = 0;
+                IGST = $(sender).closest('.add-product').find("#ddlProductID option:selected").attr('igst');
+            }
+            $(sender).closest('.add-product').find('#hdnESGST').val(SGST);
+            $(sender).closest('.add-product').find('#hdnECGST').val(CGST);
+            $(sender).closest('.add-product').find('#hdnEIGST').val(IGST);
+
+            var cQty=parseFloat(Qty) + parseFloat(Available)
+            $(sender).closest('.add-product').find('#lblGSTDetails').html("SGST: (" + SGST + "%) CGST:(" + CGST + "%) IGST:(" + IGST + "%) Quantity:(" + Available+")");
+        }
+        function AddNewStockDetail(sender) {
+
+            var vendorState = @sBranchStateID;
+            if ($('#ddlTrType').val() == 0) {
+               vendorState= $("#ddlVendors option:selected").attr('stateid');
+            }
+            if (vendorState ==@sBranchStateID) {
+                var SGST = $("#ddlProductID option:selected").attr('sgst');
+                var CGST = $("#ddlProductID option:selected").attr('cgst');
+                var IGST = 0;
+            }
+            else {
+                var SGST = 0;
+                var CGST = 0;
+                var IGST = $("#ddlProductID option:selected").attr('igst');
+            }
+
+            var Qty = $("#ddlProductID option:selected").attr('qty');
+            var Available = $("#ddlProductID option:selected").attr('available');
+            var cQty=parseFloat(Qty) + parseFloat(Available)
+            $('#lblGSTDetails').html("SGST: (" + SGST + "%) CGST:(" + CGST + "%) IGST:(" + IGST + "%) Quantity:(" + Available + ")");
+            EditSessionForm = new PNotify({
+                text: $('#divAddProduct').html(),
+                icon: false,
+                width: '40%',
+                hide: false,
+                addclass: 'dark',
+                styling: 'bootstrap3',
+                buttons: {
+                    closer: false,
+                    sticker: false
+                },
+                insert_brs: false
+            });
+            $('.ui-pnotify-text').find('#txtEPrice').val($("#ddlProductID option:selected").attr('cost'));
+            $('.ui-pnotify-text').find('#txtEMRP').val($("#ddlProductID option:selected").attr('mrp'));
+
+            if ($('#ddlTrType').val() == 0) {
+                $('.ui-pnotify-text').find('#lblPrice').html('Purchase Price');
+                $('.ui-pnotify-text').find('.costfield').css('display', '');
+            }
+            else if ($('#ddlTrType').val() == 1) {
+                $('.ui-pnotify-text').find('#lblPrice').html('Selling Price');
+                $('.ui-pnotify-text').find('.costfield').css('display', '');
+            }
+            else {
+                $('.ui-pnotify-text').find('#lblPrice').html('Purchase Price');
+                $('.ui-pnotify-text').find('.costfield').css('display', 'none');
+            }
+
+             $('.ui-pnotify-text').find('#hdnESGST').val(SGST);
+             $('.ui-pnotify-text').find('#hdnECGST').val(CGST);
+             $('.ui-pnotify-text').find('#hdnEIGST').val(IGST);
+            //$('.').css('margin-right', '100px');
+        }
+        function ImageChanged(fileBox, Type) {
+
+            if (fileBox.files && fileBox.files[0]) {
+                if (fileBox.files[0].size / 1024 < 5000) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $(fileBox).closest('.col-md-3').find('#hdnImageName').val(fileBox.files[0].name);
+                        $(fileBox).closest('.col-md-3').find('img').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(fileBox.files[0]);
+                }
+                else {
+                    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+                    $(fileBox).closest('.col-md-3').find('#hdnImageName').val('');
+                    clearFileInput(fileBox);
+                }
+            }
+        }
+        function clearFileInput(ctrl) {
+            try {
+                ctrl.value = null;
+            } catch (ex) { }
+            if (ctrl.value) {
+                ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+            }
+        }
+        function ClassChanged(sender) {
+            $('.se-pre-con').css('display', '');
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('.se-pre-con').css('display', 'none');
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function LoadStudentsForStock() {
+            if (isStudentLoaded == false) {
+                $('.se-pre-con').css('display', '');
+                $('#ddlSessions').html('<option value="0">Loading....</option>');
+                $('#ddlSection').html('<option value="0">Loading....</option>');
+                $('#ddlClasses').html('<option value="0">Loading....</option>');
+                $('#ddlStudents').html('<option value="0">Loading....</option>');
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetStudentsForStockTransfer/" + @Model.STID,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            isStudentLoaded = true;
+                            $('.se-pre-con').css('display', 'none');
+                            $('#ddlClasses').html('');
+                            for (var c = 0; c < data.Classes.length; c++) {
+                                if (data.Classes[c].ID == data.ClassID) {
+                                    $('#ddlClasses').append('<option value="' + data.Classes[c].ID + '" selected>' + data.Classes[c].Name + '</option>');
+                                }
+                                else {
+                                    $('#ddlClasses').append('<option value="' + data.Classes[c].ID + '">' + data.Classes[c].Name + '</option>');
+                                }
+                            }
+                            $('#ddlSessions').html('');
+                            for (var c = 0; c < data.Sessions.length; c++) {
+                                if (data.Sessions[c].ID == data.SessionID) {
+                                    $('#ddlSessions').append('<option value="' + data.Sessions[c].ID + '" selected>' + data.Sessions[c].Name + ' ' + (data.Sessions[c].Extra1 == "1" ? "(Active)" : "") + '</option>');
+                                }
+                                else {
+                                    $('#ddlSessions').append('<option value="' + data.Sessions[c].ID + '">' + data.Sessions[c].Name + ' ' + (data.Sessions[c].Extra1 == "1" ? "(Active)" : "") + '</option>');
+                                }
+                            }
+
+                            $('#ddlSection').html('');
+                            for (var c = 0; c < data.Sections.length; c++) {
+                                if (data.Sections[c].ID == data.SectionID) {
+                                    $('#ddlSection').append('<option value="' + data.Sections[c].ID + '" selected>' + data.Sections[c].Name + '</option>');
+                                }
+                                else {
+                                    $('#ddlSection').append('<option value="' + data.Sections[c].ID + '">' + data.Sections[c].Name + '</option>');
+                                }
+                            }
+                            $('#ddlStudents').html('');
+                            for (var c = 0; c < data.Sections.length; c++) {
+                                if (data.Students[c].ID == data.RefID) {
+                                    $('#ddlStudents').append('<option value="' + data.Students[c].ID + '" selected>' + data.Students[c].Name + '</option>');
+                                }
+                                else {
+                                    $('#ddlStudents').append('<option value="' + data.Students[c].ID + '">' + data.Students[c].Name + '</option>');
+                                }
+                            }
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+        }
+        function LoadEmployeesForStock(EType) {
+            if (isEmployeeLoaded == false) {
+                $('.se-pre-con').css('display', '');
+                $('#ddlEmployeeTypes').html('<option value="0">Loading....</option>');
+                $('#ddlEmployees').html('<option value="0">Loading....</option>');
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetEmployeesForStockTransfer/" + @Model.STID+"/" + EType,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            isEmployeeLoaded = true;
+                            $('.se-pre-con').css('display', 'none');
+                            $('#ddlEmployeeTypes').html('');
+                            for (var c = 0; c < data.EmployeeTypes.length; c++) {
+                                if (data.EmployeeTypes[c].ID == data.EmployeeTypeID) {
+                                    $('#ddlEmployeeTypes').append('<option value="' + data.EmployeeTypes[c].ID + '" selected>' + data.EmployeeTypes[c].Name + '</option>');
+                                }
+                                else {
+                                    $('#ddlEmployeeTypes').append('<option value="' + data.EmployeeTypes[c].ID + '">' + data.EmployeeTypes[c].Name + '</option>');
+                                }
+                            }
+                            $('#ddlEmployees').html('');
+                            for (var c = 0; c < data.Employees.length; c++) {
+                                if (data.Employees[c].ID == data.SessionID) {
+                                    $('#ddlEmployees').append('<option value="' + data.Employees[c].ID + '" selected>' + data.Employees[c].Name + '</option>');
+                                }
+                                else {
+                                    $('#ddlEmployees').append('<option value="' + data.Employees[c].ID + '">' + data.Employees[c].Name + '</option>');
+                                }
+                            }
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+        }
+        function LoadVendorsForStock() {
+            if (isVendorLoaded == false) {
+                $('.se-pre-con').css('display', '');
+                $('#ddlVendors').html('<option value="0">Loading....</option>');
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetVendorsForStockTransfer/" + @Model.STID,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            isVendorLoaded = true;
+                            $('.se-pre-con').css('display', 'none');
+                            $('#ddlVendors').html('');
+                            for (var c = 0; c < data.Vendors.length; c++) {
+                                if (data.Vendors[c].ID == data.VendorID) {
+                                    $('#ddlVendors').append('<option value="' + data.Vendors[c].ID + '" selected>' + data.Vendors[c].Name + '</option>');
+                                }
+                                else {
+                                    $('#ddlVendors').append('<option value="' + data.Vendors[c].ID + '">' + data.Vendors[c].Name + '</option>');
+                                }
+                            }
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+        }
+        function SectionChanged(sender) {
+            $('#ddlStudents').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetStudentOnSessionSection/" + $('#ddlSessions').val() + "/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlStudents').html('');
+                        $('#ddlStudents').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+}
+<!-- /.content -->

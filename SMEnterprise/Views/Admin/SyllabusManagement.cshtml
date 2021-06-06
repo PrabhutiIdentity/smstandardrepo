@@ -1,0 +1,355 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model SyllabusModel
+@section IncludeCss
+{
+    <title>Syllabus Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Syllabus Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Syllabus Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("SyllabusManagement", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetSyllabus" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-4 text-right">Class :</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" ID="ddlMainClass" name="ClassID" onchange="ClassMainChanged(this);">
+                                                @foreach (ClassModel e in Model.Classes)
+                                                {
+                                                    <option value="@e.ClassID" @(e.ClassID == Model.ClassID ? "Selected" : "")>@e.ClassName</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-3 text-right padding-R" style="padding-right: 5px!important;">Groups : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                            <select class="form-control" name="GroupID" ID="ddlGroups" onchange="GroupChanged(this);">
+                                                @foreach (GroupModel e in Model.Groups)
+                                                {
+                                                    <option value="@e.GroupID" @(e.GroupID == Model.GroupID ? "Selected" : "")>@e.GroupName</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+                                            <label class="col-md-3 text-right padding-R" style="padding-right: 5px!important;">Subjects : </label>
+                                            <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                                <select class="form-control" name="SubjectID" ID="ddlSubjects">
+                                                    @foreach (SubjectModel e in Model.Subjects)
+                                                    {
+                                                        <option value="@e.SubjectID" @(e.SubjectID == Model.SubjectID ? "Selected" : "")>@e.SubjectName</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a href="javascript:void(0);" onclick="$('#frmGetSyllabus').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 48%">Chapter</th>
+                                <th style="width: 10%">#Sequence</th>
+                                <th style="width: 10%">#Topics</th>
+                                <th style="width: 12%">Status</th>
+                                <th style="width: 15%">Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var cCounter = 1;
+                                foreach (var c in Model.Chapters)
+                                {
+                                    <tr>
+                                        <td>
+                                            @cCounter
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnChapterName").val($(this).val())' name="ChapterName" value="@c.ChapterName" />
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="number" onchange='$(this).closest("tr").find("#hdnChapterSequence").val($(this).val())' name="SequenceNo" value="@c.SequenceNo" />
+                                        </td>
+                                        <td>
+                                            @c.ChTopics
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.ChapterID" class="TopicsClosed Poll-Options">Manage</a>)
+                                            <input type="hidden" id="hdnTopicCount" value="@c.ChTopics" />
+                                        </td>
+
+                                        <td>
+                                            <label class="switch switch-green">
+                                                @if (c.IsApproved == 1)
+                                                {
+                                                    <input type="checkbox" class="switch-input" Checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" class="switch-input">
+                                                }
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnChapterStatus").val($(this).closest("tr").find("#hdnChapterStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateChapter", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ChapterID" id="hdnChapterID" value="@c.ChapterID" />
+                                                        <input type="hidden" name="ClassID" id="hdnClassID" value="@c.ClassID" />
+                                                        <input type="hidden" id="hdnChapterStatus" name="IsApproved" value="@c.IsApproved" />
+                                                        <input type="hidden" id="hdnChapterName" name="ChapterName" value="@c.ChapterName" />
+                                                        <input type="hidden" id="hdnChapterSequence" name="SequenceNo" value="@c.SequenceNo" />
+                                                        <input type="hidden" id="hdnClassID" name="ClassID" value="@c.ClassID" />
+                                                        <input type="hidden" id="hdnSubjectID" name="SubjectID" value="@c.SubjectID" />
+                                                        <input type="hidden" id="hdnGroupID" name="GroupID" value="@c.GroupID" />
+                                                        <input type="submit" class="btn btn-link" value="Save" />
+                                                    }
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateChapter", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ChapterID" id="hdnChapterID" value="@c.ChapterID" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                        <input type="submit" class="btn btn-link" value="Delete" onclick="return DeleteChapter(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                    cCounter++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot style="border-width: 2px;border-style: groove;">
+                            <tr>
+                                <td>
+                                    @cCounter
+                                </td>
+                                <td>
+                                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnChapterName").val($(this).val())' name="ChapterName" value="" />
+                                </td>
+                                <td>
+                                    <input class="form-control" type="number" onchange='$(this).closest("tr").find("#hdnChapterSequence").val($(this).val())' name="SequenceNo" value="@cCounter" />
+                                </td>
+                                <td>
+                                    0
+                                    <input type="hidden" id="hdnSectionCount" value="0" />
+                                </td>
+
+                                <td>
+                                    <label class="switch switch-green">
+                                        
+                                            <input type="checkbox" class="switch-input" Checked>
+                                        
+                                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnChapterStatus").val($(this).closest("tr").find("#hdnChapterStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("UpdateChapter", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="ChapterID" id="hdnChapterID" value="0" />
+                                                        <input type="hidden" id="hdnChapterStatus" name="IsApproved" value="1" />
+                                                        <input type="hidden" id="hdnChapterName" name="ChapterName" value="" />
+                                                        <input type="hidden" id="hdnChapterSequence" name="SequenceNo" value="@cCounter" />
+                                                        <input type="hidden" id="hdnClassID" name="ClassID" value="@Model.ClassID" />
+                                                        <input type="hidden" id="hdnSubjectID" name="SubjectID" value="@Model.SubjectID" />
+                                                        <input type="hidden" id="hdnGroupID" name="GroupID" value="@Model.GroupID" />
+                                                        <input type="submit" class="btn btn-link" value="Save" />
+                                            }
+
+                                        </div>
+                                       
+                                    </div>
+                                </td>
+
+
+
+                            </tr>
+
+
+
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+
+        $('#liSyllabusManagement').closest('ul').closest('li').addClass('active');
+        $('#liSyllabusManagement').addClass('active');
+    });
+    function DeleteChapter(sender) {
+        if ($(sender).closest("tr").find('#hdnTopicCount').val() != "0") {
+            alert("This Chapter has Topics, so it can't be deleted!!!!");
+            return false;
+        }
+        else {
+            return confirm("Do You Really Want To Delete this Chapter!!!!") ;
+        }
+    }
+    function ClassMainChanged(sender) {
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetClassGroupList/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlGroups').html(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+    function GroupChanged(sender) {
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetGroupSubjectList/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlSubjects').html(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+    function ToggleDetails(sender) {
+
+
+        if ($(sender).hasClass("TopicsClosed")) {
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetChapterTopics/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td id='tdTopicsDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        var ele = document.getElementsByClassName("TopicsOpened");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+        }
+
+        $(sender).removeClass("TopicsClosed");
+        $(sender).addClass("TopicsOpened");
+        $(sender).text("Close");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("TopicsOpened");
+            $(sender).addClass("TopicsClosed");
+            $(sender).closest("tr").next().remove();
+            $(sender).text("Manage");
+        }
+
+    }
+    function UpdateTopic(sender, OpType) {
+        var isProceed = true;
+        if (OpType == -1)
+        {
+            isProceed=confirm('Do you really want to delete this Topic?')
+        }
+        if (isProceed) {
+            $.ajax({
+                url: "@Url.Action("UpdateChapterTopics", "Admin")",
+                type: 'POST',
+                data: JSON.stringify({
+                    OpType: OpType,
+                    TopicID: $(sender).closest('tr').find('#hdnTopicID').val(),
+                    ChapterID: $(sender).closest('tr').find('#hdnChapterID').val(),
+                    TopicName: $(sender).closest('tr').find('#txtTopicName').val(),
+                    SequenceNo: $(sender).closest('tr').find('#txtSequenceNo').val(),
+                    EvaluationID: $(sender).closest('tr').find('#ddlEvaluations').val(),
+                    Marks: $(sender).closest('tr').find('#txtMarks').val(),
+                    Duration: $(sender).closest('tr').find('#txtDuration').val()
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+                    $(sender).closest('table').closest('td').html(html);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+
+    }
+</script>
+<!-- /.content -->

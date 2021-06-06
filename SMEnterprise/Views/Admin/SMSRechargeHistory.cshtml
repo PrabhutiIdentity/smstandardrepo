@@ -1,0 +1,222 @@
+﻿@using Pro.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>SMS Recharge Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+
+            <div class="col-md-12">
+
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-2 padding">
+                            </div>
+                            <div class="col-md-3 padding" style="color: white;font-size: 1.15em;">
+                                SMS Recharge Management
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Recharge ID</th>
+                                    <th style="width: 15%">SMS Requested</th>
+                                    <th style="width: 20%">Request Date</th>
+                                    <th style="width: 20%">Recharge Date</th>
+                                    <th style="width: 10%">Status</th>
+                                    <th style="width: 10%"></th>
+                                </tr>
+                            </thead>
+                            @{
+
+                                <tbody>
+                                    @foreach (SMSRequestModel c in Model)
+                                    {
+                                        <tr>
+
+
+                                            <td>
+                                                @c.SMSBalID
+                                            </td>
+
+                                            <td>
+                                                @c.SMSCredited
+
+                                            </td>
+                                            <td>@c.RequestDate.ToString("dd MMM,yyyy")</td>
+                                            <td>
+                                                @if (c.Status == 1)
+                                                {
+                                                    <ss>  @c.RechargeDate.ToString("dd MMM,yyyy")</ss>
+                                                }
+                                                else
+                                                {
+                                                    <ss>NA</ss>
+                                                }
+                                            </td>
+                                            <td>
+                                                @if (c.Status == 0)
+                                                {
+                                                    <label class='badge bg-orange'>Submited</label>
+                                                }
+                                                else if (c.Status == 1)
+                                                {
+                                                    <label class='badge bg-blue'>Recharged</label>
+                                                }
+                                                else
+                                                {
+                                                    <label class='badge bg-red'>Canceled</label>
+                                                }
+                                            </td>
+
+                                            <td>
+                                                @if (c.Status == 0)
+                                                {
+                                                    <div class="row" style="margin-right: 10px;">
+
+                                                        <div class="col-md-12">
+                                                            @using (Html.BeginForm("UpdateSMSRequest", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                            {
+                                                                <input type="hidden" name="Status" value="2" />
+                                                                <input type="hidden" name="SMSBalID" value="@c.SMSBalID" />
+                                                                <input type="hidden" name="RequestDate" value="@c.RequestDate" />
+                                                                <input type="hidden" name="SMSCredited" value="@c.SMSCredited" />
+                                                                <button type="submit" onclick="return CancelRequest(this);" class="btn btn-danger">Cancel</button>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                }
+
+
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+
+
+                                        <td>
+                                            0
+                                        </td>
+
+                                        <td>
+                                            <input type="number" class="form-control" name="SMSCredited" value="1000" id="txtSMSCount" />
+
+                                        </td>
+                                        <td>@Pro.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM,yyyy")</td>
+                                        <td></td>
+                                        <td>
+                                            
+                                        </td>
+
+                                        <td>
+                                            <div class="row" style="margin-right: 10px;">
+
+                                                <div class="col-md-12">
+                                                    @using (Html.BeginForm("UpdateSMSRequest", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                    {
+                                                        <input type="hidden" name="SMSBalID" value="0" />
+                                                        <input type="hidden" name="RequestDate" value="@Pro.Repository.CommonUsage.GetCurrentDate()" />
+                                                        <input type="hidden" id="hdnSMSRequest" name="SMSCredited" value="1000" />
+                                                        <button type="submit" onclick="return SMSRequest(this);" class="btn btn-info">Request</button>
+                                                    }
+                                                </div>
+                                            </div>
+
+
+
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function CancelRequest(sender) {
+            if (confirm('Do you really want Cancel This SMS Request?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        function SMSRequest(sender) {
+            if (confirm('Do you really want Recharge SMS?')) {
+                $(sender).closest('tr').find('#hdnSMSRequest').val($(sender).closest('tr').find('#txtSMSCount').val());
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    </script>
+}
+<!-- /.content -->

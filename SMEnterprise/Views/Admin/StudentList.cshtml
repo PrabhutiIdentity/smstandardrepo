@@ -1,0 +1,288 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "App Banner Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Student List</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+@model SMEnterprise.Models.StudentsPageModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .thumbImage {
+        max-width: 235px;
+        max-height: 250px;
+    }
+
+    a.btn-danger {
+        color: #fff;
+    }
+
+    *html .thumbImage {
+        width: expression((this.width/this.height)>=1?250:'auto');
+        height: expression((this.width/this.height)<1?250:'auto');
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    .RedText {
+        color: red;
+    }
+
+    .fileContainer {
+        overflow: hidden;
+        position: relative;
+    }
+
+        .fileContainer [type=file] {
+            cursor: inherit;
+            display: block;
+            font-size: 999px;
+            filter: alpha(opacity=0);
+            min-height: 100%;
+            min-width: 100%;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            text-align: right;
+            top: 0;
+        }
+
+    .BillImageBox {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #0087dd;
+    }
+
+    .BillImageBoxAdd {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        height: 292px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #0087dd;
+    }
+
+    .GalImages {
+        border: 1px solid #605ca8;
+        margin: 0px;
+        border-radius: 5px;
+    }
+
+        .GalImages .col-md-3 {
+            width: 24.4% !important;
+        }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Student List
+        <small>Student Management</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Student Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("StudentList", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="row">
+                                        <div class="col-md-4 padding">
+                                            <label class="col-md-4 text-right">Session :</label>
+                                            <div class="col-md-8">
+                                                <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                                    @foreach (NameIDModel el in Model.Sessions)
+                                                    {
+                                                        <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 padding">
+                                            <label class="col-md-4 text-right">Class :</label>
+                                            <div class="col-md-8">
+                                                <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                                    <option value="0">--Select Class--</option>
+                                                    @foreach (ClassModel el in Model.Classes)
+                                                    {
+                                                        <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 padding">
+                                            <div class="row">
+                                                <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                                <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                                    <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                        <option value="0">--Select Section--</option>
+                                                        @foreach (SectionModel el in Model.Sections)
+                                                        {
+                                                            <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Photo</th>
+                                <th style="width: 15%">Student Details</th>
+                                <th style="width: 20%">Parent's </th>
+                                <th style="width: 7%">BG</th>
+                                <th style="width: 12%">Aadhar Number</th>
+                                <th style="width: 12%">Contact</th>
+                                <th style="width: 10%">Option</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (StudentModel c in Model.Students)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                    </td>
+                                    <td>
+                                        Name : @c.Name
+                                        <br />
+                                        SID : @c.StudentSID  <br />
+                                        SR. No. :@c.SchoolUID<br />
+                                        Roll No. : @c.RollNo<br />
+                                        SSSID :@c.SSSID
+                                    </td>
+
+                                    <td>
+                                        F Name: @c.FatherName<br />
+                                        M Name: @c.MotherName<br />
+                                        G Name: @c.GuardianName
+                                    </td>
+                                    <td>@c.BloodGroup</td>
+                                    <td>
+                                        @c.AadharCardNo
+                                    </td>
+                                    <td>
+
+                                        F :  @c.FatherMobileNo<br />
+                                        M :  @c.MotherMobileNo <br />
+                                        G :  @c.GuardianMobileNo
+                                    </td>
+                                    <td>
+
+                                        @using (Html.BeginForm("GenerateTC", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                        {
+                                            <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                                            <input type="hidden" name="StudentID" value="@c.StudentID" />
+
+                                            <button type="submit" onclick="return GenerateTC(this);" class="btn btn-link">Generate TC</button>
+                                        }
+
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</section>
+<script>
+
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liProducts').closest('ul').closest('li').addClass('active');
+        $('#liProducts').addClass('active');
+    });
+    function DeleteStudent(sender) {
+        return confirm('Do you really want to Generate TC for this Student!!!!');
+    }
+    function ClassChanged(sender) {
+        $('#ddlSection').html('<option value="0">Loading....</option>');
+        $.ajax({
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+    }
+</script>
+<!-- /.content -->

@@ -1,0 +1,296 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.FeeRefundPageModel
+@section IncludeCss
+{
+    <title>Fee Refunds</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/RecieptStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 310px;
+    }
+
+        table td {
+            border: solid 1px #fab;
+            width: 100px;
+            word-wrap: break-word;
+        }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("FeeRefunds", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStocks" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                               <div class="col-md-3 padding">
+                                   @*  <label class="col-md-5 text-right">Status :</label>
+                                    <div class="col-md-7">
+                                        <select class="form-control" name="Status" id="ddlStocks">
+                                            <option value="0" @(0 == Model.Status ? "selected" : "")>Refund</option>
+                                            <option value="1" @(1 == Model.Status ? "selected" : "")>Cancelled</option>
+                                        </select>
+                                    </div>*@
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Start Date : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" value="@Model.FromDate.ToString("yyyy-MM-dd")" name="FromDate" id="dtMonth" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">End Date : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" value="@Model.ToDate.ToString("yyyy-MM-dd")" name="ToDate" id="dtMonth" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <a href="javascript:void(0);" onclick="$('#frmGetStocks').submit();"><i class="fa fa-search"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width:25%">Student</th>
+                                    <th style="width:50%">Details</th>
+                                    <th style="width:15%">Amount</th>
+                                    <th style="width:10%">View</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int count = 0;
+                                    foreach (FeeRefundModel c in Model.Refunds)
+                                    {
+                                        <tr>
+                                            <td>@c.RefundName @c.SchoolUID<br />@c.ClassName -> @c.SectionName</td>
+                                            <td>
+                                                On  @c.RefundDate.ToString("dd MMM, yyyy")<br />
+                                                @c.Reason
+                                            </td>
+                                            <td>
+                                                @c.RefundAmount.ToString("0.0")
+                                            </td>
+                                            <td>
+                                                <a href="javascript:void(0);" onclick="ViewDetails(this,@c.RefundID)">View</a>
+                                            </td>
+                                        </tr>
+
+                                        count++;
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" style="text-align:center"><a href="javascript:void(0);" onclick="ViewDetails(this,0)">Add Refund</a></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section PageBottom{
+    <div id="mdlEditRefund" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-lg">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-body">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable({ "aaSorting": [] });
+        });
+        function BeforeDeleteStock(sender) {
+            return confirm('Do you really want to delete Stock!!!!');
+        }
+        function ViewDetails(sender, ID) {
+            if (ID == 0) {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetFeeRefundDetails/" + ID,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            $("#mdlEditRefund").find(".modal-body").html(html);
+                            $("#mdlEditRefund").modal('toggle');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+            else {
+                 $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetFeeRefundPrint/" + ID,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            $("#mdlEditRefund").find(".modal-body").html(html);
+                            $("#mdlEditRefund").modal('toggle');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+        }
+
+        function PrintRecipt() {
+            var nDiv='<table>';
+            nDiv=nDiv+'<tr><td>'+$("#divRecipt").html()+'</td></tr>';
+            nDiv=nDiv+'</table>';
+            var contents =nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+        function ClassNewChanged(sender) {
+            $('#ddlNewSections').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlNewSections').html('');
+                        $('#ddlNewSections').html('<option value="0">--Select Section--</option>');
+                        $('#ddlNewSections').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function SessionChanged(sender) {
+            SectionNewChanged($('#ddlNewSections'));
+        }
+        function SectionNewChanged(sender) {
+            $('#ddlStudents').html('<option value="0">Loading....</option>');
+            //$('#ddlStudents').select2({ data: null });
+            //var datab = [{ id: 0, text: 'Loading....' }];
+            //$("#ddlStudents").select2({
+            //    data: datab
+            //});
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetSectionSelect2Students/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlStudents').html('');
+                        $('#ddlStudents').append(html);
+                        //alert(JSON.stringify( data));
+                        //$('#ddlStudents').select2({ data: null });
+                        //$("#ddlStudents").select2({
+                        //    data:data
+                        //});
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+}
+<!-- /.content -->

@@ -1,0 +1,197 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <!-- Bootstrap -->
+    <link href="@Url.Content("~/css/Admin/bootstrap.min.css")" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="@Url.Content("~/css/font-awesome.min.css")" rel="stylesheet">
+    <!-- Custom Theme Style -->
+    <link href="@Url.Content("~/css/Gent/custom.min.css")" rel="stylesheet">
+    <script src="@Url.Content("~/js/jquery.min.js")"></script>
+    <link href="@Url.Content("~/css/Admin/jquery.dataTables.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap-progressbar-3.3.4.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/font-awesome.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.buttons.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.nonblock.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Gent/custom.css")" rel="stylesheet" />
+    <script type="text/javascript" src="@Url.Content("~/js/jquery.ddslick.min.js")"></script>
+    <meta name="viewport" content="width=device-width" />
+    <title>Select Child</title>
+    <script>
+        var AlterNativeMaleImg = "@Url.Content("~/Images/MaleNoImage.png")";
+        var AlterNativeFemaleImg = "@Url.Content("~/Images/FemaleNoImage.png")";
+        var AlterNativeDocImg = "@Url.Content("~/Images/NoDocImage.jpg")";
+        function OnImageError(me, Type) {
+            if (Type == 1) {
+                me.src = AlterNativeFemaleImg;
+                return true;
+            }
+            if (Type == 3) {
+                me.src = AlterNativeDocImg;
+                return true;
+            }
+            else {
+                me.src = AlterNativeMaleImg;
+                return true;
+            }
+        }
+        function ChildSelected(val) {
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Parent/SChildChanged/" + val,
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (result) {
+
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+
+            location.href="/Parent/Dashboard";
+        }
+    </script>
+    <style>
+        .container1 {
+  width: 100%;
+  margin: 10px auto;
+  position: relative;
+  text-align:center;
+}
+
+.block1 {
+  background: white;
+  height: 350px;
+  width: 250px;
+  border-radius: 15px;
+  margin-top: 30px;
+  display:inline-block;
+  margin: 10px;
+}
+.crop-avatar {
+    position: relative;
+}
+
+.crop-avatar > span {
+    position: absolute;
+    top: 15px;
+    border-radius: 50%;
+    right: 30px;
+    font-size: 20px;
+    color: #ffffff;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    display: inline-block;
+}
+.Present{
+    background: #28b926;
+
+}
+.Absent{
+    background: #ff0000;
+
+}
+.Leave{
+    background: #ffd800;
+
+}
+.NotDone{
+    background: #808080;
+
+}
+    </style>
+</head>
+<body class="nav-md" style="background-color:#2a3f54;">
+    <div class="row" style="min-height:100px;">
+    </div>
+    <div class="row">
+        <div class="col-md-1">
+
+        </div>
+        <div class="col-md-10">
+            <div class="container1">
+                @foreach (StudentModel s in Model.Students)
+                {
+                    <div class="block1">
+                        <div class="profile_img" style="background-color:white;border-radius: 10px;">
+                            <!-- end of image cropping -->
+                            <div class="crop-avatar" style="padding-top: 10px;">
+                                @if (s.AttandanceStatus == 1)
+                                {
+                                    <span class="Present">P</span>
+                                }
+                                else if (s.AttandanceStatus == 2)
+                                {
+                                    <span class="Leave">L</span>
+                                }
+                                else if (s.AttandanceStatus == 3)
+                                {
+                                    <span class="NotDone">NA</span>
+                                }
+                                else if (s.AttandanceStatus == 0)
+                                {
+                                    <span class="Absent">A</span>
+                                }
+                                <!-- Current avatar -->
+                                <img style="margin-left: auto;margin-right: auto;display: block;max-height:200px;" class="img-responsive avatar-view" onerror="return OnImageError(this,@(s.Gender));" src="@Url.Content("~/Images/StudentImage/")@(s.StudentID)_@s.Photo" alt="Avatar">
+
+                                <!-- end of image cropping -->
+                            </div>
+                            <h3>@s.Name</h3>
+                            <ul class="list-unstyled user_data">
+                                <li>
+                                    @s.StudentSID
+                                </li>
+                                <li>
+                                    <i class="fa fa-map-marker user-profile-icon"></i> @s.ClassName - @s.SectionName
+                                </li>
+                                <li>
+                                    <i class="fa fa-briefcase user-profile-icon"></i> @s.RollNo
+                                </li>
+
+                            </ul>
+                            <a class="btn btn-success" href="javascript:void(0);" onclick="ChildSelected(@s.StudentID);">View</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="col-md-1">
+
+        </div>
+    </div>
+    <script>
+        $(document).ready(function () {
+            (function () {
+                $.ajax(
+                        {
+                            type: "POST",
+                            url: "/Account/GetSessionState/",
+                            cache: false,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                            },
+                            error: function (e) {
+
+                            }
+                        });
+                setTimeout(arguments.callee, 60000);
+            })();
+        });
+    </script>
+</body>
+</html>

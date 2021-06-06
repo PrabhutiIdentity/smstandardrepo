@@ -1,0 +1,104 @@
+﻿<div class="box box-danger">
+    <div class="box-header">
+        <h3 class="box-title">Gallery Details</h3>
+    </div>
+    @using (Html.BeginForm("UpdateGallery", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateGallery" }))
+    {
+        <div class="box-body">
+            <input type="hidden" id="hdnGalleryID" name="GalleryID" value="@Model.GalleryID" />
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Title</label>
+                    <input type="text" class="form-control" name="Title" id="txtGalleryTitle" value="@Model.Title">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Description</label>
+                    <textarea class="form-control" style="resize:none" rows="4" id="txtGalleryDescription" name="Description">@Model.Description</textarea>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-4">
+                    <label>Date</label>
+                    <input type="date" class="form-control" name="EventDate" id="txtEventDate" value="@Model.EventDate.ToString("yyyy-MM-dd")">
+                </div>
+                <div class="form-group col-md-4">
+                    <label>Status</label>
+                    <label class="switch switch-green" style="display:block;">
+                        @if (Model.Status == 1)
+                        {
+                            <input type="checkbox" class="switch-input" Checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" class="switch-input">
+                        }
+                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnGalleryStatus").val($(this).closest("label").find("#hdnGalleryStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                        <span class="switch-handle" id="shTranding"></span>
+                        <input type="hidden" name="Status" id="hdnGalleryStatus" value="@Model.Status" />
+                    </label>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <label>Images</label>
+                </div>
+                <div class="col-md-12">
+
+                    <div class="row GalImages" id="divImages">
+                        @{
+                            var counter = 0;
+                            foreach (SMEnterprise.Models.GalleryImageModel img in Model.Images)
+                            {
+                                <div class="col-md-3 BillImageBox">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="DeleteBill" style="padding-left: 200px;position: absolute;">
+                                                <a onclick="RemoveBillImage(this);" title="Remove Bill" class="RedText btn btn-danger" href="javascript:void(0);">X</a>
+                                            </div>
+                                            <figure class="figure profile-box" style="height: 150px;">
+                                                <img id="imgStudentImage" onerror="return OnImageError(this, 3);" src="@Url.Content("~/Images/GalleryImages/Thumb/")@(Model.GalleryID)_@img.ImagePath" class="img-responsive thumbImage">
+                                            </figure>
+                                            <input type="file" id="fuBillImage" onchange="ImageChanged(this,2);" name="Images[@counter].ImageFile">
+                                            <input type="hidden" id="hdnOldImageName" name="Images[@counter].OldImageName" value="@img.ImagePath" />
+                                            <input type="hidden" id="hdnImageName" name="Images[@counter].ImagePath" value="@img.ImagePath" />
+                                            <input type="hidden" id="hdnGalleryImageID" name="Images[@counter].GalleryImageID" value="@img.GalleryImageID" />
+                                            <input type="hidden" id="hdnOpType" name="Images[@counter].OpType" value="0" />
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <div class="input-group-addon">
+                                                        <span>Date</span>
+                                                    </div>
+                                                    <input id="txtImageDate" type="date" class="form-control" name="Images[@counter].ImageDate" value="@img.ImageDate.ToString("yyyy-MM-dd")">
+                                                </div>
+                                            </div>
+                                        </div><div class="col-md-12">
+                                            <textarea id="txtBillTitle" placeholder="Description for Image" class="form-control" name="Images[@counter].Description" value="" style="resize:none;" rows="2">@img.Description</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                counter++;
+                            }
+                        }
+
+                        <div class="col-md-3 BillImageBoxAdd" style="text-align: center;">
+                            <a href="javascript:void(0);" title="Add New Image" onclick="AddNewImage(this);" class="fa fa-plus-circle" style="font-size: 7em;color: #1abb9c;"></a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-success pull-right">Save</button>
+                </div>
+            </div>
+        </div>
+                            }
+</div>

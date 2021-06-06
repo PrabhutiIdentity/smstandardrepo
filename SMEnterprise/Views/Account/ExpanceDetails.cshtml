@@ -1,0 +1,445 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.ExpenceModel
+@section IncludeCss
+{
+    <title>Expence Details</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    .RedText {
+        color: red;
+    }
+
+    .fileContainer {
+        overflow: hidden;
+        position: relative;
+    }
+
+        .fileContainer [type=file] {
+            cursor: inherit;
+            display: block;
+            font-size: 999px;
+            filter: alpha(opacity=0);
+            min-height: 100%;
+            min-width: 100%;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            text-align: right;
+            top: 0;
+        }
+
+    .BillImageBox {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        margin-left: 5px;
+        border-radius: 5px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row std-mng-head">
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-2">
+
+                            </div>
+                            <div class="col-md-8">
+                                Expance Details
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="x_panel">
+                    @using (Html.BeginForm("SaveExpence", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                    {
+                        <div class="x_content">
+                            <div class="row BkRow">
+                                <div class="col-md-3">
+                                    <label>Expence Type</label>
+                                    <input type="hidden" name="ExpenceID" value="@Model.ExpenceID" />
+                                    <select class="form-control" name="ExpenceTypeID" id="ddlExpences">
+                                        @foreach (NameIDModel el in Model.ExpenceTypes)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.ExpenceTypeID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Expence Date</label>
+                                    <input type="date" class="form-control" id="txtExpenceDate" name="PaymentDate" value="@Model.PaymentDate.ToString("yyyy-MM-dd")" onchange="ExpenceDateChanged(this)"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Payment Mode</label>
+                                    <select class="form-control" name="PaymentMode">
+                                        <option value="0" @(0 == Model.PaymentMode ? "selected" : "")>Cash Payment</option>
+                                        <option value="1" @(1 == Model.PaymentMode ? "selected" : "")>Cheque Payment</option>
+                                        <option value="2" @(2 == Model.PaymentMode ? "selected" : "")>NEFT Payment</option>
+                                        <option value="3" @(3 == Model.PaymentMode ? "selected" : "")>Other Payment</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label>Referance No.</label>
+                                    <input type="text" class="form-control" name="ReferanceNumber" value="@Model.ReferanceNumber" />
+                                </div>
+                            </div>
+                            <div class="row BkRow">
+                                <div class="col-md-12">
+                                    <label>Expence Title</label>
+                                    <input type="text" name="ExpenceTitle" required class="form-control" value="@Model.ExpenceTitle" />
+                                </div>
+                            </div>
+                            <div class="row BkRow">
+                                <div class="col-md-12">
+                                    <label>Expence Details</label>
+                                    <div class="row" style="margin-left: 0px;margin-right: 0px;">
+                                        <table class="table table-striped jambo_table bulk_action">
+                                            <thead>
+                                                <tr class="headings">
+                                                    <th class="column-title" style="width:50%">Item Description</th>
+                                                    <th class="column-title" style="width:15%">Quantity</th>
+                                                    <th class="column-title" style="width:15%">Rate</th>
+                                                    <th class="column-title" style="width:15%">Total</th>
+                                                    <th class="column-title" style="width:5%"></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody style="background-color: white;" id="tblExpDetails">
+                                                @{
+
+                                                    int counter = 0;
+                                                    foreach (ExpenceDetailsModel d in Model.ExpenceDetails)
+                                                    {
+                                                        <tr class="trExpenceItem">
+                                                            <td>
+                                                                <input type="hidden" id="hdnCollectionID" name="ExpenceDetails[@counter].CollectionID" value="@d.CollectionID" />
+                                                                <input type="hidden" id="hdnOpType" name="ExpenceDetails[@counter].OpType" value="1" />
+                                                                <input type="text" class="form-control" id="txtItemName" name="ExpenceDetails[@counter].ItemName" required value="@d.ItemName" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" id="txtQuantity" name="ExpenceDetails[@counter].Quantity" value="@d.Quantity" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" id="txtRate" name="ExpenceDetails[@counter].Rate" value="@d.Rate" />
+                                                            </td>
+                                                            <td>
+                                                                <input type="text" class="form-control" id="txtAmount" name="ExpenceDetails[@counter].Amount" required value="@d.Amount" />
+                                                            </td>
+                                                            <td>
+                                                                <a href="javascript:void(0);" onclick="RemoveExpenceDetail(this);" class="btn btn-danger">Remove</a>
+                                                            </td>
+                                                        </tr>
+                                                        counter++;
+                                                    }
+                                                    if (Model.ExpenceID == 0)
+                                                    {
+                                                    <tr class="trExpenceItem">
+                                                        <td>
+                                                            <input type="hidden" id="hdnCollectionID" name="ExpenceDetails[@counter].CollectionID" value="0" />
+                                                            <input type="hidden" id="hdnOpType" name="ExpenceDetails[@counter].OpType" value="1" />
+                                                            <input type="text" class="form-control" id="txtItemName" name="ExpenceDetails[@counter].ItemName" value="" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control" id="txtQuantity" name="ExpenceDetails[@counter].Quantity" value="" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control" id="txtRate" name="ExpenceDetails[@counter].Rate" value="" />
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" class="form-control" id="txtAmount" name="ExpenceDetails[@counter].Amount" value="" />
+                                                        </td>
+                                                        <td>
+                                                            <a href="javascript:void(0);" onclick="RemoveExpenceDetail(this);" class="btn btn-danger">Remove</a>
+                                                        </td>
+                                                    </tr>
+                                                        }
+                                                    }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="row" style="margin-left: 0px;margin-right: 0px;">
+                                        <a href="javascript:void(0);" onclick="AddNewExpenceDetail(this);" class="btn btn-dark pull-right">Add New Expence Item</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row BkRow" style="display:none">
+                                <div class="col-md-12">
+                                    <label>Scan Bills</label>
+                                    <div class="row" id="divExpenceBills">
+                                        @{
+                                            int bilctr = 0;
+                                            foreach (ExpenceBillModel b in Model.ExpenceBills)
+                                            {
+                                                <div class="col-md-3 BillImageBox">
+                                                    <div class="row">
+                                                        <div class="col-md-12">
+                                                            <div class="DeleteBill" style="padding-left: 200px;position: absolute;"><a onclick="RemoveBillImage(this);" title="Remove Bill" class="RedText btn btn-danger" href=javascript:void(0);>X</a></div>
+                                                            <figure class="figure profile-box" style="height: 150px;">
+                                                                <img id="imgStudentImage" onerror="return OnImageError(this, 3);" src="@Url.Content("~/Images/ExpenceBillImages/")@(Model.ExpenceID)_@b.ImageName" class="img-responsive thumbImage">
+                                                            </figure>
+                                                            <input type="file" id="fuBillImage" onchange="ImageChanged(this,2);" name="ExpenceBills[@bilctr].ImageFile" />
+                                                            <input type="hidden" id="hdnOldImageName" name="ExpenceBills[@bilctr].OldImageName" value="@b.ImageName" />
+                                                            <input type="hidden" id="hdnBillID" name="ExpenceBills[@bilctr].BillID" value="@b.BillID" />
+                                                            <input type="hidden" id="hdnOpType" name="ExpenceBills[@bilctr].OpType" value="1" />
+                                                            <input type="hidden" id="hdnImageName" name="ExpenceBills[@bilctr].ImageName" value="@b.ImageName" />
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <input type="text" id="txtBillTitle" placeholder="Title for Image" class="form-control" name="ExpenceBills[@bilctr].BillFor" value="@b.BillFor" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                bilctr++;
+                                            }
+                                            if (Model.ExpenceID == 0)
+                                            {
+                                            <div class="col-md-3 BillImageBox">
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <div class="DeleteBill" style="padding-left: 200px;position: absolute;"><a onclick="RemoveBillImage(this);" title="Remove Bill" class="RedText btn btn-danger" href=javascript:void(0);>X</a></div>
+                                                        <figure class="figure profile-box" style="height: 150px;">
+                                                            <img id="imgStudentImage" onerror="return OnImageError(this, 3);" src="" class="img-responsive thumbImage">
+                                                        </figure>
+                                                        <input type="file" id="fuBillImage" onchange="ImageChanged(this,2);" name="ExpenceBills[@bilctr].ImageFile" />
+                                                        <input type="hidden" id="hdnOldImageName" name="ExpenceBills[@bilctr].OldImageName" value="" />
+                                                        <input type="hidden" id="hdnBillID" name="ExpenceBills[@bilctr].BillID" value="0" />
+                                                        <input type="hidden" id="hdnOpType" name="ExpenceBills[@bilctr].OpType" value="1" />
+                                                        <input type="hidden" id="hdnImageName" name="ExpenceBills[@bilctr].ImageName" value="" />
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <input type="text" id="txtBillTitle" placeholder="Title for Image" class="form-control" name="ExpenceBills[@bilctr].BillFor" value="" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                                }
+                                            }
+
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <a href="javascript:void(0);" onclick="AddNewExpenceBill(this);" class="btn btn-dark pull-right">Add New Bill/Invoice Scan Copy</a>
+                                </div>
+                            </div>
+
+                            <div class="row BkRow">
+                                <div class="col-md-12">
+                                    <input type="submit" onclick="return BeforeSaveExpence();" class="btn btn-block btn-info pull-right" value="Save" />
+                                </div>
+                            </div>
+                        </div>
+                                            }
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+</div>
+
+@section scripts
+{
+    <script>
+        function ExpenceDateChanged(sender)
+        {
+            
+            if ($('#hdnCurrentDate').val() < $(sender).val())
+            {
+                ShowNotification('Error', "Can't add Expence of date greater then Current Date", "error");
+                $(sender).val($('#hdnCurrentDate').val());
+            }
+        }
+        function BeforeSaveExpence() {
+            if ($('#txtExpenceDate').val() == '') {
+                ShowNotification('Error', "Kindly Specify Date for expence", "error");
+                return false;
+            }
+            if ($('#tblExpDetails tr').length == 0) {
+                ShowNotification('Expence Detail', 'Kindly add atleast one Expence Details', 'error');
+                return false;
+            }
+            else {
+                var Retvariable = true;
+                $(".trExpenceItem").each(function () {
+                    if ($(this).find("#txtItemName").val() == "" || $(this).find("#txtAmount").val() == "")
+                    {
+                        Retvariable = false;                        
+                    }
+                });
+                if (!Retvariable)
+                {
+                    ShowNotification('Expence Detail', 'Item Description or Amount Can\'t be Empty', 'error');
+                }
+                return Retvariable;
+            }
+        }
+        function RemoveBillImage(sender) {
+            if ($(sender).hasClass('btn-danger')) {
+                if ($(sender).closest('.col-md-3').find('#hdnBillID').val() != "0") {
+                    $(sender).closest('.col-md-3').css('background-color', 'red');
+                    $(sender).closest('.col-md-3').find('#hdnOpType').val(-1);
+                    $(sender).removeClass('btn-danger').addClass('btn-success');
+                    $(sender).html('Undo');
+                }
+                else {
+                    $(sender).closest('.col-md-3').remove();
+                    var ctr = 0;
+                    $('#divExpenceBills > .col-md-3').each(function () {
+                        $(this).find('#fuBillImage').prop('name', 'ExpenceBills[' + ctr + '].ImageFile');
+                        $(this).find('#hdnOldImageName').prop('name', 'ExpenceBills[' + ctr + '].OldImageName');
+                        $(this).find('#hdnBillID').prop('name', 'ExpenceBills[' + ctr + '].BillID');
+                        $(this).find('#hdnOpType').prop('name', 'ExpenceBills[' + ctr + '].OpType');
+                        $(this).find('#txtBillTitle').prop('name', 'ExpenceBills[' + ctr + '].BillFor');
+                        $(this).find('#hdnImageName').prop('name', 'ExpenceBills[' + ctr + '].ImageName');
+                        ctr++;
+                    });
+                }
+            }
+            else {
+                $(sender).closest('.col-md-3').css('background-color', 'white');
+                $(sender).closest('.col-md-3').find('#hdnOpType').val(0);
+                $(sender).removeClass('btn-success').addClass('btn-danger');
+                $(sender).html('X');
+
+            }
+        }
+        function RemoveExpenceDetail(sender) {
+            if ($(sender).hasClass('btn-danger')) {
+                if ($(sender).closest('tr').find('#hdnCollectionID').val() != "0") {
+                    $(sender).closest('tr').css('background-color', 'red');
+                    $(sender).closest('tr').find('#hdnOpType').val(-1);
+                    $(sender).removeClass('btn-danger').addClass('btn-success');
+                    $(sender).html('Undo');
+                }
+                else {
+                    $(sender).closest('tr').remove();
+                    var ctr = 0;
+                    $('#tblExpDetails > tr').each(function () {
+                        $(this).find('#hdnCollectionID').prop('name', 'ExpenceDetails[' + ctr + '].CollectionID');
+                        $(this).find('#hdnOpType').prop('name', 'ExpenceDetails[' + ctr + '].OpType');
+                        $(this).find('#txtItemName').prop('name', 'ExpenceDetails[' + ctr + '].ItemName');
+                        $(this).find('#txtQuantity').prop('name', 'ExpenceDetails[' + ctr + '].Quantity');
+                        $(this).find('#txtRate').prop('name', 'ExpenceDetails[' + ctr + '].Rate');
+                        $(this).find('#txtAmount').prop('name', 'ExpenceDetails[' + ctr + '].Amount');
+                        ctr++;
+                    });
+                }
+            }
+            else {
+                $(sender).closest('tr').css('background-color', 'white');
+                $(sender).closest('tr').find('#hdnOpType').val(0);
+                $(sender).removeClass('btn-success').addClass('btn-danger');
+                $(sender).html('Remove');
+
+            }
+        }
+        function AddNewExpenceBill(sender) {
+            var ctr = $('#divExpenceBills .col-md-3').length;
+            var tabRow = '<div class="col-md-3 BillImageBox"><div class="row"><div class="col-md-12">' +
+                '<div class="DeleteBill" style="padding-left: 200px;position: absolute;"><a onclick="RemoveBillImage(this);" title="Remove Bill" class="RedText btn btn-danger" href=javascript:void(0);>X</a></div>' +
+            '<figure class="figure profile-box" style="height: 150px;">' +
+            '<img id="imgStudentImage" onerror="return OnImageError(this, 3);" src="" class="img-responsive thumbImage"></figure>' +
+            '<input type="file" id="fuBillImage" onchange="ImageChanged(this,2);" name="ExpenceBills[' + ctr + '].ImageFile" />' +
+            '<input type="hidden" id="hdnOldImageName" name="ExpenceBills[' + ctr + '].OldImageName" value="" /> ' +
+            '<input type="hidden" id="hdnBillID" name="ExpenceBills[' + ctr + '].BillID" value="0" />' +
+            '<input type="hidden" id="hdnOpType" name="ExpenceBills[' + ctr + '].OpType" value="1" />' +
+            '<input type="hidden" id="hdnImageName" name="ExpenceBills[' + ctr + '].ImageName" value="" /></div>' +
+            '<div class="col-md-12">' +
+            '<input type="text" id="txtBillTitle" placeholder="Title for Image" class="form-control" name="ExpenceBills[' + ctr + '].BillFor" /></div></div></div>';
+
+            if (ctr == 0) {
+                $('#divExpenceBills').append(tabRow);
+            }
+            else {
+                $('#divExpenceBills .col-md-3:last').after(tabRow);
+            }
+        }
+        function AddNewExpenceDetail(sender) {
+            var ctr = $('#tblExpDetails tr').length;
+            var tabRow = '<tr><td><input type="hidden" id="hdnCollectionID" name="ExpenceDetails[' + ctr + '].CollectionID" value="0">' +
+                        '<input type="hidden" name="ExpenceDetails[' + ctr + '].OpType" id="hdnOpType" value="0">' +
+                         '<input type="text" id="txtItemName" name="ExpenceDetails[' + ctr + '].ItemName" class="form-control">' +
+                         '</td><td><input type="number" id="txtQuantity" name="ExpenceDetails[' + ctr + '].Quantity" class="form-control"></td>' +
+                         '<td><input type="number" id="txtRate" name="ExpenceDetails[' + ctr + '].Rate" class="form-control"></td>' +
+                         '<td><input type="number" id="txtAmount" name="ExpenceDetails[' + ctr + '].Amount" class="form-control"></td>' +
+                          '<td><a href="javascript:void(0);" onclick="RemoveExpenceDetail(this);" class="btn btn-danger">Remove</a></td></tr>';
+
+            if (ctr == 0) {
+                $('#tblExpDetails').append(tabRow);
+            }
+            else {
+                $('#tblExpDetails tr:last').after(tabRow);
+            }
+        }
+        function ImageChanged(fileBox, Type) {
+
+            if (fileBox.files && fileBox.files[0]) {
+                if (fileBox.files[0].size / 1024 < 5000) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $(fileBox).closest('.col-md-3').find('#hdnImageName').val(fileBox.files[0].name);
+                        $(fileBox).closest('.col-md-3').find('img').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(fileBox.files[0]);
+                }
+                else {
+                    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+                    $(fileBox).closest('.col-md-3').find('#hdnImageName').val('');
+                    clearFileInput(fileBox);
+                }
+            }
+        }
+        function clearFileInput(ctrl) {
+            try {
+                ctrl.value = null;
+            } catch (ex) { }
+            if (ctrl.value) {
+                ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+            }
+        }
+    </script>
+}
+<!-- /.content -->

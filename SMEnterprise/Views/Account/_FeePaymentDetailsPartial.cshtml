@@ -1,0 +1,316 @@
+﻿<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Payment Details</h2>
+                <div class="clearfix"></div>
+            </div>
+
+            <div class="x_content">
+                @using (Html.BeginForm("UpdateFeePayment", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                {
+                    <div class="row">
+                        <input type="hidden" name="PaymentID" value="@Model.PaymentID" />
+                        <input type="hidden" name="StudentID" value="@Model.StudentID" />
+                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                        <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                        <input type="hidden" name="Year" value="@Model.Year" />
+                        <input type="hidden" name="Month" value="@Model.Month" />
+
+                        <div class="col-md-3" style="vertical-align: middle;">
+                            <label style="margin-top: 6px;">@Model.StudentSID</label>
+                        </div>
+                        <div class="col-md-3" style="vertical-align: middle;">
+                            @*@{
+                                    if (Model.PaymentDetails.Count > 0)
+                                    {
+                                        Model.Month = Model.PaymentDetails[0].Month;
+                                        Model.Year = Model.PaymentDetails[0].Year;
+                                    }
+                                }*@
+                            <label style="margin-top: 6px;">  For : @SMEnterprise.Repository.CommonUsage.MonthNames[Model.Month - 1], @Model.Year</label>
+                        </div>
+                        <div class="col-md-4" style="vertical-align: middle;">
+                            <label class="col-md-2" style="margin-top: 6px;">Date</label>
+                            <div>
+                                <input id="dtPaymentDate" class="form-control col-md-10" value="@Model.PaymentDate.ToString("yyyy-MM-dd")" type="date" name="PaymentDate">
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="vertical-align: middle;">
+                            @if (Model.PaymentStatus == 1)
+                            {
+                                Model.LateFee = 0;
+                                <label style="margin-top: 6px;" class='badge bg-green'>Paid</label>
+                            }
+                            else if (Model.PaymentStatus == 2)
+                            {
+                                <label style="margin-top: 6px;" class='badge bg-blue'>Partial</label>
+                            }
+                            else
+                            {
+                                <label style="margin-top: 6px;" class='badge bg-red'>Pending</label>
+                            }
+                        </div>
+                    </div>
+                    <div class="row" style="padding-top: 5px;">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%">Fee Type</th>
+                                    <th style="width: 25%">Fee Details</th>
+                                    <th style="width: 20%">Net Amount</th>
+                                    <th style="width: 15%">Waiver</th>
+                                    <th style="width: 20%">Amount To Pay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int counter = 0;
+                                    decimal TotalWaiver = 0;
+                                    decimal TotalAmount = 0;
+                                    decimal TotalPaid = 0;
+                                    decimal PreviousDuesPaid = 0;
+                                    decimal LateFee = 0;
+                                    decimal LateFeeApplied = 0;
+                                    decimal PreviousPaidCollectionID = 0;
+                                    decimal PreviousPaidLateFee = 0;
+                                    decimal LateFeeReversal = 0;
+                                    foreach (SMEnterprise.Models.FeeDetailsModel d in Model.PaymentDetails)
+                                    {
+                                        TotalPaid = TotalPaid + d.PaymentRecieved;
+                                        if (d.FeeTypeID == -1)
+                                        {
+                                            PreviousDuesPaid = d.PaymentRecieved;
+                                            PreviousPaidCollectionID = d.CollectionID;
+                                        }
+                                        else if (d.FeeTypeID == -2)
+                                        {
+                                            LateFeeApplied = d.FeeAmount;
+                                            LateFee = d.PaymentRecieved;
+                                            PreviousPaidLateFee = d.PaymentRecieved;
+                                            LateFeeReversal = d.DiscAmt;
+                                            TotalWaiver = TotalWaiver + d.DiscAmt;
+                                        }
+                                        else
+                                        {
+                                            TotalWaiver = TotalWaiver + d.DiscAmt;
+                                            TotalAmount = TotalAmount + d.ApplicableFee;
+                                           
+                                            <tr>
+                                                <td>
+                                                    <input type="hidden" name="PaymentDetails[@counter].CollectionID" value="@d.CollectionID" />
+                                                    <input type="hidden" name="PaymentDetails[@counter].FeeTypeID" value="@d.FeeTypeID" />
+                                                    <input type="hidden" name="PaymentDetails[@counter].PaymentID" value="@Model.PaymentID" />
+                                                    <input type="hidden" name="PaymentDetails[@counter].Year" value="@Model.Year" />
+                                                    <input type="hidden" name="PaymentDetails[@counter].Month" value="@Model.Month" />
+                                                    @d.FeeTypeName
+                                                </td>
+                                                <td>
+                                                    <input type="hidden" name="PaymentDetails[@counter].Amount" value="@d.FeeAmount">
+                                                    <input type="hidden" name="PaymentDetails[@counter].Discount" value="@d.Discount">
+                                                    <input type="hidden" name="PaymentDetails[@counter].NetApplicablePayment" id="hdnBaseNetPayble" value="@d.ApplicableFee">
+                                                    Fee Amount : @d.FeeAmount.ToString("N2")<br />
+                                                    Discount : @d.Discount.ToString("N2") %<br />
+                                                    Pre. Paid: @d.PaymentRecieved.ToString("#.##")
+                                                </td>
+                                               
+                                               
+                                                <td>
+                                                    @*<input type="number" percentage="0" class="form-control NetAmount PaybleAmount" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") name="PaymentDetails[@counter].NetApplicablePayment" value="@((d.ApplicableFee-d.PaymentRecieved).ToString("#.##"))">*@
+                                                    <ss id="ssApplicableFee" class="NetAmount"> @d.ApplicableFee.ToString("N2")</ss>
+                                                </td>
+                                                <td>
+                                                    <input type="number" step=".01" percentage="0" style="width: 100px;" class="form-control Waiver" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") name="PaymentDetails[@counter].DiscAmt" value="@((d.DiscAmt))">
+                                                </td>
+                                                <td>
+                                                    <input type="number" step=".01" name="PaymentDetails[@counter].PaymentRecieved" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") value="@((d.ApplicableFee-d.PaymentRecieved-d.DiscAmt))" onchange="FeeAmountChanged();" class="form-control txtNetAmount" />
+                                                </td>
+                                            </tr>
+                                            counter++;
+                                        }
+                                    }
+
+                                    <tr>
+                                        <td colspan="1">
+                                            <input type="hidden" name="PaymentDetails[@(counter)].CollectionID" value="@PreviousPaidLateFee" />
+                                            <input type="hidden" name="PaymentDetails[@(counter)].FeeTypeID" value="-2" />
+                                            <input type="hidden" name="PaymentDetails[@(counter)].PaymentID" value="@Model.PaymentID" />
+                                            <input type="hidden" name="PaymentDetails[@counter].Year" value="@Model.Year" />
+                                            <input type="hidden" name="PaymentDetails[@counter].Month" value="@Model.Month" />
+                                            <input type="hidden" name="PaymentDetails[@counter].NetApplicablePayment" id="hdnBaseNetPayble" value="@Model.LateFee">
+                                            Late Fee
+                                        </td>
+                                        <td>
+                                            Fee Amount : @Model.LateFee.ToString("N2")<br />
+                                            Pre. Paid: @LateFee.ToString("#.##")
+                                        </td>
+                                       
+                                        <td>
+                                            @{
+                                                if (SMEnterprise.Repository.CommonUsage.GetCurrentDate().Day > ((SMEnterprise.Models.StartupModel)Session["StartupModel"]).FeePaymentReminderDate && PreviousPaidLateFee != 0)
+                                                {
+                                                    Model.LateFee = LateFee;
+                                                    LateFeeApplied = LateFee;
+                                                }
+                                                else if (SMEnterprise.Repository.CommonUsage.GetCurrentDate().Day > ((SMEnterprise.Models.StartupModel)Session["StartupModel"]).FeePaymentReminderDate && PreviousPaidLateFee == 0)
+                                                {
+                                                    LateFeeApplied = Model.LateFee;
+                                                    LateFee = 0;
+                                                }
+                                                else if (SMEnterprise.Repository.CommonUsage.GetCurrentDate().Day < ((SMEnterprise.Models.StartupModel)Session["StartupModel"]).FeePaymentReminderDate)
+                                                {
+                                                    Model.LateFee = 0;
+                                                    LateFeeApplied = 0;
+                                                }
+
+                                            }
+                                            <input type="hidden" class="aNetAmount" percentage="0" name="PaymentDetails[@(counter)].Amount" value="@LateFeeApplied">
+                                            <ss id="ssApplicableFee" class="NetAmount"> @LateFeeApplied.ToString("N2")</ss>
+                                        </td>
+                                        <td>
+                                            <input type="number" step="0.01" percentage="0" style="width: 100px;" class="form-control Waiver" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") name="PaymentDetails[@counter].DiscAmt" value="@((LateFeeReversal))">
+                                        </td>
+                                        <td>
+                                            <input type="number" step=".01" name="PaymentDetails[@(counter)].PaymentRecieved" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") onchange="FeeAmountChanged();" value="@((Model.LateFee-LateFee).ToString("N2"))" class="form-control txtNetAmount" />
+                                        </td>
+                                    </tr>
+                                                counter = counter + 1;
+                                                var MonthYear = "";
+                                                foreach (SMEnterprise.Models.FeeDetailsModel pd in Model.PreviourDuesDetails)
+                                                {
+                                                    TotalWaiver = TotalWaiver + pd.DiscAmt;
+                                                    TotalAmount = TotalAmount + pd.ApplicableFee;
+                                                    TotalPaid = TotalPaid + pd.PaymentRecieved;
+                                                    if (MonthYear != pd.Month + "-" + pd.Year)
+                                                    {
+                                                        <tr>
+                                                            <td colspan="5" style="background-color:rgba(105, 160, 95, 0.37)">
+                                                                <div class="col-md-12" style="text-align: center;">
+                                                                    <div class="center"><h2>Previous Due (@(SMEnterprise.Repository.CommonUsage.MonthNames[pd.Month - 1]), @pd.Year)</h2> </div>
+                                                                    <div class="clearfix"></div>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        MonthYear = pd.Month + "-" + pd.Year;
+                                                    }
+                                                    <tr>
+                                                        <td>
+                                                           
+                                                                <input type="hidden" name="PaymentDetails[@counter].CollectionID" value="@pd.CollectionID" />
+                                                                <input type="hidden" name="PaymentDetails[@counter].FeeTypeID" value="@pd.FeeTypeID" />
+                                                                <input type="hidden" name="PaymentDetails[@counter].PaymentID" value="@Model.PaymentID" />
+                                                                <input type="hidden" name="PaymentDetails[@counter].Year" value="@pd.Year" />
+                                                                <input type="hidden" name="PaymentDetails[@counter].Month" value="@pd.Month" />
+                                                                <input type="hidden" name="PaymentDetails[@counter].NetApplicablePayment" id="hdnBaseNetPayble" value="@pd.ApplicableFee">
+                                                            
+                                                            @(pd.FeeTypeID == -2 ? "Late Fee" : pd.FeeTypeName)
+                                                        </td>
+                                                        <td>
+                                                            
+                                                                <input type="hidden" name="PaymentDetails[@counter].Amount" value="@pd.FeeAmount">
+                                                                <input type="hidden" name="PaymentDetails[@counter].Discount" value="@pd.Discount">
+                                                            <input type="hidden" id="hdnPaidAmount" value="@pd.PaymentRecieved">
+                                                            
+                                                            Fee Amount : @pd.FeeAmount.ToString("N2")<br />
+                                                            Discount : @pd.Discount.ToString("N2") %<br />
+                                                            Pre. Paid: @pd.PaymentRecieved.ToString("#.##")
+                                                        </td>
+                                                        
+                                                       
+                                                        <td>
+                                                           
+                                                                @*<input type="number" percentage="0" class="form-control pNetAmount PaybleAmount" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") name="PaymentDetails[@counter].NetApplicablePayment" value="@((pd.ApplicableFee - pd.PaymentRecieved).ToString("#.##"))">*@
+                                                                <ss id="ssApplicableFee" class="pNetAmount">@((pd.ApplicableFee).ToString("N2"))</ss>
+                                                           
+                                                            
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" step=".01" style="width: 100px;" percentage="0" class="form-control Waiver" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") name="PaymentDetails[@counter].DiscAmt" value="@((pd.DiscAmt))">
+                                                        </td>
+                                                        <td>
+                                                           @if (pd.CollectionID == 0)
+                                                           {
+                                                                <input type="number" step=".01" name="PaymentDetails[@counter].PaymentRecieved" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") value="@((pd.ApplicableFee-pd.PaymentRecieved-pd.DiscAmt))" onchange="FeeAmountChanged();" class="form-control txtpNetAmount" />
+                                                           }
+                                                           else
+                                                            {
+                                                               <input type="hidden" name="PaymentDetails[@counter].DuesPaidCount" value="1" />
+                                                            <input type="number" step=".01" name="PaymentDetails[@counter].PaymentRecieved" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") value="@((pd.ApplicableFee-pd.PaymentRecieved-pd.DiscAmt))" onchange="FeeAmountChanged();" class="form-control txtpNetAmount" />
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                    
+                                                        counter++;
+                                                }
+                                                <tr>
+                                                    <td colspan="5" style="text-align: center;background-color: rgba(153, 197, 189, 0.43);">
+                                                        <div class="col-md-12" style="text-align: center;">
+                                                            <div class="center"><h2>Total Payment</h2> </div>
+                                                            <div class="clearfix"></div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="1">
+                                                        Total Amount
+                                                    </td>
+                                                    <td>
+                                                       Pre. Paid : @TotalPaid
+                                                    </td>
+                                                    
+                                                    <td>
+                                                        <input type="hidden" id="hdnApplicableFee" class="TotalPaybleAmount" name="ApplicableFee" percentage="0" value="@(TotalAmount + Model.PreviousDues+Model.LateFee-TotalPaid)" />
+                                                        <ss  id="ssApplicableFee">@((TotalAmount + Model.PreviousDues + Model.LateFee).ToString("N2"))</ss>
+                                                    </td>
+                                                    <td id="tdTotalWaiver">
+                                                        @TotalWaiver
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" step=".01" name="PaymentAmount" id="txtTotalPaid" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") onchange="TotalAmountChanged()" value="@((TotalAmount + Model.PreviousDues + Model.LateFee-TotalPaid-TotalWaiver).ToString("#.##"))" class="form-control" />
+                                                    </td>
+                                                </tr>
+
+                                }
+                            </tbody>
+                        </table>
+                        <script>
+                            var TotalAmount = parseFloat($('#hdnApplicableFee').val());
+                            $(".NetAmount").each(function () {
+                                var Per = ((parseFloat($(this).val().replace(',', '')) * 100) / TotalAmount);
+                                $(this).attr('percentage', Per);
+                            });
+                        </script>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            Remark
+                            <textarea @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") style="resize:none" name="Remark" class="form-control" rows="2">@Model.Remark</textarea>
+                        </div>
+                        <div class="col-md-4">
+                            Referance Number
+                            <input type="text" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "") name="ReferanceNumber" value="@Model.ReferanceNumber" style="resize:none" class="form-control" />
+                        </div>
+                        <div class="col-md-3">
+                            Payment Mode
+                            <select class="form-control" name="PaymentMode" @(Model.PaymentStatus == 1 || Model.PaymentStatus == 2 ? "readonly" : "")>
+                                <option value="0" @(Model.PaymentMode == 0 ? "selected" : "")>Cash Payment</option>
+                                <option value="1" @(Model.PaymentMode == 1 ? "selected" : "")>Cheque Payment</option>
+                                <option value="2" @(Model.PaymentMode == 2 ? "selected" : "")>NEFT Payment</option>
+                                <option value="3" @(Model.PaymentMode == 3 ? "selected" : "")>Other Payment</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="ln_solid"></div>
+                        <div class="col-md-12">
+                            @if (Model.PaymentStatus != 1 && Model.PaymentStatus != 2)
+                            {
+                                <button type="submit" class="btn btn-success pull-right">Save</button>
+                            }
+                        </div>
+                    </div>
+                                                }
+            </div>
+        </div>
+    </div>
+</div>

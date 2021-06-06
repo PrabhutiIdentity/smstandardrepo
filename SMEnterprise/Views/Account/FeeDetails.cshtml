@@ -1,0 +1,426 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.FeePaymentModel
+@section IncludeCss
+{
+    <title>Students Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .monthList {
+        text-align: center;
+        margin-bottom: 15px !important;
+    }
+
+        .monthList .col-md-1 {
+            border: 1px solid #ccc;
+            padding: 1px 10px;
+            /*input[type="checkbox"]{
+            width:18px;
+            height:18px;
+        }*/
+        }
+
+            .monthList .col-md-1 p {
+                margin-bottom: 0px;
+            }
+
+            .monthList .col-md-1.foucs {
+                background-color: #f1f1f1;
+            }
+
+    .amount-paid .col-md-4 {
+        margin-bottom: 15px;
+    }
+
+        .amount-paid .col-md-4 h4 {
+            height: 27px;
+            margin: 0px;
+        }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .slider-label-active {
+        color: red;
+    }
+</style>
+
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+
+            <div class="col-md-12">
+
+                <div class="x_panel">
+
+                    <div class="x_content">
+                        @{
+                            decimal TotalRemaining = 0;
+                            <div class="row monthList">
+                                <input type="hidden" id="hdnMonth" value="@Model.Month" />
+                                <input type="hidden" id="hdnYear" value="@Model.Year" />
+                                <div class="block">
+                                    <div id='radios' style='width: 100%!important;'>
+                                        @{
+                                            var Status = 0;
+                                            while (Model.SessionStartDate < Model.SessionEndDate)
+                                            {
+
+                                                if (Status == 0 && Model.SessionStartDate.Month == Model.Months[0].Month)
+                                                {
+                                                    Status = 1;
+                                                }
+                                                <input id='rbMonth_@Model.SessionStartDate.Month' name='options' @(Model.SessionStartDate.Month == Model.Month ? "checked" : "" ) @(Status == 0 ? "disabled" : "") type="radio">
+                                                <label for='rbMonth_@Model.SessionStartDate.Month'>@Model.SessionStartDate.ToString("MMM")</label>
+                                                Model.SessionStartDate = Model.SessionStartDate.AddMonths(1);
+                                            }
+                                        }
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row" style="padding-top: 5px;">
+                                <table id="tblCategory" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr style="background-color: #e0e0e0;">
+                                            <th style="width: 15%;vertical-align: middle;">Fee Type</th>
+                                            @foreach (PayDetailMonthsModel pm in Model.Months)
+                                            {
+                                                if (pm.PaymentRecieved == 0)
+                                                {
+                                                    <th style="vertical-align: middle;">@SMEnterprise.Repository.CommonUsage.MonthNames[pm.Month - 1] <label class='badge bg-red'>Due</label></th>
+
+                                                }
+                                                else if (pm.PaymentRecieved >= pm.ApplicableFee - pm.Waiver)
+                                                {
+                                                    <th style="vertical-align: middle;">@SMEnterprise.Repository.CommonUsage.MonthNames[pm.Month - 1] <label class='badge bg-green'>Paid</label></th>
+                                                }
+                                                else
+                                                {
+                                                    <th style="vertical-align: middle;">@SMEnterprise.Repository.CommonUsage.MonthNames[pm.Month - 1] <label class='badge bg-blue'>Partial</label></th>
+                                                }
+                                            }
+                                            <th style="vertical-align: middle;">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (NameIDModel ft in Model.FeeTypes)
+                                        {
+                                            decimal TotalAmount = 0;
+                                            <tr>
+                                                <td>
+                                                    @ft.Name
+                                                </td>
+                                                @{
+                                                    foreach (PayDetailMonthsModel pm in Model.Months)
+                                                    {
+                                                        var isFound = false;
+                                                        foreach (FeeDetailsModel pdm in Model.PaymentDetails)
+                                                        {
+                                                            if (pdm.FeeTypeID == ft.ID && pdm.Month == pm.Month)
+                                                            {
+                                                                TotalAmount = TotalAmount + pdm.NetApplicablePayment;
+                                                                isFound = true;
+                                                                <td>
+                                                                    <sa id="FeeAmt">@pdm.NetApplicablePayment</sa>
+                                                                    @if (pdm.FeeTypeID == -2)
+                                                                    {
+                                                                        foreach (PayDetailMonthsModel pmm in Model.Months)
+                                                                        {
+                                                                            if (pm.Month == pmm.Month && pmm.PaymentRecieved == 0)
+                                                                            {
+                                                                                <label class="switch switch-green">
+                                                                                    <input type="checkbox" class="switch-input" @(pmm.Waiver == 0 ? "checked" : "") />
+                                                                                    <span class="switch-label" onclick="FeeStatusChanged(this)" id="@pmm.Month" data-on="Add" data-off="Waiver"></span>
+                                                                                    <span class="switch-handle" id="shTranding"></span>
+                                                                                    <input type="hidden" name="Status" id="hdnMonthID" value="@pdm.Month">
+                                                                                    <input type="hidden" name="Status" id="hdnFeeStatus" value="@(pmm.Waiver==0?1:0)">
+                                                                                </label>
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                </td>
+                                                            }
+                                                        }
+                                                        if (!isFound)
+                                                        {
+                                                            <td>0.00</td>
+                                                        }
+                                                    }
+
+                                                }
+                                                <td id="RowTotal">@TotalAmount</td>
+                                            </tr>
+                                                    }
+                                        @{
+
+                                            decimal TotalTotal = 0;
+                                            <tr style="background-color: beige;">
+                                                <td>Total Amount</td>
+                                                @{
+                                                    foreach (PayDetailMonthsModel pm in Model.Months)
+                                                    {
+                                                        decimal TotalMonth = 0;
+                                                        foreach (FeeDetailsModel pdm in Model.PaymentDetails)
+                                                        {
+                                                            if (pdm.Month == pm.Month)
+                                                            {
+                                                                TotalMonth = TotalMonth + pdm.NetApplicablePayment;
+                                                            }
+                                                        }
+
+                                                        <td id="MonthTotal_@pm.Month">@TotalMonth</td>
+                                                        TotalTotal = TotalTotal + TotalMonth;
+                                                    }
+                                                    <td id="TotalTotal">@TotalTotal</td>
+                                                }
+                                            </tr>
+                                                <tr style="background-color: aliceblue;">
+                                                    <td>Total Paid</td>
+                                                    @{
+                                                        decimal TotalPaid = 0;
+                                                        foreach (PayDetailMonthsModel pm in Model.Months)
+                                                        {
+                                                            decimal TotalPaidMonth = 0;
+                                                            foreach (FeeDetailsModel pdm in Model.PaymentDetails)
+                                                            {
+                                                                if (pdm.Month == pm.Month)
+                                                                {
+                                                                    TotalPaidMonth = TotalPaidMonth + pdm.PaymentRecieved;
+                                                                }
+                                                            }
+
+                                                            <td>@TotalPaidMonth</td>
+                                                            TotalPaid = TotalPaid + TotalPaidMonth;
+                                                        }
+                                                        <td>@TotalPaid</td>
+                                                    }
+                                                </tr>
+                                                <tr style="background-color: rgba(255, 0, 0, 0.52);color: white;">
+                                                    <td>Total Remaining</td>
+                                                    @{
+                                                        foreach (PayDetailMonthsModel pm in Model.Months)
+                                                        {
+                                                            decimal TotalRemainingMonth = 0;
+                                                            foreach (FeeDetailsModel pdm in Model.PaymentDetails)
+                                                            {
+                                                                if (pdm.Month == pm.Month)
+                                                                {
+                                                                    TotalRemainingMonth = TotalRemainingMonth + (pdm.NetApplicablePayment - pdm.DiscAmt - pdm.PaymentRecieved);
+                                                                }
+                                                            }
+
+                                                            <td id="MonthRemainingTotal_@pm.Month">@TotalRemainingMonth</td>
+                                                            TotalRemaining = TotalRemaining + TotalRemainingMonth;
+                                                        }
+                                                        <td id="tdTotalRemainingAmount">@TotalRemaining</td>
+                                                    }
+                                                </tr>
+                                        }
+
+                                    </tbody>
+
+                                </table>
+
+                            </div>
+                                <div class="row amount-paid">
+                                    <div class="col-md-4">
+                                        Net Total Amount
+                                        <h4 id="NetTotal">@TotalRemaining</h4>
+                                    </div>
+                                    <div class="col-md-4">
+                                        Amount Paid
+                                        <input type="text" id="txtNetPaid"  value="@TotalRemaining" style="resize:none" class="form-control">
+                                    </div>
+                                    <div class="col-md-4">
+                                        Payment Mode
+                                        <select class="form-control" name="PaymentMode" id="ddlPaymentMode">
+                                            <option value="0" selected="">Cash Payment</option>
+                                            <option value="1">Cheque Payment</option>
+                                            <option value="2">NEFT Payment</option>
+                                            <option value="3">Other Payment</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        Referance Number
+                                        <input type="text" id="txtReferanceNumber" value="" style="resize:none" class="form-control">
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        Remarks
+                                        <input type="text" id="txtRemark" value="" style="resize:none" class="form-control">
+                                    </div>
+                                    <div class="col-md-4">
+                                        Collected By
+                                        <input type="text" id="txtCollectedBy" value="" style="resize:none" class="form-control">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4 col-md-offset-4">
+                                        <button type="submit" class="btn btn-lg btn-block btn-success" onclick="ShowConfirmation(this);">Submit</button>
+                                    </div>
+                                </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade bs-example-modal-sm" id="modelConfirmPayment" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel2">Confirm Payment</h4>
+            </div>
+            <div class="modal-body">
+                <h6>Please confirm below details</h6>
+                <div class="row">
+                    <label class="col-md-6">ID</label> <div class="col-md-6" id="divStudentID">Sourabh Sharma</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-6">Student</label> <div class="col-md-6" id="divPaymentFor">Sourabh Sharma</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-6">Payment Date</label> <div class="col-md-6" id="divPaymentDate">@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy")</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-6">Payment Amount</label> <div class="col-md-6" id="divPaymentAmount">1200</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="SavePayment();">Save Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
+    <script>
+        var StudentName = 'Sourabh Sharma';
+        var StudentID = 'STUD000001';
+        var SID = 0;
+        var SessionID = 0;
+        var feeDetailsSender;
+        function SavePayment() {
+            var WaiverMonths = '';
+            $(".switch").each(function () {
+                if ($(this).find('#hdnFeeStatus').val() == "0") {
+                    if (WaiverMonths != '') {
+                        WaiverMonths = WaiverMonths + ',';
+                    }
+                    WaiverMonths = WaiverMonths + $(this).find('#hdnMonthID').val();
+                }
+            });  
+            $.ajax({
+                url: "@Url.Action("SaveFeePayment", "Account")",
+                type: 'POST',
+                data: JSON.stringify({
+                    StudentID: SID,
+                    Month: $(feeDetailsSender).closest('.x_content').find('#hdnMonth').val(),
+                    Year: $(feeDetailsSender).closest('.x_content').find('#hdnYear').val(),
+                    WaiverMonths: WaiverMonths,
+                    PaymentAmount: $('#txtNetPaid').val(),
+                    CollectedBy: $('#txtCollectedBy').val(),
+                    PaymentMode: $('#ddlPaymentMode').val(),
+                    Remark: $('#txtRemark').val(),
+                    ReferanceNumber: $('#txtReferanceNumber').val(),
+                    SessionID: SessionID
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    alert(data);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        function ShowConfirmation(sender) {
+            feeDetailsSender = sender;
+            $('#divStudentID').html(StudentID);
+            $('#divPaymentFor').html(StudentName);
+            $('#divPaymentAmount').html($('#txtNetPaid').val() + ' <i class="fa fa-rupee"></i>');
+            $('#modelConfirmPayment').modal('show');
+        }
+        function FeeStatusChanged(sender) {
+            id = $(sender).attr('id');
+            var Status = $(sender).closest('label').find('#hdnFeeStatus').val() == "1" ? 0 : 1;
+            $(sender).closest('label').find('#hdnFeeStatus').val(Status);
+            var TotalRow = parseFloat($(sender).closest('tr').find('#RowTotal').html().trim());
+            var TotalRemainingMonth = parseFloat($('#MonthRemainingTotal_' + id).html().trim());
+            var TotalMonth = parseFloat($('#MonthTotal_' + id).html().trim());
+            var TotalAmount = parseFloat($('#TotalTotal').html().trim());
+            var TotalRemainingAmount = parseFloat($('#tdTotalRemainingAmount').html().trim());
+            var FeeAmt = parseFloat($(sender).closest('tr').find('#FeeAmt').html().trim())
+            if (Status == 0) {
+                $(sender).closest('tr').find('#RowTotal').html(TotalRow - FeeAmt);
+                $('#tdTotalRemainingAmount').html(TotalRemainingAmount - FeeAmt);
+                $('#TotalTotal').html(TotalAmount - FeeAmt);
+                $('#MonthTotal_' + id).html(TotalMonth - FeeAmt);
+                $('#MonthRemainingTotal_' + id).html(TotalRemainingMonth - FeeAmt);
+                $('#NetTotal').html(TotalRemainingAmount - FeeAmt);
+                $('#txtNetPaid').val(TotalRemainingAmount - FeeAmt);
+            }
+            else {
+                $(sender).closest('tr').find('#RowTotal').html(TotalRow + FeeAmt);
+                $('#tdTotalRemainingAmount').html(TotalRemainingAmount + FeeAmt);
+                $('#TotalTotal').html(TotalAmount + FeeAmt);
+                $('#MonthTotal_' + id).html(TotalMonth + FeeAmt);
+                $('#MonthRemainingTotal_' + id).html(TotalRemainingMonth + FeeAmt);
+                $('#NetTotal').html(TotalRemainingAmount + FeeAmt);
+                $('#txtNetPaid').val(TotalRemainingAmount + FeeAmt);
+            }
+        }
+        $(function () {
+            $("div[id^='radios']").radiosToSlider();
+
+        });
+
+        function DeleteStudent(sender) {
+            return confirm('Do you really want to delete Student!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->

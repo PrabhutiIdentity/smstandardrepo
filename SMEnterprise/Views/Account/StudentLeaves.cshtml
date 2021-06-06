@@ -1,0 +1,296 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Student Leave Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .select2-container {
+        width: 285px !important;
+    }
+
+    div[aria-role="alertdialog"] {
+        z-index: 2 !important;
+    }
+</style>
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .paginate_button > a {
+        z-index: 0 !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentLeaves", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding">
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <a href="Javascript:void(0);" onclick="AddNewLeave();" class="btn btn-link" style="color:white;">Add Student Leave</a>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--All Classes--</option>
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                            <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                <option value="0">--All Sections--</option>
+                                                @foreach (NameIDModel el in Model.Sections)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Student</th>
+                                    <th style="width: 10%">Class/Section</th>
+                                    <th style="width: 55%">Details</th>
+                                    <th style="width: 10%">Leave Type</th>
+                                    <th style="width: 10%">Date</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StudentLeaveModel c in Model.Students)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <div class="row" style="text-align:center;">
+                                                <div class="col-md-12"><img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content(c.Photo)" /></div>
+                                                <div class="col-md-12">
+                                                    @c.StudentName
+                                                    <br />
+                                                    @c.StudentSID
+                                                </div>
+                                            </div>
+
+                                        </td>
+                                        <td>
+                                            @c.ClassSection
+                                        </td>
+                                        <td>
+                                           @Html.Raw(c.LeaveReason.Replace("\n","<br/>"))
+                                        </td>
+                                        <td>
+                                            @(c.LeaveType == 1 ? "Full Day" : c.LeaveType == 2 ? "First Half" : "Second Half")
+                                            
+                                           
+                                        </td>
+                                        <td>
+                                            @c.StartDate.ToString("dd MMM, yyyy")
+                                            @c.EndDate.ToString("dd MMM, yyyy")
+                                        </td>
+
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    
+    <script src="@Url.Content("~/js/moment.min.js")"></script>
+    <script src="@Url.Content("~/js/daterangepicker.js")"></script>
+    <!-- Select2 -->
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script>
+        var EditSessionForm;
+        function AddNewLeave(sender) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+            $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetEditStudentLeaveForm/",
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            notice.remove();
+                            EditSessionForm = new PNotify({
+                                text: html,
+                                icon: false,
+                                width: '70%',
+                                hide: false,
+                                addclass: 'dark',
+                                styling: 'bootstrap3',
+                                buttons: {
+                                    closer: false,
+                                    sticker: false
+                                },
+                                insert_brs: false
+                            });
+
+                            $('.').css('margin-right', '100px');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+        }
+
+        function CancelLeaveEdit()
+        {
+            EditSessionForm.remove();
+        }
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+      
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function ClassNewChanged(sender) {
+            $('#ddlNewSections').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlNewSections').html('');
+            $('#ddlNewSections').html('<option value="0">--Select Section--</option>');
+            $('#ddlNewSections').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function SectionNewChanged(sender) {
+            $('#ddlStudents').html('<option value="0">Loading....</option>');
+            //$('#ddlStudents').select2({ data: null });
+            //var datab = [{ id: 0, text: 'Loading....' }];
+            //$("#ddlStudents").select2({
+            //    data: datab
+            //});
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetSectionSelect2StudentsJSON/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+                    success: function (data) {
+                        $('#ddlStudents').html('');
+                        for (var s = 0; s < data.length; s++) {
+                            $('#ddlStudents').append('<option value="' + data[s].Extra1 + '">' + data[s].Name + "</option>'")
+                        }
+           
+            //alert(JSON.stringify( data));
+            //$('#ddlStudents').select2({ data: null });
+            //$("#ddlStudents").select2({
+            //    data:data
+            //});            
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->

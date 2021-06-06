@@ -1,0 +1,415 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="icon" type="image/png" href="@Url.Content("~/favicon.ico")">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap core CSS -->
+
+    @RenderSection("IncludeCss", required: false)
+    <script src="@Url.Content("~/js/jquery.min.js")"></script>
+    <link href="@Url.Content("~/css/Gent/jquery.mCustomScrollbar.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Admin/jquery.dataTables.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap-progressbar-3.3.4.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/font-awesome.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.buttons.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.nonblock.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Gent/custom.css")" rel="stylesheet" />
+    <script type="text/javascript" src="@Url.Content("~/js/jquery.ddslick.min.js")"></script>
+    <!--[if lt IE 9]>
+        <script src="../assets/js/ie8-responsive-file-warning.js"></script>
+        <![endif]-->
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    <script>
+        $(document).ready(function () {
+            (function () {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetSessionState/",
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                        },
+                        error: function (e) {
+
+                        }
+                    });
+                setTimeout(arguments.callee, 60000);
+            })();
+
+        });
+    </script>
+    <script>
+        var AlterNativeMaleImg = "@Url.Content("~/Images/MaleNoImage.png")";
+        var AlterNativeFemaleImg = "@Url.Content("~/Images/FemaleNoImage.png")";
+        var AlterNativeDocImg = "@Url.Content("~/Images/NoDocImage.jpg")";
+        function OnImageError(me, Type) {
+            if (Type == 0) {
+                me.src = AlterNativeMaleImg;
+                return true;
+            }
+            if (Type == 1) {
+                me.src = AlterNativeFemaleImg;
+                return true;
+            }
+            if (Type == 3) {
+                me.src = AlterNativeDocImg;
+                return true;
+            }
+            else {
+                me.src = AlterNativeMaleImg;
+                return true;
+            }
+        }
+        function ChildChanged(val) {
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Parent/SChildChanged/" + val,
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (result) {
+
+        },
+        error: function (e) {
+            //alert("errorn");
+        }
+    });
+
+            location.reload();
+        }
+
+
+    </script>
+    <style>
+        .dropdown-menu > li > form > a {
+            color: #5A738E;
+        }
+
+
+        .dropdown-menu > li > form > a {
+            display: block;
+            padding: 3px 20px;
+            clear: both;
+            font-weight: 400;
+            line-height: 1.42857143;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        * {
+            font-size: 12px;
+            font-family: verdana;
+        }
+
+        .demo-content {
+            background: none repeat scroll 0 0 #DADADA;
+            border: 2px solid #DDDDDD;
+            font-size: 12px;
+            width: 900px;
+            padding: 20px;
+            margin: 0px auto;
+        }
+
+            .demo-content h3 {
+                padding: 0px;
+                margin: 0px 0px 20px;
+                font-size: 18px;
+            }
+
+        .spacer {
+            clear: both;
+            height: 20px;
+            width: 100%;
+        }
+
+        .ImageReportLogo {
+            max-width: 125px;
+            max-height: 125px;
+        }
+
+
+        *html .ImageReportLogo {
+            width: expression((this.width/this.height)>=1?125:'auto');
+            height: expression((this.width/this.height)<1?125:'auto');
+        }
+    </style>
+</head>
+
+<body class="nav-md">
+    <div class="container body">
+
+        <div class="main_container">
+            <div class="col-md-3 left_col menu_fixed">
+                <div class="left_col scroll-view">
+
+                    <div class="profile">
+                        <div class="">
+                            <img onerror="OnImageError(this,2)" src="@Url.Content("~/Images/SBranchLogo/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(@SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)" alt="..." class="img-circle profile_img">
+                        </div>
+
+                    </div>
+                    <!-- /menu prile quick info -->
+                    <br />
+                    <!-- sidebar menu -->
+                    <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                        <div class="menu_section" style="margin-bottom:0px;">
+                            <h3>Select Child</h3>
+                            <ul class="nav side-menu">
+                                <li>@Html.Action("Childs", "Parent")</li>
+                            </ul>
+                        </div>
+                        <div class="menu_section">
+                            <ul class="nav side-menu">
+                                <li>
+                                    <a href="/Parent/Dashboard"><i class="fa fa-home"></i> Home </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Parent/OnlineExams"><i class="fa fa-calendar"></i> Online Exams <label class="badge bg-red">New</label></a>
+
+                                </li>
+                                @if (SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID == 17)
+                                {
+                                    <li>
+                                        <a href="/Parent/OnlineClasses"><i class="fa fa-calendar"></i> Online Classes <label class="badge bg-red">New</label></a>
+
+                                    </li>
+                                }
+                                <li>
+                                    <a href="/Parent/TimeTable"><i class="fa fa-calendar"></i> Time Table </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Parent/Calendar"><i class="fa fa-calendar"></i> Calendar </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Parent/Assignments"><i class="fa fa-book"></i> Assignment/Home Work </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Parent/ParentDiary"><i class="fa fa-book"></i> Parent Diary </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Parent/Notices"><i class="fa fa fa-bullhorn"></i> Notices </a>
+                                </li>
+                                <li>
+                                    <a href="/Parent/FeePayment"><i class="fa fa-money"></i> Payments </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Parent/FeeSummery"><i class="fa fa-money"></i> Fee Summery </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Parent/StudentPerformance"><i class="fa fa-line-chart"></i> Performance  </a>
+                                </li>
+                                @*<li>
+                                        <a><i class="fa fa-line-chart"></i> Performance <span class="fa fa-chevron-down"></span></a>
+                                        <ul class="nav child_menu" style="display: none">
+                                            <li style="display:none;">
+                                                <a href="/Parent/Result">Result</a>
+                                            </li>
+                                            <li>
+                                                <a href="/Parent/StudentPerformance">Performance Report</a>
+                                            </li>
+
+                                        </ul>
+                                    </li>*@
+                                <li>
+                                    <a><i class="fa fa-envelope"></i> Messages <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <li>
+                                            <a href="/Parent/MailBox">Inbox</a>
+                                        </li>
+                                        <li>
+                                            <a href="/Parent/SentMail">Sent</a>
+                                        </li>
+
+                                    </ul>
+                                </li>
+
+                            </ul>
+                        </div>
+
+                    </div>
+                    <!-- /sidebar menu -->
+                    <!-- /menu footer buttons -->
+                    <div class="sidebar-footer hidden-small" style="display:none;">
+                        <a data-toggle="tooltip" data-placement="top" title="Settings">
+                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                            <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="Lock">
+                            <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="Logout">
+                            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <!-- /menu footer buttons -->
+                </div>
+            </div>
+            <!-- top navigation -->
+            <div class="top_nav">
+                <div class="nav_menu">
+                    <nav class="" role="navigation">
+                        <div class="nav toggle">
+                            <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                        </div>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="">
+                                <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <img onerror="OnImageError(this,0)" src="@Url.Content("~/Images/ParentImage/Father/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().UserID)_1_@(@SMEnterprise.Models.PermissionManager.GetLoggedInUser().UserImage)" alt="">@SMEnterprise.Models.PermissionManager.GetLoggedInUser().FullName
+                                    <span class="fa fa-angle-down"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-usermenu animated fadeInDown pull-right">
+                                    <li><a href="/Parent/ChangePassword"> Change Password</a></li>
+                                    <li>
+                                        @using (Html.BeginForm("logout", "Login", FormMethod.Post, new { id = "logoutForm" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <a href="#" onclick="$('#logoutForm').submit();"><i class="fa fa-sign-out pull-right"></i> Log off</a>
+                                        }
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="">
+                                <a href="javascript:;" class="user-profile" aria-expanded="false">
+                                    Server Time :@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy hh:mm tt")
+                                </a>
+                            </li>
+                            <li role="presentation" class="dropdown" style="display:none;">
+                                <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-envelope-o"></i>
+                                    <span class="badge bg-green">6</span>
+                                </a>
+                                <ul id="menu1" class="dropdown-menu list-unstyled msg_list animated fadeInDown" role="menu">
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="text-center">
+                                            <a>
+                                                <strong>See All Alerts</strong>
+                                                <i class="fa fa-angle-right"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- /top navigation -->
+            <!-- page content -->
+            <div class="right_col" role="main" style="min-height: 593px;">
+                @RenderBody()
+
+            </div>
+            <footer>
+                <div class="">
+                    <p class="pull-right">
+                        School Management System By <a>Prabhuti Systems</a>. |
+                        <span class="lead"> <i class="fa fa-graduation-cap"></i> PSchool!</span>
+                    </p>
+                </div>
+                <div class="clearfix"></div>
+            </footer>
+            <!-- /footer content -->
+            <!-- /page content -->
+        </div>
+    </div>
+    <div id="custom_notifications" class="custom-notifications dsp_none">
+        <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group"></ul>
+        <div class="clearfix"></div>
+        <div id="notif-group" class="tabbed_notifications"></div>
+    </div>
+
+    <script src="@Url.Content("~/js/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/Gent/jquery.mCustomScrollbar.concat.min.js")"></script>
+    <script src="@Url.Content("~/js/bootstrap-progressbar.min.js")"></script>
+    <script src="@Url.Content("~/js/nprogress.js")"></script>
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.buttons.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.nonblock.js")"></script>
+    <script src="@Url.Content("~/js/fastclick.js")"></script>
+    <script src="@Url.Content("~/js/custom.min.js")"></script>
+
+
+
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

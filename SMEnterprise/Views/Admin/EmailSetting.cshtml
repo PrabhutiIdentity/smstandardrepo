@@ -1,0 +1,324 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/Admin/plugins/iCheck/all.css")">
+    <title>Email Setting</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Email Setting
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Email Setting</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 4%">Sl.</th>
+                                <th style="width: 20%">Title</th>
+                                <th style="width: 25%">Description</th>
+                                <th style="width: 30%">Details</th>
+                                <th style="width: 7%">Status</th>
+                                <th style="width: 10%"><a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditEmailSetting(this);">Add New</a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int count = 0;
+                                foreach (MasterSettingModel c in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @(count + 1)
+
+                                            <input type="hidden" id="hdnID" value="@c.ID" />
+                                            <input type="hidden" id="hdnDetails" value="@c.Details" />
+                                        </td>
+                                        <td id="tdTitle">
+                                            @c.Name
+                                        </td>
+                                        <td id="tdDescription">
+                                            @Html.Raw(HttpUtility.HtmlDecode(c.Description.Replace("\n", "<br/>")))
+                                        </td>
+
+                                        <td>
+                                            @{
+                                                if (!String.IsNullOrEmpty(c.Details))
+                                                {
+                                                    var arrDetails = c.Details.Trim().Split('\n');
+                                                    var Setup = "SMTP Host : " + arrDetails[0] + "\n Port : " + arrDetails[1] + "\n User Name : " + arrDetails[2] + "\n SSL Enabled : " + (arrDetails[4] == "0" ? "False" : "True");
+                                                    @Html.Raw(HttpUtility.HtmlDecode(Setup.Replace("\n", "<br/>")))
+                                                }
+                                            }
+                                        </td>
+
+                                        <td>
+                                            <input type="hidden" name="Status" id="hdnEmailSettingStatus" value="@c.Status" />
+                                            @if (c.Status == 1)
+                                            {
+                                                <label class='badge bg-green'>Active</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-red'>Inactive</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <input type="hidden" name="OpType" id="hdnOpType" value="0" />
+                                                <a href="javascript:void(0);" style="background-color: cornflowerblue;color: white;" onclick="EditEmailSetting(this);" class="btn btn-default EditSectionClose" value="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+
+                                                @using (Html.BeginForm("UpdateEmailSetting", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <input type="hidden" name="EmailSettingID" value="@c.ID" />
+                                                    <button onclick="return EmailSettingDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                                    count++;
+                                                }
+
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divEditForm" style="display:none;">
+        @using (Html.BeginForm("UpdateEmailSetting", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateEmailSetting" }))
+        {
+            <div class="box box-danger" id="divEditFormDetails">
+                <div class="box-header">
+                    <h3 class="box-title">EmailSetting Details</h3>
+
+                </div>
+                <div class="box-body">
+                    <input type="hidden" id="hdnEmailSettingID" name="SettingID" value="" />
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group" style="border: 1px solid #ddd;">
+                                    <div class="input-group-addon">
+                                        <span>Status</span>
+                                    </div>
+                                    <label class="switch switch-green" style="padding-top: 3px;">
+
+                                        <input type="checkbox" id="chkEmailSettingStatus" class="switch-input">
+
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnEmailSettingStatus").val($(this).closest("tr").find("#hdnEmailSettingStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" id="hdnEmailSettingStatus" name="Status" value="1" />
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group" style="border: 1px solid #ddd;">
+                                    <div class="input-group-addon">
+                                        <span>Title</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="txtTitle" name="Title" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                  <label>Description</label>
+                                    <textarea id="txtDescription" class="form-control" name="Description" rows="5" style="resize:none"></textarea>
+                               
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                           
+                            <div class="form-group">
+                                <div class="input-group" style="border: 1px solid #ddd;">
+                                    <div class="input-group-addon">
+                                        <span>Host</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="txtHost" name="Host" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group" style="border: 1px solid #ddd;">
+                                    <div class="input-group-addon">
+                                        <span>Port</span>
+                                    </div>
+                                    <input type="number" class="form-control" id="txtPort" name="Port" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group" style="border: 1px solid #ddd;">
+                                    <div class="input-group-addon">
+                                        <span>User Name</span>
+                                    </div>
+                                    <input type="text" class="form-control" id="txtUserName" name="UserName" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group" style="border: 1px solid #ddd;">
+                                    <div class="input-group-addon">
+                                        <span>Password</span>
+                                    </div>
+                                    <input type="password" class="form-control" id="txtPassword" name="Password" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group" style="border: 1px solid #ddd;">
+                                    <div class="input-group-addon">
+                                        <span>SSL</span>
+                                    </div>
+                                    <label class="switch switch-green" style="padding-top: 3px;">
+
+                                        <input type="checkbox" id="chkEmailSettingSSL" class="switch-input">
+
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnSSL").val($(this).closest("tr").find("#hdnSSL").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" id="hdnSSL" name="SSL" value="1" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button href="javascript:void(0);" class="btn btn-info pull-right">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+@section scripts
+{
+    <script src="@Url.Content("~/Admin/plugins/iCheck/icheck.min.js")"></script>
+
+}
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liEmailSetting').closest('ul').closest('li').addClass('active');
+        $('#liEmailSetting').addClass('active');
+
+    });
+</script>
+<script>
+    function EmailSettingDelete(sender) {
+        return confirm('Do you really want to delete EmailSetting!!!!');
+    }
+    function EditEmailSetting(sender) {
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+                if ($(ele[0]).text() == 'Cancel New') {
+                    $(ele[0]).text('Add New');
+                }
+                else {
+                    $(sender).find('i').addClass('fa-pencil-square-o');
+                    $(sender).find('i').removeClass('fa-times-circle-o');
+                }
+            }
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+
+            if ($(sender).text() == 'Add New') {
+                $(sender).text('Cancel New');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnEmailSettingStatus').val(0);
+                $('#divEditFormDetails').find('#txtTitle').val('');
+                $('#divEditFormDetails').find('#txtDescription').val('');
+                $('#divEditFormDetails').find('#txtHost').val('');
+                $('#divEditFormDetails').find('#txtPort').val('');
+                $('#divEditFormDetails').find('#txtUserName').val('');
+                $('#divEditFormDetails').find('#txtPassword').val('');
+                $('#divEditFormDetails').find('#hdnSSL').val(0);
+                $('#divEditFormDetails').find('#chkEmailSettingStatus').removeProp('checked');
+                $('#divEditFormDetails').find('#chkEmailSettingSSL').removeProp('checked');
+            }
+            else {
+                $(sender).find('i').removeClass('fa-pencil-square-o');
+                $(sender).find('i').addClass('fa-times-circle-o');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnEmailSettingID').val($(sender).closest('tr').find('#hdnID').val());
+                $('#divEditFormDetails').find('#hdnEmailSettingStatus').val($(sender).closest('tr').find('#hdnEmailSettingStatus').val());
+                $('#divEditFormDetails').find('#txtTitle').val($(sender).closest('tr').find('#tdTitle').text().trim());
+                $('#divEditFormDetails').find('#txtDescription').val($(sender).closest('tr').find('#tdDescription').text().trim());
+
+                var Details = $(sender).closest('tr').find('#hdnDetails').val().split('\n');
+
+                $('#divEditFormDetails').find('#txtHost').val(Details[0]);
+                $('#divEditFormDetails').find('#txtPort').val(Details[1]);
+                $('#divEditFormDetails').find('#txtUserName').val(Details[2]);
+                $('#divEditFormDetails').find('#txtPassword').val(Details[3]);
+                $('#divEditFormDetails').find('#hdnSSL').val(Details[4]);
+                if ($(sender).closest('tr').find('#hdnEmailSettingStatus').val() == 1) {
+                    $('#divEditFormDetails').find('#chkEmailSettingStatus').prop('checked', 'checked');
+                }
+                else  {
+                    $('#divEditFormDetails').find('#chkEmailSettingStatus').removeProp('checked');
+                }
+                if (Details[4] == 1) {
+                    $('#divEditFormDetails').find('#chkEmailSettingSSL').prop('checked', 'checked');
+                }
+                else {
+                    $('#divEditFormDetails').find('#chkEmailSettingSSL').removeProp('checked');
+                }
+               
+            }
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel New') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).find('i').removeClass('fa-times-circle-o');
+                $(sender).find('i').addClass('fa-pencil-square-o');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    
+</script>
+
+<!-- /.content -->

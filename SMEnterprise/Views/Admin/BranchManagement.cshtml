@@ -1,0 +1,630 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Branch Management</title>
+    <script src="@Url.Content("~/js/MD5.js")" type="text/javascript"></script>
+}
+@model List<SMEnterprise.Models.SBranchModel>
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .errorClass {
+        border: 1px solid red;
+    }
+
+    table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 310px;
+    }
+
+        table td {
+            border: solid 1px #fab;
+            width: 100px;
+            word-wrap: break-word;
+        }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Branch Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Branch Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    @if (PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Admin)
+    {
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                    </div>
+                    <div class="box-body">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Logo</th>
+                                    <th style="width: 10%">Branch Name</th>
+                                    <th style="width: 25%">BranchSchoolName</th>
+                                    <th style="width: 15%">Principal</th>
+                                    <th style="width: 15%">Contact</th>
+                                    <th style="width: 10%">Students</th>
+                                    <th style="width: 15%">
+                                        @if (PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Admin)
+                                        {
+                                            <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditBranch(this);">Add New</a>
+                                        }
+                                    </th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (var c in Model)
+                                {
+                                    <tr>
+
+                                                                    <td>
+                                                                        <input type="hidden" id="hdnStateID" value="@c.StateID" />
+                                                                        <input type="hidden" id="hdnSBranchLogo" value="@c.Logo" />
+                                                                        <input type="hidden" id="hdnPrincipalSignature" value="@c.PrincipalSignature" />
+                                                                        <input type="hidden" id="hdnPrincipalSignatureURL" value="@Url.Content("~/Images/SBranchLogo/")@(c.SBranchID)_P_@c.PrincipalSignature" />
+                                                                        <input type="hidden" name="SBranchID" id="hdnSBranchID" value="@c.SBranchID" />
+                                                                        <input type="hidden" name="AccountUserName" id="hdnSBranchAccountName" value="@c.AccountUserName" />
+                                                                        <input type="hidden" name="NotificationServerKey" id="hdnNotificationServerKey" value="@c.NotificationServerKey" />
+                                                                        <input type="hidden" name="PlayStoreLink" id="hdnPlayStoreLink" value="@c.PlayStoreLink" />
+                                                                        <img id="imgPhoto" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(c.SBranchID)_@c.Logo" />
+                                                                    </td>
+                                        <td id="tdSBranchName">
+                                            @c.BranchName
+                                        </td>
+
+                                        <td>
+                                            <p id="pBranchSchoolName"> @c.BranchSchoolName</p>
+                                            <p id="pBranchAddress">@c.Address</p>
+
+                                        </td>
+                                        <td>
+                                            <p id="pPrincipalName">@c.PrincipalName</p>
+                                            <p id="pPrincipalMobile">@c.PrincipalMobile</p>
+                                            <p id="pPrincipalEmail">@c.PrincipalEmail</p>
+                                        </td>
+                                        <td>
+                                            <p id="pContactNo">@c.ContactNo</p>
+                                            <p id="pEmailID">@c.EmailID</p>
+                                        </td>
+                                        <td>@c.Students</td>
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditBranch(this);">Edit</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @if (c.Students == 0)
+                                                    {
+                                                        <a href="/Admin/DeleteBranch/@c.SBranchID" class="btn btn-link" onclick="return DeleteSBranch(this);">Delete</a>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="divEditForm" style="display:none;">
+            @using (Html.BeginForm("UpdateBranch", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateBranch" }))
+            {
+                <div class="box box-danger" id="divEditFormDetails">
+                    <div class="box-header">
+                        <h3 class="box-title">Details</h3>
+
+                    </div>
+                    <div class="box-body">
+                        <input type="hidden" id="hdnSBranchID" name="SBranchID" value="0" />
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Branch Logo</label>
+                                        <input type="hidden" id="hdnImageName" name="Logo" value="" />
+                                        <div style="height: 175px;">
+                                            <img class="thumbImageMain" id="imgMainPhoto" src="" alt="Photo" />
+                                        </div>
+                                        <input type="file" onchange="PhotoChanged(this,0)" name="BranchLogo" id="fuDCImage" />
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label>Principal Signature</label>
+                                        <input type="hidden" id="hdnSignatureName" name="PrincipalSignature" value="" />
+                                        <div style="height: 175px;">
+                                            <img class="thumbImageMain" id="imgSignaturePhoto" src="" alt="Photo" />
+                                        </div>
+                                        <input type="file" onchange="PhotoChanged(this,1)" name="PrincipalSignatureFile" id="fuDCPrincipalSignatureFile" />
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="col-md-8">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Branch Name</span>
+                                        </div>
+                                        <input type="text" id="txtBranchName" name="BranchName" placeholder="Branch Name" class="form-control" value="" />
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Contact</span>
+                                        </div>
+                                        <input type="text" id="txtContactNo" name="ContactNo" placeholder="Contact Number" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>EmailID</span>
+                                        </div>
+                                        <input type="text" id="txtEmailID" name="EmailID" placeholder="Branch Email ID" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Principal Name</span>
+                                        </div>
+                                        <input type="text" id="txtPrincipalName" name="PrincipalName" placeholder="Principal Name" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Principal Mobile</span>
+                                        </div>
+                                        <input type="text" id="txtPrincipalMobile" name="PrincipalMobile" placeholder="Principal Mobile Number" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Principal EmailID</span>
+                                        </div>
+                                        <input type="text" id="txtPrincipalEmail" name="PrincipalEmail" placeholder="Principal Email ID" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>School Name</span>
+                                        </div>
+                                        <input type="text" id="txtBranchSchoolName" name="BranchSchoolName" placeholder="Branch School Name" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <div class="input-group-addon">
+                                                <span>Address</span>
+                                            </div>
+                                            <textarea rows="5" id="txtAddress" style="resize:none;" name="Address" placeholder="Branch Address" class="form-control"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Push Notification Key <small>Contact PSchool Team for this</small></span>
+                                        </div>
+                                        <input type="text" id="txtNotificationServerKey" name="NotificationServerKey" placeholder="Push Notification Server Key" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Play Store Link <small>Contact PSchool Team for this</small></span>
+                                        </div>
+                                        <input type="text" id="txtPlayStoreLink" name="PlayStoreLink" placeholder="Play Store Link" class="form-control" value="" />
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="input-group">
+                                            <div class="input-group-addon">
+                                                <span>State</span>
+                                            </div>
+                                            <select class="form-control" id="ddlGSTStates" name="StateID">
+                                                @foreach (var state in SMEnterprise.Repository.CommonUsage.GSTStates)
+                                                {
+                                                    <option value="@state.StateID">@state.StateName (@state.StateCode)</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr />
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button class="btn btn-info pull-right" onclick="return BeforeBranchSave();">Save</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        using (Html.BeginForm("UpdateBranch", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateBranch" }))
+        {
+            var Branch = Model.FirstOrDefault();
+            <div class="box box-danger" id="divEditFormDetails">
+                <div class="box-header">
+                    <h3 class="box-title">Details</h3>
+
+                </div>
+                <div class="box-body">
+                    <input type="hidden" id="hdnSBranchID" name="SBranchID" value="@Branch.SBranchID" />
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <label>Branch Logo</label>
+                                    <input type="hidden" id="hdnImageName" name="Logo" value="@Branch.Logo" />
+                                    <div style="height: 175px;">
+                                        <img class="thumbImageMain" id="imgMainPhoto" src="@Url.Content("~/Images/SBranchLogo/")@(Branch.SBranchID)_@Branch.Logo" alt="Photo" />
+                                    </div>
+                                    <input type="file" onchange="PhotoChanged(this,0)" name="BranchLogo" id="fuDCImage" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Principal Signature</label>
+                                    <input type="hidden" id="hdnSignatureName" name="PrincipalSignature" value="@Branch.PrincipalSignature" />
+                                    <div style="height: 175px;">
+                                        <img class="thumbImageMain" id="imgSignaturePhoto" src="@Url.Content("~/Images/SBranchLogo/")@(Branch.SBranchID)_P_@Branch.PrincipalSignature" alt="Photo" />
+                                    </div>
+                                    <input type="file" onchange="PhotoChanged(this,1)" name="PrincipalSignatureFile" id="fuDCPrincipalSignatureFile" />
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Branch Name</span>
+                                    </div>
+                                    <input type="text" id="txtBranchName" name="BranchName" placeholder="Branch Name" class="form-control" value="@Branch.BranchName" />
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Contact</span>
+                                    </div>
+                                    <input type="text" id="txtContactNo" name="ContactNo" placeholder="Contact Number" class="form-control" value="@Branch.ContactNo" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>EmailID</span>
+                                    </div>
+                                    <input type="text" id="txtEmailID" name="EmailID" placeholder="Branch Email ID" class="form-control" value="@Branch.EmailID" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Principal Name</span>
+                                    </div>
+                                    <input type="text" id="txtPrincipalName" name="PrincipalName" placeholder="Principal Name" class="form-control" value="@Branch.PrincipalName" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Principal Mobile</span>
+                                    </div>
+                                    <input type="text" id="txtPrincipalMobile" name="PrincipalMobile" placeholder="Principal Mobile Number" class="form-control" value="@Branch.PrincipalMobile" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Principal EmailID</span>
+                                    </div>
+                                    <input type="text" id="txtPrincipalEmail" name="PrincipalEmail" placeholder="Principal Email ID" class="form-control" value="@Branch.PrincipalEmail" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>School Name</span>
+                                    </div>
+                                    <input type="text" id="txtBranchSchoolName" name="BranchSchoolName" placeholder="Branch School Name" class="form-control" value="@Branch.BranchSchoolName" />
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>Address</span>
+                                        </div>
+                                        <textarea rows="5" id="txtAddress" style="resize:none;" name="Address" placeholder="Branch Address" class="form-control">@Branch.Address</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Push Notification Key <small>Contact PSchool Team for this</small></span>
+                                    </div>
+                                    <input type="text" id="txtNotificationServerKey" name="NotificationServerKey" placeholder="Push Notification Server Key" class="form-control" value="@Branch.NotificationServerKey" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Play Store Link <small>Contact PSchool Team for this</small></span>
+                                    </div>
+                                    <input type="text" id="txtPlayStoreLink" name="PlayStoreLink" placeholder="Play Store Link" class="form-control" value="@Branch.PlayStoreLink" />
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="input-group">
+                                        <div class="input-group-addon">
+                                            <span>State</span>
+                                        </div>
+                                        <select class="form-control" id="ddlGSTStates" name="StateID">
+                                            @foreach (var state in SMEnterprise.Repository.CommonUsage.GSTStates)
+                                            {
+                                                <option value="@state.StateID" @(Branch.StateID == state.StateID ? "selected" : "")>@state.StateName (@state.StateCode)</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr />
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button type="submit" class="btn btn-info pull-right" onclick="return BeforeBranchSave();">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        }
+    }
+</section>
+<script>
+    function CheckAccountUserName(sender) {
+        $('#hdnIsUserNameOk').val(1);
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/CheckUserNameExist/" + $(sender).val() + "/" + $('#hdnSBranchID').val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    $('#hdnIsUserNameOk').val(data);
+                    if (data == 1) {
+                        $(sender).addClass('errorClass');
+                    }
+                    else {
+                        $(sender).removeClass('errorClass');
+                    }
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+
+    function BeforeBranchSave() {
+        //if ($('#hdnIsUserNameOk').val() != '0') {
+        //    alert('Account User Name Exists, kindly choose another UserName');
+        //    return false;
+        //}
+        //else {
+
+        //    if ($("#txtBranchAccountPassword").val() != "#PlacePass") {
+        //        var id = $("#txtBranchAccountPassword").val();
+        //        var id2 = hex_md5(String(id + 'd2f*jk#g&h'));
+        //        $("#txtBranchAccountPassword").val(id2);
+
+        //    } else {
+        //        $("#txtBranchAccountPassword").val('');
+        //    }
+        //    return true;
+        //}
+        return true;
+    }
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liBranchManagement').closest('ul').closest('li').addClass('active');
+        $('#liBranchManagement').addClass('active');
+    });
+    function DeleteSBranch(sender) {
+        return confirm('Do you really want to delete Branch!!!!');
+    }
+    function EditBranch(sender) {
+        $('.se-pre-con').css('display', '');
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+                if ($(ele[0]).text() == 'Cancel New') {
+                    $(ele[0]).text('Add New');
+                }
+                else {
+                    $(sender).text('Edit');
+                }
+            }
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+
+            if ($(sender).text() == 'Add New') {
+                $(sender).text('Cancel New');
+                $(sender)
+                    .closest("tr")
+                    .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnSBranchID').val(0);
+                $('#divEditFormDetails').find('#hdnImageName').val('');
+                $('#divEditFormDetails').find('#txtBranchName').val('');
+                $('#divEditFormDetails').find('#txtContactNo').val('');
+                $('#divEditFormDetails').find('#txtEmailID').val('');
+                $('#divEditFormDetails').find('#txtPrincipalName').val('');
+                $('#divEditFormDetails').find('#txtNotificationServerKey').val('');
+                $('#divEditFormDetails').find('#txtPlayStoreLink').val('');
+                $('#divEditFormDetails').find('#txtPrincipalMobile').val('');
+                $('#divEditFormDetails').find('#txtPrincipalEmail').val('');
+                $('#divEditFormDetails').find('#txtBranchSchoolName').val('');
+                $('#divEditFormDetails').find('#txtAddress').text('');
+                $('#divEditFormDetails').find('#txtBranchAccountPassword').val('#PlacePass');
+                $('#divEditFormDetails').find('#txtBranchAccountName').val('');
+                $('#divEditFormDetails').find('#ddlGSTStates').val(9);
+                var imagepath = '';
+                $('#divEditFormDetails').find('#imgMainPhoto').attr('src', imagepath);
+                $('#divEditFormDetails').find('#imgSignaturePhoto').attr('src', imagepath);
+            }
+            else {
+                $(sender).text('Cancel');
+                $(sender)
+                    .closest("tr")
+                    .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnSBranchID').val($(sender).closest('tr').find('#hdnSBranchID').val());
+                $('#divEditFormDetails').find('#hdnImageName').val($(sender).closest('tr').find('#hdnSBranchLogo').val());
+                $('#divEditFormDetails').find('#imgMainPhoto').prop('src', $(sender).closest('tr').find('#imgPhoto').prop('src'));
+                $('#divEditFormDetails').find('#txtBranchName').val($(sender).closest('tr').find('#tdSBranchName').text().trim());
+                $('#divEditFormDetails').find('#txtContactNo').val($(sender).closest('tr').find('#pContactNo').text().trim());
+                $('#divEditFormDetails').find('#txtEmailID').val($(sender).closest('tr').find('#pEmailID').text().trim());
+                $('#divEditFormDetails').find('#txtPrincipalName').val($(sender).closest('tr').find('#pPrincipalName').text().trim());
+                $('#divEditFormDetails').find('#txtPrincipalMobile').val($(sender).closest('tr').find('#pPrincipalMobile').text().trim());
+                $('#divEditFormDetails').find('#txtPrincipalEmail').val($(sender).closest('tr').find('#pPrincipalEmail').text().trim());
+                $('#divEditFormDetails').find('#txtBranchSchoolName').val($(sender).closest('tr').find('#pBranchSchoolName').text().trim());
+                $('#divEditFormDetails').find('#txtAddress').val($(sender).closest('tr').find('#pBranchAddress').text().trim());
+                $('#divEditFormDetails').find('#txtBranchAccountPassword').val('#PlacePass');
+                $('#divEditFormDetails').find('#ddlGSTStates').val($(sender).closest('tr').find('#hdnStateID').val());
+                $('#divEditFormDetails').find('#txtNotificationServerKey').val($(sender).closest('tr').find('#hdnNotificationServerKey').val());
+                $('#divEditFormDetails').find('#txtPlayStoreLink').val($(sender).closest('tr').find('#hdnPlayStoreLink').val());
+                $('#divEditFormDetails').find('#txtBranchAccountName').val($(sender).closest('tr').find('#hdnSBranchAccountName').val());
+                $('#divEditFormDetails').find('#imgSignaturePhoto').prop('src', $(sender).closest('tr').find('#hdnPrincipalSignatureURL').val());
+
+                //var imagepath = '../Images/VehicleImages/' + $(sender).closest('tr').find('#hdnVehicleID').val() + '_' + $(sender).closest('tr').find('#hdnImage').val();
+                //$('#divEditFormDetails').find('#imgMainPhoto').attr('src', imagepath);hdnPrincipalSignature
+            }
+
+
+
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel New') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).text('Edit');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+        $('.se-pre-con').css('display', 'none');
+    }
+    function PhotoChanged(fileBox, type) {
+
+        if (type == 0) {
+            if (fileBox.files && fileBox.files[0]) {
+                if (fileBox.files[0].size / 1024 < 500) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $(fileBox).closest('.col-md-12').find('#imgMainPhoto').prop('src', e.target.result);
+                    }
+                    reader.readAsDataURL(fileBox.files[0]);
+                }
+                else {
+
+                    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 500KB', 'error');
+                }
+            }
+        }
+        else {
+            {
+                if (fileBox.files && fileBox.files[0]) {
+                    if (fileBox.files[0].size / 1024 < 500) {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $(fileBox).closest('.col-md-12').find('#imgSignaturePhoto').prop('src', e.target.result);
+                        }
+                        reader.readAsDataURL(fileBox.files[0]);
+                    }
+                    else {
+
+                        ShowNotification('Large Image', 'Kindly Upload Image of Size less the 500KB', 'error');
+                    }
+                }
+            }
+        }
+    }
+</script>
+<!-- /.content -->

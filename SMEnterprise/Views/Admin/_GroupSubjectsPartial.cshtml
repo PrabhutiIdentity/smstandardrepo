@@ -1,0 +1,132 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 5%">#</th>
+            <th style="width: 15%">Code</th>
+            <th style="width: 20%">Subject</th>
+            <th style="width: 15%">Optional Subject</th>
+            <th style="width: 10%">Status</th>
+            <th style="width:10%">Sub Subjects</th>
+            <th style="width: 20%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var scount = 1;
+            foreach (var c in Model.SubjectList)
+            {
+                <tr>
+                    <td>
+                        @scount
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.SubjectCode</span>
+                        <input class="form-control editCopy hidden" id="txtSubjectCode" type="text" name="SubjectCode" value="@c.SubjectCode" />
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.SubjectName</span>
+                        <input type="hidden" id="hdnSubjectID" name="SubjectID" value="@c.SubjectID" />
+                        <input type="hidden" id="hdnGroupID" name="GroupID" value="@Model.GroupID" />
+                        <input class="form-control editCopy hidden" id="txtSubjectName" type="text" name="SubjectName" value="@c.SubjectName" />
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible"><label class='badge bg-@(c.IsOptionalsubject == 0 ? "red" : "green")'>@(c.IsOptionalsubject == 0 ? "No" : "Yes")</label></span>
+                        <label class="switch switch-green editCopy hidden">
+                            @if (c.IsOptionalsubject == 1)
+                            {
+                                <input type="checkbox" class="switch-input" Checked>
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="switch-input">
+                            }
+                            <span class="switch-label" onclick='$(this).closest("tr").find("#hdnIsOptionalsubject").val($(this).closest("tr").find("#hdnIsOptionalsubject").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+                            <input type="hidden" id="hdnIsOptionalsubject" value="@c.IsOptionalsubject" />
+                        </label>
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible"><label class='badge bg-@(c.Status == 0 ? "red" : "green")'>@(c.Status == 0 ? "Inactive" : "Active")</label></span>
+                        <label class="switch switch-green editCopy hidden">
+                            @if (c.Status == 1)
+                            {
+                                <input type="checkbox" class="switch-input" Checked>
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="switch-input">
+                            }
+                            <span class="switch-label" onclick='$(this).closest("tr").find("#hdnSubjectStatus").val($(this).closest("tr").find("#hdnSubjectStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+                            <input type="hidden" id="hdnSubjectStatus" value="@c.Status" />
+                        </label>
+                    </td>
+                    <td id="tdRoomCount">
+                        <input type="hidden" id="hdnSubSubjectCount" value="@c.SubSubjectCount" />
+                        @c.SubSubjectCount
+                        (<a href="javascript:void(0);" onclick="ViewSubSubjects(this);" id="@c.SubjectID" class="SubSubjectClosed">Manage</a>)
+
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+                                <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" onclick="SaveGroupSubject(this, 1);" />
+                                <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return SaveGroupSubject(this, -1);" />
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                scount++;
+            }
+            
+        }
+    </tbody>
+    <tfoot style="border-width: 2px;border-style: groove;display:none;">
+        <tr>
+            <td>
+                
+            </td>
+            <td>
+                <input class="form-control" id="txtSubjectCode" type="text" name="SubjectCode" value="" />
+            </td>
+            <td>
+                <input type="hidden" id="hdnSubjectID" name="SubjectID" value="0" />
+                <input type="hidden" id="hdnGroupID" name="GroupID" value="@Model.GroupID" />
+                <input class="form-control" id="txtSubjectName" type="text" name="SubjectName" value="" />
+            </td>
+            <td>
+                <label class="switch switch-green">
+
+                    <input type="checkbox" class="switch-input">
+                    <span class="switch-label" onclick='$(this).closest("tr").find("#hdnIsOptionalsubject").val($(this).closest("tr").find("#hdnIsOptionalsubject").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
+                    <span class="switch-handle" id="shTranding"></span>
+                    <input type="hidden" id="hdnIsOptionalsubject" value="0" />
+                </label>
+            </td>
+            <td>
+                <label class="switch switch-green">
+
+                    <input type="checkbox" class="switch-input" Checked>
+
+                    <span class="switch-label" onclick='$(this).closest("tr").find("#hdnSubjectStatus").val($(this).closest("tr").find("#hdnSubjectStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                    <span class="switch-handle" id="shTranding"></span>
+                    <input type="hidden" id="hdnSubjectStatus" value="1" />
+                </label>
+            </td>
+            <td>0</td>
+            <td>
+                <div class="row" style="margin-right: 0px;">
+                    <div class="col-md-6">
+                        <input type="submit" class="btn btn-link" value="Add New" onclick="SaveGroupSubject(this, 1);" />
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+
+    </tfoot>
+</table>
+

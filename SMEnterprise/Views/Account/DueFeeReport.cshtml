@@ -1,0 +1,267 @@
+﻿
+@{
+  
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+<title> Class and Section wise Due Fee Report </title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+}
+@model SMEnterprise.Models.DemandReciptListModel
+<div class="" style="background-color: white;">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("DueFeeReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            {
+                <div class="row std-mng-head col-md-12">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-2 padding">
+                                <input type="month" value="@Model.DemandMonth.ToString("yyyy-MM")" name="DemandMonth" id="dtDate" class="form-control" />
+                                @*<label class="text-right" style="padding-left: 25px;">@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("MMM, yyyy")</label>*@
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                        @*<option value="-1">--All Class--</option>*@
+                                        <option value="0">--Select Class--</option>
+                                        @foreach (SMEnterprise.Models.NameIDModel el in Model.Classes)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Section :</label>
+                                <div class="col-md-8">
+                                    <select name="SectionID" class="form-control" id="ddlSection">
+                                        <option value="0">--Select Section--</option>
+                                        @foreach (SMEnterprise.Models.NameIDModel el in Model.Sections)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Sessions :</label>
+                                <div class="col-md-8">
+                                    <select name="SessionID" class="form-control" id="ddlSessions">
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (SMEnterprise.Models.NameIDModel el in Model.Sessions)
+                                        {
+                                    <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 padding">
+                                <div class="row">
+
+                                    <div class="col-md-12">
+                                        <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row" style="display:none;">
+        <div class="col-md-2"></div>
+        <div class="col-md-10" style="text-align:right;">
+            <button type="button" class="btn btn-primary" onclick="PrintDemantRecipt();"><i class="fa fa-print"></i> Print</button>
+        </div>
+    </div>
+    <div class="x_panel">
+
+        <div class="x_content">
+
+            <table id="tblCategory" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+
+                        @*<th>Class/Section</th>*@
+                        <th>Student ID</th>
+                        <th>SR No</th>
+                        <th>Student</th>
+                        <th>Father</th>
+                        <th>Mobile </th>
+                        <th>Previous Dues</th>
+                        <th>Current Fee</th>
+                        <th>Discount</th>
+                        <th>Payment</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (SMEnterprise.Models.DemandReciptModel d in Model.Recipts)
+                    {
+                    <tr>
+                        @*<td>@d.ClassName</td>*@
+                        <td>@d.StudentSID</td>
+                        <td>@d.SchoolUID</td>
+                        <td>@d.Name</td>
+                        <td>@d.FatherName</td>
+                        <td>@d.MobileNo</td>
+                        <td>@d.PreviousDues.ToString("0.00")</td>
+                        <td>@((d.ApplicableFee + d.LateFee).ToString("0.00")) <br/>@d.MonthName</td>
+                        <td>@d.DiscAmt.ToString("0.00")</td>
+                        <td>@d.PaymentAmount.ToString("0.00")</td>
+                        <td>@((d.PreviousDues + d.ApplicableFee + d.LateFee - d.PaymentAmount - d.DiscAmt).ToString("0.00"))</td>
+                    </tr>
+
+                    }
+                    @*<tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th>
+                              @Model.Recipts.Sum(a => a.PreviousDues).ToString("0.00")
+                            </th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>*@
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        $(document).ready(function () {
+         var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy")';
+            var repname = '@Model.Branch.BranchSchoolName' + ' Class:' + $('#ddlClass option:selected').text() + ' / '+ $('#ddlSection option:selected').text()+' Due Fee Report'  
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+                        "pageLength": 40,
+
+                        bSort: true,
+                        dom: "Bfrtip",
+                        buttons: [
+                           {
+                                extend: "copy",
+                                className: "btn-sm",
+                                text: '<i class="far fa-copy"></i> Copy',
+                                message: printdate,
+                                title: repname
+                            },
+                            {
+                                extend: "csv",
+                                 className: "btn-sm",
+
+                                @*className: "btn-sm",*@
+                                text: '<i class="fas fa-file-csv"></i> CSV',
+                                message: printdate,
+                                title: repname
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                text: '<i class=""fa fa-table fainfo" aria-hidden="true""></i> Excel',
+                                message: printdate,
+                                title: repname
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn btn-dark rounded-0",
+                                text: '<i class="fa fa-file-pdf-o"></i> Pdf',
+                                message: printdate,
+                                title: repname
+                            },
+                            {
+                                 extend: "print",
+                                 className: "btn btn-dark rounded-0",
+                                 text: '<i class="fa fa-print"></i> Print',
+                                 message: printdate,
+                                 title: repname
+
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+
+        });
+    </script>
+    <script>
+        //$(function () {
+        //    $("#tblCategory").DataTable();
+        //    "pageLength": 20
+        //});
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function PrintDemantRecipt() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" type="text/css" />');
+
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 1000);
+        }
+    </script>
+}

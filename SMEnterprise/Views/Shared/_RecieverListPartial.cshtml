@@ -1,0 +1,38 @@
+﻿<div class="col-md-12">
+    <input type="hidden" id="hdnRecieverCount" value="@Model.Count" />
+    <b> Total SMS: <lable id="lblSMSCount">@Model.Count</lable></b>
+</div>
+<ul class="dd-options dd-click-off-close row" style="display: block;" id="ulSchoolList">
+    @{
+        int count = 0;
+
+        foreach (var c in Model)
+        {
+            <li class="col-md-3 listitem">
+                <div class="smsList" style="@(String.IsNullOrEmpty(c.Mobile)?"background-color: red;":"")">
+                    <div class="dd-option">
+                        <input type="hidden" name="Recievers[@count].IsSelected" id="hdnSelected" value="@(String.IsNullOrEmpty(c.Mobile)?0:1)" />
+                        <input name="Recievers[@count].RecieverID" type="hidden" value="@c.RecieverID">
+                        <input name="Recievers[@count].RecieverType" type="hidden" value="@c.RecieverType">
+                        <input name="Recievers[@count].Mobile" type="hidden" value="@c.Mobile">
+                        <input name="Recievers[@count].Amount" type="hidden" value="@c.Amount">
+                        <input name="Recievers[@count].PayDate" type="hidden" value="@c.PayDate">
+                        <input name="Recievers[@count].Name" type="hidden" value="@c.Name">
+                        <input name="Recievers[@count].Details" type="hidden" value="@c.Details">
+                        <input name="Recievers[@count].Photo" type="hidden" value="@c.Photo">
+                        <img onerror="return OnImageError(this,@c.Gender);" class="dd-option-image" src="@Url.Content("~/Images/StudentImage/")@(c.RecieverID)_@c.Photo">
+                        <label class="dd-option-text searchable">@c.Name</label>
+                        <small class="dd-option-description dd-desc">@c.Details (@c.Mobile)</small>
+                    </div>
+                    <div class="icheckbox_flat-green @(String.IsNullOrEmpty(c.Mobile)?"":"checked")" aria-checked="false" aria-disabled="false" style="position: relative;">
+                        <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                    </div>
+                </div>
+            </li>
+
+            count++;
+        }
+    }
+
+</ul>
+

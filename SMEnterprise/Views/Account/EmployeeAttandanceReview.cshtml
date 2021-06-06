@@ -1,0 +1,274 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeAttandanceReviewPageModel
+@section IncludeCss
+{
+    <title>Employee Attandance Review</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+    .table > tbody > tr > td {
+        padding-bottom: 0px !important;
+    }
+    .attDetailsTable > tbody > tr > td {
+        padding-bottom: 0px !important;
+        padding-top: 0px !important;
+    }
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+</style>
+
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("EmployeeAttandanceReview", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetEmployees" }))
+                {
+                    <div class="col-md-3">
+                        <h3 class="box-title">Review Attandance</h3>
+                    </div>
+                    <div class="row std-mng-head col-md-9">
+
+                        <div class="col-md-9 class-section">
+                            <div class="row">
+
+
+
+                                <div class="col-md-7 padding">
+                                    <label class="col-md-4 text-right">Employee Type :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="EmployeeType" id="ddlClass">
+                                            @foreach (NameIDModel el in Model.EmployeeTypes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.EmployeeType ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Date : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" value="@Model.AttandanceDate.ToString("yyyy-MM-dd")" name="AttandanceDate" id="dtDate" class="form-control" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetEmployees').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+                    <div class="x_content">
+                        <input type="hidden" name="EmployeeType" value="@Model.EmployeeType" />
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Photo</th>
+                                    <th style="width: 20%">Name</th>
+                                    <th style="width: 60%">Status</th>
+                                    <th style="width: 10%">Details</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (EmployeeAttandanceReviewModel c in Model.Attandances)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/EmployeeImage/Thumb/")@(c.EmployeeID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                            @c.EmployeeName<br />
+                                            @c.EmployeeSID
+
+                                        </td>
+
+                                        <td>@Html.Raw(c.Details)</td>
+                                        <td><a href="javascript:void(0);" class="RClosed" onclick="ViewAttandanceDetails(this,@c.EmployeeID);">Details</a> </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+
+    <script>
+        var parSender;
+        function ViewAttandanceDetails(sender, EmployeeID) {
+            parSender = sender;
+            if ($(sender).hasClass('RClosed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("ROpen");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                $.ajax({
+                            type: "POST",
+                            url: "/Account/GetEmployeeAttandanceReviewDetails/",
+                            dataType: 'json',
+                            data: {
+                                AttandanceDate: '@Model.AttandanceDate',
+                                EmployeeType: EmployeeID
+                            },
+                    success: function (data) {
+                        var StatusSwitch='<label class="switch switch-green"><input type="checkbox" class="switch-input" [checkedPlaceHolder]/>'+
+                                        '<span class="switch-label" onclick="AttandanceStatusChanged(this);"  data-on="Approved" data-off="Rejected"></span>'+
+                                        '<span class="switch-handle" id="shTranding"></span>'+
+                                        '<input type="hidden" name="Status" id="hdnaStatus" value="[hdnCheckVal]">'+
+                                        '</label>';
+                                var html = '<table class="table table-bordered"><tr><td colspan="6" style="text-align:center;font-size: 20px;background-color: beige;">Review Attandance</td></tr>'
+                                var inOuttext = '';
+                                var AttandanceTypeName = '';
+                                for(var i=0;i<data.length;i++)
+                                {
+                                    inOuttext = data[i].InOut == 0 ? '<i class="fa fa-building" aria-hidden="true"></i><i class="fa fa-arrow-left" aria-hidden="true"></i> In' : '<i class="fa fa-building" aria-hidden="true"></i><i class="fa fa-arrow-right" aria-hidden="true"></i> Out';
+                                    AttandanceTypeName = data[i].AttandanceType == 2 ? '<i class="fa fa-mobile" aria-hidden="true" style="font-size: 1.5em;"></i> App' : '<i class="fa fa-thumbs-o-up" aria-hidden="true" style="font-size: 1.5em;"></i> Other';
+                                    var sswitch = StatusSwitch;
+                                    if (data[i].Status == 0)
+                                    {
+                                        sswitch = sswitch.replace("[checkedPlaceHolder]", "checked");
+                                        sswitch = sswitch.replace("[hdnCheckVal]", "0");
+                                    }
+                                    else
+                                    {
+                                        sswitch = sswitch.replace("[checkedPlaceHolder]", "");
+                                        sswitch = sswitch.replace("[hdnCheckVal]", "1");
+                                    }
+                                    data[i].Comment = data[i].Comment == null ? "" : data[i].Comment;
+                                    var ldate = new Date(parseInt(data[i].logdatetime.substr(6))).toJSON();
+                                    var sEmployeeID = "'" + data[i].EmployeeID + "'";
+                                    html = html + '<tr><td>' + inOuttext + '</td><td>' + AttandanceTypeName + '</td><td>' + data[i].Time + '</td><td>' + data[i].Location + '</td><td>' + sswitch + '<input type="text" class="form-control" id="txtComment" placeholder="Type Comment Here" value="' + data[i].Comment + '"/><input type="hidden" id="hdnLogDateTime" value="' + ldate + '"/></td><td><a href="javascript:void(0);" onclick="UpdateAttandanceReviewStatus(this,'+sEmployeeID+');">Update</a></td></tr>';
+                                }
+                                $(sender).closest("tr").next().remove();
+                                $(sender)
+                               .closest("tr")
+                               .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + html + "</td></tr>");
+                                $(sender).text('Close');
+                                $(sender).removeClass('RClosed');
+                                $(sender).addClass('ROpen');
+                            },
+                            error: function (e) {
+                                alert("errorn");
+                            }
+                        });
+            }
+            else {
+                $(sender).text('Details');
+                $(sender).removeClass('ROpen');
+                $(sender).addClass('RClosed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        function AttandanceStatusChanged(sender)
+        {
+            $(sender).closest("label").find("#hdnaStatus").val($(sender).closest("label").find("#hdnaStatus").val() == 0 ? 1 : 0);
+            
+            $(sender).closest("tr").find('#txtComment').css('display', '');
+        }
+        function UpdateAttandanceReviewStatus(sender,EmployeeID) {
+           
+                $.ajax({
+                    type: "POST",
+                    url: "/Account/UpdateEmployeeAttandanceReview/",
+                    dataType: 'json',
+                    data: {
+                        logdatetime: $(sender).closest('tr').find('#hdnLogDateTime').val(),
+                        EmployeeID: EmployeeID,
+                        Status: $(sender).closest('tr').find('#hdnaStatus').val(),
+                        Comment: $(sender).closest('tr').find('#txtComment').val()
+                    },
+                    success: function (data) {
+
+                        var StatusSwitch = '<label class="switch switch-green"><input type="checkbox" class="switch-input" [checkedPlaceHolder]/>' +
+                                        '<span class="switch-label" onclick="AttandanceStatusChanged(this);"  data-on="Approved" data-off="Rejected"></span>' +
+                                        '<span class="switch-handle" id="shTranding"></span>' +
+                                        '<input type="hidden" name="Status" id="hdnaStatus" value="[hdnCheckVal]">' +
+                                        '</label>';
+                        var html = '<table class="table table-bordered"><tr><td colspan="6" style="text-align:center;font-size: 20px;background-color: beige;">Review Attandance</td></tr>'
+                        var inOuttext = '';
+                        var AttandanceTypeName = '';
+                        for (var i = 0; i < data.length; i++) {
+                            inOuttext = data[i].InOut == 0 ? '<i class="fa fa-building" aria-hidden="true"></i><i class="fa fa-arrow-left" aria-hidden="true"></i> In' : '<i class="fa fa-building" aria-hidden="true"></i><i class="fa fa-arrow-right" aria-hidden="true"></i> Out';
+                            AttandanceTypeName = data[i].AttandanceType == 2 ? '<i class="fa fa-mobile" aria-hidden="true" style="font-size: 1.5em;"></i> App' : '<i class="fa fa-thumbs-o-up" aria-hidden="true" style="font-size: 1.5em;"></i> Other';
+                            var sswitch = StatusSwitch;
+                            if (data[i].Status == 0) {
+                                sswitch = sswitch.replace("[checkedPlaceHolder]", "checked");
+                                sswitch = sswitch.replace("[hdnCheckVal]", "0");
+                            }
+                            else {
+                                sswitch = sswitch.replace("[checkedPlaceHolder]", "");
+                                sswitch = sswitch.replace("[hdnCheckVal]", "1");
+                            }
+                            data[i].Comment = data[i].Comment == null ? "" : data[i].Comment;
+                            var ldate = new Date(parseInt(data[i].logdatetime.substr(6))).toJSON();
+                            var sEmployeeID = "'" + data[i].EmployeeID + "'";
+                            html = html + '<tr><td>' + inOuttext + '</td><td>' + AttandanceTypeName + '</td><td>' + data[i].Time + '</td><td>' + data[i].Location + '</td><td>' + sswitch + '<input type="text" class="form-control" id="txtComment" placeholder="Type Comment Here" value="' + data[i].Comment + '"/><input type="hidden" id="hdnLogDateTime" value="' + ldate + '"/></td><td><a href="javascript:void(0);" onclick="UpdateAttandanceReviewStatus(this,' + sEmployeeID + ');">Update</a></td></tr>';
+                            
+                        }
+                        $(parSender).closest("tr").next().remove();
+                        $(parSender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + html + "</td></tr>");
+                        ShowNotification('Success', 'Attandance Review successfully updated!!!!', 'success');
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            
+        }
+    </script>
+}
+<!-- /.content -->

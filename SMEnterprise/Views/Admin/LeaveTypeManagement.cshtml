@@ -1,0 +1,204 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Leave Type Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Leave Type Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Leave Type Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 20%">Type Name</th>
+                                <th style="width: 15%">Yearly Quota</th>
+                                <th style="width: 15%">Monthly Quota</th>
+                                <th style="width: 15%">Deduction</th>
+                                <th style="width: 20%">
+                                    <a class="sbtn" href="javascript:void(0);" onclick="EditLeaveType(this,0)">Add New</a>
+                                </th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            <tbody>
+
+                                @foreach (LeaveTypeModel c in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @(count + 1)
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.LeaveTypeName</span>
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.YearlyQuota.ToString("0.0")</span>
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.MonthlyQuota.ToString("0.0")</span>
+                                        </td>
+
+
+                                        <td>
+                                            <span class="ViewCopy visible">@(c.IsSalaryDeduct == 0 ? "Salary Not Deducted" : "Salary will be deducted")</span>
+                                        </td>
+
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="javascript:void(0);" class="btn btn-default sbtn" style="background-color: dodgerblue;color: white;" onclick="EditLeaveType(this,@c.LeaveTypeID);">Edit</a>
+                                                <input type="hidden" name="YearlyQuota" id="hdnYearlyQuota" value="@c.YearlyQuota" />
+                                                <input type="hidden" name="MonthlyQuota" id="hdnMonthlyQuota" value="@c.MonthlyQuota" />
+                                                <input type="hidden" name="IsSalaryDeduct" id="hdnIsSalaryDeduct" value="@c.IsSalaryDeduct" />
+                                                <input type="hidden" name="LeaveTypeID" id="hdnLeaveTypeID" value="@c.LeaveTypeID" />
+                                                <input type="hidden" id="hdnLeaveTypeName" name="LeaveTypeName" value="@c.LeaveTypeName" />
+                                                <input type="hidden" id="hdnIsCarryForward" name="IsCarryForward" value="@c.IsCarryForward" />
+                                                <input type="hidden" id="hdnMaxConsecutive" name="MaxConsecutive" value="@c.MaxConsecutive" />
+
+                                                @using (Html.BeginForm("UpdateLeaveType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <input type="hidden" name="LeaveTypeID" value="@c.LeaveTypeID" />
+                                                    <button onclick="return LeaveTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default sbtn ViewCopy visible" value="Edit">Delete</button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+                            </tbody>
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section pageBottom{
+    <div id="mdlEditLeaveType" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Update Leave Type </h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" action="/admin/UpdateLeaveType">
+                        <div class="box-body">
+                            <input type="hidden" name="LeaveTypeID" id="hdnLeaveTypeID" value="0" />
+                            <div class="form-group col-md-12">
+                                <label for="txtSchemeTitle">Leave Type Name</label>
+                                <input type="text" required name="LeaveTypeName" class="form-control" id="txtLeaveTypeName" placeholder="Enter Leave Type Name">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="txtSchemeTitle">Monthly Quota</label>
+                                <input type="number" step="0.01" required name="MonthlyQuota" class="form-control" id="txtMonthlyQuota" placeholder="Enter Monthly Quota">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="txtSchemeTitle">Yearly Quota</label>
+                                <input type="number" step="0.01" required name="YearlyQuota" class="form-control" id="txtYearlyQuota" placeholder="Enter Yearly Quota">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="txtSchemeTitle">Salary Deduction</label>
+                                <select id="ddlIsSalaryDeduct" class="form-control" name="IsSalaryDeduct">
+                                    <option value="0" selected>Salary Not Deducted</option>
+                                    <option value="1">Deduct Salary</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="txtSchemeTitle">Max Consecutive Days Allowed</label>
+                                <input type="number" step="0.01" required name="MaxConsecutive" class="form-control" id="txtMaxConsecutive" placeholder="Enter Max Consecutive">
+                            </div>
+
+                            <div class="form-group col-md-6">
+                                <label for="txtSchemeTitle">Carry Forward in Next Session?</label>
+                                <select id="ddlIsCarryForward" class="form-control" name="IsCarryForward">
+                                    <option value="0">No</option>
+                                    <option value="1">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary pull-right" onclick="return SaveFeeCategory();">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+    function EditLeaveType(sender, ID) {
+        $('#mdlEditLeaveType').find('#hdnLeaveTypeID').val(ID);
+        $('#mdlEditLeaveType').find('#txtLeaveTypeName').val($(sender).closest('tr').find('#hdnLeaveTypeName').val());
+        $('#mdlEditLeaveType').find('#txtMonthlyQuota').val($(sender).closest('tr').find('#hdnMonthlyQuota').val());
+        $('#mdlEditLeaveType').find('#txtYearlyQuota').val($(sender).closest('tr').find('#hdnYearlyQuota').val());
+        $('#mdlEditLeaveType').find('#ddlIsSalaryDeduct').val($(sender).closest('tr').find('#hdnIsSalaryDeduct').val());
+        $('#mdlEditLeaveType').find('#txtMaxConsecutive').val($(sender).closest('tr').find('#hdnMaxConsecutive').val());
+        $('#mdlEditLeaveType').find('#ddlIsCarryForward').val($(sender).closest('tr').find('#hdnIsCarryForward').val());
+        $('#mdlEditLeaveType').modal("toggle");
+    }
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liLeaveTypeManagement').closest('ul').closest('li').addClass('active');
+        $('#liLeaveTypeManagement').addClass('active');
+    });
+    function LeaveTypeDelete(sender) {
+        if (confirm('Are you sure you wish to delete this Leave Type?')) {
+
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    function BeforeLeaveTypeUpdate(sender) {
+        if ($(sender).closest('tr').find('#txtLeaveTypeName').val() == "") {
+            alert("Plese Fill Required Details!!!!");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+<!-- /.content -->

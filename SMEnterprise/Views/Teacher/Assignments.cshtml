@@ -1,0 +1,806 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+@model SMEnterprise.Models.AssignmentPageModel
+@section IncludeCss
+{
+    <title>Assignments</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("Assignments", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+
+                    <div class="row std-mng-head col-md-12">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-2 padding">
+                                    <label class="col-md-6 text-right" style="padding-right: 0px;">Class</label>
+                                    <div class="col-md-6">
+                                        <select class="form-control smallfont" name="ClassID" id="ddlClass" onchange="ClassChanged(this);">
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding">
+                                    <label class="col-md-4 text-right">Section</label>
+                                    <div class="col-md-8">
+                                        <select name="SectionID" class="form-control padding smallfont" id="ddlSection" onchange="SectionChanged(this);">
+                                            <option value="0">--Select--</option>
+                                            @foreach (NameIDModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Subject</label>
+                                    <div class="col-md-8">
+                                        <select name="SubjectID" class="form-control smallfont" id="ddlSubjects" onchange="SubjectChanged(this);">
+                                            <option value="0">--Select Subject--</option>
+                                            @foreach (NameIDModel el in Model.Subjects)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SubjectID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <label class="col-md-3 text-right">Chapter</label>
+                                    <div class="col-md-9">
+                                        <select name="ChapterID" class="form-control smallfont" id="ddlChapters" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0">--All--</option>
+                                            @foreach (NameIDModel el in Model.Chapters)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ChapterID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+                    @using (Html.BeginForm("Assignments", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
+                    {
+                        <div class="x_content">
+
+                            <table id="tblCategory" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        @*<th style="width: 20%">Topic</th>*@
+                                        <th style="width: 20%">Title</th>
+                                        <th style="width: 15%">Start</th>
+                                        <th style="width: 15%">End</th>
+                                        <th style="width: 15%">Type</th>
+                                        <th style="width: 10%">Grace</th>
+                                        <th style="width: 13%">#SUBMS</th>
+                                        <th style="width: 12%"><a href="javascript:void(0);" class="Closed" onclick="AddAssignment(this)">Add New</a></th>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int count = 0;
+                                    foreach (AssignmentModel c in Model.Assignments)
+                                    {
+                                        <tr>
+
+                                            @*<td>
+                                                @c.TopicName
+                                            </td>*@
+                                            <td>
+                                                @c.Title
+                                            </td>
+                                            <td>
+                                                @*<input type="hidden" id="hdnChapterID" value="@c.ChapterID" />*@
+                                                @*<input type="hidden" id="hdnTopicID" value="@c.TopicID" />*@
+                                                <input type="hidden" id="hdnAssignmentID" value="@c.ID" />
+                                                <input type="hidden" id="hdnStartDate" value="@c.StartDate.ToString("yyy-MM-dd")" />
+                                                <input type="hidden" id="hdnEndDate" value="@c.EndDate.ToString("yyy-MM-dd")" />
+                                                <input type="hidden" id="hdnTaskType" value="@c.TaskType" />
+                                                <input type="hidden" id="hdnDescription" value="@c.Detail" />
+                                                <input type="hidden" id="hdnAttachments" value="@c.Attachments" />
+                                                @c.StartDate.ToString("dd MMM,yy")
+                                            </td>
+
+                                            <td>
+                                                @c.EndDate.ToString("dd MMM,yy")
+                                            </td>
+                                            <td>
+                                                @{
+                                                    if (c.TaskType == 0)
+                                                    {
+                                                        <ss>Home Work</ss>
+                                                    }
+                                                    else if (c.TaskType == 1)
+                                                    {
+                                                        <ss>
+                                                            Assignment
+                                                        </ss>
+                                                    }
+                                                    else
+                                                    {
+                                                        <ss>Project</ss>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                @c.GracedDays
+                                            </td>
+                                            <td>
+                                                @c.Submissions
+                                                @if (c.Submissions != 0)
+                                                {
+                                                    <ss> (<a href="/Teacher/AssignmentSubmissions/@c.ID" target="_blank" class="btn btn-link">View</a>)</ss>
+                                                }
+                                                <input type="hidden" id="hdnSubmissions" value="@c.Submissions" />
+                                            </td>
+                                            <td>
+                                                <a href="javascript:void(0);" onclick="ViewDetails(this);" class="btn btn-link Closed">Edit</a>
+                                                <a href="javascript:void(0);" onclick="DeleteAssignment(this,@c.ID);" style="position: absolute;" class="btn btn-link Closed">Delete</a>
+                                            </td>
+                                        </tr>
+
+                                        count++;
+                                    }
+
+
+                                }
+                            </table>
+
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divAttachmentDetails" style="display:none;">
+    <div class="col-md-12">
+        <div class="row" id="StudentDetail">
+            <ul class="nav nav-tabs responsive  hidden-xs hidden-sm" id="myTab">
+                <li class="active"><a id="tab1" href="#resp-tab1" data-toggle="tab" aria-expanded="true">Assignment Details</a></li>
+                <li><a id="tab2" style="display:none;" href="#resp-tab2" data-toggle="tab" aria-expanded="true"><i class="fa fa-paperclip" style="color: #266386;"></i>Attachments </a></li>
+            </ul>
+            <div class="tab-content responsive  hidden-xs hidden-sm">
+                <div class="tab-pane active" id="resp-tab1">
+                    <div class="row tab-bx animated fadeIn">
+                        <div class="col-md-12">
+                            <div class="form-group form-box">
+                                <input type="hidden" name="ID" id="hdnID" value="0" />
+                                @*<div class="row" style="display:none">
+
+                                    <label class="col-md-2">Chapter : </label>
+                                    <div class="col-md-4">
+                                        <select class="form-control" ID="ddlAChapter" onchange="PopulateTopics();">
+                                            @foreach (NameIDModel el in Model.Chapters)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ChapterID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <label class="col-md-2">Topic : </label>
+                                    <div class="col-md-4">
+                                        <select class="form-control" ID="ddlTopic"></select>
+                                    </div>
+                                </div>*@
+                            </div>
+                            <div class="form-group form-box">
+                                <div class="row">
+                                    <label class="col-md-2">Title : </label>
+                                    <div class="col-md-10">
+                                        <input type="text" id="txtAssignmentTitle" class="form-control" placeholder="Assignment Title">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group form-box">
+                                <div class="row">
+                                    <label class="col-md-2">Start Date : </label>
+                                    <div class="col-md-3">
+                                        <input type="date" id="txtStartDate" class="form-control" />
+                                    </div>
+                                    <label class="col-md-2">End Date : </label>
+                                    <div class="col-md-3">
+                                        <input type="date" id="txtEndDate" class="form-control" />
+                                    </div>
+                                    <label class="col-md-1">Grace : </label>
+                                    <div class="col-md-1">
+                                        <input type="number" id="txtGraceDays" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group form-box">
+                                <div class="row">
+                                    <label class="col-md-2">Task Type : </label>
+                                    <div class="col-md-5">
+                                        <label class="radio-inline">
+                                            <input name="grpTaskType" id="rbTTHomeWork" checked type="radio">Home Work
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input name="grpTaskType" id="rbTTAssignment" type="radio">Assignment
+                                        </label>
+                                        <label class="radio-inline">
+                                            <input name="grpTaskType" id="rbTTProject" type="radio">Project
+                                        </label>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="form-group form-box">
+                                <div class="row">
+                                    <label class="col-md-2">Description : </label>
+                                    <div class="col-md-10">
+                                        <textarea id="txtDescription" rows="10" style="width: 100%;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="tab-pane" id="resp-tab2">
+                    <div class="row tab-bx animated fadeIn" style="min-height: 378px;">
+                        <div class="form-group form-box">
+                            <div class="row">
+                                <label class="col-md-2">Attachment : </label>
+                                <div class="col-md-8">
+                                    <input type="file" class="form-control test" id="inpAttachment" onchange="fileChange(this)" style="display: none;">
+
+                                    <input id="txtAttachment" style="background-color: rgba(68, 88, 97, 0.71)!important;color: #f7f7f7;" type="text" class="form-control" readonly placeholder="Click To Select File" onclick="GetUploadFile();">
+                                    <div class="progress" style="margin-bottom: 0px; border-radius: 5px; height: 6px;">
+                                        <div class="progress-bar progress-bar-striped" id="dvprogressbar" role="progressbar"
+                                             aria-valuenow="2" aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2"><a class="shortcut" href="javascript:UploadAttachment();">Attach </a></div>
+                            </div>
+                        </div>
+
+                        <div class="box-body">
+                            <br />
+                            <table id="tblAttachments" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr style="color: White; background-color: rgb(68, 88, 97)!important; font-weight: bold;" role="row">
+                                        <th>Attachment Name</th>
+                                        <th>Download </th>
+                                        <th>Delete</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbdAttachments"></tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                        <!-- Right Section Ends  -->
+
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- Right Section Ends  -->
+            <div class="col-md-12">
+                <div class="pre-nxt-btn">
+                    <a class="btn btn-xs btn-primary" onclick="SaveAssignment(this);" style="width:auto;" id="btnSave">Save</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyy-MM-dd")" />
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script>
+        function DeleteAssignment(sender, ID) {
+            if ($(sender).closest('tr').find('#hdnSubmissions').val() == '0') {
+                if (confirm('Do you really want to Delete this Assignment?')) {
+                    $.ajax(
+                        {
+                            type: "POST",
+                            url: "/Teacher/DeleteAssignment/" + ID,
+                            cache: false,
+                            processData: false,
+                            contentType: false,
+                            success: function (html) {
+                                $(sender).closest('tr').remove();
+                                ShowNotification('Success', 'Assignment Successfully Deleted', 'success');
+                            },
+                            error: function (e) {
+                                alert("errorn");
+                            }
+                        });
+                }
+            }
+            else {
+                ShowNotification('Info', 'Assignment have submissions, so can\'t be deleted!', 'info');
+            }
+        }
+        function AddAssignment(sender) {
+            tTopicID = 0;
+            if ($(sender).hasClass("Closed")) {
+                $('#btnSave').html('Save & Add Attachments');
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                }
+
+                $(sender)
+                      .closest("tr")
+                      .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divAttachmentDetails').html() + "</td></tr>");
+                $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+
+                var $container = $("html,body");
+                var $scrollTo = $('.Closed');
+
+                $container.animate({ scrollTop: $scrollTo.offset().top - $container.offset().top - 35, scrollLeft: 0 }, 300);
+
+                $("#tab2").css('display', 'none');
+                var $row = $(sender).closest("tr");
+
+                $('#hdnID').val(0);
+                $('#ddlAChapter').val();
+                tTopicID = 0;
+                PopulateTopics();
+
+                $('#txtAssignmentTitle').val('');
+                $('#txtGraceDays').val(0);
+                $('#txtStartDate').val($('#hdnCurrDate').val());
+                $('#txtEndDate').val($('#hdnCurrDate').val());
+                $('#txtDescription').text('');
+
+                $('#rbTTHomeWork').attr('checked', 'checked');
+
+
+                $("#tbdAttachments").html('');
+
+
+
+                $(sender).removeClass("Closed");
+                $(sender).addClass("Open");
+                if ($(sender).html() == "Add New") {
+                    $(sender).html('Cancel');
+                }
+                else {
+                    $(sender).html('Close');
+                }
+
+            }
+            else {
+                $(sender).removeClass("Open");
+                $(sender).closest("tr").css('background-color', 'white');
+                $(sender).addClass("Closed");
+                $(sender).closest("tr").next().remove();
+                $(sender).html('Add New');
+
+            }
+        }
+        var tTopicID = 0;
+        function ViewDetails(sender) {
+            tTopicID = 0;
+            if ($(sender).hasClass("Closed")) {
+                $('#btnSave').html('Save');
+
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+                    $(ele[0]).closest("tr").css('background-color', 'white');
+                    $(ele[0]).html('Close ');
+                }
+
+                $(sender)
+                      .closest("tr")
+                      .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divAttachmentDetails').html() + "</td></tr>");
+                $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+
+                var $container = $("html,body");
+                var $scrollTo = $('.Closed');
+
+                $container.animate({ scrollTop: $scrollTo.offset().top - $container.offset().top - 35, scrollLeft: 0 }, 300);
+
+                $("#tab2").css('display', 'block');
+                var $row = $(sender).closest("tr");
+
+                $('#hdnID').val($(sender).closest('tr').find('#hdnAssignmentID').val());
+                $('#ddlAChapter').val($(sender).closest('tr').find('#hdnChapterID').val());
+                tTopicID = $(sender).closest('tr').find('#hdnTopicID').val();
+                PopulateTopics();
+
+                $('#txtAssignmentTitle').val($row.find("td:nth-child(2)").text().trim());
+                $('#txtGraceDays').val($row.find("td:nth-child(6)").text().trim());
+                $('#txtStartDate').val($(sender).closest('tr').find('#hdnStartDate').val());
+                $('#txtEndDate').val($(sender).closest('tr').find('#hdnEndDate').val());
+                $('#txtDescription').text($(sender).closest('tr').find('#hdnDescription').val());
+                var TaskType = $(sender).closest('tr').find('#hdnTaskType').val();
+
+                if (TaskType == "0") {
+                    $('#rbTTHomeWork').attr('checked', 'checked');
+                }
+                else if (TaskType == "1") {
+                    $('#rbTTAssignment').attr('checked', 'checked');
+                }
+                else {
+                    $('#rbTTProject').attr('checked', 'checked');
+                }
+
+                var Atts = $(sender).closest('tr').find('#hdnAttachments').val();
+                var arrAtts = Atts.split(';');
+                var lstAssignments = '';
+                if (Atts != '') {
+                    for (var ai = 0; ai < arrAtts.length; ai++) {
+                        lstAssignments = lstAssignments + '<tr id="trAtt_' + ai + '">';
+                        lstAssignments = lstAssignments + '<td>' + arrAtts[ai] + '</td>';
+
+                        var fName = "'" + arrAtts[ai] + "'";
+                        var fDeleName = "'" + arrAtts[ai] + "'";
+                        lstAssignments = lstAssignments + '<td><a href="javascript:void(0);" onclick="DownloadAttachment(' + $('#hdnID').val() + ',' + fName + ');"><i class="fa fa-download"></i><a></td>';
+                        lstAssignments = lstAssignments + '<td><a href="javascript:void(0);" onclick="DeleteAttachment(' + fDeleName + ',this );">Delete<a></td>';
+                        lstAssignments = lstAssignments + '</tr>';
+                    }
+                    $("#tbdAttachments").append(lstAssignments);
+                }
+
+
+
+
+                $(sender).removeClass("Closed");
+                $(sender).addClass("Open");
+
+                $(sender).html('Close');
+
+            }
+            else {
+                $(sender).removeClass("Open");
+                $(sender).closest("tr").css('background-color', 'white');
+                $(sender).addClass("Closed");
+                $(sender).closest("tr").next().remove();
+                if ($(sender).html() == "Cancel") {
+                    $(sender).html('Add New');
+                }
+                else {
+                    $(sender).html('Edit');
+                }
+            }
+        }
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Teacher/GetSectionsForTeacherClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function SectionChanged(sender) {
+            $('#ddlSubjects').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Teacher/GetSubjectsForTeacherSection/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSubjects').html('');
+            $('#ddlSubjects').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function SubjectChanged(sender) {
+            $('#ddlChapters').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Teacher/GetChaptersForSubject/" + $('#ddlClass').val() + "/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlChapters').html('');
+            $('#ddlChapters').append(html);
+            $('#ddlChapters').trigger('change');
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+
+
+        function PopulateTopics() {
+            $('#ddlTopic').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Teacher/GetChaptersTopics/" + $('#ddlAChapter').val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlTopic').html('');
+            $('#ddlTopic').append(html);
+            $('#ddlTopic').val(tTopicID);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function DownloadAttachment(ID, AttName) {
+            var curUrl = window.location.href;
+            var ind = curUrl.indexOf("Teacher");
+            var BaseUrl = curUrl.substring(0, ind);
+            var link = BaseUrl + 'Attachments/Assignments/' + ID + '_' + AttName;
+            var a = $("<a>")
+            .attr("href", link)
+             .attr("download", AttName)
+            .appendTo("body");
+
+            a[0].click();
+
+            a.remove();
+        }
+        function GetUploadFile() {
+            $('#inpAttachment').trigger('click');
+        }
+        //Need Testing
+        var fileName = '';
+        var ID = 0;
+        function UploadAttachment() {
+            ID = $('#hdnID').val();
+            var file = document.getElementById('inpAttachment').files[0];
+            fileName = file.FileName;
+            var formData = new FormData();
+            formData.append("File", file);
+            formData.append("Type", 'Assignment');
+            formData.append("ID", $('#hdnID').val());
+            ajax = new XMLHttpRequest();
+            ajax.upload.addEventListener("progress", progressHandler, false);
+            ajax.addEventListener("load", completeHandler, false);
+            ajax.open("POST", "/Common/Upload");
+            ajax.send(formData);
+        }
+
+        function progressHandler(event) {
+            var percent = (event.loaded / event.total) * 100;
+            ShowProgress(percent);
+        }
+
+        function completeHandler() {
+            //myApp.hidePleaseWait(); //hide dialog
+             $.ajax({
+                url: "@Url.Action("UpdateAssignmentAttachment", "Teacher")",
+                type: 'POST',
+                data: JSON.stringify({
+                    ID: ID,
+                    Attachments: fileName
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (id) {
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+
+            ShowProgress(0);
+            var lstAssignments = lstAssignments + '<tr>';
+            lstAssignments = lstAssignments + '<td>' + $('#txtAttachment').val().replace(/ /g, '-') + '</td>';
+
+            var fName = "'" + $('#txtAttachment').val().replace(/ /g, '-') + "'";
+            var fDeleName = "'" + $('#txtAttachment').val().replace(/ /g, '-') + "'";
+            lstAssignments = lstAssignments + '<td><a href="javascript:void(0)" onclick="DownloadAttachment(' + $('#hdnID').val() + ',' + fName + ');"><i class="fa fa-download"></i><a></td>';
+            lstAssignments = lstAssignments + '<td><a href="javascript:void(0)" onclick="DeleteAttachment(' + fDeleName + ',this);">Delete<a></td>';
+            lstAssignments = lstAssignments + '</tr>';
+
+            $("#tbdAttachments").append(lstAssignments);
+            clearFileInput($('#inpAttachment'));
+            ShowNotification('Success', '"' + $('#txtAttachment').val() + '" : uploaded Successfully, Please remember to save before exit', 'success');
+            $('#txtAttachment').val('');
+
+        }
+
+        function ShowProgress(data) {
+            if (data <= 30) {
+                $('#dvprogressbar').attr('style', 'width:' + data + '% ;background-color:#d9534f;');
+            }
+            else if (data <= 50 & data > 30) {
+
+                $('#dvprogressbar').attr('style', 'width:' + data + '%;background-color:#f0ad4e;');
+            }
+            else if (data <= 70 & data > 50) {
+
+                $('#dvprogressbar').attr('style', 'width:' + data + '%;background-color:#5bc0de;');
+            }
+            else if (data <= 100 & data > 70) {
+
+                $('#dvprogressbar').attr('style', 'width:' + data + '%;background-color:#5cb85c;');
+            }
+        }
+        function fileChange(fileBox) {
+
+            if (fileBox.files && fileBox.files[0]) {
+                $('#txtAttachment').val(fileBox.files[0].name);
+                if (fileBox.files[0].size / 1024 < 5000) {
+
+                }
+                else {
+                    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+                    clearFileInput(fileBox);
+                    $('#txtAttachment').val('');
+                }
+            }
+        }
+        function clearFileInput(ctrl) {
+            try {
+                ctrl.value = null;
+            } catch (ex) { }
+            if (ctrl.value) {
+                ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+            }
+        }
+
+        function SaveAssignment(sender) {
+            $(sender).closest('#StudentDetail').find
+            var TaskType = 0;
+            if ($(sender).closest('#StudentDetail').find('#rbTTHomeWork').is(":checked")) {
+                TaskType = 0;
+            }
+            else if ($(sender).closest('#StudentDetail').find('#rbTTAssignment').is(":checked")) {
+                TaskType = 1;
+            }
+            else {
+                TaskType = 0;
+            }
+            var Atts = "";
+            $(sender).closest('#StudentDetail').find("#tbdAttachments").find('tr').each(function () {
+                if (Atts != "") {
+                    Atts = Atts + ";";
+                }
+                Atts = Atts + $(this).find("td:nth-child(1)").text().trim().replace(' ', '_');
+            });
+            $.ajax({
+                url: "@Url.Action("UpdateAssignment", "Teacher")",
+                type: 'POST',
+                data: JSON.stringify({
+                    ID: $(sender).closest('#StudentDetail').find('#hdnID').val(),
+                    ClassID: $('#ddlClass').val(),
+                    SectionID: $('#ddlSection').val(),
+                    SubjectID: $('#ddlSubjects').val(),
+                    ChapterID: $(sender).closest('#StudentDetail').find('#ddlAChapter').val(),
+                    TopicID: $(sender).closest('#StudentDetail').find('#ddlTopic').val(),
+                    StartDate: $(sender).closest('#StudentDetail').find('#txtStartDate').val(),
+                    EndDate: $(sender).closest('#StudentDetail').find('#txtEndDate').val(),
+                    GracedDays: $(sender).closest('#StudentDetail').find('#txtGraceDays').val(),
+                    TaskType: TaskType,
+                    Title: $(sender).closest('#StudentDetail').find('#txtAssignmentTitle').val(),
+                    Detail: $(sender).closest('#StudentDetail').find('#txtDescription').val(),
+                    Attachments: Atts
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (id) {
+                    $('#btnSave').html('Save');
+                    $(sender).closest('#StudentDetail').find("#tab2").css('display', 'block');
+                    $(sender).closest('#StudentDetail').find('#hdnID').val(id);
+                    $(sender).closest('#StudentDetail').find("#tab2").click();
+                    ShowNotification('Saved', 'Assignment Saved Successfully!!!!', 'success');
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        function DeleteAttachment(file, sender) {
+            if (confirm("Do you Really Want to delete attachment????")) {
+                $.ajax({
+                    url: "@Url.Action("DeleteFile", "Common")",
+                    type: 'POST',
+                    data: JSON.stringify({
+                        ID: $(sender).closest('#StudentDetail').find('#hdnID').val(),
+                        Type: "Assignment",
+                        FileName: file
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (s) {
+                        ShowNotification('Deleted', 'Attachment Deleted Successfully, Please remember to save assignment', 'success');
+                        $(sender).closest('tr').remove();
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+        }
+        $(function () {
+
+            $('#tblCategory').DataTable({
+                "columnDefs": [{
+                    "targets": 7,
+                    "orderable": false
+                }]
+            });
+
+        });
+
+    </script>
+}
+<!-- /.content -->

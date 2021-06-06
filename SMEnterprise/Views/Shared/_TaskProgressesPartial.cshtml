@@ -1,0 +1,22 @@
+﻿<a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+    <i class="fa fa-envelope-o"></i>
+    <span class="badge bg-green" id="spTotalTask">@Model.Count</span>
+</a>
+<ul id="menu1" class="dropdown-menu list-unstyled msg_list animated fadeInDown" role="menu">
+    @foreach (SMEnterprise.Models.RunningSMSTaskModel r in Model)
+    {
+        <li id="MainLi_@r.TaskID">
+            <a class="dd-option" href="/Account/SendSMS/@r.TaskID" title="Click to Review" target="_blank">
+                <input type="hidden" id="hdnTotalReciever_@r.TaskID" value="@r.TotalCount" />
+                <input type="hidden" id="hdnProcessedReciever_@r.TaskID" value="@r.CompletedCount" />
+                <label class="dd-option-text" style="white-space: initial;">
+                    @r.Title <small>@r.RecieverList </small><small id="mainPercentage"> (@r.Progress.ToString("##")%)</small>
+                </label>
+
+            </a>
+            <div class="progress progress_sm" style="height: 2px !important;margin-bottom: 5px;">
+                <div class="progress-bar bg-red" role="progressbar" style="width:@r.Progress%;"></div>
+            </div>
+        </li>
+    }
+</ul>

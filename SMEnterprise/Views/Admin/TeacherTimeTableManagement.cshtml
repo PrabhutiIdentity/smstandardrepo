@@ -1,0 +1,650 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model @SMEnterprise.Models.TimeTablePageModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .std-mng-head .fa.fa-print {
+        height: 25px;
+        padding: 2px 10px;
+        border: 1px solid #222D32;
+        border-radius: 2px;
+        background: #5D6E76;
+        color: #FFFFFF;
+        font-size: 18px;
+    }
+    ul.day li a.Tlink_2 {
+        top: 35px;
+    }
+</style>
+@section IncludeCss
+{
+    <title>P-School | Teacher Time Table</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/TimeTableStyle.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Admin/blue.css")" rel="stylesheet">
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Teacher Time Table Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Teacher Time Table Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate()" />
+            <div class="box">
+                <div class="box-header">
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-5 text-right" style="padding-right: 0px;">Teacher :</label>
+                                    <div class="col-md-7">
+                                        <select name="TeachedID" id="ddlTeachers" class="form-control" onchange="TeacherChanged(this);">
+                                            <option value="0">--Select--</option>
+                                            @foreach (EmployeeModel el in Model.Teachers)
+                                            {
+                                                <option value="@el.EmployeeID" @(el.EmployeeID == Model.TimeTable.TeacherID ? "selected" : "" )>@el.EmployeeName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-7 padding ">
+
+                                </div>
+
+                                <div class="col-md-1 padding ">
+                                    <a href="javascript:void(0);" title="Print Time Table" onclick="printTimeTable();"><i class="fa fa-print"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="box-body" id="dvTimeTableContainer">
+                    @{
+                        <div class="ClassSectionHeader">
+                            <k2> <sk id="skTeacherName"></sk> </k2>
+                        </div>
+                        var width = 100 / (Model.TimeTable.Periods.Count + 1);
+                        <div class="time-table-dates">
+                            <div class="row" id="divTimeTableFrame" style="margin-left: 5px;">
+
+                                <ul class="days day" style="width:@width%;">
+                                    <li class="period" style="color: #fff;height: 75px;">
+                                        <p>Days</p>
+                                    </li>
+                                    @for (var day = 0; day < Model.TimeTable.Days; day++)
+                                    {
+                                        <li>
+                                            <span>@Model.TimeTable.DayNames[day]</span>
+                                        </li>
+                                    }
+                                </ul>
+                                @foreach (PeriodModel period in Model.TimeTable.Periods)
+                                {
+                                    var ulClass = "period-01 day";
+                                    var PeriodDone = 0;
+                                    if (period.PeriodType == 4)
+                                    {
+                                        ulClass = "lunch-break day lunch";
+                                    }
+                                    <ul class="@ulClass" style="width:@width%">
+                                        <li class="period" style="height: 75px;">
+                                            <p> @period.EducationLevelName </p>
+                                            <p> @period.Name </p>
+                                            <p class="period-time">
+                                                <span>@period.StartTime.Substring(0, 5)</span><span> - </span><span>@period.EndTime.Substring(0, 5)</span>
+                                            </p>
+                                        </li>
+                                        @if (period.PeriodType == 4)
+                                        {
+                                            for (var day = 0; day < Model.TimeTable.Days; day++)
+                                            {
+                                                <li>
+                                                    <p>Lunch Break</p>
+                                                </li>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (var day = 0; day < Model.TimeTable.Days; day++)
+                                            {
+                                                if (day < period.DaysCount)
+                                                {
+                                                    PeriodDone = 0;
+                                                    foreach (var lac in Model.TimeTable.Lactures.Where(c => c.PeriodID == period.PeriodID))
+                                                    {
+                                                        var subsClass = "";
+                                                        var tSubjectID = 0;
+                                                        foreach (TeacherSubstitutionModel tsm in Model.TimeTable.Substitutions)
+                                                        {
+                                                            if (tsm.DayID == day + 1 && tsm.PeriodID == period.PeriodID)
+                                                            {
+                                                                subsClass = "SubstitutedTeacherPeriod";
+                                                                break;
+                                                            }
+
+                                                        }
+                                                        var tClassName = "No Teacher";
+                                                        var subjectName = "No Subject";
+                                                        var ClsID = 0;
+                                                        var SecID = 0;
+                                                        tSubjectID = 0;
+                                                        var isOptional = 0;
+
+                                                        ClsID = lac.ClassID;
+                                                        SecID = lac.SectionID;
+                                                        tClassName = lac.ClassName + "-" + lac.SectionName;
+                                                        if (day == 0)
+                                                        {
+                                                            tSubjectID = lac.SubjectID1;
+                                                        }
+                                                        else if (day == 1)
+                                                        {
+                                                            tSubjectID = lac.SubjectID2;
+
+                                                        }
+                                                        else if (day == 2)
+                                                        {
+                                                            tSubjectID = lac.SubjectID3;
+
+                                                        }
+                                                        else if (day == 3)
+                                                        {
+                                                            tSubjectID = lac.SubjectID4;
+
+                                                        }
+                                                        else if (day == 4)
+                                                        {
+                                                            tSubjectID = lac.SubjectID5;
+
+                                                        }
+                                                        else if (day == 5)
+                                                        {
+                                                            tSubjectID = lac.SubjectID6;
+                                                        }
+                                                        var tsub = Model.TimeTable.Subjects.FirstOrDefault(c => c.SubjectID == tSubjectID);
+                                                        if (tsub != null)
+                                                        {
+                                                            subjectName = tsub.SubjectName;
+                                                            isOptional = tsub.IsOptionalsubject;
+                                                            PeriodDone = 1;
+                                                        }
+                                                        else
+                                                        {
+                                                            subjectName = "No Subject";
+                                                            isOptional = 0;
+                                                            PeriodDone = 0;
+                                                        }
+                                                        if (PeriodDone == 1)
+                                                        {
+                                                            <li class="" id="li-@period.PeriodID-@(day + 1)">
+                                                                <p class="subject">
+                                                                    @{
+                                                                        <span id="pSubject">@subjectName</span>
+                                                                    }
+                                                                </p>
+                                                                <p class="teacher" id="pTeacher">@tClassName</p>
+                                                                @{
+                                                                    var IsMerged = 0;
+
+                                                                    <div class="liBG"></div>
+                                                                    <input type="hidden" id="hdnClassName" value="@lac.ClassName" />
+                                                                    <input type="hidden" id="hdnSectionName" value="@lac.SectionName" />
+                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                    <input type="hidden" id="hdnSubjectID" value="@tSubjectID" />
+                                                                    <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                                    <input type="hidden" id="hdnDayID" value="@(day + 1)" />
+                                                                    <input type="hidden" id="hdnClassID" value="@ClsID" />
+                                                                    <input type="hidden" id="hdnSectionID" value="@SecID" />
+                                                                    <input type="hidden" id="hdnIsMergedSubject" value="@IsMerged" />
+                                                                    <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
+                                                                }
+                                                                <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
+                                                                <a href="javascript:void(0)" title="Manage Substitutions" onclick="ViewSubstitutions(this);" class="Tlink_2"><i class="fa fa-exchange"></i></a>
+
+                                                            </li>
+                                                                            break;
+                                                                        }
+
+                                                                    }
+                                                                    if (PeriodDone == 0)
+                                                                    {
+                                                                        <li class="EmptyPeriod" id="li-@period.PeriodID-@(day + 1)">
+                                                                            <p class="subject">
+
+                                                                                <span id="pSubject">No Subject</span>
+
+                                                                            </p>
+                                                                            <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
+
+                                                                            <div class="liBG"></div>
+                                                                            <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                            <input type="hidden" id="hdnSubjectID" value="0" />
+                                                                            <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                                            <input type="hidden" id="hdnDayID" value="@(day+1)" />
+                                                                            <input type="hidden" id="hdnSectionID" value="0" />
+                                                                            <input type="hidden" id="hdnClassID" value="0" />
+                                                                            <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
+                                                                            <input type="hidden" id="hdnIsMergedSubject" value="0" />
+                                                                            <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
+
+                                                                        </li>
+                                                                        }
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <li>Leave Applicable</li>
+                                                                            }
+
+                                                                        }
+                                                                    }
+                                    </ul>
+                                                                    }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="editLactureModel" class="EditLactureModel" style="width: 50%; margin-top:0px!important;" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    </div>
+    <div class="modal fade customwidth" style="left: 46%; width: 650px !important;" id="modelMergeSection" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+
+    </div>
+
+</section>
+<style>
+    .EditLactureModel {
+        margin-top: 150px !important;
+    }
+
+    .modal-dialog {
+        width: 850px !important;
+    }
+</style>
+
+<script src="@Url.Content("~/js/icheck.min.js")"></script>
+<script>
+    function printTimeTable() {
+        var teachName = $('#ddlTeachers option:selected').text();
+        var contents = $("#dvTimeTableContainer").html();
+        var frame1 = $('<iframe />');
+        frame1[0].name = "frame1";
+        frame1.css({ "position": "absolute", "top": "-1000000px" });
+        $("body").append(frame1);
+        var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+        frameDoc.document.open();
+        //Create a new HTML document.
+        frameDoc.document.write('<html><head><title>Time Table For ' + teachName + '</title>');
+        frameDoc.document.write('</head><body>');
+        //Append the external CSS file.
+        frameDoc.document.write('<link href="@Url.Content("~/css/studentStyle.css")" rel="stylesheet" type="text/css" />');
+        frameDoc.document.write('<link href="@Url.Content("~/css/TimeTableStyle.css")" rel="stylesheet" type="text/css" />');
+        //Append the DIV contents.
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            frame1.remove();
+        }, 500);
+    }
+    $(document).ready(function () {
+        $('#liTeacherTimeTable').closest('ul').closest('li').addClass('active');
+        $('#liTeacherTimeTable').addClass('active');
+        $('#skTeacherName').html($("#ddlTeachers option:selected").text());
+    });
+    var EditLactureForm;
+    function DeleteSubstitution(sender) {
+        return confirm('Do You Really want To Delete?');
+    }
+    function UpdateSubstitution(sender) {
+        return confirm('Do You Really want To Delete?');
+    }
+    function SubsDateChanged(sender, DayID) {
+        var NDayID = new Date($(sender).val()).getDay();
+        if (NDayID != DayID) {
+            $(sender).val('');
+            ShowNotification('error', 'Please Select Date of Same day for which want to do Substitution!!!!', 'error');
+        }
+    }
+    function ViewSubstitutions(sender) {
+        var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+        $.ajax({
+            url: "@Url.Action("EditTeacherSubstitution", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+
+                ClassName: $(sender).closest('li').find('#hdnClassName').val(),
+                SectionName: $(sender).closest('li').find('#hdnSectionName').val(),
+                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
+                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
+                DayID: $(sender).closest('li').find('#hdnDayID').val(),
+                TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
+                ClassID: $(sender).closest('li').find('#hdnClassID').val(),
+                EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                notice.remove();
+                EditLactureForm = new PNotify({
+                    text: html,
+                    icon: false,
+                    width: '70%',
+                    hide: false,
+                    addclass: 'dark',
+                    styling: 'bootstrap3',
+                    buttons: {
+                        closer: false,
+                        sticker: false
+                    },
+                    insert_brs: false
+                });
+
+                $('.').css('margin-right', '100px');
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                EditLactureForm.remove();
+            },
+            async: true,
+            processData: false
+        });
+    }
+    function EditLacture(sender) {
+        var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+        $.ajax({
+            url: "@Url.Action("EditTeacherLacture", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+
+                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
+                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
+                DayID: $(sender).closest('li').find('#hdnDayID').val(),
+                TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
+                ClassID: $(sender).closest('li').find('#hdnClassID').val(),
+                EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val(),
+                IsMergedSubject: $(sender).closest('li').find('#hdnIsMergedSubject').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                notice.remove();
+                EditLactureForm = new PNotify({
+                    text: html,
+                    icon: false,
+                    width: '70%',
+                    hide: false,
+                    addclass: 'dark',
+                    styling: 'bootstrap3',
+                    buttons: {
+                        closer: false,
+                        sticker: false
+                    },
+                    insert_brs: false
+                });
+
+                $('.').css('margin-right', '100px');
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                EditLactureForm.remove();
+            },
+            async: true,
+            processData: false
+        });
+    }
+    function CancelLactureEdit() {
+        EditLactureForm.remove();
+    }
+    function GetSubjectTeacher(sender) {
+
+        $.ajax({
+            url: "@Url.Action("GetSectionSubjectTeachers", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+
+                PeriodID: $(sender).closest('tr').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('tr').find('#hdnSectionID').val(),
+                SubjectID: $(sender).closest('tr').find('#ddlSubject').val(),
+                TeacherID: $(sender).closest('tr').find('#hdnReplacedTeacherID').val(),
+                DayID: $(sender).closest('tr').find('#hdnDayID').val(),
+                SenderType: 1
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                $('#ddlTeacher').html('');
+                $('#ddlTeacher').html('<option value="0">--Select--</option>');
+                $('#ddlTeacher').append(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+    function RemoveLacture(sender) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateTeacherLacture", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+
+                PeriodID: $(sender).closest('.col-md-6').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('.col-md-6').find('#ddlSections').val(),
+                SubjectID: 0,
+                TeacherID: 0,
+                ClassID: $(sender).closest('.col-md-6').find('#ddlClasses').val(),
+                EducationLevelID: $(sender).closest('.col-md-6').find('#hdnEducationLevelID').val(),
+                DayID: $(sender).closest('.col-md-6').find('#hdnDayID').val(),
+                OldClassID: $(sender).closest('.col-md-6').find('#hdnClassID').val(),
+                OldSectionID: $(sender).closest('.col-md-6').find('#hdnSectionID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (res) {
+                window.location.href = "/Admin/TeacherTimeTableManagement/" + $(sender).closest('.col-md-6').find('#hdnTeacherID').val();
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+    function UpdateLacture(sender) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateTeacherLacture", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+
+                PeriodID: $(sender).closest('.col-md-6').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('.col-md-6').find('#ddlSections').val(),
+                SubjectID: $(sender).closest('.col-md-6').find('#ddlSubject').val(),
+                TeacherID: $(sender).closest('.col-md-6').find('#hdnTeacherID').val(),
+                ClassID: $(sender).closest('.col-md-6').find('#ddlClasses').val(),
+                EducationLevelID: $(sender).closest('.col-md-6').find('#hdnEducationLevelID').val(),
+                DayID: $(sender).closest('.col-md-6').find('#hdnDayID').val(),
+                OldClassID: $(sender).closest('.col-md-6').find('#hdnClassID').val(),
+                OldSectionID: $(sender).closest('.col-md-6').find('#hdnSectionID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (res) {
+                window.location.href = "/Admin/TeacherTimeTableManagement/" + $(sender).closest('.col-md-6').find('#hdnTeacherID').val();
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+
+    function InsertSubstitution(sender, OpType) {
+        var IsContinue = true;
+        var tReplacingTeacherID = 0;
+        if (OpType == -1) {
+            IsContinue = confirm('Do you really want to remove the Substitution?');
+            tReplacingTeacherID = $(sender).closest('tr').find('#hdnReplacingTeacherID').val();
+        }
+        else {
+
+            tReplacingTeacherID = $(sender).closest('tr').find('#ddlTeacher').val();
+        }
+        if (IsContinue) {
+            if ($(sender).closest('tr').find('#ddlTeacher').val() == "0") {
+                alert("Please Select a Teacher....")
+            }
+            else {
+                var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+                $.ajax({
+                    url: "@Url.Action("UpdateTeacherSubstitution", "Admin")",
+                    type: 'POST',
+                    data: JSON.stringify({
+                        SubstitutionID: $(sender).closest('tr').find('#hdnSubstitutionID').val(),
+                        ReplacedTeacherID: $(sender).closest('tr').find('#hdnReplacedTeacherID').val(),
+                        ReplacingTeacherID: tReplacingTeacherID,
+                        PeriodID: $(sender).closest('tr').find('#hdnPeriodID').val(),
+                        DayID: $(sender).closest('tr').find('#hdnDayID').val(),
+                        SubjectID: $(sender).closest('tr').find('#hdnSubjectID').val(),
+                        NewSubjectID: $(sender).closest('tr').find('#ddlSubject').val(),
+                        ClassID: $(sender).closest('tr').find('#hdnClassID').val(),
+                        SectionID: $(sender).closest('tr').find('#hdnSectionID').val(),
+                        FromDate: $(sender).closest('tr').find('#txtSubDate').val(),
+                        OpType: OpType,
+                        EducationLevelID: $(sender).closest('tr').find('#hdnEducationLevelID').val(),
+                        ClassName: $(sender).closest('tr').find('#hdnClassName').val(),
+                        SectionName: $(sender).closest('tr').find('#hdnSectionName').val(),
+                        SendSMS: $(sender).closest('tr').find('#hdnSelected').val()
+
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (html) {
+                        $('#li-' + $(sender).closest('tr').find('#hdnPeriodID').val() + '-' + $(sender).closest('tr').find('#hdnDayID').val()).addClass('SubstitutedTeacherPeriod');
+                        notice.remove();
+                        EditLactureForm = new PNotify({
+                            text: html,
+                            icon: false,
+                            width: '70%',
+                            hide: false,
+                            addclass: 'dark',
+                            styling: 'bootstrap3',
+                            buttons: {
+                                closer: false,
+                                sticker: false
+                            },
+                            insert_brs: false
+                        });
+
+                        $('.').css('margin-right', '100px');
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                        EditLactureForm.remove();
+                    },
+                    async: true,
+                    processData: false
+                });
+            }
+        }
+    }
+    function DeleteMergedClass(sender) {
+        if (confirm("Do you Really Want to Remove Merged Section????")) {
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/DeleteMergedClassSection/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    function EducationLevelChanged(sender) {
+
+        $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetClassesOnEducationLevel/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        $('#ddlClass').html('');
+        $('#ddlClass').html('<option value="0">--Select--</option>');
+        $('#ddlClass').append(html);
+        $('#ddlSection').html('');
+        $('#ddlSection').html('<option value="0">--Select--</option>');
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+    }
+    function ClassChanged(sender) {
+        $('#ddlSections').html('<option value="-1">Loading....</option>');
+        $.ajax(
+            {
+                url: "@Url.Action("GetSectionsOnClassTeacherTT", "Admin")",
+                type: 'POST',
+                data: JSON.stringify({
+                    TeacherID: $(sender).closest('.col-md-6').find('#hdnTeacherID').val(),
+                    PeriodID: $(sender).closest('.col-md-6').find('#hdnPeriodID').val(),
+                    DayID: $(sender).closest('.col-md-6').find('#hdnDayID').val(),
+                    ClassID: $(sender).val()
+                }),
+                cache: false,
+                processData: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+                    $('#ddlSections').html('');
+                    $('#ddlSections').html('<option value="0">--Select--</option>');
+                    $('#ddlSections').append(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+    function TeacherChanged(sender) {
+        window.location.href = "/Admin/TeacherTimeTableManagement/" + $(sender).val();
+    }
+</script>
+<!-- /.content -->

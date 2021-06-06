@@ -1,0 +1,204 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.DailyAttandanceReportModel
+@section IncludeCss
+{
+    <title>Daily Attandance Report | @Model.ReportDate.ToString("dd MMM, yyyy")</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("DailyAttandanceReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetReport" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding">
+                                </div>
+                                <div class="col-md-3 padding">
+                                    @*<a href="/Account/StudentDetails/0/1" target="_blank" class="btn btn-link" style="color:white;">Add Student</a>*@
+                                </div>
+                                <div class="col-md-2 padding">
+
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <div class="row">
+                                        <label class="col-md-5 text-right padding-R" style="padding-left: 10px;">Date (mm/dd/yyyy) : </label>
+                                        <div class="col-md-5 padding-L" style="padding-left: 10px;">
+                                            <input type="date" class="form-control" name="ReportDate" value="@Model.ReportDate.ToString("yyyy-MM-dd")" onchange="$('#frmGetReport').submit();" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Sl.No.</th>
+                                    <th style="width: 25%">Class/Section</th>
+                                    <th style="width: 15%">Strength</th>
+                                    <th style="width: 15%">Present</th>
+                                    <th style="width: 15%">Absent</th>
+                                    <th style="width: 15%">Leave</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int Total = 0;
+                                int Absent = 0;
+                                int Leave = 0;
+                                int Present = 0;
+                                int count = 0;
+                                foreach (DailyAttandanceModel c in Model.Report)
+                                {
+                                    Total = Total + c.Total;
+                                    Present = Present + c.Present;
+                                    Leave = Leave + c.Leave;
+                                    Absent = Absent + c.Absent;
+                                    <tr>
+
+                                        <td>
+                                            @(count + 1)
+
+                                        </td>
+                                        <td>
+                                            @c.ClassName / @c.SectionName
+                                        </td>
+
+                                        <td>
+                                            @c.Total
+                                        </td>
+                                        <td>
+                                            @c.Present
+
+                                        </td>
+                                        <td>@(c.Absent - c.Leave)</td>
+                                        <td>@c.Leave</td>
+                                    </tr>
+
+                                    count++;
+                                }
+                                
+
+                            }
+                            <tfoot>
+                                <tr style="background-color: beige;">
+
+                                    <td colspan="2" style="text-align: center;">
+
+                                        <b>Total</b>
+                                    </td>
+
+                                    <td>
+                                        <b> @Total</b>
+                                    </td>
+                                    <td>
+                                        <b>@Present</b>
+
+                                    </td>
+                                    <td><b>@(Absent - Leave)</b></td>
+                                    <td><b>@Leave</b></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+                        bPaginate:false,
+                        dom: "Bfrtip",
+                        buttons: [
+                          {
+                              extend: "copy",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "csv",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "excel",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "pdfHtml5",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "print",
+                              className: "btn-sm"
+                          },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+
+        });
+    </script>
+
+
+
+}

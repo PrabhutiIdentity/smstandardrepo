@@ -1,0 +1,277 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+    <title>Holiday Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Holiday Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Holiday Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate()" />
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 65%">Holiday</th>
+                                <th style="width: 5%">Status</th>
+                                <th style="width: 15%"><a href="javascript:void(0);" onclick="EditHoliday(this);" class="EditSectionClose" value="Edit">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{ foreach (HolidayModel c in Model)
+                            {
+                                var ctr = 1;
+                                <tr>
+                                    <td>@ctr <input type="hidden" id="hdnStartDate" value="@c.StartDate" /></td>
+                                    <td>
+                                        <span class="badge bg-red">
+                                            @c.StartDate.ToString("dd MMM -")  @c.EndDate.ToString("dd MMM, yy") (@c.Days Days)
+                                        </span>
+                                        <span class="badge bg-aqua">@c.HolidayTypeName</span> <span class="badge bg-grey">@c.DayDurationName</span><br />
+                                        @if (c.IsStudents == 1)
+                                        {
+                                            <span class="badge bg-blue">Classes : @c.ClassesIncluded </span>
+                                        }
+                                        @if (c.IsEmployee == 1)
+                                        {
+                                            <span class="badge bg-yellow">Employees : @c.EmployeeTypes </span>
+                                        }
+                                        <br />
+                                        <b>@c.Title</b>
+                                        <input type="hidden" name="HolidayID" id="hdnHolidayID" value="@c.HolidayID" />
+                                    </td>
+                                    <td>
+                                        @if (c.Status == 1)
+                                        {
+                                            <label class='badge bg-green'>Active</label>
+                                        }
+                                        else
+                                        {
+                                            <label class='badge bg-red'>Inactive</label>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <input type="hidden" name="OpType" id="hdnOpType" value="0" />
+                                            <a href="javascript:void(0);" style="background-color: cornflowerblue;color: white;" onclick="EditHoliday(this);" class="btn btn-default EditSectionClose" value="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+
+                                            <a target="_blank" href="/Admin/HolidayNoticePrint/@c.HolidayID" style="background-color: #00a65a;color: white;" class="btn btn-default" value="Edit"><i class="fa fa-print" aria-hidden="true"></i></a>
+                                            @using (Html.BeginForm("DeleteHoliday", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="HolidayID" value="@c.HolidayID" />
+                                                <button onclick="return HolidayDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+                                            }
+                                            @using (Html.BeginForm("SendHolidaySMS", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="SMSText" value="@(c.Title + "%0a" + Convert.ToDateTime(c.StartDate).ToString("dd MMM -") + Convert.ToDateTime(c.EndDate).ToString("dd MMM, yy") + "%0a For:" + c.ClassesIncluded + "%0a" + c.DayDurationName)" />
+                                                <input type="hidden" name="ID" value="@c.HolidayID" />
+                                                <input type="hidden" name="RecieverType" value="3" />
+                                                <input type="hidden" name="AssociatedIDs" value="@c.ClassesIncludedIDs" />
+                                                <button onclick="return NoticeSendSMS(this);" msgSend="@c.IsSMSSent" style="background-color: @(c.IsSMSSent == 0 ? "gray" : "green");color: white;" class="btn btn-default" title="@(c.IsSMSSent == 0 ? "SMS Not Sent For This Holiday" : "SMS Already Sent For This Holiday")">SMS</button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                                ctr++;
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section scripts
+{
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script src="@Url.Content("~/js/icheck.min.js")"></script>
+
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable({
+                "ordering": false
+            });
+            $('#liHolidayManagement').closest('ul').closest('li').addClass('active');
+            $('#liHolidayManagement').addClass('active');
+        });
+        function TitleChanged(sender) {
+            $(sender).closest('.input-group').find('#ssTitleCharCount').html($(sender).val().length);
+        }
+        function NoticeSendSMS(sender) {
+            if ($(sender).attr('msgSend') == "1") {
+                alert('SMS is already sent for this Holiday....');
+                return false;
+            }
+            else {
+                return confirm('Do you really want to Send SMS!!!!');
+            }
+        }
+        function HolidayDelete(sender) {
+
+            var StartDate = new Date($(sender).closest('tr').find('#hdnStartDate').val());
+            var CurrentDate = new Date($("#hdnCurrentDate").val());
+            if (StartDate < CurrentDate) {
+                alert("Holiday Has already been started, Now it can not be deleted!!!!")
+                return false;
+            }
+            else {
+                if (confirm('Are you sure you wish to delete this Holiday?')) {
+
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        function PrintHolidayNotice(sender) {
+
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetHolidayPrint/" + $(sender).closest('tr').find('#hdnHolidayID').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        var printWindow = window.open('', '', 'height=400,width=800');
+                        printWindow.document.write(html);
+                        printWindow.document.close();
+                        setTimeout(function () {
+                            printWindow.print();
+                        }, 500);
+                        return false;
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+
+
+
+        }
+
+        function EditHoliday(sender) {
+
+
+            if ($(sender).hasClass("EditSectionClose")) {
+                $(sender)
+                    .closest("tr")
+                    .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading, Please Wait....</td></tr>");
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Admin/GetHolidayDetails/" + $(sender).closest('tr').find('#hdnHolidayID').val(),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            // fill the div with the html returned by action
+                            $(sender).closest("tr").next().remove();
+
+                            var ele = document.getElementsByClassName("EditSectionOpen");
+                            if (ele.length > 0) {
+                                $(ele[0]).click();
+                                if ($(ele[0]).text() == 'Cancel') {
+                                    $(ele[0]).text('Add New');
+                                }
+                                else {
+                                    $(sender).find('i').addClass('fa-pencil-square-o');
+                                    $(sender).find('i').removeClass('fa-times-circle-o');
+                                }
+                            }
+                            if ($(sender).text() == 'Add New') {
+                                $(sender).text('Cancel');
+                            }
+                            else {
+
+                                $(sender).find('i').removeClass('fa-pencil-square-o');
+                                $(sender).find('i').addClass('fa-times-circle-o');
+                            }
+                            $(sender).removeClass("EditSectionClose");
+                            $(sender).addClass("EditSectionOpen");
+                            $(sender)
+                                .closest("tr")
+                                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+            else {
+                $(sender).removeClass("EditSectionOpen");
+                $(sender).addClass("EditSectionClose");
+                if ($(sender).text() == 'Cancel') {
+                    $(sender).text('Add New');
+                }
+                else {
+                    $(sender).find('i').addClass('fa-pencil-square-o');
+                    $(sender).find('i').removeClass('fa-times-circle-o');
+                }
+                $(sender).closest("tr").next().remove();
+
+            }
+
+        }
+        function SaveHoliday(sender) {
+            if ($('#txtHolidayTitle').val() == null || $('#txtHolidayTitle').val()=='' )
+            {
+                alert('Please Enter Holiday Title Name.');
+                return false;
+            }
+            if ($('#txtHStartDate').val() > $('#txtHEndDate').val()) {
+                alert('End date should not be less then Start date....');
+                return false;
+            }
+            else {
+                $('#hdnClassesIncluded').val($(sender).closest('.box-body').find('#ddlClasses').val());
+                $('#hdnAssociatedIDs').val($(sender).closest('.box-body').find('#ddlAssociateIDs').val());
+                $('#hdnHolidayType').val($(sender).closest('.box-body').find('#rbHolidayType1').is(":checked") ? "0" : "1");
+                if ($(sender).closest('.box-body').find('#rbHolidayDur1').is(":checked")) {
+                    $('#hdnDayDuration').val("1");
+                }
+                else if ($(sender).closest('.box-body').find('#rbHolidayDur2').is(":checked")) {
+                    $('#hdnDayDuration').val("2");
+                }
+                else {
+                    $('#hdnDayDuration').val("3");
+                }
+                return true;
+            }
+        }
+    </script>
+}
+<!-- /.content -->

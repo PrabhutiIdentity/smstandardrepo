@@ -1,0 +1,93 @@
+﻿@{
+    var c = Model.StudentDetails;
+}
+<tr id="trFee_@c.StudentID">
+
+    <td>
+        <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+    </td>
+    <td>  @c.SchoolUID</td>
+    <td>
+        Name :<nam id="sName"> @c.Name</nam>
+        <br />
+        ID :<nam id="sSID">  @c.StudentSID </nam>
+        <br />
+        Roll No : @c.RollNo
+        <br />
+        Mode : @(c.FeePaymentMode == 1 ? "Monthly" : c.FeePaymentMode == 3 ? "Quarterly" : "Half Yearly")<br />
+        Father : @c.FatherName
+    </td>
+    <td>
+        @c.QuotaName
+    </td>
+
+    <td>
+
+        Fee Amount : @(c.FeeAmount.ToString("N2"))<br />
+        Previous Dues :@c.PreviousDue.ToString("N2")<br />
+        Late Fee Fine :@c.LateFee.ToString("N2")<br />
+        Fee Concession :@c.Discounts.ToString("N2")<br />
+        Paid Amount :@c.Paid.ToString("N2")<br />
+
+        <label class='badge bg-red'> Net Amount :@(((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid - c.Discounts).ToString("N2"))</label>
+    </td>
+    <td>
+        @if ((c.FeeAmount + c.PreviousDue + c.LateFee - c.Paid - c.Discounts) == 0)
+        {
+            <label class='badge bg-green'>Paid</label>
+        }
+        else if (c.Paid != 0)
+        {
+            <label class='badge bg-blue'>Partial</label>
+        }
+        else
+        {
+            <label class='badge bg-red'>Pending</label>
+        }
+    </td>
+    <td>
+        <div class="row">
+            <div class="col-md-6">
+                <input type="hidden" value="@c.PaymentID" id="hdnPaymentID" />
+                <input type="hidden" value="@c.ClassID" id="hdnClassID" />
+                <input type="hidden" value="@c.SectionID" id="hdnSectionID" />
+                <input type="hidden" value="@c.GroupID" id="hdnGroupID" />
+                <input type="hidden" value="@c.StudentID" id="hdnStudentID" />
+                <input type="hidden" value="@c.SessionID" id="hdnSessionID" />
+                <input type="hidden" value="@c.Month" id="hdnMonth" />
+
+                @*<a href="javascript:void(0);" onclick="ViewPaymentDetails(this);" class="btn btn-danger Closed">Pay Now</a>*@
+
+                @if ((c.FeeAmount + c.PreviousDue + c.LateFee - c.Paid - c.Discounts) > 0)
+                {
+                    <a href="javascript:void(0);" onclick="ViewPaymentDetails(this);" class="btn btn-danger Open">Close</a>
+                }
+                @if ((c.FeeAmount + c.PreviousDue + c.LateFee - c.Paid - c.Discounts) <= 0)
+                {
+                    <a href="javascript:void(0);" onclick="ViewPaymentDetails(this);" class="btn btn-danger Open">Close</a>
+                }
+            </div>
+            <div class="col-md-6">
+                <a href="javascript:void(0);" onclick="ViewPayments(this,@c.StudentID);" class="btn btn-primary Closed">Payments</a>
+            </div>
+        </div>
+    </td>
+</tr>
+
+<tr>
+    <td id="tdDetails" colspan="999" style="border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);">
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Payment Saved</h2>
+
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                <input type="hidden" id="hdnSavedPaymentID" value="@Model.PaymentID" />
+                <button type="button" onclick="PrintPaidRecipt(this)" class="btn btn-round btn-success">Print Recipt</button>
+                <button type="button" onclick="SendPaymentSMS(@Model.PaymentID)" class="btn btn-round btn-success">Send SMS</button>
+                <button type="button" onclick="ClosePrintRecipt(this,@c.StudentID)" class="btn btn-round btn-success">Close</button>
+            </div>
+        </div>
+    </td>
+</tr>

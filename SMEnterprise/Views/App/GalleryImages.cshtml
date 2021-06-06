@@ -1,0 +1,54 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_AppLayout.cshtml";
+}
+@model SMEnterprise.Models.GalleryModel
+<style>
+    .backtogallery {
+        outline: none;
+        color: #212121;
+        padding: 10px 0;
+        font-size: 1.5em;
+        width: 18.4%;
+        background: #F7DD2C;
+        border: none;
+        text-transform: uppercase;
+        margin-left: 1em;
+    }
+</style>
+<link href="@Url.Content("~/Content/AppPages/css/jquery.easy-gallery.css")" rel="stylesheet" />
+<div class="agile_footer_grid" style="padding-top: 20px;">
+
+    <a class="backtogallery" href="/App/Gallery/@Model.SBranchID#Gal_@Model.GalleryID">Back To Gallery</a>
+</div>
+<div class="banner-bottom">
+    <div class="agileinfo_banner_bottom">
+        <h3>@Model.Title</h3>
+        <p>
+            @Model.EventDate.ToString("dd MMM, yyyy")<br />
+            @Model.Description
+        </p>
+    </div>
+</div>
+<div class="gallery">
+    <div class="gallery_grids">
+        @foreach (var g in Model.Images)
+            {
+            <div class="agile_gallery_grid">
+
+                <div class="agile_gallery_grid_w3">
+                    <img src='@Url.Content("~/images/GalleryImages/Thumb/")@(Model.GalleryID)_@g.ImagePath' data-big-src='@Url.Content("~/images/GalleryImages/")@(Model.GalleryID)_@g.ImagePath' alt=" " />
+                    <p style='opacity:0;display:none'>@g.ImageDate.ToString("dd MMM, yyyy")<br />@g.Title</p>
+                </div>
+                <div class="clearfix"> </div>
+
+            </div> 
+        }
+        <div class="clearfix"> </div>
+        <script type='text/javascript' src='@Url.Content("~/Content/AppPages/js/jquery.easy-gallery.js")'></script>
+        <script type='text/javascript'>
+            //init Gallery
+            $('.gallery').easyGallery();
+        </script>
+    </div>
+</div>

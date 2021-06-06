@@ -1,0 +1,253 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StockManagementModel
+@section IncludeCss
+{
+    <title>Stock Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+    <link rel="stylesheet" href="@Url.Content("~/css/RecieptStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        width: 310px;
+    }
+
+        table td {
+            border: solid 1px #fab;
+            width: 100px;
+            word-wrap: break-word;
+        }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StockManagement", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStocks" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-5 padding">
+                                    <label class="col-md-5 text-right">Stock Type :</label>
+                                    <div class="col-md-7">
+                                        <select class="form-control" name="TrType" id="ddlStocks">
+                                            <option value="0" @(0 == Model.TrType ? "selected" : "")>Purchase</option>
+                                            <option value="1" @(1 == Model.TrType ? "selected" : "")>Sale</option>
+                                            <option value="2" @(2 == Model.TrType ? "selected" : "")>Allocate (No Sale)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Start Date : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" value="@Model.StartDate.ToString("yyyy-MM-dd")" name="StartDate" id="dtMonth" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">End Date : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" value="@Model.EndDate.ToString("yyyy-MM-dd")" name="EndDate" id="dtMonth" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-1">
+                                    <a href="javascript:void(0);" onclick="$('#frmGetStocks').submit();"><i class="fa fa-search"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width:30%">Transaction</th>
+                                    <th>Quantity</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Update</th>
+                                    <td>Print</td>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StockTransaferMasterModel c in Model.Transactions)
+                                {
+                                    <tr>
+                                        <td>
+                                            On @c.TrDate.ToString("dd MMM, yyyy") For: @c.RefName<br />
+                                            @c.Remark
+                                        </td>
+                                        <td>
+                                            @c.Quantity.ToString("N2")
+                                        </td>
+                                        <td>
+                                            @c.Amount.ToString("N2")
+                                        </td>
+                                        <td>
+                                            @(c.Status == 0?"Canceled":"Approved")
+                                        </td>
+                                        <td>
+                                            <div class="row" style="margin-right: 10px;">
+                                                <div class="col-md-6">
+                                                    <a href="/Account/StockDetails/@c.STID" class="btn btn-link">View</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("DeleteStock", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                    {
+                                                        <input type="hidden" name="ID" value="@c.STID" />
+                                                        <button type="submit" onclick="return BeforeDeleteStock(this);" class="btn btn-link">Delete</button>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td> <a href="javascript:void(0);" onclick="PrintTransactionReciept(this,@c.STID);" class="btn btn-link Closed">Print</a></td>
+                                    </tr>
+
+                                    count++;
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable({ "aaSorting": [] });
+        });
+        function BeforeDeleteStock(sender) {
+            return confirm('Do you really want to delete Stock!!!!');
+        }
+
+        function PrintTransactionReciept(sender, PayID) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                    .closest("tr")
+                    .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetSaleTransactionPrintData/" + PayID,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            $(sender).closest("tr").next().remove();
+                            $(sender)
+                                .closest("tr")
+                                .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + html + "</td></tr>");
+                            $(sender).text('Close');
+                            $(sender).removeClass('Closed');
+                            $(sender).addClass('Open');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+            else {
+                $(sender).text('Receipt');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+
+        function PrintRecipt() {
+            var nDiv='<table>';
+          //  nDiv=nDiv+'<tr><td>'+$('#divRecipt').html()+'</td><td>'+$('#divRecipt').html()+'</td></tr>';
+   nDiv = nDiv + '<tr><td>' + $('#divRecipt').html().replace('[CopyPlaceHolder]', 'School Copy') + '</td><td>' + $('#divRecipt').html().replace('[CopyPlaceHolder]', 'Student Copy') + '</td></tr>';
+            nDiv=nDiv+'</table>';
+            var contents =nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}
+<!-- /.content -->

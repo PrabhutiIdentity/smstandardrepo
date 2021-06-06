@@ -1,0 +1,111 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 4%">#</th>
+            <th style="width: 40%">Section/Topic</th>
+            <th style="width: 8%">Sequence</th>
+            <th style="width: 10%">Marks</th>
+            <th style="width: 10%">Lactures</th>
+            <th style="width: 14%">Evaluation</th>
+            <th style="width: 15%">Edit/Delete</th>
+        </tr>
+    </thead>
+
+    @{
+        var counter = 1;
+        <tbody>
+
+            @foreach (var c in Model.Topics)
+            {
+                <tr>
+                    <td>
+                        @counter
+
+                    </td>
+                    <td>
+                        <input type="hidden" id="hdnTopicID" name="TopicID" value="@c.TopicID" />
+                        <input class="form-control" id="txtTopicName" type="text" onchange='$(this).closest("tr").find("#hdnTopicName").val($(this).val())' name="TopicName" value="@c.TopicName" />
+                    </td>
+
+
+                    <td>
+                        <input type="number" class="form-control" id="txtSequenceNo" name="SequenceNo" value="@c.SequenceNo" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" id="txtMarks" name="Marks" value="@c.Marks" />
+                    </td>
+                    <td>
+                        <input type="number" class="form-control" id="txtDuration" name="Duration" value="@c.Duration" />
+                    </td>
+                    <td>
+                        <select id="ddlEvaluations" class="form-control">
+                            @foreach (var e in Model.Evaluations)
+                            {
+                                <option value="@e.EvaluationID" @(e.EvaluationID==c.EvaluationID?"selected":"")>@e.EvaluationName</option>
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+                                <input type="submit" class="btn btn-link" value="Save" onclick="UpdateTopic(this,1);" />
+                            </div>
+                            <div class="col-md-6">
+
+                                <input type="hidden" name="ChapterID" id="hdnChapterID" value="@Model.ChapterID" />
+                                <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                <input type="submit" class="btn btn-link" value="Delete" onclick="return UpdateTopic(this, -1);" />
+
+                            </div>
+                        </div>
+                    </td>
+
+
+
+                </tr>
+                counter++;
+            }
+
+        </tbody>
+        <tfoot style="border-width: 2px;border-style: groove;">
+            <tr>
+                <td>
+                    @counter
+                    <input type="hidden" name="ChapterID" id="hdnChapterID" value="@Model.ChapterID" />
+
+                </td>
+                <td>
+                    <input type="hidden" id="hdnTopicID" name="TopicID" value="0" />
+                    <input class="form-control" id="txtTopicName" type="text" onchange='$(this).closest("tr").find("#hdnTopicName").val($(this).val())' name="TopicName" value="" />
+                </td>
+                <td>
+                    <input type="number" id="txtSequenceNo" class="form-control" name="SequenceNo" value="@counter" />
+                </td>
+                <td>
+                    <input type="number" id="txtMarks" class="form-control" name="Marks" value="0" />
+                </td>
+                <td>
+                    <input type="number" id="txtDuration" class="form-control" name="Duration" value="1" />
+                </td>
+                <td>
+                    <select id="ddlEvaluations" class="form-control">
+                        @foreach (var e in Model.Evaluations)
+                        {
+                            <option value="@e.EvaluationID">@e.EvaluationName</option>
+                        }
+                    </select>
+                </td>
+
+                <td>
+                    <div class="row" style="margin-right: 0px;">
+                        <div class="col-md-6">
+                            <input type="submit" class="btn btn-link" value="Add New" onclick="UpdateTopic(this,1);" />
+                        </div>
+
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    }
+</table>

@@ -1,0 +1,449 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Vehicle Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #divEditFormDetails .form-control {
+        font-size: 12px;
+        height: 28px;
+    }
+
+    #divEditFormDetails .row {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    #divEditFormDetails .col-md-3 {
+        padding: 0px;
+        text-align: right;
+    }
+
+    .col45 {
+        width: 37.5%;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Vehicle Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Vehicle Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Photo</th>
+                                <th style="width: 8%">Number</th>
+                                <th style="width: 15%">Reg. No.</th>
+                                <th style="width: 7%">Capacity</th>
+                                <th style="width: 10%">Type</th>
+                                <th style="width: 10%">Contact</th>
+                                <th style="width: 18%">Ins. Renewal</th>
+                                <th style="width: 7%">Status</th>
+                                <th style="width: 15%"><a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditVehicle(this);">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.Vehicles)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <input type="hidden" name="VehicleID" id="hdnVehicleID" value="@c.VehicleID" />
+                                        <input type="hidden" name="VehicleImage" id="hdnImage" value="@c.VehicleImage" />
+                                        <input type="hidden" name="DeviceID" id="hdnDeviceID" value="@c.DeviceID" />
+                                        <input type="hidden" name="VehicleType" id="hdnVehicleType" value="@c.VehicleType" />
+                                        <input type="hidden" name="DriverID" id="hdnDriverID" value="@c.DriverID" />
+                                        <input type="hidden" name="ConductorID" id="hdnConductorID" value="@c.ConductorID" />
+                                        <input type="hidden" name="IsApproved" id="hdnIsApproved" value="@c.IsApproved" />
+                                        <input type="hidden" name="ContactPerson" id="hdnContactPerson" value="@c.ContactPerson" />
+                                        <input type="hidden" name="ContactNumber" id="hdnContactNumber" value="@c.ContactNumber" />
+                                        <input type="hidden" name="VehicleCondition" id="hdnVehicleCondition" value="@c.VehicleCondition" />
+                                        <img id="imgPhoto" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/VehicleImages/Thumb/")@(c.VehicleID)_@c.VehicleImage" />
+                                    </td>
+                                    <td id="tdVehicleNumber">
+                                        @c.VehicleNumber
+                                    </td>
+
+                                    <td id="tdRegistrationNumber">
+                                        @c.RegistrationNumber
+
+                                    </td>
+                                    <td id="tdVehicleCapacity">
+                                        @c.VehicleCapacity
+                                    </td>
+                                    @if (c.VehicleType == 0)
+                                    {
+                                        <td>
+                                            Own
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            Contract
+                                        </td>
+                                    }
+                                    <td>
+                                        <p>@c.ContactPerson</p>
+                                        <p>@c.ContactNumber</p>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" id="hdnInsuranceRenewalDate" value="@Convert.ToDateTime(c.InsuranceRenewalDate).ToString("yyyy-MM-dd")" />
+                                        @Convert.ToDateTime(c.InsuranceRenewalDate).ToString("dd MMM, yy")
+                                    </td>
+
+                                    <td>
+                                        @if (c.IsApproved == 1)
+                                        {
+                                            <label class='badge bg-green'>Active</label>
+                                        }
+                                        else
+                                        {
+                                            <label class='badge bg-red'>Inactive</label>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="row" style="margin-right: 0px;">
+                                            <div class="col-md-6">
+                                                <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditVehicle(this);">Edit</a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a href="/Admin/DeleteVehicle/@c.VehicleID" class="btn btn-link" onclick="return DeleteVehicle(this);">Delete</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divEditForm" style="display:none;">
+        @using (Html.BeginForm("UpdateVehicle", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateDriverConductor" }))
+        {
+            <div class="box box-danger" id="divEditFormDetails">
+                <div class="box-header">
+                    <h3 class="box-title">Details</h3>
+
+                </div>
+                <div class="box-body">
+                    <input type="hidden" id="hdnVehicleID" name="VehicleID" value="0" />
+                    <div class="row">
+                        <div class="col-md-3 col25" style="padding-left:10px;padding-right: 10px;text-align: left;">
+                            <input type="hidden" id="hdnImageName" name="VehicleImage" value="" />
+                            <div style="height: 175px;">
+                                <img class="thumbImageMain" id="imgMainPhoto" src="" alt="Photo" />
+                            </div>
+                            <input type="file" onchange="PhotoChanged(this)" name="PhotoFile" id="fuDCImage" />
+
+                        </div>
+                        <div class="col-md-4 col45" style="padding-left:10px;">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Vehicle No.</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtVehicleNumber" name="VehicleNumber" placeholder="Vehicle Number" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Reg. No.</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtRegistrationNumber" name="RegistrationNumber" placeholder="Registration Number" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Condition</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <select id="ddlVehicleCondition" name="VehicleCondition" class="form-control">
+                                        <option value="0">New</option>
+                                        <option value="1">Old</option>
+                                        <option value="2">Retired</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Cont. Name</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtContactPerson" placeholder="Contact Person" name="ContactPerson" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Driver</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <select id="ddlDrivers" name="DriverID" class="form-control">
+                                        @foreach (NameIDModel d in Model.Drivers)
+                                        {
+                                            <option value="@d.ID">@d.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> GPS Device ID</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtDeviceID" placeholder="GPS Device ID" name="DeviceID" class="form-control" value="" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 col45">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Type</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <select id="ddlVehicleType" name="VehicleType" class="form-control">
+                                        <option value="0">Own</option>
+                                        <option value="1">Contract</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Capacity</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="number" id="txtVehicleCapacity" name="VehicleCapacity" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small> Ins.Ren.Date</small>
+                                </div>
+                                <div class="col-md-9">
+                                    @*<input type="text" required="" class="form-control has-feedback-left dateinput" id="txtInsuranceRenewalDate" placeholder="Insurance Renewal Date" aria-describedby="inputSuccess2Status" name="InsuranceRenewalDate" value="@c.InsuranceRenewalDate.ToShortDateString()">
+                                    <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                                    <span id="inputSuccess2Status" class="sr-only">(success)</span>*@
+                                    <input type="date" id="txtInsuranceRenewalDate" name="InsuranceRenewalDate" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small>Contact No</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtContactNumber" placeholder="Contact Number" name="ContactNumber" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small>Conductor</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <select id="ddlConductors" name="ConductorID" class="form-control">
+                                        @foreach (NameIDModel d in Model.Conductors)
+                                        {
+                                            <option value="@d.ID">@d.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <small>Status</small>
+                                </div>
+                                <div class="col-md-9">
+                                    <label class="switch switch-green" style="padding-top: 3px;">
+                                        <input id="chkIsApproved" type="checkbox" class="switch-input" checked>
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnIsApproved").val($(this).closest("tr").find("#hdnIsApproved").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" id="hdnIsApproved" name="IsApproved" value="1" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+
+
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-info pull-right">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liVehicleManagement').closest('ul').closest('li').addClass('active');
+        $('#liVehicleManagement').addClass('active');
+    });
+    function DeleteVehicle(sender) {
+        return confirm('Do you really want to delete Vehicle!!!!');
+    }
+    function EditVehicle(sender) {
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+                if ($(ele[0]).text() == 'Cancel New') {
+                    $(ele[0]).text('Add New');
+                }
+                else {
+                    $(sender).text('Edit');
+                }
+            }
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+
+            if ($(sender).text() == 'Add New') {
+                $(sender).text('Cancel New');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnVehicleID').val(0);
+                $('#divEditFormDetails').find('#hdnImageName').val('');
+                $('#divEditFormDetails').find('#hdnIsApproved').val('');
+                $('#divEditFormDetails').find('#txtVehicleNumber').val('');
+                $('#divEditFormDetails').find('#txtRegistrationNumber').val('');
+                $('#divEditFormDetails').find('#ddlVehicleType').val(0);
+                $('#divEditFormDetails').find('#ddlVehicleCondition').val(0);
+                $('#divEditFormDetails').find('#txtVehicleCapacity').val('');
+                $('#divEditFormDetails').find('#txtInsuranceRenewalDate').val('');
+                $('#divEditFormDetails').find('#txtContactPerson').val('');
+                $('#divEditFormDetails').find('#txtContactNumber').val(0);
+                $('#divEditFormDetails').find('#ddlDrivers').val(0);
+                $('#divEditFormDetails').find('#ddlConductors').val(0);
+                $('#divEditFormDetails').find('#chkIsApproved').attr('checked', 'checked');
+                $('#divEditFormDetails').find('#txtDeviceID').val('');
+                var imagepath = '';
+                $('#divEditFormDetails').find('#imgMainPhoto').attr('src', imagepath);
+            }
+            else {
+                $(sender).text('Cancel');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnVehicleID').val($(sender).closest('tr').find('#hdnVehicleID').val());
+                $('#divEditFormDetails').find('#hdnImageName').val($(sender).closest('tr').find('#hdnImage').val());
+                $('#divEditFormDetails').find('#hdnIsApproved').val($(sender).closest('tr').find('#hdnIsApproved').val());
+                $('#divEditFormDetails').find('#txtVehicleNumber').val($(sender).closest('tr').find('#tdVehicleNumber').text().trim());
+                $('#divEditFormDetails').find('#txtRegistrationNumber').val($(sender).closest('tr').find('#tdRegistrationNumber').text().trim());
+                $('#divEditFormDetails').find('#ddlVehicleType').val($(sender).closest('tr').find('#hdnVehicleType').val());
+                $('#divEditFormDetails').find('#ddlVehicleCondition').val($(sender).closest('tr').find('#hdnVehicleCondition').val());
+                $('#divEditFormDetails').find('#txtVehicleCapacity').val($(sender).closest('tr').find('#tdVehicleCapacity').text().trim());
+                $('#divEditFormDetails').find('#txtInsuranceRenewalDate').val($(sender).closest('tr').find('#hdnInsuranceRenewalDate').val());
+                $('#divEditFormDetails').find('#txtContactPerson').val($(sender).closest('tr').find('#hdnContactPerson').val());
+                $('#divEditFormDetails').find('#txtContactNumber').val($(sender).closest('tr').find('#hdnContactNumber').val());
+                $('#divEditFormDetails').find('#ddlDrivers').val($(sender).closest('tr').find('#hdnDriverID').val());
+                $('#divEditFormDetails').find('#ddlConductors').val($(sender).closest('tr').find('#hdnConductorID').val());
+                $('#divEditFormDetails').find('#txtDeviceID').val($(sender).closest('tr').find('#hdnDeviceID').val());
+
+                if ($(sender).closest('tr').find('#hdnIsApproved').val() == 1) {
+                    $('#divEditFormDetails').find('#chkIsApproved').attr('checked', 'checked');
+                }
+                else {
+                    $('#divEditFormDetails').find('#chkIsApproved').removeAttr('checked');
+                }
+                var imagepath = '../Images/VehicleImages/' + $(sender).closest('tr').find('#hdnVehicleID').val() + '_' + $(sender).closest('tr').find('#hdnImage').val();
+                $('#divEditFormDetails').find('#imgMainPhoto').attr('src', imagepath);
+            }
+
+
+
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel New') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).text('Edit');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    function PhotoChanged(fileBox) {
+
+        if (fileBox.files && fileBox.files[0]) {
+            if (fileBox.files[0].size / 1024 < 500) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(fileBox).closest('.col-md-3').find('#imgMainPhoto').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(fileBox.files[0]);
+            }
+            else {
+
+                //ShowNotification('Large Image', 'Kindly Upload Image of Size less the 500KB', 'error');
+            }
+        }
+    }
+</script>
+<!-- /.content -->

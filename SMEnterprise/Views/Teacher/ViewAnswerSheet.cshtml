@@ -1,0 +1,319 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using Newtonsoft.Json;
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+@model SMEnterprise.Models.OnlineExamEditModel
+@section IncludeCss
+{
+    <title>Answer Sheet</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.11/summernote.css" rel="stylesheet">
+}
+<style>
+    .checkbox, .radio {
+        position: relative;
+        display: block;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="x_title">
+
+            <div class="clearfix"></div>
+        </div>
+        <div class="clearfix"></div>
+        @using (Html.BeginForm("UpdateOnlineExamSubmissionStatus", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row std-mng-head col-md-12">
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <input type="hidden" name="OExamID" value="@Model.Exam.OExamID" />
+                                <input type="hidden" name="SubmissionID" value="@Model.Exam.SubmissionID" />
+                                <div class="form-group col-md-12">
+                                    <label>Online Exam for class @Model.Exam.ClassName/@Model.Exam.SectionName and @Model.Exam.SubjectName Subject for session @Model.Exam.SessionName by @Model.Exam.TeacherName</label>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label> @Model.Exam.ExamTitle</label>
+
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label style="text-align:left">@Model.Exam.ExamDescription</label>
+
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label> Exam Started at @Model.Exam.OExamStartDate.ToString("dd MMM, yyyy hh:mm tt") and will end at @Model.Exam.OExamEndDate.ToString("dd MMM, yyyy hh:mm tt")</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h2>
+                                Submission Status : <label class="badge bg-@(Model.Exam.Status == 0 ? "blue" : Model.Exam.Status == 1 ? "green" : "red")">@(Model.Exam.Status == 0 ? "Submitted" : Model.Exam.Status == 1 ? "Accepted" : "Rejected")</label>
+                            </h2>
+                            <ul class="nav navbar-right panel_toolbox" style="width:40%;text-align:right">
+                                <li style="width: 100%;">
+                                    <div class="form-group">
+                                        <label class="col-form-label col-md-6 col-sm-6 label-align">Change Status</label>
+                                        <div class="col-md-6 col-sm-6">
+                                            <select class="form-control" name="Status">
+                                                <option value="1" @(Model.Exam.Status == 1 ? "selected" : "")>Accepted</option>
+                                                <option value="2" @(Model.Exam.Status == 2 ? "selected" : "")>Rejected</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </li>
+
+                            </ul>
+                            <div class="clearfix"></div>
+                            <div class="col-md-12">
+                                <label>Submission Remark <small>(remark which teacher would want to give for whole submission)</small></label>
+                                <input type="text" class="form-control" name="TeacherRemark" value="@Model.Exam.TeacherRemark" />
+                            </div>
+                            <div class="clearfix"></div>
+
+                        </div>
+                        <div class="x_title">
+
+                            <h2>
+                                Question and Answers
+                            </h2>
+
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            <ul class="messages" id="ulExamQuestions">
+                                @{
+                                    var ctr = 1;
+                                    foreach (var q in Model.ExamQuestions)
+                                    {
+                                        <li class="queli">
+                                            <div class="message_date">
+                                                <h3 class="date text-error">@q.Marks</h3>
+                                                <p class="month">Marks</p>
+                                            </div>
+                                            <div class="message_wrapper" style="margin-left: 0;">
+                                                <input type="hidden" name="Answers[@(ctr - 1)].ID" value="@q.OXQID" />
+                                                <h4 class="heading searchable"><ctr>@(ctr).</ctr> @Html.Raw(q.QuestionText)@*@q.QuestionText*@</h4>
+                                                @if (q.QuestionType != 2)
+                                                {
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">A. @Html.Raw(q.Option1)@*@q.Option1*@</blockquote>
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">B. @Html.Raw(q.Option2)@*@q.Option2*@</blockquote>
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">C. @Html.Raw(q.Option3)@*@q.Option3*@</blockquote>
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">D. @Html.Raw(q.Option4)@*@q.Option4*@</blockquote>
+                                                }
+                                                <div class="row">
+                                                    @if (q.QuestionType != 2)
+                                                    {
+                                                        <div class="col-md-12">
+                                                            Your Answer <label> @Html.Raw(q.StudentAnswer)@*@q.StudentAnswer*@</label>
+
+                                                            Correct Answer <label> @Html.Raw(q.Answer)@*@q.Answer*@</label>
+                                                            @if (q.StudentAnswer == q.Answer)
+                                                            {
+                                                                <label>Marks Obtained : @q.Marks</label>
+                                                                <input type="hidden" name="Answers[@(ctr - 1)].Name" value="@q.Marks" />
+                                                            }
+                                                            else if (q.QuestionType == 0)
+                                                            {
+                                                                <label>Marks Obtained : 0</label>
+                                                                <input type="hidden" name="Answers[@(ctr - 1)].Name" value="0" />
+                                                            }
+                                                            else
+                                                            {
+                                                                q.StudentAnswer = q.StudentAnswer == null ? "" : q.StudentAnswer;
+                                                                var answers = q.Answer.Split(",".ToCharArray());
+                                                                var sanswers = q.StudentAnswer.Split(",".ToCharArray());
+                                                                var crtcount = 0;
+                                                                foreach (var sa in sanswers)
+                                                                {
+                                                                    if (answers.Contains(sa))
+                                                                    {
+                                                                        crtcount = crtcount + 1;
+                                                                    }
+                                                                }
+                                                                var divi = crtcount / answers.Count();
+                                                                <label>Marks Obtained : @((q.Marks * divi).ToString("0.00"))</label>
+                                                                <input type="hidden" name="Answers[@(ctr - 1)].Name" value="@((q.Marks * divi).ToString("0.00"))" />
+                                                            }
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="col-md-12">
+                                                            <label>Student's Answer </label>
+                                                            @Html.Raw(q.StudentAnswer)@*@q.StudentAnswer*@
+                                                        </div>
+                                                        <div class="col-md-12">
+                                                            <label>Correct Answer</label>
+                                                            @Html.Raw(q.Answer)@*@q.Answer*@
+                                                            @if (Model.Exam.SubmissionStatus == 0)
+                                                            {
+                                                                <label>Marks Obtained : <input type="number" step="0.5" name="Answers[@(ctr - 1)].Name" value="@q.MarksGiven" /></label>
+                                                            }
+                                                            else
+                                                            {
+                                                                @*<label>Marks Obtained : @q.MarksGiven</label>*@
+                                                                <label>Marks Obtained : <input type="number" step="0.5" name="Answers[@(ctr - 1)].Name" value="@q.MarksGiven" /></label>
+                                                            }
+                                                        </div>
+                                                    }
+                                                    <div class="col-md-12">
+                                                        <label>Explaination</label>
+                                                        @Html.Raw(q.Explaination) @*@q.Explaination*@
+                                                    </div>
+                                                    @if (q.TeacherRemark != null)
+                                                    {
+                                                        <div class="col-md-12">
+                                                            <label>Teacher Remark</label>
+                                                            @q.TeacherRemark
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <br />
+                                                <div class="row">
+                                                    <div class="col-md-12">
+                                                        <label class="badge bg-@(q.Complexity == 0 ? "yellow" : q.Complexity == 1 ? "blue" : "red")">@(q.Complexity == 0 ? "Easy" : q.Complexity == 1 ? "Medium" : "Difficult")</label>
+                                                    </div>
+                                                    <div class="col-md-12">
+                                                        <label>Remark <small>(if any)</small></label>
+                                                        <input type="text" class="form-control" name="Answers[@(ctr - 1)].Extra1" value="@q.TeacherRemark" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        ctr++;
+                                    }
+                                }
+                            </ul>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-info pull-right">Submit Response</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyy-MM-dd")" />
+
+@section scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js" defer></script>
+    <script>
+
+        $(document).ready(function () {
+
+            $('#txtExplaination').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('#txtSubjectiveAnswer').summernote({
+
+                height: 200,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+
+
+        });
+    </script>
+    <script>
+
+        function SubmitExam() {
+            $('.queli').each(function () {
+                var qType = $(this).find('#hdnQuestionType').val();
+                var answer = '';
+                if (opt == 0) {
+                    if ($(this).find('#SCOpetion1').is(':checked') == true) {
+                        answer = 'A';
+                    }
+                    else if ($(this).find('#SCOpetion2').is(':checked') == true) {
+                        answer = 'B';
+                    }
+                    else if ($(this).find('#SCOpetion3').is(':checked') == true) {
+                        answer = 'C';
+                    }
+                    else if ($(this).find('#SCOpetion4').is(':checked') == true) {
+                        answer = 'D';
+                    }
+                }
+                else if (opt == 1) {
+                    if ($(this).find('#SMOpetion1').is(':checked') == true) {
+                        answer = 'A';
+                    }
+                    if ($(this).find('#SMOpetion2').is(':checked') == true) {
+                        if (answer != '') {
+                            answer = answer + ',';
+                        }
+                        answer = 'B';
+                    }
+                    if ($(this).find('#SMOpetion3').is(':checked') == true) {
+                        if (answer != '') {
+                            answer = answer + ',';
+                        }
+                        answer = 'C';
+                    }
+                    if ($(this).find('#SMOpetion4').is(':checked') == true) {
+                        if (answer != '') {
+                            answer = answer + ',';
+                        }
+                        answer = 'D';
+                    }
+                }
+                else {
+                    answer = $(this).find('#txtSubjectiveAnswer').val();
+                }
+                $(this).find('#hdnAnswer').val(answer);
+            });
+            return true;
+        }
+    </script>
+}
+<!-- /.content -->

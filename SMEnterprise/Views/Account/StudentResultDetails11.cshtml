@@ -1,0 +1,403 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.PerformanceParameterDetailModel
+@section IncludeCss
+{
+    <title>Result Card | @Model.Student.Name</title>
+    <style>
+        #tblResult > tbody > tr > td {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        .table > tbody > tr > td {
+            padding-bottom: 1px;
+            padding-top: 2px;
+        }
+
+        .print {
+            display: none;
+        }
+    </style>
+}
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_content">
+                    <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
+                        <tr style="width:100%">
+                            <td style="width:20%;text-align:left;">
+                                <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                            </td>
+
+                            <td style="width:60%;text-align:center;">
+                                <table style="width:100%">
+                                    <tr>
+                                        <td style="text-align: left;vertical-align: middle;">
+                                            <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.SBranchDetails.BranchSchoolName</p>
+
+                                            <p style="margin-bottom: 2px;font-size: 16px;text-align: center;">
+                                                @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
+                                                @*@Model.SBranchDetails.Address*@
+                                            </p>
+                                            <p style="margin-bottom: 2px;text-align: center;"> <b>Ph.</b> @Model.SBranchDetails.ContactNo,  <b> Email :</b> @Model.SBranchDetails.EmailID</p>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td style="width:20%;text-align:right;">
+                                <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align: center;border-bottom: 0px solid #ddd;">
+
+                                <p style="margin-bottom: 2px;text-align: center;">
+                                    <b style="font-size: 26px;">Result Card</b>
+                                    <br />
+
+                                </p>
+                                <p style="font-size: 22px;text-align: center;">Academic Session : @Model.SessionName</p>
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td colspan="3" style="text-align:center">
+                                Evaluation:   <b>@Model.EvaluationName</b>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align: center;">
+                                <table style="width:100%">
+                                    <tr style="padding-top:10px;padding-bottom:10px;">
+
+                                        <td style="padding-left:10px;text-align:left; width:45%">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    Roll No. :<b> @Model.Student.RollNo</b>
+                                                </div>
+                                                <div class="row">
+                                                    Student : <b id="bStudentNate">@Model.Student.Name</b>
+                                                </div>
+                                                <div class="row">
+                                                    Mother's Name : <b>@Model.Student.MotherName</b>
+                                                </div>
+                                                <div class="row">
+                                                    Father's Name : <b>@Model.Student.FatherName</b>
+                                                </div>
+                                                <div class="row">
+                                                    Parent's ID : <b>@Model.Student.SParentID</b>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding-left:10px;width:45%;text-align:left;">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    Date of Birth :<b> @Model.Student.DOB.ToString("dd MMM, yyyy")</b>
+                                                </div>
+                                                <div class="row">
+                                                    Class-Section :<b id="bClassSection"> @Model.Student.ClassName </b>
+                                                </div>
+                                                <div class="row">
+                                                    Student ID :<b> @Model.Student.StudentSID</b>
+                                                </div>
+                                                <div class="row">
+                                                    SR No.  :<b> @Model.Student.SchoolUID</b>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="width:10%">
+                                            <div class="col-md-12" style="text-align:right;">
+                                                @if (Model.Student.Photo == null)
+                                                {
+                                                    <p style="width:100px;height:100px;"></p>
+                                                }
+                                                else
+                                                {
+                                                    <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+                                                }
+                                            </div>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 5px;">
+                        <tr>
+                            <td style="text-align:left;">
+                                <img onerror="return OnImageError(this,2);" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/cbse-logo.png")" />
+                            </td>
+                            <td style="text-align: center;vertical-align: middle;">
+                                <h2 class="SchoolNameHead" style="margin-top: 2px;margin-bottom: 5px;font-size: 30px;">@Model.SBranchDetails.BranchSchoolName</h2>
+                                <p style="margin-bottom: 2px;">@Model.SBranchDetails.TagLine</p>
+                                <p style="margin-bottom: 2px;">@Model.SBranchDetails.Address</p>
+                                <p style="margin-bottom: 2px;"> Email : @Model.SBranchDetails.EmailID</p>
+                            </td>
+                            <td style="text-align: right;">
+                                <img onerror="return OnImageError(this,2);" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align:center">
+                                @Model.EvaluationName
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="text-align:center">
+                                Session  @Model.SessionName
+                            </td>
+                        </tr>
+                    </table>
+                 
+                    <div class="col-md-8">
+                        <div class="row" style="display:none;">
+                            Roll No. :<b> @Model.Student.RollNo</b>
+                        </div>
+                        <div class="row">
+                            Student : <b id="bStudentNate">@Model.Student.Name</b>
+                        </div>
+                        <div class="row">
+                            Mother's Name : <b>@Model.Student.MotherName</b>
+                        </div>
+                        <div class="row">
+                            Father's Name : <b>@Model.Student.FatherName</b>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row" style="display:none;">
+                            Date of Birth :<b> @Model.Student.DOB.ToString("dd MMM, yyyy")</b>
+                        </div>
+                        <div class="row">
+                            Class-Section :<b id="bClassSection"> @Model.Student.ClassName.Replace("/", "-") </b>
+                        </div>
+                        <div class="row">
+                            Student ID :<b> @Model.Student.StudentSID</b>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <table id="tblResult" class="table table-bordered table-hover">
+                            @{
+                                if (Model.SubjectTypes.Count > 1)
+                                {
+                                    <thead style="text-align: center;font-weight: bold;">
+                                        <tr style="border-bottom-width: 2px;">
+                                            <td rowspan="2" style="vertical-align: middle;border:1px solid #808080">
+                                                Sub Code
+                                            </td>
+                                            <td rowspan="2" style="vertical-align: middle;border:1px solid #808080">
+                                                Subject
+                                            </td>
+                                            <td colspan="4" style="vertical-align: middle;border:1px solid #808080">Marks Obtained</td>
+                                            <td rowspan="2" style="vertical-align: middle;border:1px solid #808080">Positional Grade</td>
+                                        </tr>
+                                        <tr style="border-bottom-width: 2px;">
+                                            <td style="border:1px solid #808080">
+                                                Theory
+                                            </td>
+                                            <td style="border:1px solid #808080">
+                                                Practical
+                                            </td>
+                                            <td style="border:1px solid #808080">
+                                                Total
+                                            </td>
+                                            <td style="border:1px solid #808080">
+                                                Total in Words
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                }
+                                else
+                                {
+                                    <thead style="font-weight: bold;">
+
+                                        <tr>
+                                            <td>
+                                                Subject
+                                            </td>
+                                            <td>
+                                                Max Marks
+                                            </td>
+                                            <td>
+                                                Pass Marks
+                                            </td>
+                                            <td>
+                                                Marks Scored
+                                            </td>
+                                            <td>
+                                                Grade
+                                            </td>
+                                        </tr>
+                                    </thead>
+                                }
+                                decimal TotalMarks = 0;
+                                decimal MarksObtained = 0;
+                                decimal PassMarks = 0;
+                                foreach (SubjectModel sm in Model.Subjects)
+                                {
+                                    decimal subTotalMarks = 0;
+                                    decimal subTotalScored = 0;
+                                    var isML = false;
+                                    var isAnyNML = false;
+                                    <tr>
+                                        <td style="text-align:left!important;"><b>@sm.SubjectCode</b></td>
+                                        <td style="text-align:left!important;"><b>@sm.SubjectName</b></td>
+                                        @foreach (NameIDModel st in Model.SubjectTypes)
+                                        {
+                                            var isfound = false;
+
+                                            foreach (ExamResultDetailModel r in Model.Result)
+                                            {
+                                                if ((r.MainSubID == 0 && r.SubjectID == sm.SubjectID || r.MainSubID != 0 && r.MainSubID == sm.SubjectID) && r.SubjectType == st.ID)
+                                                {
+                                                    subTotalMarks = subTotalMarks + r.MaxMarks;
+                                                    subTotalScored = subTotalScored + r.MarksScored;
+                                                    isfound = true;
+                                                    isML = r.Status == -1 ? true : false;
+                                                    isAnyNML = !isML && !isAnyNML ? true : isAnyNML;
+                                                    <td>@(r.MaxMarks == 0 ? "NA" : r.Status == -1 ? "M/L" : r.MarksScored.ToString("00") )</td>
+                                                    @*<td>@(r.MaxMarks == 0 ? "NA" : r.MarksScored.ToString("00") )</td>*@
+                                                    break;
+                                                }
+                                            }
+                                            if (!isfound)
+                                            {
+                                                <td>XXX</td>
+                                            }
+                                        }
+                                        @*<td>@subTotalScored.ToString("00")</td>*@
+                                        <td>@(isAnyNML == false ? "M/L" : subTotalScored.ToString("00"))</td>
+                                        <td>@SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords((long)subTotalScored)</td>
+                                        <td>@(subTotalMarks == 0 || !isAnyNML ? "--" : AcadmicModel.CalculateGrade(subTotalScored, subTotalMarks))</td>
+
+                                    </tr>
+
+                                    TotalMarks = TotalMarks + subTotalMarks;
+                                    MarksObtained = MarksObtained + subTotalScored;
+                                }
+                                foreach (var pp in Model.PerformanceParameters)
+                                {
+                                    decimal subTotalMarks = 0;
+                                    decimal subTotalScored = 0;
+                                    <tr>
+                                        <td style="text-align:left!important;"><b>@pp.Code</b></td>
+                                        <td style="text-align:left!important;"><b>@pp.ParamName</b></td>
+                                        @foreach (NameIDModel st in Model.SubjectTypes)
+                                        {
+                                            <td></td>
+                                        }
+                                        <td></td>
+                                        <td></td>
+                                        <td>@pp.Grade</td>
+
+                                    </tr>
+
+                                    TotalMarks = TotalMarks + subTotalMarks;
+                                    MarksObtained = MarksObtained + subTotalScored;
+                                }
+
+                                @*foreach (ExamResultDetailModel r in Model.Result)
+                    {
+                        TotalMarks = TotalMarks + r.MaxMarks;
+                        MarksObtained = MarksObtained + r.MarksScored;
+                        PassMarks = PassMarks + r.PassMarks;
+                            <tr>
+                                <td>@r.SubjectName</td>
+                               <td>@r.MaxMarks</td>
+                                <td>@r.PassMarks</td>
+                                <td>@(r.Status==-1?"M/L": r.MarksScored.ToString("0.00"))</td>
+                                <td>@AcadmicModel.CalculateGrade(r.MarksScored,r.MaxMarks)</td>
+                                <td>@AcadmicModel.CalculateGradePoints(r.MarksScored,r.MaxMarks)</td>
+                            </tr>
+                            }
+                        <tr style="font-weight: 700;background-color: rgba(58, 84, 42, 0.95);color: white;">
+                            <td>Total</td>
+                            <td>@TotalMarks</td>
+                            <td>@PassMarks</td>
+                            <td>@MarksObtained</td>
+                            <td>@AcadmicModel.CalculateGrade(MarksObtained, TotalMarks)</td>
+                            <td>@AcadmicModel.CalculateGradePoints(MarksObtained, TotalMarks)</td>
+                        </tr>*@
+                            }
+                        </table>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-6" style="text-align: left;">
+                        Abbreviations<br />
+                        AB: Absent<br />
+                        FP: Fail in Practical<br />
+                        FT: Fail in Theory
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-6" style="text-align: left;">
+                        Result : <br />
+                        Remark :
+                    </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+                        <br /><br /><br /><br /><br />
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-4" style="text-align: left;">
+                        Place : Modinagar<br />
+                        Date : @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyyy")
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-4" style="text-align: center;">
+                        SIGNATURE OF CLASS TEACHER
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-4" style="text-align: right;">
+                        SIGNATURE OF PRINCIPAL
+                    </div>
+                </div>
+
+                <div class="col-md-12">
+                    <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function DrawAttandanceChart(data) {
+            new Chart(document.getElementById("canvas000"), {
+                type: 'line',
+                data: data
+            });
+        }
+        function PrintReport() {
+            var StudentName = $('#bStudentNate').html();
+            var ClassSection = $('#bClassSection').html();
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title>Result For ' + StudentName + ' Class ' + ClassSection + '</title>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard1.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}

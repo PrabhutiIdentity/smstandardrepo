@@ -1,0 +1,270 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>P-School | Time Table</title>
+<link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+<link href="@Url.Content("~/css/TimeTableStyle.css")" rel="stylesheet" />
+}
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+
+            <div class="x_panel">
+                @{
+                    var width = 100 / (Model.TimeTable.Periods.Count + 1) - 0.5;
+                    <div class="time-table-dates">
+                        <div class="row" id="divTimeTableFrame" style="margin-left: 5px;">
+
+                            <ul class="days day" style="width:@width%;">
+                                <li class="period" style="color: #fff;height: 75px;">
+                                    <p>Days</p>
+                                </li>
+                                @for (var day = 0; day < Model.TimeTable.Days; day++)
+                                {
+                                    <li>
+                                        <span>@Model.TimeTable.DayNames[day]</span>
+                                    </li>
+                                }
+                            </ul>
+                            @foreach (PeriodModel period in Model.TimeTable.Periods)
+                            {
+                                var ulClass = "period-01 day";
+                                var PeriodDone = 0;
+                                if (period.PeriodType == 4)
+                                {
+                                    ulClass = "lunch-break day lunch";
+                                }
+                                <ul class="@ulClass" style="width:@width%">
+                                    <li class="period" style="height: 75px;">
+                                        <p> @period.EducationLevelName </p>
+                                        <p> @period.Name </p>
+                                        <p class="period-time">
+                                            <span>@period.StartTime.Substring(0, 5)</span><span> - </span><span>@period.EndTime.Substring(0, 5)</span>
+                                        </p>
+                                    </li>
+                                    @if (period.PeriodType == 4)
+                                    {
+                                        for (var day = 0; day < Model.TimeTable.Days; day++)
+                                        {
+                                            <li>
+                                                <p>Lunch Break</p>
+                                            </li>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        var isAssigned = false;
+                                        var donePeriodID = 0;
+                                        var maxDays = period.DaysCount;
+                                        foreach (var lac in Model.TimeTable.Lactures)
+                                        {
+                                            //maxDays = lac.DaysCount;
+                                            if (lac.PeriodID == period.PeriodID && donePeriodID != lac.PeriodID)
+                                            {
+                                                PeriodDone = 1;
+                                                for (var day = 0; day < Model.TimeTable.Days; day++)
+                                                {
+                                                    if (day < lac.DaysCount)
+                                                    {
+                                                        var subsClass = "";
+                                                        var tSubjectID = 0;
+
+                                                        foreach (TeacherSubstitutionModel tsm in Model.TimeTable.Substitutions)
+                                                        {
+                                                            if (tsm.DayID == day + 1 && tsm.PeriodID == period.PeriodID)
+                                                            {
+                                                                subsClass = "SubstitutedTeacherPeriod";
+                                                                break;
+                                                            }
+
+                                                        }
+
+                                                        foreach (var lac2 in Model.TimeTable.Lactures)
+                                                        {
+
+                                                            if (lac2.PeriodID == lac.PeriodID)
+                                                            {
+
+                                                                var tClassName = "No Teacher";
+                                                                var subjectName = "No Subject";
+                                                                var ClsID = 0;
+                                                                var SecID = 0;
+                                                                var isOptional = 0;
+                                                                ClsID = lac2.ClassID;
+                                                                SecID = lac2.SectionID;
+                                                                tClassName = lac2.ClassName + "-" + lac2.SectionName;
+                                                                if (day == 0)
+                                                                {
+                                                                    tSubjectID = lac2.SubjectID1;
+                                                                }
+                                                                else if (day == 1)
+                                                                {
+                                                                    tSubjectID = lac2.SubjectID2;
+
+                                                                }
+                                                                else if (day == 2)
+                                                                {
+                                                                    tSubjectID = lac2.SubjectID3;
+
+                                                                }
+                                                                else if (day == 3)
+                                                                {
+                                                                    tSubjectID = lac2.SubjectID4;
+
+                                                                }
+                                                                else if (day == 4)
+                                                                {
+                                                                    tSubjectID = lac2.SubjectID5;
+
+                                                                }
+                                                                else if (day == 5)
+                                                                {
+                                                                    tSubjectID = lac2.SubjectID6;
+                                                                }
+                                                                for (var sub = 0; sub < Model.TimeTable.Subjects.Count; sub++)
+                                                                {
+                                                                    if (Model.TimeTable.Subjects[sub].SubjectID == tSubjectID)
+                                                                    {
+                                                                        subjectName = Model.TimeTable.Subjects[sub].SubjectName;
+                                                                        isOptional = Model.TimeTable.Subjects[sub].IsOptionalsubject;
+                                                                        break;
+                                                                    }
+                                                                }
+                                                                if (tSubjectID != 0)
+                                                                {
+                                                                    donePeriodID = lac.PeriodID;
+                                                                    isAssigned = true;
+                                                                    <li class="@subsClass" id="li-@period.PeriodID-@(day + 1)">
+                                                                        <p class="subject">
+                                                                            @{
+
+                                                                                PeriodDone = 1;
+                                                                                <span id="pSubject">@subjectName</span>
+                                                                            }
+                                                                        </p>
+                                                                        <p class="teacher" id="pTeacher">@tClassName</p>
+                                                                        @{
+                                                                            var IsMerged = 0;
+                                                                            
+                                                                                    <input type="hidden" id="hdnClassName" value="@lac2.ClassName" />
+                                                                                    <input type="hidden" id="hdnSectionName" value="@lac2.SectionName" />
+                                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                                    <input type="hidden" id="hdnSubjectID" value="@tSubjectID" />
+                                                                                    <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                                                    <input type="hidden" id="hdnDayID" value="@(day + 1)" />
+                                                                                    <input type="hidden" id="hdnClassID" value="@ClsID" />
+                                                                                    <input type="hidden" id="hdnSectionID" value="@SecID" />
+                                                                                    <input type="hidden" id="hdnIsMergedSubject" value="@IsMerged" />
+                                                                                    <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
+                                                                        }
+                                                                        
+                                                                    </li>
+                                                                                        break;
+                                                                                    }
+
+                                                                                }
+                                                                            }
+                                                                            if (tSubjectID == 0)
+                                                                            {
+                                                                                <li class="EmptyPeriod">
+                                                                                    <p class="subject">
+
+                                                                                        <span id="pSubject">No Subject</span>
+
+                                                                                    </p>
+                                                                                    <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
+
+                                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                                    <input type="hidden" id="hdnSubjectID" value="0" />
+                                                                                    <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                                                    <input type="hidden" id="hdnDayID" value="@(day+1)" />
+                                                                                    <input type="hidden" id="hdnSectionID" value="0" />
+                                                                                    <input type="hidden" id="hdnClassID" value="0" />
+                                                                                    <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
+                                                                                    <input type="hidden" id="hdnIsMergedSubject" value="0" />
+                                                                                   
+                                                                                </li>
+                                                                                }
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <li>Not Applicable</li>
+                                                                                        }
+                                                                                    }
+
+                                                                                }
+
+                                                                            }
+                                                                            if (PeriodDone == 0)
+                                                                            {
+                                                                                for (var day = 0; day < Model.TimeTable.Days; day++)
+                                                                                {
+                                                                                    if (day < maxDays)
+                                                                                    {
+                                                                                        <li class="EmptyPeriod">
+                                                                                            <p class="subject">
+
+                                                                                                <span id="pSubject">No Subject</span>
+
+                                                                                            </p>
+                                                                                            <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
+
+                                                                                            <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                                            <input type="hidden" id="hdnSubjectID" value="0" />
+                                                                                            <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                                                            <input type="hidden" id="hdnDayID" value="@(day+1)" />
+                                                                                            <input type="hidden" id="hdnSectionID" value="@Model.TimeTable.SectionID" />
+                                                                                            <input type="hidden" id="hdnClassID" value="@Model.TimeTable.ClassID" />
+                                                                                            <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
+                                                                                            <input type="hidden" id="hdnIsMergedSubject" value="0" />
+                                                                                           
+                                                                                        </li>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <li><p class="teacher">Not Applicable</p></li>
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                </ul>
+                                                                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/jquery.min.js")"></script>
+    <script src="@Url.Content("~/js/Chart.min.js")"></script>
+
+    <script>
+        $(function () {
+
+        });
+    </script>
+    <!-- datepicker -->
+    <script type="text/javascript">
+        function DrawAttandanceChart(data) {
+            new Chart(document.getElementById("canvas000"), {
+                type: 'line',
+                data: data
+            });
+        }
+
+        $(document).ready(function () {
+
+        });
+    </script>
+}

@@ -1,0 +1,341 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_LibraryLayout.cshtml";
+}
+@model SMEnterprise.Models.LibraryListModel
+@section IncludeCss
+{
+    <title>Library Structure</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .RClosebtn {
+        display: none;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    #tblCategory .form-control {
+        width: 100% !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">#</th>
+
+                                    <th style="width: 50%"> Name</th>
+
+                                    <th style="width: 15%">#Floors</th>
+                                    <th style="width: 10%">Status</th>
+                                    <th style="width: 20%">Edit</th>
+                                </tr>
+                            </thead>
+                            @{
+
+                                var fCounter = 1;
+                                <tbody>
+
+                                    @foreach (var c in Model.List)
+                                    {
+                                    <tr>
+                                        <td>
+                                            @fCounter
+                                        </td>
+                                        <td>
+
+                                            <span class="ViewCopy visible">@c.Name</span>
+                                            <input class="form-control editCopy hidden" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' type="text" id="txtName" value="@c.Name" />
+                                        </td>
+
+                                        <td id="tdRoomCount">
+                                            <input type="hidden" id="hdnCount" value="@c.Count" />
+                                            @c.Count
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.ID" class="@(Model.MasterID)_Closed">Manage</a>)
+                                        </td>
+                                        <td>
+
+                                            <span class="ViewCopy visible">@(c.Status==1?"Active": "Inactive")</span>
+
+                                            <label class="switch switch-green editCopy hidden">
+                                                @if (c.Status == 1)
+                                                {
+                                                    <input type="checkbox" class="switch-input" Checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" class="switch-input">
+                                                }
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+
+                                                    <a href="javascript:void(0);" class="btn btn-link sbtn" onclick="EditCopy(this);">Edit</a>
+
+                                                    
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateLibraryStructure", "Library", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "LibraryUpdate" }))
+                                                    {
+                                                        <input type="hidden" id="hdnStatus" name="Status" value="@c.Status" />
+                                                        <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+                                                        <input type="hidden" id="hdnID" name="ID" value="@c.ID" />
+                                                        <input type="hidden" id="hdnType" name="Type" value="@Model.Type" />
+                                                        <input type="hidden" id="hdnMasterID" name="MasterID" value="@Model.MasterID" />
+
+                                                        <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" />
+                                                    }
+
+                                                    @using (Html.BeginForm("UpdateLibraryStructure", "Library", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "LibraryUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                        <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteLibrary(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                    fCounter++;
+                                    }
+
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td>
+                                            @fCounter
+                                        </td>
+                                        <td>
+                                            <input type="hidden" id="hdnID" value="0" />
+                                            <input type="hidden" id="hdnType" value="0" />
+                                            <input type="hidden" id="hdnMasterID" value="0" />
+                                            <input class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' type="text" id="txtName" value="" />
+                                        </td>
+
+                                        <td id="tdRoomCount">
+                                            <input type="hidden" id="hdnCount" value="0" />
+                                            0
+                                        </td>
+                                        <td>
+                                            <label class="switch switch-green">
+                                               
+                                                    <input type="checkbox" class="switch-input" Checked>
+                                                
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateLibraryStructure", "Library", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "LibraryUpdate" }))
+                                                    {
+                                                        <input type="hidden" id="hdnStatus" name="Status" value="1" />
+                                                        <input type="hidden" id="hdnName" name="Name" value="" />
+                                                        <input type="hidden" id="hdnID" name="ID" value="0" />
+                                                        <input type="hidden" id="hdnType" name="Type" value="@Model.Type" />
+                                                        <input type="hidden" id="hdnMasterID" name="MasterID" value="@Model.MasterID" />
+
+                                                        <input type="submit" class="btn btn-link" value="Add New" />
+                                                    }
+
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                </tfoot>
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+        function ToggleDetails(sender) {
+
+            var MID = $(sender).closest('tr').find('#hdnMasterID').val();
+            if ($(sender).hasClass(MID+"_Closed")) {
+                $(sender)
+                          .closest("tr")
+                          .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading Details, Please Wait....</td></tr>");
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Library/GetLibraryStructure/" + $(sender).closest('tr').find('#hdnID').val() + "/" + $(sender).closest('tr').find('#hdnType').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        // fill the div with the html returned by action
+                        $(sender)
+                            .closest("tr")
+                            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                        var ele = document.getElementsByClassName(MID + "_Opened");
+                        if (ele.length > 0) {
+                                $(ele[0]).click();
+                        }
+
+                        $(sender).removeClass(MID + "_Closed");
+                        $(sender).text('Close');
+                        $(sender).addClass(MID + "_Opened");
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+            else {
+                $(sender).removeClass(MID + "_Opened");
+                $(sender).addClass(MID + "_Closed");
+                $(sender).closest("tr").next().remove();
+                $(sender).text('Manage')
+            }
+
+        }
+        function DeleteLibrary(sender) {
+            var cnt = $(sender).closest('tr').find('#hdnCount').val();
+            var tp = $(sender).closest('tr').find('#hdnType').val();
+            var sndr = 'Library';
+            var chld = 'Floors';
+            if (tp == 1)
+            {
+                sndr = 'Floor';
+                chld = 'Blocks';
+            }
+            else if (tp == 2)
+            {
+                sndr = 'Block';
+                chld = 'Bays';
+            }
+            else if (tp == 3) {
+                sndr = 'Bay';
+                chld = 'Books';
+            }
+            if (cnt != 0) {
+                ShowNotification('Error', sndr + ' has ' + chld + ' so it can\'t be deleted!!!!', 'error');
+                return false;
+            }
+            else {
+                return confirm('Do you really want to delete '+sndr+'!!!!');
+            }
+        }
+        function UpdateLibrary(sender, OpType) {
+            var bCanProceed = true;
+            if (OpType == -1)
+            {
+                var cnt = $(sender).closest('tr').find('#hdnCount').val();
+                var tp = $(sender).closest('tr').find('#hdnType').val();
+                var sndr = 'Library';
+                var chld = 'Floors';
+                if (tp == 1) {
+                    sndr = 'Floor';
+                    chld = 'Blocks';
+                }
+                else if (tp == 2) {
+                    sndr = 'Block';
+                    chld = 'Bays';
+                }
+                else if (tp == 3) {
+                    sndr = 'Bay';
+                    chld = 'Books';
+                }
+                if (cnt != 0) {
+                    ShowNotification('Error', sndr + ' has ' + chld + ' so it can\'t be deleted!!!!', 'error');
+                    bCanProceed= false;
+                }
+                else {
+                    bCanProceed= confirm('Do you really want to delete ' + sndr + '!!!!');
+                }
+            }
+            if (bCanProceed) {
+                $.ajax({
+                    url: "@Url.Action("UpdateLibraryDetails", "Library")",
+                    type: 'POST',
+                    data: JSON.stringify({
+                        OpType: OpType,
+                        Name: $(sender).closest('tr').find('#txtName').val(),
+                        Type: $(sender).closest('tr').find('#hdnType').val(),
+                        Status: $(sender).closest('tr').find('#hdnStatus').val(),
+                        ID: $(sender).closest('tr').find('#hdnID').val(),
+                        MasterID: $(sender).closest('tr').find('#hdnMasterID').val(),
+                        Detail: $(sender).closest('tr').find('#txtDetail').val()
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (html) {
+                        ShowNotification('Success', 'Changes updated successfully', 'info');
+                        $(sender).closest('table').closest('td').html(html);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                    },
+                    async: true,
+                    processData: false
+                });
+            }
+        }
+    </script>
+}
+<!-- /.content -->

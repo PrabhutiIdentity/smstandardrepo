@@ -1,0 +1,241 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Black Board Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+@model SMEnterprise.Models.BlackBoardAdminPageModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .thumbImage {
+        max-width: 235px;
+        max-height: 250px;
+    }
+
+    *html .thumbImage {
+        width: expression((this.width/this.height)>=1?250:'auto');
+        height: expression((this.width/this.height)<1?250:'auto');
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Black Board Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Black Board Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    @using (Html.BeginForm("BlackBoard", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+    {
+        <div class="row">
+            <div class="col-md-3 form-group">
+                <label>Session</label>
+                <select class="form-control" name="SessionID">
+                    @foreach (var s in Model.Sessions)
+                    {
+                        <option value="@s.ID" @(s.ID == Model.SessionID ? "selected" : "")>@s.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 form-group">
+                <label>Class</label>
+                <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                    @foreach (var s in Model.Classes)
+                    {
+                        <option value="@s.ID" @(s.ID == Model.ClassID ? "selected" : "")>@s.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 form-group">
+                <label>Section</label>
+                <select class="form-control" name="SectionID" id="ddlSection">
+                    @foreach (var s in Model.Sections)
+                    {
+                        <option value="@s.ID" @(s.ID == Model.SectionID ? "selected" : "")>@s.Name</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 form-group">
+                <label>Date</label>
+                <input type="date" name="BBDate" class="form-control" value="@Model.BBDate.ToString("yyyy-MM-dd")" />
+            </div>
+            <div class="col-md-3 form-group">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 4%">Sl.</th>
+                                <th style="width: 10%">Image</th>
+                                <th style="width: 56%">Details</th>
+                                <th style="width: 10%">Date</th>
+                                <th style="width: 15%">View</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.BlackBoards)
+                            {
+                                <tr>
+                                    <td>@(count + 1)</td>
+                                    <td>
+
+                                        <img id="imgPhoto" class="thumbImageGrid" alt="Photo" onerror="return OnImageError(this, 3);" src="@Url.Content("~/Images/BlackBoard/")@c.Images" />
+                                    </td>
+                                    <td>
+                                        <b>@c.TeacherName @c.SubjectName @c.ClassName @c.SectionName</b>
+                                        <p> @c.Title</p>
+                                    </td>
+
+                                    <td>
+                                        @c.BDate.ToString("dd MMM,yyyy")
+
+                                    </td>
+                                    <td>
+                                        <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="ViewImages(this,'@c.BlackBoardID');">View</a>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</section>
+@section pageBottom{
+    <div id="mdlImages" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Black Board Images</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="mbImages">
+                        <div class="col-md-4">
+                            <img src="" class="thumbImageMain" />
+                            <p></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+    function ClassChanged(sender) {
+        $('.se-pre-con').css('display', '');
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlSection').html('');
+                    $('#ddlSection').html('<option value="0">--Select--</option>');
+                    $('#ddlSection').append(html);
+
+                    $('.se-pre-con').css('display', 'none');
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+
+   $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+    });
+   
+    function ViewImages(sender, BlackBoardID) {
+
+        $('#mbImages').html('<div class="col-md-12">Loading Please wait....</div>');
+        $('#mdlImages').modal('toggle');
+        $('.se-pre-con').css('display', '');
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetBlackBoardImages/" + BlackBoardID,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    $('#mbImages').html('');
+                    if (data.length == 0) {
+                        $('#mbImages').html('<div class="col-md-12">No Images</div>');
+                    }
+                    for (var i = 0; i < data.length; i++) {
+                        var dv = '<div class="col-md-6">' +
+                            '<img src = "/Images/Blackboard/' + data[i].BlackBoardID + '_' + data[i].Photo+'" class="thumbImageMain" />' +
+                            ' <p>' + data[i].Detail+'</p></div>';
+                        $('#mbImages').append(dv);
+                    }
+                    $('.se-pre-con').css('display', 'none');
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+</script>
+<!-- /.content -->

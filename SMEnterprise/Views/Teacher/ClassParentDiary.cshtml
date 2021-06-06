@@ -1,0 +1,341 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+@model SMEnterprise.Models.ParentDiaryModel
+@section IncludeCss
+{
+    <title>Parent Diary | Class Teacher</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Admin/blue.css")" rel="stylesheet">
+    @*<link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">*@
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.11/summernote.css" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+
+    .smallfont {
+        font-size: 11px;
+    }
+
+    .dd-option {
+        position: relative;
+        padding: 10px;
+        width: 90%;
+        padding-left: 30px;
+        display: inline-table;
+        border-bottom: solid 1px #ddd;
+        overflow: hidden;
+        text-decoration: none;
+        color: #333;
+        cursor: pointer;
+        -webkit-transition: all 0.25s ease-in-out;
+        -moz-transition: all 0.25s ease-in-out;
+        -o-transition: all 0.25s ease-in-out;
+        -ms-transition: all 0.25s ease-in-out;
+    }
+
+    .dd-option-image, .dd-selected-image {
+        vertical-align: middle;
+        float: left;
+        margin-right: 5px;
+        max-width: 40px;
+    }
+
+    .dd-container {
+        position: relative;
+    }
+
+    * {
+        font-size: 12px;
+        font-family: verdana;
+    }
+
+    .dd-desc {
+        color: #aaa;
+        display: block;
+        overflow: hidden;
+        font-weight: normal;
+        line-height: 1.4em;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("ClassParentDiary", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+
+                    <div class="row std-mng-head col-md-12">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-6 text-right" style="padding-right: 0px;">Class</label>
+                                    <div class="col-md-6">
+                                        <select class="form-control smallfont" name="ClassID" id="ddlClass" onchange="ClassChanged(this);">
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Section</label>
+                                    <div class="col-md-8">
+                                        <select name="SectionID" class="form-control padding smallfont" id="ddlSection" onchange="SectionChanged(this);">
+                                            <option value="0">--Select--</option>
+                                            @foreach (NameIDModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-1 padding">
+                                    <div class="row">
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+            @using (Html.BeginForm("InsertStudentDiary", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
+            {
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Parent Diary </h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="col-md-12">
+                            <input type="text" class="form-control" name="Title" placeholder="Title For Diary Entry" value="@Model.Title" />
+                        </div>
+                        <div class="col-md-12" style="margin-top: 10px;">
+                            <textarea rows="10" class="form-control summernote1" placeholder="Description For Diary Entry" name="Description">@Model.Description</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Students <small><input type="checkbox" class="flat selectAll"> Select to Send</small></h2>
+
+                        <div class="clearfix"></div>
+                    </div>
+
+                    <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                    <input type="hidden" name="TeacherType" value="0" />
+                    <input type="hidden" name="Priority" value="1" />
+                    <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                    <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
+                    <input type="hidden" name="TeacherID" value="@Model.TeacherID" />
+                    <div class="x_content">
+                        @if (Model.Students.Count == 0)
+                        {
+                            <div>No Student</div>
+                        }
+                        else
+                        {
+                            <div class="dd-container">
+                                <ul class="dd-options dd-click-off-close row" style="display: block;" id="ulSchoolList">
+                                    @{
+                                        int count = 0;
+                                        foreach (StudentModel c in Model.Students)
+                                        {
+                                            <li class="col-md-4">
+                                                <input type="checkbox" class="flat" style="margin-top: 14px;">
+                                                <input class="dd-option-value" name="Students[@count].IsSelected" id="hdnSelected" type="hidden" value="@c.IsSelected">
+                                                <a class="dd-option">
+                                                    <input name="Students[@count].StudentID" type="hidden" value="@c.StudentID">
+                                                    <img onerror="return OnImageError(this,@c.Gender);" class="dd-option-image" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo">
+                                                    <label class="dd-option-text">@c.Name</label>
+                                                    <small class="dd-option-description dd-desc">@c.ClassName/@c.SectionName (@c.RollNo)</small>
+                                                </a>
+                                            </li>
+
+                                            count++;
+                                        }
+
+                                    }
+                                </ul>
+                            </div>
+                            <div>
+                                <button href="javascript:void(0);" id="btnSaveResult" type="submit" class="btn btn-block btn-info pull-right">Submit</button>
+                            </div>
+                        }
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js" defer></script>
+    <script>
+
+        $(document).ready(function () {
+
+            $('#txtExplaination').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],    
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('.summernote1').summernote({
+
+                height: 250,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+
+
+        });
+    </script>
+
+    <script>
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Teacher/GetTeacherClassSections/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+
+        function CheckChanged(sender) {
+            $(sender).closest('li').find('#hdnSelected').val($(sender).is(":checked") ? 1 : 0);
+        }
+        $(function () {
+            //  InitializeListCheckBox();
+            //$('.selectAll').on('click', function (event) {
+            //    if (!$(this).closest('.icheckbox_flat-green').hasClass("checked")) {
+            //        $("#ulSchoolList").find('li').each(function () {
+            //            $(this).find('.dd-option').find('#hdnSelected').val(1);
+            //            $(this).find('.slectli').addClass('checked');
+            //            $(this).find('.icheckbox_flat-green').addClass('active');
+            //            $(this).find('.icheckbox_flat-green').addClass('checked');
+            //        });
+            //        $('#lblSMSCount').text($('#hdnRecieverCount').val());
+            //        $(this).closest('.icheckbox_flat-green').addClass('checked');
+            //    }
+            //    else {
+            //        $("#ulSchoolList").find('li').each(function () {
+            //            $(this).find('.dd-option').find('#hdnSelected').val(0);
+            //            $(this).find('.icheckbox_flat-green').removeClass('active');
+            //            $(this).find('.icheckbox_flat-green').removeClass('checked');
+            //        });
+            //        $('#lblSMSCount').text(0);
+            //        $(this).find('.icheckbox_flat-green').removeClass('active');
+            //        $(this).closest('.icheckbox_flat-green').removeClass('checked');
+            //    }
+            //});
+
+            $('input[type="checkbox"].selectAll').on('ifChanged', function (event) {
+                if ($(this).is(":checked")) {
+                    $("#ulSchoolList").find('li').each(function () {
+                        $(this).find('#hdnSelected').val(1);
+                        $(this).find('.icheckbox_flat-blue').addClass('checked');
+                    });
+                }
+                else {
+                    $("#ulSchoolList").find('li').each(function () {
+                        $(this).find('#hdnSelected').val(0);
+                        $(this).find('.icheckbox_flat-blue').removeClass('checked');
+                    });
+                }
+            });
+            $('input[type="checkbox"]').on('ifChanged', function (event) {
+                if ($(this).is(":checked")) {
+                    $(this).closest('li').find('#hdnSelected').val(1);
+                }
+                else {
+                    $(this).closest('li').find('#hdnSelected').val(0);
+                }
+            });
+        });
+        function InitializeListCheckBox() {
+            $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+                checkboxClass: 'icheckbox_flat-green',
+                radioClass: 'iradio_flat-green'
+            });
+
+            $('.helpcheck').on('click', function (event) {
+                var RecCount = parseInt($('#lblSMSCount').text());
+                if ($(this).closest('li').find('#hdnSelected').val() == "0") {
+                    $(this).closest('li').find('#hdnSelected').val(1);
+                    $('#lblSMSCount').text(RecCount + 1);
+                    $(this).find('.icheckbox_flat-green').addClass('active');
+                    $(this).closest('li').find('.icheckbox_flat-green').addClass('checked');
+                }
+                else {
+                    $(this).closest('li').find('#hdnSelected').val(0);
+                    $('#lblSMSCount').text(RecCount - 1);
+                    $(this).find('.icheckbox_flat-green').removeClass('active');
+                    $(this).closest('li').find('.icheckbox_flat-green').removeClass('checked');
+                }
+            });
+        }
+    </script>
+}
+<!-- /.content -->

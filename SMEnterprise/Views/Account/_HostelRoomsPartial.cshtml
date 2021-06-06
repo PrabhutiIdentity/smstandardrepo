@@ -1,0 +1,52 @@
+﻿
+@{
+            int rcount = 0;
+            foreach (SMEnterprise.Models.HostalRoomModel c in Model.Rooms)
+            {
+                rcount++;
+        <tr>
+            <td>@rcount</td>
+
+            <td>
+                @c.Name
+            </td>
+            <td>
+                @c.RoomTypeName
+            </td>
+            <td>@c.RoomNo</td>
+            <td>@c.Capacity</td>
+            <td>
+                @c.Occupents
+            </td>
+            <td style="text-align:center">@c.Rate</td>
+            <td style="text-align:center">
+                <div class="radio">
+                    <label>
+                        @{
+                            var chk = "";
+                            if (Model.RoomID == c.ID)
+                            {
+                                chk = "checked";
+                            }
+                            <div class="iradio_flat-blue @chk" style="position: relative;">
+                                <input type="radio" class="flat icheckRadio" @chk value="@c.ID" @(c.Capacity > c.Occupents ? "" : "disable") name="RoomID" style="position: absolute; opacity: 0;">
+                                <ins class="iCheck-helper" onclick="HostalCheckChanged(this);" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                            </div>
+                            @*<input type="radio" class="flat icheckRadioH" @chk value="@c.ID" @(c.Capacity > c.Occupents ? "" : "disable") name="RoomID">*@
+                        }
+                    </label>
+                </div>
+            </td>
+        </tr>
+
+                            }
+<script>
+    $('input.flat').iCheck({
+        checkboxClass: 'icheckbox_flat-blue',
+        radioClass: 'iradio_flat-blue'
+    });
+   
+</script>
+}
+
+

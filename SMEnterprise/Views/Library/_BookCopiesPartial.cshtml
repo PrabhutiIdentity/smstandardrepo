@@ -1,0 +1,92 @@
+﻿<table id="tblCopies" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 5%">#</th>
+            <th style="width: 20%">Code</th>
+            <th style="width: 20%">BarCode</th>
+            <th style="width: 20%">RFID</th>
+            <th style="width: 15%">Status</th>
+            <th style="width: 15%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+        </tr>
+    </thead>
+    @{
+        var fCounter = 1;
+        <tbody>
+            @foreach (var c in Model.Copies)
+            {
+                <tr>
+                    <td>
+                        @fCounter
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.Code</span>
+                        <input class="form-control editCopy hidden" type="text" id="txtCode" value="@c.Code" />
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.BarCode</span>
+                        <input class="form-control editCopy hidden" type="text" id="txtBarCode" value="@c.BarCode" />
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.RFID</span>
+                        <input class="form-control editCopy hidden" type="text" id="txtRFID" value="@c.RFID" />
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@(c.AStatus==0?"Available": c.AStatus == 1 ?"Issued":"Removed")</span>
+                        <select class="form-control editCopy hidden" id="ddlStatus" @(c.AStatus == 1 ? "disabled" : "")>
+                            <option value="0" @(c.AStatus == 0 ? "selected" : "")>Available</option>
+                            <option value="1" @(c.AStatus == 1 ? "selected" : "")>Issued</option>
+                            <option value="2" @(c.AStatus == 2 ? "selected" : "")>Removed</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+                                <input type="hidden" id="hdnBookID" value="@Model.BookID" />
+                                <input type="hidden" id="hdnCopyID" value="@c.CopyID" />
+                                <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                            </div>
+                            <div class="col-md-6">
+                                <a href="javascript:void(0);" class="sbtn editCopy hidden" onclick="UpdateBookCopy(this, 1);">Save</a>
+                                <a href="javascript:void(0);" class="sbtn ViewCopy visible" onclick="UpdateBookCopy(this, -1);">Delete</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                fCounter++;
+            }
+
+        </tbody>
+        <tfoot style="border-width: 2px;border-style: groove;display:none;">
+            <tr>
+                <td>
+                    @fCounter
+                </td>
+                <td>
+                    <input class="form-control" type="text" id="txtCode" value="" />
+                </td>
+                <td>
+                    <input class="form-control" type="text" id="txtBarCode" value="" />
+                </td>
+                <td>
+                    <input class="form-control" type="text" id="txtRFID" value="" />
+                </td>
+                <td>
+                    <select class="form-control" id="ddlStatus">
+                        <option value="0">Available</option>
+                        <option value="1">Issued</option>
+                        <option value="2">Removed</option>
+                    </select>
+                </td>
+                <td>
+                    <div class="row" style="margin-right: 0px;">
+                        <div class="col-md-12">
+                            <input type="hidden" id="hdnBookID" value="@Model.BookID" />
+                            <input type="hidden" id="hdnCopyID" value="0" />
+                            <a href="javascript:void(0);" class="sbtn" onclick="UpdateBookCopy(this, 1);" >Add New</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tfoot>
+    }
+</table>

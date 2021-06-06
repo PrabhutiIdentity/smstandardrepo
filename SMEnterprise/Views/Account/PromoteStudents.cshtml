@@ -1,0 +1,432 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentPromotionModel
+@section IncludeCss
+{
+    <title>Promote Students</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/newStyle.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Admin/blue.css")" rel="stylesheet">
+}
+<style>
+    #ulSchoolList li .smsList .dd-option {
+        padding: 10px 10px;
+        border: 0;
+    }
+
+    .dd-option-text {
+        margin-bottom: 0px;
+    }
+
+    #myTabContent .form-control {
+        width: 100% !important;
+    }
+
+    #myTabContent .form-horizontal .form-group {
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+
+    .dd-option {
+        position: relative;
+        padding: 5px;
+        width: 90%;
+        padding-left: 5px;
+        display: inline-table;
+        border-bottom: solid 1px #ddd;
+        overflow: hidden;
+        text-decoration: none;
+        color: #333;
+        cursor: pointer;
+        -webkit-transition: all 0.25s ease-in-out;
+        -moz-transition: all 0.25s ease-in-out;
+        -o-transition: all 0.25s ease-in-out;
+        -ms-transition: all 0.25s ease-in-out;
+    }
+
+    .dd-option-image, .dd-selected-image {
+        vertical-align: middle;
+        float: left;
+        margin-right: 5px;
+        max-width: 40px;
+    }
+
+    .dd-container {
+        position: relative;
+    }
+
+    .dd-desc {
+        color: #f7f7f7;
+        display: block;
+        overflow: hidden;
+        font-weight: normal;
+        line-height: 1.4em;
+    }
+
+
+    .dd-options:before {
+        content: '';
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("PromoteStudents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (ClassModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                            <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                <option value="0">--Select Section--</option>
+                                                @foreach (SectionModel el in Model.Sections)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+                    @using (Html.BeginForm("UpdatePromotedStudents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmPromoteStudents" }))
+                    {
+                    <div class="x_content">
+                        <input type="hidden" id="hdnPSessionID" name="SessionID" />
+                        <input type="hidden" id="hdnPClassID" name="ClassID" />
+                        <input type="hidden" id="hdnPSectionID" name="SectionID" />
+                        <input type="hidden" id="hdnPSBranchID" name="SBranchID" />
+                        <div class="col-md-12">
+                            <input type="hidden" id="hdnRecieverCount" value="@Model.Students.Count" />
+                            <b> Total Students: <lable id="lblSMSCount">@Model.Students.Count</lable></b>
+                        </div>
+
+                        <div class="row">
+
+                            <div class="icheckbox_flat-blue checked " aria-checked="false" aria-disabled="false" style="position: relative;">
+
+                                <ins class="iCheck-helper selectAll" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                            </div><small>
+                                Select All
+                            </small>
+
+                            <div class="clearfix"></div>
+                        </div>
+                        <ul class="dd-options dd-click-off-close row" style="display: block;" id="ulSchoolList">
+                            @{
+                                int count = 0;
+
+                                foreach (var c in Model.Students)
+                                {
+                                    <li class="col-md-3">
+                                        <div class="smsList">
+                                            <div class="dd-option">
+                                                <input type="hidden" name="Students[@count].IsSelected" id="hdnSelected" value="1" />
+                                                <input type="hidden" name="Students[@count].QuotaID" value="@c.QuotaID" />
+                                                <input type="hidden" name="Students[@count].FeePaymentMode" value="@c.FeePaymentMode" />
+                                                <input name="Students[@count].StudentID" type="hidden" value="@c.StudentID">
+                                                <img onerror="return OnImageError(this,@c.Gender);" class="dd-option-image" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo">
+                                                <label class="dd-option-text">@c.Name</label>
+                                                <small class="dd-option-description dd-desc">@c.StudentSID</small>
+                                                <small class="dd-option-description dd-desc">@c.FatherName</small>
+                                            </div>
+                                            <div class="icheckbox_flat-blue checked" aria-checked="false" aria-disabled="false" style="position: relative;">
+
+                                                <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                    count++;
+                                }
+                            }
+
+                        </ul>
+
+                        <div>
+                            <a href="javascript:void(0);" id="btnSaveResult" data-toggle="modal" data-target="#modelPromoteStudents" @*onclick="return PromoteStudents();"*@ class="btn btn-block btn-info pull-right">Confirm Promote</a>
+                        </div>
+                    </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section PageBottom{
+    <div class="modal fade bs-example-modal-sm" id="modelPromoteStudents" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                    <h4 class="modal-title" id="myModalLabel2">Confirm Promotion</h4>
+                </div>
+                <div class="modal-body">
+                    @if (Model.Branches != null)
+                    {
+                    <div class="form-group">
+                        <label>Branch</label>
+                        <select class="form-control" onchange="PromoteBranchChanged(this);" id="ddlPromoteBranch">
+                            <option value="0">--Select Branch--</option>
+                            @foreach (NameIDModel el in Model.Branches)
+                            {
+
+                                <option value="@el.ID" @(el.ID == Model.SBranchID ? "selected" : "")>@el.Name</option>
+                            }
+                        </select>
+                    </div>
+                    }
+                    <div class="form-group">
+                        <label>Session</label>
+                        <select class="form-control" onchange="PromoteSessionChanged(this);" id="ddlPromoteSession">
+                            <option value="0">--Select Session--</option>
+                            @foreach (NameIDModel el in Model.Sessions)
+                            {
+                                if (el.Extra1 == "1")
+                                {
+                                    <option value="@el.ID">@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Class</label>
+                            <select class="form-control" onchange="PromoteClassChanged(this);" id="ddlPromoteClass">
+                                <option value="0">--Select Class--</option>
+                                @foreach (ClassModel el in Model.Classes)
+                                {
+                                    <option value="@el.ClassID">@el.ClassName</option>
+                                }
+                            </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Section</label>
+                            <select class="form-control" onchange="PromoteSectionChanged(this);" id="ddlPromoteSection">
+                                <option value="0">--Select Section--</option>
+                                @foreach (SectionModel el in Model.Sections)
+                                {
+                                    <option value="@el.ID">@el.Name</option>
+                                }
+                            </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="ConfirmPromoteStudent();">Promote</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/moment.min.js")"></script>
+    <script src="@Url.Content("~/js/daterangepicker.js")"></script>
+    <script>
+        function ConfirmPromoteStudent() {
+            if ($('#ddlPromoteSession').val() == 0 || $('#ddlPromoteClass').val() == 0 || $('#ddlPromoteSection').val() == 0) {
+                ShowNotification('Select', 'Please Select Promoted Session/Class/Section', 'info');
+            }
+            else {
+                $('#hdnPSBranchID').val($('#ddlPromoteBranch').val());
+                $('#hdnPSessionID').val($('#ddlPromoteSession').val());
+                $('#hdnPClassID').val($('#ddlPromoteClass').val());
+                $('#hdnPSectionID').val($('#ddlPromoteSection').val());
+                $('#frmPromoteStudents').submit();
+            }
+        }
+        function PromoteBranchChanged(sender) {
+            $('#ddlPromoteSession').html('<option value="0">Loading....</option>');
+            $('#ddlPromoteClass').html('<option value="0">Loading....</option>');
+            $('#ddlPromoteSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetSessionClassSectionOnBranch/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        $('#ddlPromoteSession').html('<option value="0">--Select Session--</option>');
+                        for (var i = 0; i < data.Sessions.length; i++) {
+                            $('#ddlPromoteSession').append('<option value="' + data.Sessions[i].ID + '" ' + (data.Sessions[i].ID == data.SessionID ? 'selected' : '') + '>' + data.Sessions[i].Name +'</option>');
+                        }
+                        $('#ddlPromoteClass').html('<option value="0">--Select Class--</option>');
+                        for (var i = 0; i < data.Classes.length; i++) {
+                            $('#ddlPromoteClass').append('<option value="' + data.Classes[i].ClassID + '" ' + (data.Classes[i].ClassID==data.ClassID?'selected':'')+ '>' + data.Classes[i].ClassName + '</option>');
+                        }
+
+                        $('#ddlPromoteSection').html('<option value="0">--Select Section--</option>');
+                        for (var i = 0; i < data.Sections.length; i++) {
+                            $('#ddlPromoteSection').append('<option value="' + data.Sections[i].ID + '" ' + (data.Sections[i].ID == data.SectionID ? 'selected' : '') + '>' + data.Sections[i].Name + '</option>');
+                        }
+                        console.log(data);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function PromoteClassChanged(sender) {
+            $('#ddlPromoteSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlPromoteSection').html('');
+                        $('#ddlPromoteSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlPromoteSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        $(function () {
+            InitializeListCheckBox();
+            $('.selectAll').on('click', function (event) {
+                if (!$(this).closest('.icheckbox_flat-blue').hasClass("checked")) {
+                    $("#ulSchoolList").find('li').each(function () {
+                        $(this).find('.dd-option').find('#hdnSelected').val(1);
+                        $(this).find('.slectli').addClass('checked');
+                        $(this).find('.icheckbox_flat-blue').addClass('active');
+                        $(this).find('.icheckbox_flat-blue').addClass('checked');
+                    });
+                    $('#lblSMSCount').text($('#hdnRecieverCount').val());
+                    $(this).closest('.icheckbox_flat-blue').addClass('checked');
+                }
+                else {
+                    $("#ulSchoolList").find('li').each(function () {
+                        $(this).find('.dd-option').find('#hdnSelected').val(0);
+                        $(this).find('.icheckbox_flat-blue').removeClass('active');
+                        $(this).find('.icheckbox_flat-blue').removeClass('checked');
+                    });
+                    $('#lblSMSCount').text(0);
+                    $(this).find('.icheckbox_flat-blue').removeClass('active');
+                    $(this).closest('.icheckbox_flat-blue').removeClass('checked');
+                }
+            });
+        });
+        function InitializeListCheckBox() {
+            $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+                checkboxClass: 'icheckbox_flat-blue',
+                radioClass: 'iradio_flat-blue'
+            });
+
+            $('.helpcheck').on('click', function (event) {
+                var RecCount = parseInt($('#lblSMSCount').text());
+                if ($(this).closest('li').find('#hdnSelected').val() == "0") {
+                    $(this).closest('li').find('#hdnSelected').val(1);
+                    $('#lblSMSCount').text(RecCount + 1);
+                    $(this).find('.icheckbox_flat-blue').addClass('active');
+                    $(this).closest('li').find('.icheckbox_flat-blue').addClass('checked');
+                }
+                else {
+                    $(this).closest('li').find('#hdnSelected').val(0);
+                    $('#lblSMSCount').text(RecCount - 1);
+                    $(this).find('.icheckbox_flat-blue').removeClass('active');
+                    $(this).closest('li').find('.icheckbox_flat-blue').removeClass('checked');
+                }
+            });
+        }
+    </script>
+}
+<!-- /.content -->

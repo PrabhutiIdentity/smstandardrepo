@@ -1,0 +1,83 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 5%"></th>
+            <th style="width: 20%">Title</th>
+            <th style="width: 15%">Sub Title</th>
+            <th style="width: 20%">Edit/Delete</th>
+        </tr>
+    </thead>
+
+    @{
+        var counter = 1;
+        <tbody>
+            
+            @foreach (SMEnterprise.Models.EducationLevelSectionModel c in Model.ReportSections)
+            {
+            <tr>
+                <td>
+                    @counter
+                </td>
+                <td>
+                    <input class="form-control" id="txtSectionTitle" type="text" onchange='$(this).closest("tr").find("#hdnTitle").val($(this).val())' name="SectionTitle" value="@c.SectionTitle" />
+                </td>
+                <td>
+                    <input class="form-control" id="txtSectionSubTitle" type="text" onchange='$(this).closest("tr").find("#hdnSectionSubTitle").val($(this).val())' name="SectionSubTitle" value="@c.SectionSubTitle" />
+                </td>
+                <td>
+                    <div class="row" style="margin-right: 0px;">
+                        <div class="col-md-6">
+                            <input type="submit" class="btn btn-link" value="Save" onclick="UpdateReportSection(this, 1);" />
+                        </div>
+                        <div class="col-md-6">
+
+                            <input type="hidden" name="EducationLevelID" id="hdnEducationLevelID" value="@Model.ID" />
+                            <input type="hidden" id="hdnELSectionID" name="ELSectionID" value="@c.ELSectionID" />
+                            <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                            <input type="submit" class="btn btn-link" value="Delete" onclick="return DeleteReportSection(this, -1);" />
+
+                        </div>
+                    </div>
+                </td>
+
+
+
+            </tr>
+            counter++;
+            }
+
+        </tbody>
+        <tfoot style="border-width: 2px;border-style: groove;">
+            <tr>
+                <td>
+                    @counter
+                </td>
+                <td>
+                    <input class="form-control" id="txtSectionTitle" type="text" onchange='$(this).closest("tr").find("#hdnTitle").val($(this).val())' name="SectionTitle" value="" />
+                </td>
+                <td>
+                    <input class="form-control" id="txtSectionSubTitle" type="text" onchange='$(this).closest("tr").find("#hdnSectionSubTitle").val($(this).val())' name="SectionSubTitle" value="" />
+                </td>
+                <td>
+                    <div class="row" style="margin-right: 0px;">
+                        <div class="col-md-6">
+                            <input type="submit" class="btn btn-link" value="Save" onclick="UpdateReportSection(this, 1);" />
+                        </div>
+                        <div class="col-md-6">
+
+                            <input type="hidden" name="EducationLevelID" id="hdnEducationLevelID" value="@Model.ID" />
+                            <input type="hidden" id="hdnELSectionID" name="ELSectionID" value="0" />
+                            <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                            <input type="submit" class="btn btn-link" value="Delete" onclick="return DeleteReportSection(this, -1);" />
+
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+        </tfoot>
+    }
+</table>
+

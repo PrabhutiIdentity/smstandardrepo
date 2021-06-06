@@ -1,0 +1,542 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/png" href="@Url.Content("~/favicon.ico")">
+    <!-- Bootstrap core CSS -->
+    <script src="@Url.Content("~/js/jquery.min.js")"></script>
+    <link href="@Url.Content("~/css/Gent/jquery.mCustomScrollbar.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap-progressbar-3.3.4.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/font-awesome.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.buttons.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.nonblock.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Gent/custom.css")" rel="stylesheet" />
+    <script src="@Url.Content("~/js/icheck.min.js")"></script>
+    <!-- jQuery 2.2.3 -->
+    <script>
+        var AlterNativeMaleImg = "@Url.Content("~/Images/MaleNoImage.png")";
+        var AlterNativeFemaleImg = "@Url.Content("~/Images/FemaleNoImage.png")";
+        var AlterNativeDocImg = "@Url.Content("~/Images/NoDocImage.jpg")";
+        function OnImageError(me, Type) {
+            if (Type == 1) {
+                me.src = AlterNativeFemaleImg;
+                return true;
+            }
+            if (Type == 3) {
+                me.src = AlterNativeDocImg;
+                return true;
+            }
+            else {
+                me.src = AlterNativeMaleImg;
+                return true;
+            }
+        }
+        function OnImageErrorReport(me, Type) {
+            $(me).css('display', 'none');
+        }
+
+    </script>
+    <style>
+        .nav-md .container.body .col-md-3.left_col{
+            z-index:1;
+        }
+       .no-js #loader { display: none;  }
+.js #loader { display: block; position: absolute; left: 100px; top: 0; }
+.se-pre-con {
+	position: fixed;
+	left: 0px;
+	top: 0px;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	background: url(/Images/SBranchLogo/@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(@SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)) center no-repeat #2a3f545e;
+    background-size: 200px auto;
+}
+
+        .dropdown-menu > li > form > a {
+            color: #5A738E;
+        }
+
+
+        .dropdown-menu > li > form > a {
+            display: block;
+            padding: 3px 20px;
+            clear: both;
+            font-weight: 400;
+            line-height: 1.42857143;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .ImageReportLogo {
+            max-width: 125px;
+            max-height: 125px;
+        }
+        *html .ImageReportLogo {
+            width: expression((this.width/this.height)>=1?125:'auto');
+            height: expression((this.width/this.height)<1?125:'auto');
+        }
+
+        .thumbImage {
+            max-width: 185px;
+            max-height: 185px;
+        }
+
+
+        *html .thumbImage {
+            width: expression((this.width/this.height)>=1?185:'auto');
+            height: expression((this.width/this.height)<1?185:'auto');
+        }
+
+         .reportSign {
+            max-width: 200px;
+            max-height: 100px;
+        }
+
+
+        *html .reportSign {
+            width: expression((this.width/this.height)>=1?200:'auto');
+            height: expression((this.width/this.height)<1?100:'auto');
+        }
+    </style>
+    @RenderSection("IncludeCss", required: false)
+    <!--[if lt IE 9]>
+        <script src="../assets/js/ie8-responsive-file-warning.js"></script>
+        <![endif]-->
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    <script>
+
+    </script>
+</head>
+
+<body class="nav-md">
+    <div class="se-pre-con" style="display: none; "></div>
+    <div class="container body">
+
+        <div class="main_container">
+            <div class="col-md-3 left_col ">
+                @*menu_fixed*@
+                        <div class="left_col scroll-view">
+
+                            <div class="profile">
+                                <div class="">
+                                    <img onerror="OnImageError(this,2)" src="@Url.Content("~/Images/SBranchLogo/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(@SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)" alt="..." class="img-circle profile_img">
+                                </div>
+
+                            </div>
+                            <!-- /menu prile quick info -->
+                            <br />
+                            <!-- sidebar menu -->
+                            <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                                <div class="menu_section" style="margin-bottom:0px;">
+                                    <h3></h3>
+                                    <ul class="nav side-menu">
+                                        <li></li>
+                                    </ul>
+                                </div>
+                                <div class="menu_section">
+                                    <ul class="nav side-menu">
+                                        <li>
+                                            <a href="/Account/Dashboard"><i class="fa fa-home"></i> Home </a>
+                                        </li>
+                                        <li>
+                                            <a href="/Account/Calendar"><i class="fa fa-calendar-o"></i> Calendar </a>
+
+                                        </li>
+                                        <li>
+                                            <a href="/Account/ParentAppDetail"><i class="fa fa-user"></i> Parent App  Details</a>
+                                        </li>
+                                        <li>
+                                            <a><i class="fa fa-user-plus"></i> Student Section <span class="fa fa-chevron-down"></span></a>
+                                            <ul class="nav child_menu" style="display: none">
+                                                <li>
+                                                    <a href="/Account/Students">Manage Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentDetails">Add Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentsIDCards">ID Cards</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentsIDCardsHorizontal">ID Cards Landscape</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/SearchStudents">Search Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentQuickEdit">Quick Edit</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentLeaves">Student Leaves</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentsFee">Manage Fee</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/FeeRefunds">Manage Fee Refunds</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/PromoteStudents">Promote Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentInActive">InActive Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/SearchStudentsForTC">Generate TC</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a><i class="fa fa-money"></i> Sale/Purchase <span class="fa fa-chevron-down"></span></a>
+                                            <ul class="nav child_menu" style="display: none">
+                                                @*<li>
+                    <a href="/Account/DayBook">Day Book</a>
+                </li>*@
+                                                <li>
+                                                    <a href="/Account/ExtraIncomes">Extra Income</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/Vendors">Vendors</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/LowStockProducts">Low Stock Products</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StockProducts">Available Stock Products</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StockManagement">Transactions</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StockDetails">New Transaction</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a><i class="fa fa-bar-chart"></i>Exam/Result <span class="fa fa-chevron-down"></span></a>
+                                            <ul class="nav child_menu" style="display: none">
+                                                <li>
+                                                    <a href="/Account/ExamDate">Exam Summery</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/DeskSlip">Desk Slip</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/AdmitCard">Admit Card</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/ExamResults">Results</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentResultList">Student Result Summery</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentResultScrutiny">Class Result Checking I</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/ClassResultReport">Class Result Checking II</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentPerformance">Report Card</a>
+                                                </li>
+
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a><i class="fa fa-user-plus"></i> Employee Section <span class="fa fa-chevron-down"></span></a>
+                                            <ul class="nav child_menu" style="display: none">
+                                                <li>
+                                                    <a href="/Account/EmployeeList">Employee List</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/Employees">Manage Employees</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/EmployeeDetails">Add Employees</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/AdvancePayments">Advance Payments</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/EmployeeAttandanceReview">Attandance Review</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/EMonthlyAttendance"> Attendance Time Report</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/EMonthlyAttendancestatus">Employee Attendance Report</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/EmployeeLeaves">Employee Leaves</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/EmployeeSalary">Employee Salary</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a href="/Account/EmployeeAttandance"><i class="fa fa-user" aria-hidden="true"></i>Employee Attandance</a>
+                                        </li>
+                                        <li>
+                                            <a><i class="fa fa-money"></i> Expanse Management <span class="fa fa-chevron-down"></span></a>
+                                            <ul class="nav child_menu" style="display: none">
+                                                <li>
+                                                    <a href="/Account/ExpanceManagement">View Expanses</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/ExpanceDetails">Add Expanse</a>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li>
+                                            <a href="/Account/StudentAttandance"><i class="fa fa-user" aria-hidden="true"></i>Student Attandance</a>
+                                        </li>
+                                        <li>
+                                            <a><i class="fa fa-user-plus"></i> Report Section <span class="fa fa-chevron-down"></span></a>
+                                            <ul class="nav child_menu" style="display: none">
+                                                <li>
+                                                    <a href="/Account/ClassCategoryGenderStudents"> Category Gender Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/ClassWiseHouseStudents">Class Student Houses</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/HouseWiseStudents">House wise Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/ClassWiseHouseStudents">Class Student Houses</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/BusWiseStudents">Bus wise Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/BusStopWiseStudents">Bus Stop Wise Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StopWiseCollection">Stop wise No. of Students</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/DueFeeReport">Due Fee Report</a>
+                                                </li>
+
+                                                <li>
+                                                    <a href="/Account/DailyAttandanceReport">Daily Attandance Report</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/AbsentStudentReport">Daily Absent Student Report</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentsAttendanceMonthly">Students Monthly Attendance</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/StudentClassReport">Student Details</a>
+                                                </li>
+                                                <li>
+                                                    <a href="/Account/AllStudentReport">All Student Details</a>
+                                                </li>
+                                               
+                                                <li>
+                                                    <a href="/Account/MonthlyExpenceReport">Monthly Expanses</a>
+                                                </li>
+                                               
+                                            </ul>
+                                        </li>
+
+                                        <li>
+                                            <a><i class="fa fa-money"></i> Fee Related Report <span class="fa fa-chevron-down"></span></a>
+                                            <ul class="nav child_menu" style="display: none">
+
+
+
+                                                <li>
+                                                    <a href="/Account/DemandRecipt">Demand Recipt</a>
+                                                </li>
+                                                <li><a href="/Account/ReportDueFee">Due Fee Report1</a></li>
+                                                <li><a href="/Account/DueFeeReport">Due Fee Report2</a></li>
+                                                <li><a href="/Account/ReportDailyCollection"> Daily Collection</a></li>
+                                                <li><a href="/Account/ReportDailyFeeCollection"> Daily Fee Wise Collection</a></li>
+                                                <li>
+                                                    <a href="/Account/MonthlyFeeCollection">Monthly Collection 1</a>
+                                                </li>
+                                                <li><a href="/Account/ReportMonthlyCollection"> Monthly Collection 2</a></li>
+                                                <li><a href="/Account/ReportMonthlyFeeCollection"> Monthly Fee Wise Collection</a></li>
+                                                <li><a href="/Account/ReportDatewiseFeeCollection">Date/Fee Wise Collection</a></li>
+                                                <li><a href="/Account/ReportQuarterlyCollection"> Quarterly Collection</a></li>
+                                                <li><a href="/Account/ReportBetweenDatesCollection"> Date Range Collection</a></li>
+
+                                                <li>
+                                                    <a href="/Account/StudentPayments">Payment Recipts</a>
+                                                </li>
+
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+            <!-- top navigation -->
+            <div class="top_nav">
+                <div class="nav_menu">
+                    <nav class="" role="navigation">
+                        <div class="nav toggle">
+                            <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                        </div>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="">
+                                <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <img src="@Url.Content("~/Images/SBranchLogo/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(@SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)" alt="">@SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchName Account
+                                    <span class="fa fa-angle-down"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-usermenu animated fadeInDown pull-right">
+                                    <li><a href="/Account/ChangePassword"> Change Password</a></li>
+                                    <li>
+                                        @using (Html.BeginForm("logout", "Login", FormMethod.Post, new { id = "logoutForm" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <a href="#" onclick="$('#logoutForm').submit();"><i class="fa fa-sign-out pull-right"></i> Log off</a>
+                                        }
+                                    </li>
+                                </ul>
+                            </li>
+                            <li class="">
+                                <a href="javascript:;" class="user-profile" aria-expanded="false">
+                                    Server Time :@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy hh:mm tt")
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- /top navigation -->
+            <!-- page content -->
+            <div class="right_col" role="main" style="min-height:590px;">
+                @RenderBody()
+
+            </div>
+            <footer>
+                <div class="">
+                    <p class="pull-right">
+                        School Management System By <a href="http://www.prabhutisystems.com" target="_blank">Prabhuti Systems</a>. |
+                        <span class="lead"> <i class="fa fa-graduation-cap"></i> PSchool!</span>
+                    </p>
+                </div>
+                <div class="clearfix"></div>
+            </footer>
+            <!-- /footer content -->
+            <!-- /page content -->
+        </div>
+    </div>
+    <div id="custom_notifications" class="custom-notifications dsp_none">
+        <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group">
+        </ul>
+        <div class="clearfix"></div>
+        <div id="notif-group" class="tabbed_notifications"></div>
+    </div>
+    <script src="@Url.Content("~/js/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/Gent/jquery.mCustomScrollbar.concat.min.js")"></script>
+    <script src="@Url.Content("~/js/bootstrap-progressbar.min.js")"></script>
+    <script src="@Url.Content("~/js/nprogress.js")"></script>
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.buttons.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.nonblock.js")"></script>
+    <script src="@Url.Content("~/js/fastclick.js")"></script>
+    <script src="@Url.Content("~/js/custom.min.js")"></script>
+
+    @RenderSection("scripts", required: false)
+    <script>
+        //    function CheckSession()
+        //    {
+        //        var seconds = 1;
+        //        setTimeout(function () {
+        //            $.ajax(
+        //{
+        //    type: "POST",
+        //    url: "/Account/GetSessionState/",
+        //    cache: false,
+        //    processData: false,
+        //    contentType: false,
+        //    success: function (data) {
+        //        $('#aSessionStatus').html(data);
+        //    },
+        //    error: function (e) {
+        //        alert("errorn");
+        //    }
+        //});
+        //        }, seconds * 1000);
+        //    }
+        $(document).ready(function () {
+            (function () {
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetSessionState/",
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                        },
+                        error: function (e) {
+
+                        }
+                    });
+                setTimeout(arguments.callee, 60000);
+            })();
+            //var notice=  new PNotify({
+            //      title: "PNotify",
+            //      type: "info",
+            //      text: "Welcome. Try hovering over me. You can click things behind me, because I'm non-blocking.",
+
+            //      addclass: 'dark',
+            //      styling: 'bootstrap3'
+
+            //});
+            //notice.get().click(function () {
+            //    notice.remove();
+            //});
+
+        });
+        function ShowNotification(Title, Text, Type) {
+            //var Notifi = document.getElementsByClassName('ui-pnotify-text');
+            //var isNotiExist = 0;
+            //for (var i = 0; i < Notifi.length; i++) {
+            //    if (Notifi[i].textContent == Text) {
+            //        isNotiExist = 1
+            //        break;
+            //    }
+            //}
+            //if (isNotiExist == 0) {
+            var notice = new PNotify({
+                title: Title,
+                text: Text,
+                type: Type,
+                addclass: 'dark',
+                styling: 'bootstrap3',
+            });
+            notice.get().click(function () {
+                notice.remove();
+            });
+            //}
+            return notice;
+
+        }
+
+    </script>
+
+    @RenderSection("PageBottom", required: false)
+</body>
+
+</html>

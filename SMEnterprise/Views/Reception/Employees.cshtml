@@ -1,0 +1,239 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_ReceptionLayout.cshtml";
+}
+@model ReceptionStudentSearchModel
+@section IncludeCss
+{
+    <title>P-School | Employees</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+    <link href="@Url.Content("~/css/Admin/blue.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/TimeTableStyle.css")" rel="stylesheet" />
+    <style>
+        .select2-container {
+            width: 100% !important;
+        }
+
+        .seven-cols .col-md-1,
+        .seven-cols .col-sm-1,
+        .seven-cols .col-lg-1 {
+            width: 14.285714285714285714285714285714%;
+            *width: 14.285714285714285714285714285714%;
+            height: 54px;
+            text-align: center;
+            padding-top: 18px;
+            border-radius: 34px;
+        }
+
+        .Legends {
+            height: 54px;
+            text-align: center;
+            padding-top: 18px;
+            border-radius: 34px;
+        }
+
+        .AttLegends .col-md-2 {
+            width: 14.285714285714285714285714285714%;
+            *width: 14.285714285714285714285714285714%;
+            text-align: right;
+            margin-left: -25px;
+        }
+
+        #tblMonthAttandance > thead > tr > th {
+            text-align: center;
+            background-color: #71c1b2;
+            color: white;
+        }
+
+        .divLegendHeader {
+            background-color: #f5f7fa;
+            color: #71c1b2;
+            text-decoration: underline;
+            text-align: center;
+        }
+
+        .divAttHeader {
+            text-align: center;
+            background-color: #71c1b2;
+            color: white;
+        }
+
+        #tblMonthAttandance > tbody > tr > td {
+            text-align: center;
+            color: white;
+        }
+
+        .inactive {
+            background-color: rgba(128, 128, 128, 0.08);
+            text-align: center;
+        }
+
+        .holiday {
+            background-color: rgba(204, 0, 255, 0.47);
+            color: white;
+            text-align: center;
+        }
+
+        .leave {
+            background-color: rgba(0, 0, 255, 0.65);
+            color: white;
+            text-align: center;
+        }
+
+        .Absent {
+            background-color: rgba(202, 6, 6, 0.58);
+            color: white;
+            text-align: center;
+        }
+
+        .Present {
+            background-color: rgba(4, 208, 4, 0.68);
+            color: white;
+            text-align: center;
+        }
+
+        .HalfDay {
+            background-color: rgba(255, 71, 0, 0.55);
+            color: white;
+            text-align: center;
+        }
+
+        .select2-container--default .select2-selection--single {
+            border-radius: 20px;
+        }
+
+            .select2-container--default .select2-selection--single .select2-selection__arrow {
+                display: none;
+            }
+
+        .select2-selection__clear {
+            display: none;
+        }
+        .select2-container .select2-selection--single .select2-selection__rendered {
+            text-align: center;
+        }
+    </style>
+}
+<div class="">
+    <div class="page-title">
+        <div class="title_left">
+            <h3>Search Employee</h3>
+        </div>
+        <div class="title_right">
+            <div class="col-md-7 col-sm-7 col-xs-12 form-group pull-right top_search">
+                <select class="form-control" id="ddlSelectSearchStudent"></select>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="x_panel" id="divStudentDetails">
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-ddTHH:mm")" />
+@section scripts
+{
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+
+    <script type="text/javascript">
+        $("#ddlSelectSearchStudent").select2({
+            placeholder: "Type to find a Employee",
+            allowClear: true,
+            minimumInputLength: 3,
+            ajax: {
+                cache: false,
+                dataType: "json",
+                type: "GET",
+                url: "@Url.Action("GetSearchedEmployees", "Reception")",
+                data: function (search) {
+                    return { query: search.term };
+                },
+                results: function (data) {
+                    console.log(data);
+                    return { results: data };
+                }
+            },
+            formatResult: contractFormatResult,
+            formatSelection: contractFormatSelection,
+            escapeMarkup: function (m) { return m; }
+        });
+
+
+        function contractFormatResult(contract) {
+            console.log(contract);
+            var markup = "<table class='contract-result'><tr>";
+            if (contract.name !== undefined) {
+                markup += "<div class='contract-name'>" + contract.text + "</div>";
+            }
+            markup += "</td></tr></table>"
+            return markup;
+        }
+
+        function contractFormatSelection(contract) {
+            return contract.name;
+        }
+        $('.select2-selection--single')
+        {
+
+        }
+        $('#ddlSelectSearchStudent').on("change", function (e) {
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Reception/GetEmployeeDetails/" + e.target.value,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#divStudentDetails').html(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        });
+        function LoadTimeTable() {
+            if ($('#timetable-tab').attr('isloaded') == '0') {
+                $.ajax(
+                   {
+                       type: "POST",
+                       url: "/Reception/GetEmployeeTimeTable/" + $('#hdnEmployeeID').val(),
+                       cache: false,
+                       processData: false,
+                       contentType: false,
+                       success: function (html) {
+                           $('#tab_timetable').html(html);
+                           $('#timetable-tab').attr('isloaded', '1');
+                       },
+                       error: function (e) {
+                           alert("errorn");
+                       }
+                   });
+
+            }
+        }
+        function LoadSubjects() {
+            if ($('#Subjects-tab').attr('isloaded') == '0') {
+                $.ajax(
+                   {
+                       type: "POST",
+                       url: "/Reception/GetTeacherSubjects/" + $('#hdnEmployeeID').val(),
+                       cache: false,
+                       processData: false,
+                       contentType: false,
+                       success: function (html) {
+                           $('#tab_Subjects').html(html);
+                           $('#Subjects-tab').attr('isloaded', '1');
+                       },
+                       error: function (e) {
+                           alert("errorn");
+                       }
+                   });
+            }
+        }
+    </script>
+}

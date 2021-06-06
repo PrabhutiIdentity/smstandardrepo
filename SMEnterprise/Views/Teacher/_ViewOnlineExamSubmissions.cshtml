@@ -1,0 +1,56 @@
+﻿@model SMEnterprise.Models.StudentOnlineExamSubmissionPageModel
+
+<div class="x_panel">
+    <div class="x_title">
+        <h2>@Model.Exam.ExamTitle <small>Online Exam for class @Model.Exam.ClassName/@Model.Exam.SectionName and @Model.Exam.SubjectName Subject for session @Model.Exam.SessionName by @Model.Exam.TeacherName</small></h2>
+        <ul class="nav navbar-right panel_toolbox">
+            
+            <li>
+                <a class="close-link"  data-dismiss="modal"><i class="fa fa-close"></i></a>
+            </li>
+        </ul>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content">
+        <br>
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>Submission Date</th>
+                        <th>Checked Date</th>
+                        <th>Remark</th>
+                        <th>Question</th>
+                        <th>Marks</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var ctr = 1;
+                        foreach (var s in Model.Submissions)
+                        {
+                    <tr>
+                        <th scope="row">@ctr</th>
+                        <td>@s.StudentName<br />@s.StudentSID</td>
+                        <td>@s.SubmissionDate.ToString("dd MMM, yyyy hh:mm tt")</td>
+                        <td>@(s.Status == 0 ? "Not Checked" : s.CheckDate.ToString("dd MMM, yyyy hh:mm tt"))</td>
+                        <td>@s.TeacherRemark</td>
+                        <td>@s.QuestionCount</td>
+                        <td>@s.TotalMarks</td>
+                        <td>@s.MarksObtained</td>
+                        <td>@(s.Status == 0 ? "Submitted" : s.Status == 1 ? "Accepted" : "Rejected")</td>
+                        <td><a href="\Teacher\ViewAnswerSheet\@s.SubmissionID" target="_blank">View</a></td>
+                    </tr>
+                            ctr++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

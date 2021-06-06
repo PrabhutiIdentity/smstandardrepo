@@ -1,0 +1,132 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/Admin/plugins/iCheck/all.css")">
+    <title>Email Setting</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Email Setting
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Email Setting</li>
+    </ol>
+</section>
+
+@section scripts
+{
+    <script src="@Url.Content("~/Admin/plugins/iCheck/icheck.min.js")"></script>
+
+}
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liEmailSetting').closest('ul').closest('li').addClass('active');
+        $('#liEmailSetting').addClass('active');
+
+    });
+</script>
+<script>
+    function EmailSettingDelete(sender) {
+        return confirm('Do you really want to delete EmailSetting!!!!');
+    }
+    function EditEmailSetting(sender) {
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+                if ($(ele[0]).text() == 'Cancel New') {
+                    $(ele[0]).text('Add New');
+                }
+                else {
+                    $(sender).find('i').addClass('fa-pencil-square-o');
+                    $(sender).find('i').removeClass('fa-times-circle-o');
+                }
+            }
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+
+            if ($(sender).text() == 'Add New') {
+                $(sender).text('Cancel New');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnEmailSettingStatus').val(0);
+                $('#divEditFormDetails').find('#txtTitle').val('');
+                $('#divEditFormDetails').find('#txtDescription').val('');
+                $('#divEditFormDetails').find('#txtHost').val('');
+                $('#divEditFormDetails').find('#txtPort').val('');
+                $('#divEditFormDetails').find('#txtUserName').val('');
+                $('#divEditFormDetails').find('#txtPassword').val('');
+                $('#divEditFormDetails').find('#hdnSSL').val(0);
+                $('#divEditFormDetails').find('#chkEmailSettingStatus').removeProp('checked');
+                $('#divEditFormDetails').find('#chkEmailSettingSSL').removeProp('checked');
+            }
+            else {
+                $(sender).find('i').removeClass('fa-pencil-square-o');
+                $(sender).find('i').addClass('fa-times-circle-o');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnEmailSettingID').val($(sender).closest('tr').find('#hdnID').val());
+                $('#divEditFormDetails').find('#hdnEmailSettingStatus').val($(sender).closest('tr').find('#hdnEmailSettingStatus').val());
+                $('#divEditFormDetails').find('#txtTitle').val($(sender).closest('tr').find('#tdTitle').text().trim());
+                $('#divEditFormDetails').find('#txtDescription').val($(sender).closest('tr').find('#tdDescription').text().trim());
+
+                var Details = $(sender).closest('tr').find('#hdnDetails').val().split('\n');
+
+                $('#divEditFormDetails').find('#txtHost').val(Details[0]);
+                $('#divEditFormDetails').find('#txtPort').val(Details[1]);
+                $('#divEditFormDetails').find('#txtUserName').val(Details[2]);
+                $('#divEditFormDetails').find('#txtPassword').val(Details[3]);
+                $('#divEditFormDetails').find('#hdnSSL').val(Details[4]);
+                if ($(sender).closest('tr').find('#hdnEmailSettingStatus').val() == 1) {
+                    $('#divEditFormDetails').find('#chkEmailSettingStatus').prop('checked', 'checked');
+                }
+                else  {
+                    $('#divEditFormDetails').find('#chkEmailSettingStatus').removeProp('checked');
+                }
+                if (Details[4] == 1) {
+                    $('#divEditFormDetails').find('#chkEmailSettingSSL').prop('checked', 'checked');
+                }
+                else {
+                    $('#divEditFormDetails').find('#chkEmailSettingSSL').removeProp('checked');
+                }
+               
+            }
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel New') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).find('i').removeClass('fa-times-circle-o');
+                $(sender).find('i').addClass('fa-pencil-square-o');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    
+</script>
+
+<!-- /.content -->

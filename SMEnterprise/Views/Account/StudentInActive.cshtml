@@ -1,0 +1,397 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentsPageModel
+@section IncludeCss
+{
+    <title>Students Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+    <script src="@Url.Content("~/js/MD5.js")" type="text/javascript"></script>
+}
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentInActive", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding" style="display:none">
+                                    <a href="/Account/StudentDetails/0/1" target="_blank" class="btn btn-success pull-right" style="color:white;">Add Student</a>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (ClassModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                            <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                <option value="0">--Select Section--</option>
+                                                @foreach (SectionModel el in Model.Sections)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+                        <div style="text-align:center;color:red; font-size:15px;">InActive Student</div> 
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Photo</th>
+                                    <th style="width: 15%">Student Details</th>
+                                    <th style="width: 20%">Parent's </th>
+                                    <th style="width: 7%">BG</th>
+                                    <th style="width: 12%">Aadhar Number</th>
+                                    <th style="width: 12%">Contact</th>
+                                    <th style="width: 7%">Hostel</th>
+                                    <th style="width: 7%">Transport</th>
+                                    <th style="width: 10%">View</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StudentModel c in Model.Students)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                            Name : @c.Name
+                                            <br />
+                                            SID : @c.StudentSID  <br />
+                                            SR. No. :@c.SchoolUID<br />
+                                            Roll No. : @c.RollNo<br />
+                                            SSSID :@c.SSSID
+                                        </td>
+
+                                        <td>
+                                            User ID: @c.SParentID <br />
+                                            F Name: @c.FatherName<br />
+                                            M Name: @c.MotherName<br />
+                                            G Name: @c.GuardianName
+                                        </td>
+                                        <td>@c.BloodGroup</td>
+                                        <td>
+                                            @c.AadharCardNo
+                                        </td>
+                                        <td>
+
+                                            F :  @c.FatherMobileNo<br />
+                                            M :  @c.MotherMobileNo <br />
+                                            G :  @c.GuardianMobileNo
+                                        </td>
+                                        <td>
+                                            @if (c.HostelRoomID != 0)
+                                            {
+                                                <label class='badge bg-green'>Yes</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-blue'>No</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (c.StopID != 0)
+                                            {
+                                                <label class='badge bg-green'>Yes</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-blue'>No</label>
+                                            }
+                                        </td>
+
+                                        <td>
+                                            <div class="row" style="margin-right: 10px;">
+                                                <div class="col-md-6">
+                                                    <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
+                                                    <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
+                                                </div>
+                                                <div class="col-md-6" style="display:none">
+                                                    @using (Html.BeginForm("DeleteStudent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                    {
+                                                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                                                        <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                                                        <input type="hidden" name="StudentID" value="@c.StudentID" />
+
+                                                        <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link">Delete</button>
+                                                    }
+                                                </div>
+                                                <hr />
+
+                                                <a href="javascript:void(0)" style="display:none" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
+
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="modal fade bs-example-modal-lg" id="modelViewDetails" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog modal-lg" style="width: 640px;">
+                <div class="modal-content">
+                    <div class="modal-body" id="mbdViewStudentDetails">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section pageBottom{
+    <div id="mdlEditPassword" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Change Password</h4>
+                </div>
+                <div class="modal-body">
+                    @*<form role="form" action="/Common/UpdateStudentPassword">*@
+                    <div class="box-body">
+                        <div class="form-group">
+                            <input type="hidden" name="parentid" id="hdnparentid" value="" />
+
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtPassword">
+                                Password <span class="required">*</span>
+                            </label>
+                            <div>
+                                <input type="hidden" name="ID" id="hdnPassword" value="" />
+                                <input type="password" id="txtPassword" required="required">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtConfirmPassword">
+                                Confirm Password <span class="required">*</span>
+                            </label>
+                            <div>
+                                <input type="password" id="txtConfirmPassword" required="required">
+                            </div>
+                        </div>
+
+                        <div class="ln_solid"></div>
+                        @*<div class="form-group">
+                                <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+
+                                </div>
+                            </div>*@
+
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div class="box-footer">
+
+                        <button type="submit" id="btnSave" class="btn btn-success" onclick="return UpdateStudentPassword();">Submit</button>
+                    </div>
+                    @*</form>*@
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+
+    <script>
+
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+
+        $(document).ready(function () {
+            $("#btnSave").click(function () {
+
+                var Password = $("#hdnPassword").val();
+                var pid = $("#hdnparentid").val();
+
+                $.ajax(
+                    {
+                        type: "POST", //HTTP POST Method
+                        url: '/Account/UpdateStudentPassword/"', // Controller/View
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ id: Password, parentid: pid }),
+                        dataType: 'json',
+
+                        // data: JSON.stringify(ai),
+
+                        success: function (d) {
+                            // alert(d);
+                            $("#mdlEditPassword").modal('hide');
+
+                        },
+                        error: function () {
+                            alert("Parent ID Not Created");
+                        },
+
+                    });
+
+            });
+        });
+
+
+        function DeleteStudent(sender) {
+            return confirm('Do you really want to delete Student!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function UpdateStudentPassword() {
+            if ($('#txtPassword').val() == '' || $('#txtConfirmPassword').val() == '') {
+                $('#lblError').css('display', '');
+                $('#lblError').text('Please Enter Password');
+                return false;
+            }
+            else if ($('#txtPassword').val() != $('#txtConfirmPassword').val()) {
+                $('#lblError').css('display', '');
+                $('#lblError').text('Password and Confirm Password do not Match');
+                return false;
+            }
+            else {
+
+                var id = $("#txtPassword").val();
+                var id2 = hex_md5(String(id + 'd2f*jk#g&h'));
+                $("#hdnPassword").val(id2);
+                $("#txtPassword").val('******');
+                $("#txtConfirmPassword").val('******');
+                return true;
+            }
+        }
+        function PrintStudentDetails(sender, ID) {
+
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/StudentViewDetails/" + ID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#mbdViewStudentDetails').html(html);
+                        $('#modelViewDetails').modal('toggle');
+                    },
+                    error: function (e) {
+                        alert("Hi");
+                    }
+                });
+        }
+        
+        function EditPassword(parentid) {
+            $('#hdnparentid').val(parentid);
+
+        }
+    </script>
+}
+<!-- /.content -->

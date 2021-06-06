@@ -1,0 +1,367 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "App Banner Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Products Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+@model SMEnterprise.Models.ProductsPageModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .thumbImage {
+        max-width: 235px;
+        max-height: 250px;
+    }
+
+    a.btn-danger {
+        color: #fff;
+    }
+
+    *html .thumbImage {
+        width: expression((this.width/this.height)>=1?250:'auto');
+        height: expression((this.width/this.height)<1?250:'auto');
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    .RedText {
+        color: red;
+    }
+
+    .fileContainer {
+        overflow: hidden;
+        position: relative;
+    }
+
+        .fileContainer [type=file] {
+            cursor: inherit;
+            display: block;
+            font-size: 999px;
+            filter: alpha(opacity=0);
+            min-height: 100%;
+            min-width: 100%;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            text-align: right;
+            top: 0;
+        }
+
+    .BillImageBox {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #0087dd;
+    }
+
+    .BillImageBoxAdd {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        height: 292px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #0087dd;
+    }
+
+    .GalImages {
+        border: 1px solid #605ca8;
+        margin: 0px;
+        border-radius: 5px;
+    }
+
+        .GalImages .col-md-3 {
+            width: 24.4% !important;
+        }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Products Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Products Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("Products", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetProducts" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-6 padding">
+                                        <label class="col-md-4 text-right">Categories</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" ID="ddlCategories" name="CategoryID" onchange="$('#frmGetProducts').submit();">
+                                                @foreach (ProductCategoryModel e in Model.Categories)
+                                                {
+                                                    <option value="@e.ID" @(Model.CategoryID==e.ID?"selected":"")>@e.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 4%">Sl.</th>
+                                <th style="width: 10%">Image</th>
+                                <th style="width: 39%">Name</th>
+                                <th style="width: 10%">Available</th>
+                                <th style="width: 10%">Min Qty</th>
+                                <th style="width: 7%">Status</th>
+                                <th style="width: 15%"><a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditProduct(this,0);">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (ProductModel c in Model.Products)
+                            {
+                        <tr>
+                            <td>
+                                <input type="hidden" id="hdnProductTranCount" name="ProductTranCount" value="@c.ProductTranCount" />
+                                @(count + 1)
+                            </td>
+                            <td>
+                              
+                                <img id="imgPhoto" class="thumbImageGrid" alt="Photo" onerror="return OnImageError(this, 3);" src="@Url.Content("~/Images/Products/")@(c.ProductID)_@c.Photo" />
+                            </td>
+                            <td>
+                                <b>@c.Name</b>
+                                <br /> MRP : @c.MRP Selling Price : @c.Price
+                            </td>
+                            <td>@c.Quantity</td>
+                            <td>@c.MinQty</td>
+                            <td>
+                                @if (c.Status == 1)
+                                {
+                                    <label class='badge bg-green'>Active</label>
+                                }
+                                else
+                                {
+                                    <label class='badge bg-red'>Inactive</label>
+                                }
+                            </td>
+                            <td>
+                                <div class="row" style="margin-right: 0px;">
+                                    <div class="col-md-6">
+                                        <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditProduct(this,@c.ProductID);">Edit</a>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <a href="javascript:void(0);" class="btn btn-link" onclick="return DeleteProduct(this,@c.ProductID);">Delete</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</section>
+<script>
+
+    function PhotoChanged(fileBox) {
+        console.log("asasas");
+        if (fileBox.files && fileBox.files[0]) {
+            if (fileBox.files[0].size / 1024 < 500) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(fileBox).closest('.col-md-12').find('img').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(fileBox.files[0]);
+            }
+            else {
+                ShowNotification('Large Image', 'Kindly Upload Image of Size less the 500kb', 'error');
+                clearFileInput(fileBox);
+            }
+        }
+    }
+    function clearFileInput(ctrl) {
+        try {
+            ctrl.value = null;
+        } catch (ex) { }
+        if (ctrl.value) {
+            ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+        }
+    }
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liProducts').closest('ul').closest('li').addClass('active');
+        $('#liProducts').addClass('active');
+    });
+    function DeleteProduct(sender, ProductID) {
+        var Product = $(sender).closest('tr').find('#hdnProductTranCount').val();
+
+       
+        if (Product > 0) {
+            ShowClosingNotification('Error', 'This Product has Sales/Purchase, so can\'t be deleted!!!!', 'error');
+            return false
+        }
+        else {
+            if (confirm("Do you Really Want to Delete this Proudct????")) {
+                    $.ajax({
+                        url: "@Url.Action("DeleteProduct", "Admin")",
+                        type: 'POST',
+                        data: JSON.stringify({
+                          
+                            ProductID
+                           
+                        }),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (html) {
+                            ShowClosingNotification('Success', 'Delete successfully', 'info');
+                            $(sender).closest('tr').remove();
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                        },
+                        async: true,
+                        processData: false
+                    });
+                }
+           // return confirm("Do you Really Want to Delete this Proudct????");
+        }
+       
+    }
+    function PhotoChanged(fileBox) {
+
+        if (fileBox.files && fileBox.files[0]) {
+            if (fileBox.files[0].size / 1024 < 500) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(fileBox).closest('.col-md-6').find('#imgMainPhoto').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(fileBox.files[0]);
+            }
+            else {
+
+                ShowNotification('Large Image', 'Kindly Upload Image of Size less the 500KB', 'error');
+            }
+        }
+    }
+    function EditProduct(sender, ProductID) {
+
+
+        if ($(sender).hasClass("EditSectionClose")) {
+            $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading, Please Wait....</td></tr>");
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetProductDetails/" + ProductID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        // fill the div with the html returned by action
+                        $(sender).closest("tr").next().remove();
+
+                        var ele = document.getElementsByClassName("EditSectionOpen");
+                        if (ele.length > 0) {
+                            $(ele[0]).click();
+                            if ($(ele[0]).text() == 'Cancel') {
+                                $(ele[0]).text('Add New');
+                            }
+                            else {
+                                $(sender).html('Edit');
+                            }
+                        }
+                        if ($(sender).html() == 'Add New') {
+                            $(sender).html('Cancel');
+                        }
+                        else {
+
+                            $(sender).html('Close');
+                        }
+                        $(sender).removeClass("EditSectionClose");
+                        $(sender).addClass("EditSectionOpen");
+                        $(sender)
+                            .closest("tr")
+                            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).text('Edit');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+</script>
+<!-- /.content -->

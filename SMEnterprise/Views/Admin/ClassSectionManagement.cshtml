@@ -1,0 +1,512 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Class/Section Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Class/Section Management</title>
+
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <script>
+        function DeleteClass(sender) {
+            var Floors = $(sender).closest('tr').find('#hdnSectionCount').val();
+            if (Floors > 0) {
+                ShowClosingNotification('Error', 'This Class has Sections, so can\'t be deleted!!!!', 'error');
+                return false
+            }
+            else {
+                return confirm("Do you Really Want to Delete this Class????");
+            }
+
+        }
+        function ToggleDetails(sender) {
+
+
+            if ($(sender).hasClass("SectionClosed")) {
+                var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Admin/GetClassSections/" + $(sender).attr('id') + "/" + $(sender).closest('tr').find('#hdnEducationLevelID').val() + "/" + $('#ddlSessions').val(),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            notice.remove();
+                            // fill the div with the html returned by action
+                            $(sender)
+                                .closest("tr")
+                                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                            $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+                            var ele = document.getElementsByClassName("SectionOpened");
+                            if (ele.length > 0) {
+                                $(ele[0]).click();
+                                $(ele[0]).closest("tr").css('background-color', 'white');
+                            }
+
+                            $(sender).removeClass("SectionClosed");
+                            $(sender).addClass("SectionOpened");
+                            $(sender).text('Close');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+            else {
+                $(sender).removeClass("SectionOpened");
+                $(sender).closest("tr").css('background-color', 'white');
+                $(sender).addClass("SectionClosed");
+                $(sender).closest("tr").next().remove();
+                $(sender).text('Manage');
+
+            }
+
+        }
+
+
+        function EditSection(sender, type) {
+
+
+            if ($(sender).hasClass("EditSectionClose")) {
+                var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Admin/GetSectionDetails/" + $(sender).attr('id') + "/" + $(sender).closest('td').find('#hdnHeaderClassID').val(),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            notice.remove();
+                            // fill the div with the html returned by action
+                            html = html.replace('id="hdnEditEducationLevelID"', 'id="hdnEditEducationLevelID" value="' + $(sender).closest("tr").find('#hdnEducationLevelID').val() + '"');
+                            $(sender)
+                                .closest("tr")
+                                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+
+
+                            var ele = document.getElementsByClassName("EditSectionOpen");
+                            if (ele.length > 0) {
+                                $(ele[0]).click();
+                                if ($(ele[0]).text() == 'Cancel') {
+                                    $(ele[0]).text('Add New');
+                                }
+                                else {
+                                    $(ele[0]).text('Edit');
+                                }
+                            }
+                            if ($(sender).text() == 'Add New') {
+                                $(sender).text('Cancel');
+                            }
+                            else {
+
+                                $(sender).text('Close');
+                            }
+                            $(sender).removeClass("EditSectionClose");
+                            $(sender).addClass("EditSectionOpen");
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+            else {
+                $(sender).removeClass("EditSectionOpen");
+                $(sender).addClass("EditSectionClose");
+                if ($(sender).text() == 'Cancel') {
+                    $(sender).text('Add New');
+                }
+                else {
+                    $(sender).text('Edit');
+                }
+                $(sender).closest("tr").next().remove();
+
+            }
+
+        }
+        function BuildingChanged(sender) {
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionBuildingFloors/" + $(sender).closest('.box-body').find('#hdnSectionID').val() + "/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest('.box-body').find('#ddlSectionFloors').html(html);
+                        FloorChanged($(sender).closest('.box-body').find('#ddlSectionFloors'));
+                    },
+                    error: function (e) {
+                        alert(JSON.stringify(e));
+                    }
+                });
+
+
+        }
+        function FloorChanged(sender) {
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetFloorRooms/" + $(sender).closest('.box-body').find('#hdnSectionID').val() + "/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest('.box-body').find('#ddlSectionRooms').html(html);
+
+                    },
+                    error: function (e) {
+                        alert(JSON.stringify(e));
+                    }
+                });
+
+
+        }
+
+        function GroupChanged(sender) {
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionTeachers/" + $(sender).val() + "/" + $(sender).closest('.input-group').find('#hdnEditEducationLevelID').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest('.box-body').find('#ddlSectionTeacher').html(html);
+
+                    },
+                    error: function (e) {
+                        alert(JSON.stringify(e));
+                    }
+                });
+
+
+        }
+
+    </script>
+    <script>
+        function DeleteSection(sender) {
+            if ($(sender).closest('tr').find('#tdStudentCount').text() != '0') {
+                ShowClosingNotification('Error', 'Students are Added in this Section, It can\'t be deleted!!!!', 'error');
+            }
+            else {
+                if (confirm("Do you Really Want to Delete this Section????")) {
+                    $.ajax({
+                        url: "@Url.Action("UpdateSection", "Admin")",
+                        type: 'POST',
+                        data: JSON.stringify({
+                            OpType: -1,
+                            ClassID: $(sender).closest('tr').find('#hdnClassID').val(),
+                            ID: $(sender).closest('tr').find('#hdnSectionID').val(),
+                            EducationLevelID: $(sender).closest('tr').find('#hdnEducationLevelID').val(),
+                            SessionID: $('#ddlSessions').val()
+                        }),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (html) {
+                            ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+                            $(sender).closest('table').closest('td').html(html);
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                        },
+                        async: true,
+                        processData: false
+                    });
+                }
+            }
+        }
+        function UpdateSection(sender, OpType) {
+
+            $.ajax({
+                url: "@Url.Action("UpdateSection", "Admin")",
+                type: 'POST',
+                data: JSON.stringify({
+                    OpType: OpType,
+                    Name: $(sender).closest('.box-body').find('#txtSectionName').val(),
+                    Status: $(sender).closest('.box-body').find('#hdnSectionEditStatus').val(),
+                    ID: $(sender).closest('.box-body').find('#hdnSectionID').val(),
+                    ClassID: $(sender).closest('.box-body').find('#hdnClassID').val(),
+                    GroupID: $(sender).closest('.box-body').find('#ddlSectionGroup').val(),
+                    TeacherID: $(sender).closest('.box-body').find('#ddlSectionTeacher').val(),
+                    Capacity: $(sender).closest('.box-body').find('#txtSectionCapacity').val(),
+                    RoomID: $(sender).closest('.box-body').find('#ddlSectionRooms').val(),
+                    EducationLevelID: $(sender).closest('.box-body').find('#hdnEditEducationLevelID').val()
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+                    ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+                    $(sender).closest('table').closest('td').html(html);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        function UpdateClass(sender) {
+            if ($(sender).closest('tr').find('#txtClassName').val() != "") {
+                if ($(sender).closest('tr').find('#hdnSectionCount').val() != "0") {
+                    var oldEduID = $(sender).closest('tr').find('#hdnOldEducationLevelID').val();
+                    var newEduID = $(sender).closest('tr').find('#ddlEducationLevel').val();
+                    if (newEduID != oldEduID) {
+                        ShowClosingNotification('Error', 'Sections are added in this class, so Education Level Can\'t be changed....', 'error');
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                else {
+                    return true;
+                }
+            }
+            else {
+                ShowClosingNotification('Error', 'Class Name Can\'t be Blank....', 'error');
+                return false;
+            }
+
+        }
+        function AddClass(sender) {
+            $(sender).closest('tr').find('#hdnEducationLevelID').val($(sender).closest('tr').find('#ddlEducationLevel').val());
+            if ($(sender).closest('tr').find('#txtClassName').val() == "") {
+                ShowClosingNotification('Error', 'Class Name Can\'t be Blank....', 'error');
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    </script>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Class/Section Management
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Class/Section Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("ClassSectionManagement", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-5 text-right" style="padding-right: 0px;">Session :</label>
+                                        <div class="col-md-7">
+                                            <select class="form-control" name="ID" ID="ddlSessions">
+                                                @foreach (SchoolSessionModel e in Model.Sessions)
+                                                {
+                                                    <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+
+                                            <div class="col-md-2">
+                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 20%">Class</th>
+                                <th style="width: 15%">Education Level</th>
+                                <th style="width: 10%">#Sections</th>
+                                <th style="width: 10%">#Students</th>
+                                <th style="width: 12%">Status</th>
+                                <th style="width: 18%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var cCounter = 1;
+                                foreach (var c in Model.Classes)
+                                {
+                                    <tr>
+                                        <td>
+                                            @cCounter
+
+
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="ClassID" value="@c.ClassID" />
+                                            <span class="ViewCopy visible">@c.ClassName</span>
+                                            <input id="txtClassName" class="form-control editCopy hidden" type="text" onchange='$(this).closest("tr").find("#hdnClassName").val($(this).val())' name="ClassName" value="@c.ClassName" />
+                                        </td>
+                                        <td>
+                                            @foreach (var ch in Model.EducationLevels)
+                                            {
+
+                                                if (c.EducationLevelID == ch.ID)
+                                                {
+                                                    <span class="ViewCopy visible">@ch.Name</span>
+                                                    break;
+                                                }
+                                            }
+                                            <input type="hidden" id="hdnOldEducationLevelID" value="@c.EducationLevelID" />
+                                            <select id="ddlEducationLevel" onchange="$(this).closest('tr').find('#hdnEducationLevelID').val($(this).val());" class="form-control editCopy hidden">
+                                                @foreach (NameIDModel el in Model.EducationLevels)
+                                                {
+                                                    <option value="@el.ID" @(c.EducationLevelID == el.ID ? "Selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </td>
+                                        <td>
+                                            @c.SectionCount
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.ClassID" class="SectionClosed Poll-Options animated rubberBand infinite">Manage</a>)
+                                            <input type="hidden" id="hdnSectionCount" value="@c.SectionCount" />
+                                        </td>
+                                        <td>@c.StudentCount</td>
+                                        <td>
+                                            <span class="ViewCopy visible"><label class='badge bg-@(c.Status == 0 ? "red" : "green")'>@(c.Status == 0 ? "Inactive" : "Active")</label></span>
+
+                                            <label class="switch switch-green editCopy hidden">
+                                                @if (c.Status == 1)
+                                                {
+                                                    <input type="checkbox" class="switch-input" Checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" class="switch-input">
+                                                }
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnClassStatus").val($(this).closest("tr").find("#hdnClassStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateClass", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ClassID" id="hdnClassID" value="@c.ClassID" />
+                                                        <input type="hidden" id="hdnClassStatus" name="Status" value="@c.Status" />
+                                                        <input type="hidden" id="hdnClassName" name="ClassName" value="@c.ClassName" />
+                                                        <input type="hidden" id="hdnEducationLevelID" name="EducationLevelID" value="@c.EducationLevelID" />
+                                                        <input type="hidden" id="hdnSessionID" name="SessionID" value="@Model.SessionID" />
+                                                        <input type="hidden" id="hdnEvaluationSchemeID" name="EvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                                        <input type="submit" onclick="return UpdateClass(this);" class="btn btn-link sbtn editCopy hidden" value="Save" />
+                                                    }
+
+                                                    @using (Html.BeginForm("UpdateClass", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ClassID" id="hdnClassID" value="@(c.SectionCount==0?c.ClassID:0)" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                        <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteClass(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                    cCounter++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot style="border-width: 2px;border-style: groove;display:none;">
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <input type="hidden" name="ClassID" value="0" />
+                                    <input class="form-control" type="text" id="txtClassName" onchange='$(this).closest("tr").find("#hdnClassName").val($(this).val())' name="ClassName" value="" />
+                                </td>
+                                <td>
+                                    <select id="ddlEducationLevel" onchange="$(this).closest('tr').find('#hdnEducationLevelID').val($(this).val());" class="form-control">
+                                        @foreach (NameIDModel el in Model.EducationLevels)
+                                        {
+                                            <option value="@el.ID">@el.Name</option>
+                                        }
+                                    </select>
+                                </td>
+
+                                <td>0 <input type="hidden" id="hdnSectionCount" value="0" /></td>
+                                <td>0</td>
+                                <td>
+                                    <label class="switch switch-green">
+
+                                        <input type="checkbox" class="switch-input" Checked>
+
+                                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnClassStatus").val($(this).closest("tr").find("#hdnClassStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("UpdateClass", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="ClassID" id="hdnClassID" value="0" />
+                                                <input type="hidden" id="hdnClassStatus" name="Status" value="1" />
+                                                <input type="hidden" id="hdnClassName" name="ClassName" value="" />
+                                                <input type="hidden" id="hdnEducationLevelID" name="EducationLevelID" value="1" />
+                                                <input type="hidden" id="hdnSessionID" name="SessionID" value="@Model.SessionID" />
+                                                <input type="hidden" id="hdnEvaluationSchemeID" name="EvaluationSchemeID" value="0" />
+                                                <input type="submit" onclick="return AddClass(this);" class="btn btn-link" value="Save" />
+                                            }
+
+                                        </div>
+
+                                    </div>
+                                </td>
+
+
+
+                            </tr>
+
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+
+
+        $('#liClassManagement').closest('ul').closest('li').addClass('active');
+        $('#liClassManagement').addClass('active');
+    });
+
+</script>
+
+<!-- /.content -->

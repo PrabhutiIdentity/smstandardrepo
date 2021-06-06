@@ -1,0 +1,175 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model SMSConfigirationModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        SMS Panel Configuration
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">SMS Panel Configuration</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    @using (Html.BeginForm("UpdateSMSConfiguration", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                    {
+                        <div class="box-body">
+                            <div class="form-group">
+                                <label for="txtTitle">Title</label>
+                                <input type="hidden" name="SMSConfigID" id="hdnSMSConfigID" value="@Model.SMSConfigID" />
+                                <input type="text" name="Title" class="form-control" id="txtTitle" value="@Model.Title" placeholder="Configuration Title">
+                            </div>
+                            <div class="form-group">
+                                <label for="txtHeader">Header</label>
+                                <input type="text" class="form-control" id="txtHeader" name="header" value="@Model.header" placeholder="Header which needs to be added in SMS Api">
+                            </div>
+                            <div class="form-group">
+                                <label for="txtBaseURL">API Base URL</label>
+                                <input type="text" class="form-control" id="txtBaseURL" name="baseurl" value="@Model.baseurl" placeholder="URL of SMS Api">
+                            </div>
+                            <div class="form-group">
+                                <label for="txtBaseURL">SMS Balance API URL</label>
+                                <input type="text" class="form-control" id="txtBaseURL" name="balanceURL" value="@Model.balanceURL" placeholder="URL of SMS Api to get balance">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Is Default</label>
+                                <label class="switch switch-green">
+                                    @if (Model.IsDefault == 1)
+                                    {
+                                        <input type="checkbox" class="switch-input" Checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="switch-input">
+                                    }
+                                    <span class="switch-label" onclick='$("#hdnIsDefault").val($("#hdnIsDefault").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" value="@Model.IsDefault" name="IsDefault" id="hdnIsDefault" />
+                                </label>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Status</label>
+                                <label class="switch switch-green">
+                                    @if (Model.Status == 1)
+                                    {
+                                        <input type="checkbox" class="switch-input" Checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="switch-input">
+                                    }
+                                    <span class="switch-label" onclick='$("#hdnStatus").val($("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" value="@Model.Status" name="Status" id="hdnStatus" />
+                                </label>
+                            </div>
+                            <div class="col-md-12">
+                                <table id="tblParams" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Type</th>
+                                            <th>Param Name</th>
+                                            <th>Param Value</th>
+                                            <th>Delete</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbdParams">
+                                        @{
+                                            int count = 0;
+                                            foreach (SMSConfigirationParamModel c in Model.Params)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <input type="hidden" value="@c.SMSParamID" name="Params[@count].SMSParamID" />
+                                                        <input type="hidden" id="hdnOpType" value="0" name="Params[@count].OpType" />
+                                                        <select class="form-control" name="Params[@count].ParamType" onchange="ParamTypeChanged(this);">
+                                                            <option value="0" @(c.ParamType == 0 ? "selected" : "")>General</option>
+                                                            <option value="1" @(c.ParamType == 1 ? "selected" : "")>Mobile Number</option>
+                                                            <option value="2" @(c.ParamType == 2 ? "selected" : "")>SMS text</option>
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control param-name" value="@c.ParamName" name="Params[@count].ParamName" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" class="form-control param-value" @(c.ParamType!=0?"disabled":"") value="@(c.ParamType!=0?"Not Required":c.ParamValue)" name="Params[@count].ParamValue" />
+                                                    </td>
+                                                    <td>
+                                                        <a href="javascript:void(0);" onclick="removeParam(this)" class="btn btn-link">Remove</a>
+                                                    </td>
+                                                </tr>
+                                                count++;
+                                            }
+                                        }
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td colspan="10"> <a class="btn btn-link pull-right" href="javascript:void(0);" onclick="AddNewParam()">Add New</a></td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-info pull-right" onclick="return UpdateSMSConfiguration();">Update</button>
+                        </div>
+                        <!-- /.box-footer -->
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    function AddNewParam() {
+        var count = $('#tbdParams').find('tr').length;
+        var tr = '<tr><td><input type="hidden" value="0" name="Params['+count+'].SMSParamID" />' +
+            '<input type="hidden" value="0" id="hdnOpType" name="Params['+count+'].OpType" />' +
+            '<select class="form-control" name="Params['+count+'].ParamType" onchange="ParamTypeChanged(this);">' +
+            '<option value="0">General</option>' +
+            '<option value="1" >Mobile Number</option>' +
+            '<option value="2" >SMS text</option>' +
+            '</select></td>' +
+            '<td><input type="text" class="form-control param-name" value="" name="Params['+count+'].ParamName" /></td>' +
+            '<td><input type="text" class="form-control param-value" value="" name="Params['+count+'].ParamValue" /></td>' +
+            '<td><a href="javascript:void(0);" onclick="removeParam(this)" class="btn btn-link">Remove</a></td>' +
+            '</tr>';
+        $('#tbdParams').append(tr);
+    }
+    function ParamTypeChanged(sender) {
+        if ($(sender).val() == 0) {
+            $(sender).closest('tr').find('.param-value').removeAttr('disabled');
+            $(sender).closest('tr').find('.param-value').val('');
+        }
+        else {
+            $(sender).closest('tr').find('.param-value').val('Not Required');
+            $(sender).closest('tr').find('.param-value').attr('disabled','disabled');
+        }
+    }
+    function removeParam(sender) {
+        if (confirm('Do you really want to remove this parameter!!!!')) {
+            $(sender).closest('tr').css('display', 'none');
+            $(sender).closest('tr').find('#hdnOpType').val(-1);
+        }
+    }
+</script>
+<!-- /.content -->

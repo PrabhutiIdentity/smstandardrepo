@@ -1,0 +1,164 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Hostal Type Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Hostal Type Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Hostal Type Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 50%">Hostal Type Name</th>
+                                <th style="width: 10%">#Hostals</th>
+                                <th style="width: 10%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            <tbody>
+
+                                @foreach (HostalTypeModel c in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @(count + 1)
+                                            <input type="hidden" name="ID" id="hdnHostalTypeID" value="@c.ID" />
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.Name</span>
+                                            <input type="text" class="form-control editCopy hidden" onchange='$(this).closest("tr").find("#hdnHostalTypeName").val($(this).val())' id="txtHostalTypeName" name="Name" value="@c.Name" />
+                                        </td>
+
+
+                                        <td>
+                                            <input type="hidden" id="hdnHostalCount" value="@c.Hostals" />
+                                            @c.Hostals
+                                        </td>
+
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="javascript:void(0);" class="btn btn-default sbtn" style="background-color: dodgerblue;color: white;" onclick="EditCopy(this);">Edit</a>
+                                                @using (Html.BeginForm("UpdateHostalType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="ID" id="hdnHostalTypeID" value="@c.ID" />
+                                                    <input type="hidden" id="hdnHostalTypeName" name="Name" value="@c.Name" />
+                                                    <input type="submit" onclick="return BeforeHostalTypeUpdate(this);" class="btn btn-default sbtn editCopy hidden" style="background-color: #1abb9c;color: white;" value="Save" />
+                                                }
+                                                @using (Html.BeginForm("UpdateHostalType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <input type="hidden" name="ID" value="@c.ID" />
+                                                    <button onclick="return HostalTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default sbtn ViewCopy visible" value="Edit">Delete</button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+                            </tbody>
+                            <tfoot style="display:none;">
+                                <tr>
+
+                                    <td>
+                                        @(count + 1)
+                                        <input type="hidden" name="ID" id="hdnHostalTypeID" value="0" />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnHostalTypeName").val($(this).val())' id="txtHostalTypeName" name="Name" value="" />
+                                    </td>
+
+
+                                    <td>
+                                        0
+                                    </td>
+
+                                    <td>
+                                        <div class="btn-group">
+                                            @using (Html.BeginForm("UpdateHostalType", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="ID" id="hdnHostalTypeID" value="0" />
+                                                <input type="hidden" id="hdnHostalTypeName" name="Name" value="" />
+                                                <input type="submit" onclick="return BeforeHostalTypeUpdate(this);" class="btn btn-default" style="background-color: #605ca8;color: white;" value="Add New" />
+                                            }
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liHostalTypeManagement').closest('ul').closest('li').addClass('active');
+        $('#liHostalTypeManagement').addClass('active');
+    });
+    function HostalTypeDelete(sender) {
+        var StuCount = $(sender).closest('tr').find('#hdnHostalCount').val();
+        if (StuCount!=0) {
+            alert("This Hostal Type Has Hastels, So it can not be deleted!!!!")
+            return false;
+        }
+        else {
+            if (confirm('Are you sure you wish to delete this Hostal Type?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+    function BeforeHostalTypeUpdate(sender)
+    {
+        if ($(sender).closest('tr').find('#txtHostalTypeName').val() == "" ) {
+            alert("Plese Fill Required Details!!!!");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+<!-- /.content -->

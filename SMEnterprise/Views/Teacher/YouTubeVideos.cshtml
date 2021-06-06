@@ -1,0 +1,249 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+@model SMEnterprise.Models.YoutubeAdminEditPageData
+@section IncludeCss
+{
+    <title>YouTube Videos</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("YouTubeVideos", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+
+                    <div class="row std-mng-head col-md-12">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-6 text-right" style="padding-right: 0px;">Class</label>
+                                    <div class="col-md-6">
+                                        <select class="form-control smallfont" name="ClassID" id="ddlClass" onchange="ClassChanged(this);">
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Section</label>
+                                    <div class="col-md-8">
+                                        <select name="SectionID" class="form-control padding smallfont" id="ddlSection" onchange="SectionChanged(this);">
+                                            <option value="0">--Select--</option>
+                                            @foreach (NameIDModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Subject</label>
+                                    <div class="col-md-8">
+                                        <select name="SubjectID" class="form-control smallfont" id="ddlSubjects" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0">--Select Subject--</option>
+                                            @foreach (NameIDModel el in Model.Subjects)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SubjectID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3 padding">
+                                    <a href="/Teacher/EditYouTubeVideo/0" class="btn btn-success" value="Add Video">Add New Video</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+                    <div class="x_content">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">Sl.</th>
+                                    <th style="width: 15%">Image</th>
+                                    <th style="width: 60%">Details</th>
+                                    <th style="width: 10%">Date</th>
+                                    <th style="width: 10%">View</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (var c in Model.Videos)
+                                {
+                                    <tr>
+                                        <td>@(count + 1)</td>
+                                        <td>
+                                            <input type="hidden" id="hdnYouTubeLink" value="https://www.youtube.com/embed/@c.YVideoID?autoplay=1" />
+                                            <input type="hidden" id="hdnTitle" value="@c.Title" />
+                                            <img id="imgPhoto" class="thumbImageGrid" alt="Photo" src="https://img.youtube.com/vi/@c.YVideoID/0.jpg" />
+                                        </td>
+                                        <td>
+                                            <b>@c.TeacherName @c.SubjectName @c.ClassName @c.SectionName</b>
+                                            <p> @c.Title</p>
+                                        </td>
+
+                                        <td>
+                                            @c.UploadDate.ToString("dd MMM,yyyy")
+
+                                        </td>
+                                        <td>
+
+                                            <a href="javascript:void(0);" onclick="ShowVideo(this);">Show</a> |
+
+                                            <a href="/Teacher/EditYouTubeVideo/@c.VideoID" target="_blank">Edit</a>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section pageBottom{
+    <div id="mdlVideo" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Video</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row" id="mbImages">
+                        <div class="col-md-12">
+                            <iframe id="videosrc" width="100%" height="315">
+                            </iframe>
+                            <p id="pTitle"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyy-MM-dd")" />
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script>
+
+        function ShowVideo(sender) {
+
+            var video = $(sender).closest('tr').find('#hdnYouTubeLink').val();
+            var title = $(sender).closest('tr').find('#hdnTitle').val();
+            $('#videosrc').attr('src', video);
+            $('#pTitle').html(title);
+            $('#mdlVideo').modal('toggle');
+
+        }
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Teacher/GetSectionsForTeacherClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function SectionChanged(sender) {
+            $('#ddlSubjects').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Teacher/GetSubjectsForTeacherSection/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSubjects').html('');
+                        $('#ddlSubjects').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        $(function () {
+
+            $('#tblCategory').DataTable();
+
+        });
+
+    </script>
+}
+<!-- /.content -->

@@ -1,0 +1,221 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    if(Model.Video.VideoID==0)
+    {
+        Model.Video.UploadDate = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+        Model.Video.VideoDate = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+    }
+}
+@model YoutubeAdminEditPageData
+<script src="@Url.Content("~/js/MD5.js")" type="text/javascript"></script>
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+    .student-container {
+        min-height: 50px;
+        border: 1px solid #b3b3e8;
+        border-radius: 5px;
+        margin: 2px;
+        width: 28%;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        YouTube Video
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">YouTube Video</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <div class="row" style="min-height:20px;">
+
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">YouTube Video</h3>
+                </div>
+                <!-- /.box-header -->
+                <!-- form start -->
+                @using (Html.BeginForm("UpdateYoutubeVideo", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                {
+                    <div class="box-body">
+                        <div class="">
+                            <input type="hidden" name="Video.VideoID" value="@Model.Video.VideoID" />
+                            <input type="hidden" name="Video.TeacherID" value="@Model.Video.TeacherID" />
+                            <div class="form-group col-md-12">
+                                <label>Title</label>
+                                <input type="text" class="form-control" id="txtTitle" required name="Video.Title" placeholder="Title for Video" value="@Model.Video.Title">
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label>Video Link</label>
+                                <input type="text" class="form-control" id="txtLink" required name="Video.YouTubeID" placeholder="Link for Video" value="@Model.Video.YouTubeID">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label>Video Date</label>
+                                <input type="date" class="form-control" id="txtVideoDate" required name="Video.VideoDate" value="@Model.Video.VideoDate.ToString("yyyy-MM-dd")">
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label>Description</label>
+                                <textarea class="form-control" rows="4" name="Video.Description">@Model.Video.Description</textarea>
+                            </div>
+                            <div class="form-group col-md-3 dvSpecificStudent" style="display:@(Model.Video.IsSpecificStudent==1?"":"none");">
+                                <label>Session</label>
+                                <select class="form-control" name="Video.SessionID" id="ddlSession" onchange="SessionChanged(this);">
+                                    @foreach (var c in Model.Sessions)
+                                    {
+                                        <option value="@c.ID" @(c.ID == Model.SessionID ? "selected" : "")>@c.Name @(c.Extra1 == "1" ? "(active)" : "")</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-3">
+                                <label>Class</label>
+                                <select class="form-control" name="Video.ClassID" id="ddlClasses" onchange="ClassChanged(this);">
+                                    @foreach (var c in Model.Classes)
+                                    {
+                                        <option value="@c.ID" @(c.ID == Model.ClassID ? "selected" : "")>@c.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>Section</label>
+                                <select class="form-control" name="Video.SectionID" id="ddlSection" onchange="SectionChanged(this);">
+                                    @foreach (var c in Model.Sections)
+                                    {
+                                        <option value="@c.ID" @(c.ID == Model.SectionID ? "selected" : "")>@c.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>Subjects</label>
+                                <select class="form-control" name="Video.SubjectID" id="ddlSubjects">
+                                    @foreach (var c in Model.Subjects)
+                                    {
+                                        <option value="@c.ID" @(c.ID == Model.SubjectID ? "selected" : "")>@c.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="chkSelectAll">Selected Students</label>
+                                <select class="form-control" name="Video.IsSpecificStudent" id="ddlAllClass" onchange="SelectAllChanged(this);">
+                                    <option value="0" @(Model.Video.IsSpecificStudent==0?"selected":"")>No</option>
+                                    <option value="1" @(Model.Video.IsSpecificStudent==1?"selected":"")>Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="dvSpecificStudent" id="dvStudents" style="display:@(Model.Video.IsSpecificStudent==1?"":"none");">
+                            @{
+                                var ctr = 0;
+                                foreach (var s in Model.Students)
+                                {
+                                    <div class="col-md-4 student-container">
+                                        <input type="hidden" name="Students[@ctr].ID" value="@s.ID" />
+                                        <input class="chk" type="checkbox" id="student_@s.ID" name="Students[@ctr].Extra2" value="1" @(s.Extra2=="0"?"":"checked")>
+                                        <label for="student_@s.ID">@s.Name <br /> @s.Extra1</label>
+                                    </div>
+                                    ctr++;
+                                }
+                            }
+                        </div>
+                        <label id="lblError" style="color:red;display:none"></label>
+                    </div>
+                    <!-- /.box-body -->
+                    <div class="box-footer">
+                        <button type="submit" class="btn btn-info pull-right">Update</button>
+                    </div>
+                    <!-- /.box-footer -->
+                }
+            </div>
+        </div>
+    </div>
+
+
+</section>
+<script>
+    function SelectAllChanged(sender) {
+        var status = $(sender).val();
+        if (status == 0) {
+            $('.dvSpecificStudent').css('display', 'none');
+        }
+        else {
+            $('.dvSpecificStudent').css('display', '');
+        }
+        //$('#dvStudents').find('.chk').each(function (index, value) {
+        //        if (status == true) {
+        //            $(this).prop('checked', true);
+        //        }
+        //        else {
+        //            $(this).prop('checked',false);
+        //        }
+        //    });
+    }
+    function ClassChanged(sender) {
+        $('#ddlSection').html('<option value="0">Loading....</option>');
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Account/GetSectionOnClass/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlSection').html('');
+                    $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                    $('#ddlSection').append(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+    function SessionChanged(sender) {
+        SectionChanged(sender);
+    }
+    function SectionChanged(sender) {
+        var SectionID = $('#ddlSection').val();
+        var SessionID = $('#ddlSession').val();
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetSectionSubjectsStudents/" + SectionID + "/" + SessionID+"/@Model.VideoID",
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    $('#ddlSubjects').html('<option value="0">--Select Subject--</option>');
+                    for (var i = 0; i < data.Subjects.length; i++) {
+                        $('#ddlSubjects').append('<option value="' + data.Subjects[i].ID + '" ' + (data.Subjects[i].ID==data.SubjectID?"selected":"")+'>' + data.Subjects[i].Name +'</option>');
+                    }
+                    $('#dvStudents').html('');
+                    for (var i = 0; i < data.Students.length; i++) {
+                        var srow = '<div class="col-md-4 student-container">' +
+                            '<input type="hidden" name="Students[' + i + '].ID" value="' + data.Students[i].ID+'" />' +
+                            '<input type="checkbox" class="chk" id="student_' + i + '" name="Students[' + i + '].Extra2" value="1" ' + (data.Students[i].Extra2 == "0" ? "" :"checked")+'>' +
+                            '<label for="student_' + i + '">' + data.Students[i].Name + ' <br /> ' + data.Students[i].Extra1 +'</label>' +
+                            '</div>';
+                        $('#dvStudents').append(srow);
+                    }
+                    console.log(data);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+
+</script>
+<!-- /.content -->

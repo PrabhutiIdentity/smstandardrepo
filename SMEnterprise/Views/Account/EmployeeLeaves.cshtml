@@ -1,0 +1,401 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Employee Leave Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .select2-container {
+        width: 285px !important;
+    }
+
+    div[aria-role="alertdialog"] {
+        z-index: 2 !important;
+    }
+</style>
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .paginate_button > a {
+        z-index: 0 !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-2 padding">
+                            </div>
+                            <div class="col-md-3 padding">
+                                <a href="Javascript:void(0);" id="0" onclick="AddNewAdvancePayment(this);" class="btn btn-link" style="color:white;">Add New Leave</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Employee</th>
+                                    <th style="width: 65%">Details</th>
+                                    <th style="width: 10%">Status</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (EmployeeLeaveModel c in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content(c.Photo)" />
+                                        </td>
+                                        <td>
+                                            <b>@c.LeaveTypeName</b><br />
+                                            <b>
+                                                @c.EmployeeName (@c.EmployeeSID)  @c.StartDate.ToString("dd MMM, yyyy") to @c.EndDate.ToString("dd MMM, yyyy")
+                                            </b>
+                                            <br />@c.LeaveReason
+                                        </td>
+                                        <td>
+                                            @if (c.IsApproved == 0)
+                                            {
+                                                <label class='badge bg-red'>Reject</label>
+                                            }
+                                            else if (c.IsApproved == 2)
+                                            {
+                                                <label class='badge bg-orange'>Pending</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-blue'>Approved</label>
+                                            }
+
+                                        </td>
+
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/moment.min.js")"></script>
+    <script src="@Url.Content("~/js/daterangepicker.js")"></script>
+    <!-- Select2 -->
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script>
+        var EditSessionForm;
+        function CancelPaymentEdit() {
+            EditSessionForm.remove();
+        }
+        function AddNewAdvancePayment(sender) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+            $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetEditEmployeeLeaveForm/" + $(sender).attr('id'),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            notice.remove();
+                            EditSessionForm = new PNotify({
+                                text: html,
+                                icon: false,
+                                width: '70%',
+                                hide: false,
+                                addclass: 'dark',
+                                styling: 'bootstrap3',
+                                buttons: {
+                                    closer: false,
+                                    sticker: false
+                                },
+                                insert_brs: false
+                            });
+
+                            $('.').css('margin-right', '100px');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+        }
+
+        function ToggleDetails(sender) {
+
+
+            if ($(sender).hasClass("closed")) {
+                $(sender)
+               .closest("tr")
+               .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading....</td></tr>");
+                $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetAdvancePaymentDeductions/" + $(sender).attr('id'),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+
+            $(sender).closest("tr").next().remove();
+            // fill the div with the html returned by action
+            $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+            var ele = document.getElementsByClassName("opened");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+            }
+
+            $(sender).removeClass("closed");
+            $(sender).addClass("opened");
+            $(sender).text("Close");
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+            }
+            else {
+                $(sender).removeClass("opened");
+                $(sender).addClass("closed");
+                $(sender).closest("tr").next().remove();
+                $(sender).text("Details");
+            }
+
+        }
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function DeleteEmployee(sender) {
+            return confirm('Do you really want to delete Employee!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function EmployeeChanged(sender) {
+            var etype = $(sender).find('option:selected').attr('etype');
+            //if ($(sender).find('option:selected').text().substring(0, 3) == "TRA") {
+            //    etype = -1;
+            //}
+            var dt = $(sender).closest('.x_content').find('#txtStartDate').val().split('/');
+            console.log(dt);
+            console.log(etype);
+            $(sender).closest('.x_content').find('#hdnEmployeeType').val(etype);
+            $.ajax(
+               {
+                   url: "@Url.Action("GetEmployeeLeavesDetails", "Account")",
+                   type: 'POST',
+                   data: JSON.stringify({
+                       ApplicantID: $(sender).val(),
+                       EmployeeType: etype,
+                       Month: dt[0],
+                       Year: dt[2]
+                   }),
+                   contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        for (var i = 0; i < data.length; i++) {
+                            var mon = data[i].MonthlyQuota - data[i].MonthlyApplied;
+                            var year = data[i].YearlyQuota - data[i].YearlyApplied;
+                            $('#leavetype_' + data[i].LeaveTypeID).find('#spDetails').html('M:' + mon + '/Y:' + year);
+                            $('#leavetype_' + data[i].LeaveTypeID).find('#hdnMAvailable').val(mon);
+                            $('#leavetype_' + data[i].LeaveTypeID).find('#hdnYAvailable').val(year);
+                            $('#leavetype_' + data[i].LeaveTypeID).find('.leaveinput').val(data[i].Applied);
+                            DistributeLeaves();
+                        }
+                        console.log(JSON.stringify(data));
+                   },
+                   error: function (e) {
+                       alert("errorn");
+                   }
+               });
+
+        }
+        function LeaveDateChanged() {
+            var startdt = $('#leaveform').find('#txtStartDate').val();
+            var enddt = $('#leaveform').find('#txtEndDate').val();
+            var dtstart = new Date(startdt);
+            var dtend = new Date(enddt);
+            console.log(dtstart.getMonth());
+            console.log(dtend.getMonth());
+            if (dtstart.getMonth() != dtend.getMonth()) {
+                GetDifferentMonthLeaves();
+            }
+        }
+        function GetDifferentMonthLeaves() {
+            var etype = $('#ddlEmployee option:selected').attr('etype');
+            //if ($(sender).find('option:selected').text().substring(0, 3) == "TRA") {
+            //    etype = -1;
+            //}
+            var startdt = $('#leaveform').find('#txtStartDate').val();
+            var enddt = $('#leaveform').find('#txtEndDate').val();
+            $.ajax(
+               {
+                   url: "@Url.Action("GetEmployeeLeavesDetailDifferentMonths", "Account")",
+                   type: 'POST',
+                   data: JSON.stringify({
+                       ApplicantID: $('#ddlEmployee').val(),
+                       ApplicantType: etype,
+                       StartDate: startdt,
+                       EndDate: enddt
+                   }),
+                   contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        for (var i = 0; i < data.length; i++) {
+                            var mon = data[i].MonthlyQuota - data[i].MonthlyApplied;
+                            var year = data[i].YearlyQuota - data[i].YearlyApplied;
+                            $('#leavetype_' + data[i].LeaveTypeID).find('#spDetails').html('M:' + mon + '/Y:' + year);
+                            $('#leavetype_' + data[i].LeaveTypeID).find('#hdnMAvailable').val(mon);
+                            $('#leavetype_' + data[i].LeaveTypeID).find('#hdnYAvailable').val(year);
+                            $('#leavetype_' + data[i].LeaveTypeID).find('.leaveinput').val(data[i].Applied);
+                            DistributeLeaves();
+                        }
+                   },
+                   error: function (e) {
+                       alert("errorn");
+                   }
+               });
+
+        }
+        function LeaveAppliedChanged(sender, type) {
+            if (parseFloat($(sender).val()) < 0)
+            {
+                ShowNotification('Error','Leave can\'t be Negative!!!!','error')
+                $(sender).val('0');
+            }
+            else if (type == 1) {
+                var fMCLAvailable = parseFloat($(sender).closest('.x_content').find('#hdnMCLAvailable').val());
+                var fYCLAvailable = parseFloat($(sender).closest('.x_content').find('#hdnYCLAvailable').val());
+                var fMCLApplied = parseFloat($(sender).val());
+
+                if (fYCLAvailable > fMCLApplied) {
+                    if (fMCLApplied > fMCLAvailable) {
+                        $(sender).closest('.x_content').find('#txtCLs').val(fMCLAvailable);
+                    }
+                    else {
+                        $(sender).closest('.x_content').find('#txtCLs').val(fMCLApplied);
+                    }
+                }
+                else {
+                    $(sender).closest('.x_content').find('#txtCLs').val(fYCLAvailable);
+                }
+            }
+            else if (type == 2) {
+                var fMCLAvailable = parseFloat($(sender).closest('.x_content').find('#hdnMELAvailable').val());
+                var fYCLAvailable = parseFloat($(sender).closest('.x_content').find('#hdnYELAvailable').val());
+                var fMCLApplied = parseFloat($(sender).val());
+                if (fYCLAvailable > fMCLApplied) {
+
+                    if (fMCLApplied > fMCLAvailable) {
+                        $(sender).closest('.x_content').find('#txtELs').val(fMCLAvailable);
+                    }
+                    else {
+                        $(sender).closest('.x_content').find('#txtELs').val(fMCLApplied);
+                    }
+                }
+                else {
+                    $(sender).closest('.x_content').find('#txtELs').val(fYCLAvailable);
+                }
+            }
+            else {
+                var fMCLAvailable = parseFloat($(sender).closest('.x_content').find('#hdnMPLAvailable').val());
+                var fYCLAvailable = parseFloat($(sender).closest('.x_content').find('#hdnYPLAvailable').val());
+                var fMCLApplied = parseFloat($(sender).val());
+
+                if (fYCLAvailable > fMCLApplied) {
+
+                    if (fMCLApplied > fMCLAvailable) {
+                        $(sender).closest('.x_content').find('#txtPLs').val(fMCLAvailable);
+                    }
+                    else {
+                        $(sender).closest('.x_content').find('#txtPLs').val(fMCLApplied);
+                    }
+                }
+                else {
+                    $(sender).closest('.x_content').find('#txtPLs').val(fYCLAvailable);
+                }
+            }
+        }
+    </script>
+}
+<!-- /.content -->

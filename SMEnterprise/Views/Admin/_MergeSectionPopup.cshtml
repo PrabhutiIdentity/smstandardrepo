@@ -1,0 +1,88 @@
+﻿<div class="modal-dialog" role="document" style="width: 100%; margin: 0px auto;">
+    <div class="modal-content">
+        <div class="modal-header merge-header">
+            <button type="button" class="close merge-close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title text-center" id="myModalLabel1">Merge Section</h4>
+        </div>
+        <div class="modal-body merge-body">
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        @if (Model.MergedClasses.Count > 0)
+                        {
+                        <tr>
+                            <td style="background: #f2f2f2;">Base Section</td>
+                            <td style="background: #f2f2f2;">Merged Section</td>
+                            <td style="background: #f2f2f2;">Remove</td>
+                        </tr>
+                        }
+                    </thead>
+                    <tbody id="tbMergeClassList">
+
+
+                        @foreach (var merge in Model.MergedClasses)
+                        {
+                            <tr>
+                                <td>@merge.FirstClassSection</td>
+                                <td>@merge.SecondClassSection</td>
+                                <td>
+                                    <a data-dismiss="modal" aria-label="Close" id="@merge.ClassMergeID" href="javascript:void(0);" onclick="return DeleteMergedClass(this);">Remove</a>
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td colspan="3">
+                                Merge More Sections
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <input type="hidden" id="hdnPeriodID" value="@Model.PeriodID" />
+                                <input type="hidden" id="hdnDayID" value="@Model.DayID" />
+                                <input type="hidden" id="hdnSectionID" value="@Model.SectionID" />
+                                <input type="hidden" id="hdnClassID" value="@Model.ClassID" />
+                                <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                <input type="hidden" id="hdnEducationLevelID" value="@Model.EducationLevelID" />
+                                <input type="hidden" id="hdnSubjectID" value="@Model.SubjectID" />
+                                <select class="form-control merge-select" id="m_ddlClass" onchange="javascript: MergeClassChanged(this);">
+                                    @foreach (var cls in Model.Classes)
+                                    {
+                                        <option value="@cls.ClassID" @(cls.ClassID == Model.ClassID ? "selected" : "")>@cls.ClassName</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control merge-select" id="m_ddlSection" onchange="javascript: MergeSectionChanged(this);">
+                                    @foreach (var sec in Model.Sections)
+                                    {
+                                        <option value="@sec.ID">@sec.Name</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <a href="javascript:void(0);" title="Update" data-dismiss="modal" aria-label="Close" class="merge-add" onclick="InsertMergeClass(this);">
+                                  Merge </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td>Existing Lacture</td>
+                            <td colspan="2">
+                                <span id="lblCurrentSubject" style="margin: 0px; font-size: 16px; color: #003A7D;">
+
+                                    @Model.SubTeacherDetails.SubjectName
+                                </span>
+                               
+                                <span id="lblCurrentTeacher" style="margin: 0px;font-size: 12px;color: red;">@Model.SubTeacherDetails.TeacherName</span>
+
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+        </div>
+
+    </div>
+</div>

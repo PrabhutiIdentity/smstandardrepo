@@ -1,0 +1,152 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 5%">#</th>
+            @if (Model.Type != 2)
+            {
+                <th style="width: 45%">@(Model.Type == 0 ? "Library" : Model.Type == 1 ? "Floor" : Model.Type == 2 ? "Block" : "Bay")  Name</th>
+            }
+            else
+            {
+                <th style="width: 20%">@(Model.Type == 0 ? "Library" : Model.Type == 1 ? "Floor" : Model.Type == 2 ? "Block" : "Bay") Name</th>
+                <th style="width: 25%"> Book Categories</th>
+            }
+            <th style="width: 15%">@(Model.Type == 0 ? "#Floors" : Model.Type == 1 ? "#Blocks" : Model.Type == 2 ? "#Bays" : "#Books")</th>
+            <th style="width: 20%">Status</th>
+            <th style="width: 20%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+        </tr>
+    </thead>
+
+    @{
+        var fCounter = 1;
+        <tbody>
+            @foreach (var c in Model.List)
+            {
+                <tr>
+                    <td>
+                        @fCounter
+                    </td>
+                    <td>
+                        <input type="hidden" id="hdnID" value="@c.ID" />
+                        <input type="hidden" id="hdnType" value="@Model.Type" />
+                        <input type="hidden" id="hdnMasterID" value="@Model.MasterID" />
+                        <span class="ViewCopy visible">@c.Name</span>
+                        <input class="form-control editCopy hidden" type="text" id="txtName" value="@c.Name" />
+                    </td>
+                    @if (Model.Type == 2)
+                    {
+                        <td>
+                            <span class="ViewCopy visible">@c.Detail</span>
+                            <input class="form-control editCopy hidden" type="text" id="txtDetail" value="@c.Detail" />
+                        </td>
+                    }
+                    @if (Model.Type != 3)
+                    {
+                        <td id="tdRoomCount">
+                            <input type="hidden" id="hdnCount" value="@c.Count" />
+                            @c.Count
+
+                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.ID" class="@(Model.MasterID)_Closed">Manage</a>)
+
+                        </td>
+                    }
+                    else
+                    {
+                        <td id="tdRoomCount">
+                            <input type="hidden" id="hdnCount" value="@c.Count" />
+                            @c.Count
+
+                        </td>
+                    }
+                    <td>
+                        <span class="ViewCopy visible">@(c.Status == 1 ? "Active" : "Inactive")</span>
+                        <label class="switch switch-green editCopy hidden">
+                            @if (c.Status == 1)
+                            {
+                                <input type="checkbox" class="switch-input" Checked>
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="switch-input">
+                            }
+                            <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+
+                        </label>
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+
+                                <input type="hidden" id="hdnStatus" name="Status" value="@c.Status" />
+
+                                <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+
+
+                            </div>
+                            <div class="col-md-6">
+
+                                <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+                                <a href="javascript:void(0);" class="sbtn editCopy hidden" onclick="UpdateLibrary(this, 1);">Save</a>
+                                <a href="javascript:void(0);" class="sbtn ViewCopy visible" onclick="return UpdateLibrary(this, -1);">Delete</a>
+
+
+                            </div>
+                        </div>
+                    </td>
+
+
+
+                </tr>
+                fCounter++;
+            }
+        </tbody>
+            <tfoot style="display:none;">
+                <tr>
+                    <td>
+                        @fCounter
+                    </td>
+                    <td>
+                        <input type="hidden" id="hdnID" value="0" />
+                        <input type="hidden" id="hdnType" value="@Model.Type" />
+                        <input type="hidden" id="hdnMasterID" value="@Model.MasterID" />
+                        <input class="form-control" type="text" id="txtName" value="" />
+                    </td>
+                    @if (Model.Type == 2)
+                    {
+                        <td>
+                            <input class="form-control" type="text" id="txtDetail" value="" />
+                        </td>
+                    }
+
+                    <td id="tdRoomCount">
+                        <input type="hidden" id="hdnCount" value="0" />
+                        0
+
+                    </td>
+                    <td>
+                        <label class="switch switch-green">
+
+                            <input type="checkbox" class="switch-input" Checked>
+
+                            <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+
+                        </label>
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-12">
+
+                                <input type="hidden" id="hdnStatus" name="Status" value="1" />
+
+                                <a href="javascript:void(0);" class="sbtn" onclick="UpdateLibrary(this, 1);">Add New</a>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </tfoot>
+    }
+
+</table>

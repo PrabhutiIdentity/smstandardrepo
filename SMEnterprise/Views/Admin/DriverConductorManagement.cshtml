@@ -1,0 +1,361 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Driver/Conductor Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Driver/Conductor Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Driver/Conductor Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Photo</th>
+                                <th style="width: 19%">Name</th>
+                                <th style="width: 10%">Licence No.</th>
+                                <th style="width: 15%">Address</th>
+                                <th style="width: 10%">Phone</th>
+                                <th style="width: 10%">Birth Date</th>
+                                <th style="width: 7%">Type</th>
+                                <th style="width: 7%">Status</th>
+                                <th style="width: 20%"><a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditDC(this);">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        <input type="hidden" name="ID" id="hdnDCID" value="@c.ID" />
+                                        <input type="hidden" name="Name" id="hdnName" value="@c.Name" />
+                                        <input type="hidden" name="Image" id="hdnImage" value="@c.Image" />
+                                        <input type="hidden" name="PermanentAddress" id="hdnPermanentAddress" value="@c.PermanentAddress" />
+                                        <input type="hidden" name="Type" id="hdnType" value="@c.Type" />
+                                        <input type="hidden" name="isVarified" id="hdnIsVarified" value="@c.isVarified" />
+                                        <img id="imgPhoto" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/DriverConductor/Thumb/")@(c.ID)_@c.Image" />
+                                    </td>
+                                    <td id="tdName">
+                                        @c.Name
+                                    </td>
+
+                                    <td id="tdLicenceNo">
+                                        @c.LicenceNo
+
+                                    </td>
+                                    <td id="tdAddress">
+                                        @Html.Raw(c.CurrentAddress.Replace("\n", "<br>"))
+                                    </td>
+
+                                    <td id="tdContact">
+                                        @c.ContactNumber
+                                    </td>
+                                    <td>
+                                        <input type="hidden" id="hdnBirthDate" value="@Convert.ToDateTime(c.BirthDate).ToString("yyyy-MM-dd")" />
+                                        @Convert.ToDateTime(c.BirthDate).ToString("dd MMM, yy")
+                                    </td>
+                                    @if (c.Type == 0)
+                                    {
+                                        <td>
+                                            Driver
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            Conductor
+                                        </td>
+                                    }
+                                    <td>
+                                        @if (c.isVarified == 1)
+                                        {
+                                            <label class='badge bg-green'>Varified</label>
+                                        }
+                                        else
+                                        {
+                                            <label class='badge bg-red'>Unvarified</label>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="row" style="margin-right: 0px;">
+                                            <div class="col-md-6">
+                                                <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditDC(this);">Edit</a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a href="/Admin/DeleteDriverConductor/@c.ID" class="btn btn-link" onclick="return DeleteDC(this);">Delete</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divEditForm" style="display:none;">
+        @using (Html.BeginForm("UpdateDriverConductor", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateDriverConductor" }))
+        {
+            <div class="box box-danger" id="divEditFormDetails">
+                <div class="box-header">
+                    <h3 class="box-title">Details</h3>
+
+                </div>
+                <div class="box-body">
+                    <input type="hidden" id="hdnDCID" name="ID" value="0" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="hidden" id="hdnImageName" name="Image" value="" />
+                            <div style="height: 175px;">
+                                <img class="thumbImageMain" id="imgMainPhoto" src="" alt="Photo" />
+                            </div>
+                            <input type="file" onchange="PhotoChanged(this)" name="PhotoFile" id="fuDCImage" />
+                            <div class="form-group">
+                                <label class="switch switch-green" style="padding-top: 3px;">
+                                    <input id="chkType" type="checkbox" class="switch-input" checked>
+                                    <span class="switch-label" onclick='$(this).closest("label").find("#hdnType").val($(this).closest("tr").find("#hdnType").val() == "0" ? "1" : "0");' data-on="Driver" data-off="Conductor"></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" id="hdnType" name="Type" value="0" />
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 14px 0px 14px;">Name</span>
+                                    </div>
+                                    <input type="text" id="txtName" name="Name" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Licence No</span>
+                                    </div>
+                                    <input type="text" id="txtLicenceNo" name="LicenceNo" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 13px 0px 14px;">Phone</span>
+                                    </div>
+                                    <input type="text" id="txtContactNumber" name="ContactNumber" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 3px 0px 2px;">Birth Date</span>
+                                    </div>
+                                    <input type="date" id="txtBirthDate" name="BirthDate" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 10px 0px 10px;">Varified</span>
+                                    </div>
+                                    <label class="switch switch-green" style="padding-top: 3px;">
+                                        <input id="chkVarified" type="checkbox" class="switch-input">
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnDCStatus").val($(this).closest("tr").find("#hdnDCStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" id="hdnDCStatus" name="isVarified" value="0" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p>Current Address</p>
+                            <textarea rows="5" style="resize:none;" class="form-control" name="CurrentAddress" id="txtCurrentAddress"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <p>Permanent Address</p>
+                            <textarea rows="5" style="resize:none;" class="form-control" name="PermanentAddress" id="txtPermanentAddress"></textarea>
+
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-info pull-right">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liDCManagement').closest('ul').closest('li').addClass('active');
+        $('#liDCManagement').addClass('active');
+    });
+    function DeleteDC(sender)
+    {
+        return confirm('Do you really want to delete Transport Staff!!!!');
+    }
+    function EditDC(sender) {
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+                if ($(ele[0]).text() == 'Cancel New') {
+                    $(ele[0]).text('Add New');
+                }
+                else {
+                    $(sender).text('Edit');
+                }
+            }
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+
+            if ($(sender).text() == 'Add New') {
+                $(sender).text('Cancel New');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnDCID').val(0);
+                $('#divEditFormDetails').find('#txtName').val('');
+                $('#divEditFormDetails').find('#txtLicenceNo').val('');
+                $('#divEditFormDetails').find('#txtContactNumber').val('');
+                $('#divEditFormDetails').find('#txtBirthDate').val('');
+                $('#divEditFormDetails').find('#chkVarified').val(0);
+                $('#divEditFormDetails').find('#chkType').val(0);
+                $('#divEditFormDetails').find('#hdnImageName').val('');
+                $('#divEditFormDetails').find('#txtCurrentAddress').val('');
+                $('#divEditFormDetails').find('#txtPermanentAddress').val('');
+                $('#divEditFormDetails').find('#hdnDCStatus').val(0);
+                $('#divEditFormDetails').find('#hdnType').val(0);
+                    $('#divEditFormDetails').find('#chkType').removeProp('checked');
+                    $('#divEditFormDetails').find('#chkVarified').removeProp('checked');
+                var imagepath = '';
+                $('#divEditFormDetails').find('#imgMainPhoto').attr('src', imagepath);
+            }
+            else {
+                $(sender).text('Cancel');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnDCID').val($(sender).closest('tr').find('#hdnDCID').val());
+                $('#divEditFormDetails').find('#txtName').val($(sender).closest('tr').find('#hdnName').val());
+                $('#divEditFormDetails').find('#txtLicenceNo').val($(sender).closest('tr').find('#tdLicenceNo').text().trim());
+                $('#divEditFormDetails').find('#txtContactNumber').val($(sender).closest('tr').find('#tdContact').text().trim());
+                $('#divEditFormDetails').find('#txtBirthDate').val($(sender).closest('tr').find('#hdnBirthDate').val());
+                $('#divEditFormDetails').find('#chkVarified').val($(sender).closest('tr').find('#hdnIsVarified').val());
+                $('#divEditFormDetails').find('#chkType').val($(sender).closest('tr').find('#hdnType').val());
+                $('#divEditFormDetails').find('#hdnImageName').val($(sender).closest('tr').find('#hdnImage').val());
+                $('#divEditFormDetails').find('#txtCurrentAddress').val($(sender).closest('tr').find('#tdAddress').text().trim().replace('<br>', '\n'));
+                $('#divEditFormDetails').find('#txtPermanentAddress').val($(sender).closest('tr').find('#hdnPermanentAddress').val());
+                $('#divEditFormDetails').find('#hdnDCStatus').val($(sender).closest('tr').find('#hdnIsVarified').val());
+                $('#divEditFormDetails').find('#hdnType').val($(sender).closest('tr').find('#hdnType').val());
+                if ($(sender).closest('tr').find('#hdnType').val() == 1) {
+                    $('#divEditFormDetails').find('#chkType').prop('checked', 'checked');
+                }
+                if ($(sender).closest('tr').find('#hdnIsVarified').val() == 1) {
+                    $('#divEditFormDetails').find('#chkVarified').prop('checked', 'checked');
+                }
+                var imagepath = '../Images/DriverConductor/' + $(sender).closest('tr').find('#hdnDCID').val() + '_' + $(sender).closest('tr').find('#hdnImage').val();
+                $('#divEditFormDetails').find('#imgMainPhoto').attr('src', imagepath);
+            }
+           
+           
+            
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel New') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).text('Edit');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    function PhotoChanged(fileBox) {
+
+        if (fileBox.files && fileBox.files[0]) {
+            if (fileBox.files[0].size / 1024 < 500) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(fileBox).closest('.col-md-6').find('#imgMainPhoto').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(fileBox.files[0]);
+            }
+            else {
+
+                //ShowNotification('Large Image', 'Kindly Upload Image of Size less the 500KB', 'error');
+            }
+        }
+    }
+</script>
+<!-- /.content -->

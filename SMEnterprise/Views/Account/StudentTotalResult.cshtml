@@ -1,0 +1,254 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.TotalResultModel
+@section IncludeCss
+{
+    <title>Result Card | @Model.Student.Name</title>
+    <style>
+        #tblResult > tbody > tr > td {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        .table > tbody > tr > td {
+            padding-bottom: 1px;
+            padding-top: 2px;
+        }
+
+        .print {
+            display: none;
+        }
+    </style>
+}
+<div class="">
+    @{
+        decimal ResultMaxMarks = 0;
+        decimal ResultScoredMarks = 0;
+    }
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_content">
+                    <table class="table" style="width:100%;border-bottom: 1px solid #ddd;padding-bottom: 5px;">
+                        <tr>
+                            <td style="text-align:left;width:20%">
+                                Name : @Model.Student.Name
+                            </td>
+                            <td style="text-align: left;vertical-align: middle;width:15%">
+                                Class : @Model.ClassName
+                            </td>
+                            <td style="text-align: left;width:15%">
+                                Section : @Model.SectionName
+                            </td>
+                            <td style="text-align:left;width:25%">
+                                Date Of Birth : @Model.Student.DOB.ToString("dd/MM/yyyy")
+                            </td>
+                            <td style="text-align: center;vertical-align: middle;width:25%">
+                                Session : @Model.Session.SessionName
+                            </td>
+                        </tr>
+                    </table>
+                    <table class="table" style="width:100%;border-bottom: 1px solid #ddd;padding-bottom: 5px;">
+                        <thead>
+                            <tr>
+                                <th rowspan="3">SUBJECT</th>
+                                @foreach (var e in Model.Evaluations.Where(c => c.MasterID == 0))
+                                {
+                                    <th style="text-align:center" colspan="@(Model.Evaluations.Where(c => c.MasterID == e.EvaluationID).Count()*2+1)"><b>@e.EvaluationName</b></th>
+                                }
+                                <th colspan="2" rowspan="2" style="text-align:center">All Total</th>
+                            </tr>
+                            <tr>
+                                @foreach (var e in Model.Evaluations.Where(c => c.MasterID == 0))
+                                {
+                                    foreach (var se in Model.Evaluations.Where(c => c.MasterID == e.EvaluationID))
+                                    {
+                                        <th style="text-align:center" colspan="2">@se.EvaluationName</th>
+                                    }
+                                    <th style="text-align:center">Total</th>
+                                }
+                            </tr>
+                            <tr>
+                                @foreach (var e in Model.Evaluations.Where(c => c.MasterID == 0))
+                                {
+                                    string termNames = "";
+                                    foreach (var se in Model.Evaluations.Where(c => c.MasterID == e.EvaluationID))
+                                    {
+                                        if (termNames == "")
+                                        {
+                                            termNames = termNames + " " + se.EvaluationName;
+                                        }
+                                        else
+                                        {
+                                            termNames = termNames + "+" + se.EvaluationName;
+                                        }
+
+                                        <th style="text-align:center">M.M.</th>
+                                        <th style="text-align:center">M.O.</th>
+                                    }
+                                    <th style="text-align:center">@termNames</th>
+                                }
+                                <th style="text-align:center">M.M.</th>
+                                <th style="text-align:center">M.O.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model.Subjects)
+                            {
+                                decimal totaltotal = 0;
+                                decimal maxtotaltotal = 0;
+                                <tr>
+                                    <td>@s.SubjectName</td>
+                                    @foreach (var e in Model.Evaluations.Where(c => c.MasterID == 0))
+                                    {
+                                        decimal eveTotal = 0;
+                                        foreach (var se in Model.Evaluations.Where(c => c.MasterID == e.EvaluationID))
+                                        {
+                                            var exam = Model.Exams.Where(r => r.SubjectID == s.SubjectID && r.EvaluationID == se.EvaluationID).SingleOrDefault();
+                                            if (exam != null)
+                                            {
+                                                maxtotaltotal = maxtotaltotal + exam.MaxMarks;
+                                                var result = Model.Result.Where(rs => rs.ExamID == exam.ExamID).SingleOrDefault();
+                                                <td style="text-align:center">@exam.MaxMarks.ToString("0")</td>
+                                                if (result != null)
+                                                {
+                                                    eveTotal = eveTotal + result.MarksScored;
+                                                    <td style="text-align:center">@result.MarksScored.ToString("0")</td>
+                                                }
+                                                else
+                                                {
+                                                    <td style="text-align:center">-</td>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <td style="text-align:center">-</td>
+                                                <td style="text-align:center">-</td>
+                                            }
+                                        }
+                                        totaltotal = totaltotal + eveTotal;
+                                        <td style="text-align:center">@eveTotal.ToString("0")</td>
+                                    }
+                                    <td style="text-align:center"><b>@maxtotaltotal.ToString("0")</b></td>
+                                    <td style="text-align:center"><b>@totaltotal.ToString("0")</b></td>
+                                </tr>
+                                ResultMaxMarks = ResultMaxMarks + maxtotaltotal;
+                                ResultScoredMarks = ResultScoredMarks + totaltotal;
+                            }
+                            <tr>
+                                <td><b>TOTAL</b></td>
+                                @foreach (var e in Model.Evaluations.Where(c => c.MasterID == 0))
+                                {
+                                    decimal totalevams = 0;
+                                    decimal totalevamm = 0;
+                                    foreach (var se in Model.Evaluations.Where(c => c.MasterID == e.EvaluationID))
+                                    {
+                                        decimal mm = 0;
+                                        decimal ms = 0;
+                                        foreach (var exm in Model.Exams.Where(em => em.EvaluationID == se.EvaluationID))
+                                        {
+                                            mm = mm + exm.MaxMarks;
+                                            ms = ms + Model.Result.Where(em => em.ExamID == exm.ExamID).Sum(em => em.MarksScored);
+                                        }
+                                        totalevams = totalevams + ms;
+                                        totalevamm = totalevamm + mm;
+                                        <td style="text-align:center">@mm.ToString("0")</td>
+                                        <td style="text-align:center">@ms.ToString("0")</td>
+                                    }
+                                    e.TotalMarks = totalevamm;
+                                    e.MarksObtained = totalevams;
+                                    <td style="text-align:center">@totalevams.ToString("0")</td>
+                                }
+                                <td style="text-align:center"><b>@ResultMaxMarks.ToString("0")</b></td>
+                                <td style="text-align:center"><b>@ResultScoredMarks.ToString("0")</b></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table class="table" style="width:100%;border-bottom: 1px solid #ddd;padding-bottom: 5px;">
+                        <tr>
+                            @foreach (var e in Model.Evaluations.Where(c => c.MasterID == 0))
+                            {
+                                <td>
+
+                                    <table class="table" style="width:100%;border-bottom: 1px solid #ddd;padding-bottom: 5px;">
+                                        <tr>
+                                            <td style="width:33%">
+                                                @e.EvaluationName
+                                            </td>
+                                            <td style="width:33%">REMARKS</td>
+                                            <td style="width:33%">Class Teacher</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:33%">
+                                                Attendance :
+                                            </td>
+                                            <td style="width:33%"></td>
+                                            <td style="width:33%"></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:33%">
+                                                Percentage : @(e.TotalMarks == 0 ? "-" : (e.MarksObtained * 100 / e.TotalMarks).ToString("0.0"))%
+                                            </td>
+                                            <td style="width:33%"></td>
+                                            <td style="width:33%"></td>
+                                        </tr>
+                                        <tr>
+                                            <td style="width:33%">
+                                                Position : 
+                                            </td>
+                                            <td style="width:33%"></td>
+                                            <td style="width:33%"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            }
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="col-md-12">
+                    <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function DrawAttandanceChart(data) {
+            new Chart(document.getElementById("canvas000"), {
+                type: 'line',
+                data: data
+            });
+        }
+        function PrintReport() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title>Result For @Model.Student.Name Class  @Model.ClassName @Model.SectionName</title>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard1.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}

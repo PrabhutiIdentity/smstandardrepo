@@ -1,0 +1,501 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentsMonthlyAttendancePageModel
+@section IncludeCss
+{
+    <title>Students Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    input[type=month]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        display: none;
+    }
+
+    input[type=month]::-webkit-clear-button {
+        display: none; /* Hide the button */
+        -webkit-appearance: none; /* turn off default browser styling */
+    }
+
+    .btn {
+        padding: 3px 6px;
+    }
+    .unknown {
+        background-color: orange;
+        font-size: 10px;
+    }
+
+    .leave {
+        background-color: cornflowerblue;
+        color: white;
+        font-size: 10px;
+    }
+
+    .absent {
+        background-color: #fb5252;
+        color: white;
+        font-size: 10px;
+    }
+
+    .holiday {
+        background-color: lightyellow;
+        font-size: 10px;
+    }
+
+    .present {
+        background-color: green;
+        color: white;
+        font-size: 10px;
+    }
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentsAttendanceMonthly", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (ClassModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                            <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                <option value="0">--Select Section--</option>
+                                                @foreach (SectionModel el in Model.Sections)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Month : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="month" class="form-control" name="ReportDate" onchange="$('#frmGetStudents').submit();" value="@Model.ReportDate.ToString("yyyy-MM")" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                    <div class="x_panel">
+                        @*<a href="javascript:void(0)" onclick="PrintReport()">Print</a>*@
+                        <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
+
+                        <div class="x_content">
+                            <table id="tblCategory" class="table table-bordered table-hover" style="font-size: 9px;">
+                                <thead>
+                                    <tr>
+                                        <th colspan="39" style="text-align:center;font-size: 12px;">
+                                            @*PRERNA BAL NIKETAN HIGHER SECONDARY SCHOOL <small>TEHSIL : INDORE     DISTRICT : INDORE</small>*@
+                                            <br /> Daily Attendance Register<br />Class : @Model.Classes.Where(c => c.ClassID == Model.ClassID).SingleOrDefault().ClassName
+                                            / @Model.Sections.Where(c => c.ID == Model.SectionID).SingleOrDefault().Name
+                                            <br/>
+                                            Month : <b>@Model.ReportDate.ToString("MMMM")</b> <b>@Model.ReportDate.Year</b>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th rowspan="2">Seq</th>
+                                        <th rowspan="2">SR No</th>
+
+                                        <th rowspan="2" style="width:20%">
+                                            Name of Student
+                                            @*<br />(with Mother & Father)*@
+                                        </th>
+                                        <th rowspan="2" style="width:10%;">Date of Birth</th>
+                                        <th colspan="31" style="text-align:center;">Days of Month</th>
+                                        <th colspan="4" style="text-align:center;">ATTENDANCE</th>
+                                    </tr>
+                                    <tr>
+                                        <th>1</th>
+                                        <th>2</th>
+                                        <th>3</th>
+                                        <th>4</th>
+                                        <th>5</th>
+                                        <th>6</th>
+                                        <th>7</th>
+                                        <th>8</th>
+                                        <th>9</th>
+                                        <th>10</th>
+                                        <th>11</th>
+                                        <th>12</th>
+                                        <th>13</th>
+                                        <th>14</th>
+                                        <th>15</th>
+                                        <th>16</th>
+                                        <th>17</th>
+                                        <th>18</th>
+                                        <th>19</th>
+                                        <th>20</th>
+                                        <th>21</th>
+                                        <th>22</th>
+                                        <th>23</th>
+                                        <th>24</th>
+                                        <th>25</th>
+                                        <th>26</th>
+                                        <th>27</th>
+                                        <th>28</th>
+                                        <th>29</th>
+                                        <th>30</th>
+                                        <th>31</th>
+                                        <th><small>Curr. Month</small></th>
+                                        <th><small>Prev. Month</small></th>
+                                        <th><small>Total</small></th>
+                                        <th><small>%</small></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        int[] daysTotalPresent = new int[31];
+                                        int[] daysTotalAbsent = new int[31];
+                                        int[] daysTotalHalfDay = new int[31];
+                                        int count = 1;
+                                        foreach (StudentModel c in Model.Students)
+                                        {
+                                            var att = Model.Attendances.Where(a => a.StudentID == c.StudentID).SingleOrDefault();
+
+                                    <tr>
+                                        <td>@count</td>
+                                        <td>@c.SchoolUID</td>
+
+                                        <td style="width:20%">
+                                            <b>@c.Name <br /> @c.StudentSID @*/ @c.MotherName / @c.FatherName*@</b>
+                                        </td>
+                                        <td>@c.DOB.ToString("dd MMM, yyyy")</td>
+                                        @if (att == null)
+                                        {
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                            <td>-</td>
+                                        }
+                                        else
+                                        {
+                                            for (int i = 0; i < 31; i++)
+                                            {
+                                                var val = Convert.ToDouble(att.GetType().GetProperty("D" + (i + 1)).GetValue(att, null));
+
+                                                if (val == 0)
+                                                {
+                                                    daysTotalAbsent[i] = daysTotalAbsent[i] + 1;
+                                                }
+                                                else if (val == 1)
+                                                {
+                                                    daysTotalPresent[i] = daysTotalPresent[i] + 1;
+                                                }
+                                                else if (val == 0.5)
+                                                {
+                                                    daysTotalHalfDay[i] = daysTotalHalfDay[i] + 1;
+                                                }
+                                            }
+
+                                            <td class="@(att.D1==1?"present":att.D1==3?"holiday":att.D1==-1?"leave":att.D1==0?"absent":att.D1==0.5?"unknown":"")">
+                                                @(att.D1 == 1 ? "P" : att.D1 == 0 ? "A" : att.D1 == -1 ? "L" : att.D1 == 0.5 ? "HD" : att.D1 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D2==1?"present":att.D2==3?"holiday":att.D2==-1?"leave":att.D2==0?"absent":att.D2==0.5?"unknown":"")">
+                                                @(att.D2 == 1 ? "P" : att.D2 == 0 ? "A" : att.D2 == -1 ? "L" : att.D2 == 0.5 ? "HD" : att.D2 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D3==1?"present":att.D3==3?"holiday":att.D3==-1?"leave":att.D3==0?"absent":att.D3==0.5?"unknown":"")">
+                                                @(att.D3 == 1 ? "P" : att.D3 == 0 ? "A" : att.D3 == -1 ? "L" : att.D3 == 0.5 ? "HD" : att.D3 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D4==1?"present":att.D4==3?"holiday":att.D4==-1?"leave":att.D4==0?"absent":att.D4==0.5?"unknown":"")">
+                                                @(att.D4 == 1 ? "P" : att.D4 == 0 ? "A" : att.D4 == -1 ? "L" : att.D4 == 0.5 ? "HD" : att.D4 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D5==1?"present":att.D5==3?"holiday":att.D5==-1?"leave":att.D5==0?"absent":att.D5==0.5?"unknown":"")">
+                                                @(att.D5 == 1 ? "P" : att.D5 == 0 ? "A" : att.D5 == -1 ? "L" : att.D5 == 0.5 ? "HD" : att.D5 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D6==1?"present":att.D6==3?"holiday":att.D6==-1?"leave":att.D6==0?"absent":att.D6==0.5?"unknown":"")">
+                                                @(att.D6 == 1 ? "P" : att.D6 == 0 ? "A" : att.D6 == -1 ? "L" : att.D6 == 0.5 ? "HD" : att.D6 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D7==1?"present":att.D7==3?"holiday":att.D7==-1?"leave":att.D7==0?"absent":att.D7==0.5?"unknown":"")">
+                                                @(att.D7 == 1 ? "P" : att.D7 == 0 ? "A" : att.D7 == -1 ? "L" : att.D7 == 0.5 ? "HD" : att.D7 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D8==1?"present":att.D8==3?"holiday":att.D8==-1?"leave":att.D8==0?"absent":att.D8==0.5?"unknown":"")">
+                                                @(att.D8 == 1 ? "P" : att.D8 == 0 ? "A" : att.D8 == -1 ? "L" : att.D8 == 0.5 ? "HD" : att.D8 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D9==1?"present":att.D9==3?"holiday":att.D9==-1?"leave":att.D9==0?"absent":att.D9==0.5?"unknown":"")">
+                                                @(att.D9 == 1 ? "P" : att.D9 == 0 ? "A" : att.D9 == -1 ? "L" : att.D9 == 0.5 ? "HD" : att.D9 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D10==1?"present":att.D10==3?"holiday":att.D10==-1?"leave":att.D10==0?"absent":att.D10==0.5?"unknown":"")">
+                                                @(att.D10 == 1 ? "P" : att.D10 == 0 ? "A" : att.D10 == -1 ? "L" : att.D10 == 0.5 ? "HD" : att.D10 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D11==1?"present":att.D11==3?"holiday":att.D11==-1?"leave":att.D11==0?"absent":att.D11==0.5?"unknown":"")">
+                                                @(att.D11 == 1 ? "P" : att.D11 == 0 ? "A" : att.D11 == -1 ? "L" : att.D11 == 0.5 ? "HD" : att.D11 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D12==1?"present":att.D12==3?"holiday":att.D12==-1?"leave":att.D12==0?"absent":att.D12==0.5?"unknown":"")">
+                                                @(att.D12 == 1 ? "P" : att.D12 == 0 ? "A" : att.D12 == -1 ? "L" : att.D12 == 0.5 ? "HD" : att.D12 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D13==1?"present":att.D13==3?"holiday":att.D13==-1?"leave":att.D13==0?"absent":att.D13==0.5?"unknown":"")">
+                                                @(att.D13 == 1 ? "P" : att.D13 == 0 ? "A" : att.D13 == -1 ? "L" : att.D13 == 0.5 ? "HD" : att.D13 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D14==1?"present":att.D14==3?"holiday":att.D14==-1?"leave":att.D14==0?"absent":att.D14==0.5?"unknown":"")">
+                                                @(att.D14 == 1 ? "P" : att.D14 == 0 ? "A" : att.D14 == -1 ? "L" : att.D14 == 0.5 ? "HD" : att.D14 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D15==1?"present":att.D15==3?"holiday":att.D15==-1?"leave":att.D15==0?"absent":att.D15==0.5?"unknown":"")">
+                                                @(att.D15 == 1 ? "P" : att.D15 == 0 ? "A" : att.D15 == -1 ? "L" : att.D15 == 0.5 ? "HD" : att.D15 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D16==1?"present":att.D16==3?"holiday":att.D16==-1?"leave":att.D16==0?"absent":att.D16==0.5?"unknown":"")">
+                                                @(att.D16 == 1 ? "P" : att.D16 == 0 ? "A" : att.D16 == -1 ? "L" : att.D16 == 0.5 ? "HD" : att.D16 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D17==1?"present":att.D17==3?"holiday":att.D17==-1?"leave":att.D17==0?"absent":att.D17==0.5?"unknown":"")">
+                                                @(att.D17 == 1 ? "P" : att.D17 == 0 ? "A" : att.D17 == -1 ? "L" : att.D17 == 0.5 ? "HD" : att.D17 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D18==1?"present":att.D18==3?"holiday":att.D18==-1?"leave":att.D18==0?"absent":att.D18==0.5?"unknown":"")">
+                                                @(att.D18 == 1 ? "P" : att.D18 == 0 ? "A" : att.D18 == -1 ? "L" : att.D18 == 0.5 ? "HD" : att.D18 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D19==1?"present":att.D19==3?"holiday":att.D19==-1?"leave":att.D19==0?"absent":att.D19==0.5?"unknown":"")">
+                                                @(att.D19 == 1 ? "P" : att.D19 == 0 ? "A" : att.D19 == -1 ? "L" : att.D19 == 0.5 ? "HD" : att.D19 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D20==1?"present":att.D20==3?"holiday":att.D20==-1?"leave":att.D20==0?"absent":att.D20==0.5?"unknown":"")">
+                                                @(att.D20 == 1 ? "P" : att.D20 == 0 ? "A" : att.D20 == -1 ? "L" : att.D20 == 0.5 ? "HD" : att.D20 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D21==1?"present":att.D21==3?"holiday":att.D21==-1?"leave":att.D21==0?"absent":att.D21==0.5?"unknown":"")">
+                                                @(att.D21 == 1 ? "P" : att.D21 == 0 ? "A" : att.D21 == -1 ? "L" : att.D21 == 0.5 ? "HD" : att.D21 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D22==1?"present":att.D22==3?"holiday":att.D22==-1?"leave":att.D22==0?"absent":att.D22==0.5?"unknown":"")">
+                                                @(att.D22 == 1 ? "P" : att.D22 == 0 ? "A" : att.D22 == -1 ? "L" : att.D22 == 0.5 ? "HD" : att.D22 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D23==1?"present":att.D23==3?"holiday":att.D23==-1?"leave":att.D23==0?"absent":att.D23==0.5?"unknown":"")">
+                                                @(att.D23 == 1 ? "P" : att.D23 == 0 ? "A" : att.D23 == -1 ? "L" : att.D23 == 0.5 ? "HD" : att.D23 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D24==1?"present":att.D24==3?"holiday":att.D24==-1?"leave":att.D24==0?"absent":att.D24==0.5?"unknown":"")">
+                                                @(att.D24 == 1 ? "P" : att.D24 == 0 ? "A" : att.D24 == -1 ? "L" : att.D24 == 0.5 ? "HD" : att.D24 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D26==1?"present":att.D26==3?"holiday":att.D26==-1?"leave":att.D26==0?"absent":att.D26==0.5?"unknown":"")">
+                                                @(att.D25 == 1 ? "P" : att.D25 == 0 ? "A" : att.D25 == -1 ? "L" : att.D25 == 0.5 ? "HD" : att.D25 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D26==1?"present":att.D26==3?"holiday":att.D26==-1?"leave":att.D26==0?"absent":att.D26==0.5?"unknown":"")">
+                                                @(att.D26 == 1 ? "P" : att.D26 == 0 ? "A" : att.D26 == -1 ? "L" : att.D26 == 0.5 ? "HD" : att.D26 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D27==1?"present":att.D27==3?"holiday":att.D27==-1?"leave":att.D27==0?"absent":att.D27==0.5?"unknown":"")">
+                                        @(att.D27 == 1 ? "P" : att.D27 == 0 ? "A" : att.D27 == -1 ? "L" : att.D27 == 0.5 ? "HD" : att.D27 == 3 ? "-" : "H")</td>
+                                            <td class="@(att.D28==1?"present":att.D28==3?"holiday":att.D28==-1?"leave":att.D28==0?"absent":att.D28==0.5?"unknown":"")">
+                                                @(att.D28 == 1 ? "P" : att.D28 == 0 ? "A" : att.D28 == -1 ? "L" : att.D28 == 0.5 ? "HD" : att.D28 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D29==1?"present":att.D29==3?"holiday":att.D29==-1?"leave":att.D29==0?"absent":att.D29==0.5?"unknown":"")">
+                                                @(att.D29 == 1 ? "P" : att.D29 == 0 ? "A" : att.D29 == -1 ? "L" : att.D29 == 0.5 ? "HD" : att.D29 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D30==1?"present":att.D30==3?"holiday":att.D30==-1?"leave":att.D30==0?"absent":att.D30==0.5?"unknown":"")">
+                                                @(att.D30 == 1 ? "P" : att.D30 == 0 ? "A" : att.D30 == -1 ? "L" : att.D30 == 0.5 ? "HD" : att.D30 == 3 ? "-" : "H")
+                                            </td>
+                                            <td class="@(att.D31==1?"present":att.D31==3?"holiday":att.D31==-1?"leave":att.D31==0?"absent":att.D31==0.5?"unknown":"")">
+                                                @(att.D31 == 1 ? "P" : att.D31 == 0 ? "A" : att.D31 == -1 ? "L" : att.D31 == 0.5 ? "HD" : att.D31 == 3 ? "-" : "H")
+                                            </td>
+                                            <td>
+                                                @att.Total
+                                            </td>
+                                            <td></td>
+                                            <td>@att.TotalDays</td>
+                                            <td>@(((decimal)(att.Total * 100 / att.TotalDays)).ToString("0.0"))</td>
+                                        }
+                                    </tr>
+
+                                            count++;
+                                        }
+
+                                        <tr>
+                                            <td colspan="4" style="text-align:right;">DAYS OF MONTH -----------></td>
+                                            @for (int i = 0; i < 31; i++)
+                                            {
+                                                <td><b>@(i + 1)</b></td>
+                                            }
+                                            <td colspan="4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4"><b>Present</b></td>
+                                            @for (int i = 0; i < 31; i++)
+                                            {
+                                                <td>@daysTotalPresent[i]</td>
+                                            }
+                                            <td colspan="4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4"><b>Absent</b></td>
+                                            @for (int i = 0; i < 31; i++)
+                                            {
+                                                <td>@daysTotalAbsent[i]</td>
+                                            }
+                                            <td colspan="4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4"><b>Half Day</b></td>
+                                            @for (int i = 0; i < 31; i++)
+                                            {
+                                                <td>@daysTotalHalfDay[i]</td>
+                                            }
+                                            <td colspan="4"></td>
+                                        </tr>
+                                        <tr style="display:none;">
+                                            <td colspan="4"><b>Total</b></td>
+                                            @for (int i = 0; i < 31; i++)
+                                            {
+                                                <td>@(daysTotalAbsent[i] + daysTotalPresent[i] + (daysTotalHalfDay[i] / 2))</td>
+                                            }
+                                            <td colspan="4"></td>
+                                        </tr>
+
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    @*<script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>*@
+    <script type="text/javascript">
+        function PrintReport() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            @*frameDoc.document.write('<link href="@Url.Content("~/css/bootstrap.min.css")" rel="stylesheet" type="text/css" />');*@
+             frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+        $(function () {
+            // $("#tblCategory").DataTable();
+        });
+        function DeleteStudent(sender) {
+            return confirm('Do you really want to delete Student!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->

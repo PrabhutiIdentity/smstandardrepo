@@ -1,0 +1,569 @@
+﻿@using SMEnterprise.Models;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model SMEnterprise.Models.AdminDashboardModel
+@section IncludeCss
+{
+    <link href="@Url.Content("~/css/ExtraCss.css")" rel="stylesheet" />
+    <title>P-School | Dashboard</title>
+
+    <style>
+        .table td {
+            padding: 0px !important;
+        }
+
+        .tile_count {
+            margin-bottom: 5px;
+        }
+
+            .tile_count div:first-child .left {
+                border: 0;
+            }
+
+            .tile_count .tile_stats_count {
+                border-left: 0px solid #333;
+                padding-bottom: 8px;
+                padding-top: 5px;
+                background-color: white;
+            }
+
+        .tile_stats_count .left {
+            width: 15%;
+            float: left;
+            height: 65px;
+            border-left: 2px solid #ADB2B5;
+            margin-top: 10px;
+        }
+
+        .tile_stats_count .right {
+            padding-left: 10px;
+            height: 100%;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+            .tile_stats_count .right span {
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+        .tile_stats_count .count {
+            font-size: 40px;
+            line-height: 47px;
+            font-weight: 600;
+        }
+
+            .tile_stats_count .count small {
+                font-size: 20px;
+                line-height: 20px;
+                font-weight: 600;
+            }
+
+        .count_bottom i {
+            width: 12px;
+        }
+
+        .dashboard_graph {
+            background: #fff;
+            padding: 7px 10px;
+        }
+
+            .dashboard_graph .col-md-9,
+            .dashboard_graph .col-md-3 {
+                padding: 0;
+            }
+
+        .panel_toolbox {
+            float: right;
+            min-width: 70px;
+        }
+
+            .panel_toolbox > li {
+                float: left;
+            }
+
+                .panel_toolbox > li > a {
+                    padding: 5px;
+                    color: #C5C7CB;
+                    font-size: 14px;
+                }
+
+                    .panel_toolbox > li > a:hover {
+                        background: #F5F7FA;
+                    }
+
+        .list {
+            max-height: 208px;
+            overflow-y: auto;
+        }
+
+            .list::-webkit-scrollbar-thumb {
+                background-color: #000000;
+            }
+
+            .list::-webkit-scrollbar {
+                width: 7px;
+            }
+
+            .list::-webkit-scrollbar-track {
+                -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+            }
+
+            .list::-webkit-scrollbar-thumb {
+                background-color: darkgrey;
+                outline: 1px solid slategrey;
+            }
+
+        .small-box h3, .small-box p {
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .small-box .icon {
+            top: 20px !important;
+            right: 110px !important;
+        }
+
+        .collection .col-lg-3 {
+            padding-right: 5px;
+            padding-left: 5px;
+        }
+
+        .dropdown-menu li {
+            border-radius: 5px;
+            background-color: beige;
+            margin: 2px;
+            border: 0.15em solid #f5e4dc;
+        }
+
+        .takeBackup a {
+            color: #4fa55b;
+        }
+
+            .takeBackup a:hover {
+                color: #615db0;
+            }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+}
+<style>
+    .thumbImageGrid {
+        max-width: 35px;
+        max-height: 35px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?35:'auto');
+        height: expression((this.width/this.height)<1?35:'auto');
+    }
+</style>
+<section class="content" style="min-height: 0px;padding-top: 0px;">
+    <div class="row tile_count" style="background-color: #F7F7F7;padding-top: 10px;">
+        Active Session : @Model.SessionName
+    </div>
+</section>
+<!-- Main content -->
+<section class="content" style="min-height: 0px;padding-top: 0px;">
+    <div class="row tile_count" style="background-color: #F7F7F7;padding-top: 10px;">
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count" style="color: #73879c;">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> Total Students</span>
+                <div class="count">
+                    @Model.StudentsCount
+                </div>
+
+            </div>
+        </div>
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count" style="color: #73879c;">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> Total Teachers</span>
+                <div class="count">
+                    @Model.TeacherCount
+                </div>
+
+            </div>
+        </div>
+        <div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count" style="color: #73879c;">
+            <div class="left"></div>
+
+            <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+                <div class="right">
+                    <span class="count_top"><i class="fa fa-user"></i> Absent Teachers</span>
+                    <div class="count red">
+                        @Model.AbsentTeachers <small>Today</small>
+                    </div>
+
+                </div>
+            </a>
+            <ul class="dropdown-menu list-unstyled msg_list animated fadeInDown list" role="menu" style="color: #73879c;width: 285px;">
+                @foreach (EmployeeModel ae in Model.AbsentTeacherList)
+                {
+                    <li>
+                        <a target="_blank" href="/Admin/TeacherTimeTableManagement/@ae.EmployeeID" title="Click to Manage Time Table">
+                            <span class="image"><img onerror="return OnImageError(this,@(ae.Gender));" src="@Url.Content("~/Images/EmployeeImage/" + ae.Photo)" class="thumbImageGrid" alt="Profile Image" /></span>
+                            <span style="margin-left: 10px;position: absolute;color: #1a2226;text-transform: capitalize;"> @ae.EmployeeName</span>
+                            <span style="margin-left: 10px;position: absolute;margin-top: 15px;"> @ae.EmployeeSID (@ae.MobileNumber)</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </div>
+        <div class="animated flipInY col-md-3 col-sm-4 col-xs-4 tile_stats_count" style="color: #73879c;">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> Month Collections</span>
+                <div class="count" style="font-size: 24px;">
+                    @((Model.MonthlyCollection / 1000).ToString("N2")) K
+                </div>
+
+            </div>
+        </div>
+        <div class="animated flipInY col-md-3 col-sm-4 col-xs-4 tile_stats_count" style="color: #73879c;">
+            <div class="left"></div>
+            <div class="right">
+                <span class="count_top"><i class="fa fa-user"></i> Monthly Expence</span>
+                <div class="count" style="font-size: 24px;">
+                    @((Model.MonthlyExpence / 1000).ToString("N2")) K
+                </div>
+
+            </div>
+        </div>
+        @*<div class="animated flipInY col-md-2 col-sm-4 col-xs-4 tile_stats_count" style="color: #73879c;">
+                <div class="left"></div>
+                <div style="margin-top: 12px;">
+                    <div class="count takeBackup" style="font-size: 28px;">
+                        <span class="count_top" id="spnTakeBackup"><a href="javascript:void(0);" onclick="GenerateBackup();"> <i class="fa fa-database"></i> Backup</a></span>
+                    </div>
+                    <div class="count downloadBackup hidden" style="font-size: 22px;">
+                        <span class="count_top" id="spnTakeBackup"><a href="javascript:void(0);" onclick="DownloadBackup(this);"> <i class="fa fa-download"></i> Download</a></span>
+                    </div>
+                    <span class="count_top backupProgress hidden"><i class="fa fa-database"></i> Backup in Process</span>
+                    <div class="indicator backupProgress hidden">
+                        <svg width="16px" height="12px">
+                            <polyline id="back" points="1 6 4 6 6 11 10 1 12 6 15 6"></polyline>
+                            <polyline id="front" points="1 6 4 6 6 11 10 1 12 6 15 6"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>*@
+    </div>
+    <div class="row collection">
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    <p>Daily Collection</p>
+                    <table class="table" style="margin-bottom:0px;">
+                        @{
+                            decimal total = 0;
+                            foreach (var p in Model.DailyFMCollection)
+                            {
+                                <tr>
+                                    <td>@p.PaymentModeName</td>
+                                    <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", p.Amount)</td>
+                                </tr>
+                                total = total + p.Amount;
+                            }
+                            <tr style="background-color: #00acd7;">
+                                <td>Total</td>
+                                <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", total)</td>
+                            </tr>
+                        }
+                    </table>
+
+                </div>
+                <div class="icon">
+                    <i class="fa fa-inr"></i>
+                </div>
+                <a href="/Admin/ReportDailyCollection" class="small-box-footer">View Details <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-green">
+                <div class="inner">
+                    <p>Monthly Collection</p>
+                    <table class="table" style="margin-bottom:0px;">
+                        @{
+                            total = 0;
+                            foreach (var p in Model.MonthlyFMCollection)
+                            {
+                                <tr>
+                                    <td>@p.PaymentModeName</td>
+                                    <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", p.Amount)</td>
+                                </tr>
+                                total = total + p.Amount;
+                            }
+                            <tr style="background-color: #009551;">
+                                <td>Total</td>
+                                <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", total)</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-inr"></i>
+                </div>
+                <a href="/Admin/ReportMonthlyCollection" class="small-box-footer">View Details <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-yellow">
+                <div class="inner">
+                    <p>Quarterly Collection</p>
+                    <table class="table" style="margin-bottom:0px;">
+                        @{
+                            total = 0;
+                            foreach (var p in Model.QuarterlyCollection)
+                            {
+                                <tr>
+                                    <td>@p.PaymentModeName</td>
+                                    <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", p.Amount)</td>
+                                </tr>
+                                total = total + p.Amount;
+                            }
+                            <tr style="background-color: #da8c10;">
+                                <td>Total</td>
+                                <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", total)</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-inr"></i>
+                </div>
+                <a href="/Admin/ReportQuarterlyCollection" class="small-box-footer">View Details <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-red">
+                <div class="inner">
+                    <p>Session Collection</p>
+                    <table class="table" style="margin-bottom:0px;">
+                        @{
+                            total = 0;
+                            foreach (var p in Model.AnnualCollection)
+                            {
+                                <tr>
+                                    <td>@p.PaymentModeName</td>
+                                    <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", p.Amount)</td>
+                                </tr>
+                                total = total + p.Amount;
+                            }
+                            <tr style="background-color: #c64333;">
+                                <td>Total</td>
+                                <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", total)</td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-inr"></i>
+                </div>
+                <a href="/Admin/ReportBetweenDatesCollection" class="small-box-footer">View Between Dates <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+        <!-- ./col -->
+        <div class="col-lg-3 col-xs-6">
+            <!-- small box -->
+            <div class="small-box bg-aqua">
+                <div class="inner">
+                    <p>Fee Head Daily Collection</p>
+                    <table class="table" style="margin-bottom:0px;">
+                        @{
+                            total = 0;
+                            foreach (var p in Model.DailyFTCollection)
+                            {
+                                <tr>
+                                    <td>@p.Name</td>
+                                    <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", p.Sum)</td>
+                                </tr>
+                                total = total + p.Sum;
+                            }
+                            <tr style="background-color: #00acd7;">
+                                <td>Total</td>
+                                <td><i class="fa fa-inr" aria-hidden="true"></i> @String.Format("{0:0,0}", total)</td>
+                            </tr>
+                        }
+                    </table>
+
+                </div>
+                <div class="icon">
+                    <i class="fa fa-inr"></i>
+                </div>
+                <a href="/Admin/ReportDailyFeeCollection" class="small-box-footer">View Details <i class="fa fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <!-- USERS LIST -->
+            <div class="box box-danger">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Today Birthdays</h3>
+                    <div class="box-tools pull-right">
+                        <span class="label label-danger">@Model.BirthDays.Count() Birthdays</span>
+
+                    </div>
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body no-padding">
+                    <ul class="users-list clearfix">
+                        @foreach (var b in Model.BirthDays)
+                        {
+                            if (b.NotificationSMSTo == -1)
+                            {
+                                <li style="width: 15%;">
+                                    <img onerror="return OnImageError(this,@(b.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/EmployeeImage/")@(b.StudentID)_@b.Photo">
+                                    <a class="users-list-name" href="#">@b.Name</a>
+                                    <span class="users-list-date">@b.ClassName</span>
+                                </li>
+                            }
+                            else
+                            {
+                                <li style="width: 15%;">
+                                    <img onerror="return OnImageError(this,@(b.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(b.StudentID)_@b.Photo">
+                                    <a class="users-list-name" href="#">@b.Name</a>
+                                    <span class="users-list-date">@b.ClassName / @b.SectionName</span>
+                                </li>
+                            }
+                        }
+                    </ul>
+                    <!-- /.users-list -->
+                </div>
+
+            </div>
+            <!--/.box -->
+        </div>
+    </div>
+    <div class="row tile_count">
+        <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left:1px;padding-right:1px;">
+            <div class="dashboard_graph">
+
+                <div class="row x_title">
+                    <div class="col-md-6">
+
+                        <h3>Class/Student Density <small>Capacity vs Admissions</small></h3>
+
+                    </div>
+                    <div class="col-md-6">
+
+                    </div>
+
+
+                </div>
+
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_content">
+                        <canvas id="canvas_dahs" style="max-height: 260px!important; max-width: 95%;"></canvas>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row tile_count">
+        <div class="col-md-12 col-sm-12 col-xs-12" style="padding-left:1px;padding-right:1px;">
+            <div class="dashboard_graph">
+
+                <div class="row x_title">
+                    <div class="col-md-6">
+                        <h3>Employee Attandance <small>Month wise</small></h3>
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                    </div>
+
+
+                </div>
+
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_content">
+                        <canvas id="canvas_EmpAttandance" style="max-height: 260px!important; max-width: 95%;"></canvas>
+                    </div>
+                </div>
+
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+    </div>
+    <!-- Main row -->
+    <div class="row">
+    </div>
+    <!-- /.row (main row) -->
+
+</section>
+<!-- /.content -->
+@section scripts
+{
+    <script src="@Url.Content("~/js/Chart.min.js")"></script>
+    <script>
+        function GenerateBackup()
+        {
+            $('.takeBackup').addClass('hidden');
+            $('.backupProgress').removeClass('hidden');
+            $.ajax(
+                   {
+                       type: "POST",
+                       url: "/Admin/TakeBackup/",
+                       cache: false,
+                       processData: false,
+                       contentType: false,
+                       success: function (filename) {
+                           $('.downloadBackup').removeClass('hidden');
+                           $('.downloadBackup').find('a').attr('FileName',filename);
+                           $('.backupProgress').addClass('hidden');
+                       },
+                       error: function (e) {
+                           alert("errorn");
+                       }
+                   });
+        }
+        function DownloadBackup(sender)
+        {
+            var curUrl = window.location.href;
+            var ind = curUrl.indexOf("Admin");
+            var BaseUrl = curUrl.substring(0, ind);
+            var link = BaseUrl + 'Backup/Database/'+$(sender).attr('FileName');
+            var a = $("<a>")
+            .attr("href", link)
+             .attr("download", $(sender).attr('FileName'))
+            .appendTo("body");
+
+            a[0].click();
+
+            a.remove();
+        }
+        var ClassChart;
+        var EmpAttChart;
+        $(function () {
+            ClassChart = @Html.Raw(Json.Encode(Model.ClassSection));
+            EmpAttChart = @Html.Raw(Json.Encode(Model.EmployeeAttandanceChart));
+            new Chart(document.getElementById("canvas_dahs"), {
+                type: 'line',
+                data: ClassChart
+            });
+            new Chart(document.getElementById("canvas_EmpAttandance"), {
+                type: 'line',
+                data: EmpAttChart
+            });
+        });
+    </script>
+}

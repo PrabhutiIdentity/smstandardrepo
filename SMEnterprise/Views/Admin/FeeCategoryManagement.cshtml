@@ -1,0 +1,260 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/bootstrap-colorpicker.min.css")">
+    <title>Fee Head Management</title>
+}
+@model FeeCategoryEditModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Fee Category Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Fee Category Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 30%">Name</th>
+                                @*<th style="width: 20%">Color</th>*@
+                                <th style="width: 30%">Occurance</th>
+                                <th style="width: 10%">Edit/Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbdFeeCategories">
+                            @{
+                                int count = 0;
+                                foreach (FeeCategoryModel c in Model.FeeCategories)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @(count + 1)
+                                            <input type="hidden" name="ID" id="hdnFeeTypeID" value="@c.FeeTypeID" />
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="ID" id="hdnFeeTypeName" value="@c.FeeTypeName" />
+                                            @c.FeeTypeName
+                                        </td>
+                                        <td>
+                                            <input type="hidden" id="hdnFeeTypeApplicable" value="@c.FeeTypeApplicable" />
+                                            <input type="hidden" id="hdnFeeMonths" value="@c.Months" />
+                                            @c.FeeTypeApplicableName<br />
+                                            <small id="spnMonthNames"></small>
+                                        </td>
+
+                                        <td>
+                                            <div class="btn-group">
+                                                <a class="btn btn-link" onclick="EditFeeCategory(this)">Edit</a>
+                                                @using (Html.BeginForm("UpdateFeeType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <input type="hidden" name="FeeTypeID" value="@c.FeeTypeID" />
+                                                    <button onclick="return FeeTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="4">
+                                    <a class="btn btn-link pull-right" onclick="AddFeeCategory(this)">Add Fee Category</a>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section pageBottom{
+    <div id="mdlEditFeeCategory" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Fee Category</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" action="/admin/UpdateFeeType">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <input type="hidden" name="Months" id="hdnMonths" />
+                                <input type="hidden" name="FeeTypeID" id="hdnEditFeeTypeID" />
+                                <label for="txtSchemeTitle">Fee Category Title</label>
+                                <input type="text" required name="FeeTypeName" class="form-control" id="txtFeeTypeName" placeholder="Enter Fee Category Name">
+                            </div>
+                            @*<div class="form-group" id="divChartColor">
+                                    <label for="txtSchemeTitle">Chart Color</label>
+                                    <div class="input-group my-colorpicker2">
+                                        <input type="text" class="form-control" id="txtFeeTypeColor" onchange='$("#hdnFeeTypeColor").val($(this).val())' value="">
+                                        <div class="input-group-addon">
+                                            <i></i>
+                                        </div>
+                                        <input type="hidden" id="hdnFeeTypeColor" name="ChartColor" value="" />
+                                    </div>
+                                </div>*@
+                            <div class="form-group">
+                                <label for="txtSchemeTitle">Fee Applicable</label>
+                                <select class="form-control" id="ddlFeeTypeApplicable" name="FeeTypeApplicable" onchange="FeeAplicableChanged(this);">
+                                    @foreach (var fta in Model.FeeApplicables)
+                                    {
+                                        <option value="@fta.ID">@fta.Name</option>
+                                    }
+                                </select>
+                            </div>
+
+                            <div class="form-group" id="divFeeMonths" style="display:none;">
+                                <label for="exampleInputPassword1">Fee Months</label>
+                                <div class="row EMonthsList">
+                                    @for (var mon = 1; mon <= 12; mon++)
+                                    {
+                                        <div class="col-md-4">
+                                            <input type="checkbox" value="@mon" id="chkMonth_@mon" class="minimal class-checkbox">@((new DateTime(2019, mon, 1)).ToString("MMMM"))
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary pull-right" onclick="return SaveFeeCategory();">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/bootstrap-colorpicker.min.js")"></script>
+    <script>
+        var monthList = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+        function AddFeeCategory() {
+            $('#hdnMonths').val('');
+            $('#hdnEditFeeTypeID').val(0);
+            $('#txtFeeTypeName').val('');
+            $('#ddlFeeTypeApplicable').val(1);
+            $('#ddlFeeTypeApplicable').trigger('change');
+            $(".EMonthsList").find('.class-checkbox').each(function () {
+                $(this).removeAttr('checked');
+            });
+            $('#mdlEditFeeCategory').modal('toggle');
+        }
+        function EditFeeCategory(sender) {
+            var cls = $(sender).closest('tr').find('#hdnFeeMonths').val().split(",");
+            $('#hdnMonths').val($(sender).closest('tr').find('#hdnFeeMonths').val());
+            $('#hdnEditFeeTypeID').val($(sender).closest('tr').find('#hdnFeeTypeID').val());
+            $('#txtFeeTypeName').val($(sender).closest('tr').find('#hdnFeeTypeName').val());
+            $('#ddlFeeTypeApplicable').val($(sender).closest('tr').find('#hdnFeeTypeApplicable').val());
+            $('#ddlFeeTypeApplicable').trigger('change');
+            $(".EMonthsList").find('.class-checkbox').each(function () {
+                if ($.inArray($(this).val(), cls) != -1) {
+                    $(this).attr('checked', 'checked');
+                }
+                else {
+                    $(this).removeAttr('checked');
+                }
+            });
+            $('#mdlEditFeeCategory').modal('toggle');
+        }
+        function FeeAplicableChanged(sender) {
+            if ($(sender).val() == 9) {
+                $('#divFeeMonths').css('display', '');
+            }
+            else {
+                $('#divFeeMonths').css('display', 'none');
+            }
+        }
+        $(function () {
+            $('#tbdFeeCategories').find('tr').each(function () {
+                console.log($(this).find('#hdnFeeTypeApplicable').val());
+                if ($(this).find('#hdnFeeTypeApplicable').val() == 9) {
+                    var months = '';
+                    var cls = $(this).find('#hdnFeeMonths').val().split(",");
+                    console.log(cls);
+                    $.each(cls, function (i, month) {
+                        if (months != '') {
+                            months = months + ',';
+                        }
+                        months = months + monthList[month - 1];
+                    });
+                    $(this).find('#spnMonthNames').html(' (' + months + ')');
+                }
+            });
+            $("#tblCategory").DataTable({
+                "ordering": false
+            });
+            $('#liFeeTypeManagement').closest('ul').closest('li').addClass('active');
+            $('#liFeeTypeManagement').addClass('active');
+            $(".my-colorpicker2").colorpicker();
+        });
+        function FeeTypeDelete(sender) {
+            if (confirm('Are you sure you wish to delete this Fee Category?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        function SaveFeeCategory(sender) {
+            if ($(sender).closest('tr').find('#txtFeeTypeName').val() == "") {
+                alert("Plese Fill Required Details!!!!");
+                return false;
+            }
+            else {
+                var months = '';
+                $(".EMonthsList").find('.class-checkbox').each(function () {
+                    if ($(this).is(':checked') == true) {
+                        if (months != '') {
+                            months = months + ',';
+                        }
+                        months = months + $(this).val();
+                    }
+                });
+                $('#hdnMonths').val(months);
+                //$(sender).closest('td').find('#hdnFeeTypeColor').val($(sender).closest('tr').find('#txtFeeTypeColor').val());
+                return true;
+            }
+        }
+    </script>
+}
+<!-- /.content -->

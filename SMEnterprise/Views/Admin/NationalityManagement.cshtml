@@ -1,0 +1,138 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Nationality Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Nationality Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Nationality Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 30%">Nationality Name</th>
+                                <th style="width: 10%">Edit/Delete</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @(count+1)
+                                        <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' id="txtName" name="Name" value="@c.Name" />
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            @using (Html.BeginForm("UpdateNationality", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                                <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+                                                <input type="submit" onclick="return BeforeUpdate(this);" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Save" />
+                                            }
+                                            @using (Html.BeginForm("UpdateNationality", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="ID" value="@c.ID" />
+                                                <button onclick="return Delete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+                            <tr>
+
+                                <td>
+                                    @(count+1)
+                                    <input type="hidden" name="ID" id="hdnID" value="0" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' id="txtName" name="Name" value="" />
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        @using (Html.BeginForm("UpdateNationality", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                        {
+                                            <input type="hidden" name="ID" id="hdnID" value="0" />
+                                            <input type="hidden" id="hdnName" name="Name" value="" />
+                                            <input type="submit" onclick="return BeforeUpdate(this);" class="btn btn-default" style="background-color: #605ca8;color: white;" value="Add New" />
+                                        }
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section scripts
+{
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable({
+                "ordering": false
+            });
+            $('#liNationalityManagement').closest('ul').closest('li').addClass('active');
+            $('#liNationalityManagement').addClass('active');
+        });
+        function Delete(sender) {
+            if (confirm('Are you sure you wish to delete this Nationality?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        function BeforeUpdate(sender) {
+            if ($(sender).closest('tr').find('#txtName').val() == "") {
+                ShowClosingNotification('Error', 'Plese Fill Required Details!!!!', 'error');
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    </script>
+}
+<!-- /.content -->

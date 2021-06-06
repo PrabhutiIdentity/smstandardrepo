@@ -1,0 +1,584 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_LibraryLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Books Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+}
+<style>
+    .select2-container {
+        width: 100% !important;
+    }
+
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+    .thumbImageList {
+        max-width: 45px;
+        max-height: 45px;
+    }
+
+
+    *html1 .thumbImageList {
+        width: expression((this.width/this.height)>=1?45:'auto');
+        height: expression((this.width/this.height)<1?45:'auto');
+    }
+    .thumbImageMain {
+        max-width: 235px;
+        max-height: 235px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?235:'auto');
+        height: expression((this.width/this.height)<1?235:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .form-inline .form-control {
+        width: 100% !important;
+    }
+
+    .row {
+        margin-bottom: 3px;
+        margin-top: 2px;
+    }
+
+    .form-group {
+        margin-bottom: 3px;
+        margin-top: 2px;
+    }
+
+    .input-sm {
+        width: auto !important;
+    }
+
+    #IssueDetail .x_panel {
+        padding: 4px 4px;
+        margin-bottom: 0px;
+    }
+    .Hidden {
+        display: none;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("LibraryRegister", "Library", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetRegister" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions">
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-2 text-right">From :</label>
+                                    <div class="col-md-4">
+                                        <input type="date" class="form-control" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                    <label class="col-md-2 text-right">To :</label>
+                                    <div class="col-md-4">
+                                        <input type="date" class="form-control" name="EndDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetRegister').submit();"><i class="fa fa-search"></i></a>
+                                            <a href="javascript:void(0);" title="More Filter Options" onclick="AdvanceOptionMenu(this);"><i class="fa fa-angle-down"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" id="divadvanceSearch" style="display:none;">
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right">Library :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="LibraryID" id="ddlLibraries">
+                                            @foreach (NameIDModel el in Model.Libraries)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.LibraryID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-3 text-right">Type :</label>
+                                    <div class="col-md-9">
+                                        <select class="form-control" name="BorrowerType" id="ddlBorrowerTypes">
+                                            <option value="-1" @(-1 == Model.BorrowerType ? "selected" : "")>Everyone</option>
+                                            <option value="0" @(0 == Model.BorrowerType ? "selected" : "")>Teacher</option>
+                                            <option value="1" @(1 == Model.BorrowerType ? "selected" : "")>Student</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr id="trHeader">
+                                    <th style="width: 10%">Issued To</th>
+                                    <th style="width: 15%">Borrower</th>
+                                    <th style="width: 15%">Issue Date</th>
+                                    <th style="width: 30%">Remark</th>
+                                    <th style="width: 10%">Status</th>
+                                    <th style="width: 10%">Re/Isd <i class="fa fa-info-circle" aria-hidden="true" title="Returned / Issued Books"></i></th>
+                                    <th style="width: 10%"><a href="javascript:void(0);" onclick="AddNewIssue(this);" class="IssueClosed">Add New</a></th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (LibraryRegisterModel c in Model.IssueList)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <input type="hidden" id="hdnIssueID" value="@c.IssueID" />
+                                            @(c.BorrowerType == 0 ? "Teacher" : "Student")
+                                        </td>
+                                        <td>
+                                            @c.BorrowerName
+                                        </td>
+
+                                        <td>
+                                            @c.IssueDate.ToString("dd MMM, yyyy")
+
+                                        </td>
+                                        <td>@c.Remark</td>
+                                        <td>
+                                            @(c.ReturnedBooks == 0 ? "Issued" : c.ReturnedBooks < c.Books ? "Partial" : "Returned")
+                                        </td>
+                                        <td>
+                                            @c.ReturnedBooks/@c.Books
+                                        </td>
+
+
+                                        <td>
+                                            <div class="row" style="margin-right: 10px;">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" onclick="ViewBookDetails(this,@c.IssueID);" class="btn btn-link IssueClosed">View</a>
+                                                </div>
+
+                                            </div>
+
+
+
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function SaveRegisterDetails(sender)
+        {
+            var IssueID = $(sender).closest('#IssueDetail').find('#hdnIssueID').val();
+            $(sender).closest('#IssueDetail').find('#hdnLibraryID').val($('#ddlLibraries').val())
+            var $this = $('#frmUpdateRegister');
+
+            var form = $('#frmUpdateRegister');
+            var formdata = false;
+            if (window.FormData) {
+                formdata = new FormData(form[0]);
+            }
+
+            $.ajax({
+                type: $this.attr('method'),
+                url: $this.attr('action'),
+                data: formdata ? formdata : form.serialize(),
+                contentType: false,
+                processData: false,
+                method: 'POST'
+            })
+            .done(function (html) {
+                ShowNotification('Updated', 'Register Successfully Updated', 'success');
+                if (IssueID != 0) {
+                    var $row = $(sender).closest('tr');
+                    $row.prev().replaceWith(html);
+                    $row.remove();
+                }
+                else
+                {
+                    $(sender).closest('tr').replaceWith(html);
+                    $(sender).closest('table').find('thead').find('.IssueOpened').html('Add New').removeClass('IssueOpened').addClass('IssueClosed')
+                }
+            })
+            .fail(function () {
+                $("#para").text("An error occured");
+            });
+            event.preventDefault();
+            return false;
+        }
+        function AddNewIssue(sender)
+        {
+            if ($(sender).hasClass("IssueClosed")) {
+                $(sender)
+                          .closest("tr")
+                          .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading Details, Please Wait....</td></tr>");
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Library/GetIssueRegisterDetails/0/" + $('#ddlSessions').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        // fill the div with the html returned by action
+                        $(sender)
+                            .closest("tr")
+                            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                        var ele = document.getElementsByClassName("IssueOpened");
+                        if (ele.length > 0) {
+                            $(ele[0]).click();
+                        }
+                        $('.editIssueRegister').click();
+                        $(sender).removeClass("IssueClosed");
+                        $(sender).text('Cancel');
+                        $(sender).addClass("IssueOpened");
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+            else {
+                $(sender).removeClass("IssueOpened");
+                $(sender).addClass("IssueClosed");
+                $(sender).closest("tr").next().remove();
+                $(sender).text('Add New')
+            }
+        }
+        function ViewBookDetails(sender) {
+
+            if ($(sender).hasClass("IssueClosed")) {
+                $(sender)
+                          .closest("tr")
+                          .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading Details, Please Wait....</td></tr>");
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Library/GetIssueRegisterDetails/" + $(sender).closest('tr').find('#hdnIssueID').val() + "/" + $('#ddlSessions').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        // fill the div with the html returned by action
+                        $(sender)
+                            .closest("tr")
+                            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html+ "</td></tr>");
+                        var ele = document.getElementsByClassName("IssueOpened");
+                        if (ele.length > 0) {
+                            $(ele[0]).click();
+                        }
+
+                        $(sender).removeClass("IssueClosed");
+                        $(sender).text('Close');
+                        $(sender).addClass("IssueOpened");
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+            else {
+                $(sender).removeClass("IssueOpened");
+                $(sender).addClass("IssueClosed");
+                $(sender).closest("tr").next().remove();
+                $(sender).text('View')
+            }
+
+        }
+
+
+        function OnEditClick(sender) {
+            if ($(sender).hasClass('EditOpened')) {
+                $(sender).html('Edit');
+                $(sender).removeClass('EditOpened');
+                $('.EditIssueDetail').addClass('Hidden');
+                $('.ViewIssueDetail').removeClass('Hidden');
+            }
+            else {
+                $(sender).html('Cancel');
+                $(sender).addClass('EditOpened');
+                $('.EditIssueDetail').removeClass('Hidden');
+                $('.ViewIssueDetail').addClass('Hidden');
+            }
+        }
+        var months = ['Blank','Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        function BarCodeChanged(sender)
+        {
+            var BarCode = $(sender).val();
+            $.ajax(
+               {
+                   type: "POST",
+                   url: "/Library/GetBookOnBarCode/" + BarCode,
+                   cache: false,
+                   processData: false,
+                   contentType: false,
+                   success: function (data) {
+                       if (data) {
+                           var opValue =  data.BookID + '^' + data.CopyID + '^' + data.IssueDays + '^' + data.BarCode + '^' + data.RFID + '^' + data.Code + '^' + data.Image;
+                           console.log(data);
+                           if ($("#ddlNewBook").find("option[value='" + opValue + "']").length) {
+                               $("#ddlNewBook").val(opValue).trigger("change");
+                           } else {
+                               // Create the DOM option that is pre-selected by default
+                               var newBook = new Option('('+data.Code +') '+data.Title, opValue, true, true);
+                               // Append it to the select
+                               $("#ddlNewBook").append(newBook).trigger('change');
+                           }
+                           //var imgPath = window.location.protocol + "//" + window.location.host + "/Images/BookImage/" + data.BookID + "_" + data.Image;
+                           //$(e.target).closest('tr').find('img').attr('src', imgPath);
+                           //$(e.target).closest('tr').find('#hdnCopyID').val(data.CopyID);
+                           //$(e.target).closest('tr').find('#hdnBookID').val(data.BookID);
+
+                           //$(e.target).closest('tr').find('#hdnIssueDays').val(data.IssueDays);
+                           //$(e.target).closest('tr').find('#txtBarCode').val(data.BarCode);
+                           //$(e.target).closest('tr').find('#txtDays').val(data.IssueDays);
+                       }
+                       else
+                       {
+                           console.log('Not Found');
+                       }
+                       console.log(data.BookID);
+                   },
+                   error: function (e) {
+                       ShowNotification('Not Found', 'Book Not Found....', 'error');
+                   }
+               });
+        }
+        function SpecificAddFunctionalities(sender)
+        {            
+            $('#txtDate').val($('#txtIssueDate').val());
+        }
+        function RemoveBook(sender)
+        {
+            var BookIssueID = $(sender).closest('tr').find('#hdnBookIssueID').val();
+            if (confirm('Do you really want to remove this book!!!!')) {
+                if (BookIssueID == 0) {
+                    var $Table = $(sender).closest('table');
+                    $(sender).closest('tr').remove();
+                    var cnt = 0;
+                    $Table.find('tbody tr').each(function () {
+                        $(this).find('#hdnBookIssueID').attr('name', 'IssuedBooks[' + cnt + '].BookIssueID');
+                        $(this).find('#hdnCopyID').attr('name', 'IssuedBooks[' + cnt + '].CopyID');
+                        $(this).find('#hdnBookID').attr('name', 'IssuedBooks[' + cnt + '].BookID');
+                        $(this).find('#hdnOpType').attr('name', 'IssuedBooks[' + cnt + '].OpType');
+                        $(this).find('#hdnIssueDays').attr('name', 'IssuedBooks[' + cnt + '].IssueDays');
+                        $(this).find('#hdnIssueDate').attr('name', 'IssuedBooks[' + cnt + '].IssueDate');
+                        $(this).find('#ddlBookStatus').attr('name', 'IssuedBooks[' + cnt + '].BookStatus');
+                        cnt++;
+                    });
+                }
+                else
+                {
+                    $(sender).closest('tr').css('display', 'none');
+                    $(sender).closest('tr').find('#hdnOpType').val(-1);
+                }
+               
+            }
+        }
+        function UpdateIssuedBook(sender,t)
+        {
+            $(sender).closest('tr').find('.bStatus').html($(sender).closest('tr').find('#ddlBookStatus option:selected').text());
+            $(sender).closest('tr').find('.editbtnOpen').click();
+        }
+        function AddIssueBook(sender)
+        {
+            var rowcount = $(sender).closest('table').find('tbody').find('tr').length;
+            var datearr = $(sender).closest("tr").find("#txtDate").val().split('-');
+            var rowdata = '<tr><td><img id="imgPhoto" onerror="return OnBookImageError(this, 2);" class="thumbImageList" alt="Photo" src="'+$(sender).closest("tr").find("#imgPhoto").attr("src")+'">' +
+                   '<input type="hidden" id="hdnBookIssueID" name="IssuedBooks[' + rowcount + '].BookIssueID" value="0">' +
+                   '<input type="hidden" id="hdnCopyID" name="IssuedBooks[' + rowcount + '].CopyID" value="' + $(sender).closest("tr").find("#hdnCopyID").val() + '">' +
+                   '<input type="hidden" id="hdnBookID" name="IssuedBooks[' + rowcount + '].BookID" value="' + $(sender).closest("tr").find("#hdnBookID").val() + '">' +
+                   '<input type="hidden" id="hdnOpType" name="IssuedBooks[' + rowcount + '].OpType" value="0">' +
+                   '<input type="hidden" id="hdnIssueDays" name="IssuedBooks[' + rowcount + '].IssueDays" value="' + $(sender).closest("tr").find("#txtDays").val() + '">' +
+                   '<input type="hidden" id="hdnIssueDate" name="IssuedBooks[' + rowcount + '].IssueDate" value="' + $(sender).closest("tr").find("#txtDate").val() + '">' +
+                   '</td><td>' + $('#ddlNewBook option:selected').text() + '</td><td>' + $(sender).closest("tr").find("#txtBarCode").val() + '</td><td>' + datearr[2] + ' ' + months[datearr[1]] + ' ,' + datearr[0] + '</td><td>' + $(sender).closest("tr").find("#txtDays").val() + '</td>' +
+                   '<td><span class="ViewCopy visible bStatus">' + $(sender).closest('tr').find('#ddlBookStatus option:selected').text() + '</span>' +
+                   '<select class="form-control editCopy hidden" id="ddlBookStatus" name="IssuedBooks[' + rowcount + '].AStatus">' +
+                   '<option value="0"' + ($(sender).closest("tr").find('#ddlBookStatus').val() == 0 ? "selected" : "") + '>Issue</option><option value="1" ' + ($(sender).closest("tr").find('#ddlBookStatus').val() == 1 ? "selected" : "") + '>Return</option><option value="2" ' + ($(sender).closest("tr").find('#ddlBookStatus').val() == 2 ? "selected" : "") + '>Lost</option>' +
+                   '</select></td>' +
+                   '<td class="EditIssueDetail"><a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>  <aa>|</aa>  <a href="javascript:void(0);" class="sbtn ViewCopy visible" onclick="RemoveBook(this);">Remove</a>' +
+                   '<a href="javascript:void(0);" class="sbtn editCopy hidden" onclick="UpdateIssuedBook(this, 1);">Save</a></td></tr>';
+            if (rowcount>0)
+            {
+                $(sender).closest('table').find('tbody').find('tr:last').after(rowdata);
+            }
+            else
+            {
+                $(sender).closest('table').find('tbody').html(rowdata);
+            }
+            $('#btnIssueNew').click();
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSections').html('');
+                        $('#ddlSections').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSections').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function SectionChanged(sender) {
+            $('#ddlStudents').html('<option value="0">Loading....</option>');
+            $.ajax(
+            {
+                type: "POST",
+                url: "/Library/GetStudentsOnSection/" + $(sender).val() + '/' + $('#ddlSessions').val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    $('#ddlStudents').html('');
+                    $('#ddlStudents').html('<option value="0">--Select Student--</option>');
+                    for (var i = 0; i < data.length; i++) {
+                        $('#ddlStudents').append('<option value="' + data[i].ID + '">' + data[i].Name + '</option>');
+                    }
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+        }
+
+        function AdvanceOptionMenu(sender) {
+            if ($(sender).find('i').hasClass('fa-angle-down')) {
+                $(sender).find('i').removeClass('fa-angle-down');
+                $(sender).find('i').addClass('fa-angle-up');
+                $('#divadvanceSearch').css('display', '');
+            }
+            else {
+                $(sender).find('i').removeClass('fa-angle-up');
+                $(sender).find('i').addClass('fa-angle-down');
+                $('#divadvanceSearch').css('display', 'none');
+            }
+        }
+        function BorrowerTypeChanged(sender) {
+            $(sender).closest('.x_content').find('.iradio_flat-blue').removeClass('checked');
+            $(sender).addClass('checked');
+            if ($(sender).attr('value') == '0') {
+                $('#divTeacherB').css('display', '');
+                $('#divStudentB').css('display', 'none');
+                $(sender).closest('#IssueDetail').find('#hdnBorrowerType').val(0)
+            }
+            else {
+                $('#divTeacherB').css('display', 'none');
+                $('#divStudentB').css('display', '');
+                $(sender).closest('#IssueDetail').find('#hdnBorrowerType').val(1)
+            }
+        }
+        function StuSearchTypeChanged(sender) {
+            $(sender).closest('.x_content').find('.iradio_flat-blue').removeClass('checked');
+            $(sender).addClass('checked');
+            if ($(sender).attr('value') == '0') {
+                $('#divSearchStuByClass').css('display', '');
+                $('#divSearchStuByName').css('display', 'none');
+            }
+            else {
+                $('#divSearchStuByClass').css('display', 'none');
+                $('#divSearchStuByName').css('display', '');
+            }
+        }
+       
+
+        function contractFormatResult(contract) {
+            console.log(contract);
+            var markup = "<table class='contract-result'><tr>";
+            if (contract.name !== undefined) {
+                markup += "<div class='contract-name'>" + contract.text + "</div>";
+            }
+            markup += "</td></tr></table>"
+            return markup;
+        }
+
+        function contractFormatSelection(contract) {
+            return contract.name;
+        }
+       
+
+        function contractFormatBookResult(contract) {
+            var markup = "<table class='contract-result'><tr>";
+            if (contract.name !== undefined) {
+                markup += "<div class='contract-name'>" + contract.text + "</div>";
+            }
+            markup += "</td></tr></table>"
+            return markup;
+        }
+
+        function contractFormatBookSelection(contract) {
+            return contract.name;
+        }
+       
+    </script>
+}
+<!-- /.content -->

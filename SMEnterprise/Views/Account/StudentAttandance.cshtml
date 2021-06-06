@@ -1,0 +1,304 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentAttandancePageModel
+@section IncludeCss
+{
+    <title>Attandance</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .Undone .slider-bar
+    {
+        background-color:rgba(255, 0, 0, 0.52)!important;
+    }
+    .Leave .slider-bar
+    {
+        background-color:rgba(96, 109, 115, 0.61)!important;
+    }
+    .holiday .slider-bar
+    {
+        background-color: rgba(255, 102, 0, 0.69)!important;
+    }
+    .normal .slider-bar {
+        /*      background-color: rgb(255, 128, 128) !important;*/
+        background-color: rgba(219, 199, 180, 0.68) !important;
+    } 
+    
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+        
+    }
+    
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentAttandance", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="col-md-3">
+                        <h3 class="box-title">Student Attandance </h3>
+                    </div>
+                    <div class="row std-mng-head col-md-9">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right">Section :</label>
+                                    <div class="col-md-8">
+                                        <select name="SectionID" class="form-control" id="ddlSection">
+                                            <option value="0">--Select Section--</option>
+                                            @foreach (NameIDModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Date : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" name="SelectedDate" id="dtDate" class="form-control" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+                    @using (Html.BeginForm("UpdateStudentAttandance", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
+                    {
+                        <div class="x_content">
+                            <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                            <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                            <input type="hidden" name="Month" value="@Model.Month" />
+                            <input type="hidden" name="Year" value="@Model.Year" />
+                            <input type="hidden" name="Day" value="D@(Model.Day)" />
+                            <table id="tblCategory" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 10%">Photo</th>
+                                        <th style="width: 20%">Name</th>
+                                        <th style="width: 70%">Status</th>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int count = 0;
+                                    foreach (StudentAttandanceModel c in Model.StudentAttandances)
+                                    {
+                                        <tr>
+
+                                            <td>
+                                                <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                            </td>
+                                            <td>
+                                                <ss @((c.IsExist == 0 || c.Status == 3) ? "style=color:red;" : "")> @c.Name</ss><br />
+                                                Reg. No. :@c.StudentSID<br />
+                                                SR No. :@c.SchoolUID
+
+                                            </td>
+
+                                            <td>
+                                                @{
+                                                    var bkColor = "normal";
+                                                    if (c.LeaveID != 0)
+                                                    {
+                                                        bkColor = "leave";
+                                                    }
+                                                    else if (c.Status == 2 || Model.SelectedDate.DayOfWeek == DayOfWeek.Sunday && c.IsExist == 0)
+                                                    {
+                                                        bkColor = "holiday";
+                                                    }
+                                                    else if (c.IsExist == 0)
+                                                    {
+                                                        bkColor = "Undone";
+                                                    }
+                                                    <div class="block" title="@bkColor">
+                                                        <div id='radios-@c.StudentID' style="width: 680px!important;" class="@bkColor">
+                                                            <input id='rbLeave_@c.StudentID' name='options_@c.StudentID' type="radio" @( c.Status != 0 && c.Status != 1 && c.Status != 0.5 && (c.Status == 2) ? "checked" : "")>
+                                                            <label for='rbLeave_@c.StudentID'>Leave/Holiday</label>
+                                                            <input id='rbAbsent_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 0 ? "checked" : "")>
+                                                            <label for='rbAbsent_@c.StudentID'>Absent</label>
+
+                                                            <input id='rbHalfDay_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 0.5 ? "checked" : "")>
+                                                            <label for='rbHalfDay_@c.StudentID'>Half Day</label>
+
+                                                            <input id='rbPresent_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.LeaveID == 0 && (c.Status == 1 || c.Status == 3) ? "checked" : "")>
+                                                            <label for='rbPresent_@c.StudentID'>Present</label>
+                                                            <input type="hidden" id="hdnStatus" name="StudentAttandances[@count].Status" value="@(c.Status==3?1:c.Status)" />
+                                                            <input type="hidden" name="StudentAttandances[@count].IsExist" value="@c.IsExist" />
+                                                            <input type="hidden" name="StudentAttandances[@count].StudentID" value="@c.StudentID" />
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </td>
+
+                                        </tr>
+
+                                                        count++;
+                                                    }
+
+
+                                }
+                            </table>
+                            <div>
+                                <button href="javascript:void(0);" id="btnSaveAttandance"  type="submit" class="btn btn-block btn-info pull-right">Save</button>
+                            </div>
+                        </div>
+                                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
+
+    <script>
+       
+        
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+
+        $(function () {
+            //$("label[for*='rbAbsent_']").change(function () {
+            //    alert($(this).attr('for'));
+            //    var cb = $(this).attr('for');
+            //    $('#' + cb).attr('checked', 'checked');
+            //});
+            $("div[id^='radios']").radiosToSlider({
+                animation: true,
+            });
+            $('ins').on('click', function () {
+                var type = $(this).attr('data-radio');
+                var val = 0;
+                if (type.indexOf("rbLeave") >= 0) {
+                    val = -1;
+                }
+                else if (type.indexOf("rbAbsent") >= 0) {
+                    val = 0;
+                }
+                else if (type.indexOf("rbHalfDay") >= 0) {
+                    val = 0.5;
+                }
+                else if (type.indexOf("rbPresent") >= 0) {
+                    val = 1;
+                }
+                $(this).closest('div').find('#hdnStatus').val(val);
+            });
+            $('.slider-label').on('click', function () {
+                var type = $(this).attr('for');
+                var val = 0;
+                if (type.indexOf("rbLeave") >= 0) {
+                    val = -1;
+                }
+                else if (type.indexOf("rbAbsent") >= 0) {
+                    val = 0;
+                }
+                else if (type.indexOf("rbHalfDay") >= 0) {
+                    val = 0.5;
+                }
+                else if (type.indexOf("rbPresent") >= 0) {
+                    val = 1;
+                }
+                $(this).closest('div').find('#hdnStatus').val(val);
+            });
+            //var Table = $("#tblCategory").DataTable({ "bPaginate": false, retrieve: true });
+            //function ClearSearch() {
+            //    $('#tblCategory_filter').find('input').val('');
+
+            //    Table.search('');
+            //}
+            var table = $('#tblCategory').DataTable({
+                
+                "bPaginate": false,
+                "retrieve": true
+            });
+            $('#btnSaveAttandance').click(function () {
+                $('.bs-filters').val('');
+                $('input[type=search]').val('');
+                
+                table.search('').columns().search('').draw();
+                return true;
+            });
+        });
+
+    </script>
+}
+<!-- /.content -->

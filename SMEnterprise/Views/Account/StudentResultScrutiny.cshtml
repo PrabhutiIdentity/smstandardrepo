@@ -1,0 +1,227 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentResultScrutinyListModel
+@section IncludeCss
+{
+    <title>Student Performance</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+    #tblCategory>tbody>tr>td{
+        vertical-align:middle;
+    }
+    .tblResult {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+    .tblResult>tbody>tr>td{
+        padding:1px;
+    }
+        .tblResult > thead > tr > td {
+            padding: 1px;
+        }
+        .tblResult thead {
+            font-weight: bold;
+        }
+    .tblResultEvName
+    {
+        font-weight:bold;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentResultScrutiny", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions"  onchange="$('#frmGetStudents').submit();">
+                                            <option value="0">--Select Session--</option>
+                                            @foreach (SchoolSessionModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.SessionID" @(el.SessionID == Model.SessionID ? "selected" : "")>@el.SessionName @(el.SessionStatus == 1 ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Section :</label>
+                                    <div class="col-md-8">
+                                        <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right padding-R">Evaluation : </label>
+                                    <div class="col-md-8 padding-L" style="padding-left: 10px;">
+                                        <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetStudents').submit();">
+                                                @foreach (NameIDModel el in Model.Evaluations)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                                                }
+                <div class="x_panel">
+
+                    <a class="btn btn-dark" onclick="PrintReport();">Print</a>
+                    <div class="x_content">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%" class="NoPrint">Photo</th>
+                                    <th style="width: 20%">Detail</th>
+                                    <th style="width: 70%">Result <span id="sClassName">Class Section</span></th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StudentResultScrutinyModel c in Model.StudentResult)
+                                {
+                                    <tr>
+
+                                        <td class="NoPrint">
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                           Name : <ss> @c.Name</ss><br />
+                                           Student ID : @c.StudentSID<br />
+                                           Roll No: @c.RollNo<br />
+                                           Sr. No. : @c.SchoolUID
+
+                                        </td>
+                                        <td>
+                                                @Html.Raw(c.ResultDetails)
+                                       </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+<script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
+<script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#sClassName').html(' For : ' + $('#ddlClass option:selected').text() + '-' + $('#ddlSection option:selected').text() + ' (' + $('#ddlEvaluation option:selected').text() + ') - ' + $('#ddlSessions option:selected').text());
+        });
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function PrintReport() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/ResultScrutiny.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}
+<!-- /.content -->

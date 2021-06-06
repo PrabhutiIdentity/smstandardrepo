@@ -1,0 +1,512 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>P-School | Dashboard</title>
+    <style>
+        .seven-cols .col-md-1,
+        .seven-cols .col-sm-1,
+        .seven-cols .col-lg-1 {
+            width: 14.285714285714285714285714285714%;
+            *width: 14.285714285714285714285714285714%;
+            height: 54px;
+            text-align: center;
+            padding-top: 18px;
+            border-radius: 34px;
+        }
+
+        .Legends {
+            height: 54px;
+            text-align: center;
+            padding-top: 18px;
+            border-radius: 34px;
+        }
+
+        .AttLegends .col-md-2 {
+            width: 14.285714285714285714285714285714%;
+            *width: 14.285714285714285714285714285714%;
+            text-align: right;
+            margin-left: -25px;
+        }
+
+        #tblMonthAttandance > thead > tr > th {
+            text-align: center;
+            background-color: #71c1b2;
+            color: white;
+        }
+
+        .divLegendHeader {
+            background-color: #f5f7fa;
+            color: #71c1b2;
+            text-decoration: underline;
+            text-align: center;
+        }
+
+        .divAttHeader {
+            text-align: center;
+            background-color: #71c1b2;
+            color: white;
+        }
+
+        #tblMonthAttandance > tbody > tr > td {
+            text-align: center;
+            color: white;
+        }
+
+        .inactive {
+            background-color: rgba(128, 128, 128, 0.08);
+            text-align: center;
+        }
+
+        .holiday {
+            background-color: rgba(204, 0, 255, 0.47);
+            color: white;
+            text-align: center;
+        }
+
+        .leave {
+            background-color: rgba(0, 0, 255, 0.65);
+            color: white;
+            text-align: center;
+        }
+
+        .Absent {
+            background-color: rgba(202, 6, 6, 0.58);
+            color: white;
+            text-align: center;
+        }
+
+        .Present {
+            background-color: rgba(4, 208, 4, 0.68);
+            color: white;
+            text-align: center;
+        }
+
+        .HalfDay {
+            background-color: rgba(255, 71, 0, 0.55);
+            color: white;
+            text-align: center;
+        }
+    </style>
+    <script>
+        var AlterNativeMaleImg = "@Url.Content("~/Images/MaleNoImage.png")";
+        var AlterNativeFemaleImg = "@Url.Content("~/Images/FemaleNoImage.png")";
+        var AlterNativeDocImg = "@Url.Content("~/Images/NoDocImage.jpg")";
+        function OnImageError(me, Type) {
+            if (Type == 1) {
+                me.src = AlterNativeFemaleImg;
+                return true;
+            }
+            if (Type == 3) {
+                me.src = AlterNativeDocImg;
+                return true;
+            }
+            else {
+                me.src = AlterNativeMaleImg;
+                return true;
+            }
+        }
+    </script>
+}
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Child Report <small>Activity report</small></h2>
+
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <div class="col-md-3 col-sm-3 col-xs-12 profile_left">
+                        <div class="profile_img">
+                            <!-- end of image cropping -->
+                            <div id="crop-avatar">
+                                <!-- Current avatar -->
+                                <div class="avatar-view">
+                                    <img id="imgStudentPhoto" style="max-width: 100%;" onerror="return OnImageError(this,@(Model.StudentDetail.Gender));" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetail.StudentID)_@Model.StudentDetail.Photo" alt="Avatar">
+                                </div>
+                            </div>
+                            <!-- end of image cropping -->
+                        </div>
+                        <h3>@Model.StudentDetail.Name</h3>
+                        <ul class="list-unstyled user_data">
+                            <li>
+                                <i class="fa fa-map-marker user-profile-icon"></i> @Model.StudentDetail.ClassName - @Model.StudentDetail.SectionName
+                            </li>
+                            <li>
+                                <i class="fa fa-briefcase user-profile-icon"></i> @Model.StudentDetail.RollNo
+                            </li>
+                        </ul>
+                        <br />
+                        <!-- start skills -->
+                        <h4 style="display:none;">Skills</h4>
+                        <ul class="list-unstyled user_data" style="display:none;">
+                            <li>
+                                <p>Web Applications</p>
+                                <div class="progress progress_sm">
+                                    <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="50"></div>
+                                </div>
+                            </li>
+                            <li>
+                                <p>Website Design</p>
+                                <div class="progress progress_sm">
+                                    <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="70"></div>
+                                </div>
+                            </li>
+                            <li>
+                                <p>Automation & Testing</p>
+                                <div class="progress progress_sm">
+                                    <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="30"></div>
+                                </div>
+                            </li>
+                            <li>
+                                <p>UI / UX</p>
+                                <div class="progress progress_sm">
+                                    <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="50"></div>
+                                </div>
+                            </li>
+                        </ul>
+                        <!-- end of skills -->
+                    </div>
+                    <div class="col-md-9 col-sm-9 col-xs-12" style="padding: 0px;">
+                        <div class="x_content">
+                            <div class="" role="tabpanel" data-example-id="togglable-tabs">
+                                <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
+                                    <li role="presentation" class="active">
+                                        <a href="#tab_content6" role="tab" id="profile-tab6" data-toggle="tab" aria-expanded="true">Month Attandance</a>
+                                    </li>
+                                    <li role="presentation" class="">
+                                        <a href="#tab_content5" role="tab" id="profile-tab5" data-toggle="tab" aria-expanded="false">Year Attandance</a>
+                                    </li>
+                                    <li role="presentation" class="">
+                                        <a href="#tab_content1" id="home-tab" role="tab" data-toggle="tab" aria-expanded="false">Notice (@Model.Notices.Count)</a>
+                                    </li>
+                                    <li role="presentation" class="">
+                                        <a href="#tab_content4" role="tab" id="profile-tab1" data-toggle="tab" aria-expanded="false">Messages (@Model.Messages.Count)</a>
+                                    </li>
+                                    <li role="presentation" class="">
+                                        <a href="#tab_content2" role="tab" id="profile-tab" data-toggle="tab" aria-expanded="false">Exams</a>
+                                    </li>
+                                    <li role="presentation" class="">
+                                        <a href="#tab_content3" role="tab" id="profile-tab2" data-toggle="tab" aria-expanded="false">Events (@Model.Events.Count)</a>
+                                    </li>
+                                </ul>
+                                <div id="myTabContent" class="tab-content">
+                                    <div role="tabpanel" class="tab-pane fade" id="tab_content1" aria-labelledby="home-tab">
+                                        <!-- start recent activity -->
+                                        <ul class="messages">
+                                            @{
+                                                if (Model.Notices.Count > 0)
+                                                {
+                                                    foreach (SMEnterprise.Models.NoticeModel m in Model.Notices)
+                                                    {
+                                            <li>
+                                                <div class="message_date">
+                                                    <h3 class="date text-info">@m.NoticeStartDate.Day</h3>
+                                                    <p class="month">@m.NoticeStartDate.ToString("MMM")</p>
+                                                </div>
+                                                <div class="message_wrapper">
+                                                    <h4 class="heading">@(m.NoticeLevel == 0 ? "High" : m.NoticeLevel == 1 ? "Medium" : "Low")</h4>
+                                                    <blockquote class="message">@m.NoticeTitle</blockquote>
+                                                    <br />
+                                                    <p class="url">
+                                                        <span class="fs1 text-info" aria-hidden="true" data-icon=""></span>
+                                                        <a style="display:none;" href="#"><i class="fa fa-paperclip"></i> User Acceptance Test.doc </a>
+                                                    </p>
+                                                </div>
+                                            </li>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                            <li>
+
+                                                <div class="message_wrapper">
+                                                    <blockquote class="message">No Notice</blockquote>
+
+                                                </div>
+                                            </li>
+                                                }
+                                            }
+                                        </ul>
+                                        <!-- end recent activity -->
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane fade" id="tab_content4" aria-labelledby="home-tab">
+                                        <!-- start recent activity -->
+                                        <ul class="messages">
+                                            @foreach (SMEnterprise.Models.MessageModel m in Model.Messages)
+                                            {
+                                            <li>
+                                                <div class="message_date">
+                                                    <h3 class="date text-info">@m.SendDate.Day</h3>
+                                                    <p class="month">@m.SendDate.ToString("MMM")</p>
+                                                </div>
+                                                <div class="message_wrapper">
+                                                    <h4 class="heading">@m.SenderName</h4>
+                                                    <blockquote class="message">@m.MessageTitle</blockquote>
+                                                    <br />
+                                                    <p class="url">
+                                                        <span class="fs1 text-info" aria-hidden="true" data-icon=""></span>
+                                                        <a style="display:none;" href="#"><i class="fa fa-paperclip"></i> User Acceptance Test.doc </a>
+                                                    </p>
+                                                </div>
+                                            </li>
+                                            }
+                                        </ul>
+                                        <!-- end recent activity -->
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane fade" id="tab_content2" aria-labelledby="profile-tab">
+                                        <!-- start user projects -->
+                                        <table class="data table table-striped no-margin">
+                                            <thead>
+                                                <tr>
+                                                    <th>#</th>
+                                                    <th>Exam Name</th>
+                                                    <th>Weightage</th>
+                                                    <th>Scheduled Month</th>
+                                                    <th>Start Date</th>
+                                                    <th>End Date</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    string[] Months = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
+                                                    var counter = 1;
+                                                    foreach (SMEnterprise.Models.EvaluationModel e in Model.Evaluations)
+                                                    {
+                                                <tr>
+                                                    <td>@counter</td>
+                                                    <td>@e.EvaluationName</td>
+                                                    <td class="vertical-align-mid">
+                                                        <div class="progress">
+                                                            <div class="progress-bar progress-bar-success" data-transitiongoal="@e.Weightage"></div>
+                                                        </div>
+                                                    </td>
+                                                    <td> @(Months[e.EvaluationMonth - 1])</td>
+                                                    <td>@(e.StartDate.Year == 0001 ? "Not Scheduled" : e.StartDate.ToString("dd MMM, yyyy"))</td>
+                                                    <td>@(e.EndDate.Year == 0001 ? "Not Scheduled" : e.EndDate.ToString("dd MMM, yyyy"))</td>
+
+                                                </tr>
+                                                        counter++;
+                                                    }
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                        <!-- end user projects -->
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane fade" id="tab_content3" aria-labelledby="profile-tab">
+                                        <ul class="messages">
+                                            @foreach (SMEnterprise.Models.EventModel m in Model.Events)
+                                            {
+                                            <li>
+                                                <div class="message_date">
+                                                    <h3 class="date text-info">@m.StartDate.Day</h3>
+                                                    <p class="month">@m.StartDate.ToString("MMM"), @m.StartDate.Year</p>
+                                                </div>
+                                                <div class="message_wrapper">
+                                                    <h4 class="heading">@m.Title</h4>
+                                                    <blockquote class="message">@m.Description</blockquote>
+                                                    <br />
+                                                    <p class="url">
+                                                        <span class="fs1 text-info" aria-hidden="true" data-icon=""></span>
+                                                        <a style="display:none;" href="#"><i class="fa fa-paperclip"></i> User Acceptance Test.doc </a>
+                                                    </p>
+                                                </div>
+                                            </li>
+                                            }
+                                        </ul>
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane fade" id="tab_content5" aria-labelledby="attChart-tab">
+                                        <!-- start of user-activity-graph -->
+                                        <canvas id="canvas000"></canvas>
+                                        <!-- end of user-activity-graph -->
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane fade active in" id="tab_content6" aria-labelledby="attMonth-tab">
+                                        @{
+                                            var totalLeaves = 0;
+                                            var totalPresent = 0;
+                                            var totalHalfDay = 0;
+                                            var totalHolidays = 0;
+                                            var totalAbsent = 0;
+                                            var curdate = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+                                            var totalDays = System.DateTime.DaysInMonth(curdate.Year, curdate.Month);
+                                            var totalSchoolDays = totalDays;
+                                            var StartDate = new DateTime(curdate.Year, curdate.Month, 1);
+                                            var fDay = (int)StartDate.DayOfWeek;
+                                            <div class="row">
+                                                <div class="col-md-7">
+                                                    <div class="row seven-cols" style="width: 392px;margin-left: 40px;">
+                                                        <div class="col-md-1 divAttHeader">Sun</div>
+                                                        <div class="col-md-1 divAttHeader">Mon</div>
+                                                        <div class="col-md-1 divAttHeader">Tues</div>
+                                                        <div class="col-md-1 divAttHeader">Wed</div>
+                                                        <div class="col-md-1 divAttHeader">Thu</div>
+                                                        <div class="col-md-1 divAttHeader">Fri</div>
+                                                        <div class="col-md-1 divAttHeader">Sat</div>
+                                                        @for (int i = 0; i < fDay; i++)
+                                                        {
+                                                            <div class="col-md-1 inactive"></div>
+                                                        }
+                                                        @if (Model.MonthAttandance.Count > 0)
+                                                        {
+                                                            foreach (SMEnterprise.Models.AttandanceCalenderModel a in Model.MonthAttandance)
+                                                            {
+                                                                if (totalDays < a.DayID)
+                                                                {
+                                                                    <div class="col-md-1"></div>
+                                                                }
+                                                                else
+                                                                {
+                                                                    //var cdow=(int)( new DateTime(curdate.Year, curdate.Month, 1)).DayOfWeek;
+                                                                    var css = "inactive";
+                                                                    if (a.Status == 3)
+                                                                    {
+                                                                        css = "inactive";
+                                                                    }
+                                                                    else if (a.Status == 1)
+                                                                    {
+                                                                        css = "Present";
+                                                                        totalPresent = totalPresent + 1;
+                                                                    }
+                                                                    else if (a.Status == 2 || a.Status == -2)
+                                                                    {
+                                                                        css = "holiday";
+                                                                        totalHolidays = totalHolidays + 1;
+                                                                        totalSchoolDays = totalSchoolDays - 1;
+                                                                    }
+                                                                    else if (a.Status == 0)
+                                                                    {
+                                                                        css = "Absent";
+                                                                        totalAbsent = totalAbsent + 1;
+                                                                    }
+                                                                    else if (a.Status.ToString() == "0.50")
+                                                                    {
+                                                                        css = "HalfDay";
+                                                                        totalHalfDay = totalHalfDay + 1;
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        css = "leave";
+                                                                        totalLeaves = totalLeaves + 1;
+                                                                    }
+                                                                    <div class="col-md-1 @css">@a.DayID</div>
+                                                                }
+
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            for (var ii = 0; ii < totalDays; ii++)
+                                                            {
+                                                                <div class="col-md-1 inactive">@(ii + 1)</div>
+                                                            }
+                                                        }
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <div class="col-md-12 Legends divLegendHeader">
+                                                        Legends
+                                                    </div>
+                                                    <div class="col-md-6 Legends">
+                                                        Absent :
+                                                    </div>
+                                                    <div class="col-md-6 Absent Legends">
+                                                        @totalAbsent / @totalSchoolDays
+                                                    </div>
+                                                    <div class="col-md-6 Legends">
+                                                        Present :
+                                                    </div>
+                                                    <div class="col-md-6 Present Legends">
+                                                        @totalPresent / @totalSchoolDays
+                                                    </div>
+                                                    <div class="col-md-6 Legends">
+                                                        holiday :
+                                                    </div>
+                                                    <div class="col-md-6 holiday Legends">
+                                                        @totalHolidays / @totalDays
+                                                    </div>
+                                                    <div class="col-md-6 Legends">
+                                                        Leave :
+                                                    </div>
+                                                    <div class="col-md-6 leave Legends">
+                                                        @totalLeaves / @totalSchoolDays
+                                                    </div>
+                                                    <div class="col-md-6 Legends">
+                                                        HalfDay :
+                                                    </div>
+                                                    <div class="col-md-6 HalfDay Legends">
+                                                        @totalHalfDay / @totalSchoolDays
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="clearfix">.</div>
+                                            <div class="row AttLegends">
+
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/Chart.min.js")"></script>
+
+    <script>
+        $(function () {
+
+        });
+    </script>
+    <!-- datepicker -->
+    <script type="text/javascript">
+
+            function DrawAttandanceChart(data) {
+                    new Chart(document.getElementById("canvas000"), {
+                        type: 'line',
+                        data: data
+                    });
+                }
+
+            $(document).ready(function () {
+
+                    $.ajax(
+                        {
+                            type: "POST",
+                            url: "/Parent/GetDashboardData",
+                            cache: false,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                DrawAttandanceChart(data.AttandanceChart);
+                            },
+                            error: function (e) {
+                                alert("errorn");
+                            }
+                        });
+                var cb = function (start, end, label) {
+                    console.log(start.toISOString(), end.toISOString(), label);
+                $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+                //alert("Callback has fired: [" + start.format('MMMM D, YYYY') + " to " + end.format('MMMM D, YYYY') + ", label = " + label + "]");
+            }
+
+        });
+    </script>
+}

@@ -1,0 +1,98 @@
+﻿
+<div class="box box-danger">
+    <div class="box-header">
+        <h3 class="box-title">Stop Details</h3>
+    </div>
+    <div class="box-body">
+        <input type="hidden" id="hdnRouteID" name="RouteID" value="" />
+        <input type="hidden" id="hdnStopID" name="StopID" value="@Model.StopID" />
+        <table class="table table-bordered edit-table">
+            <tr>
+                <td width="14%">City :</td>
+                <td width="26%" colspan="2">
+                    <select ID="ddlRouteStoppageCity" onchange="LocationChanged(this,2)" class="form-control" name="CityID">
+                        @foreach (var op in Model.Cities)
+                        {
+                            <option value="@op.ID" @(op.ID == Model.CityID ? "selected" : "")>@op.Name</option>
+                        }
+                    </select>
+                </td>
+                <td width="14%">Area :</td>
+                <td width="32%" colspan="3">
+                    <select ID="ddlRouteStoppageArea" class="form-control" name="AreaID">
+                        @foreach (var op in Model.Areas)
+                        {
+                            <option value="@op.ID" @(op.ID == Model.AreaID ? "selected" : "")>@op.Name</option>
+                        }
+                    </select>
+                </td>
+
+               
+               
+            </tr>
+            <tr>
+                <td>Pick-Up :</td>
+                <td colspan="7">
+                    <table class="table table-bordered edit-table">
+                        <tr>
+                            <td style="width: 20%;">Time : (HH:mm)</td>
+                            <td style="width: 20%;">
+
+                                <input type="time" ID="txtRouteStoppageTime" name="Time" value="@Model.Time" class="form-control" />
+
+                            </td>
+                            <td style="width: 20%;">Halt : (in Minutes)</td>
+                            <td style="width: 10%;">
+                                <input type="number" ID="txtRouteStoppageHalt" name="HaltDuration" value="@Model.HaltDuration" class="form-control" />
+                            </td>
+                            <td style="width: 15%;">Sequence No :</td>
+                            <td style="width: 10%;">
+                                <input type="number" ID="txtRouteStoppageSequence" name="SequenceNo" value="@Model.SequenceNo" class="form-control" />
+                            </td>
+
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>Drop :</td>
+                <td colspan="7">
+                    <table class="table table-bordered edit-table">
+                        <tr>
+                            <td style="width: 20%;">Time : (HH:mm)</td>
+                            <td style="width: 20%;">
+
+                                <input type="time" ID="txtRouteStoppageTimeR" value="@Model.TimeR" name="TimeR" class="form-control" />
+
+                            </td>
+                            <td style="width: 20%;">Halt : (in Minutes)</td>
+                            <td style="width: 10%;">
+                                <input type="number" ID="txtRouteStoppageHaltR" value="@Model.HaltDurationR" name="HaltDurationR" class="form-control" />
+                            </td>
+                            <td style="width: 15%;">Sequence No :</td>
+                            <td style="width: 10%;">
+                                <input type="number" ID="txtRouteStoppageSequenceR" value="@Model.SequenceNoR" name="SequenceNoR" class="form-control" />
+                            </td>
+
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            
+                <tr  @(((SMEnterprise.Models.StartupModel)Session["StartupModel"]).TransportFeeMode == 0?"":"style=display:none;")>
+                    <td>
+                        Fee
+                    </td>
+                    <td>
+                        <input type="number" id="txtRate" class="form-control" value="@Model.Rate" />
+                    </td>
+                </tr>
+        </table>
+        <hr />
+        <div class="row">
+            <div class="col-md-12">
+                <button href="javascript:void(0);" class="btn btn-info pull-right" onclick="SaveStop(this);">Save</button>
+            </div>
+        </div>
+    </div>
+</div>

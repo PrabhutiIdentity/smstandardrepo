@@ -1,0 +1,93 @@
+﻿@{
+    ViewBag.Title = "MailBox";
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>P-School | Parent Diary</title>
+    <link href="@Url.Content("~/css/Admin/blue.css")" rel="stylesheet">
+
+
+}
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Parent Diary</h2>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+
+                        <!-- start project list -->
+                        <ul class="list-unstyled timeline widget">
+                            @{
+                                var counter = 1;
+                                foreach (SMEnterprise.Models.ParentDiaryModel p in Model)
+                                {
+
+                                    <li>
+                                        <div class="block">
+                                            <div class="block_content">
+
+                                                <h2 class="title">
+                                                    @*<input style="display:none;" type="checkbox" class="flat" @(p.IsRead==1?"checked disabled":"") title="Click to Mark as Read">*@
+                                                    <a style="margin-left: 5px;" href="javascript:void(0);" onclick="ViewNoticeDescription(this);" title="Click to View Details" class="Closed">@p.Title (View Details)</a>
+                                                </h2>
+                                                <div class="byline">
+                                                    <span>@p.PBDate.ToString("dd MMM,yyyy")</span> by <apan>@p.TeacherName (@(p.TeacherType == 0 ? "Class Teacher" : p.SubjectName)) for<b> @p.StudentName</b></apan>
+
+                                                </div>
+
+                                                <p class="excerpt" style="display:none;">
+                                                    @Html.Raw(p.Description)   @*@p.Description*@
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                    counter++;
+                                }
+                            }
+                        </ul>
+                        <!-- end project list -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+<script src="@Url.Content("~/js/icheck.min.js")"></script>
+    <script>
+        //$(document).ready(function () {
+        //    $('input.flat').iCheck({
+        //        checkboxClass: 'icheckbox_flat-blue',
+        //        radioClass: 'iradio_flat-blue'
+        //    });
+        //});
+        function ViewNoticeDescription(sender) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender).closest('li').find('.excerpt').css('display', '');
+                $(sender).removeClass('Closed').addClass('Opened');
+                $(sender).attr('title', 'Click to Hide Details');
+                $(sender).html($(sender).html().replace('(View Details)','(Hide Details)'));
+            }
+            else {
+                $(sender).closest('li').find('.excerpt').css('display', 'none');
+                $(sender).removeClass('Opened').addClass('Closed');
+                $(sender).attr('title', 'Click to Show Details');
+                $(sender).html($(sender).html().replace('(Hide Details)', '(View Details)'));
+            }
+
+        }
+    </script>
+}

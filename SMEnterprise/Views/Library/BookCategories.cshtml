@@ -1,0 +1,179 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_LibraryLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Book Categories</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .RClosebtn {
+        display: none;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    #tblCategory .form-control {
+        width: 100% !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+
+                                    <th> Name</th>
+                                    <th> #Books</th>
+                                    <th> Edit</th>
+                                </tr>
+                            </thead>
+                            @{
+
+                                var fCounter = 1;
+                                <tbody>
+
+                                    @foreach (NameIDModel c in Model)
+                                    {
+                                    <tr>
+                                        <td>
+                                            @fCounter
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.Name</span>
+                                            <input class="form-control editCopy hidden" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' type="text" id="txtName" value="@c.Name" />
+                                        </td>
+                                        <td>
+                                            @c.Extra1
+                                        </td>
+                                        
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" class="btn btn-link sbtn" onclick="EditCopy(this);">Edit</a>
+                                                    
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateBookCategory", "Library", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "LibraryUpdate" }))
+                                                    {
+                                                        <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+                                                        <input type="hidden" id="hdnID" name="ID" value="@c.ID" />
+
+                                                        <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" />
+                                                    }
+                                                    @using (Html.BeginForm("UpdateBookCategory", "Library", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "LibraryUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                                        <input type="hidden" name="Extra2" id="hdnOpType" value="-1" />
+                                                        <input type="hidden" name="ID" id="hdnBookCount" value="@c.Extra1" />
+
+                                                        <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteCategory(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                    fCounter++;
+                                    }
+
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td>
+                                            @fCounter
+                                        </td>
+                                        <td>
+                                            <input class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' type="text" id="txtName" value="" />
+                                        </td>
+                                        <td>0</td>
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateBookCategory", "Library", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "LibraryUpdate" }))
+                                                    {
+                                                        <input type="hidden" id="hdnName" name="Name" value="" />
+                                                        <input type="hidden" id="hdnID" name="ID" value="0" />
+
+                                                        <input type="submit" class="btn btn-link" value="Add New" />
+                                                    }
+
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                </tfoot>
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+       
+        function DeleteCategory(sender) {
+            var cnt = $(sender).closest('tr').find('#hdnBookCount').val();
+            if (cnt != 0) {
+                ShowNotification('Error', 'Category has Books so it can\'t be deleted!!!!', 'error');
+                return false;
+            }
+            else {
+                return confirm('Do you really want to delete Category!!!!');
+            }
+        }
+    </script>
+}
+<!-- /.content -->

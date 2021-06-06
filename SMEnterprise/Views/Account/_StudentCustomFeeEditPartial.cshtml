@@ -1,0 +1,100 @@
+﻿@model SMEnterprise.Models.StudentEditModel
+
+@{
+    if(Model.Student.StudentSessionUID==0)
+    {
+        try
+        {
+            Model.Student.StudentSessionUID = Model.CustomeFee.FirstOrDefault().SessionID;
+        }
+        catch
+        {
+
+        }
+    }
+}
+    <div class="row">
+        <input type="hidden" name="StudentSessionUID" id="hdnStudentSessionUID" value="@Model.Student.StudentSessionUID">
+        <div class="col-md-4 form-group pull-right">
+            <label>Is Applicable</label>
+            <br />
+            <label class="switch switch-green">
+                <input type="checkbox" class="switch-input" @(Model.Student.IsCustomFee == 1 ? "checked" : "")>
+                <span class="switch-label" onclick="CustomFeeStatusChanged(this);" data-on="Yes" data-off="No"></span>
+                <span class="switch-handle" id="shTranding"></span>
+                <input type="hidden" name="IsCustomFee" id="hdnCustomFeeApplicable" value="@Model.Student.IsCustomFee">
+            </label>
+        </div>
+    </div>
+<div class="row">
+    <div class="col-md-12">
+        <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+        <table id="tblFeee" class="table table-bordered table-hover">
+            <thead>
+                <tr style="color: White; background-color: rgb(68, 88, 97)!important; font-weight: bold;" role="row">
+                    <th style="width:10%">#</th>
+                    <th style="width:30%">Fee Head</th>
+                    <th style="width:25%">Standard Class Fee </th>
+                    <th style="width:25%">Student Custom Fee</th>
+                    <th style="width:10%">Is Applicable</th>
+                </tr>
+            </thead>
+            <tbody id="tbdSalary">
+                @{
+                    var ctr = 0;
+                    decimal TotalSalaryStructure = 0;
+                    decimal TotalOffered = 0;
+                    foreach (var fee in Model.CustomeFee)
+                    {
+
+                        TotalSalaryStructure = TotalSalaryStructure + fee.ClassFee;
+                        TotalOffered = TotalOffered + fee.FeeAmount;
+                        <tr>
+                            <td>
+                                @(ctr + 1)
+                                <input type="hidden" name="CustomeFee[@ctr].FeeTypeID" value="@fee.FeeTypeID" />
+                                <input type="hidden" name="CustomeFee[@ctr].SessionID" value="@fee.SessionID" />
+                                <input type="hidden" name="CustomeFee[@ctr].SFID" value="@fee.SFID" />
+                                <input type="hidden" name="CustomeFee[@ctr].StudentID" value="@Model.Student.StudentID" />
+                            </td>
+                            <td>
+                                @fee.FeeTypeName
+                            </td>
+                            <td>
+                                @fee.ClassFee.ToString("N2")
+                            </td>
+                            <td>
+                                <input type="number" step=".01" name="CustomeFee[@ctr].FeeAmount" value="@(String.Format("{0:0}", fee.FeeAmount))" class="form-control SalaryDetail" />
+                            </td>
+                            <td>
+                                <label class="switch switch-green col-md-6">
+                                    <input type="checkbox" class="switch-input" @(fee.SFID == 0 ? "checked" : fee.IsApplicable == 1 ? "checked" : "")>
+                                    <span class="switch-label" onclick="$(this).closest('label').find('#hdnIsFeeApplicable').val($(this).closest('label').find('#hdnIsFeeApplicable').val() == '0' ? '1' : '0');" data-on="Yes" data-off="No"></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" name="CustomeFee[@ctr].IsApplicable" id="hdnIsFeeApplicable" value="@(fee.SFID == 0 ? 1 : fee.IsApplicable )">
+                                </label>
+                            </td>
+                        </tr>
+                        ctr++;
+                    }
+                    <tr style="background-color: rgba(115, 135, 156, 0.44);color:white">
+                        <td colspan="2">
+                            Total
+                        </td>
+                        <td>
+                            @TotalSalaryStructure.ToString("N2")
+                        </td>
+                        <td>
+                            <input readonly type="number" step=".01" name="Amount" value="@(String.Format("{0:0}", TotalOffered))" class="form-control TotalSalary" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+            </tfoot>
+        </table>
+        <div class="form-group col-md-12">
+            <button type="submit" class="btn btn-success pull-right">Save</button>
+        </div>
+    </div>
+</div>

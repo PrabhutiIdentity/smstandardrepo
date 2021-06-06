@@ -1,0 +1,91 @@
+﻿@model SMEnterprise.Models.ProductsPageModel
+<div class="box box-danger">
+    <div class="box-header">
+        <h3 class="box-title">Product Details</h3>
+    </div>
+    @using (Html.BeginForm("UpdateProduct", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateGallery" }))
+    {
+        if (Model.Product.ProductID == 0)
+        {
+            Model.Product.Status = 1;
+        }
+        <div class="box-body">
+            <input type="hidden" id="hdnABID" name="ProductID" value="@Model.Product.ProductID" />
+            <div class="row">
+                <div class="col-md-4">
+                    <label>Image</label>
+                    <input type="hidden" id="hdnImageName" name="Photo" value="@Model.Product.Photo" />
+                    <div style="height: 175px;">
+                        <img class="thumbImageMain" id="imgMainPhoto" src="@Url.Content("~/Images/Products/")@(Model.Product.ProductID)_@Model.Product.Photo" alt="Photo" />
+                    </div>
+                    <input type="file" onchange="PhotoChanged(this)" name="ProductPhoto" id="fuDCImage" />
+                </div>
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label>Category</label>
+                            <select class="form-control" name="ProductCategoryID">
+                                @foreach (var c in Model.Categories)
+                                {
+                                <option value="@c.ID" @(c.ID == Model.Product.ProductCategoryID ? "selected" : "")>@c.Name @c.HSNCode (@c.SGST.ToString("0")/@c.CGST.ToString("0")/@c.IGST.ToString("0"))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Quantity</label>
+                            <input type="number" class="form-control" name="Quantity" id="txtGalleryTitle" value="@Model.Product.Quantity">
+
+                        </div>
+                        <div class="col-md-3">
+                            <label>Min. Qty</label>
+                            <input type="number" class="form-control" name="MinQty" id="txtGalleryTitle" value="@Model.Product.MinQty">
+
+                        </div>
+                        <div class="col-md-12">
+                            <label>Product Name</label>
+                            <input type="text" class="form-control" name="Name" id="txtGalleryTitle" value="@Model.Product.Name">
+
+                        </div>
+                        <div class="form-group col-md-12">
+                            <div class="input-group col-md-4">
+                                <div class="input-group-addon">
+                                    <span>Status</span>
+                                </div>
+                                <label class="switch switch-green">
+                                    @if (Model.Product.Status == 1)
+                                    {
+                                        <input type="checkbox" class="switch-input" Checked>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" class="switch-input">
+                                    }
+                                    <span class="switch-label" onclick='$(this).closest("label").find("#hdnSectionEditStatus").val($(this).closest("label").find("#hdnSectionEditStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" name="Status" id="hdnSectionEditStatus" value="@Model.Product.Status" />
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label>MRP</label>
+                            <input type="number" step="0.01" class="form-control" name="MRP" id="txtMRP" value="@Model.Product.MRP">
+
+                        </div>
+                        <div class="col-md-4">
+                            <label>Selling Price</label>
+                            <input type="number" step="0.01" class="form-control" name="Price" id="txtPrice" value="@Model.Product.Price">
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-success pull-right">Save</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>

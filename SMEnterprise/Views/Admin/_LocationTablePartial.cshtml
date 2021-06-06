@@ -1,0 +1,168 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th colspan="@(Model.Type==4?7:5)" style="text-align: center;background-color: #5753a1;color: white;">
+                Manage @(Model.Type == 2 ? "States" : Model.Type == 3 ?"Cities":"Areas") For [MasterNamePlaceHolder]
+            </th>
+        </tr>
+        <tr>
+            <th style="width: 5%">#</th>
+            @if (Model.Type == 2)
+            {
+                <th style="width: 45%">Name</th>
+                <th style="width: 15%">#Cities</th>
+            }
+            else if (Model.Type == 3)
+            {
+                <th style="width: 45%">Name</th>
+                <th style="width: 15%">#Areas</th>
+            }
+            else
+            {
+                <th style="width: 20%">Name</th>
+                <th style="width: 15%">Pin Code</th>
+                <th style="width: 10%">#Routes</th>
+            }
+            <th style="width: 15%">Status</th>
+            <th style="width: 20%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var fCounter = 1;
+            foreach (var c in Model.List)
+            {
+                <tr>
+                    <td>
+                        @fCounter
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.Name</span>
+                        <input class="form-control editCopy hidden" type="text" id="txtName" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="@c.Name" />
+
+                        <input type="hidden" id="hdnType" value="@Model.Type" />
+                    </td>
+
+                    @if (Model.Type == 4)
+                    {
+                        <td>
+                            <span class="ViewCopy visible">@c.Other</span>
+                            <input class="form-control editCopy hidden" type="text" onchange='$(this).closest("tr").find("#hdnOther").val($(this).val());' name="Other" value="@c.Other" />
+                        </td>
+                        <td>
+                            <input type="hidden" id="hdnCount" value="@c.Count" />
+                            @c.Count
+                        </td>
+                        
+                    }
+                    else
+                    {
+                        <td>
+                            <input type="hidden" id="hdnCount" value="@c.Count" />
+                            @c.Count
+
+                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.ID" lType="@(c.Type+1)" class="Closed Table_@c.Type">Manage</a>)
+
+                        </td>
+                    }
+                    <td>
+
+                        <span class="ViewCopy visible"><label class='badge bg-@(c.IsApproved == 0 ? "red" : "green")'>@(c.IsApproved == 0 ? "Inactive" : "Active")</label></span>
+                        <label class="switch switch-green editCopy hidden">
+                            @if (c.IsApproved == 1)
+                            {
+                                <input type="checkbox" class="switch-input" Checked>
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="switch-input">
+                            }
+                            <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+
+                        </label>
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+                                <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                <input type="hidden" name="MasterID" id="hdnMasterID" value="@Model.MasterID" />
+                                <input type="hidden" name="Other" id="hdnOther" value="@c.Other" />
+                                <input type="hidden" id="hdnStatus" name="IsApproved" value="@c.IsApproved" />
+                                <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+
+                                <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" onclick="UpdateLocation(this, 1);" />
+
+                                <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteLocation(this);" />
+
+                            </div>
+                        </div>
+                    </td>
+
+
+
+                </tr>
+                fCounter++;
+            }
+        }
+    </tbody>
+    <tfoot style="border-width: 2px;border-style: groove;display:none;">
+        <tr>
+            <td></td>
+            <td>
+                <input type="hidden" name="ID" value="0" />
+                <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="" />
+            </td>
+            @if (Model.Type == 4)
+            {
+                <td>
+                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnOther").val($(this).val())' name="Other" value="" />
+                </td>
+                <td>
+                    <a class="btn btn-link" href="javascript:void(0);" title="click to change" onclick="ShowLocationMap(this,'0','0');"> NA,NA</a>
+                </td>
+            }
+            <td>0</td>
+            <td>
+                <label class="switch switch-green">
+
+                    <input type="checkbox" class="switch-input" Checked>
+
+                    <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                    <span class="switch-handle" id="shTranding"></span>
+
+                </label>
+            </td>
+            <td>
+                <div class="row">
+                    <div class="col-md-6">
+
+                        <input type="hidden" id="hdnType" value="@Model.Type" />
+                        <input type="hidden" name="ID" id="hdnID" value="0" />
+                        <input type="hidden" name="MasterID" id="hdnMasterID" value="@Model.MasterID" />
+                        <input type="hidden" id="hdnStatus" name="Status" value="1" />
+                        <input type="hidden" id="hdnName" name="Name" value="" />
+                        <input type="hidden" name="Other" id="hdnOther" value="" />
+
+                        <input type="submit" class="btn btn-link" value="Add New" onclick="UpdateLocation(this, 1);" />
+
+
+                    </div>
+
+                </div>
+            </td>
+
+
+
+
+
+        </tr>
+
+    </tfoot>
+</table>

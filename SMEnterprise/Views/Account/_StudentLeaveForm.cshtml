@@ -1,0 +1,149 @@
+﻿
+<div class="x_content">
+    <div class="row">
+        @using (Html.BeginForm("SaveStudentLeave", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+        {
+            <div class="col-md-12">
+                <label class="control-label col-md-12 col-sm-3 col-xs-12" style="text-align: center;font-size: 22px;padding-bottom: 8px;">Leave Details</label>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Class </label>
+                <div class="">
+                    <select class="form-control" id="ddlNewClasses" name="ClassID" onchange="ClassNewChanged(this);">
+                        @foreach (SMEnterprise.Models.NameIDModel q in Model.Classes)
+                        {
+
+                            <option value="@q.ID">@q.Name </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-3">
+                <label>Section</label>
+                <div>
+                    <select class="form-control" id="ddlNewSections" name="SectionID" onchange="SectionNewChanged(this);">
+                        @foreach (SMEnterprise.Models.NameIDModel q in Model.Sections)
+                        {
+
+                            <option value="@q.ID"> @q.Name </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <label>Student : </label>
+                <div>
+                    <select class="form-control select2_single" id="ddlStudents" name="StudentID">
+                        @foreach (SMEnterprise.Models.NameIDModel q in Model.Students)
+                        {
+
+                            <option value="@q.Extra1"> @q.Name </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label>Leave Type :</label>
+                <div>
+                    <div class="row">
+                        <div class="radio col-md-4">
+                            <label style="padding-left:0px;">
+                                <input type="radio" checked="" class="flat-red" value="1" id="optionsRadios1" name="LeaveType"> Full Day
+                            </label>
+                        </div>
+                        <div class="radio col-md-4">
+                            <label style="padding-left:0px;">
+                                <input type="radio" class="flat-red" value="2" id="optionsRadios2" name="LeaveType"> 1st Half
+                            </label>
+                        </div>
+                        <div class="radio col-md-4">
+                            <label style="padding-left:0px;">
+                                <input type="radio" class="flat-red" value="3" id="optionsRadios3" name="LeaveType"> 2nd Half
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group col-md-4">
+                <label>Start Date : <small>(mm/dd/yyyy)</small></label>
+                <div class="input-group">
+                    <input type="text" required="" class="form-control has-feedback-left dateinput inpStartDate" id="txtStartDate" placeholder="Date" aria-describedby="inputSuccess2Status" name="StartDate" value="@Model.StartDate.ToString("MM/dd/yyyy")">
+                    <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                    <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                </div>
+            </div>
+
+            <div class="form-group col-md-4">
+                <label>End Date : <small>(mm/dd/yyyy)</small></label>
+                <div class="input-group">
+                    <input type="text" required="" class="form-control has-feedback-left dateinput inpEndDate" id="txtEndDate" placeholder="Date" aria-describedby="inputSuccess2Status" name="EndDate" value="@Model.EndDate.ToString("MM/dd/yyyy")">
+                    <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                    <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                </div>
+
+            </div>
+            <div class="form-group col-md-12">
+                <label>Reason : </label>
+                <div>
+                    <textarea rows="3" class="form-control" style="resize:none;" required name="LeaveReason" />
+                </div>
+            </div>
+            <div class="col-md-12 pull-right">
+                <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+                    <label id="lblError" style="color: red;"></label>
+                    <button type="submit" class="btn btn-success pull-right" onclick="return BeforePaymentSave();">Submit</button>
+                    <button type="button" onclick="CancelLeaveEdit()" class="btn btn-primary pull-right">Cancel</button>
+                </div>
+            </div>
+            <script>
+                var LeaveType = '1';
+                var StartDate = new Date($('#txtStartDate').val());
+                var EndDate = new Date($('#txtEndDate').val());
+                $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+                    checkboxClass: 'icheckbox_flat-blue',
+                    radioClass: 'iradio_flat-blue'
+                });
+                $('input').on('ifChecked', function (event) {
+                    LeaveType = $(this).val();
+                    DistributeLeaves();
+                });
+                $('.inpStartDate').daterangepicker({
+                    singleDatePicker: true,
+                    calender_style: "picker_1"
+                }, function (start, end, label) {
+
+                    if (start > EndDate) {
+                        $('#lblError').text('Start Date can not be greater then End Date....');
+                        $('#txtStartDate').val($('#txtEndDate').val());
+                        setTimeout(function () {
+                            $('#lblError').text('');
+                        }, 5000);
+                    }
+                    else { StartDate = start; }
+
+                   // DistributeLeaves();
+                });
+
+                $('.inpEndDate').daterangepicker({
+                    singleDatePicker: true,
+                    calender_style: "picker_1"
+                }, function (start, end, label) {
+                    if (StartDate > start) {
+                        $('#lblError').text('End Date can not be less then Start Date....');
+                        $('#txtEndDate').val($('#txtStartDate').val());
+                        setTimeout(function () {
+                            $('#lblError').text('');
+                        }, 5000);
+                    }
+                    else { EndDate = start; }
+                });
+                            //$(".select2_single").select2({
+                            //    placeholder: "Select a Students",
+                            //    allowClear: true
+                            //});
+
+            </script>
+        }
+    </div>
+</div>

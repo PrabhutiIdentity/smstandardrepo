@@ -1,0 +1,216 @@
+﻿
+@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Parent App Installation SMS</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Parent App Installation SMS
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Parent App Installation SMS</li>
+    </ol>
+</section>
+@if (TempData["IsQueued"] != null)
+{
+    <div class="alert alert-info alert-dismissible">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+        <h4><i class="icon fa fa-info"></i> SMS Queued!</h4>
+        SMS are queued, will be delilvered in a while, please be patient.
+    </div>
+    TempData["IsQueued"] = null;
+}
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            @using (Html.BeginForm("SendParentAppInstalSMS", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetProducts" }))
+            {
+                <div class="box">
+                    <div class="box-header">
+                        <div class="row">
+                            <div class="col-md-3 form-group">
+                                <label>Session</label>
+                                <select class="form-control" ID="ddlCategories" name="SessionID" onchange="SessionChanged(this);">
+                                    @foreach (NameIDModel e in Model.Sessions)
+                                    {
+                                        <option value="@e.ID" @(Model.SessionID == e.ID ? "selected" : "")>@e.Name @(e.Extra1 == "1" ? "(Active)" : "")</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-2 padding">
+                                <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                        <option value="0">--Select Class--</option>
+                                        @foreach (var el in Model.Classes)
+                                        {
+                                            <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Section :</label>
+                                <div class="col-md-8">
+                                    <select name="SectionID" class="form-control" id="ddlSection">
+                                        <option value="0">--Select Section--</option>
+                                        @foreach (var el in Model.Sections)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label>Password</label>
+                                <input type="text" name="Password" class="form-control" required />
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label>Send SMS</label><br />
+                                <input type="submit" class="btn btn-primary" value="Send SMS" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" onchange="SelectAllChanged(this);" id="chkSelectAll" /></th>
+                                    <th>Student Name</th>
+                                    @*<th>Student SR No</th>*@
+                                    <th>Father/Mother/Guardian Name</th>
+                                    <th>Number</th>
+                                    <th>UserName</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int count = 0;
+                                    foreach (ParentModel c in Model.Parents)
+                                    {
+                                        <tr>
+
+                                            <td>
+                                                <input type="hidden" name="Parents[@count].ParentSID" value="@c.ParentSID" />
+                                                @if (c.NotificationSMSTo == 0)
+                                                {
+                                                    <input type="hidden" name="Parents[@count].FatherMobileNo" value="@c.FatherMobileNo" />
+                                                    <input type="hidden" name="Parents[@count].FatherName" value="@c.FatherName" />
+                                                }
+                                                else if (c.NotificationSMSTo == 1)
+                                                {
+                                                    <input type="hidden" name="Parents[@count].FatherMobileNo" value="@c.MotherMobileNo" />
+                                                    <input type="hidden" name="Parents[@count].FatherName" value="@c.MotherName" />
+                                                }
+                                                else
+                                                {
+                                                    <input type="hidden" name="Parents[@count].FatherMobileNo" value="@c.GuardianMobileNo" />
+                                                    <input type="hidden" name="Parents[@count].FatherName" value="@c.GuardianName" />
+                                                }
+                                                @*<input type="hidden" name="Parents[@count].FatherMobileNo" value="@c.FatherMobileNo" />*@
+                                                @*<input type="hidden" name="Parents[@count].FatherName" value="@c.FatherName" />*@
+                                                <input type="checkbox" class="chk" name="Parents[@count].IsSelected" value="1" />
+                                            </td>
+                                            <td>
+                                                @c.StudentName
+                                            </td>
+
+                                            <td>
+                                                @if (c.NotificationSMSTo == 0)
+                                                {
+                                                    @c.FatherName
+                                                }
+                                                else if (c.NotificationSMSTo == 1)
+                                                {
+                                                    @c.MotherName
+                                                }
+                                                else
+                                                {
+                                                    @c.GuardianName
+                                                }
+                                            </td>
+
+                                            <td>
+                                                @if (c.NotificationSMSTo == 0)
+                                                {
+                                                    @c.FatherMobileNo
+                                                }
+                                                else if (c.NotificationSMSTo == 1)
+                                                {
+                                                    @c.MotherMobileNo
+                                                }
+                                                else
+                                                {
+                                                    @c.GuardianMobileNo
+                                                }
+
+                                            </td>
+                                            <td style="text-align: center;">
+                                                @c.ParentSID
+                                            </td>
+                                        </tr>
+
+                                        count++;
+                                    }
+
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+            }
+        </div>
+    </div>
+
+</section>
+<script>
+            function ClassChanged(sender) {
+          window.location.href = "/Admin/ParentAppInstalSMS/" + $(sender).val();
+        }
+    function SessionChanged(sender) {
+        window.location.href = "/Admin/ParentAppInstalSMS/" + $(sender).val();
+    }
+
+    function SelectAllChanged(sender) {
+        var Status = $(sender).is(":checked");
+        console.log(Status);
+        $('tbody').find('.chk').prop('checked', Status);
+    }
+    $(function () {
+        //$("#tblCategory").DataTable({
+        //    "ordering": false
+        //});
+        $('#liContactManagement').closest('ul').closest('li').addClass('active');
+        $('#liContactManagement').addClass('active');
+    });
+    function ContactDelete(sender) {
+        if (confirm('Are you sure you wish to delete this Contact?')) {
+
+            return true;
+        }
+        else {
+            return false;
+        }
+
+    }
+
+</script>
+<!-- /.content -->

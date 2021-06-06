@@ -1,0 +1,197 @@
+﻿@using Pro.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>SMS Template Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+
+            <div class="col-md-12">
+
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-2 padding">
+                            </div>
+                            <div class="col-md-3 padding" style="color: white;font-size: 1.15em;">
+                                SMS Template Management
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="x_panel">
+
+                    <div class="x_content">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <button class="btn btn-success pull-right" onclick="AddNewTemplate(this);">Add New</button>
+                            </div>
+                        </div>
+                        <div class="row" id="divNewForm" style="display:none;">
+                            @using (Html.BeginForm("InsertSMSTemplate", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                            {
+                                <div class="col-md-12">
+                                    <label>Type</label>
+                                    <select class="form-control" name="SMSType">
+                                        @foreach (NameIDModel t in Model.Types)
+                                        {
+                                            <option value="@t.ID">@t.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Title</label>
+                                    <input type="text" name="Title" class="form-control" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label>Template</label>
+                                    <textarea type="text" name="Template" class="form-control"></textarea>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-info pull-right">Save</button>
+                                </div>
+                            }
+
+                        </div>
+                        <div class="row">
+                            <table id="tblCategory" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 15%">Template ID</th>
+                                        <th style="width: 60%">Details</th>
+                                        <th style="width: 15%">Template For</th>
+                                        <th style="width: 10%">Status</th>
+                                    </tr>
+                                </thead>
+                                @{
+
+                                    <tbody>
+                                        @foreach (SMSTemplateModel c in Model.Templates)
+                                        {
+                                            <tr>
+
+
+                                                <td>
+                                                    @c.TemplateID
+                                                </td>
+
+                                                <td>
+                                                    <b> Title: @c.Title</b><br />
+                                                    @c.Template
+
+                                                </td>
+                                                <td>
+                                                    @c.SMSTypeName
+                                                </td>
+                                                <td>
+                                                    @if (c.IsApproved == 0)
+                                                    {
+                                                        <label class='badge bg-orange'>Pending</label>
+                                                    }
+                                                    else if (c.IsApproved == 2)
+                                                    {
+                                                        <label class='badge bg-red'>Unapproved</label>
+                                                    }
+                                                    else
+                                                    {
+                                                        <label class='badge bg-blue'>Approved</label>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+
+                                }
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+        function AddNewTemplate(sender) {
+            if ($(sender).text() == "Add New") {
+                $('#divNewForm').css('display', '');
+                $(sender).text('Close');
+            }
+            else {
+                $('#divNewForm').css('display', 'none');
+                $(sender).text('Add New');
+            }
+        }
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function CancelRequest(sender) {
+            if (confirm('Do you really want Cancel This SMS Request?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        function SMSRequest(sender) {
+            if (confirm('Do you really want Recharge SMS?')) {
+                $(sender).closest('tr').find('#hdnSMSRequest').val($(sender).closest('tr').find('#txtSMSCount').val());
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    </script>
+}
+<!-- /.content -->

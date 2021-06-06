@@ -1,0 +1,381 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentResultScrutinyListModel
+@section IncludeCss
+{
+    <title>Student Performance</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .tblResult {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+        .tblResult > tbody > tr > td {
+            padding: 0px;
+        }
+
+        .tblResult > thead > tr > td {
+            padding: 0px;
+        }
+
+        .tblResult thead {
+            font-weight: bold;
+        }
+
+    .tblResultEvName {
+        font-weight: bold;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentResultList", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions">
+                                            <option value="0">--Select Session--</option>
+                                            @foreach (SchoolSessionModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.SessionID" @(el.SessionID == Model.SessionID ? "selected" : "")>@el.SessionName @(el.SessionStatus == 1 ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Section :</label>
+                                    <div class="col-md-8">
+                                        <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right padding-R">Evaluation : </label>
+                                    <div class="col-md-8 padding-L" style="padding-left: 10px;">
+                                        <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Evaluations)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
+                                            }
+                                            <option value="-1" @(-1 == Model.EvaluationID ? "selected" : "")>All</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <a class="btn btn-dark" onclick="PrintReport();">Print</a>
+                    <div class="x_content">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <td colspan="@(Model.Subjects2.Count()+5)">
+                                        <table width="100%">
+                                            <tr>
+                                                <td style="width:40%">MARK CHART REPORT</td>
+                                                <td style="width:60%"><strong>@Model.Branch.BranchSchoolName</strong></td>
+                                            </tr>
+                                        </table>
+                                        <br />   <b>Class :</b> @Model.ClassName &nbsp;&nbsp;&nbsp;&nbsp; <b>Section :</b> @Model.SectionName
+
+
+                                    </td>
+                                </tr>
+                                <tr style="width:100%">
+                                    <th>Student Name</th>
+                                    <th>Exam</th>
+                                    @foreach (var sub in Model.Subjects2)
+                                    {
+                                        <th>@sub.SubjectName</th>
+                                    }
+                                    <th>Obt.</th>
+                                    <th>Max Total</th>
+                                    <th>%</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var stu in Model.StudentResult)
+                                {
+                                    Model.Subjects2 = Model.Subjects2.Select(c => { c.MaxMarks = 0; return c; }).ToList();
+                                    Model.Subjects2 = Model.Subjects2.Select(c => { c.ScoredMarks = 0; return c; }).ToList();
+                                    <tr>
+                                        <td style="page-break-before: avoid;page-break-inside:avoid" rowspan="@(Model.SubEvaluations.Count() + 3)">
+                                            @stu.Name<br />@stu.SchoolUID
+                                        </td>
+                                    </tr>
+                                    foreach (var ex in Model.SubEvaluations)
+                                    {
+                                        decimal TotalScored = 0;
+                                        decimal TotalMarks = 0;
+                                        <tr>
+                                            <td>@ex.Name</td>
+                                            @foreach (var sub in Model.Subjects2)
+                                            {
+                                                var exam = Model.Exams.Where(e => e.SubjectID == sub.SubjectID && e.EvaluationID == ex.ID).SingleOrDefault();
+                                                if (exam != null)
+                                                {
+                                                    sub.MaxMarks = sub.MaxMarks + exam.MaxMarks;
+                                                    TotalMarks = TotalMarks + exam.MaxMarks;
+                                                    var result = Model.Result.Where(c => c.ExamID == exam.ExamID && c.StudentID == stu.StudentID).SingleOrDefault();
+                                                    if (result != null)
+                                                    {
+                                                        sub.ScoredMarks = sub.ScoredMarks + result.MarksScored;
+                                                        TotalScored = TotalScored + result.MarksScored;
+                                                        <td>@result.MarksScored</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td>-</td>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <td>-</td>
+                                                }
+                                            }
+                                            <td>@TotalScored.ToString("0.00")</td>
+                                            <td>@TotalMarks.ToString("0.00")</td>
+                                            <td>@((TotalMarks != 0 ? (TotalScored * 100 / TotalMarks).ToString("0.00") + "%" : "-"))</td>
+                                        </tr>
+                                    }
+                                    <tr style="font-weight: bold;">
+                                        <td>Total</td>
+                                        @foreach (var sub in Model.Subjects2)
+                                        {
+                                            <td>@sub.ScoredMarks.ToString("0.00")</td>
+                                        }
+                                        <td>@Model.Subjects2.Sum(x => x.ScoredMarks)</td>
+                                        <td>@Model.Subjects2.Sum(x => x.MaxMarks)</td>
+                                        @{
+                                            var totaltoalmarks = Model.Subjects2.Sum(x => x.MaxMarks);
+                                            var scoredtotalmarks = Model.Subjects2.Sum(x => x.ScoredMarks);
+                                            if (totaltoalmarks != 0)
+                                            {
+                                                <td>@((scoredtotalmarks * 100 / totaltoalmarks).ToString("0.00"))%</td>
+                                            }
+                                        }
+                                    </tr>
+                                    <tr style="font-weight: bold;">
+                                        <td>Grade</td>
+                                        @foreach (var sub in Model.Subjects2)
+                                        {
+                                            if (sub.ScoredMarks != 0)
+                                            {
+                                                <td>@AcadmicModel.CalculateGrade(sub.ScoredMarks, sub.MaxMarks)</td>
+                                            }
+                                            else
+                                            {
+                                                <td>-</td>
+                                            }
+                                            @*<td>@AcadmicModel.CalculateGrade(sub.ScoredMarks, sub.MaxMarks)</td>*@
+                                        }
+                                        <td>@AcadmicModel.CalculateGrade(Model.Subjects2.Sum(x => x.ScoredMarks), Model.Subjects2.Sum(x => x.MaxMarks))</td>
+                                        <td></td>
+                                        @{
+                                            if (totaltoalmarks != 0)
+                                            {
+                                                <td>@AcadmicModel.CalculateGrade(scoredtotalmarks, totaltoalmarks)</td>
+                                            }
+                                        }
+                                    </tr>
+                                    <tr></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+   
+
+    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+
+    <script>
+        $(document).ready(function () {
+            var repname = '@PermissionManager.GetLoggedInUser().BranchSchoolName' + '<br /> MARK CHART REPORT : ' + $('#ddlSection option:selected').text();
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+
+                        bSort: false,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+
+        });
+    </script>*@
+    <script>
+        $(document).ready(function () {
+            $('#sClassName').html(' For : ' + $('#ddlClass option:selected').text() + '-' + $('#ddlSection option:selected').text() + ' (' + $('#ddlEvaluation option:selected').text() + ') - ' + $('#ddlSessions option:selected').text());
+        });
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function PrintReport() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<html><head><title></title><style type = "text/css" > ' +
+                'table th, table td {' +
+                'border-bottom:1px solid #000;' +
+                'border-top:1px solid #000;' +
+                '}' +
+                '</style>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/ResultScrutiny.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}
+<!-- /.content -->

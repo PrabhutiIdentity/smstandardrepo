@@ -1,0 +1,189 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model SectionClassTeacherReportPageModel
+@section IncludeCss
+{
+    <title>Section Class Teacher Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Section Class Teacher Report
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Section Class Teacher Report</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-body">
+                    <table id="PaymentsTable" class="table table-striped payments">
+                        <thead>
+                            <tr>
+                                <th>Class</th>
+                                <th>Section</th>
+                                <th>Teacher</th>
+                                <th>Change</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            decimal TotalDue = 0;
+                            foreach (var c in Model.Report)
+                            {
+
+                                <tr>
+
+                                    <td>
+                                        @c.ClassName
+                                    </td>
+                                    <td>
+                                        @c.SectionName
+                                    </td>
+                                    <td>@c.TeacherName</td>
+                                    <td>
+                                        <a href="javascript:void(0);" onclick="UpdateClassTeacher(this,@c.ClassID,@c.SectionID,@c.TeacherID,'@c.ClassName','@c.SectionName')">Change</a>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+@section pageBottom{
+    <div id="mdlUpdate" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Update Section Class Teacher</h4>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("UpdateSectionClassTeacher", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                    {
+                        <div class="row" id="mbImages">
+                            <div class="col-md-6" id="dvClassName">
+                            </div>
+                            <div class="col-md-6" id="dvSectionName">
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <input type="hidden" name="SectionID" id="hdnSectionID" />
+                                    <label>Class Teacher</label>
+                                    <select class="form-control" id="ddlTeacher" name="TeacherID">
+                                        @foreach (var t in Model.Teachers)
+                                        {
+                                            <option value="@t.ID">@t.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    }
+                    </div>
+            </div>
+
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        function UpdateClassTeacher(sender, ClassID, SectionID, TeacherID, ClassName, SectionName) {
+            $('#dvClassName').html(ClassName);
+            $('#dvSectionName').html(SectionName);
+            $('#hdnSectionID').val(SectionID);
+            $('#ddlTeacher').val(TeacherID);
+            $('#mdlUpdate').modal('toggle');    
+        }
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+                        "bPaginate": false,
+                        "retrieve": true,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm"
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm"
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm"
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm"
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm"
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
+        });
+        $(function () {
+
+            $('#liReportSectionClassTeacher').closest('ul').closest('li').addClass('active');
+            $('#liReportSectionClassTeacher').addClass('active');
+        });
+
+    </script>
+}
+<!-- /.content -->

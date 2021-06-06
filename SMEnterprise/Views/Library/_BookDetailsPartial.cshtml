@@ -1,0 +1,286 @@
+﻿<tr>
+
+    <td>
+        <img id="imgPhoto" onerror="return OnBookImageError(this, 2);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/BookImage/")@(Model.Book.BookID)_@Model.Book.Image" />
+    </td>
+    <td>
+        @(Model.Book.BookID == 0 ? "New Book" : Model.Book.Title)<br />
+                @Model.Book.BookCode<br />
+                Copies :@Model.Book.Copies <br />
+                <a class="sbtn Closed" href="javascript:void(0);" onclick="ViewBookCopies(this,@Model.Book.BookID);">Manage Copies</a>
+    </td>
+
+    <td>
+        @Model.Book.Publisher<br />
+        @Model.Book.Author
+
+    </td>
+    <td>@Model.Book.Classes</td>
+    <td>
+        @Model.Book.CategoryNames
+    </td>
+    <td>
+        @Model.Book.Price.ToString("0.00")
+    </td>
+
+
+    <td>
+        <div class="row" style="margin-right: 10px;">
+            <div class="col-md-6">
+                @if (Model.Book.BookID != 0)
+                {
+                    <a href="javascript:void(0);" onclick="ViewBookDetails(this,@Model.Book.BookID);" class="btn btn-link Open EditBookLink">Close</a>
+                    <input type="hidden" id="hdnBookID" value="@Model.Book.BookID" />
+                }
+            </div>
+            <div class="col-md-6">
+                @using (Html.BeginForm("UpdateBook", "Library", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                {
+                    <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                        <input type="hidden" name="SectionID" value="@Model.CategoryID" />
+                        <input type="hidden" name="BookID" value="@Model.Book.BookID" />
+                        <input type="hidden" id="hdnIssued" value="@Model.Book.Issued" />
+                        <button type="submit" onclick="return DeleteBook(this,@Model.Book.BookID);" class="btn btn-link @(Model.Book.BookID==0?" Open EditBookLink":"")">Delete</button>
+                }
+            </div>
+        </div>
+
+
+
+    </td>
+</tr>
+
+
+
+<tr>
+    <td id='tdDetails' colspan='999' style='border-left: 3px solid #7b64a5;background-color: white'>
+
+        <div class="x_panel">
+            @using (Html.BeginForm("UpdateBookDetails", "Library", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSaveBook", @class = "form-horizontal form-label-left" }))
+            {
+                Model.Book.CategoryIDs = Model.Book.CategoryIDs == null ? ",0," : Model.Book.CategoryIDs;
+                Model.Book.ClassesIDs = Model.Book.ClassesIDs == null ? ",0," : Model.Book.ClassesIDs;
+                Model.Book.Status = Model.Book.BookID == 0 ? 1 : Model.Book.Status;
+                <div class="x_content">
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="col-md-5">
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-4 col-sm-3 col-xs-12">
+                                        </label>
+                                        <div class="col-md-8 col-sm-9 col-xs-12">
+                                            <figure class="figure profile-box" style="height: 235px;">
+                                                <img id="imgBookImage" onerror="return OnBookImageError(this, 2);" src="@Url.Content("~/Images/BookImage/")@(Model.Book.BookID)_@Model.Book.Image" class="img-responsive thumbImageMain">
+                                            </figure>
+                                            <input type="hidden" id="hdnImageName" name="OldImage" value="@Model.Book.Image" />
+                                            <input type="hidden" id="hdnImage" name="Image" value="@Model.Book.Image" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                                            Status
+                                        </label>
+                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                            <label class="switch switch-green col-md-6">
+                                                <input type="checkbox" class="switch-input" @(Model.Book.Status == 1? "checked" : "" )>
+                                                <span class="switch-label" onclick="$(this).closest('label').find('#hdnBookStatus').val($(this).closest('label').find('#hdnBookStatus').val() == '0' ? '1' : '0');" data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+                                                <input type="hidden" name="Status" id="hdnBookStatus" value="@Model.Book.Status">
+                                            </label>
+                                            <div class="col-md-6">
+                                                <input type="file" name="PhotoFile" onchange="ImageChanged(this, 'book');" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-7">
+                                <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            Book ID
+                                        </label>
+                                        <div class="col-md-4 col-sm-9 col-xs-12">
+                                            <input type="hidden" id="hdnBookID" name="BookID" value="@Model.Book.BookID" />
+                                            <input style="background-color:@(Model.Book.BookID == 0 ? " antiquewhite" : "aliceblue");" type="text" id="txtBookUID" class="form-control" disabled="" value="@Model.Book.BookID">
+                                        </div>
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            Issue Days
+                                        </label>
+                                        <div class="col-md-4 col-sm-9 col-xs-12">
+                                            <input type="number" id="txtIssueDays" class="form-control" name="IssueDays" value="@Model.Book.IssueDays" />
+                                        </div>
+
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            Code
+                                        </label>
+                                        <div class="col-md-10 col-sm-9 col-xs-12">
+                                            <input type="text" id="txtBookCode" class="form-control" name="BookCode" value="@Model.Book.BookCode" />
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            Publisher
+                                        </label>
+                                        <div class="col-md-10 col-sm-9 col-xs-12">
+                                            <input type="text" id="txtPublisher" class="form-control" name="Publisher" value="@Model.Book.Publisher" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            Author
+                                        </label>
+                                        <div class="col-md-10 col-sm-9 col-xs-12">
+                                            <input type="text" id="txtAuthor" class="form-control" name="Author" value="@Model.Book.Author" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            ISBN
+                                        </label>
+                                        <div class="col-md-10 col-sm-9 col-xs-12">
+                                            <input type="text" id="txtISBN" class="form-control" name="ISBN" value="@Model.Book.ISBN" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            ISBN13
+                                        </label>
+                                        <div class="col-md-10 col-sm-9 col-xs-12">
+                                            <input type="text" id="txtISBN13" class="form-control" name="ISBN13" value="@Model.Book.ISBN13" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-12">
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            Price
+                                        </label>
+                                        <div class="col-md-4 col-sm-9 col-xs-12">
+                                            <input type="number" step="0.01" id="txtPrice" class="form-control" name="Price" value="@Model.Book.Price" />
+                                        </div>
+                                        <label class="control-label col-md-2 col-sm-3 col-xs-12">
+                                            Copies
+                                        </label>
+                                        <div class="col-md-4 col-sm-9 col-xs-12">
+                                            <input type="number" id="txtCopies" class="form-control" name="Copies" value="@Model.Book.Copies" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-1 col-sm-3 col-xs-12">
+                                Title
+                            </label>
+                            <div class="col-md-11 col-sm-9 col-xs-12">
+                                <input type="text" class="form-control" id="txtBookTitle" name="Title" value="@Model.Book.Title" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-1 col-sm-3 col-xs-12">
+                                Location
+                            </label>
+                            <div class="col-md-3 col-sm-9 col-xs-12">
+                                <select id="ddlLibraries" class="form-control" onchange="LocationChanged(this, 0);">
+                                    <option value="0">--Select--</option>
+                                    @foreach (var lib in Model.Libraries)
+                                    {
+                                        <option value="@lib.ID" @(lib.ID == Model.LibraryID ? "selected" : "")>@lib.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-2 col-sm-9 col-xs-12">
+                                <select id="ddlFloors" class="form-control" onchange="LocationChanged(this, 1);">
+                                    <option value="0">--Select--</option>
+                                    @foreach (var lib in Model.Floors)
+                                    {
+                                        <option value="@lib.ID" @(lib.ID == Model.FloorID ? "selected" : "")>@lib.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-sm-9 col-xs-12">
+                                <select id="ddlBlocks" class="form-control" onchange="LocationChanged(this, 2);">
+                                    <option value="0">--Select--</option>
+                                    @foreach (var lib in Model.Blocks)
+                                    {
+                                        <option value="@lib.ID" @(lib.ID == Model.BlockID ? "selected" : "")>@lib.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-3 col-sm-9 col-xs-12">
+                                <select id="ddlBays" class="form-control" name="BayID">
+                                    <option value="0">--Select--</option>
+                                    @foreach (var lib in Model.Bays)
+                                    {
+                                        <option value="@lib.ID" @(lib.ID == Model.BayID ? "selected" : "")>@lib.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-1 col-sm-3 col-xs-12">
+                                Categories
+                            </label>
+                            <div class="col-md-11 col-sm-9 col-xs-12">
+                                <select id="ddlDCategories" multiple class="form-control select2">
+                                    <option value="0" @(Model.Book.CategoryIDs.Contains(",0,") ? "Selected" : "")>--All--</option>
+                                    @foreach (var lib in Model.Categories)
+                                    {
+                                        <option value="@lib.ID" @(Model.Book.CategoryIDs.Contains("," + lib.ID + ",") ? "Selected" : "")>@lib.Name</option>
+                                    }
+                                </select>
+                                <input type="hidden" name="CategoryIDs" id="hdnCategoryIDs" value="@Model.Book.CategoryIDs.Substring(1,Model.Book.CategoryIDs.Length-2)" />
+                                <script>
+                                    $("#ddlDCategories").select2();
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-1 col-sm-3 col-xs-12">
+                                Classes
+                            </label>
+                            <div class="col-md-11 col-sm-9 col-xs-12">
+                                <select id="ddlDClasses" multiple class="form-control select2">
+                                    <option value="0" @(Model.Book.ClassesIDs.Contains(",0,") ? "Selected" : "")>--All--</option>
+                                    @foreach (var lib in Model.Classes)
+                                    {
+                                        <option value="@lib.ID" @(Model.Book.ClassesIDs.Contains("," + lib.ID + ",") ? "Selected" : "")>@lib.Name</option>
+                                    }
+                                </select>
+                                <input type="hidden" name="ClassesIDs" id="hdnClassesIDs" value="@Model.Book.ClassesIDs.Substring(1,Model.Book.ClassesIDs.Length-2)" />
+                                <script>
+                                    $("#ddlDClasses").select2();
+                                </script>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-12">
+                            <label class="control-label col-md-1 col-sm-3 col-xs-12">
+                                Description
+                            </label>
+                            <div class="col-md-11 col-sm-9 col-xs-12">
+                                <textarea class="form-control" id="txtDescription" name="Description" style="resize:none" rows="3">@Model.Book.Description</textarea>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-12">
+                            <button type="button" onclick="return SaveBookDetails(this);" class="btn btn-success pull-right">Save</button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </td>
+</tr>

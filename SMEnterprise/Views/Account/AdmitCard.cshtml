@@ -1,0 +1,273 @@
+﻿
+@{
+    ViewBag.Title = "Admint Card";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Admit Card</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+}
+@model SMEnterprise.Models.AdmitCardListModel
+<div class="" style="background-color: white;">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("AdmitCard", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            {
+                <div class="row std-mng-head col-md-12">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-2 padding">
+                                @*<label class="col-md-5 text-right padding-R" style="padding-left: 150px;">Month  </label>*@
+                                <label class="text-right" style="padding-left: 25px;">@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("MMM, yyyy")</label>
+                                @*<input type="month" value="@Model.DemandMonth.ToString("yyyy-MM")" name="DemandMonth" id="dtDate" class="form-control" />*@
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Sessions :</label>
+                                <div class="col-md-8">
+                                    <select name="SessionID" class="form-control" id="ddlSessions">
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (var el in Model.Sessions)
+                                        {
+                                            <option value="@el.SessionID" @(el.SessionID == Model.SessionID ? "selected" : "")>@el.SessionName @(el.SessionStatus == 1 ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                        <option value="0">--Select Class--</option>
+                                        @foreach (var el in Model.Classes)
+                                        {
+                                            <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                        }
+                                    </select>
+                                </div>
+
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Section :</label>
+                                <div class="col-md-8">
+                                    <select name="SectionID" class="form-control" id="ddlSection">
+                                        <option value="0">--Select Section--</option>
+                                        @foreach (var el in Model.Sections)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right padding-R">Evaluation : </label>
+                                <div class="col-md-8 padding-L" style="padding-left: 10px;">
+                                    <select name="EvaluationID" class="form-control" id="ddlEvaluation">
+                                        @foreach (var el in Model.Evaluations)
+                                        {
+                                            <option value="@el.EvaluationID" @(el.EvaluationID == Model.EvaluationID ? "selected" : "")>@el.EvaluationName</option>
+                                        }
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 padding">
+                                <div class="row">
+
+                                    <div class="col-md-12">
+                                        <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="txtsearch" placeholder="Search Text" onkeyup="Search(this);" />
+        </div>
+        <div class="col-md-6" style="text-align:right;">
+            <button type="button" class="btn btn-primary" onclick="PrintDemantRecipt();"><i class="fa fa-print"></i> Print</button>
+        </div>
+    </div>
+    <div class="row" id="admitcards">
+        <table style="width:100%;">
+            @foreach (var d in Model.AdmitCards)
+            {
+                <tr class="listitem" style="page-break-before: avoid;page-break-inside:avoid">
+                    <td>
+                        <table style="width:100%;text-align:center;">
+                            <tr>
+                                <td> <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(d.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(d.StudentID)_@d.Photo" /></td>
+                                <td colspan="2">
+                                    <h2>@Model.Branch.BranchSchoolName</h2>
+                                    <h4>@Model.Branch.Address</h4>
+                                </td>
+                                <td> <img id="imgPhoto" class="thumbImageGrid" style="height:120px;width:120px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@Model.Branch.Logo" /></td>
+                            </tr>
+                            @*<tr style="border-bottom:1px solid black;">
+                                    <td colspan="2" style="white-space:pre-line"><h4>@Model.Branch.Address</h4>
+
+                                    </td>
+                                </tr>*@
+                            <tr style="border-bottom:1px solid black;">
+                                <td colspan="2" style="white-space:pre-line"><b>Admit Card</b></td>
+                            </tr>
+                        </table>
+                        <table style="width:100%;">
+                            <tr style="border-bottom:1px solid black;">
+                                <td>Session</td>
+                                <td>@d.SessionName</td>
+                                <td>Evaluation</td>
+                                <td>@d.EvaluationName</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid black;">
+                                <td>Student Name</td>
+                                <td class="searchable">@d.Name</td>
+                                <td>Sr. No.</td>
+                                <td>@d.SchoolUID</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid black;">
+                                <td>Class</td>
+                                <td>@d.ClassName</td>
+                                <td>Section</td>
+                                <td>@d.SectionName</td>
+                            </tr>
+                            <tr style="border-bottom:1px solid black;">
+                                <td>Father's Name</td>
+                                <td class="searchable">@d.FatherName</td>
+                                <td>Mother's Name</td>
+                                <td class="searchable">@d.MotherName</td>
+                            </tr>
+                            @*<tr style="border-bottom:1px solid black;">
+                                <td>Mother's Name</td>
+                                <td>@d.MotherName</td>
+                            </tr>*@
+                            <tr style="border-bottom:1px solid black;">
+                                <td colspan="4">
+                                    
+                                </td>
+                            </tr>
+                        </table>
+                        <table style="width:100%;">
+                            <thead>
+                                <tr style="border-bottom:1px solid black; text-align:center;">
+                                    <th>#</th>
+                                    <th>Subject</th>
+                                    <th>Date</th>
+                                    <th>Start Time</th>
+                                    <th>End Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var ctr = 1;
+                                    foreach (var e in Model.Exams)
+                                    {
+                                        <tr style="border-bottom:1px solid black;">
+                                            <td>@ctr</td>
+                                            <td>@e.SubjectName</td>
+                                            <td>@e.ExamDate.ToString("dd/MM/yyyy")</td>
+                                            <td>@e.StartTime</td>
+                                            <td>@e.EndTime</td>
+                                            <td><p></p></td>
+                                        </tr>
+                                        ctr++;
+                                    }
+                                }
+                               
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+            }
+        </table>
+    </div>
+</div>
+@section scripts
+{
+    <script>
+         function Search(sender) {
+            var sText = $(sender).val();
+            console.log(sText);
+            if (sText == "") {
+                $('.listitem').css('display', '');
+            }
+            else {
+                $(".listitem").each(function () {
+                    var isExist = false;
+                    $(this).find(".searchable").each(function () {
+                        if ($(this).html().toLowerCase().includes(sText.toLowerCase()) == true) {
+                            isExist = true;
+                                }
+                    });
+                    if (isExist == true) {
+                        $(this).css('display', '');
+                    }
+                    else {
+                         $(this).css('display', 'none');
+                    }
+                  });
+            }
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+                    url: "/Account/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function PrintDemantRecipt() {
+            var contents = $("#admitcards").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title><style type = "text/css" > ' +
+                    'table th, table td {' +
+                'border-bottom:1px solid #000;' +
+                '}' +
+                '</style>');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" type="text/css" />');
+
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 1000);
+        }
+    </script>
+}

@@ -1,0 +1,271 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentPerformanceListModel
+@section IncludeCss
+{
+    <title>Student Performance</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentPerformance", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions">
+                                            <option value="0">--Select Session--</option>
+                                            @foreach (SchoolSessionModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.SessionID" @(el.SessionID == Model.SessionID ? "selected" : "")>@el.SessionName @(el.SessionStatus == 1 ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Section :</label>
+                                    <div class="col-md-8">
+                                        <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right padding-R">Evaluation : </label>
+                                    <div class="col-md-8 padding-L" style="padding-left: 10px;">
+                                        <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Evaluations)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
+                                            }
+                                            <option value="-1" @(-1 == Model.EvaluationID ? "selected" : "")> All </option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                @using (Html.BeginForm("StudentPerformanceDetailsClass", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
+                    <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                    <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                    <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                    <input type="submit" value="GetCompleteReports" />
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Photo</th>
+                                    <th style="width: 40%">Name</th>
+                                    <th style="width: 15%">CGPA</th>
+                                    <th style="width: 20%">View Test Result</th>
+                                    <th style="width: 15%">View Report Card</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StudentPerformanceModel c in Model.StudentPerformances)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                            <ss> @c.Name</ss><br />
+                                            @c.StudentSID<br />
+                                            @c.RollNo
+
+                                        </td>
+
+                                        <td>
+                                            @c.CGPA
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <li class="dropdown">
+                                                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">View Result</a>
+                                                    @*<ul class="dropdown-menu" role="menu">
+                                                        @foreach (var se in Model.SubEvaluations)
+                                                        {
+                                                            <li>
+                                                                <a href="/Account/StudentResultDetails/@c.StudentSessionUID/@se.ID/@Model.SessionID" target="_blank"> @se.Name</a>
+                                                            </li>
+                                                        }
+                                                    </ul>*@
+                                                    @if (Model.ClassID == 20)
+                                                        {
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                @foreach (var se in Model.SubEvaluations)
+                                                                {
+                                                                    // class XI & XII for both branch
+
+                                                                    <li>
+                                                                        <a href="/Account/StudentResultDetails11/@c.StudentSessionUID/@se.ID/@Model.SessionID" target="_blank"> @se.Name</a>
+                                                                    </li>
+
+
+                                                                }
+                                                            </ul>
+                                                         }
+                                                         else
+                                                         {
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                @foreach (var se in Model.SubEvaluations)
+                                                                {
+
+                                                                <li>
+                                                                    <a href="/Account/StudentResultDetails/@c.StudentSessionUID/@se.ID/@Model.SessionID" target="_blank"> @se.Name</a>
+                                                                </li>
+
+
+                                                                }
+                                                            </ul>
+                                                        }
+                                                </li>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @* Shine School*@
+                                            @*<a href="/Account/StudentPerformanceResult/@c.StudentSessionUID/@Model.EvaluationID/@Model.SessionID" target="_blank"> View Report</a>*@
+
+                                             <a href="/Account/StudentPerformanceDetails/@c.StudentSessionUID/@Model.EvaluationID/@Model.SessionID" target="_blank"> View Report</a>
+
+                                            @*@if (Model.SBranchID == 1)
+                                            {
+                                                <a href="/Account/StudentPerformanceDetailsH/@c.StudentSessionUID/@Model.EvaluationID/@Model.SessionID" target="_blank"> View Report</a>
+                                            }
+                                            else
+                                            {
+                                                <a href="/Account/StudentPerformanceDetailsESS/@c.StudentSessionUID/@Model.EvaluationID/@Model.SessionID" target="_blank"> View Report</a>
+                                            }*@
+
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
+
+    <script>
+
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+
+        $(function () {
+
+            var table = $('#tblCategory').DataTable({
+                "bPaginate": false,
+                "retrieve": true
+            });
+
+        });
+
+    </script>
+}
+<!-- /.content -->

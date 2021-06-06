@@ -1,0 +1,323 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Quota Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script>
+    function SessionChanged(sender)
+    {
+        var SessionID = $(sender).val();
+        var QuotaID = $('#hdnDetailsQuotaID').val();
+        $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetQuotaDiscounts/" + QuotaID + "/" + SessionID,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        $(sender).closest('table').closest("tr").remove();
+        // fill the div with the html returned by action
+        $('#tr_' + QuotaID).after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td id='tdDiscountsDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+    }
+    function ToggleDetails(sender, SessionID) {
+
+
+        if ($(sender).hasClass("DiscountsClosed")) {
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetQuotaDiscounts/" + $(sender).attr('id')+"/"+SessionID,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td id='tdDiscountsDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        var ele = document.getElementsByClassName("DiscountsOpened");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+        }
+
+        $(sender).removeClass("DiscountsClosed");
+        $(sender).addClass("DiscountsOpened");
+        $(sender).text("Close");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("DiscountsOpened");
+            $(sender).addClass("DiscountsClosed");
+            $(sender).closest("tr").next().remove();
+            $(sender).text("Manage");
+        }
+
+    }
+
+    function DeleteDiscounts(sender) {
+        if ($(sender).closest('tr').find('#tdRoomCount').text() != '0') {
+            alert("Rooms are added in Discounts, It can't be deleted!!!!");
+        }
+        else {
+            if (confirm("Do you Really Want to Delete this Discounts????")) {
+                UpdateDiscounts(sender, -1);
+            }
+        }
+    }
+
+    function UpdateDiscounts(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateDiscounts", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+                OpType: OpType,
+                Name: $(sender).closest('tr').find('#hdnName').val(),
+                Status: $(sender).closest('tr').find('#hdnDiscountsStatus').val(),
+                ID: $(sender).closest('tr').find('#hdnID').val(),
+                EmployeeTypeID: $(sender).closest('tr').find('#hdnEmployeeTypeID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                $(sender).closest('table').closest('td').html(html);
+                alert("Saved Successfully!!!!");
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+
+    function DeleteEmployeeType(sender) {
+        var Discountss = $(sender).closest('tr').find('#hdnStudents').val();
+        if (Discountss > 0) {
+            alert("This Discount has been given to Students, so can't be deleted!!!!")
+            return false
+        }
+        else {
+            return confirm("Do you Really Want to Delete this Discount????");
+        }
+
+    }
+
+</script>
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Quota Management
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Quota Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 20%">Title</th>
+                                <th style="width: 10%">#Limit</th>
+                                <th style="width: 30%">Detail</th>
+                                <th style="width: 10%">Avg Dis.</th>
+                                <th style="width: 10%">Status</th>
+                                <th style="width: 15%">Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var bCounter = 1;
+                                foreach (QuotaModel c in Model)
+                                {
+                                    <tr id="tr_@c.QuotaID">
+                                        <td>
+                                            @bCounter
+
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="QuotaID" value="@c.QuotaID" />
+                                            <input type="hidden" id="hdnStudents" value="@c.Students" />
+                                            <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="@c.QuotaName" />
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="number" onchange='$(this).closest("tr").find("#hdnLimit").val($(this).val())' name="Name" value="@c.NumberOfStudents" />
+                                        </td>
+                                        <td>
+                                            <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnDescription").val($(this).val())' name="Name" value="@c.Description" />
+                                        </td>
+                                        <td>
+                                            @c.AvgDiscount.ToString("0.00") %
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this,0);" id="@c.QuotaID" class="DiscountsClosed Poll-Options">Manage</a>
+                                            )
+                                        </td>
+                                        <td>
+                                            <label class="switch switch-green" style="padding-top: 3px;">
+
+                                                <input type="checkbox" id="chkEmailSettingSSL" @(c.IsApproved == 1 ? "checked" : "") class="switch-input">
+
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateQuota", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "Employee TypeUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="QuotaID" id="hdnID" value="@c.QuotaID" />
+                                                        <input type="hidden" id="hdnLimit" name="NumberOfStudents" value="@c.NumberOfStudents" />
+                                                        <input type="hidden" id="hdnName" name="QuotaName" value="@c.QuotaName" />
+                                                        <input type="hidden" id="hdnDescription" name="Description" value="@c.Description" />
+                                                        <input type="hidden" id="hdnStatus" name="IsApproved" value="@c.IsApproved" />
+
+                                                        <input type="submit" class="btn btn-link" value="Save" />
+                                                    }
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateQuota", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "Employee TypeUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="QuotaID" id="hdnID" value="@c.QuotaID" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                        <input type="submit" class="btn btn-link" value="Delete" onclick="return DeleteEmployeeType(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                    bCounter++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot style="border-width: 2px;border-style: groove;">
+                            <tr>
+                                <td>
+                                    @bCounter
+
+                                </td>
+                                <td>
+                                    <input type="hidden" name="QuotaID" value="0" />
+                                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="" />
+                                </td>
+                                <td>
+                                    <input class="form-control" type="number" onchange='$(this).closest("tr").find("#hdnLimit").val($(this).val())' name="Name" value="0" />
+                                </td>
+                                <td>
+                                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnDescription").val($(this).val())' name="Name" value="" />
+                                </td>
+                                <td>
+                                    0.00
+                                    
+                                </td>
+                                <td>
+                                    <label class="switch switch-green" style="padding-top: 3px;">
+
+                                        <input type="checkbox" id="chkEmailSettingSSL" checked class="switch-input">
+
+                                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="row" style="margin-right: 0px;">
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("UpdateQuota", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "Employee TypeUpdate" }))
+                                            {
+                                                <input type="hidden" name="QuotaID" id="hdnID" value="0" />
+                                                        <input type="hidden" id="hdnLimit" name="NumberOfStudents" value="0" />
+                                                        <input type="hidden" id="hdnName" name="QuotaName" value="" />
+                                                        <input type="hidden" id="hdnDescription" name="Description" value="" />
+                                                        <input type="hidden" id="hdnStatus" name="IsApproved" value="1" />
+
+                                                        <input type="submit" class="btn btn-link" value="Save" />
+                                            }
+
+                                        </div>
+                                       
+                                    </div>
+                                </td>
+
+
+
+                            </tr>
+
+
+
+
+
+
+
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+
+        $('#liQuotaManagement').closest('ul').closest('li').addClass('active');
+        $('#liQuotaManagement').addClass('active');
+
+       
+    });
+    
+    function SaveQuotaStructure(sender)
+    {
+        var formData = new FormData($(sender).closest('#frmDiscountsDetails')[0]);
+        $.ajax(
+   {
+       type: "POST",
+       url: "@Url.Action("UpdateQuotaDiscounts", "Admin")"  ,
+            data: formData,
+        cache: false,
+        processData: false,
+        contentType: false,
+        success:function(html)
+        {
+            ShowNotification('Discounts', 'Quota Discount Updated Successfully....', 'success');
+            $('#tdDiscountsDetails').html(html);
+        },
+        error:  function(e)
+        {
+            alert("errorn");
+        }
+    });
+    }
+
+</script>
+
+<!-- /.content -->

@@ -1,0 +1,313 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Employee Type Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script>
+
+    function ToggleDetails(sender) {
+
+
+        if ($(sender).hasClass("SalaryClosed")) {
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetEmployeeTypeSalaries/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        var ele = document.getElementsByClassName("SalaryOpened");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+        }
+
+        $(sender).removeClass("SalaryClosed");
+        $(sender).addClass("SalaryOpened");
+        $(sender).text("Close");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("SalaryOpened");
+            $(sender).addClass("SalaryClosed");
+            $(sender).closest("tr").next().remove();
+            $(sender).text("Manage");
+        }
+
+    }
+
+    function DeleteSalary(sender) {
+        if ($(sender).closest('tr').find('#tdRoomCount').text() != '0') {
+            alert("Rooms are added in Salary, It can't be deleted!!!!");
+        }
+        else {
+            if (confirm("Do you Really Want to Delete this Salary????")) {
+                UpdateSalary(sender, -1);
+            }
+        }
+    }
+
+    function UpdateSalary(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateSalary", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+                OpType: OpType,
+                Name: $(sender).closest('tr').find('#hdnName').val(),
+                Status: $(sender).closest('tr').find('#hdnSalaryStatus').val(),
+                ID: $(sender).closest('tr').find('#hdnID').val(),
+                EmployeeTypeID: $(sender).closest('tr').find('#hdnEmployee TypeID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                $(sender).closest('table').closest('td').html(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+
+    function DeleteEmployeeType(sender) {
+        var Salarys = $(sender).closest('tr').find('#hdnSalaryCount').val();
+        if (Salarys > 0) {
+            alert("This Employee Type has Salarys, so can't be deleted!!!!")
+            return false
+        }
+        else {
+            return confirm("Do you Really Want to Delete this Employee Type????");
+        }
+
+    }
+
+</script>
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Employee Type Management
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Employee Type Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 30%">Employee Type Name</th>
+                                <th style="width: 20%">#Employees</th>
+                                <th style="width: 20%">Net Salary</th>
+                                <th style="width: 20%">Edit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var bCounter = 1;
+                                foreach (EmployeeTypeModel c in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @bCounter
+
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="ID" value="@c.EmployeeTypeID" />
+                                            @if (c.SBranchID !=0)
+                                            {
+                                                <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="@c.EmployeeTypeName" />
+                                            }
+                                            else
+                                            {
+                                                @c.EmployeeTypeName
+                                            }
+                                        </td>
+                                        <td>
+                                            @c.EmployeeCount
+                                        </td>
+                                        <td>
+                                            @c.NetSalary
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.EmployeeTypeID" class="FloorClosed Poll-Options">Manage</a>
+                                            )
+                                        </td>
+
+                                        <td>
+                                            @if (c.SBranchID !=0)
+                                            {
+                                                <div class="row" style="margin-right: 0px;">
+                                                    <div class="col-md-6">
+                                                        @using (Html.BeginForm("UpdateEmployeeType", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "Employee TypeUpdate" }))
+                                                        {
+                                                            <input type="hidden" name="EmployeeTypeID" id="hdnID" value="@c.EmployeeTypeID" />
+                                                            <input type="hidden" id="hdnEmployeeTypeNetSalary" name="NetSalary" value="@c.NetSalary" />
+                                                            <input type="hidden" id="hdnName" name="EmployeeTypeName" value="@c.EmployeeTypeName" />
+
+                                                            <input type="submit" class="btn btn-link" value="Save" />
+                                                        }
+
+                                                    </div>
+                                                    @if (c.SBranchID != 0)
+                                                    {
+                                                        <div class="col-md-6">
+                                                            @using (Html.BeginForm("UpdateEmployeeType", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "Employee TypeUpdate" }))
+                                                            {
+                                                                <input type="hidden" name="EmployeeTypeID" id="hdnID" value="@c.EmployeeTypeID" />
+                                                                <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                                <input type="submit" class="btn btn-link" value="Delete" onclick="return DeleteEmployeeType(this);" />
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </td>
+
+
+
+                                    </tr>
+                                    bCounter++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot style="border-width: 2px;border-style: groove;">
+                            <tr>
+                                <td>
+                                    @bCounter
+
+                                </td>
+                                <td>
+                                    <input type="hidden" name="ID" value="0" />
+                                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="" />
+                                </td>
+                                <td>0</td>
+                                <td>
+                                    0.00
+                                </td>
+
+                                <td>
+                                    <div class="row" style="margin-right: 0px;">
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("UpdateEmployeeType", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "Employee TypeUpdate" }))
+                                            {
+                                                <input type="hidden" name="EmployeeTypeID" id="hdnID" value="0" />
+                                                <input type="hidden" id="hdnEmployeeTypeNetSalary" name="NetSalary" value="0" />
+                                                <input type="hidden" id="hdnName" name="EmployeeTypeName" value="" />
+
+                                                <input type="submit" class="btn btn-link" value="Add New" />
+                                            }
+
+                                        </div>
+
+                                    </div>
+                                </td>
+
+
+
+                            </tr>
+
+
+
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+
+        $('#liEmployeeTypeManagement').closest('ul').closest('li').addClass('active');
+        $('#liEmployeeTypeManagement').addClass('active');
+
+
+    });
+    function ToggleDetails(sender) {
+
+
+        if ($(sender).hasClass("FloorClosed")) {
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetEmployeeTypeSalaries/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' id='tdSalaryDetails' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        var ele = document.getElementsByClassName("FloorOpened");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+        }
+
+        $(sender).removeClass("FloorClosed");
+        $(sender).addClass("FloorOpened");
+        $(sender).text("Close");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("FloorOpened");
+            $(sender).addClass("FloorClosed");
+            $(sender).closest("tr").next().remove();
+            $(sender).text("Manage");
+        }
+
+    }
+    function SaveSalaryStructure(sender) {
+        var formData = new FormData($(sender).closest('#frmSalaryDetails')[0]);
+        $.ajax(
+   {
+       type: "POST",
+       url: "@Url.Action("UpdateSalaryStructure", "Admin")",
+       data: formData,
+       cache: false,
+       processData: false,
+       contentType: false,
+       success: function (html) {
+           $('#tdSalaryDetails').html(html);
+           ShowNotification('Updated', 'Salary Structure Updated Successfully....', 'info');
+       },
+       error: function (e) {
+           alert("errorn");
+       }
+   });
+    }
+
+</script>
+
+<!-- /.content -->

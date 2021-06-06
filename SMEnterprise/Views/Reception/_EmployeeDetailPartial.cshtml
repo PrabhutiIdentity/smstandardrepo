@@ -1,0 +1,217 @@
+﻿
+<div class="x_title">
+    <h2>Employee Details <small></small></h2>
+    <input type="hidden" id="hdnEmployeeID" value="@Model.Employee.EmployeeID" />
+    <div class="clearfix"></div>
+</div>
+<div class="x_content">
+
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="" role="tabpanel" data-example-id="togglable-tabs">
+            <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
+                <li role="presentation" class="active">
+                    <a href="#tab_content1" id="home-tab" role="tab" data-toggle="tab" aria-expanded="true">Employee</a>
+                </li>
+                @if (Model.Employee.EmployeeType == 1)
+                {
+                    <li role="presentation" class="">
+                        <a href="#tab_timetable" role="tab" id="timetable-tab" data-toggle="tab" aria-expanded="false" isloaded="0" onclick="LoadTimeTable();">Time Table</a>
+                    </li>
+                    <li role="presentation" class="">
+                        <a href="#tab_Subjects" role="tab" id="Subjects-tab" data-toggle="tab" aria-expanded="false" isloaded="0" onclick="LoadSubjects();">Subjects</a>
+                    </li>
+                }
+                <li role="presentation" class="">
+                    <a href="#tab_Others" role="tab" id="Other-tab" data-toggle="tab" aria-expanded="false" isloaded="0">Other Details</a>
+                </li>
+            </ul>
+            <div id="myTabContent" class="tab-content">
+                <div role="tabpanel" class="tab-pane fade active in" id="tab_content1" aria-labelledby="home-tab">
+                    <div class="col-md-3 col-sm-3 col-xs-12 profile_left">
+                        <div class="profile_img">
+                            <!-- end of image cropping -->
+                            <div id="crop-avatar">
+                                <!-- Current avatar -->
+                                <img class="img-responsive avatar-view" onerror="return OnImageError(this,@(Model.Employee.Gender));" src="@Url.Content("~/Images/EmployeeImage/")@(Model.Employee.EmployeeID)_@Model.Employee.Photo" alt="Avatar" title="Change the avatar">
+
+                            </div>
+                            <!-- end of image cropping -->
+                        </div>
+                        <h3>@Model.Employee.EmployeeName</h3>
+                        <ul class="list-unstyled user_data">
+                            <li>
+                                @if (Model.TodayAttandanceStatus == 1)
+                                {
+                                    <label class='badge bg-green'>Present</label>
+                                }
+                                else if (Model.TodayAttandanceStatus == 0)
+                                {
+                                    <label class='badge bg-red'>Absent</label>
+                                }
+                                else/* if (Model.TodayAttandanceStatus == 3)*/
+                                {
+                                    <label class='badge bg-blue'>Undone</label>
+                                }
+                            </li>
+                            <li>
+                                Contact : @Model.Employee.MobileNumber
+                            </li>
+                            <li>
+                                EmailID : @Model.Employee.EmailID
+                            </li>
+                        </ul>
+
+                    </div>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        @{
+                            var totalLeaves = 0;
+                            var totalPresent = 0;
+                            var totalHalfDay = 0;
+                            var totalHolidays = 0;
+                            var totalAbsent = 0;
+                            var curdate = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+                            var totalDays = System.DateTime.DaysInMonth(curdate.Year, curdate.Month);
+                            var totalSchoolDays = totalDays;
+                            var StartDate = new DateTime(curdate.Year, curdate.Month, 1);
+                            var fDay = (int)StartDate.DayOfWeek;
+                            <div class="row">
+                                <div class="col-md-7">
+                                    <div class="row seven-cols" style="width: 392px;margin-left: 40px;">
+                                        <div class="col-md-1 divAttHeader">Sun</div>
+                                        <div class="col-md-1 divAttHeader">Mon</div>
+                                        <div class="col-md-1 divAttHeader">Tues</div>
+                                        <div class="col-md-1 divAttHeader">Wed</div>
+                                        <div class="col-md-1 divAttHeader">Thu</div>
+                                        <div class="col-md-1 divAttHeader">Fri</div>
+                                        <div class="col-md-1 divAttHeader">Sat</div>
+                                        @for (int i = 0; i < fDay; i++)
+                                        {
+                                            <div class="col-md-1 inactive"></div>
+                                        }
+                                        @if (Model.MonthAttandance.Count > 0)
+                                        {
+                                            foreach (SMEnterprise.Models.AttandanceCalenderModel a in Model.MonthAttandance)
+                                            {
+                                                if (totalDays < a.DayID)
+                                                {
+                                                    <div class="col-md-1"></div>
+                                                }
+                                                else
+                                                {
+                                                    //var cdow=(int)( new DateTime(curdate.Year, curdate.Month, 1)).DayOfWeek;
+                                                    var css = "inactive";
+                                                    if (a.Status == 3)
+                                                    {
+                                                        css = "inactive";
+                                                    }
+                                                    else if (a.Status == 1)
+                                                    {
+                                                        css = "Present";
+                                                        totalPresent = totalPresent + 1;
+                                                    }
+                                                    else if (a.Status == 2 || a.Status == -2)
+                                                    {
+                                                        css = "holiday";
+                                                        totalHolidays = totalHolidays + 1;
+                                                        totalSchoolDays = totalSchoolDays - 1;
+                                                    }
+                                                    else if (a.Status == 0)
+                                                    {
+                                                        css = "Absent";
+                                                        totalAbsent = totalAbsent + 1;
+                                                    }
+                                                    else if (a.Status.ToString() == "0.50")
+                                                    {
+                                                        css = "HalfDay";
+                                                        totalHalfDay = totalHalfDay + 1;
+                                                    }
+                                                    else
+                                                    {
+                                                        css = "leave";
+                                                        totalLeaves = totalLeaves + 1;
+                                                    }
+                                                    <div class="col-md-1 @css">@a.DayID</div>
+                                                }
+
+                                            }
+                                        }
+                                        else
+                                        {
+                                            for (var ii = 0; ii < totalDays; ii++)
+                                            {
+                                                <div class="col-md-1 inactive">@(ii + 1)</div>
+                                            }
+                                        }
+                                    </div>
+
+                                </div>
+
+                                <div class="col-md-1">.</div>
+                                <div class="col-md-4">
+                                    <div class="col-md-12 Legends divLegendHeader">
+                                        Legends
+                                    </div>
+                                    <div class="col-md-6 Legends">
+                                        Absent :
+                                    </div>
+                                    <div class="col-md-6 Absent Legends">
+                                        @totalAbsent / @totalSchoolDays
+                                    </div>
+                                    <div class="col-md-6 Legends">
+                                        Present :
+                                    </div>
+                                    <div class="col-md-6 Present Legends">
+                                        @totalPresent / @totalSchoolDays
+                                    </div>
+                                    <div class="col-md-6 Legends">
+                                        holiday :
+                                    </div>
+                                    <div class="col-md-6 holiday Legends">
+                                        @totalHolidays / @totalDays
+                                    </div>
+                                    <div class="col-md-6 Legends">
+                                        Leave :
+                                    </div>
+                                    <div class="col-md-6 leave Legends">
+                                        @totalLeaves / @totalSchoolDays
+                                    </div>
+                                    <div class="col-md-6 Legends">
+                                        HalfDay :
+                                    </div>
+                                    <div class="col-md-6 HalfDay Legends">
+                                        @totalHalfDay / @totalSchoolDays
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clearfix">.</div>
+                            <div class="row AttLegends">
+
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="tab_timetable" aria-labelledby="timetable-tab">
+                    <div class="col-md-12 col-sm-3 col-xs-12 profile_left">
+                        <div class="" style="text-align: center;min-height: 350px;">
+                            <img src="@Url.Content("~/Images/LoadingCam.gif")" alt="Avatar">
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="tab_Subjects" aria-labelledby="Subjects-tab">
+                    <div class="col-md-12 col-sm-3 col-xs-12 profile_left">
+                        <div class="" style="text-align: center;min-height: 350px;">
+                            <img src="@Url.Content("~/Images/LoadingCam.gif")" alt="Avatar">
+                        </div>
+                    </div>
+                </div>
+                <div role="tabpanel" class="tab-pane fade" id="tab_Others" aria-labelledby="Other-tab">
+                    <div class="col-md-12 col-sm-3 col-xs-12 profile_left">
+                        <div class="" style="text-align: center;min-height: 350px;">
+                            <img src="@Url.Content("~/Images/LoadingCam.gif")" alt="Avatar">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

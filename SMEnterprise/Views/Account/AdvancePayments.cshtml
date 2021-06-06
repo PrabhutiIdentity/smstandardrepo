@@ -1,0 +1,328 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeAdvancePaymentListModel
+@section IncludeCss
+{
+    <title>Employee Advance Payment Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+<link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+<link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .select2-container
+    {
+        width:285px!important;
+    }
+    div[aria-role="alertdialog"] {
+        z-index: 2 !important;
+    }
+</style>
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+    .paginate_button > a{
+        z-index:0!important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-2 padding">
+                            </div>
+                            <div class="col-md-3 padding">
+                                <a href="Javascript:void(0);" id="0" onclick="AddNewAdvancePayment(this);" class="btn btn-link" style="color:white;">Add New Advance Payment</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="x_panel">
+
+                    <div class="x_content">
+                       
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 15%">Employee</th>
+                                    <th style="width: 75%">Details</th>
+                                    <th style="width: 10%">Date</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (EmployeeAdvancePaymentModel c in Model.Employees)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <div class="row" style="text-align:center;">
+                                                <div class="col-md-12"><img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content(c.Photo)" /></div>
+                                                <div class="col-md-12">
+                                                    @c.EmployeeName
+                                                    <br />
+                                                    @c.EmployeeSID
+                                                </div>
+                                            </div>
+
+                                        </td>
+                                        <td>
+                                            <div class="row" style="display:table;width: 100%;">
+                                                <div class="col-md-12" style="display:table-cell;">
+                                                    <b>@c.Title</b>
+                                                    <br />
+                                                    @c.Description
+                                                </div>
+                                                <div class="col-md-12" style="vertical-align: bottom; display: table-cell;">
+                                                    <table class="table" style="margin-bottom: 0px;">
+                                                        <thead>
+                                                            <tr>
+                                                                <td>Amount</td>
+                                                                <td>Months</td>
+                                                                <td>EMI</td>
+                                                                <td>Returned</td>
+                                                                <td>Status</td>
+                                                                <td>Deductions</td>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td>@c.Amount</td>
+                                                                <td>@c.Months</td>
+                                                                <td>@c.EMI</td>
+                                                                <td>@c.DeductedAmount</td>
+                                                                <td>
+                                                                    @if (c.DeductionsDone == 0)
+                                                                    {
+                                                                        <label class='badge bg-orange'>Started</label>
+                                                                    }
+                                                                    else if (c.DeductedAmount == c.Amount)
+                                                                    {
+                                                                        <label class='badge bg-green'>Completed</label>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <label class='badge bg-blue'>Running</label>
+                                                                    }
+                                                                </td>
+                                                                <td>
+                                                                    @c.DeductionsDone (<a href="javascript:void(0);" id="@c.AdPaymentID" class="closed" onclick="ToggleDetails(this);">Details</a>)
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            @c.PaymentDate.ToString("dd MMM, yyyy")
+                                        </td>
+
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+<script src="@Url.Content("~/js/moment.min.js")"></script>
+<script src="@Url.Content("~/js/daterangepicker.js")"></script>
+<!-- Select2 -->
+<script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script>
+        function UpdateAdvancePayment(sender) {
+
+            $.ajax({
+                url: "@Url.Action("AddAdvancePaymentDeductions", "Account")",
+                type: 'POST',
+            data: JSON.stringify({
+                AdPayID: $(sender).closest('tr').find('#hdnAdPaymentID').val(),
+                Date: $(sender).closest('tr').find('#txtDate').val(),
+                Amount: $(sender).closest('tr').find('#txtAmount').val(),
+                Mode: 0,
+                Remark: $(sender).closest('tr').find('#txtRemark').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                $(sender).closest('table').closest('td').html(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+        }
+        function BeforePaymentSave()
+        {
+            $('#hdnEmployeeType').val($('#ddlEmployee :selected').attr('etype'));
+            return true;
+        }
+        function UpdateEMI() {
+            var Amount = $('#txtAmount').val();
+            var Months = $('#txtMonths').val();
+            var Emi = parseFloat(Amount) / parseFloat(Months);
+            $('#txtEMI').val(Emi.toFixed(2));
+        }
+        var EditSessionForm;
+        function CancelPaymentEdit() {
+            EditSessionForm.remove();
+        }
+        function AddNewAdvancePayment(sender) {
+            $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetEditAdvancePaymentForm/" + $(sender).attr('id'),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            EditSessionForm = new PNotify({
+                                text: html,
+                                icon: false,
+                                width: '70%',
+                                hide: false,
+                                addclass: 'dark',
+                                styling: 'bootstrap3',
+                                buttons: {
+                                    closer: false,
+                                    sticker: false
+                                },
+                                insert_brs: false
+                            });
+
+                            $('.').css('margin-right', '100px');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+        }
+
+        function ToggleDetails(sender) {
+
+
+            if ($(sender).hasClass("closed")) {
+                $(sender)
+               .closest("tr")
+               .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading....</td></tr>");
+                $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetAdvancePaymentDeductions/" + $(sender).attr('id'),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+
+            $(sender).closest("tr").next().remove();
+            // fill the div with the html returned by action
+            $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+            var ele = document.getElementsByClassName("opened");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+            }
+
+            $(sender).removeClass("closed");
+            $(sender).addClass("opened");
+            $(sender).text("Close");
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+            }
+            else {
+                $(sender).removeClass("opened");
+                $(sender).addClass("closed");
+                $(sender).closest("tr").next().remove();
+                $(sender).text("Details");
+            }
+
+        }
+        $(function () {
+            $("#tblCategory").DataTable({ "aaSorting": [] });
+        });
+        function DeleteEmployee(sender) {
+            return confirm('Do you really want to delete Employee!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->

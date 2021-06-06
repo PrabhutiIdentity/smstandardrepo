@@ -1,0 +1,349 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_ReceptionLayout.cshtml";
+}
+@model ReceptionDashboardModel
+@section IncludeCss
+{
+    <title>P-School | Dashboard</title>
+    <link href="@Url.Content("~/css/Admin/blue.css")" rel="stylesheet" />
+    <style>
+        .scroll380 {
+            max-height: 380px;
+            overflow-y: scroll;
+        }
+
+            .scroll380::-webkit-scrollbar-track {
+                -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+                background-color: #F5F5F5;
+                border-radius: 10px;
+                padding-left: 5px;
+            }
+
+            .scroll380::-webkit-scrollbar {
+                width: 2px;
+                background-color: #F5F5F5;
+            }
+
+            .scroll380::-webkit-scrollbar-thumb {
+                border-radius: 10px;
+                background-color: #fd3a13;
+            }
+
+            .scroll380 ul.to_do li.pending {
+                border: 1px solid rgba(253, 58, 19, 0.31) !important;
+                background-color: white;
+            }
+
+            .scroll380 ul.to_do {
+                margin-right: 3px;
+            }
+
+                .scroll380 ul.to_do li.done {
+                    border: 1px solid rgba(92, 184, 160, 0.4) !important;
+                    background-color: white;
+                }
+
+                .scroll380 ul.to_do li a {
+                    padding: 1px 4px 1px 5px;
+                    color: #ffffff;
+                    background-color: #5cb8a0;
+                    border-radius: 4px;
+                }
+
+        .force-overflow {
+            min-height: 380px;
+        }
+
+        .nosidepad {
+            padding: 10px 0px;
+        }
+
+            .nosidepad .x_title {
+                padding: 0px 15px;
+            }
+
+        .panel_toolbox > li > a {
+            padding: 5px;
+            color: #488ce2;
+            font-size: 14px;
+        }
+
+        .addNewBox {
+            border: 1px solid #5cb8a0;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            box-shadow: 2px 3px 1px 0px rgb(121, 137, 163);
+            background-color: beige;
+        }
+
+        .badge-hower:hover {
+            box-shadow: -1px 1px 1px 1px rgb(172, 178, 187);
+            color: #535f7a;
+            background-color: rgb(4, 251, 187) !important;
+            border: 1px solid #535f7a !important;
+            cursor: pointer;
+        }
+
+        .badge-hower {
+            border: 1px solid beige !important;
+            color: #2e3c5a;
+        }
+
+        .badge-selected {
+            border: 1px solid #2e3c5a !important;
+            color: white;
+        }
+        .square {
+            background-color: rgb(2, 255, 189);
+            transition: opacity 1s ease-in-out;
+        }
+    </style>
+}
+<div class="">
+
+    <div class="row tile_count">
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+            <span class="count_top"><i class="fa fa-clock-o"></i> Scheduled Today</span>
+            <div class="count">@Model.ScheduledToday.ToString("N0")</div>
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+            <span class="count_top"><i class="fa fa-user"></i> Total Enquiries</span>
+            <div class="count">@Model.TotalEnquiries.ToString("N0")</div>
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+            <span class="count_top"><i class="fa fa-phone"></i> Total Followups</span>
+            <div class="count">@Model.TotalFollowups.ToString("N0")</div>
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+            <span class="count_top"><i class="fa fa-thumbs-o-up"></i> Total Converted</span>
+            <div class="count green">@Model.TotalConverted.ToString("N0")</div>
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+            <span class="count_top"><i class="fa fa-user"></i>- Total Failed</span>
+            <div class="count">@Model.TotalFailed.ToString("N0")</div>
+        </div>
+        <div class="col-md-2 col-sm-4 col-xs-6 tile_stats_count">
+            <span class="count_top"><i class="fa fa-user">o</i> Total Pending</span>
+            <div class="count">@Model.TotalPending.ToString("N0")</div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <div class="row">
+            <div class="col-md-5 col-sm-5 col-xs-12">
+                <div class="x_panel nosidepad">
+                    <div class="x_title">
+                        <h2>To Do List <small>One week old completed tasks will be removed</small></h2>
+                        <ul class="nav navbar-right panel_toolbox" style="min-width:auto;">
+                            <li class="pull-right" title="Add New Task">
+                                <a class="addnewtask" data-toggle="tooltip" data-placement="right" title="Click to Add New quick To Do Item"><i class="fa fa-plus"></i></a>
+                            </li>
+                        </ul>
+                        <div class="row">
+                            <div class="col-md-12 addNewBox" style="display:none;">
+                                <input type="hidden" id="hdnTaskPriority" value="2" />
+                                Priority : <label class='badge bg-red badge-hower' value="1" style="margin-top: 2px;">High</label>
+                                <label class='badge bg-blue badge-hower badge-selected' style="margin-top: 2px;" value="2">Normal</label>
+                                <label class='badge bg-green badge-hower' style="margin-top: 2px;" value="3">Low</label>
+                                <input class="form-control" type="datetime-local" id="txtToDoDate" />
+                                <textarea class="form-control" style="resize:none" id="txtToDoDetails" rows="2" placeholder="Type detail of task here"></textarea>
+                                <a class="pull-right btn btn" href="javascript:void(0);" onclick="InsertUpdateToDoItem(this,1);">Add</a>
+                            </div>
+                        </div>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="scroll380">
+                            <ul class="to_do force-overflow" id="ulToDoList">
+                                @foreach (ToDoItemModel ti in Model.ToDoList)
+                                {
+                                    <li class="@(ti.Status==0?"pending":"done")">
+                                        <input type="hidden" id="hdnToDoID" value="@ti.ToDoID" />
+                                        <p>
+                                            <label class='badge bg-@(ti.Priority==1?"red":ti.Priority==2?"blue":"green")'>@ti.ScheduledDateTime.ToString("dd MMM, yyyy hh:mm tt")</label> @ti.Details
+                                            <div class="icheckbox_flat-blue pull-right @(ti.Status==0?"":"checked")" aria-checked="false" aria-disabled="false" style="position: relative;margin-top: -20px;" data-toggle="tooltip" data-placement="right" title="Click to Mark To Do Item as Completed">
+                                                <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                            </div>
+
+                                        </p>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-7 col-sm-7 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Scheduled Followups <small>Today</small></h2>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="dashboard-widget-content scroll380">
+                            <ul class="list-unstyled timeline widget force-overflow">
+                                @foreach (ScheduledEnquiryModel s in Model.ScheduledEnquiries)
+                                {
+                                    <li>
+                                        <div class="block">
+                                            <div class="block_content">
+                                                <h2 class="title">
+                                                    <a target="_blank" href="/Reception/EnquiryDetail/@s.EnquiryID">@s.StudentName @(s.Gender==0?"son":"daughter") of @s.FatherName and @s.MotherName for Class @s.ClassName (@s.SessionName)</a>
+                                                </h2>
+                                                <div class="byline">
+                                                    <span>@s.FDate.ToString("dd MMM, yyyy hh:mm tt")</span> by <a>@s.FollowupByName</a> Status @(s.EStatus==0?"Open":s.EStatus==1?"Converted":"Lost")
+                                                </div>
+                                                <p class="excerpt">
+                                                    @s.Remark
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-ddTHH:mm")" />
+@section scripts
+{
+    <script src="@Url.Content("~/js/Chart.min.js")"></script>
+
+    <script>
+    </script>
+    <!-- datepicker -->
+    <script type="text/javascript">
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $('.addnewtask').click(function () {
+            if ($(this).find('i').hasClass('fa-plus')) {
+                $(this).closest('.x_title').find('.addNewBox').css('display', '');
+                $(this).find('i').addClass('fa-minus').removeClass('fa-plus');
+            }
+            else {
+                $(this).closest('.x_title').find('.addNewBox').css('display', 'none');
+                $(this).find('i').removeClass('fa-minus').addClass('fa-plus');
+            }
+        });
+        $('.badge-hower').click(function () {
+            $('.badge-hower').removeClass('badge-selected');
+            $(this).addClass('badge-selected');
+            $(this).closest('.addNewBox').find('#hdnTaskPriority').val($(this).attr('value'));
+        });
+        $(document).ready(function () {
+
+        });
+        $('.icheckbox_flat-blue').click(function () {
+            if (!$(this).hasClass('checked')) {
+                InsertUpdateToDoItem($(this), -1);
+            }
+        })
+        function InsertUpdateToDoItem(sender, Type) {
+
+            var ToDoID = 0;
+            var Priority = 2;
+            var ScheduledDateTime;
+            var Status = 0;
+            var Details = '';
+
+            if (Type == -1) {
+                ToDoID = $(sender).closest('li').find('#hdnToDoID').val();
+                ScheduledDateTime = new Date();
+            }
+            else {
+                ToDoID = 0;
+                ScheduledDateTime = $(sender).closest('.addNewBox').find('#txtToDoDate').val();
+                Priority = $(sender).closest('.addNewBox').find('#hdnTaskPriority').val();
+                Details = $(sender).closest('.addNewBox').find('#txtToDoDetails').val();
+            }
+            if (Type != -1 || Type == -1 && !$(sender).hasClass('checked')) {
+                $.ajax({
+                    url: "@Url.Action("InsertUpdateToDoItem", "Reception")",
+                    type: 'POST',
+                    data: JSON.stringify({
+                        OpType: Type,
+                        ToDoID: ToDoID,
+                        Priority: Priority,
+                        Status: Status,
+                        Details: Details,
+                        ScheduledDateTime: ScheduledDateTime
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        if (data > 0) {
+                            ShowNotification('Success', 'To Do List updated successfully', 'success');
+                            if (Type == -1) {
+                                $(sender).closest('li').addClass('square').addClass('done').removeClass('pending');
+                                $(sender).addClass('checked');
+                                var $square = $('.square');
+                                $square.css('opacity', '0');
+                                $square.one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", function () {
+                                    $square.removeClass('square');
+                                    $square.css('opacity', '1');
+                                });
+                                $(sender).attr('title', 'This Task has been marked as Done....')
+                                $(sender).tooltip({
+                                    container: 'body'
+                                });
+                            }
+                            else {
+                                var tDatetime = $(sender).closest('.addNewBox').find('#txtToDoDate').val().split('T');
+                                var tDate = tDatetime[0].split('-');
+                                var tTime = tDatetime[1];
+                                var tHour = tTime.split(':')[0];
+                                var tMin = tTime.split(':')[1];
+                                var mer = 'AM';
+                                if (tHour > 12) {
+                                    mer = 'PM';
+                                    tHour = tHour - 12;
+                                }
+                                var liItem = '<li class="pending">' +
+                                            '<input type="hidden" id="hdnToDoID" value="' + data + '" />' +
+                                           ' <p><label class="badge bg-' + (Priority == 1 ? 'red' : Priority = 2 ? 'blue' : 'green') + '">' + tDate[2] + ' ' + months[tDate[1] - 1] + ' ,' + tDate[0] + ' ' + tHour + ':' + tMin + ' ' + mer + '</label> ' + $(sender).closest('.addNewBox').find('#txtToDoDetails').val() +
+                                                '<div class="icheckbox_flat-blue pull-right" aria-checked="false" aria-disabled="false" style="position: relative;margin-top: -20px;" data-toggle="tooltip" data-placement="right" title="Click to Mark To Do Item as Completed">' +
+                                                    '<ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>' +
+                                                '</div>' +
+                                            '</p>' +
+                                        '</li>';
+                                $(liItem).prependTo('#ulToDoList');
+                                $(sender).closest('.addNewBox').find('#txtToDoDate').val($('#hdnCurrDate').val());
+                                $(sender).closest('.addNewBox').find('#hdnTaskPriority').val(2);
+                                $(sender).closest('.addNewBox').find('#txtToDoDetails').val('');
+                                $(sender).closest('.addNewBox').find('.badge').removeClass('badge-selected');
+                                $(sender).closest('.addNewBox').find('.bg-blue').addClass('badge-selected');
+                                $(sender).closest('.x_title').find('.addnewtask').click();
+                                $('[data-toggle="tooltip"]').tooltip({
+                                    container: 'body'
+                                });
+                                $('.icheckbox_flat-blue').click(function () {
+                                    if (!$(this).hasClass('checked')) {
+                                        InsertUpdateToDoItem($(this), -1);
+                                    }
+                                })
+                            }
+
+                        }
+                        else {
+                            ShowNotification('Error', 'To Do Item Not updated', 'error');
+                        }
+
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                    },
+                    async: true,
+                    processData: false
+                });
+            }
+        }
+    </script>
+}
