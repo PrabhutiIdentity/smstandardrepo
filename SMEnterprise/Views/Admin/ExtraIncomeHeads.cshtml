@@ -1,0 +1,177 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Extra Income Heads Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Extra Income Heads Management
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Extra Income Heads Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 25%">Name</th>
+                                <th style="width: 15%">Created Date</th>
+                                <th style="width: 15%">Status</th>
+                                <th style="width: 15%"><a href="javascript:void(0);" onclick="EditSession(this,0)">Add New</a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var elCounter = 1;
+                                foreach (ExtraIncomeHeadModel c in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @elCounter
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.Name</span>
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.CreatedDate.ToString("dd MMM,yyyy")</span>
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible"><label class='badge bg-@(c.Status == 0 ? "red" : "green")'>@(c.Status == 0 ? "Inactive" : "Active")</label></span>
+
+                                        </td>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" class="sbtn" onclick="EditSession(this,@c.ID);">Edit</a>
+                                                    <input type="hidden" id="hdnName" name="Name" required value="@c.Name" />
+                                                    <input type="hidden" id="hdnStatus" name="Status" value="@c.Status" />
+                                                </div>
+                                                @using (Html.BeginForm("UpdateExtraIncomeHead", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <input type="hidden" name="LeaveTypeID" value="@c.ID" />
+                                                    <button onclick="return DeleteExtraIncomeHead(this);" style="background-color: red;color: white;" class="btn btn-default sbtn ViewCopy visible" value="Edit">Delete</button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    elCounter++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section pageBottom{
+    <div id="mdlEditSession" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Update Extra Income Head</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" action="/admin/UpdateExtraIncomeHead">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <input type="hidden" id="hdnID" name="ID" value="0" />
+                                <label for="txtSchemeTitle">Head Title</label>
+                                <input type="text" required name="Name" class="form-control" id="txtName" placeholder="Enter Head Title">
+                            </div>
+                            <div class="form-group sessionStatus">
+                                <label for="txtSchemeTitle">Status</label>
+                                <label class="switch switch-green">
+                                    <input type="checkbox" class="switch-input" Checked>
+                                    <span class="switch-label" onclick='$(this).closest(".sessionStatus").find("#hdnSessionStatus").val($(this).closest(".sessionStatus").find("#hdnSessionStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" id="hdnSessionStatus" name="Status" value="1" />
+                                </label>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary pull-right">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+    function EditSession(sender, ID) {
+        var SessionName = $(sender).closest('td').find('#hdnName').val();
+        var SessionStatus = $(sender).closest('td').find('#hdnStatus').val();
+        $('#mdlEditSession').find('#hdnID').val(ID);
+        $('#mdlEditSession').find('#txtName').val(SessionName);
+        if (ID == 0) {
+            SessionStatus = 1;
+        }
+        if (SessionStatus == 1) {
+            $('#mdlEditSession').find('.sessionStatus').find('.switch-input').attr('checked', 'checked');
+        }
+        else {
+            $('#mdlEditSession').find('.sessionStatus').find('.switch-input').removeAttr('checked');
+        }
+        $('#mdlEditSession').find('.sessionStatus').find('#hdnSessionStatus').val(SessionStatus);
+        $('#mdlEditSession').modal('toggle');
+    }
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+
+        $('#liExtraIncomeHeadManagement').closest('ul').closest('li').addClass('active');
+        $('#liExtraIncomeHeadManagement').addClass('active');
+    });
+
+    function DeleteExtraIncomeHead(sender) {
+        var pCount = $(sender).closest('tr').find('#hdnPeriodsCount').val();
+        var cCount = $(sender).closest('tr').find('#hdnClassesCount').val();
+        if (pCount == 0 && cCount == 0) {
+            return confirm("Do you Really Want to Delete this Education Level????");
+        }
+        else {
+            var abc = "";
+            if (pCount > 0) {
+                abc = "Periods";
+            }
+            if (cCount > 0) {
+                if (pCount > 0) {
+                    abc = "Periods And Classes";
+                }
+                else {
+                    abc = "Classes"
+                }
+            }
+            ShowClosingNotification('Error', 'This Education Level has ' + abc + ' Defined, so can\'t be deleted....', 'error');
+            return false;
+        }
+
+    }
+</script>
+
+<!-- /.content -->

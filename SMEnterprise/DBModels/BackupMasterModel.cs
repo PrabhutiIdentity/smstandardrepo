@@ -1,0 +1,152 @@
+﻿using SMEnterpriseDB.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+
+namespace SMEnterpriseDB.DBModels
+{
+    [Serializable]
+    public class BackupMasterModel
+    {
+        public List<TransportHostalAllocationDelocation> PTransportHostalAllocationDelocation { get; set; }
+        public List<Employees> PEmployees { get; set; }
+        public List<GalleryMaster> PGalleryMaster { get; set; }
+        public List<BookMaster> PBookMaster { get; set; }
+        public List<EmployeeSalaryDetails> PEmployeeSalaryDetails { get; set; }
+        public List<LibraryIssueBooks> PLibraryIssueBooks { get; set; }
+        public List<GalleryImages> PGalleryImages { get; set; }
+        public List<EmployeesBio> PEmployeesBio { get; set; }
+        public List<EmployeeTypeMaster> PEmployeeTypeMaster { get; set; }
+        public List<EmployeeTypeSalaryDetails> PEmployeeTypeSalaryDetails { get; set; }
+        public List<SessionMaster> PSessionMaster { get; set; }
+        public List<EvaluationDetails> PEvaluationDetails { get; set; }
+        public List<SMSFailureLog> PSMSFailureLog { get; set; }
+        public List<EvaluationMaster> PEvaluationMaster { get; set; }
+        public List<EventMaster> PEventMaster { get; set; }
+        public List<EventTypeMaster> PEventTypeMaster { get; set; }
+        public List<ExamMaster> PExamMaster { get; set; }
+        public List<ExamResultMaster> PExamResultMaster { get; set; }
+        public List<NotificationMaster> PNotificationMaster { get; set; }
+        public List<ExpenceTypeMaster> PExpenceTypeMaster { get; set; }
+        public List<NotificationRecievers> PNotificationRecievers { get; set; }
+        public List<FeeApplicableMaster> PFeeApplicableMaster { get; set; }
+        public List<FeeTypeMaster> PFeeTypeMaster { get; set; }
+        public List<FloorMaster> PFloorMaster { get; set; }
+        public List<Group_Subject> PGroup_Subject { get; set; }
+        public List<AppUsers> PAppUsers { get; set; }
+        public List<GroupMaster> PGroupMaster { get; set; }
+        public List<GroupTypeMaster> PGroupTypeMaster { get; set; }
+        public List<Holiday_Classes> PHoliday_Classes { get; set; }
+        public List<HolidayMaster> PHolidayMaster { get; set; }
+        public List<Hostel_FloorMaster> PHostel_FloorMaster { get; set; }
+        public List<Hostel_HostelTypeMaster> PHostel_HostelTypeMaster { get; set; }
+        public List<Hostel_RoomMaster> PHostel_RoomMaster { get; set; }
+        public List<Hostel_RoomTypeMaster> PHostel_RoomTypeMaster { get; set; }
+        public List<Hostel_RoomTypeRateMaster> PHostel_RoomTypeRateMaster { get; set; }
+        public List<HostelMaster> PHostelMaster { get; set; }
+        public List<HouseMaster> PHouseMaster { get; set; }
+        public List<LeaveMaster> PLeaveMaster { get; set; }
+        public List<LeaveTypeMaster> PLeaveTypeMaster { get; set; }
+        public List<LoginDetails> PLoginDetails { get; set; }
+        public List<BookCategory> PBookCategory { get; set; }
+        public List<MailMaster> PMailMaster { get; set; }
+        public List<MailProcessingStatus> PMailProcessingStatus { get; set; }
+        public List<MailTemplates> PMailTemplates { get; set; }
+        public List<MasterSettings> PMasterSettings { get; set; }
+        public List<MessageMaster> PMessageMaster { get; set; }
+        public List<News> PNews { get; set; }
+        public List<NoticeBoard> PNoticeBoard { get; set; }
+        public List<ExpenceMaster> PExpenceMaster { get; set; }
+        public List<ExpenceDetails> PExpenceDetails { get; set; }
+        public List<ParallelAttLogExportDetails> PParallelAttLogExportDetails { get; set; }
+        public List<ParallelDatabaseDetails> PParallelDatabaseDetails { get; set; }
+        public List<ParentMaster> PParentMaster { get; set; }
+        public List<PaymentDetails> PPaymentDetails { get; set; }
+        public List<PaymentMaster> PPaymentMaster { get; set; }
+        public List<PerformanceParameterMaster> PPerformanceParameterMaster { get; set; }
+        public List<PerformanceParameterValues> PPerformanceParameterValues { get; set; }
+        public List<ThoughtMaster> PThoughtMaster { get; set; }
+        public List<PeriodMaster> PPeriodMaster { get; set; }
+        public List<PeriodTypeMaster> PPeriodTypeMaster { get; set; }
+        public List<Permissions> PPermissions { get; set; }
+        public List<ProductMaster> PProductMaster { get; set; }
+        public List<QuestionBankMaster> PQuestionBankMaster { get; set; }
+        public List<QuotaDiscountDetails> PQuotaDiscountDetails { get; set; }
+        public List<QuotaMaster> PQuotaMaster { get; set; }
+        public List<RoomMaster> PRoomMaster { get; set; }
+        public List<RoomSizeMaster> PRoomSizeMaster { get; set; }
+        public List<SalaryTypeMaster> PSalaryTypeMaster { get; set; }
+        public List<SBranchMaster> PSBranchMaster { get; set; }
+        public List<SchoolDetails> PSchoolDetails { get; set; }
+        public List<SMSCountDetails> PSMSCountDetails { get; set; }
+        public List<StateMaster> PStateMaster { get; set; }
+        public List<EvaluationTypes> PEvaluationTypes { get; set; }
+        public List<Student_Session> PStudent_Session { get; set; }
+        public List<Student_Session_OptionalSubjects> PStudent_Session_OptionalSubjects { get; set; }
+        public List<StudentAttendanceMasterT> PStudentAttendanceMasterT { get; set; }
+        public List<StudentMaster> PStudentMaster { get; set; }
+        public List<SubjectMasterT> PSubjectMasterT { get; set; }
+        public List<EvaluationSchemeMaster> PEvaluationSchemeMaster { get; set; }
+        public List<SyllabusScheduleStatus> PSyllabusScheduleStatus { get; set; }
+        public List<Teacher_Subject> PTeacher_Subject { get; set; }
+        public List<TeacherSubstitutionMaster> PTeacherSubstitutionMaster { get; set; }
+        public List<Time_Table_Master> PTime_Table_Master { get; set; }
+        public List<TopicMaster> PTopicMaster { get; set; }
+        public List<ClassSessionDetails> PClassSessionDetails { get; set; }
+        public List<Transport_Vehicle_Route> PTransport_Vehicle_Route { get; set; }
+        public List<Transport_Vehicle_Route_Details> PTransport_Vehicle_Route_Details { get; set; }
+        public List<TransportRouteDetails> PTransportRouteDetails { get; set; }
+        public List<TransportRouteMaster> PTransportRouteMaster { get; set; }
+        public List<User_Details> PUser_Details { get; set; }
+        public List<UserPermissions> PUserPermissions { get; set; }
+        public List<Users> PUsers { get; set; }
+        public List<VehicleDetails> PVehicleDetails { get; set; }
+        public List<C_MasterSettings> P_MasterSettings { get; set; }
+        public List<VerificationMode> PVerificationMode { get; set; }
+        public List<AdvancePaymentDeductions> PAdvancePaymentDeductions { get; set; }
+        public List<BookCopyDetail> PBookCopyDetail { get; set; }
+        public List<AdvancePaymentMaster> PAdvancePaymentMaster { get; set; }
+        public List<ApplicationLogTable> PApplicationLogTable { get; set; }
+        public List<AreaMaster> PAreaMaster { get; set; }
+        public List<AssignmentMaster> PAssignmentMaster { get; set; }
+        public List<AssignmentSubmissions> PAssignmentSubmissions { get; set; }
+        public List<PaymentModeMaster> PPaymentModeMaster { get; set; }
+        public List<AttandanceDeviceDetails> PAttandanceDeviceDetails { get; set; }
+        public List<AttendanceStates> PAttendanceStates { get; set; }
+        public List<BuildingMaster> PBuildingMaster { get; set; }
+        public List<ParentDiary> PParentDiary { get; set; }
+        public List<ChapterMaster> PChapterMaster { get; set; }
+        public List<SMSTypeMaster> PSMSTypeMaster { get; set; }
+        public List<FeeDiscountRequestMaster> PFeeDiscountRequestMaster { get; set; }
+        public List<SMSBalanceMaster> PSMSBalanceMaster { get; set; }
+        public List<FeeDiscountRequestDetails> PFeeDiscountRequestDetails { get; set; }
+        public List<CityMaster> PCityMaster { get; set; }
+        public List<SMSTemplateMaster> PSMSTemplateMaster { get; set; }
+        public List<Class_Merge_Master> PClass_Merge_Master { get; set; }
+        public List<Class_Sections> PClass_Sections { get; set; }
+        public List<ClassFeeStructureMaster> PClassFeeStructureMaster { get; set; }
+        public List<ClassMaster> PClassMaster { get; set; }
+        public List<SMSSendingDetails> PSMSSendingDetails { get; set; }
+        public List<LibraryIssueRegister> PLibraryIssueRegister { get; set; }
+        public List<CountryMaster> PCountryMaster { get; set; }
+        public List<SMSProcessingLog> PSMSProcessingLog { get; set; }
+        public List<SMSSendingMaster> PSMSSendingMaster { get; set; }
+        public List<ExpenceBillImages> PExpenceBillImages { get; set; }
+        public List<SubSubjectTypes> PSubSubjectTypes { get; set; }
+        public List<Devices> PDevices { get; set; }
+        public List<DevicesStatus> PDevicesStatus { get; set; }
+        public List<DriverConductorDetails> PDriverConductorDetails { get; set; }
+        public List<EducationLevelMaster> PEducationLevelMaster { get; set; }
+        public List<EmployeeAttendanceMasterT> PEmployeeAttendanceMasterT { get; set; }
+        public List<EmployeeEducationDetails> PEmployeeEducationDetails { get; set; }
+        public List<EmployeeExperienceDetails> PEmployeeExperienceDetails { get; set; }
+        public List<NewsMaster> PNewsMaster { get; set; }
+        public List<EmployeeLeaveTypeMaster> PEmployeeLeaveTypeMaster { get; set; }
+        public List<LibraryMaster> PLibraryMaster { get; set; }
+        public List<EmployeeMaster> PEmployeeMaster { get; set; }
+        public List<AdmissionEnquiryMaster> PAdmissionEnquiryMaster { get; set; }
+        public List<AdmissionEnquiryFollowups> PAdmissionEnquiryFollowups { get; set; }
+
+    }
+}

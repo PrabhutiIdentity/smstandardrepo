@@ -1,0 +1,214 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+    var currentDatetime = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+}
+@model SMEnterprise.Models.StudentOnlineExamListPageModel
+@section IncludeCss
+{
+    <title>Online Exams</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row std-mng-head col-md-12">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-10">
+                                <div class="row">
+                                    @using (Html.BeginForm("OnlineExams", "Parent", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                                    {
+                                        <div class="col-md-3 padding">
+                                            <label class="col-md-4 text-right">Subject</label>
+                                            <div class="col-md-8">
+                                                <select name="SubjectID" class="form-control smallfont" id="ddlSubjects" onchange="$('#frmGetExams').submit();">
+                                                    <option value="0">--Select Subject--</option>
+                                                    @foreach (NameIDModel el in Model.Subjects)
+                                                    {
+                                                        <option value="@el.ID" @(el.ID == Model.SubjectID ? "selected" : "")>@el.Name</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <ul class="messages">
+                            @{
+                                var ctr = 1;
+                                foreach (var q in Model.Exams)
+                                {
+                                    <li class="queli">
+                                        <div class="message_wrapper" style="margin-left: 0;">
+                                            <label class="badge badge-info">Exam Timing : from @q.OExamStartDate.ToString("dd MMM, yyyy hh:mm tt") to  @q.OExamEndDate.ToString("dd MMM, yyyy hh:mm tt")</label>
+                                            <h4 class="heading searchable"> @(ctr). @q.ExamTitle</h4>
+                                            <blockquote class="message" style="font-size: 12px;">@Html.Raw(q.ExamDescription)@*@q.ExamDescription*@</blockquote>
+                                            <br />
+                                            <div class="row">
+                                                <div class="col-md-10">
+                                                    <label class="badge bg-@(q.SubmissionID!=0?"blue":q.OExamStartDate>currentDatetime? "green":q.OExamStartDate<currentDatetime && q.OExamEndDate>currentDatetime? "green":"red")">
+                                                        @(q.SubmissionID != 0 ? "Submitted" : q.OExamStartDate > currentDatetime ? "Not Started" : q.OExamStartDate < currentDatetime && q.OExamEndDate > currentDatetime ? "Started" : "Ended")
+                                                    </label>
+                                                    <label class="badge badge-@(q.ExamPriority==0?"secondary":q.ExamPriority==1?"success": "danger")">Priority : @(q.ExamPriority == 0 ? "Low" : q.ExamPriority == 1 ? "Medium" : "High")</label>
+                                                    <label class="badge bg-green">#Questions : @q.QuestionCount</label>
+                                                    <label class="badge bg-green">#Total Marks : @q.TotalMarks</label>
+                                                    @if (q.SubmissionID != 0)
+                                                    {
+                                                        <label class="badge bg-blue">Marks : @q.MarksObtained</label>
+                                                    }
+                                                </div>
+                                                <div class="col-md-2" style="text-align: right;@(q.SubmissionCount==0?"": "display:none")">
+
+
+                                                    @if (q.SubmissionID != 0)
+                                                    {
+                                                        using (Html.BeginForm("ViewAnswerSheet", "Parent", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline" }))
+                                                        {
+                                                            <input type="hidden" name="OExamID" value="@q.OExamID" />
+                                                            <input type="hidden" name="SubmissionID" value="@q.SubmissionID" />
+                                                          
+                                                                <button type="submit" href="javascript:void(0);" class="btn btn-sm btn-success">View Answer Sheet</button>
+                                                         
+                                                        }
+                                                    }
+                                                    else if (q.OExamStartDate < currentDatetime && q.OExamEndDate > currentDatetime)
+
+                                                    {
+                                                        using (Html.BeginForm("StartOnlineExam", "Parent", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline" }))
+                                                        {
+                                                            <input type = "hidden" name = "OExamID" value = "@q.OExamID" />
+
+                                                            <button type = "submit" href = "javascript:void(0);" class="btn btn-sm btn-danger">Start Test</button>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    ctr++;
+                                }
+                            }
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyy-MM-dd")" />
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script>
+        function DeleteOnlineExam() {
+            return confirm('Do you really want to delete this exam?');
+        }
+        function ClassChanged() {
+            var sectionid = 0;
+            var clsID = $('#ddlClass').val();
+
+            $("#ddlSection option").each(function () {
+                if ($(this).attr('classid') == clsID) {
+                    if (sectionid == 0) {
+                        sectionid = this.value;
+                    }
+                    $(this).css('display', '');
+                }
+                else {
+                    $(this).css('display', 'none');
+                }
+            });
+            $('#ddlSection').val(sectionid);
+            SectionChanged();
+        }
+        function SectionChanged() {
+            var subjectid = 0;
+            var secid = $('#ddlSection').val();
+            $("#ddlSubjects option").each(function () {
+                if ($(this).attr('sectionid') == secid) {
+                    if (subjectid == 0) {
+                        subjectid = this.value;
+                    }
+                    $(this).css('display', '');
+                }
+                else {
+                    $(this).css('display', 'none');
+                }
+            });
+            $('#ddlSubjects').val(subjectid);
+            $('#frmGetExams').submit();
+        }
+        $(function () {
+
+            $('#tblCategory').DataTable({
+                "columnDefs": [{
+                    "targets": 7,
+                    "orderable": false
+                }]
+            });
+
+        });
+
+    </script>
+}
+<!-- /.content -->

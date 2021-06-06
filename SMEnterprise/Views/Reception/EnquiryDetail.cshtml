@@ -1,0 +1,751 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_ReceptionLayout.cshtml";
+}
+@model SMEnterprise.Models.AdmissionEnquiryPageModel
+@section IncludeCss
+{
+    <title>Admission Enquiry</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .tblEqDetails > tbody > tr > td {
+        padding: 0px;
+    }
+
+    .noPadRight {
+        padding-right: 0px;
+    }
+
+    .noPadLeft {
+        padding-left: 0px;
+    }
+
+    .enqDetails .row {
+        border-bottom: 1px solid #d9dbdf;
+        padding: 2px 0px 2px 0px;
+    }
+
+    .enqDetails .form-control {
+        display: inline;
+        width: auto;
+        border-radius: 3px;
+        padding: 2px 5px;
+        font-size: 12px;
+        height: 20px;
+    }
+
+    .enqDetails .btn {
+        padding: 0px 2px;
+        font-size: 13px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .Followup {
+        border: 2px solid #5cb8a0;
+        padding: 2px 2px 2px 8px;
+        border-radius: 3px;
+        margin-top: 2px;
+    }
+
+        .Followup .row {
+            border-bottom: 0px;
+        }
+
+        .Followup .col-md-4 {
+            border-bottom: 1px solid red;
+            text-align: center;
+        }
+
+        .Followup .col-md-12 {
+            margin-top: 2px;
+        }
+
+    .square {
+        background-color: rgba(255, 0, 0, 0.59);
+        transition: opacity 1s ease-in-out;
+    }
+</style>
+<div class="" id="tdDetails">
+
+    <div class="x_panel tblEqDetailswrapper">
+        <div class="x_content enqDetails">
+            @using (Html.BeginForm("UpdateAdmissionEnquiry", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSaveAdmissionEnquiry" }))
+            {
+                <div class="row">
+                    <div class="col-md-5">
+                        @if (SMEnterprise.Models.PermissionManager.GetLoggedInUser().RoleID == 10)
+                        {
+                            <span>Assigned To : <b id="vReceptionist">@Model.Enquiry.ReciptionistName</b></span>
+                            <select class="form-control editReceptionEnquiry hidden" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
+
+                                <option value="0">--Select--</option>
+                                @foreach (var Emp in Model.Receptionists)
+                                {
+                                    <option value="@Emp.ID" @(Emp.ID == Model.Enquiry.AssignedTo ? "selected" : "")>@Emp.Name</option>
+                                }
+                            </select>
+                        }
+                        else
+                        {
+                            <span>Assigned To : <b id="vReceptionist">@SMEnterprise.Models.PermissionManager.GetLoggedInUser().FullName</b></span>
+                            <input type="hidden" name="AssignedTo" value="@SMEnterprise.Models.PermissionManager.GetLoggedInUser().UserID" />
+                        }
+                    </div>
+                    <div class="col-md-5"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint hidden" onclick="PrintEnquiry(this);"> Print</a></div>
+                    <div class="col-md-2"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint" id="btnEditEnquiry" onclick="EditEnquiryDetails(this);"> Edit Details</a></div>
+                </div>
+                <div class="viewe">
+                    <div class="row">
+                        <div class="col-md-3">Enquery Date : <b id="vEnqDate">@Model.Enquiry.EDate.ToString("dd MMM, yyyy")</b></div>
+                        <div class="col-md-2">Status : <b id="vEStatus">@(Model.Enquiry.EStatus == 0 ? "Open" : Model.Enquiry.EStatus == 1 ? "Converted" : "Lost")</b></div>
+                        <div class="col-md-2">Prospect : <b id="vProspect">@(Model.Enquiry.EPossibility == 0 ? "Neutral" : Model.Enquiry.EPossibility == 1 ? "Positive" : "Negative")</b></div>
+                        <div class="col-md-3">Followup Due : <b id="vFollowupdate">@Model.Enquiry.NextFollowUpDate.ToString("dd MMM, yyyy hh:mm tt")</b></div>
+                        <div class="col-md-2">Source : <b id="vSource">@(Model.Enquiry.ESource == 0 ? "Search" : Model.Enquiry.ESource == 1 ? "Referance" : "Ads")</b></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">Student : <b id="vStudentName">@Model.Enquiry.StudentName</b></div>
+                        <div class="col-md-2">DOB : <b id="vStudentDOB">@Model.Enquiry.StudentDOB.ToString("dd MMM, yyyy")</b></div>
+                        <div class="col-md-2">Gender : <b id="vStudentGender">@(Model.Enquiry.Gender == 0 ? "Male" : "Female")</b></div>
+                        <div class="col-md-3">Session : <b id="vSessionApplied">@Model.Enquiry.SessionName</b></div>
+                        <div class="col-md-2">Class Applied : <b id="vClassApplied">@Model.Enquiry.ClassName</b></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">Current School : <b id="vCurSchoolName">@Model.Enquiry.CurrentSchool</b></div>
+                        <div class="col-md-5">Current Board: <b id="vCurrentBoard">@Model.Enquiry.CurrentEducationSystem </b></div>
+                        <div class="col-md-2">Current Class : <b id="vCurrentClass">@Model.Enquiry.CurrentClassName</b></div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                            <div class="col-md-12" style="text-align:center"><b>Father</b></div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    Name :
+                                </div>
+                                <div class="col-md-9" id="vFatherName">
+                                    @Model.Enquiry.FatherName
+                                </div>
+                                <div class="col-md-3">
+                                    Occupation :
+                                </div>
+                                <div class="col-md-9" id="vFatherOccupation">
+                                    @Model.Enquiry.FOccupation
+                                </div>
+                                <div class="col-md-3">
+                                    Mobile :
+                                </div>
+                                <div class="col-md-9" id="vFatherMobile">
+                                    @Model.Enquiry.FatherMobileNo
+                                </div>
+                                <div class="col-md-3">
+                                    Email ID :
+                                </div>
+                                <div class="col-md-9" id="vFatherEmail">
+                                    @Model.Enquiry.FatherEmailID
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                            <div class="col-md-12" style="text-align:center"><b>Mother</b></div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    Name :
+                                </div>
+                                <div class="col-md-9" id="vMotherName">
+                                    @Model.Enquiry.MotherName
+                                </div>
+                                <div class="col-md-3">
+                                    Occupation :
+                                </div>
+                                <div class="col-md-9" id="vMotherOccupation">
+                                    @Model.Enquiry.MOccupation
+                                </div>
+                                <div class="col-md-3">
+                                    Mobile :
+                                </div>
+                                <div class="col-md-9" id="vMotherMobile">
+                                    @Model.Enquiry.MotherMobileNo
+                                </div>
+                                <div class="col-md-3">
+                                    Email ID :
+                                </div>
+                                <div class="col-md-9" id="vMotherEmail">
+                                    @Model.Enquiry.MotherEmailID
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    Income :
+                                </div>
+                                <div class="col-md-12" id="vIncome">
+                                    @Model.Enquiry.FamilyIncome Lakh
+                                </div>
+                                <div class="col-md-12">
+                                    Nationality :
+                                </div>
+                                <div class="col-md-12" id="vNationality">
+                                    @Model.Enquiry.Nationality
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">Address : <b id="vAddress">@Model.Enquiry.Address</b></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            Reason For Change :
+                            <b id="vReason">@Model.Enquiry.ReasonForChange</b>
+                        </div>
+                    </div>
+                </div>
+                <div class="editEnquiry hidden">
+                    <div class="row">
+
+                        <input type="hidden" name="EnquiryID" value="@Model.Enquiry.EnquiryID" id="hdnEnquiryID" />
+                        <input type="hidden" name="SrNo" value="" id="hdnSrNo" />
+                        <div class="col-md-3">Enquery Date : <input type="date" name="EDate" class="form-control" id="txtEnqDate" value="@Model.Enquiry.EDate.ToString("yyyy-MM-dd")" /></div>
+                        <div class="col-md-2" style="padding:0px;width: 14%;">
+                            Status :
+                            <select class="form-control editEnquiry hidden" name="EStatus" id="ddlEStatus">
+                                <option value="0" @(Model.Enquiry.EStatus == 0 ? "selected" : "")>Open</option>
+                                <option value="1" @(Model.Enquiry.EStatus == 1 ? "selected" : "")>Converted</option>
+                                <option value="2" @(Model.Enquiry.EStatus == 2 ? "selected" : "")>Lost</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2" style="padding:0px;width: 15%;">
+                            Prospect :
+                            <select class="form-control editEnquiry hidden" name="EPossibility" id="ddlEProspect">
+                                <option value="0" @(Model.Enquiry.EPossibility == 0 ? "selected" : "")>Neutral</option>
+                                <option value="1" @(Model.Enquiry.EPossibility == 1 ? "selected" : "")>Positive</option>
+                                <option value="2" @(Model.Enquiry.EPossibility == 2 ? "selected" : "")>Negative</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3" style="padding:0px;width: 29%;">Followup Due : <input type="datetime-local" name="NextFollowUpDate" value="@Model.Enquiry.NextFollowUpDate.ToString("yyyy-MM-ddTHH:mm")" class="form-control" id="txtFollowDate" /></div>
+                        <div class="col-md-2 noPadLeft noPadRight">
+                            Source :
+                            <select class="form-control" name="ESource" id="ddlSource">
+                                <option value="0" @(Model.Enquiry.ESource == 0 ? "selected" : "")>Search</option>
+                                <option value="1" @(Model.Enquiry.ESource == 1 ? "selected" : "")>Referance</option>
+                                <option value="2" @(Model.Enquiry.ESource == 2 ? "selected" : "")>Advertisement</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="col-md-3 noPadLeft noPadRight">Student :</div>
+                            <div class="col-md-9">
+                                <input type="text" id="txtStudentName" name="StudentName" value="@Model.Enquiry.StudentName" class="form-control" style="width: 100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-3 noPadLeft noPadRight" style="width: 18%;">
+                            DOB :<input type="date" class="form-control" name="StudentDOB" value="@Model.Enquiry.StudentDOB.ToString("yyyy-MM-dd")" id="txtDOB">
+                        </div>
+                        <div class="col-md-1" style="width: 16%;">
+                            Gender :
+                            <select class="form-control" id="ddlGender" name="Gender">
+                                <option value="0" @(Model.Enquiry.Gender == 0 ? "selected" : "")>Male</option>
+                                <option value="1" @(Model.Enquiry.Gender == 1 ? "selected" : "")>Female</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 noPadLeft noPadRight" style="width: 16%;">
+                            Session :
+                            <select class="form-control" id="ddlEnqSessions" name="AppliedForSession">
+                                @foreach (var s in Model.Sessions)
+                                {
+                                    <option value="@s.ID" @(Model.Enquiry.AppliedForSession == s.ID ? "selected" : "")>@s.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            Class Applied :
+                            <select class="form-control" id="ddlEnqClassApplied" name="AppliedForClass">
+                                @foreach (var c in Model.Classes)
+                                {
+                                    <option value="@c.ID" @(Model.Enquiry.AppliedForClass == c.ID ? "selected" : "")>@c.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="col-md-3 noPadLeft noPadRight">Current School :</div>
+                            <div class="col-md-9">
+                                <input type="text" id="txtSchoolName" name="CurrentSchool" value="@Model.Enquiry.CurrentSchool" class="form-control" style="width: 100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="col-md-3 noPadLeft noPadRight">Current Board:</div>
+                            <div class="col-md-9">
+                                <input type="text" id="txtBoardName" name="CurrentEducationSystem" value="@Model.Enquiry.CurrentEducationSystem" class="form-control" style="width: 100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            Current Class :
+                            <select class="form-control" id="ddlEnqClassCurrent" name="CurrentClass">
+                                @foreach (var c in Model.Classes)
+                                {
+                                    <option value="@c.ID" @(Model.Enquiry.CurrentClass == c.ID ? "selected" : "")>@c.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                            <div class="col-md-12" style="text-align:center"><b>Father</b></div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    Name :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtFatherName" name="FatherName" value="@Model.Enquiry.FatherName" class="form-control" style="width: 100%;" />
+                                </div>
+                                <div class="col-md-3">
+                                    Occupation :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtFOccupation" name="FOccupation" value="@Model.Enquiry.FOccupation" class="form-control" style="width: 100%;" />
+                                </div>
+                                <div class="col-md-3">
+                                    Mobile :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtFMobile" name="FatherMobileNo" value="@Model.Enquiry.FatherMobileNo" class="form-control" style="width: 100%;" />
+                                </div>
+                                <div class="col-md-3">
+                                    Email ID :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtEmail" name="FatherEmailID" class="form-control" value="@Model.Enquiry.FatherEmailID" style="width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                            <div class="col-md-12" style="text-align:center"><b>Mother</b></div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    Name :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtMotherName" name="MotherName" value="@Model.Enquiry.MotherName" class="form-control" style="width: 100%;" />
+                                </div>
+                                <div class="col-md-3">
+                                    Occupation :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtMOccupation" name="MOccupation" value="@Model.Enquiry.MOccupation" class="form-control" style="width: 100%;" />
+                                </div>
+                                <div class="col-md-3">
+                                    Mobile :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtMMobile" name="MotherMobileNo" value="@Model.Enquiry.MotherMobileNo" class="form-control" style="width: 100%;" />
+                                </div>
+                                <div class="col-md-3">
+                                    Email ID :
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" id="txtMEmail" name="MotherEmailID" value="@Model.Enquiry.MotherEmailID" class="form-control" style="width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    Income (Lakhs):
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="number" id="txtAnnualIncome" name="FamilyIncome" value="@Model.Enquiry.FamilyIncome" class="form-control" style="width: 100%;" />
+                                </div>
+                                <div class="col-md-12">
+                                    Nationality :
+                                </div>
+                                <div class="col-md-12">
+                                    <input type="text" id="txtNationality" name="Nationality" value="@Model.Enquiry.Nationality" class="form-control" style="width: 100%;" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">Address :</div>
+                        <div class="col-md-12">
+                            <input type="text" id="txtAddress" name="Address" class="form-control" style="width: 100%;" value="@Model.Enquiry.Address" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">Reason For Change :</div>
+                        <div class="col-md-12">
+                            <textarea type="text" id="txtReason" rows="2" name="ReasonForChange" class="form-control" style="width: 100%;height:auto;">@Model.Enquiry.ReasonForChange</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="row editEnquiry hidden">
+                    <div class="col-md-12">
+                        <button onclick="return SaveAdmissionEnquiry(this);" class="btn btn-primary pull-right">Save</button>
+                    </div>
+                </div>
+            }
+            <div class="row" style="text-align:center;">
+                <h4><b>Followups</b></h4>
+            </div>
+            <div id="divFollowups">
+            </div>
+            <div class="row NoPrint">
+                <a href="javascript:void(0);" id="btnAddFollowup" onclick="AddNewFollowup(this);" class="btn btn-link pull-right add">Add New followup</a>
+            </div>
+            <div id="divNewFollowup" style="display:none;">
+                @using (Html.BeginForm("AddFollowup", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmAddFollowup" }))
+            {
+                    <div class="Followup" style="border-color: #d9dbdf;">
+                        <input type="hidden" name="FollowupBy" id="hdnFollowupBy" />
+                        <input type="hidden" name="EnquiryID" value="0" id="hdnFEnquiryID" />
+                        <div class="row">
+                            <div class="col-md-2 pull-left">
+                                Prospect :
+                                <select class="form-control" name="Possibility" id="ddlEProspect">
+                                    <option value="0">Neutral</option>
+                                    <option value="1" selected>Positive</option>
+                                    <option value="2">Negative</option>
+                                </select>
+                            </div><div class="col-md-5 pull-left" style="border:0px;">
+                                Followup On  (mm/dd/yyyy): <input type="datetime-local" id="txtFollowupDate" name="FDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                            </div><div class="col-md-5 pull-right">
+                                <div class="pull-right">
+                                    Next Scheduled (mm/dd/yyyy): <input type="datetime-local" id="txtNextFollowupDate" name="NextFollowupDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(2).ToString("yyyy-MM-dd")" />
+
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <textarea rows="4" class="form-control" id="txtDetails" name="Remark" style="width:100%;height:auto;"></textarea>
+                            </div>
+                            <div class="col-md-12">
+                                <button type="submit" onclick="return SaveAdmissionEnquiryFeedback(this)" class="btn btn-success pull-right">Update</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+    <input type="hidden" id="hdnNext2DaysDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(2).ToString("yyyy-MM-dd")" />
+
+
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+        function AddNewFollowup(sender)
+        {
+            if($(sender).hasClass('add'))
+            {
+                $(sender).closest('.enqDetails').find('#divNewFollowup').css('display','');
+                $(sender).removeClass('add').addClass('cancel').html('Cancel');
+            }
+            else
+            {
+
+                $(sender).closest('.enqDetails').find('#divNewFollowup').css('display','none');
+                $(sender).removeClass('cancel').addClass('add').html('Add New Followup');
+            }
+        }
+        var ut=@PermissionManager.GetLoggedInUser().RoleID;
+        function EditEnquiryDetails(sender) {
+            if ($(sender).hasClass('edit')) {
+                $(sender).html('Cancel');
+                $(sender).removeClass('edit').addClass('cancel');
+                $(sender).closest('.enqDetails').find('.viewe').addClass('hidden');
+                $(sender).closest('.enqDetails').find('.editEnquiry').removeClass('hidden');
+                if(ut==10)
+                {
+                    $(sender).closest('.enqDetails').find('#vReceptionist').addClass('hidden');
+                    $(sender).closest('.enqDetails').find('#ddlReceptionist').removeClass('hidden');
+
+                }
+            }
+            else {
+                $(sender).html('Edit Details');
+                $(sender).removeClass('cancel').addClass('edit');
+                $(sender).closest('.enqDetails').find('.viewe').removeClass('hidden');
+                $(sender).closest('.enqDetails').find('.editEnquiry').addClass('hidden');
+                if(ut==10)
+                {
+                    $(sender).closest('.enqDetails').find('#vReceptionist').removeClass('hidden');
+                    $(sender).closest('.enqDetails').find('#ddlReceptionist').addClass('hidden');
+
+                }
+            }
+        }
+        $(function () {
+            if($('#hdnEnquiryID').val()==0)
+            {
+                $('#tdDetails').find('.enqDetails').find('#btnAddFollowup').css('display','none');
+                $('#btnEditEnquiry').click();
+            }
+
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Reception/EnquiryFollowups/" + $('#hdnEnquiryID').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        console.log(data);
+                        for(var i=0;i<data.length;i++)
+                        {
+                            var dtFollowup=new Date(data[i].FDate.match(/\d+/).map(Number)[0]);
+                            var sFollowup= dtFollowup.getDate() + ' ' + months[dtFollowup.getMonth()] + ', ' + dtFollowup.getFullYear()+' ' + (pad(dtFollowup.getHours()>12?dtFollowup.getHours()-12:dtFollowup.getHours(),2))+':'+pad(dtFollowup.getMinutes(),2)+' '+(dtFollowup.getHours()>12?'PM':'AM');
+                            var dtnFollowup=new Date(data[i].NextFollowupDate.match(/\d+/).map(Number)[0]);
+                            var snFollowup= dtnFollowup.getDate() + ' ' + months[dtnFollowup.getMonth()] + ', ' + dtnFollowup.getFullYear()+' ' + (pad(dtnFollowup.getHours()>12?dtnFollowup.getHours()-12:dtnFollowup.getHours(),2))+':'+pad(dtnFollowup.getMinutes(),2)+' '+(dtnFollowup.getHours()>12?'PM':'AM');
+
+                            var followup='<div class="Followup"><div class="row"><div class="col-md-4 pull-left" style=text-align:left>'+
+                                'Prospect : <b>'+(data[i].Possibility==0?'Neutral':data[i].Possibility==1?'Positive':'Negative')+'</b>'+
+                            '</div><div class="col-md-4 pull-left">'+
+                              '  Followup On : <b>'+sFollowup+'</b>'+
+                          '  </div><div class="col-md-4 pull-right">'+
+                           '     Next Scheduled : <b>'+snFollowup+'</b>'+
+                           ' </div><div class="col-md-12">'+
+                           data[i].Remark+
+                           ' </div></div></div>';
+                            $('#tdDetails').find('#divFollowups').append(followup);
+                        }
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        });
+
+        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        function SaveAdmissionEnquiry(sender)
+        {
+
+            var $this = $(sender).closest('#tdDetails').find('#frmSaveAdmissionEnquiry');
+            var form = $(sender).closest('#tdDetails').find('#frmSaveAdmissionEnquiry');
+            var formdata = true;
+            if (window.FormData) {
+                formdata = new FormData(form[0]);
+            }
+
+            event.preventDefault();
+            $.ajax({
+                type: $this.attr('method'),
+                url: $this.attr('action'),
+                data: formdata ? formdata : form.serialize(),
+                contentType: false,
+                processData: false,
+                method: 'POST'
+            })
+            .done(function (html) {
+                window.location.reload();
+                //ShowNotification('Updated', 'Admission Enquiry Successfully Updated', 'success');
+                //var EnqDate= $('#txtEnqDate').val().split('-');
+                //var dDOB=$('#txtDOB').val().split('-');
+
+                //var tDatetime = $('#txtFollowDate').val().split('T');
+                //var tDate = tDatetime[0].split('-');
+                //var tTime = tDatetime[1];
+                //var tHour = tTime.split(':')[0];
+                //var tMin = tTime.split(':')[1];
+                //var mer = 'AM';
+                //if (tHour > 12) {
+                //    mer = 'PM';
+                //    tHour = tHour - 12;
+                //}
+                //var sFollow=tDate[2] + ' ' + months[tDate[1] - 1] + ' ,' + tDate[0] + ' ' + tHour + ':' + tMin + ' ' + mer ;
+                //console.log($('#ddlEProspect option[selected]').text());
+                //console.log($('#ddlEnqClassCurrent option[selected]').text());
+                //$('#vReceptionist').html($('#ddlReceptionist option[selected]').text());
+                //$('#vEnqDate').html(EnqDate[2] + ' ' + months[EnqDate[1] - 1] + ' ,' + EnqDate[0]);
+                //$('#vEStatus').html($('#ddlEStatus option[selected]').text());
+                //$('#vProspect').html($('#ddlEProspect option[selected]').text());
+                //$('#vFollowupdate').html(sFollow);
+                //$('#vSource').html($('#ddlSource option[selected]').text());
+                //$('#vStudentName').html($('#txtStudentName').val());
+                //$('#vStudentDOB').html(dDOB[2] + ' ' + months[dDOB[1] - 1] + ' ,' + dDOB[0]);
+                //$('#vStudentGender').html($('#ddlGender option[selected]').text());
+                //$('#vSessionApplied').html($('#ddlEnqSessions option[selected]').text());
+                //$('#vClassApplied').html($('#ddlEnqClassApplied option[selected]').text());
+                //$('#vCurSchoolName').html( $('#txtSchoolName').val());
+                //$('#vCurrentBoard').html( $('#txtBoardName').val());
+                //$('#vCurrentClass').html($('#ddlEnqClassCurrent option[selected]').text());
+                //$('#vFatherName').html($('#txtFatherName').val());
+                //$('#vFatherOccupation').html( $('#txtFOccupation').val());
+                //$('#vFatherMobile').html($('#txtFMobile').val());
+                //$('#vFatherEmail').html($('#txtEmail').val());
+                //$('#vMotherName').html($('#txtMotherName').val());
+                //$('#vMotherOccupation').html($('#txtMOccupation').val());
+                //$('#vMotherMobile').html($('#txtMMobile').val());
+                //$('#vMotherEmail').html($('#txtMEmail').val());
+                //$('#vIncome').html( $('#txtAnnualIncome').val());
+                //$('#vNationality').html($('#txtNationality').val());
+                //$('#vAddress').html($('#txtAddress').val());
+                //$('#vReason').html($('#txtReason').html());
+            })
+            .fail(function () {
+                ShowNotification('Error', 'Admission Enquiry Not Updated', 'error');
+            });
+
+
+            return false;
+        }
+        function SaveAdmissionEnquiryFeedback(sender)
+        {
+
+            var $this = $(sender).closest('#tdDetails').find('#frmAddFollowup');
+            var form = $(sender).closest('#tdDetails').find('#frmAddFollowup');
+            var formdata = true;
+            if (window.FormData) {
+                formdata = new FormData(form[0]);
+            }
+
+            event.preventDefault();
+            $.ajax({
+                type: $this.attr('method'),
+                url: $this.attr('action'),
+                data: formdata ? formdata : form.serialize(),
+                contentType: false,
+                processData: false,
+                method: 'POST'
+            })
+            .done(function (html) {
+                ShowNotification('Updated', 'Enquiry Followup Successfully Updated', 'success');
+                var fdatearr = $(sender).closest('#divNewFollowup').find('#txtFollowupDate').val().split('-');
+                var fndatearr = $(sender).closest('#divNewFollowup').find('#txtNextFollowupDate').val().split('-');
+
+                var tDatetime = $(sender).closest('#divNewFollowup').find('#txtFollowupDate').val().split('T');
+                var tDate = tDatetime[0].split('-');
+                var tTime = tDatetime[1];
+                var tHour = tTime.split(':')[0];
+                var tMin = tTime.split(':')[1];
+                var mer = 'AM';
+                if (tHour > 12) {
+                    mer = 'PM';
+                    tHour = tHour - 12;
+                }
+                var sfdate=tDate[2] + ' ' + months[tDate[1] - 1] + ', ' + tDate[0] + ' ' + pad(tHour,2) + ':' + pad(tMin,2) + ' ' + mer;
+
+                tDatetime = $(sender).closest('#divNewFollowup').find('#txtNextFollowupDate').val().split('T');
+                tDate = tDatetime[0].split('-');
+                tTime = tDatetime[1];
+                tHour = tTime.split(':')[0];
+                tMin = tTime.split(':')[1];
+                mer = 'AM';
+                if (tHour > 12) {
+                    mer = 'PM';
+                    tHour = tHour - 12;
+                }
+                var snfdate=tDate[2] + ' ' + months[tDate[1] - 1] + ', ' + tDate[0] + ' ' + pad(tHour,2) + ':' + pad(tMin,2) + ' ' + mer;
+
+                var followup='<div class="Followup"><div class="row"><div class="col-md-4 pull-left" style=text-align:left>'+
+                                           'Prospect : <b>'+($(sender).closest('#divNewFollowup').find('#ddlEProspect').val()==0?'Neutral':$(sender).closest('#divNewFollowup').find('#ddlEProspect').val()==1?'Positive':'Negative')+'</b>'+
+                                       '</div><div class="col-md-4 pull-left">'+
+                                         '  Followup On : <b>'+sfdate+'</b>'+
+                                     '  </div><div class="col-md-4 pull-right">'+
+                                      '     Next Scheduled : <b>'+snfdate+'</b>'+
+                                      ' </div><div class="col-md-12">'+
+                                     $(sender).closest('#divNewFollowup').find('#txtDetails').val()+
+                                      ' </div></div></div>';
+                $('#tdDetails').find('#divFollowups').append(followup);
+
+                $('#tdDetails').find('#vFollowupdate').html(sfdate);
+                $('#tdDetails').closest('tr').prev().find('#lblNextFollowDate').html(snfdate);
+                $('#tdDetails').find('#txtFollowDate').html($(sender).closest('#divNewFollowup').find('#txtFollowupDate').val());
+                $(sender).closest('#divNewFollowup').find('#ddlEProspect').val(0);
+                $(sender).closest('#divNewFollowup').find('#txtFollowupDate').val($('#hdnCurrentDate').val())
+                $(sender).closest('#divNewFollowup').find('#txtNextFollowupDate').val($('#hdnNext2DaysDate').val())
+                $(sender).closest('#divNewFollowup').find('#txtDetails').val('');
+                $('#tdDetails').find('#btnAddFollowup').click();
+                //var $square = $('.square');
+
+                //$square.css('opacity', '0');
+
+                //$square.one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", function() {
+                //    $square.removeClass('square');
+
+                //    $square.css('opacity', '1');
+                //});
+            })
+            .fail(function () {
+                ShowNotification('Error', 'Enquiry Feedback Not Updated', 'error');
+            });
+
+
+            return false;
+        }
+        function pad(str, max) {
+            str = str.toString();
+            return str.length < max ? pad("0" + str, max) : str;
+        }
+        var isAddStarted=false;
+        function PrintEnquiry(sender) {
+            var contents =$(sender).closest(".enqDetails").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/AdmissionEnquiry.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+
+    </script>
+}
+<!-- /.content -->

@@ -1,0 +1,235 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.VendorPageModel
+@section IncludeCss
+{
+    <title>Vendors</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="x_panel">
+                    <div class="x_content">
+                        <table id="tblCategory" class="table table-bordered table-hover display nowrap">
+                            <thead>
+                                <tr>
+                                    @*<th>Photo</th>*@
+                                    <th>#</th>
+                                    <th>Company Name</th>
+                                    <th>Contact Person</th>
+                                    <th>State</th>
+                                    <th>GSTIN</th>
+                                    <th>Option</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    int count = 1;
+                                    foreach (VendorModel c in Model.Vendors)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @count
+                                            </td>
+                                            <td>
+                                                @c.CompanyName
+                                            </td>
+                                            <td>
+                                                @c.ContactPerson
+                                            </td>
+                                            <td>
+                                                @c.StateName
+                                            </td>
+                                            <td>
+                                                @c.GSTIN
+                                            </td>
+                                            <td>
+                                                <div class="row" style="margin-right: 10px;">
+                                                    <div class="col-md-6">
+                                                        <input type="hidden" id="hdnVendorID" value="@c.VendorID" />
+                                                        <a href="javascript:void(0);" onclick="EditVendor(@c.VendorID)" class="btn btn-link">Edit</a>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        @using (Html.BeginForm("UpdateVendor", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                        {
+                                                            <input type="hidden" name="VendorID" value="@c.VendorID" />
+                                                            <input type="hidden" name="OpType" value="-1" />
+                                                            <button type="submit" onclick="return DeleteVendor(this);" class="btn btn-link">Delete</button>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        count++;
+                                    }
+
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="6">
+                                        <a href="javascript:void(0);" onclick="EditVendor(0)" class="btn btn-link pull-right">Add New Vendor</a>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mdlEditVendor" class="modal fade bs-example-modal-lg" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Update Vendor Details</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            @*<div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>*@
+        </div>
+
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+
+    <script>
+        $(document).ready(function () {
+            var repname = '@PermissionManager.GetLoggedInUser().Description' + '<br /> Bus wise Student Records ' + $('#ddlBus option:selected').text();
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+
+                        bSort: false,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+
+        });
+    </script>
+    <script>
+        function EditVendor(vendorID) {
+         $('.se-pre-con').css('display', '');
+             $.ajax(
+                 {
+                     type: "POST",
+                     url: "/Account/GetVendorDetails/" + vendorID,
+                     cache: false,
+                     processData: false,
+                     contentType: false,
+                     success: function (html) {
+                         $('#mdlEditVendor').find('.modal-body').html(html);
+                         $('#mdlEditVendor').modal('toggle');
+                         $('.se-pre-con').css('display', 'none');
+                     },
+                     error: function (e) {
+                         alert("errorn");
+                     }
+                 });
+        }
+        function DeleteVendor() {
+            return confirm('Do you really want to remove vendor!');
+        }
+    </script>
+}
+<!-- /.content -->

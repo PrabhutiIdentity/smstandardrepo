@@ -1,0 +1,513 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Location Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+<link href="@Url.Content("~/css/MapStyleSheet.css")" rel="stylesheet" type="text/css" />
+    <title>Location/Area Management</title>
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCnOlC8MgMBPoCAhPFtLa-N3YeXztqBXyI&libraries=places">
+</script>
+<style>
+    .modal {
+       
+        width:auto!important;
+        height:auto!important;
+    }
+    .apply
+    {
+        color:black;
+    }
+</style>
+}
+<script>
+    var DistrictName = '';
+    var Dlat = 0;
+    var Dlong = 0;
+    function ToggleDetails(sender) {
+       
+        if ($(sender).hasClass("Closed")) {
+            $(sender)
+          .closest("tr")
+          .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading....</td></tr>");
+            var cName = '.Table_' + (parseInt($(sender).attr('lType')) - 1);
+            $(cName).each(function (index) {
+                if ($(this).hasClass('Opened')) {
+                    $(this).removeClass("Opened");
+                    $(this).addClass("Closed");
+                    $(this).closest("tr").next().remove();
+                    $(this).text("Manage");
+                }
+            });
+            if ($(sender).attr('lType') == '4') {
+                var DistName = $(sender).closest('tr').find('#txtName').val();
+                DistrictName = DistName;
+                var geocoder = new google.maps.Geocoder();
+
+                geocoder.geocode({ 'address': DistrictName }, function (results, status) {
+                    if (status === 'OK') {
+                        Dlat = results[0].geometry.location.lat();
+                        Dlong = results[0].geometry.location.lng();
+                    } else {
+                        //alert('Geocode was not successful for the following reason: ' + status);
+                    }
+                });
+
+                
+            }
+            $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Admin/GetLocation/" + $(sender).attr('id') + "/" + $(sender).attr('lType'),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            html = html.replace('[MasterNamePlaceHolder]', $(sender).closest('tr').find('#txtName').val());
+                            $(sender).closest("tr").next().remove();
+                            // fill the div with the html returned by action
+                            $(sender)
+                                .closest("tr")
+                                .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'><input type='hidden' id='hdnMainName' value='" + $(sender).closest('tr').find('#txtName').val() + "'/></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                           
+
+                            $(sender).removeClass("Closed");
+                            $(sender).addClass("Opened");
+                            $(sender).text("Close");
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+        }
+        else {
+            $(sender).removeClass("Opened");
+            $(sender).addClass("Closed");
+            $(sender).closest("tr").next().remove();
+            $(sender).text("Manage");
+        }
+
+    }
+    function DeleteCountry(sender)
+    {
+        if ($(sender).closest('tr').find('#hdnCount').val() != '0') {
+            ShowClosingNotification('Error', 'States are added in Country, It can\'t be deleted!!!!', 'error');
+            return false;
+        }
+        else {
+            return confirm("Do you Really Want to Delete this Country????");
+        }
+    }
+    function DeleteLocation(sender) {
+        var type = $(sender).closest('tr').find('#hdnType').val();
+        var mName = type == "2" ? "State" : type == "3" ? "City" : "Area";
+        var sName = type == "2" ? "Cities" : type == "3" ? "Areas" : "Route Stoppages";
+        if ($(sender).closest('tr').find('#hdnCount').val() != '0') {
+            ShowClosingNotification('Error', sName + " are added in " + mName + ", It can't be deleted!!!!", 'error');
+        }
+        else {
+            if (confirm("Do you Really Want to Delete this " + mName + "????")) {
+                UpdateLocation(sender, -1);
+            }
+        }
+    }
+
+    function UpdateLocation(sender, OpType) {
+        var MainName = $(sender).closest('table').closest('tr').find('#hdnMainName').val();
+        $.ajax({
+            url: "@Url.Action("AddLocation", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+                OpType: OpType,
+                Name: $(sender).closest('tr').find('#hdnName').val(),
+                IsApproved: $(sender).closest('tr').find('#hdnStatus').val(),
+                ID: $(sender).closest('tr').find('#hdnID').val(),
+                MasterID: $(sender).closest('tr').find('#hdnMasterID').val(),
+                Type: $(sender).closest('tr').find('#hdnType').val(),
+                Other: $(sender).closest('tr').find('#hdnOther').val(),
+                Latitude: $(sender).closest('tr').find('#hdnLatitude').val(),
+                Longitude: $(sender).closest('tr').find('#hdnLongitude').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                ShowNotification('Saved', 'Successfully Saved', 'success');
+                html = html.replace('[MasterNamePlaceHolder]', MainName);
+                $(sender).closest('table').closest('td').html(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                ShowNotification('Not Saved', 'Some problem occured, please try again!!!!', 'error');
+            },
+            async: true,
+            processData: false
+        });
+    }
+    
+
+</script>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Area/Location Management
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li><a href="javascript:void(0);" onclick="ShowLocationMapModel();"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Area/Location Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 45%">City Name</th>
+                                <th style="width: 20%">#Areas</th>
+                                <th style="width: 15%">Status</th>
+                                <th style="width: 20%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var bCounter = 1;
+                                foreach (var c in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @bCounter
+
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible">@c.Name</span>
+                                            <input type="hidden" name="ID" value="@c.ID" />
+                                            <input class="form-control editCopy hidden" id="txtName" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="@c.Name" />
+                                        </td>
+
+                                        <td>
+                                            @c.Count
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.ID" lType="@(c.Type+1)" class="Closed Table_@(c.Type)">Manage</a>
+                                            )
+                                            <input type="hidden" id="hdnCount" value="@c.Count" />
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible"><label class='badge bg-@(c.IsApproved == 0 ? "red" : "green")'>@(c.IsApproved == 0 ? "Inactive" : "Active")</label></span>
+                                            <label class="switch switch-green editCopy hidden">
+                                                @if (c.IsApproved == 1)
+                                                {
+                                                    <input type="checkbox" class="switch-input" Checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" class="switch-input">
+                                                }
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateCity", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "BuildingUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                                        <input type="hidden" name="Type" id="hdnType" value="@c.Type" />
+                                                        <input type="hidden" id="hdnStatus" name="IsApproved" value="@c.IsApproved" />
+                                                        <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+
+                                                        <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" />
+                                                    }
+                                                    @using (Html.BeginForm("UpdateCity", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "BuildingUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                                        <input type="hidden" name="Type" id="hdnType" value="@c.Type" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                        <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteCountry(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                    bCounter++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot style="border-width: 2px;border-style: groove;display:none;">
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <input type="hidden" name="ID" value="0" />
+                                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="" />
+                                </td>
+                                <td>
+                                    0
+                                </td>
+                                <td>
+                                    <label class="switch switch-green">
+
+                                        <input type="checkbox" class="switch-input" Checked>
+
+                                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnStatus").val($(this).closest("tr").find("#hdnStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("UpdateCity", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "BuildingUpdate" }))
+                                            {
+                                                <input type="hidden" name="ID" id="hdnID" value="0" />
+                                                        <input type="hidden" name="Type" id="hdnType" value="1" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="1" />
+                                                        <input type="hidden" id="hdnStatus" name="IsApproved" value="1" />
+                                                        <input type="hidden" id="hdnName" name="Name" value="" />
+
+                                                        <input type="submit" class="btn btn-link" value="Add New" />
+                                            }
+
+                                        </div>
+
+                                    </div>
+                                </td>
+
+
+
+
+
+                            </tr>
+
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+<div style="display:none;" id="divloadMap">
+    <div class="row">
+        <div class="col-md-12">
+            <input id="txtsearch" class="apply" type="text" placeholder="Enter Search Place">
+            <div id="map_canvas" style="width: 90%; height: 275px; box-shadow: 0px 0px 5px 5px #BBB; margin-top: 10px;"></div>
+            <input type="hidden" ID="hdnLongitude" value="0" />
+        </div>
+        <div class="col-md-12">
+            <a href="javascript:void(0);" class="btn btn-link pull-right" onclick="CloseMap(this);">Close</a>
+        </div> 
+    </div>
+    <input type="hidden" ID="hdnLatitude" value="0" />
+</div>
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "aoColumns": [{ "bSortable": false }, null, null, null,  { "bSortable": false }]
+        });
+        $('#liLocationManagement').closest('ul').closest('li').addClass('active');
+        $('#liLocationManagement').addClass('active');
+    });
+    
+    function CloseMap(sender)
+    {
+        $(rowsender).click();
+    }
+    var map;
+    var NewLatitude;
+    var NewLongitude;
+    var marker;
+    var rowsender;
+    //creating function to load initial MAP when page loading
+    function LoadGoogleMAP(sender, lat, long) {
+        $(sender).closest("tr").next().remove();
+        $(sender)
+       .closest("tr")
+       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + $('#divloadMap').html().replace('map_canvas','cmap_canvas').replace('txtsearch','Ctxtsearch') + "</td></tr>");
+        $(sender).removeClass('MapClosed');
+        $(sender).addClass('MapOpen');
+
+        var isMarker = true;
+        if (lat == '')
+        {
+            isMarker = false;
+            lat = Dlat;
+            long = Dlong;
+        }
+        var myLatlng = new google.maps.LatLng(lat, long);
+        var markers = [];
+        var myOptions = {
+            center: myLatlng,
+            zoom: 14,
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById("cmap_canvas"), myOptions);
+            try {
+                marker.setVisible(false);
+            }
+            catch (err) {
+
+            }
+
+        map.panTo(myLatlng)
+        // map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+            marker = new google.maps.Marker({
+                position: myLatlng,
+                title: "lat: " + lat + " long: " + long
+            });
+        if (isMarker) {
+            marker.setMap(map);
+        }
+        // Create the search box and link it to the UI element.
+        var input = (document.getElementById('Ctxtsearch'));
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        var searchBox = new google.maps.places.SearchBox(input);
+        // Listen for the event fired when the user selects an item from the
+        // pick list. Retrieve the matching places for that item.
+        google.maps.event.addListener(searchBox, 'places_changed', function () {
+            var places = searchBox.getPlaces();
+
+            if (places.length == 0) {
+                return;
+            }
+            //              for (var i = 0, marker; marker = markers[i]; i++) {
+            //                  //marker.setMap(null);
+            //              }
+
+            // For each place, get the icon, place name, and location.
+            markers = [];
+
+            var bounds = new google.maps.LatLngBounds();
+            for (var i = 0, place; place = places[i]; i++) {
+                var image = {
+                    url: place.icon
+
+                };
+
+                // Create a marker for each place.
+                marker = new google.maps.Marker({
+                    map: map,
+                    title: place.name,
+                    position: place.geometry.location
+                });
+
+                markers.push(marker);
+
+                bounds.extend(place.geometry.location);
+            }
+
+            map.fitBounds(bounds);
+            google.maps.event.trigger(map, "resize");
+        });
+
+
+        google.maps.event.addListener(map, "click", function (e) {
+
+            if (confirm("Are you sure you want to change Map Location?") == true) {
+
+                marker.setVisible(false);
+
+
+                var clickLat = e.latLng.lat();
+                var clickLon = e.latLng.lng();
+                var latLng = e.latLng;
+
+                NewLatitude = clickLat;
+                NewLongitude = clickLon;
+
+                $(sender).closest('td').find('#hdnLongitude').val(NewLongitude.toString().substring(0, 8));
+                $(sender).closest('td').find('#hdnLatitude').val(NewLatitude.toString().substring(0, 8));
+                $(sender).html(NewLatitude.toString().substring(0, 8) + ',' + NewLongitude.toString().substring(0, 8));
+                var markerNew = new google.maps.Marker({
+
+                    position: new google.maps.LatLng(clickLat, clickLon),
+                    map: map
+
+                });
+                markerNew.setMap(map);
+
+                marker = markerNew;
+            }
+        });
+        // current map's viewport.
+        google.maps.event.addListener(map, 'bounds_changed', function () {
+            var bounds = map.getBounds();
+            searchBox.setBounds(bounds);
+        });
+            
+    }
+    function ShowLocationMap(sender) {
+        if ($(sender).hasClass('MapClosed')) {
+            rowsender = sender;
+            var Lat = $(sender).closest('td').find('#hdnLatitude').val();
+            var Long = $(sender).closest('td').find('#hdnLongitude').val();
+            $(sender)
+                   .closest("tr")
+                   .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+            var ele = document.getElementsByClassName("MapOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+
+                //$(ele[0]).text('Edit');
+            }
+            
+            LoadGoogleMAP(sender, Lat, Long);           
+        }
+        else {
+            rowsender = null;
+            $(sender).removeClass('MapOpen');
+            $(sender).addClass('MapClosed');
+            $(sender).closest("tr").next().remove();
+        }
+    
+    }
+    function SetMapCordinates(sender,lat, long) {
+        try {
+            marker.setVisible(false);
+        }
+        catch (err) {
+
+        }
+        
+
+        NewLatitude = lat;
+        NewLongitude = long;
+        $('#hdnLongitude').val(NewLongitude);
+        $('#hdnLatitude').val(NewLatitude);
+        var myLatlng = new google.maps.LatLng(lat, long);
+        map.panTo(myLatlng)
+        // map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+
+        marker = new google.maps.Marker({
+            position: myLatlng,
+            title: "lat: " + lat + " long: " + long
+        });
+
+        marker.setMap(map);
+        google.maps.event.trigger(map, "resize");
+      
+    }
+
+</script>
+
+<!-- /.content -->

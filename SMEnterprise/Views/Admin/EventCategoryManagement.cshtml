@@ -1,0 +1,203 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/bootstrap-colorpicker.min.css")">
+    <title>Event Category Management</title>
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+    }
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Event Category Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Event Category Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 15%">Category</th>
+                                <th style="width: 10%">BG Color</th>
+                                <th style="width: 10%">Text Color</th>
+                                <th style="width: 15%">Preview</th>
+                                <th style="width: 5%">#Events</th>
+                                <th style="width: 15%">Edit/Delete</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (EventCategoryModel c in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @(count + 1)
+                                        <input type="hidden" name="ID" id="hdnEventTypeID" value="@c.ID" />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' id="txtEventTypeName" name="Name" value="@c.Name" />
+                                    </td>
+
+                                    <td>
+                                        <div class="input-group my-colorpicker2">
+                                            <input type="text" class="form-control" readonly id="txtBackGroundColor" onchange='$(this).closest("tr").find("#hdnBackGroundColor").val($(this).val())' value="@c.BackGroundColor">
+                                            <div class="input-group-addon">
+                                                <i style="background-color: @c.BackGroundColor;"></i>
+                                            </div>
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <div class="input-group my-colorpicker2">
+                                            <input type="text" class="form-control" readonly id="txtTextColor" onchange='$(this).closest("tr").find("#hdnTextColor").val($(this).val())' value="@c.TextColor">
+                                            <div class="input-group-addon">
+                                                <i style="background-color: @c.TextColor;"></i>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="background-color:@c.BackGroundColor; color:@c.TextColor;text-align: center;height: 32px;padding-top: 3px;border-radius: 5px">This is a Testing Event Title</div>
+                                    </td>
+                                    <td>
+                                        <input type="hidden" value="@c.Count" id="hdnEventCount" />
+                                        @c.Count
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            @using (Html.BeginForm("UpdateEventType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="ID" id="hdnEventTypeID" value="@c.ID" />
+                                                <input type="hidden" name="BackGroundColor" id="hdnBackGroundColor" value="@c.BackGroundColor" />
+                                                <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+                                                <input type="hidden" id="hdnTextColor" name="TextColor" value="@c.TextColor" />
+                                                        <input type="submit" onclick="return BeforeEventTypeUpdate(this);" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Save" />
+                                            }
+                                            @using (Html.BeginForm("UpdateEventType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="ID" value="@c.ID" />
+                                                <button onclick="return EventTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+                            <tr>
+
+                                <td>
+                                    @(count + 1)
+                                    <input type="hidden" name="ID" id="hdnEventTypeID" value="" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' id="txtEventTypeName" name="Name" value="" />
+                                </td>
+
+                                <td>
+                                    <div class="input-group my-colorpicker2">
+                                        <input type="text" class="form-control" id="txtBackGroundColor" onchange='$(this).closest("tr").find("#hdnBackGroundColor").val($(this).val())' value="">
+                                        <div class="input-group-addon">
+                                            <i style=""></i>
+                                        </div>
+                                    </div>
+
+                                </td>
+                                <td>
+                                    <div class="input-group my-colorpicker2">
+                                        <input type="text" class="form-control" id="txtTextColor" onchange='$(this).closest("tr").find("#hdnTextColor").val($(this).val())' value="">
+                                        <div class="input-group-addon">
+                                            <i style=""></i>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="background-color:white; color:black;text-align: center;height: 32px;padding-top: 3px;border-radius: 5px">This is a Testing Event Title</div>
+                                </td>
+                                <td>
+                                    0
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        @using (Html.BeginForm("UpdateEventType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                        {
+                                            <input type="hidden" name="ID" id="hdnEventTypeID" value="0" />
+                                            <input type="hidden" name="BackGroundColor" id="hdnBackGroundColor" value="" />
+                                                <input type="hidden" id="hdnName" name="Name" value="" />
+                                                <input type="hidden" id="hdnTextColor" name="TextColor" value="" />
+                                                <input type="submit" onclick="return BeforeEventTypeUpdate(this);" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Add New" />
+                                        }
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/bootstrap-colorpicker.min.js")"></script>
+<script>
+    $(function () {
+
+        $('#liEventTypeManagement').closest('ul').closest('li').addClass('active');
+        $('#liEventTypeManagement').addClass('active');
+        $(".my-colorpicker2").colorpicker();
+    });
+    function EventTypeDelete(sender) {
+        if ($(sender).closest('tr').find('#hdnEventCount').val() == "0") {
+            if (confirm('Are you sure you wish to delete this Event Category?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            alert('Events are defined on this Category, so it can\'t be deleted');
+            return false;
+        }
+    }
+    function BeforeEventTypeUpdate(sender) {
+        if ($(sender).closest('tr').find('#txtEventTypeName').val() == "" || $(sender).closest('tr').find('#txtBackGroundColor').val() == "") {
+            alert("Plese Fill Required Details!!!!");
+            return false;
+        }
+        else {
+            $(sender).closest('td').find('#hdnBackGroundColor').val($(sender).closest('tr').find('#txtBackGroundColor').val());
+            $(sender).closest('td').find('#hdnTextColor').val($(sender).closest('tr').find('#txtTextColor').val());
+            return true;
+        }
+    }
+</script>
+    }
+<!-- /.content -->

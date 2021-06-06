@@ -1,0 +1,167 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 30%">Room Name</th>
+            <th style="width: 15%">Room Size</th>
+            <th style="width: 10%">Room No</th>
+            <th style="width: 20%">Section</th>
+            <th style="width: 10%">Status</th>
+            <th style="width: 15%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            foreach (var c in Model.Rooms)
+            {
+                <tr>
+
+                    <td>
+                        <input type="hidden" name="ID" value="@c.ID" />
+                        <input type="hidden" name="FloorID" value="@c.FloorID" />
+                        <span class="ViewCopy visible">@c.Name</span>
+                        <input class="form-control editCopy hidden" id="txtRoomName" type="text" name="Name" value="@c.Name" />
+                    </td>
+
+
+                    <td>
+                        @foreach (var ch in Model.RoomSizes)
+                        {
+
+                            if (ch.SizeID == c.SizeID)
+                            {                        
+                                <span class="ViewCopy visible">@ch.Name</span>
+                                break;
+                            }
+                        }
+                        <select id="ddlRoomSizes" onchange="$(this).closest('tr').find('#hdnRoomSizeID').val($(this).val());" class="form-control editCopy hidden">
+
+                            @foreach (var ch in Model.RoomSizes)
+                            {
+
+                                if (ch.SizeID == c.SizeID)
+                                {
+                                    <option value="@ch.SizeID" selected>@ch.Name</option>
+
+                                }
+                                else
+                                {
+                                    <option value="@ch.SizeID">@ch.Name</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.RoomNo</span>
+                            <input class="form-control editCopy hidden" id="txtRoomNo" type="text" name="RoomNo" value="@c.RoomNo" />
+                    </td>
+                    <td id="tdSection">
+                        @c.Section
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible"><label class='badge bg-@(c.Status == 0 ? "red" : "green")'>@(c.Status == 0 ? "Inactive" : "Active")</label></span>
+                        <label class="switch switch-green editCopy hidden">
+                            @if (c.Status == 1)
+                            {
+                                <input type="checkbox" class="switch-input" Checked>
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="switch-input">
+                            }
+                            <span class="switch-label" onclick='$(this).closest("tr").find("#hdnRoomStatus").val($(this).closest("tr").find("#hdnRoomStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+
+                        </label>
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+                                <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+
+                                <input type="hidden" name="FloorID" id="hdnFloorID" value="@Model.ID" />
+                                <input type="hidden" name="SizeID" id="hdnRoomSizeID" value="@c.SizeID" />
+                                <input type="hidden" id="hdnRoomStatus" name="Status" value="@c.Status" />
+                                <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+
+                                <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" onclick="UpdateRoom(this, 1);" />
+
+                                <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteRoom(this);" />
+
+                            </div>
+                        </div>
+                    </td>
+
+
+
+                </tr>
+            }
+        }
+    </tbody>
+    <tfoot style="border-width: 2px;border-style: groove;display:none;">
+        <tr>
+
+            <td>
+                
+                <input class="form-control" id="txtRoomName" type="text" name="Name" value="" />
+            </td>
+
+
+            <td>
+                <select id="ddlRoomSizes" onchange="$(this).closest('tr').find('#hdnRoomSizeID').val($(this).val());" class="form-control">
+
+                    @foreach (var ch in Model.RoomSizes)
+                    {
+                            <option value="@ch.SizeID">@ch.Name</option>
+                    }
+                </select>
+            </td>
+            <td><input class="form-control" id="txtRoomNo" type="text" name="RoomNo" value="" /></td>
+            <td></td>
+            <td>
+                <label class="switch switch-green">
+                  
+                        <input type="checkbox" class="switch-input" Checked>
+                    
+                    <span class="switch-label" onclick='$(this).closest("tr").find("#hdnRoomStatus").val($(this).closest("tr").find("#hdnRoomStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                    <span class="switch-handle" id="shTranding"></span>
+
+                </label>
+            </td>
+            <td>
+                <div class="row">
+                    <div class="col-md-6">
+
+                        <input type="hidden" name="ID" id="hdnID" value="0" />
+                        <input type="hidden" name="FloorID" id="hdnFloorID" value="@Model.ID" />
+                        <input type="hidden" name="SizeID" id="hdnRoomSizeID" value="1" />
+                        <input type="hidden" id="hdnRoomStatus" name="Status" value="1" />
+
+                        <input type="submit" class="btn btn-link" value="Save" onclick="UpdateRoom(this, 1);"/>
+
+
+                    </div>
+                    <div class="col-md-6">
+
+                        <input type="hidden" name="ID" id="hdnID" value="0" />
+                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                        <input type="submit" class="btn btn-link" value="Delete" onclick="return DeleteRoom(this);" />
+
+                    </div>
+                </div>
+            </td>
+
+
+
+        </tr>
+
+
+
+    </tfoot>
+</table>
+

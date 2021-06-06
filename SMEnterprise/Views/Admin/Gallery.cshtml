@@ -1,0 +1,375 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Gallery Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .thumbImage {
+        max-width: 235px;
+        max-height: 250px;
+    }
+
+    a.btn-danger {
+        color: #fff;
+    }
+
+    *html .thumbImage {
+        width: expression((this.width/this.height)>=1?250:'auto');
+        height: expression((this.width/this.height)<1?250:'auto');
+    }
+
+    .fa-remove {
+        color: red;
+    }
+
+    .RedText {
+        color: red;
+    }
+
+    .fileContainer {
+        overflow: hidden;
+        position: relative;
+    }
+
+        .fileContainer [type=file] {
+            cursor: inherit;
+            display: block;
+            font-size: 999px;
+            filter: alpha(opacity=0);
+            min-height: 100%;
+            min-width: 100%;
+            opacity: 0;
+            position: absolute;
+            right: 0;
+            text-align: right;
+            top: 0;
+        }
+
+    .BillImageBox {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #0087dd;
+    }
+
+    .BillImageBoxAdd {
+        padding: 10px 5px 5px 5px;
+        background-color: white;
+        height: 292px;
+        margin-left: 5px;
+        border-radius: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        border: 1px solid #0087dd;
+    }
+
+    .GalImages {
+        border: 1px solid #605ca8;
+        margin: 0px;
+        border-radius: 5px;
+    }
+
+        .GalImages .col-md-3 {
+            width: 24.4% !important;
+        }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Gallery Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Gallery Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 4%">Sl.</th>
+                                <th style="width: 10%">Image</th>
+                                <th style="width: 49%">Details</th>
+                                <th style="width: 10%">Date</th>
+                                <th style="width: 7%">Status</th>
+                                <th style="width: 15%"><a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditGallery(this,0);">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (GalleryModel c in Model)
+                            {
+                                <tr>
+                                    <td>@(count + 1)</td>
+                                    <td>
+
+                                        <img id="imgPhoto" class="thumbImageGrid" alt="Photo" onerror="return OnImageError(this, 3);" src="@Url.Content("~/Images/GalleryImages/Thumb/")@(c.GalleryID)_@c.FeatureImage" />
+                                    </td>
+                                    <td>
+                                        <b>@c.ImagesCount</b> Images<br />
+                                        <b>@c.Title</b><br />
+                                        @c.Description
+                                    </td>
+
+                                    <td>
+                                        @c.EventDate.ToString("dd MMM,yyyy")
+
+                                    </td>
+
+                                    <td>
+                                        @if (c.Status == 1)
+                                        {
+                                            <label class='badge bg-green'>Active</label>
+                                        }
+                                        else
+                                        {
+                                            <label class='badge bg-red'>Inactive</label>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="row" style="margin-right: 0px;">
+                                            <div class="col-md-6">
+                                                <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditGallery(this,@c.GalleryID);">Edit</a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a href="/Admin/UpdateGallery/@c.GalleryID" class="btn btn-link" onclick="return DeleteGallery(this);">Delete</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+</section>
+<script>
+    function AddNewImage(sender) {
+        var ctr = $('#divImages .BillImageBox').length;
+        var tabRow = '<div class="col-md-3 BillImageBox" style="background-color: rgb(255, 255, 255);"><div class="row"><div class="col-md-12">'+
+        '<div class="DeleteBill" style="padding-left: 200px;position: absolute;">'+
+        '<a onclick="RemoveBillImage(this);" title="Remove Bill" class="RedText btn btn-danger" href="javascript:void(0);">X</a></div>'+
+        '<figure class="figure profile-box" style="height: 150px;">'+
+        '<img id="imgStudentImage" onerror="return OnImageError(this, 3);" src="/Images/NoDocImage.jpg" class="img-responsive thumbImage"></figure>'+
+        '<input type="file" id="fuBillImage" onchange="ImageChanged(this,2);" name="Images[' + ctr + '].ImageFile">'+
+        '<input type="hidden" id="hdnOldImageName" name="Images[' + ctr + '].OldImageName" value="">'+
+        '<input type="hidden" id="hdnImageName" name="Images[' + ctr + '].ImagePath" value="">'+
+        '<input type="hidden" id="hdnGalleryImageID" name="Images[' + ctr + '].GalleryImageID" value="0">'+
+        '<input type="hidden" id="hdnOpType" name="Images[' + ctr + '].OpType" value="1">'+
+        '</div><div class="col-md-8"><div class="form-group"><div class="input-group"><div class="input-group-addon">'+
+        '<span>Date</span></div><input id="txtImageDate" type="date" class="form-control" name="Images[' + ctr + '].ImageDate" value="' + $('#txtEventDate').val() + '">'+
+        '</div></div></div><div class="col-md-12">'+
+        '<textarea id="txtBillTitle" placeholder="Description for Image" class="form-control" name="Images[' + ctr + '].Description" value="" style="resize:none;" rows="2"></textarea></div></div></div>';
+        if (ctr == 0) {
+            var ahtml = $('#divImages').html();
+            $('#divImages').html(tabRow);
+            $('#divImages').append(ahtml);
+        }
+        else {
+            $('#divImages .BillImageBox:last').after(tabRow);
+        }
+    }
+    function RemoveBillImage(sender) {
+        if ($(sender).hasClass('btn-danger')) {
+            if ($(sender).closest('.col-md-3').find('#hdnGalleryImageID').val() != "0") {
+                $(sender).closest('.col-md-3').css('background-color', 'red');
+                $(sender).closest('.col-md-3').find('#hdnOpType').val(-1);
+                $(sender).removeClass('btn-danger').addClass('btn-success');
+                $(sender).html('Undo');
+            }
+            else {
+                $(sender).closest('.col-md-3').remove();
+                var ctr = 0;
+                $('#divImages > .col-md-3').each(function () {
+                    $(this).find('#fuBillImage').prop('name', 'Images[' + ctr + '].ImageFile');
+                    $(this).find('#hdnOldImageName').prop('name', 'Images[' + ctr + '].OldImageName');
+                    $(this).find('#hdnGalleryImageID').prop('name', 'Images[' + ctr + '].GalleryImageID');
+                    $(this).find('#hdnOpType').prop('name', 'Images[' + ctr + '].OpType');
+                    $(this).find('#txtBillTitle').prop('name', 'Images[' + ctr + '].Description');
+                    $(this).find('#hdnImageName').prop('name', 'Images[' + ctr + '].ImagePath');
+                    $(this).find('#txtImageDate').prop('name', 'Images[' + ctr + '].ImageDate');
+                    ctr++;
+                });
+            }
+        }
+        else {
+            $(sender).closest('.col-md-3').css('background-color', 'white');
+            $(sender).closest('.col-md-3').find('#hdnOpType').val(0);
+            $(sender).removeClass('btn-success').addClass('btn-danger');
+            $(sender).html('X');
+
+        }
+    }
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liGalleryManagement').closest('ul').closest('li').addClass('active');
+        $('#liGalleryManagement').addClass('active');
+    });
+    function ImageChanged(fileBox, Type) {
+
+        if (fileBox.files && fileBox.files[0]) {
+            if (fileBox.files[0].size / 1024 < 5000) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(fileBox).closest('.col-md-3').find('#hdnImageName').val(fileBox.files[0].name);
+                    $(fileBox).closest('.col-md-3').find('img').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(fileBox.files[0]);
+            }
+            else {
+                ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+                $(fileBox).closest('.col-md-3').find('#hdnImageName').val('');
+                clearFileInput(fileBox);
+            }
+        }
+    }
+    function clearFileInput(ctrl) {
+        try {
+            ctrl.value = null;
+        } catch (ex) { }
+        if (ctrl.value) {
+            ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+        }
+    }
+    function DeleteGallery(sender) {
+        return confirm('Do you really want to delete Gallery!!!!');
+
+    }
+    function EditDC(sender) {
+
+    }
+    function PhotoChanged(fileBox) {
+
+        if (fileBox.files && fileBox.files[0]) {
+            if (fileBox.files[0].size / 1024 < 500) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $(fileBox).closest('.col-md-6').find('#imgMainPhoto').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(fileBox.files[0]);
+            }
+            else {
+
+                //ShowNotification('Large Image', 'Kindly Upload Image of Size less the 500KB', 'error');
+            }
+        }
+    }
+    function EditGallery(sender,GalleryID) {
+
+
+        if ($(sender).hasClass("EditSectionClose")) {
+            $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading, Please Wait....</td></tr>");
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetGalleryDetails/" + GalleryID,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        // fill the div with the html returned by action
+        $(sender).closest("tr").next().remove();
+
+        var ele = document.getElementsByClassName("EditSectionOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            if ($(ele[0]).text() == 'Cancel') {
+                $(ele[0]).text('Add New');
+            }
+            else {
+                $(sender).html('Edit');
+            }
+        }
+        if ($(sender).html() == 'Add New') {
+            $(sender).html('Cancel');
+        }
+        else {
+
+            $(sender).html('Close');
+        }
+        $(sender).removeClass("EditSectionClose");
+        $(sender).addClass("EditSectionOpen");
+        $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).text('Edit');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+</script>
+<!-- /.content -->

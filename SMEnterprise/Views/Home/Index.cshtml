@@ -1,0 +1,338 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>P-School | Login</title>
+    <!-- Bootstrap -->
+  
+    <script src="@Url.Content("~/js/jquery.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/js/MD5.js")" type="text/javascript"></script>
+    <link href="@Url.Content("~/css/bootstrap.min.css")" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="@Url.Content("~/css/font-awesome.min.css")" rel="stylesheet">
+   
+    <link href="@Url.Content("~/css/local.css")" rel="stylesheet" />
+    <script>
+    function EncLogin() {
+        if ($("#txtpassword").val() != "") {
+            var id = $("#txtpassword").val();
+            var salt = '@ViewBag.Salt';
+            var id2 = hex_md5(String(id + 'd2f*jk#g&h'));
+            var id3 = hex_md5(String(id2 + salt));
+            $("#txtpassword").val(id3);
+            return true;
+        }else
+        {
+            return false;
+        }
+    }
+        function GetEncLogin() {
+            if ($("#txtpassword").val() != "") {
+                var id = $("#txtpassword").val();
+                var id2 = hex_md5(String(id + 'd2f*jk#g&h'));
+                $("#txtpassword").val(id2);
+                return true;
+            } else {
+                return false;
+            }
+        }
+        var DynamicSalt = '';
+        var UUID = '860848030107289_0';
+        function EncLogin2() {
+            if ($("#txtpassword").val() != "") {
+                var id = '030pschool030';
+                var salt = 'IROQBXXXZU';
+                var id2 = hex_md5(String(id + 'd2f*jk#g&h'));
+                var id3 = hex_md5(String(id2 + salt));
+                $("#txtpassword").val(id3);
+                //TestAPI(id3);
+            } else {
+            }
+        }
+        function ClearIndex() {
+            $.ajax({
+                url: '/api/CommonApi/ClearLuceneIndex',
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    UUID: UUID
+                },
+                success: function (data, textStatus, xhr) {
+                    //DynamicSalt = data;
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        }
+        function GetDynamicSalt() {
+            $.ajax({
+                url: '/api/CommonApi/GetLoginDynamicSalt',
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    UUID: UUID
+                },
+                success: function (data, textStatus, xhr) {
+                    DynamicSalt = data;
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        }
+        function GetListForAttandance(pass)
+        {
+            $.ajax({
+                url: '/api/ParentApi/GetStudentTransportMap',
+                type: 'Post',
+                dataType: 'json',
+                data: {
+                    UUID: UUID,
+                    ID : 14
+                },
+                success: function (data, textStatus, xhr) {
+                    console.log(JSON.stringify( data));
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        }
+        function GetDayPeriods() {
+            $.ajax({
+                url: '/api/TeacherApi/GetDayPeriods',
+                type: 'Post',
+                dataType: 'json',
+                data: {
+                    UUID: UUID,
+                    DayID: 1
+                },
+                success: function (data, textStatus, xhr) {
+                    console.log(JSON.stringify(data));
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        }
+        function ApiLogin(pass) {
+            var Password = 'GAUR0101';
+            var id2 = hex_md5(String(Password + 'd2f*jk#g&h'));
+            var id3 = hex_md5(String(id2 + DynamicSalt));
+            $.ajax({
+                url: '/api/CommonApi/Login',
+                type: 'Post',
+                dataType: 'json',
+                data: {
+                    UUID: UUID,
+                    username: 'EMP000002',
+                    deviceType: 'EMP000002',
+                    deviceToken: 'EMP000002',
+                    password: id3
+                },
+                success: function (data, textStatus, xhr) {
+                    console.log(JSON.stringify(data));
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        }
+        function ApiParentLogin(pass) {
+            var Password = '030prabhuti030';
+            var id2 = hex_md5(String(Password + 'd2f*jk#g&h'));
+            var id3 = hex_md5(String(id2 + 'GBUCDBUKSR'));
+            console.log(id3);
+            //$.ajax({
+            //    url: '/api/CommonApi/Login',
+            //    type: 'Post',
+            //    dataType: 'json',
+            //    data: {
+            //        UUID: UUID,
+            //        username: 'PAR000001',
+            //        password: id3
+            //    },
+            //    success: function (data, textStatus, xhr) {
+            //        console.log(JSON.stringify(data));
+            //    },
+            //    error: function (xhr, textStatus, errorThrown) {
+            //        console.log(textStatus);
+            //    }
+            //});
+        }
+        function GetLuceneDataList() {
+            $.ajax({
+                url: '/api/CommonApi/GetLuceneData',
+                type: 'Post',
+                dataType: 'json',
+                data: {
+                    UUID: 1,
+                    ID: 14
+                },
+                success: function (data, textStatus, xhr) {
+                    console.log(JSON.stringify(data));
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        }
+        function GenerateJSON() {
+            var dates = ['2020-03-28', '2020-03-29', '2020-03-30'];
+            var jsonObj = "{";
+
+            for (var i = 0; i < dates.length; i++) {
+                var jsitem = "";
+                if (jsonObj != "{") {
+                    jsonObj = jsonObj + ',';
+                }
+                jsitem = "\"'" + dates[i] + "'\":{";  
+                jsitem = jsitem + "\"customStyles\":{";
+                jsitem = jsitem + "\"container\": {";
+                jsitem = jsitem + "\"backgroundColor\": \"green\"";
+                jsitem = jsitem + "},";
+                jsitem = jsitem + "\"text\": {";
+                jsitem = jsitem + "\"color\": \"black\",";
+                jsitem = jsitem + "\"fontWeight\": \"bold\"";
+                jsitem = jsitem + "}";
+                jsitem = jsitem + "}";
+                jsitem = jsitem + "}";
+                jsonObj = jsonObj + jsitem;
+                    
+            }
+            jsonObj = jsonObj + "}";
+            console.log(JSON.parse(jsonObj));
+        }
+    </script>
+</head>
+<body class="login-bgone">
+    <div class="loginpage-head">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-8">
+                    <div class="row login-bgwh">
+                        <div class="col-md-6 box-sh">
+                            <div class="loginpage-footer">
+                                <img src="@Url.Content("~/images/pschool-logo.png")" alt="logo" class="img-responsive" />
+                                <h3>Solution at a Glance</h3>
+                                <p>School Management is comprehensive web based software for managing day to day school operation easliy. Reduced costs and less administration paper work.</p>
+                                <ul>
+                                    <li>Real time SMS notification to Teacher and parents.</li>
+                                    <li>Easy performance monitoring of individual modules. Build Education level, Period, class section and subject.</li>
+                                    <li>Android App with individual parent, teacher and administration login.</li>
+
+                                </ul>
+                                <div class="btntw">
+                                    <a href="http://www.pschoolonline.in/" target="_blank">
+                                        <input type="button" class="btn btn-info" value="Read more" />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6" style="padding: 0;">
+                            <div class="bor-righ">
+                                <div class="login-imgone">
+                                    <img src="@Url.Content("~/images/logo.png")" alt="pschool-logo" class="img-responsive" />
+                                </div>
+                                <div class="login_content">
+                                    <a class="hiddenanchor" id="signup"></a>
+                                    <a class="hiddenanchor" id="signin"></a>
+
+                                    @using (Html.BeginForm("Login", "Login", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "LoginForm" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <h1>Login</h1>
+                                        if (ViewBag.LoginError != null)
+                                        {
+                                            <div>@ViewBag.LoginError</div>
+                                        }
+                                        <div>
+                                            <input type="text" id="txtUserName" class="form-control" placeholder="Username" required="" name="username" />
+                                            @*@{
+                                                    if (Session["UserID"] != null)
+                                                    {
+                                                        <a>@Session["UserID"].ToString()</a>
+                                                    }
+                                                    if (SMEnterprise.Models.PermissionManager.GetLoggedInUser() != null)
+                                                    {
+                                                        <a>@SMEnterprise.Models.PermissionManager.GetLoggedInUser().UserName</a>
+                                                    }
+                                                    <a>Start @SMEnterprise.Repository.CommonUsage.SessionStart</a>
+                                                    <a>End @SMEnterprise.Repository.CommonUsage.SessionEnd</a>
+                                                }*@
+                                            <a></a>
+                                        </div>
+                                        <div>
+                                            <input type="password" id="txtpassword" class="form-control" name="Password" placeholder="Password" required="" />
+                                        </div>
+                                        <div>
+                                            <input type="hidden" name="salt" value="@ViewBag.Salt">
+                                            <a class="reset_pass" href="javascript:void(0);" onclick="GenerateJSON();">Generate JSON</a>
+
+                                            <button type="submit" class="btn btn-default submit btnone" onclick="return EncLogin();"><span><i class="fa fa-lock" aria-hidden="true"></i></span> Log in</button>
+                                            <div style="display:none;">
+                                                <a class="reset_pass" href="/Home/StartSchedule">Send SMS?</a>
+                                                <a class="reset_pass" href="javascript:void(0);" onclick="GetListForAttandance('asas');">GetStudentList</a>
+                                                <a class="reset_pass" href="javascript:void(0);" onclick="ApiLogin();">Login</a>
+                                                <a class="reset_pass" href="javascript:void(0);" onclick="ApiParentLogin();">PLogin</a>
+                                                <a class="reset_pass" href="javascript:void(0);" onclick="GetDynamicSalt();">DynamicSalt</a>
+                                                <a class="reset_pass" href="javascript:void(0);" onclick="ClearIndex();">ClearIndex</a>
+                                                <a class="reset_pass" href="javascript:void(0);" onclick="EncLogin2();">GetAllIndexed</a>
+                                                <a class="reset_pass" href="javascript:void(0);" onclick="SVGtoPNG();">GetTeacherDayPeriods</a>
+                                                <ul>
+                                                    @foreach(var d in SMEnterprise.Repository.CommonUsage.ConnectionStrings)
+                                                    {
+                                                        <li>@d.Key -> @d.Value</li>
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        <div class="clearfix"></div>
+                                        <div class="separator">
+
+                                            <div class="clearfix"></div>
+                                            <br />
+                                            <div>
+                                                <h1><img src="images/footerlogo.png" alt="footerlogo" /> <small> Pro!</small></h1>
+                                                <p style="color:#313131;">©2016 All Rights Reserved.<a href="http://www.prabhutisystems.com"> Prabhuti Systems Pvt. Ltd.</a></p>
+                                            </div>
+                                        </div>
+                                    }
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2"></div>
+            </div>
+        </div>
+    </div>
+    @*<div class="razorpay-embed-btn" data-url="https://rzp.io/l/XSd6veO" data-text="Pay Now" data-color="#528FF0" data-size="large">
+        <script>
+            (function () {
+                var d = document; var x = !d.getElementById('razorpay-embed-btn-js')
+                if (x) {
+                    var s = d.createElement('script'); s.defer = !0; s.id = 'razorpay-embed-btn-js';
+                    s.src = 'https://cdn.razorpay.com/static/embed_btn/bundle.js'; d.body.appendChild(s);
+                } else {
+                    var rzp = window['__rzp__'];
+                    rzp && rzp.init && rzp.init()
+                }
+            })();
+        </script>
+    </div>*@
+    <script src="@Url.Content("~/js/local.js")"></script>
+</body>
+</html>

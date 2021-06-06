@@ -1,0 +1,1722 @@
+﻿@{
+    ViewBag.Title = "StudentDetails";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentEditModel
+@section IncludeCss
+{
+    <title>P-School | Student Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+    <style>
+        div[aria-role="alertdialog"] {
+            z-index: 2 !important;
+        }
+
+        .table thead tr th {
+            text-align: center !important;
+            vertical-align: middle !important;
+            background-color: rgb(68, 88, 97);
+            color: white;
+        }
+
+        #tblCategory table thead tr th a {
+            color: #b26c33;
+        }
+
+        .thumbImage {
+            max-width: 150px;
+            max-height: 150px;
+        }
+
+        .OptedSubjects:hover {
+            color: #535f7a;
+            background-color: #e8edf1 !important;
+            border: 1px solid #535f7a !important;
+            cursor: pointer;
+        }
+    </style>
+}
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_content">
+
+                    <div class="" role="tabpanel" data-example-id="togglable-tabs">
+                        <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
+                            <li role="presentation" class="@(Model.CurrentTab == 1 || Model.Student.StudentID == 0 ? " active" : "")">
+                                <a href="#tab_Personal" id="Personal-tab" role="tab" data-toggle="tab" aria-expanded="true">Personal</a>
+                            </li>
+                            @if (Model.Student.StudentID != 0)
+                            {
+                                <li role="presentation" class="@(Model.CurrentTab == 2 ? " active" : "")">
+                                    <a href="#tab_Parent" role="tab" id="Parent-tab" data-toggle="tab" aria-expanded="false">Parent</a>
+                                </li>
+                                <li role="presentation" class="@(Model.CurrentTab == 3 ? " active" : "")">
+                                    <a href="#tab_address" role="tab" id="address-tab" data-toggle="tab" aria-expanded="false">Address</a>
+                                </li>
+                                <li role="presentation" class="@(Model.CurrentTab == 4 ? " active" : "")">
+                                    <a href="#tab_guardian" role="tab" id="guardian -tab" data-toggle="tab" aria-expanded="false">Guardian </a>
+                                </li>
+                                <li role="presentation" class="@(Model.CurrentTab == 5 ? " active" : "")">
+                                    <a href="#tab_documents" role="tab" id="documents -tab" data-toggle="tab" aria-expanded="false">Documents </a>
+                                </li>
+                                <li role="presentation" class="@(Model.CurrentTab == 6 ? " active" : "")">
+                                    <a href="#tab_session " role="tab" id="session -tab" data-toggle="tab" aria-expanded="false">Session </a>
+                                </li>
+                                <li role="presentation" class="@(Model.CurrentTab == 7 ? " active" : "")">
+                                    <a href="#tab_transport" role="tab" id="transport-tab" data-toggle="tab" aria-expanded="false">Transport </a>
+                                </li>
+                                <li role="presentation" class="@(Model.CurrentTab == 8 ? " active" : "")">
+                                    <a href="#tab_hostel" role="tab" id="hostel-tab" data-toggle="tab" aria-expanded="false">Hostel  </a>
+                                </li>
+                            }
+                        </ul>
+                        <div id="myTabContent" class="tab-content">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 1 ? " active in" : "")" id="tab_Personal" aria-labelledby="home-tab">
+                                @using (Html.BeginForm("SaveStudentPersonal", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                                {
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <figure class="figure profile-box" style="height: 150px;">
+                                                        <img id="imgStudentImage" onerror="return OnImageError(this, @Model.Student.Gender);" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" class="img-responsive thumbImage">
+                                                    </figure>
+                                                    <input type="hidden" id="hdnImageName" name="Photo" value="@Model.Student.Photo" />
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtAdmissionUID">
+                                                        Admission UID
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="hidden" id="hdnStudentID" name="StudentID" value="@Model.Student.StudentID" />
+                                                        <input style="background-color:@(Model.Student.StudentID == 0 ? " antiquewhite" : "aliceblue");" type="text" id="txtAdmissionUID" class="form-control col-md-7 col-xs-12" disabled="" value="@Model.Student.StudentSID">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtDOB">
+                                                        Birth Date <span class="required">*</span> <small>(mm/dd/yyyy)</small>
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="text" required="" class="form-control has-feedback-left dateinput" id="txtDOB" placeholder="Date Of Birth" aria-describedby="inputSuccess2Status" name="DOB" value="@Model.Student.DOB.ToShortDateString()">
+                                                        <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                                                        <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtName">
+                                                        Name <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="text" id="txtName" value="@Model.Student.Name" name="Name" required="required" class="form-control col-md-7 col-xs-12">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlNationality">
+                                                        Nationality
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <select type="text" id="ddlNationality" name="Nationality" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.Student.Nationality == 1 ? "selected" : "" )>Indian</option>
+                                                            <option value="2" @(Model.Student.Nationality == 2 ? "selected" : "" )>Other</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                                                        Gender
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <label class="switch switch-green col-md-6">
+                                                            <input type="checkbox" class="switch-input" @(Model.Student.Gender == 0 ? "checked" : "" )>
+                                                            <span class="switch-label" onclick="$(this).closest('label').find('#hdnStudentGender').val($(this).closest('label').find('#hdnStudentGender').val() == '0' ? '1' : '0');" data-on="Male" data-off="Female"></span>
+                                                            <span class="switch-handle" id="shTranding"></span>
+                                                            <input type="hidden" name="Gender" id="hdnStudentGender" value="@Model.Student.Gender">
+                                                        </label>
+                                                        <div class="col-md-6">
+                                                            <input type="file" name="StudentImageUploader" onchange="ImageChanged(this, 'student');" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtDOj">
+                                                        Joining Date <span class="required">*</span> <small>(mm/dd/yyyy)</small>
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="text" required="" class="form-control has-feedback-left dateinput" id="txtDOj" placeholder="Date Of Joining" aria-describedby="inputSuccess2Status" name="DOJ" value="@Model.Student.DOJ.ToShortDateString()">
+                                                        <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                                                        <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtSSchoolUID">
+                                                        School UID
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="text" class="form-control" name="SchoolUID" value="@Model.Student.SchoolUID" id="txtSSchoolUID" placeholder="School's Unique ID/ Sr. No." aria-describedby="inputSuccess2Status">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtSEmailID">
+                                                        Aadhaar <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="text" class="form-control" name="AadharCardNo" value="@Model.Student.AadharCardNo" id="txtSEmailID" placeholder="Aadhaar Card Number" aria-describedby="inputSuccess2Status">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlReligion">
+                                                        SMS Notification
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <select id="ddlReligion" name="NotificationSMSTo" class="form-control col-md-7 col-xs-12">
+                                                            <option value="0" @(Model.Student.NotificationSMSTo == 0 ? "selected" : "" )>On Father's Mobile</option>
+                                                            <option value="1" @(Model.Student.NotificationSMSTo == 1 ? "selected" : "" )>On Mother's Mobile</option>
+                                                            <option value="2" @(Model.Student.NotificationSMSTo == 2 ? "selected" : "" )>On Guardian</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlReligion">
+                                                        Religion
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <select type="text" id="ddlReligion" name="ReligionID" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.Student.ReligionID == 1 ? "selected" : "" )>Hindu</option>
+                                                            <option value="2" @(Model.Student.ReligionID == 2 ? "selected" : "" )>Muslim</option>
+                                                            <option value="3" @(Model.Student.ReligionID == 3 ? "selected" : "" )>Sikh</option>
+                                                            <option value="4" @(Model.Student.ReligionID == 4 ? "selected" : "" )>Christian</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlSDisability">
+                                                        Disability
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <select id="ddlSDisability" name="Disability" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.Student.Disability == 1 ? "selected" : "" )>None</option>
+                                                            <option value="2" @(Model.Student.Disability == 2 ? "selected" : "" )>Handicap</option>
+                                                            <option value="3" @(Model.Student.Disability == 3 ? "selected" : "" )>Other</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlSCategory">
+                                                        Category
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <select id="ddlSCategory" name="Category" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.Student.Category == 1 ? "selected" : "" )>General</option>
+                                                            <option value="2" @(Model.Student.Category == 2 ? "selected" : "" )>SC</option>
+                                                            <option value="3" @(Model.Student.Category == 3 ? "selected" : "" )>ST</option>
+                                                            <option value="4" @(Model.Student.Category == 4 ? "selected" : "" )>OBC</option>
+                                                            <option value="5" @(Model.Student.Category == 5 ? "selected" : "" )>Other</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlSMotherTongue">
+                                                        Mother Tongue
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <select id="ddlSMotherTongue" name="MotherTongueID" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.Student.MotherTongueID == 1 ? "selected" : "" )>Hindi</option>
+                                                            <option value="2" @(Model.Student.MotherTongueID == 2 ? "selected" : "" )>English</option>
+                                                            <option value="3" @(Model.Student.MotherTongueID == 3 ? "selected" : "" )>Tamil</option>
+                                                            <option value="4" @(Model.Student.MotherTongueID == 4 ? "selected" : "" )>Telgu</option>
+                                                            <option value="5" @(Model.Student.MotherTongueID == 5 ? "selected" : "" )>Marathi</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlSBloodGroup">
+                                                        Blood Group
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <select id="ddlSBloodGroup" name="BloodGroup" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option @(Model.Student.BloodGroup == "A+" ? "selected" : "" )>A+</option>
+                                                            <option @(Model.Student.BloodGroup == "A-" ? "selected" : "" )>A-</option>
+                                                            <option @(Model.Student.BloodGroup == "B+" ? "selected" : "" )>B+</option>
+                                                            <option @(Model.Student.BloodGroup == "B-" ? "selected" : "" )>B-</option>
+                                                            <option @(Model.Student.BloodGroup == "O-" ? "selected" : "" )>O-</option>
+                                                            <option @(Model.Student.BloodGroup == "O+" ? "selected" : "" )>O+</option>
+                                                            <option @(Model.Student.BloodGroup == "AB+" ? "selected" : "" )>AB-</option>
+                                                            <option @(Model.Student.BloodGroup == "AB+" ? "selected" : "" )>AB+</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtSPassportNo">
+                                                        Passport No.
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="text" class="form-control" name="PassportNo" value="@Model.Student.PassportNo" id="txtSPassportNo" placeholder="Passport Number" aria-describedby="inputSuccess2Status">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtAccessCard">
+                                                        Access Card <span class="required">*</span>
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <input type="text" class="form-control" name="AccessCardNo" value="@Model.Student.AccessCardNo" id="txtAccessCard" placeholder="Access Card Number" aria-describedby="inputSuccess2Status">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtSAllergicMedicine">
+                                                        Allergic Med.
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <textarea rows="2" style="resize:none;" name="Allergic_Medicine" type="text" class="form-control" id="txtSAllergicMedicine" placeholder="Allergic Medicine" aria-describedby="inputSuccess2Status">@Model.Student.Allergic_Medicine</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtSExtraCurricular">
+                                                        Extra Curricular.
+                                                    </label>
+                                                    <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <textarea rows="2" style="resize:none;" name="ExtraCurricular" type="text" class="form-control" id="txtSExtraCurricular" placeholder="Extra Curricular" aria-describedby="inputSuccess2Status">@Model.Student.ExtraCurricular</textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-12">
+                                                    <button type="submit" onclick="return CheckStudentDetails();" class="btn btn-success pull-right">Save</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 2 ? " active in" : "")" id="tab_Parent" aria-labelledby="profile-tab">
+                                @using (Html.BeginForm("SaveStudentParent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                                {
+                                    <div class="form-group col-md-6">
+                                        <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtParentID">Parent ID : </label>
+                                        <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                            <input style="background-color:@(Model.ParantDetails.ParentID == 0 ? " antiquewhite" : "aliceblue");" value="@Model.ParantDetails.ParentSID" type="text" id="txtParentID" class="form-control" placeholder="Parent ID (If Exist)">
+                                            <span class="input-group-btn">
+                                                <a href="javascript:void(0);" class="btn btn-primary" onclick="CheckParantDetails();"><i class="fa fa-refresh"></i></a>
+                                            </span>
+                                        </div>
+                                        <input type="hidden" id="hdnParentID" name="ParentID" value="@Model.ParantDetails.ParentID" />
+                                        <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+                                    </div>
+                                    <div class="clearfix"></div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <figure class="figure profile-box" style="height: 150px;">
+                                                        <img id="imgFatherImage" onerror="return OnImageError(this, 0);" src="@Url.Content("~/Images/ParentImage/Father/")@(Model.ParantDetails.ParentID)_1_@Model.ParantDetails.FatherImage" class="img-responsive thumbImage" />
+                                                    </figure>
+                                                </div>
+                                                <input type="file" name="FatherImageUploader" onchange="ImageChanged(this, 'father');" />
+                                                <input type="hidden" name="FatherImage" id="hdnFatherImage" value="@Model.ParantDetails.FatherImage" />
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPFatherName">
+                                                    Father Name
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" name="FatherName" value="@Model.ParantDetails.FatherName" class="form-control" id="txtPFatherName" placeholder="Father's Name" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPMotherName">
+                                                    Aadhaar
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" value="@Model.ParantDetails.FatherAadhaar" name="FatherAadhaar" class="form-control" id="txtPFatherAadhaar" placeholder="Father's Aadhaar Number" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="ddlPFatherOccupation">
+                                                    Father Occupation
+                                                </label>
+                                                <div class="col-md-8 col-sm-8 col-xs-12">
+                                                    <input type="text" name="FatherOccupationID" value="@Model.ParantDetails.FatherOccupationID" class="form-control" id="ddlPFatherOccupation" placeholder="Father's Occupation" aria-describedby="inputSuccess2Status">
+                                                    @*<select id="ddlPFatherOccupation" name="FatherOccupationID" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.ParantDetails.FatherOccupationID == 1 ? "selected" : "" )>Service</option>
+                                                            <option value="2" @(Model.ParantDetails.FatherOccupationID == 2 ? "selected" : "" )>Other</option>
+                                                        </select>*@
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPFatherDOB">
+                                                    Father DOB <span class="required">*</span> <small>(mm/dd/yyyy)</small>
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" required="" class="form-control has-feedback-left dateinput" id="txtDOB" placeholder="Father's Date Of Birth" aria-describedby="inputSuccess2Status" name="FatherDOB" value="@(Model.ParantDetails.FatherDOB.Year==1?SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToShortDateString(): Model.ParantDetails.FatherDOB.ToShortDateString())">
+                                                    <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                                                    <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPFatherMobile">
+                                                    Father Mobile
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" value="@Model.ParantDetails.FatherMobileNo" name="FatherMobileNo" class="form-control" id="txtPFatherMobile" placeholder="Father's Mobile" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPFatherEmailID">
+                                                    Father EmailID
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" value="@Model.ParantDetails.FatherEmailID" name="FatherEmailID" class="form-control" id="txtPFatherEmailID" placeholder="Father's EmailID" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="ddlPFatherBloodGroup">
+                                                    Blood Group
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <select id="ddlPFatherBloodGroup" name="FatherBloodGroup" required="required" class="form-control col-md-7 col-xs-12">
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "A+" ? "selected" : "" )>A+</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "A-" ? "selected" : "" )>A-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "B+" ? "selected" : "" )>B+</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "B-" ? "selected" : "" )>B-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "O-" ? "selected" : "" )>O-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "O+" ? "selected" : "" )>O+</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "AB+" ? "selected" : "" )>AB-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "AB+" ? "selected" : "" )>AB+</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="ddlPFatherEducation">
+                                                    Education
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" name="FatherEducationID" value="@Model.ParantDetails.FatherEducationID" class="form-control" id="ddlPFatherEducation" placeholder="Father's Education" aria-describedby="inputSuccess2Status">
+                                                    @*<select id="ddlPFatherEducation" name="FatherEducationID" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.ParantDetails.FatherEducationID == 1 ? "selected" : "" )>Graduate</option>
+                                                            <option value="2" @(Model.ParantDetails.FatherEducationID == 2 ? "selected" : "" )>Other</option>
+                                                        </select>*@
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPLandLineNumber">
+                                                    Landline No.
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" name="HomeLandLineNo" value="@Model.ParantDetails.HomeLandLineNo" class="form-control" id="txtPLandLineNumber" placeholder="Home Landline Number" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <figure class="figure profile-box" style="height: 150px;">
+                                                        <img id="imgMotherImage" onerror="return OnImageError(this, 1);" src="@Url.Content("~/Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage" class="img-responsive thumbImage" />
+                                                    </figure>
+                                                </div>
+                                                <input type="file" name="MotherImageUploader" onchange="ImageChanged(this, 'mother');" />
+                                                <input type="hidden" name="MotherImage" id="hdnMotherImage" value="@Model.ParantDetails.MotherImage" />
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPMotherName">
+                                                    Mother Name
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" value="@Model.ParantDetails.MotherName" name="MotherName" class="form-control" id="txtPMotherName" placeholder="Mother's Name" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPMotherName">
+                                                   Aadhaar
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" value="@Model.ParantDetails.MotherAadhaar" name="MotherAadhaar" class="form-control" id="txtPMotherAadhaar" placeholder="Mother's Aadhaar Number" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="ddlPMotherOccupation">
+                                                    Mother Occupation
+                                                </label>
+                                                <div class="col-md-8 col-sm-8 col-xs-12">
+                                                    <input type="text" name="MotherOccupationID" value="@Model.ParantDetails.MotherOccupationID" class="form-control" id="ddlPMotherOccupation" placeholder="Mother's Occupation" aria-describedby="inputSuccess2Status">
+                                                    @*<select id="ddlPMotherOccupation" name="MotherOccupationID" required="required" class="form-control col-md-7 col-xs-12">
+                                                            <option value="1" @(Model.ParantDetails.MotherOccupationID == 1 ? "selected" : "" )>Service</option>
+                                                            <option value="2" @(Model.ParantDetails.MotherOccupationID == 2 ? "selected" : "" )>Other</option>
+                                                        </select>*@
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPMotherDOB">
+                                                    Monther DOB <span class="required">*</span> <small>(mm/dd/yyyy)</small>
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" required="" class="form-control has-feedback-left dateinput" id="txtPMotherDOB" placeholder="Mother's Date Of Birth" aria-describedby="inputSuccess2Status" name="MotherDOB" value="@(Model.ParantDetails.MotherDOB.Year==1?SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToShortDateString(): Model.ParantDetails.MotherDOB.ToShortDateString())">
+                                                    <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                                                    <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPMotherMobile">
+                                                    Mother Mobile
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" class="form-control" name="MotherMobileNo" value="@Model.ParantDetails.MotherMobileNo" id="txtPMotherMobile" placeholder="Mother's Mobile" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPMotherEmailID">
+                                                    Mother EmailID
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" class="form-control" name="MotherEmailID" value="@Model.ParantDetails.MotherEmailID" id="txtPMotherEmailID" placeholder="Mother's EmailID" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="ddlPMotherBloodGroup">
+                                                    Blood Group
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <select id="ddlPMotherBloodGroup" name="MotherBloodGroup" required="required" class="form-control col-md-7 col-xs-12">
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "A+" ? "selected" : "" )>A+</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "A-" ? "selected" : "" )>A-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "B+" ? "selected" : "" )>B+</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "B-" ? "selected" : "" )>B-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "O-" ? "selected" : "" )>O-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "O+" ? "selected" : "" )>O+</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "AB-" ? "selected" : "" )>AB-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "AB+" ? "selected" : "" )>AB+</option>
+
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="ddlPMotherEducation">
+                                                    Education
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" name="MotherEducationID" value="@Model.ParantDetails.MotherEducationID" class="form-control" id="ddlPMotherEducation" placeholder="Mother's Education" aria-describedby="inputSuccess2Status">
+
+                                                    @*<select id="ddlPMotherEducation" name="MotherEducationID" required="required" class="form-control col-md-7 col-xs-12">
+                                                        <option value="1" @(Model.ParantDetails.MotherEducationID == 1 ? "selected" : "" )>Graduate</option>
+                                                        <option value="2" @(Model.ParantDetails.MotherEducationID == 2 ? "selected" : "" )>Other</option>
+                                                    </select>*@
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtPAccessCardNo">
+                                                    Access Card No
+                                                </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12">
+                                                    <input type="text" name="AccessCardNo" value="@Model.ParantDetails.AccessCardNo" class="form-control" id="txtPAccessCardNo" placeholder="Access Card Number" aria-describedby="inputSuccess2Status">
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="clearfix"></div>
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">House No : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_HouseNo" name="Padd_HouseNo" id="txtPadd_HouseNo" class="form-control" placeholder="House No" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">Street / Road : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_Street" name="Padd_Street" id="txtPadd_Street" class="form-control" placeholder="Street / Road" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">Area / City : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_Area" name="Padd_Area" id="txtPadd_Area" class="form-control" placeholder="Area / City" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">Sector : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_Sector" name="Padd_Sector" id="txtPadd_Sector" class="form-control" placeholder="Sector" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">District : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_District" name="Padd_District" id="txtPadd_District" class="form-control" placeholder="District" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">State : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_State" name="Padd_State" id="txtPadd_State" class="form-control" placeholder="Country" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">Pin Code/ Zip Code : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_PinCode" name="Padd_PinCode" id="txtPadd_PinCode" class="form-control" placeholder="Pin Code" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label class="control-label col-md-4 col-sm-3 col-xs-12">Country : </label>
+                                                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                    <input type="text" value="@Model.ParantDetails.Padd_Country" name="Padd_Country" id="txtPadd_Country" class="form-control" placeholder="Country" />
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group col-md-12">
+                                            <button type="submit" onclick="return CheckParentForm();" class="btn btn-success pull-right">Save</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 3 ? " active in" : "")" id="tab_address">
+                                @using (Html.BeginForm("SaveStudentAddress", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                                {
+                                    <div class="form-horizontal form-label-left">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">House No : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <input type="text" class="form-control" value="@Model.Student.Cadd_HouseNo" name="Cadd_HouseNo" placeholder="House No" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Street / Road : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <input type="text" class="form-control" value="@Model.Student.Cadd_Street" name="Cadd_Street" placeholder="Street / Road" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Sector : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <input type="text" name="Cadd_Sector" value="@Model.Student.Cadd_Sector" class="form-control" placeholder="Sector" />
+                                                    </div>
+                                                </div>
+
+
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Pin Code/ Zip Code : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <input type="text" name="Cadd_PinCode" value="@Model.Student.Cadd_PinCode" class="form-control" placeholder="Pin Code" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Country : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control select2_single" id="ddlCadd_CountryCode" name="Cadd_CountryCode" onchange="CountryChanged(this,0);">
+                                                            <option value="0">--Select--</option>
+                                                            @foreach (var li in Model.Countries)
+                                                            {
+                                                                <option value="@li.ID" @(li.ID == Model.Student.Cadd_CountryCode ? "selected" : "" )>@li.Name</option>
+                                                            }
+                                                            <option value="-1">Add New</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">State : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control select2_single" id="ddlCadd_StateCode" name="Cadd_StateCode" onchange="StateChanged(this,0);">
+                                                            <option value="0">--Select--</option>
+                                                            @foreach (var li in Model.States)
+                                                            {
+                                                                <option value="@li.ID" @(li.ID == Model.Student.Cadd_StateCode ? "selected" : "" )>@li.Name</option>
+                                                            }
+                                                            <option value="-1">Add New</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">District : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control select2_single" id="ddlCadd_DistrictCode" name="Cadd_DistrictCode" onchange="CityChanged(this,0);">
+                                                            <option value="0">--Select--</option>
+                                                            @foreach (var li in Model.Cities)
+                                                            {
+                                                                <option value="@li.ID" @(li.ID == Model.Student.Cadd_DistrictCode ? "selected" : "" )>@li.Name</option>
+                                                            }
+                                                            <option value="-1">Add New</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Area / City : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control select2_single" id="ddlCadd_AreaCode" name="Cadd_AreaCode" onchange="AreaChanged(this,0)">
+                                                            <option value="0">--Select--</option>
+                                                            @foreach (var li in Model.Areas)
+                                                            {
+                                                                <option value="@li.ID" @(li.ID == Model.Student.Cadd_AreaCode ? "selected" : "" )>@li.Name</option>
+                                                            }
+                                                            <option value="-1">Add New</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group col-md-12">
+                                                    <button type="submit" class="btn btn-success pull-right">Save</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 4 ? " active in" : "")" id="tab_guardian">
+                                @using (Html.BeginForm("SaveStudentGuardian", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                                {
+                                    <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+                                    <div class="form-horizontal form-label-left">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Gurdian Name : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <input type="text" class="form-control" name="GuardianName" value="@Model.Student.GuardianName" placeholder="Gurdian Name" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Gurdian Relation : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" name="RelationWithGuardian">
+                                                            <option value="1" @(Model.Student.RelationWithGuardian == 1 ? "selected" : "" )>Uncle</option>
+                                                            <option value="2" @(Model.Student.RelationWithGuardian == 1 ? "selected" : "" )>Cousin</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Mobile No : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <input type="text" name="GuardianMobileNo" value="@Model.Student.GuardianMobileNo" class="form-control" placeholder="Mobile No" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Email ID : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <input type="text" class="form-control" name="GuardianEmail" value="@Model.Student.GuardianEmail" placeholder="Email ID" />
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group col-md-12">
+                                            <button type="submit" class="btn btn-success pull-right">Save</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 5 ? " active in" : "")" id="tab_documents">
+                                @using (Html.BeginForm("SaveStudentDocuments", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                                {
+                                    <div class="form-horizontal form-label-left">
+
+                                        <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group form-box file-box">
+                                                    <div class="row">
+                                                        <label class="lbl-txt col-md-12 padding-L text-left">Birth Certificate : </label>
+                                                        <div class="col-md-7">
+                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Birth_@Model.Student.BirthCertificate" id="imgBirthCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <input type="hidden" value="@Model.Student.BirthCertificate" name="BirthCertificate" />
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <input type="file" name="BirthCertificateUploader" class="form-control test" id="input001" onchange="ImageChanged(this,'birth')" accept="image/*" tabindex="-1" style="position: absolute; clip: rect(0px 0px 0px 0px);"><div class="bootstrap-filestyle input-group"><input type="text" class="form-control" value="@Model.Student.BirthCertificate" placeholder="Birth Certificate" disabled=""> <span class="group-span-filestyle input-group-btn" tabindex="0"><label for="input001" class="btn btn-warning "><span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span> <span class="buttonText">Choose file</span></label></span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group form-box file-box">
+                                                    <div class="row">
+                                                        <label class="lbl-txt col-md-12 padding-L text-left">Address Proof : </label>
+                                                        <div class="col-md-7">
+                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Address_@Model.Student.AddressProof" id="imgAddressProof" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <input type="hidden" value="@Model.Student.AddressProof" name="AddressProof" />
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <input type="file" name="AddressCertificateUploader" class="form-control test" id="input002" onchange="ImageChanged(this,'address')" accept="image/*" tabindex="-1" style="position: absolute; clip: rect(0px 0px 0px 0px);">
+                                                            <div class="bootstrap-filestyle input-group">
+                                                                <input type="text" value="@Model.Student.AddressProof" class="form-control" readonly="readonly" placeholder="Address Proof">
+                                                                <span class="group-span-filestyle input-group-btn" tabindex="0">
+                                                                    <label for="input002" class="btn btn-warning">
+                                                                        <span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span>
+                                                                        <span class="buttonText">Choose file</span>
+                                                                    </label>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group form-box file-box">
+                                                    <div class="row">
+                                                        <label class="lbl-txt col-md-12 padding-L text-left">Transfer Certificate : </label>
+                                                        <div class="col-md-7">
+                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Transfer_@Model.Student.TransferCertificate" id="imgTransferCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <input type="hidden" name="TransferCertificate" value="@Model.Student.TransferCertificate" />
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <input name="TransferCertificateUploader" type="file" class="form-control test" id="input003" onchange="ImageChanged(this,'transfer')" accept="image/*" tabindex="-1" style="position: absolute; clip: rect(0px 0px 0px 0px);"><div class="bootstrap-filestyle input-group"><input type="text" class="form-control " placeholder="Transfer Certificate" value="@Model.Student.TransferCertificate" disabled=""> <span class="group-span-filestyle input-group-btn" tabindex="0"><label for="input003" class="btn btn-warning "><span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span> <span class="buttonText">Choose file</span></label></span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group form-box file-box">
+                                                    <div class="row">
+                                                        <label class="lbl-txt col-md-12 padding-L text-left">Category Certificate : </label>
+                                                        <div class="col-md-7">
+                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Category_@Model.Student.CategoryCertificate" id="imgCategoryCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <input type="hidden" value="@Model.Student.CategoryCertificate" name="CategoryCertificate" />
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <input type="file" name="CategoryCertificateUploader" class="form-control test" id="input004" onchange="ImageChanged(this,'category')" accept="image/*" tabindex="-1" style="position: absolute; clip: rect(0px 0px 0px 0px);"><div class="bootstrap-filestyle input-group"><input type="text" class="form-control " placeholder="Category Certificate" value="@Model.Student.CategoryCertificate" disabled=""> <span class="group-span-filestyle input-group-btn" tabindex="0"><label for="input004" class="btn btn-warning "><span class="icon-span-filestyle glyphicon glyphicon-folder-open"></span> <span class="buttonText">Choose file</span></label></span></div>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-12">
+                                            <button type="submit" class="btn btn-success pull-right">Save</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 6 ? " active in" : "")" id="tab_session">
+                                <div class="form-horizontal form-label-left">
+
+                                    <input type="hidden" id="hdnStudentID" value="@Model.Student.StudentID" />
+                                    <button href="javascript:void(0);" id="0" class="btn btn-primary pull-right" onclick="AddSession(this);">Add New Session</button>
+                                    <div class="row">
+                                        <div id="divSessionsList">
+                                            @Html.Partial("_SessionListPartial", Model)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 7 ? " active in" : "")" id="tab_transport">
+                                @using (Html.BeginForm("SaveStudentTransport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                                {
+                                    <input type="hidden" id="hdnStudentID" name="StudentID" value="@Model.Student.StudentID" />
+                                    <div class="form-horizontal form-label-left">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Country </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" id="ddlTCountries" onchange="CountryChanged(this, 1);">
+                                                            <option value="0">-Select-</option>
+                                                            @foreach (var o in Model.Transport.Countries)
+                                                            {
+                                                                <option value="@o.ID" @(o.ID == Model.Transport.StopDetails.CountryID ? "selected" : "")>@o.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">State : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" id="ddlTStates" onchange="StateChanged(this, 1);">
+                                                            @foreach (var o in Model.Transport.States)
+                                                            {
+                                                                <option value="@o.ID" @(o.ID == Model.Transport.StopDetails.StateID ? "selected" : "")>@o.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">City : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" id="ddlTCities" onchange="CityChanged(this, 1);">
+                                                            @foreach (var o in Model.Transport.Cities)
+                                                            {
+                                                                <option value="@o.ID" @(o.ID == Model.Transport.StopDetails.CityID ? "selected" : "")>@o.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Area : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" id="ddlTAreas" onchange="AreaChanged(this, 1);">
+                                                            @foreach (var o in Model.Transport.Areas)
+                                                            {
+                                                                <option value="@o.ID" @(o.ID == Model.Transport.StopDetails.AreaID ? "selected" : "")>@o.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Route : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" id="ddlTRoutes" onchange="TransportRouteChanged(this);">
+                                                            @foreach (var o in Model.Transport.Routes)
+                                                            {
+                                                                <option value="@o.ID" @(o.ID == Model.Transport.StopDetails.RouteID ? "selected" : "")>@o.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                @{
+                                                    var Capacity = "NA";
+                                                    var filled = "NA";
+                                                    <div class="form-group col-md-3">
+                                                        <label class="control-label col-md-4 col-sm-3 col-xs-12">Vehicle : </label>
+                                                        <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                            <select class="form-control" id="ddlTVehicles" name="VehicleRouteID" onchange="TransportRouteVehicleChanged(this);">
+                                                                @foreach (var o in Model.Transport.Vehicles)
+                                                                {
+                                                                    <option capacity="@o.Extra2" filled="@o.Extra1" value="@o.ID" @(o.ID == Model.Transport.StopDetails.VehicleRouteID ? "selected" : "")>@o.Name</option>
+                                                                    if (o.ID == Model.Transport.StopDetails.VehicleRouteID || Capacity == "NA")
+                                                                    {
+                                                                        Capacity = o.Extra2;
+                                                                        filled = o.Extra1;
+                                                                    }
+                                                                }
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group col-md-3" style="padding-left: 90px;" id="divFilledStatus">
+                                                        Filled Seats :@filled <br /> Capacity : @Capacity
+                                                    </div>
+                                                }
+                                                <div class="form-group col-md-3" style="padding-left: 40px;">
+                                                    <label class="control-label col-md-6 col-sm-3 col-xs-12">Applicable : </label>
+                                                    <div class="col-md-6 col-sm-9 col-xs-12 input-group">
+                                                        <label class="switch switch-green col-md-6">
+                                                            <input type="checkbox" class="switch-input" @(Model.Transport.StopDetails.Applicable == 1 ? "checked" : "" )>
+                                                            <span class="switch-label" onclick="TransportStatusChanged(this);" data-on="Yes" data-off="No"></span>
+                                                            <span class="switch-handle" id="shTranding"></span>
+                                                            <input type="hidden" name="Applicable" id="hdnTransportApplicable" value="@Model.Transport.StopDetails.Applicable">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6 pull-right" id="divTransportChangedDate" style="padding-left: 40px;display:none;">
+                                                    <label class="control-label col-md-6 col-sm-3 col-xs-12" id="lblTransportChangeDate">Changed from (mm-dd-yyyy) </label>
+                                                    <div class="col-md-6 col-sm-9 col-xs-12 input-group">
+                                                        <input type="date" name="ChangeDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="divStopsList">
+                                                <table id="tblCategory" class="table table-bordered table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th rowspan="2" style="width: 5%">#</th>
+                                                            <th rowspan="2" style="width: 35%;">Stop</th>
+                                                            <th colspan="3" style="width: 25%">Pick-up</th>
+                                                            <th colspan="3" style="width: 25%">Drop</th>
+                                                            <th rowspan="2" style="width: 10%">Select</th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th style="width: 9%">#Sequence</th>
+                                                            <th style="width: 8%">Time</th>
+                                                            <th style="width: 8%">Halt</th>
+                                                            <th style="width: 9%">#Sequence</th>
+                                                            <th style="width: 8%">Time</th>
+                                                            <th style="width: 8%">Halt</th>
+
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="tbTransportRouteDetails">
+                                                        @Html.Partial("_TransportStoppagesPartial", Model.Transport)
+                                                    </tbody>
+
+                                                </table>
+                                                <input type="hidden" name="StopID" id="hdnTStopID" value="@Model.Student.StopID" />
+                                            </div>
+                                            <div class="form-group col-md-12">
+                                                <button type="submit" class="btn btn-success pull-right">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                                    }
+                            </div>
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab==8?" active in":"")" id="tab_hostel">
+                                @using (Html.BeginForm("SaveStudentHostel", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+                                {
+                                    <input type="hidden" id="hdnStudentID" name="StudentID" value="@Model.Student.StudentID" />
+                                    <div class="form-horizontal form-label-left">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Hostel : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" id="ddlHHostels" onchange="HostelChanged(this)">
+                                                            @foreach (var o in Model.Hostel.Hostels)
+                                                            {
+                                                                <option value="@o.ID" @(o.ID == Model.Hostel.HostelID ? "selected" : "")>@o.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Floor : </label>
+                                                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                                                        <select class="form-control" id="ddlHFloors" onchange="HostelFloorChanged(this)">
+                                                            @foreach (var o in Model.Hostel.Floors)
+                                                            {
+                                                                <option value="@o.ID" @(o.ID == Model.Hostel.FloorID ? "selected" : "")>@o.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <label class="control-label col-md-6 col-sm-3 col-xs-12">Applicable : </label>
+                                                    <div class="col-md-6 col-sm-9 col-xs-12 input-group">
+                                                        <label class="switch switch-green col-md-6">
+                                                            <input type="checkbox" class="switch-input" @(Model.Hostel.Applicable == 1 ? "checked" : "" )>
+                                                            <span class="switch-label" onclick="HostalStatusChanged(this);" data-on="Yes" data-off="No"></span>
+                                                            <span class="switch-handle" id="shTranding"></span>
+                                                            <input type="hidden" name="Applicable" id="hdnHostelApplicable" value="@Model.Hostel.Applicable">
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-6 pull-right" id="divHostalChangedDate" style="padding-left: 40px;display:none;">
+                                                    <label class="control-label col-md-6 col-sm-3 col-xs-12" id="lblTransportChangeDate">Changed from (mm-dd-yyyy) </label>
+                                                    <div class="col-md-6 col-sm-9 col-xs-12 input-group">
+                                                        <input type="date" name="ChangedDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <table id="tblHostelRooms" class="table table-bordered table-hover">
+                                                <thead>
+                                                    <tr style="color: White; background-color: rgb(68, 88, 97)!important; font-weight: bold;" role="row">
+                                                        <th>#</th>
+                                                        <th>Room</th>
+                                                        <th>Type </th>
+                                                        <th>Room No</th>
+                                                        <th>Capacity</th>
+                                                        <th>Occupents</th>
+                                                        <th>Rate</th>
+                                                        <th>Select </th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="tbdHostelRooms">
+                                                    @Html.Partial("_HostelRoomsPartial", Model.Hostel)
+                                                </tbody>
+                                                <tfoot>
+                                                </tfoot>
+                                            </table>
+                                            <div class="form-group col-md-12">
+                                                <button type="submit" class="btn btn-success pull-right">Save</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="form_notice" style="display: none;">
+    <form class="pf-form pform_custom" id="frmAddLocation" action="" method="post">
+        <div class="pf-element pf-heading">
+            <h3 style="margin-top: 0;">Add New <ss id="ssType"></ss></h3>
+            <input type="hidden" id="hdnSenderType" />
+        </div>
+        <div class="pf-element">
+            <label>
+                <span class="pf-label">Name :</span>
+                <input class="pf-field form-control" id="txtLocationName" type="text" placeholder="Name" value="" />
+            </label>
+        </div>
+
+        <div class="pf-element pf-buttons pf-centered">
+            <input class="pf-button btn btn-primary" type="button" onclick="SaveLocation(this)" name="submit" value="Submit" />
+            <input class="pf-button btn btn-default" type="button" onclick="AddLocationCancel();" name="cancel" value="Cancel" />
+        </div>
+    </form>
+</div>
+
+@section scripts
+{
+
+
+    <script src="@Url.Content("~/js/moment.min.js")"></script>
+    <script src="@Url.Content("~/js/daterangepicker.js")"></script>
+    <!-- Select2 -->
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script>
+        function OptionalSubjectClicked(sender) {
+            if ($(sender).hasClass('bg-green')) {
+                $(sender).removeClass('bg-green');
+                $(sender).attr('title', 'This subject is not opted');
+                $(sender).addClass('bg-red');
+                $(sender).find('#hdnOpType').val(0);
+            }
+            else {
+                $(sender).attr('title', 'Student Opted for this subject');
+                $(sender).addClass('bg-green');
+                $(sender).removeClass('bg-red');
+                $(sender).find('#hdnOpType').val(1);
+            }
+        }
+        function SessionSectionChanged(sender) {
+            $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Loading Optional Subjects....</label>')
+            $.ajax(
+                 {
+                     type: "POST",
+                     url: "/Account/GetSectionOptionalSubjects/" + $(sender).val(),
+                     cache: false,
+                     processData: false,
+                     contentType: false,
+                     success: function (data) {
+                         var OSubject = '';
+                         for (var i = 0; i < data.length; i++) {
+                             OSubject = OSubject + '<label class="badge bg-red OptedSubjects" onclick="OptionalSubjectClicked(this);" title="This subject is not opted">' +
+                                            '<input type="hidden" id="hdnSSOSID" name="SubjectsOpted[' + i + '].Extra1" value="0">' +
+                                            '<input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[' + i + '].ID" value="' + data[i].ID + '">' +
+                                           ' <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[' + i + '].Name" value="0">' +
+                                            '<input type="hidden" id="hdnOpType" name="SubjectsOpted[' + i + '].Extra2" value="0">' +
+                                            data[i].Name +
+                                        '</label>';
+                         }
+                         $(sender).closest('.x_content').find('#divOptionalSubjects').html(OSubject);
+                     },
+                     error: function (e) {
+                         alert("errorn");
+                     }
+                 });
+        }
+
+        function HostalCheckChanged(sender) {
+            $('#divHostalChangedDate').css('display', '');
+        }
+        function TransportCheckChanged(sender, StopID) {
+            $('#hdnTStopID').val(StopID);
+            $('#divTransportChangedDate').css('display', '');
+        }
+        function TransportStatusChanged(sender) {
+            var curStatus = $(sender).closest('label').find('#hdnTransportApplicable').val();
+            $(sender).closest('label').find('#hdnTransportApplicable').val(curStatus == '0' ? '1' : '0');
+
+            $('#divTransportChangedDate').css('display', '');
+        }
+        function HostalStatusChanged(sender) {
+            var curStatus = $(sender).closest('label').find('#hdnHostelApplicable').val();
+            $(sender).closest('label').find('#hdnHostelApplicable').val(curStatus == '0' ? '1' : '0');
+
+            $('#divHostalChangedDate').css('display', '');
+        }
+        function CheckStudentDetails() {
+            var Name = $('#txtName').val();
+            Name = Name.replace(" ", "").replace(".", "");
+            if (Name.length < 4) {
+                ShowNotification('Student Name', 'Student Name must Contain atleast 4 characters ("." and Space not Counted)', 'error');
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        function CheckParentForm() {
+            var FathName = $('#txtPFatherName').val();
+            FathName = FathName.replace(" ", "").replace(".", "");
+            if (FathName.length < 4) {
+                ShowNotification('Father Name', 'Father Name must Contain atleast 4 characters ("." and Space not Counted)', 'error');
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        var basePath = '@Url.Content("~/Images")';
+        $(function () {
+
+
+            //$('.icheckRadio').on('ifChanged', function (event) {
+            //    if ($(this).is(":checked")) {
+            //        $(this).closest('form').find('#hdnTransportStopID').val($(this).attr('value'));
+            //    }
+            //});
+            //$('.icheckRadioH').on('ifChanged', function (event) {
+            //    if ($(this).is(":checked")) {
+            //        $(this).closest('form').find('#hdnHostelRoomID').val($(this).attr('value'));
+            //    }
+            //});
+            $('.dateinput').daterangepicker({
+                singleDatePicker: true,
+                calender_style: "picker_1"
+            }, function (start, end, label) {
+                console.log(start.toISOString(), end.toISOString(), label);
+            });
+            $("#ddlCadd_CountryCode").select2({
+                placeholder: "Select a Country",
+                allowClear: true
+            });
+            $("#ddlCadd_StateCode").select2({
+                placeholder: "Select a State",
+                allowClear: true
+            });
+            $("#ddlCadd_DistrictCode").select2({
+                placeholder: "Select a City",
+                allowClear: true
+            });
+            $("#ddlCadd_AreaCode").select2({
+                placeholder: "Select a Area",
+                allowClear: true
+            });
+            $("#ddlCadd_CountryCode").closest('.input-group').find('.select2-container').css('width', '100%');
+            $("#ddlCadd_StateCode").closest('.input-group').find('.select2-container').css('width', '100%');
+            $("#ddlCadd_DistrictCode").closest('.input-group').find('.select2-container').css('width', '100%');
+            $("#ddlCadd_AreaCode").closest('.input-group').find('.select2-container').css('width', '100%');
+        });
+
+        function ImageChanged(fileBox, Type) {
+
+            if (fileBox.files && fileBox.files[0]) {
+                MainImageName = fileBox.files[0].name;
+                if (fileBox.files[0].size / 1024 < 5000) {
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        if (Type == 'student') {
+                            $('#imgStudentImage').attr('src', e.target.result);
+                        }
+                        if (Type == 'father') {
+                            $('#imgFatherImage').attr('src', e.target.result);
+                        }
+                        if (Type == 'mother') {
+                            $('#imgMotherImage').attr('src', e.target.result);
+                        }
+                        if (Type == 'birth') {
+                            $('#imgBirthCertificate').attr('src', e.target.result);
+                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                        }
+                        if (Type == 'address') {
+                            $('#imgAddressProof').attr('src', e.target.result);
+                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                        }
+                        if (Type == 'transfer') {
+                            $('#imgTransferCertificate').attr('src', e.target.result);
+                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                        }
+                        if (Type == 'category') {
+                            $('#imgCategoryCertificate').attr('src', e.target.result);
+                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                        }
+                    }
+                    reader.readAsDataURL(fileBox.files[0]);
+                }
+                else {
+                    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+                    clearFileInput(fileBox);
+                }
+            }
+        }
+        function clearFileInput(ctrl) {
+            try {
+                ctrl.value = null;
+            } catch (ex) { }
+            if (ctrl.value) {
+                ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+            }
+        }
+
+        function CheckParantDetails() {
+            $.ajax(
+        {
+            type: "POST",
+            url: "/Account/GetParentDetailsOnParentID/" + $('#txtParentID').val(),
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (data) {
+                $('#txtParentID').val(data.ParentSID);
+                $('#txtParentID').css('background-color', 'aliceblue');
+
+                $('#hdnParentID').val(data.ParentID);
+                $('#imgFatherImage').attr('src', basePath + '/ParentImage/Father/' + data.ParentID + '_1_' + data.FatherImage);
+                $('#hdnFatherImage').val(data.FatherImage);
+                $('#txtPFatherName').val(data.FatherName);
+                $('#ddlPFatherOccupation').val(data.FatherOccupationID);
+                $('#txtPFatherMobile').val(data.FatherMobileNo);
+                $('#txtPFatherEmailID').val(data.FatherEmailID);
+                $('#ddlPFatherBloodGroup').val(data.FatherBloodGroup);
+                $('#ddlPFatherEducation').val(data.FatherEducationID);
+                $('#ddlPFatherAadhaar').val(data.FatherAadhaar);
+                $('#txtPLandLineNumber').val(data.HomeLandLineNo);
+
+                $('#imgMotherImage').attr('src', basePath + '/ParentImage/Mother/' + data.ParentID + '_2_' + data.MotherImage);
+                $('#hdnMotherImage').val(data.MotherImage);
+                $('#txtPMotherName').val(data.MotherName);
+                $('#ddlPMotherOccupation').val(data.MotherOccupationID);
+                $('#txtPMotherMobile').val(data.MotherMobileNo);
+                $('#txtPMotherEmailID').val(data.MotherEmailID);
+                $('#ddlPMotherBloodGroup').val(data.MotherBloodGroup);
+                $('#ddlPMotherEducation').val(data.MotherEducationID);
+                $('#ddlPMotherAadhaar').val(data.MotherAadhaar);
+
+
+                $('#txtPadd_HouseNo').val(data.Padd_HouseNo);
+                $('#txtPadd_Street').val(data.Padd_Street);
+                $('#txtPadd_Area').val(data.Padd_Area);
+                $('#txtPadd_Sector').val(data.Padd_Sector);
+                $('#txtPadd_PinCode').val(data.Padd_PinCode);
+                $('#txtPadd_District').val(data.Padd_District);
+                $('#txtPadd_State').val(data.Padd_State);
+                $('#txtPadd_Country').val(data.Padd_Country);
+                $('#txtPAccessCardNo').val(data.AccessCardNo);
+
+            },
+            error: function (e) {
+                ShowNotification('Not Found', 'Parent Not Found, Please check ParentID Again!!!!', 'error');
+
+                $('#txtParentID').css('background-color', 'antiquewhite');
+
+                $('#hdnParentID').val(0);
+                $('#imgFatherImage').attr('src', '');
+                $('#hdnFatherImage').val('');
+                $('#txtPFatherName').val('');
+                $('#ddlPFatherOccupation').val(0);
+                $('#txtPFatherMobile').val('');
+                $('#txtPFatherEmailID').val('');
+                $('#ddlPFatherBloodGroup').val('A+');
+                $('#ddlPFatherEducation').val(0);
+                $('#txtPLandLineNumber').val('');
+
+                $('#imgMotherImage').attr('src', '');
+                $('#hdnMotherImage').val('');
+                $('#txtPMotherName').val('');
+                $('#ddlPMotherOccupation').val(0);
+                $('#txtPMotherMobile').val('');
+                $('#txtPMotherEmailID').val('');
+                $('#ddlPMotherBloodGroup').val('A+');
+                $('#ddlPMotherEducation').val(0);
+                $('#txtPadd_HouseNo').val('');
+                $('#txtPadd_Street').val('');
+                $('#txtPadd_Area').val('');
+                $('#txtPadd_Sector').val('');
+                $('#txtPadd_PinCode').val('');
+                $('#txtPadd_District').val('');
+                $('#txtPadd_State').val('');
+                $('#txtPadd_Country').val('');
+            }
+        });
+        }
+        function AddLocationCancel() {
+            AddLocation.remove();
+        }
+        function CancelSessionEdit() {
+            EditSessionForm.remove();
+        }
+        function SaveLocation(sender) {
+            var Type = $(sender).closest('#frmAddLocation').find('#hdnSenderType').val();
+            var Value = $(sender).closest('#frmAddLocation').find('#txtLocationName').val();
+            var MasterID = 0;
+            var ctrID = '';
+            if (Type == 1) {
+                ctrID = '#ddlCadd_CountryCode';
+
+            }
+            else if (Type == 2) {
+                ctrID = '#ddlCadd_StateCode';
+                MasterID = $('#ddlCadd_CountryCode').val();
+            }
+            else if (Type == 3) {
+                ctrID = '#ddlCadd_DistrictCode';
+                MasterID = $('#ddlCadd_StateCode').val();
+
+            }
+            else if (Type == 4) {
+                ctrID = '#ddlCadd_AreaCode';
+                MasterID = $('#ddlCadd_DistrictCode').val();
+
+            }
+            $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/AddLocation/" + MasterID + "/" + Type + "/" + Value,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+
+                            $(ctrID).html(html);
+                            $(ctrID).append('<option value="-1">Add New</option>');
+                            $(ctrID).select2('val', '0');
+
+                            AddLocation.remove();
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+
+        }
+        var AddLocation;
+        function CountryChanged(sender, tab) {
+            if ($(sender).val() == "-1" && tab == 0) {
+                $('#frmAddLocation').find('#hdnSenderType').val(1);
+                $('#frmAddLocation').find('#ssType').text('Country');
+                $('#frmAddLocation').find('#txtLocationName').val('');
+                AddLocation = new PNotify({
+                    text: $('#form_notice').html(),
+                    icon: false,
+                    width: 'auto',
+                    hide: false,
+                    addclass: 'dark',
+                    styling: 'bootstrap3',
+                    buttons: {
+                        closer: false,
+                        sticker: false
+                    },
+                    insert_brs: false
+                });
+            }
+            else {
+                if (tab == 0) {
+                    $('#ddlCadd_StateCode').html('<option value="-1">Loading....</option>');
+                }
+                else {
+                    $('#ddlTStates').html('<option value="-1">Loading....</option>');
+                    $('#tbTransportRouteDetails').html('');
+                    $('#ddlTCities').html('<option value="-1">--Select--</option>');
+
+                    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
+                    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+                    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+                }
+                $.ajax(
+                    {
+
+                        type: "POST",
+                        url: "/Account/GetCountryStates/" + $(sender).val(),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            if (tab == 0) {
+                                $('#ddlCadd_StateCode').html(html);
+                                $('#ddlCadd_StateCode').append('<option value="-1">Add New</option>');
+                                $("#ddlCadd_StateCode").select2('val', '0');
+                            }
+                            else {
+                                $('#ddlTStates').html(html);
+                            }
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+        }
+        function StateChanged(sender, tab) {
+            if ($(sender).val() == "-1" && tab == 0) {
+                $('#frmAddLocation').find('#hdnSenderType').val(2);
+                $('#frmAddLocation').find('#ssType').text('State');
+                $('#frmAddLocation').find('#txtLocationName').val('');
+                AddLocation = new PNotify({
+                    text: $('#form_notice').html(),
+                    icon: false,
+                    width: 'auto',
+                    hide: false,
+                    addclass: 'dark',
+                    styling: 'bootstrap3',
+                    buttons: {
+                        closer: false,
+                        sticker: false
+                    },
+                    insert_brs: false
+                });
+            }
+            else {
+                if (tab == 0) {
+                    $('#ddlCadd_DistrictCode').html('<option value="-1">Loading....</option>');
+                }
+                else {
+                    $('#tbTransportRouteDetails').html('');
+                    $('#ddlTCities').html('<option value="-1">Loading....</option>');
+
+                    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
+                    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+                    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+                }
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetStateCities/" + $(sender).val(),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            if (tab == 0) {
+                                $('#ddlCadd_DistrictCode').html(html);
+                                $('#ddlCadd_DistrictCode').append('<option value="-1">Add New</option>');
+                                $("#ddlCadd_DistrictCode").select2('val', '0');
+                            }
+                            else {
+                                $('#ddlTCities').html(html);
+                            }
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+        }
+        function CityChanged(sender, tab) {
+            if ($(sender).val() == "-1" && tab == 0) {
+                $('#frmAddLocation').find('#hdnSenderType').val(3);
+                $('#frmAddLocation').find('#ssType').text('City');
+                $('#frmAddLocation').find('#txtLocationName').val('');
+                AddLocation = new PNotify({
+                    text: $('#form_notice').html(),
+                    icon: false,
+                    width: 'auto',
+                    hide: false,
+                    addclass: 'dark',
+                    styling: 'bootstrap3',
+                    buttons: {
+                        closer: false,
+                        sticker: false
+                    },
+                    insert_brs: false
+                });
+            }
+            else {
+                if (tab == 0) {
+                    $('#ddlCadd_AreaCode').html('<option value="-1">Loading....</option>');
+                }
+                else {
+                    $('#tbTransportRouteDetails').html('');
+                    $('#ddlTAreas').html('<option value="-1">Loading....</option>');
+                    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+                    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+                }
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetCityAreas/" + $(sender).val(),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            if (tab == 0) {
+                                $('#ddlCadd_AreaCode').html(html);
+                                $('#ddlCadd_AreaCode').append('<option value="-1">Add New</option>');
+                                $("#ddlCadd_AreaCode").select2('val', '0');
+                            }
+                            else {
+                                $('#ddlTAreas').html(html);
+                            }
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+        }
+        function AreaChanged(sender, tab) {
+            if ($(sender).val() == "-1" && tab == 0) {
+                $('#frmAddLocation').find('#hdnSenderType').val(4);
+                $('#frmAddLocation').find('#ssType').text('Area');
+                $('#frmAddLocation').find('#txtLocationName').val('');
+                AddLocation = new PNotify({
+                    text: $('#form_notice').html(),
+                    icon: false,
+                    width: 'auto',
+                    hide: false,
+                    addclass: 'dark',
+                    styling: 'bootstrap3',
+                    buttons: {
+                        closer: false,
+                        sticker: false
+                    },
+                    insert_brs: false
+                });
+            }
+            else {
+                $('#tbTransportRouteDetails').html('');
+                $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+                $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+                $.ajax(
+                   {
+                       type: "POST",
+                       url: "/Account/GetAreaRoutes/" + $(sender).val(),
+                       cache: false,
+                       processData: false,
+                       contentType: false,
+                       success: function (html) {
+
+                           $('#ddlTRoutes').html(html);
+                       },
+                       error: function (e) {
+                           alert("errorn");
+                       }
+                   });
+            }
+        }
+        function TransportRouteChanged(sender) {
+            $('#tbTransportRouteDetails').html('');
+            $('#ddlTVehicles').html('<option value="-1">Loading....</option>');
+            $.ajax(
+               {
+                   type: "POST",
+                   url: "/Account/GetRouteVehicles/" + $(sender).val(),
+                   cache: false,
+                   processData: false,
+                   contentType: false,
+                   success: function (data) {
+                       $('#divFilledStatus').html('Filled Seats :0<br/> Capacity : 0');
+                       $('#ddlTVehicles').html('');
+                       $('#ddlTVehicles').append('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+                       for (var i = 0; i < data.length; i++) {
+
+                           $('#ddlTVehicles').append('<option capacity="' + data[i].Extra2 + '" filled="' + data[i].Extra1 + '" value="' + data[i].ID + '">' + data[i].Name + ' </option>');
+                       }
+                   },
+                   error: function (e) {
+                       alert("errorn");
+                   }
+               });
+        }
+        function TransportRouteVehicleChanged(sender) {
+            $('#divFilledStatus').html('Filled Seats :' + $("#ddlTVehicles option:selected").attr('filled') + '<br/> Capacity : ' + $("#ddlTVehicles option:selected").attr('capacity') + '');
+            $('#tbTransportRouteDetails').html('<tr><td colspan="9">Loading....</td></tr>');
+            $.ajax(
+               {
+                   type: "POST",
+                   url: "/Account/GetVehicleRouteStoppages/" + $(sender).val() + "/" + $('#hdnTransportStopID').val(),
+                   cache: false,
+                   processData: false,
+                   contentType: false,
+                   success: function (html) {
+                       $('#tbTransportRouteDetails').html(html);
+                   },
+                   error: function (e) {
+                       alert("errorn");
+                   }
+               });
+        }
+        function HostelChanged(sender) {
+            $('#tbdHostelRooms').html('');
+            $('#ddlHFloors').html('<option value="-1">Loading....</option>');
+            $.ajax(
+               {
+                   type: "POST",
+                   url: "/Account/GetHostelFloors/" + $(sender).val(),
+                   cache: false,
+                   processData: false,
+                   contentType: false,
+                   success: function (html) {
+                       $('#ddlHFloors').html('');
+
+                       $('#ddlHFloors').html(html);
+
+                   },
+                   error: function (e) {
+                       alert("errorn");
+                   }
+               });
+        }
+        function HostelFloorChanged(sender) {
+            $('#tbdHostelRooms').html('<tr><td colspan="8">Loading....</td></tr>');
+            $.ajax(
+               {
+                   type: "POST",
+                   url: "/Account/GetHostelFloorRooms/" + $('#ddlHHostels').val() + "/" + $(sender).val(),
+                   cache: false,
+                   processData: false,
+                   contentType: false,
+                   success: function (html) {
+                       $('#tbdHostelRooms').html(html);
+                   },
+                   error: function (e) {
+                       alert("errorn");
+                   }
+               });
+        }
+        var EditSessionForm;
+        function AddSession(sender) {
+            var StudentID = $(sender).closest('div').find('#hdnStudentID').val();
+            GetEditSession(sender, StudentID);
+        }
+        function EditSession(sender) {
+            var StudentID = $(sender).closest('td').find('#hdnStudentID').val();
+            GetEditSession(sender, StudentID);
+        }
+        function GetEditSession(sender, StudentID) {
+            $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/EditSessionDetails/" + $(sender).attr('id') + "/" + StudentID,
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            EditSessionForm = new PNotify({
+                                text: html,
+                                icon: false,
+                                width: '70%',
+                                hide: false,
+                                addclass: 'dark',
+                                styling: 'bootstrap3',
+                                buttons: {
+                                    closer: false,
+                                    sticker: false
+                                },
+                                insert_brs: false
+                            });
+
+                            $('.').css('margin-right', '100px');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+        }
+        function SchoolSessionChanged(sender) {
+            $('#txtStartDate').val($('#ddlSchoolSessions option:selected').attr('startDate'));
+            $('#txtEndDate').val($('#ddlSchoolSessions option:selected').attr('endDate'));
+        }
+        function SessionClassChanged(sender) {
+            $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>')
+
+            $('#ddlSections').html('<option value="-1">Loading....</option>');
+            $.ajax(
+                 {
+                     type: "POST",
+                     url: "/Account/GetSectionOnClass/" + $(sender).val(),
+                     cache: false,
+                     processData: false,
+                     contentType: false,
+                     success: function (html) {
+                         $('#ddlSections').html('');
+                         $('#ddlSections').html('<option value="0">--Select--</option>');
+                         $('#ddlSections').append(html);
+                     },
+                     error: function (e) {
+                         alert("errorn");
+                     }
+                 });
+        }
+    </script>
+}

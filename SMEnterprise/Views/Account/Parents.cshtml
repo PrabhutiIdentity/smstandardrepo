@@ -1,0 +1,284 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.ParentPageModel
+@section IncludeCss
+{
+    <title>Parents</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .PrintReceiptClick {
+        font-size: 15px;
+        color: yellow;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @*<div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4><i class="icon fa fa-check"></i> Payment Successfull!</h4>
+                        Payment is successfull for ParentID PAR000307 Payment Receipt No is 1819/2/000001 Total Amount Received is Rs.10000.00
+                        <a href="javascript:void(0);" class="PrintReceiptClick" onclick="PrintReciept(7)"> Click Here</a> to print receipt
+                    </div>*@
+            </div>
+            @if (TempData["PaymentMessage"] != null)
+            {
+                <div class="col-md-12">
+                    <div class="alert alert-success alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                        <h4><i class="icon fa fa-check"></i> Payment Successfull!</h4>
+                        @Html.Raw(TempData["PaymentMessage"].ToString())
+                    </div>
+                </div>
+            }
+            <div class="col-md-12">
+                @using (Html.BeginForm("Parents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetParents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-3 text-right" style="padding-right: 0px;">Session</label>
+                                    <div class="col-md-9">
+                                        <select class="form-control" name="SessionID" id="ddlSessions">
+                                            <option value="0">--Select Session--</option>
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-4 text-right">Search :</label>
+                                    <div class="col-md-8">
+                                        <input type="text" class="form-control" name="SText" value="@Model.SText" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2 padding">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetParents').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+                    <div class="x_content">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">Sl.No.</th>
+                                    <th style="width: 10%">Father</th>
+                                    <th style="width: 10%">Mother</th>
+                                    <th style="width: 20%">Details</th>
+                                    <th style="width: 20%">Contact</th>
+                                    <th style="width: 10%">Take Fee</th>
+                                    <th>Payments</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 1;
+                                foreach (ParentModel c in Model.Parents)
+                                {
+                                    <tr>
+                                        <td>@count</td>
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,0);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(c.ParentID)_1_@c.FatherImage" />
+                                        </td>
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,1);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(c.ParentID)_2_@c.MotherImage" />
+                                        </td>
+                                        <td>
+                                            Father : @c.FatherName
+                                            <br />
+                                            Mother : @c.MotherName
+                                        </td>
+
+                                        <td>
+                                            Father : @c.FatherMobileNo
+                                            <br />
+                                            Mother : @c.MotherMobileNo
+                                        </td>
+
+                                        <td>
+                                            @using (Html.BeginForm("ParentFeeDetails", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                            {
+                                                <input type="hidden" name="ParentID" value="@c.ParentID" />
+                                                <input type="hidden" name="SessionID" value="@Model.SessionID" />
+
+                                                <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link">Take Payment</button>
+                                            }
+                                        </td>
+                                        <td><button type="button" data-toggle="modal" data-target="#mdlParentPayments" onclick="return OpenParentPayments(@c.ParentID);" class="btn btn-link">Payments</button></td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />
+<div id="divtest">
+
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+
+        //$(function () {
+        //    $("#tblCategory").DataTable();
+        //});
+
+        function PrintReciept(PayID) {
+            $.ajax(
+      {
+          type: "POST",
+          url: "/Account/GetFeeReciept/" + PayID,
+          cache: false,
+          processData: false,
+          contentType: false,
+          success: function (html) {
+              $('#divtest').html(html);
+              @*var nDiv = '<table>';
+              nDiv = nDiv + '<tr><td>' + html + '</td></tr>';
+              nDiv = nDiv + '</table>';
+              var contents = nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+              var frame1 = $('<iframe />');
+              frame1[0].name = "frame1";
+              frame1.css({ "position": "absolute", "top": "-1000000px" });
+              $("body").append(frame1);
+              var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+              frameDoc.document.open();
+              //Create a new HTML document.
+              frameDoc.document.write('<html><head><title></title>');
+              frameDoc.document.write('</head><body>');
+              //Append the external CSS file.
+              frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+              //Append the DIV contents.
+              frameDoc.document.write(contents);
+              frameDoc.document.write('</body></html>');
+              frameDoc.document.close();
+              setTimeout(function () {
+                  window.frames["frame1"].focus();
+                  window.frames["frame1"].print();
+                  frame1.remove();
+              }, 500);*@
+          },
+          error: function (e) {
+              alert("errorn");
+          }
+      });
+
+        }
+        function OpenParentPayments(ParID) {
+            
+            $('#tbdPayments').html('<tr><td colspan="4" style="text-align:center"><b>Please Wait....</b></td></tr>');
+            $.ajax(
+      {
+          type: "POST",
+          url: "/Account/GetParentPayments/" + ParID+"/0",
+          cache: false,
+          processData: false,
+          contentType: false,
+          success: function (html) {
+              $('#tbdPayments').html(html);
+          },
+          error: function (e) {
+              alert("errorn");
+          }
+      });
+
+        }
+
+    </script>
+}
+<!-- /.content -->
+@section PageBottom{
+    <div class="modal" id="mdlParentPayments">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Payments by Parent</h4>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body" id="mdlParPayBody">
+                   <table class="table table-bordered">
+                       <thead>
+                           <tr>
+                               <th>Reciept No.</th>
+                               <th>Date</th>
+                               <th>Amount</th>
+                               <th>Print</th>
+                           </tr>
+                       </thead>
+                       <tbody id="tbdPayments">
+
+                       </tbody>
+                   </table>
+                </div>
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}

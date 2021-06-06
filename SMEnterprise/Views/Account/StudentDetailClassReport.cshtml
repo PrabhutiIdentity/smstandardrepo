@@ -1,0 +1,353 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentsPageModel
+@section IncludeCss
+{
+    <title>Students Details</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+
+<style>
+    .tableexport-caption{
+        display:none;
+    }
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentDetailClassReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding">
+                                    <a href="javascript:void(0);" class="btn btn-info" onclick="PrintData()">Print</a>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0">--Select Session--</option>
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (ClassModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                            <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                <option value="0">--Select Section--</option>
+                                                @foreach (SectionModel el in Model.Sections)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr><td colspan="13" style="text-align:center" id="tdHeader">Detail Student List</td></tr>
+                                <tr>
+
+                                    <th style="border:1px solid">Sr No.</th>
+                                    <th style="border:1px solid">Sch. No.</th>
+                                    <th style="border:1px solid">Student Name</th>
+                                    <th style="border:1px solid">Father & Mother Name</th>
+                                    <th style="border:1px solid">SSSMID <br />FamilyID</th>
+                                    <th style="border:1px solid">Bank A/C No<br />IFS Code</th>
+                                    <th style="border:1px solid">Date Of Birth</th>
+                                    <th style="border:1px solid">Phone No.</th>
+                                    <th style="border:1px solid">Caste</th>
+                                    <th style="border:1px solid">Bus</th>
+                                    <th style="border:1px solid">Adm<br />  Status/Date</th>
+                                    <th style="border:1px solid">Stream</th>
+                                    <th style="border:1px solid">Class <br /> Section</th>
+
+                                </tr>
+                            </thead>
+                            <tbody style="font-size: 10px;">
+                                @{
+                                    int count = 1;
+                                    foreach (StudentModel c in Model.Students)
+                                    {
+                                        <tr>
+                                            <td style="border:1px solid" rowspan="2">@count</td>
+                                            <td style="border:1px solid" rowspan="2">
+                                                @c.SchoolUID
+                                            </td>
+                                            <td style="border:1px solid" rowspan="2">
+                                                @c.Name
+                                            </td>
+                                            <td style="border:1px solid" rowspan="2">
+                                                @c.FatherName <br />@c.MotherName<br />@c.FatherOccupationID
+                                            </td>
+                                            <td style="border:1px solid" rowspan="2">
+                                                @c.SSSID <br />@c.FamilyID
+                                            </td>
+                                            <td style="border:1px solid" rowspan="2">
+                                                @c.AccountNumber <br />@c.IFSCCode
+                                            </td>
+                                            <td style="border:1px solid">
+                                                @c.DOB.ToString("dd/MM/yyyy")<br />@c.CityName
+                                            </td>
+                                            <td style="border:1px solid">
+                                                @c.FatherMobileNo <br />@c.MotherMobileNo
+                                            </td>
+                                            <td style="border:1px solid">
+                                                @c.SubReligion <br />@(c.Category == 1 ? "General" : c.Category == 2 ? "SC" : c.Category == 3 ? "ST" : c.Category == 4 ? "OBC" : "Other")
+                                            </td>
+                                            <td style="border:1px solid" rowspan="2">@(c.BusNo == "NA" ? "NO" : "Yes")<br />@(c.BusNo == null ? "NIL" : c.BusNo)</td>
+                                            <td style="border:1px solid" rowspan="2">@(c.IsOld == 0 ? "New" : "Old")<br />@c.DOJ.ToString("dd/MM/yyyy")</td>
+                                            <td style="border:1px solid" rowspan="2">
+                                                @c.Stream
+                                            </td>
+                                            <td style="border:1px solid" rowspan="2">
+                                                @c.ClassName <br />@c.SectionName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="border:1px solid" colspan="3">Aadhar No : @c.AadharCardNo</td>
+                                        </tr>
+
+                                        count++;
+                                    }
+
+                                }
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        function PrintData()
+        {
+             var nDiv = '<table>';
+             nDiv = nDiv + '<tr><td>' + $('#tblCategory').html() + '</td></tr>';
+            nDiv = nDiv + '</table>';
+            var contents = nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            //frameDoc.document.write('<style>#tblCategory > tbody > tr > td {vertical-align: middle;border: 2px solid;}table.table-bordered.dataTable{border-collapse:separate!important}table.dataTable{clear:both;margin-top:6px!important;margin-bottom:6px!important;max-width:none!important}.table-bordered{border:1px solid #ddd}.table{width:100%;max-width:100%;margin-bottom:20px}table{background-color:transparent}table{border-spacing:0;border-collapse:collapse}</style>')
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+        $(document).ready(function () {
+            $('caption').remove();
+            $('#tdHeader').html('Detail Student List ' + $('#ddlClass option:selected').text() + ' ' + $('#ddlSection option:selected').text() + ' (' + $('#ddlSessions option:selected').text()+')')
+        });
+        //$(document).ready(function () {
+        //    var handleDataTableButtons = function () {
+        //        if ($("#tblCategory").length) {
+        //            $("#tblCategory").DataTable({
+        //                "paging":   false,
+        //                "ordering": false,
+        //                "info":     false,
+        //                'createdRow': function(row, data, dataIndex){
+        //                    // Use empty value in the "Office" column
+        //                    // as an indication that grouping with COLSPAN is needed
+        //                    console.log( dataIndex);
+        //                    console.log("222" + data[2] + ":" + dataIndex);
+        //                    if (data[0] == '') {
+        //                        console.log("asasa");
+        //                        // Add COLSPAN attribute
+        //                        $('td:eq(6)', row).attr('colspan', 3);
+
+        //                        // Hide required number of columns
+        //                        // next to the cell with COLSPAN attribute
+        //                        $('td:eq(0)', row).css('display', 'none');
+        //                        $('td:eq(1)', row).css('display', 'none');
+        //                        $('td:eq(2)', row).css('display', 'none');
+        //                        $('td:eq(3)', row).css('display', 'none');
+        //                        $('td:eq(4)', row).css('display', 'none');
+        //                        $('td:eq(5)', row).css('display', 'none');
+        //                        $('td:eq(7)', row).css('display', 'none');
+        //                        $('td:eq(8)', row).css('display', 'none');
+        //                        $('td:eq(9)', row).css('display', 'none');
+        //                        $('td:eq(10)', row).css('display', 'none');
+        //                        $('td:eq(11)', row).css('display', 'none');
+        //                        $('td:eq(12)', row).css('display', 'none');
+        //                    }
+        //                    else {
+        //                        console.log("bbbb");
+        //                        $('td:eq(0)', row).attr('rowspan', 2);
+        //                        $('td:eq(1)', row).attr('rowspan', 2);
+        //                        $('td:eq(2)', row).attr('rowspan', 2);
+        //                        $('td:eq(3)', row).attr('rowspan', 2);
+        //                        $('td:eq(4)', row).attr('rowspan', 2);
+        //                        $('td:eq(5)', row).attr('rowspan', 2);
+
+        //                        $('td:eq(9)', row).attr('rowspan', 2);
+        //                        $('td:eq(10)', row).attr('rowspan', 2);
+        //                        $('td:eq(11)', row).attr('rowspan', 2);
+        //                        $('td:eq(12)', row).attr('rowspan', 2);
+        //                        console.log("bbbb2");
+        //                    }
+        //                }   ,
+        //                dom: "Bfrtip",
+        //                buttons: [
+        //                  {
+        //                      extend: "copy",
+        //                      className: "btn-sm"
+        //                  },
+        //                  {
+        //                      extend: "csv",
+        //                      className: "btn-sm"
+        //                  },
+        //                  {
+        //                      extend: "excel",
+        //                      className: "btn-sm"
+        //                  },
+        //                  {
+        //                      extend: "pdfHtml5",
+        //                      className: "btn-sm"
+        //                  },
+        //                  {
+        //                      extend: "print",
+        //                      className: "btn-sm"
+        //                  },
+        //                ],
+        //                responsive: true
+        //            });
+        //        }
+        //    };
+        //    TableManageButtons = function () {
+        //        "use strict";
+        //        return {
+        //            init: function () {
+        //                handleDataTableButtons();
+        //            }
+        //        };
+        //    }();
+        //    TableManageButtons.init();
+
+        //});
+    </script>
+    <script>
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+
+
+}

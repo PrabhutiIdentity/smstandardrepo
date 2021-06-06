@@ -1,0 +1,108 @@
+﻿<div>
+    <button class="btn btn-info" onclick="PrintRecipt();">Print</button>
+    @*<button type="button" onclick="SendPaymentSMS(@Model.PaymentID)" class="btn btn-round btn-success">Send SMS</button>
+    <button type="button" onclick="ClosePrintRecipt(this,@Model.StudentID)" class="btn btn-round btn-success RClosebtn">Close</button>*@
+</div>
+<div id="divRecipt">
+<div class="wrapper"> 
+    <div class="header-1">
+        <div class="col-2">
+            <div class="logo-img">
+                <img src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+            </div>
+        </div>
+        <div class="col-1">
+            <h1>@Model.SBranchDetails.BranchSchoolName <br /><ad style="font-size:21px!important;"> @Html.Raw(Model.SBranchDetails.Address == null ? "" : Model.SBranchDetails.Address.Replace("\n", "<br/>"))</ad></h1>
+        </div>
+    </div>
+    @*<div class="header-2">
+        <h4>Issued by school as per directives of central board of secondary education, delhi</h4>
+    </div>*@
+    <div class="form-name">
+        <div class="row form-box name">
+            <label class="col-sm-2">Name : </label>
+            <div class="col-sm-10">@Model.Name</div>
+        </div>
+        <div class="row form-box class">
+            <div class="col-sm-4">
+                <div class="row f-sec">
+                    <label class="col-sm-6">Class : </label>
+                    <div class="col-sm-6">@(Model.ClassName)</div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="row f-sec">
+                    <label class="col-sm-6">Roll No : </label>
+                    <div class="col-sm-6">@Model.RollNo</div>
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="row f-sec">
+                    <label class="col-sm-6">Section : </label>
+                    <div class="col-sm-6">@(Model.SectionName)</div>
+                </div>
+            </div>
+        </div>
+        <div class="row form-box roll">
+            <div class="col-sm-6">
+                <div class="row f-sec">
+                    <label class="col-sm-4">Reg.No : </label>
+                    <div class="col-sm-8">@Model.StudentSID</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="row f-sec">
+                    <label class="col-sm-4">Date : </label>
+                    <div class="col-sm-8">@Model.PaymentDate.ToString("dd MMM, yyyy")</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class="fee-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>S No.</th>
+                    <th>Particulars</th>
+                    <th>Amount</th>
+                </tr>
+            </thead>
+            @{
+                var counter = 1;
+                decimal TotalAmount = 0;
+                <tbody>
+
+
+
+                    @foreach (SMEnterprise.Models.FeeDetailsModel f in Model.PaymentDetails)
+                    {
+                        <tr>
+                            <td>@(counter).</td>
+                            <td>@f.FeeTypeName</td>
+                            <td>₹ @f.PaymentRecieved</td>
+                        </tr>
+                        TotalAmount = TotalAmount + f.PaymentRecieved;
+                        counter++;
+                    }
+
+
+                </tbody>
+                <tbody class="total">
+                    <tr>
+                        <td></td>
+                        <td align="right"><strong>Total Amount</strong></td>
+                        <td>₹ @TotalAmount</td>
+                    </tr>
+                </tbody>
+            }
+        </table>
+    </div>
+    <div class="row bottom-sec">
+        <div class="col-sm-8">
+            Note : - Fee must be paid up to @(Model.LastPayDay)th date of every month otherwise student will have to pay fine Rs. @Model.LateFee/-.
+        </div>
+        <div class="col-sm-4 principle">Principal</div>
+    </div>
+</div>
+</div>

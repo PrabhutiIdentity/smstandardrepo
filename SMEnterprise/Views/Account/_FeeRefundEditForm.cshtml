@@ -1,0 +1,103 @@
+﻿@model SMEnterprise.Models.FeeRefundEditModel
+@{
+    var disable = "";
+    if (Model.RefundDetails.RefundID != 0)
+    {
+        disable = "disabled";
+    }
+}
+<div class="">
+    <div class="row">
+        @using (Html.BeginForm("SaveFeeRefund", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+        {
+            <input type="hidden" name="RefundID" value="@Model.RefundDetails.RefundID" />
+            <div class="col-md-12">
+                <label class="control-label col-md-12 col-sm-3 col-xs-12" style="text-align: center;font-size: 22px;padding-bottom: 8px;">Refund Details</label>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="">Sessions </label>
+                <div class="">
+                    <select class="form-control" id="ddlNewSessions" name="SessionID" @disable onchange="SessionChanged(this);">
+                        @foreach (SMEnterprise.Models.NameIDModel q in Model.Sessions)
+                        {
+
+                            <option value="@q.ID" @(Model.RefundDetails.SessionID == q.ID ? "selected" : "")>@q.Name @(q.Extra1 == "1" ? "(Active)" : "")</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="">Class </label>
+                <div class="">
+                    <select class="form-control" id="ddlNewClasses" name="ClassID" @disable onchange="ClassNewChanged(this);">
+                        @foreach (SMEnterprise.Models.NameIDModel q in Model.Classes)
+                        {
+
+                            <option value="@q.ID" @(Model.RefundDetails.ClassID == q.ID ? "selected" : "")>@q.Name </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="">Section</label>
+                <div class="">
+                    <select class="form-control" id="ddlNewSections" name="SectionID" @disable onchange="SectionNewChanged(this);">
+                        @foreach (SMEnterprise.Models.NameIDModel q in Model.Sections)
+                        {
+
+                            <option value="@q.ID" @(Model.RefundDetails.SectionID == q.ID ? "selected" : "")> @q.Name </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="">Student : </label>
+                <div class="">
+                    <select class="form-control select2_single" id="ddlStudents" @disable name="RefundTo">
+                        @foreach (SMEnterprise.Models.NameIDModel q in Model.Students)
+                        {
+
+                            <option value="@q.ID" @(Model.RefundDetails.RefundTo == q.ID ? "selected" : "")> @q.Name </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="">Refund Date : <small>(mm/dd/yyyy)</small></label>
+                <div class="">
+                    <input type="text" required="" class="form-control inpStartDate" id="txtStartDate" placeholder="Date"
+                           aria-describedby="inputSuccess2Status" name="RefundDate" @disable value="@Model.RefundDetails.RefundDate.ToString("MM/dd/yyyy")">
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label class="">Refund Amount</label>
+                <div class="">
+                    <input type="number" step="0.01" required="" class="form-control" @disable id="txtRefundAmount" placeholder="Date"
+                           name="RefundAmount" value="@Model.RefundDetails.RefundAmount">
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <label class="">Reason : </label>
+                <div class="">
+                    <textarea rows="3" class="form-control" style="resize:none;" @disable required name="Reason">@Model.RefundDetails.Reason</textarea>
+                </div>
+            </div>
+            <div class="col-md-12 pull-right">
+                <label id="lblError" style="color: red;"></label>
+                @if (disable == "")
+                {
+                    <button type="submit" class="btn btn-success pull-right" @disable onclick="return BeforePaymentSave();">Submit</button>
+                }
+                <button type="button" class="btn btn-default  pull-left" data-dismiss="modal">Close</button>
+            </div>
+            <script>
+                var LeaveType = '1';
+                var StartDate = new Date($('#txtStartDate').val());
+                            //$('.inpStartDate').daterangepicker({
+                            //    singleDatePicker: true,
+                            //    calender_style: "picker_1"
+                            //});
+            </script>
+        }
+    </div>
+</div>

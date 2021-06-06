@@ -1,0 +1,133 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model List<SMEnterprise.Models.ProductModel>
+@section IncludeCss
+{
+<title>Available Stock Products</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Photo</th>
+                                    <th style="width: 40">Product</th>
+                                    <th style="width: 13%">Available Qty</th>
+                                    <th style="width: 13%">MinQty</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (ProductModel c in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,3);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/Products/")@(c.ProductID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                            @c.Name
+                                        </td>
+
+                                        <td>
+                                            @c.Quantity.ToString("0.0")
+                                        </td>
+                                        <td>
+                                            @c.MinQty.ToString("0.0")
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function DeleteEmployee(sender) {
+            return confirm('Do you really want to delete Employee!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->

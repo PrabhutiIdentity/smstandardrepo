@@ -1,0 +1,59 @@
+﻿<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header edit-header">
+            <button type="button" class="close edit-close" data-dismiss="modal" aria-label="Close">
+                <a href="javascript:void(0);" style="color:white;" onclick="CancelLactureEdit();">X</a>
+            </button>
+            <h4 class="modal-title" id="myModalLabel" style="text-align: center;">Select Subject or Teacher</h4>
+        </div>
+        <div class="modal-body edit-body">
+            <div class="row">
+                <div class="col-md-3">
+                </div>
+                <div class="col-md-6">
+                    <input type="hidden" id="hdnPeriodID" value="@Model.PeriodID" />
+                    <input type="hidden" id="hdnDayID" value="@Model.DayID" />
+                    <input type="hidden" id="hdnSectionID" value="@Model.SectionID" />
+                    <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                    <input type="hidden" id="hdnClassID" value="@Model.ClassID" />
+                    <input type="hidden" id="hdnEducationLevelID" value="@Model.EducationLevelID" />
+                    <div class="form-group">
+                        <label>
+                            Select Subject:
+                        </label>
+                        <select class="form-control" id="ddlSubject" onchange="GetSubjectTeacher(this);">
+                            <option value="0" @(0 == Model.SubjectID ? "selected" : "")>No Subject</option>
+                            @foreach (var subject in Model.Subjects)
+                            {
+                                <option value="@subject.SubjectID" @(subject.SubjectID == Model.SubjectID ? "selected" : "")>@subject.SubjectName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            Select Teacher:
+                        </label>
+                        <select class="form-control" id="ddlTeacher">
+                            @if (Model.Teachers.Count == 0)
+                            {
+
+                                <option value="0" Selected>No Teacher</option>
+                            }
+                            @foreach (var teacher in Model.Teachers)
+                            {
+                                <option value="@teacher.EmployeeID" @(teacher.EmployeeID == Model.TeacherID ? "selected" : "")>@teacher.EmployeeName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="from-group">
+                        <button type="button" class="btn btn-block btn-primary btn-sm" data-dismiss="modal" aria-label="Close" onclick="UpdateLacture(this);">
+                            Update
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>
+    </div>
+</div>

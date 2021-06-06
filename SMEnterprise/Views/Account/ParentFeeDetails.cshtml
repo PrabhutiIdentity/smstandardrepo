@@ -1,0 +1,303 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.ParentFeeDetailsPageModel
+@section IncludeCss
+{
+    <title>@Model.Parent.FatherName and @Model.Parent.MotherName Fee Details</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .parentblock {
+        border: 1px solid;
+        border-radius: 5px;
+    }
+
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("ParentFeeDetails", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-2">
+                                    <label class="text-right pull-right" style="padding-right: 0px;">Session</label>
+                                </div>
+                                <div class="col-md-4">
+                                    @using (Html.BeginForm("ParentFeeDetails", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                    {
+                                     
+                                        <select class="form-control" name="SessionID" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (var s in Model.Sessions)
+                                            {
+                                                <option value="@s.SessionID" @(s.SessionID == Model.SessionID? "selected" : "")>@s.SessionName @(s.SessionStatus==1?"(Active)":"")</option>                                               
+                                            }
+                                        </select>
+                                    }
+                                </div>
+                                <div class="col-md-2" style="display:none;">
+                                    <label class="text-right pull-right" style="padding-right: 0px;">Fee Month</label>
+                                </div>
+                                <div class="col-md-4" style="display:none;">
+                                    @{
+                                        DateTime StartDate = Model.Session.SessionStartDate;
+                                        <input type="hidden" name="ParentID" value="@Model.ParentID" />
+                                        <select class="form-control" name="YearMonth" onchange="$('#frmGetStudents').submit();">
+                                            @while (StartDate < Model.Session.SessionEndDate)
+                                            {
+                                                <option value="@(StartDate.Month)-@StartDate.Year" @(StartDate.Month == Model.Month && StartDate.Year == Model.Year ? "selected" : "")>@StartDate.ToString("MMM,yyyy")</option>
+                                                StartDate = StartDate.AddMonths(1);
+                                            }
+                                        </select>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+                    <div class="x_content">
+                        @{
+                            string[] MonthNames = { "A", "Jan", "Feb", "March", "April", "May", "June", "July", "Aug", "Sept", "Oct", "Nov", "Dec" };
+                            var ctr = 0;
+                            decimal TotalTotalPayment = 0;
+                        }
+                        <div class="row">
+                            <div class="col-md-6 parentblock">
+                                <div class="row">
+                                    <div class="col-md-12" style="text-align:center;">
+                                        Father
+                                    </div>
+                                    <div class="col-md-4">
+                                        <img id="imgPhoto" onerror="return OnImageError(this,0);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(Model.Parent.ParentID)_1_@Model.Parent.FatherImage" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Model.Parent.FatherName<br />@Model.Parent.FatherMobileNo
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 parentblock">
+                                <div class="row">
+                                    <div class="col-md-12" style="text-align:center;">
+                                        Mother
+                                    </div>
+                                    <div class="col-md-4">
+                                        <img id="imgPhoto" onerror="return OnImageError(this,1);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(Model.Parent.ParentID)_2_@Model.Parent.MotherImage" />
+                                    </div>
+                                    <div class="col-md-8">
+                                        @Model.Parent.MotherName<br />@Model.Parent.MotherMobileNo
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @using (Html.BeginForm("ProcessParentFeeDetails", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                        {
+                            <input type="hidden" name="ParentID" value="@Model.ParentID" />
+                            <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                            <input type="hidden" name="Year" value="@Model.Year" />
+                            <input type="hidden" name="Month" value="@Model.Month" />
+                            <input type="hidden" name="Parent.FatherName" value="@Model.Parent.FatherName" />
+                            <input type="hidden" name="Parent.MotherName" value="@Model.Parent.MotherName" />
+                            <div class="row" style="margin: 10px 0px 6px 0px;border: 1px solid;border-radius: 5px;padding: 5px;">
+                                <div class="col-md-12">
+                                    <input type="text" placeholder="remark" name="Remark" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    Payment Mode
+                                    <select class="form-control" name="PaymentMode" id="ddlPaymentMode">
+                                        <option value="0" selected="">Cash Payment</option>
+                                        <option value="1">Cheque Payment</option>
+                                        <option value="2">NEFT Payment</option>
+                                        <option value="3">Other Payment</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    Discount (Rs)
+                                    <input type="number" step="0.01" id="txtDiscount" name="DiscountAmount" class="form-control" value="0" />
+                                </div>
+                                <div class="col-md-3">
+                                    Net Payment
+                                    <input type="hidden" id="hdnApplicableAmount" name="ApplicableAmount" value="@Model.FeeDetails.Sum(f => f.NetApplicablePayment - f.DiscAmt - f.PaymentRecieved)" />
+                                    <input type="number" step="0.01" id="txtTotalPayment" name="PaymentAmount" class="form-control" value="@Model.FeeDetails.Sum(f => f.NetApplicablePayment - f.DiscAmt - f.PaymentRecieved)" />
+                                </div>
+                                <div class="col-md-1" style="padding-top: 20px;">
+                                    <button type="submit" class="btn btn-primary">Recieve Payment</button>
+                                </div>
+                            </div>
+                            foreach (var st in Model.Students)
+                            {
+                                decimal TotalPayment = 0;
+                                <div class="row">
+                                    <div class="col-md-12" style="text-align:center">
+                                        <b>  @st.Name </b>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <table class="table table-bordered table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <td>Fee</td>
+                                                    <td>Month/Year</td>
+                                                    <td>Amount</td>
+                                                    <td>Discount</td>
+                                                    <td>Previous Paid</td>
+                                                    <td>Net Amount</td>
+                                                    <td>Paid Amount</td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var f in Model.FeeDetails.Where(c => c.PayeeID == st.StudentID))
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <b>@f.FeeTypeName</b>
+                                                            <input type="hidden" name="FeeDetails[@ctr].FeeTypeID" value="@f.FeeTypeID" />
+                                                            <input type="hidden" name="FeeDetails[@ctr].PayeeID" value="@f.PayeeID" />
+                                                            <input type="hidden" name="FeeDetails[@ctr].Month" value="@f.Month" />
+                                                            <input type="hidden" name="FeeDetails[@ctr].SBranchID" value="@f.SBranchID" />
+                                                            <input type="hidden" name="FeeDetails[@ctr].Year" value="@f.Year" />
+                                                            <input type="hidden" name="FeeDetails[@ctr].Amount" value="@f.NetApplicablePayment" />
+                                                            <input type="hidden" name="FeeDetails[@ctr].DuesPaidCount" value="@(f.PaymentRecieved>0?1:0)" />
+                                                            <input type="hidden" name="FeeDetails[@ctr].NetApplicablePayment" value="@f.NetApplicablePayment" />
+                                                            <input type="hidden" id="hdnNetAmount" value="@(f.NetApplicablePayment - f.DiscAmt - f.PaymentRecieved)" />
+                                                        </td>
+                                                        <td><b>@MonthNames[f.Month] / @f.Year</b></td>
+                                                        <td>@f.NetApplicablePayment.ToString("0.00")</td>
+                                                        <td><input type="number" name="FeeDetails[@ctr].DiscAmt" class="form-control discounttd" value="@f.DiscAmt.ToString("0")" /></td>
+                                                        <td>@f.PaymentRecieved.ToString("0.00")</td>
+                                                        <td>@((f.NetApplicablePayment - f.DiscAmt - f.PaymentRecieved).ToString("0.00"))</td>
+                                                        <td><input type="number" step="0.01" name="FeeDetails[@ctr].PaymentRecieved" class="form-control paymentAmounttd" value="@((f.NetApplicablePayment - f.DiscAmt - f.PaymentRecieved).ToString("0.00"))" /></td>
+                                                    </tr>
+                                                    TotalPayment = TotalPayment + f.NetApplicablePayment - f.DiscAmt - f.PaymentRecieved;
+                                                    ctr++;
+                                                }
+                                                <tr>
+                                                    <td style="text-align:right;" colspan="6">
+                                                        <b>Total Payment</b>
+                                                    </td>
+                                                    <td>@TotalPayment.ToString("0.00")</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                TotalTotalPayment = TotalTotalPayment + TotalPayment;
+                            }
+                        }
+                        <div class="row">
+                            <div class="col-md-12" style="text-align:center">
+                                <b>Net Payment For All Students</b>: @TotalTotalPayment.ToString("0.00")
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
+
+    <script>
+        $(".paymentAmounttd").change(function () {
+            var tAmount = parseFloat($(this).val());
+            var reqAmount = parseFloat($(this).closest('tr').find('#hdnNetAmount').val());
+            if (tAmount > reqAmount)
+            {
+                $(this).val(reqAmount);
+            }
+            if (tAmount < 0)
+            {
+                $(this).val(0);
+            }
+            var TotalPaid = 0;
+            $(".paymentAmounttd").each(function (index) {
+                TotalPaid = TotalPaid + parseFloat($(this).val());
+            });
+            $("#txtTotalPayment").val(TotalPaid);
+        });
+        $("#txtTotalPayment").change(function () {
+            var TotalPaid = parseFloat($(this).val());
+            $(".paymentAmounttd").each(function (index) {
+                var tPayment = parseFloat($(this).val());
+                if(TotalPaid>=tPayment)
+                {
+                    TotalPaid = TotalPaid - tPayment;
+                }
+                else {
+                    $(this).val(TotalPaid);
+                    TotalPaid = 0;
+                }
+            });
+        });
+
+        $("#txtDiscount").change(function () {
+            var TotalDiscount = parseFloat($(this).val());
+            var totdis = TotalDiscount;
+            $(".paymentAmounttd").each(function (index) {
+                var tPayment = parseFloat($(this).val());
+                if (TotalDiscount >= tPayment) {
+                    TotalDiscount = TotalDiscount - tPayment;
+                    $(this).closest('tr').find('.discounttd').val(tPayment);
+                    $(this).val(0);
+                }
+                else if(TotalDiscount < tPayment) {
+                    $(this).val(tPayment - TotalDiscount);
+                    $(this).closest('tr').find('.discounttd').val(TotalDiscount);
+                    TotalDiscount = 0;
+                }
+                else {
+                    $(this).closest('tr').find('.discounttd').val(0);
+                }
+            });
+            var totPay = parseFloat($("#hdnApplicableAmount").val());
+            $("#txtTotalPayment").val(totPay - totdis);
+        });
+    </script>
+}
+<!-- /.content -->

@@ -1,0 +1,90 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th rowspan="2" style="width: 5%">Sl.</th>
+            @if (((SMEnterprise.Models.StartupModel)Session["StartupModel"]).TransportFeeMode == 0)
+            {
+                <th rowspan="2" style="width: 16%;">Area</th>
+                <th rowspan="2" style="width: 10%">Fee</th>
+            }
+            else
+            {
+                <th rowspan="2" style="width: 26%;">Area</th>
+            }
+            <th colspan="3" style="width: 27%">Pick-up</th>
+            <th colspan="3" style="width: 27%">Drop</th>
+            <th style="width: 15%" rowspan="2">
+                <input type="hidden" id="hdnRouteID" value="@Model.RouteID" />
+                <a class="EditSectionClose" title="Add New Stop" onclick="EditStop(this, 1);" href="javascript:void(0);">Add New Stop</a>
+            </th>
+        </tr>
+        <tr>
+            <th style="width: 11%">Seq. No</th>
+            <th style="width: 9%">Time</th>
+            <th style="width: 7%">Halt</th>
+            <th style="width: 11%">Seq. No</th>
+            <th style="width: 9%">Time</th>
+            <th style="width: 7%">Halt</th>
+            
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int rcount = 0;
+            foreach (SMEnterprise.Models.RouteStoppageModel c in Model.Stops)
+            {
+                rcount++;
+                    <tr>
+                        <td>@rcount</td>
+
+                        <td>
+                            <input type="hidden" id="hdnStopID" name="StopID" value="@c.StopID" />
+                            <input type="hidden" id="hdnRouteID" value="@Model.RouteID" />
+                            <input type="hidden" id="hdnCountryID" name="CountryID" value="@c.CountryID" />
+                            <input type="hidden" id="hdnStateID" name="StateID" value="@c.StateID" />
+                            <input type="hidden" id="hdnCityID" name="CityID" value="@c.CityID" />
+                            <input type="hidden" id="hdnAreaID" name="AreaID" value="@c.AreaID" />
+                            @c.AreaName
+                        </td>
+@if (((SMEnterprise.Models.StartupModel)Session["StartupModel"]).TransportFeeMode == 0)
+{
+                        <td>
+                            @c.Rate.ToString("00")
+                        </td>
+}
+                        <td>
+                            @c.SequenceNo
+                        </td>
+                        <td>@c.Time</td>
+                        <td>@c.HaltDuration min</td>
+                        <td>
+                            @c.SequenceNoR
+                        </td>
+                        <td>@c.TimeR</td>
+
+                        <td>@c.HaltDurationR min</td>
+                        
+                        <td>
+                            <div class="row" style="margin-right: 0px;">
+                                <div class="col-md-6">
+                                    <a href="javascript:void(0);" id="@c.StopID" class="btn btn-link EditSectionClose" onclick="EditStop(this, 1);">Edit</a>
+
+
+                                </div>
+                                <div class="col-md-6">
+
+                                    <a href="javascript:void(0);" class="btn btn-link" onclick="return DeleteStop(this);">Delete</a>
+
+                                </div>
+                            </div>
+                        </td>
+
+
+
+                    </tr>
+            }
+        }
+    </tbody>
+
+</table>
+

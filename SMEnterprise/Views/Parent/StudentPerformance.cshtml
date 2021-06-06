@@ -1,0 +1,145 @@
+﻿@{
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Student Performance | P-School</title>
+}
+
+@model SMEnterprise.Models.ParentStudentPerformancePage
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="x_panel">
+            <div class="x_content">
+                <div class="profile_img col-md-2">
+
+                    <!-- end of image cropping -->
+                    <div>
+                        <!-- Current avatar -->
+                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" class="img-responsive avatar-view" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+
+
+                    </div>
+                    <!-- end of image cropping -->
+
+                </div>
+                <div class="col-md-1">
+
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <h2> Student : @Model.Student.Name</h2>
+                    </div>
+                    <div class="row">
+                        <h2> Roll No. : @Model.Student.RollNo</h2>
+                    </div>
+                    <div class="row">
+                        <h2> Student ID : @Model.Student.StudentSID</h2>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="row">
+                        <h2> Class : @Model.ClassName </h2>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Performance Report <small>See the Report Card</small></h2>
+                   
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Evaluation</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model.Evaluations.Count > 0)
+                                {
+                                    var ctr = 1;
+                                    foreach (var ev in Model.Evaluations)
+                                    {
+                                    <tr>
+                                        <th scope="row">@ctr</th>
+                                        <td>@ev.EvaluationName</td>
+                                        <td><a href="/Parent/StudentPerformanceDetails/@Model.Student.StudentSessionUID/@ev.EvaluationID/@Model.SessionID" target="_blank">View</a></td>
+                                    </tr>
+                                        ctr++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" style="text-align:center">No Report Card Published</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <div class="x_panel">
+                <div class="x_title">
+                    <h2>Results <small>See the Result and Marks</small></h2>
+
+                    <div class="clearfix"></div>
+                </div>
+                <div class="x_content">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Evaluation</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (Model.Exams.Count > 0)
+                                {
+                                    var ctrr = 1;
+                                    foreach (var ev in Model.Exams)
+                                    {
+                                    <tr>
+                                        <th scope="row">@ctrr</th>
+                                        <td>@ev.Name</td>
+                                        <td><a href="/Parent/StudentResultDetails/@Model.Student.StudentSessionUID/@ev.ID/@Model.SessionID" target="_blank">View</a></td>
+                                    </tr>
+                                        ctrr++;
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="3" style="text-align:center">No Result Declared</td>
+                                    </tr>
+                                }
+                                }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    
+}

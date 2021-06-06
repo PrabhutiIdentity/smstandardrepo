@@ -1,0 +1,240 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.ExpenceManagementModel
+@section IncludeCss
+{
+    <title>Expence Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .fa-remove {
+        color: red;
+    }
+     table {border-collapse:collapse; table-layout:fixed; width:310px;}
+   table td {border:solid 1px #fab; width:100px; word-wrap:break-word;}
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("ExpanceManagement", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExpences" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-4 text-right">Expence Type :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ExpenceType" id="ddlExpences">
+                                            <option value="0" @(0 == Model.ExpenceType ? "selected" : "")>All Types</option>
+                                            @foreach (NameIDModel el in Model.ExpenceTypes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ExpenceType ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Month : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="month" value="@(Model.Year + "-" + Model.Month.ToString().PadLeft(2,'0'))" name="StartDate" id="dtMonth" class="form-control" onchange="ExpenceMonthChanged();" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetExpences').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="hdnCurrentMonth" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().Month" />
+                        <input type="hidden" id="hdnCurrentYear" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().Year" />
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width:30%;">Title</th>
+                                    @if (Model.ExpenceType == 0)
+                                    {
+                                        <th style="width:10%">Type</th>
+                                    }
+                                    <th style="width:15%">Paid By</th>
+                                    <th style="width:8%">Date</th>
+                                    <th style="width:7%">Amount</th>
+                                    <th style="width:9%;">Update</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (ExpenceModel c in Model.Expences)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @c.ExpenceTitle
+                                        </td>
+                                        @if (Model.ExpenceType == 0)
+                                        {
+                                            <td>
+                                                <label class='badge' style="background-color:@c.ChartColor">@c.ExpenceType</label>
+                                            </td>
+                                        }
+
+                                        <td>
+                                            @if (c.PaymentMode == 0)
+                                            {
+                                                <ss>Cash Payment</ss>
+                                            }
+                                            else if (c.PaymentMode == 1)
+                                            {
+                                                <ss>Cheque Payment</ss>
+                                            }
+                                            else if (c.PaymentMode == 2)
+                                            {
+                                                <ss>NEFT Payment</ss>
+                                            }
+                                            else if (c.PaymentMode == 2)
+                                            {
+                                                <ss>Other Payment</ss>
+                                            }
+                                            <br />
+                                            @c.ReferanceNumber
+                                        </td>
+                                        <td>
+                                            @c.PaymentDate.ToString("dd MMM, yyyy")
+                                        </td>
+                                        <td>
+                                            @c.PaymentAmount.ToString("N2")
+                                        </td>
+
+                                        <td>
+                                            <div class="row" style="margin-right: 10px;">
+                                                <div class="col-md-6">
+                                                    <a href="/Account/ExpanceDetails/@c.ExpenceID" class="btn btn-link">View</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("DeleteExpence", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                    {
+                                                        <input type="hidden" name="ID" value="@c.ExpenceID" />
+                                                        <button type="submit" onclick="return BeforeDeleteExpence(this);" class="btn btn-link">Delete</button>
+                                                    }
+                                                </div>
+                                            </div>
+
+
+
+                                        </td>
+
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+        function ExpenceMonthChanged()
+        {
+            var monthyear = $('#dtMonth').val().split('-');
+            var sMonth =parseInt(monthyear[1]);
+            var sYear = parseInt(monthyear[0]);
+
+            var cMonth = parseInt($('#hdnCurrentMonth').val());
+            var cYear = parseInt($('#hdnCurrentYear').val());
+            if(sMonth+sYear*12>cMonth+cYear*12)
+            {
+                ShowNotification('error', 'Month Should be less then Current Month', 'error');
+                if (cMonth < 10) {
+                    $('#dtMonth').val(cYear + '-0' + cMonth);
+                }
+                else {
+                    $('#dtMonth').val(cYear + '-' + cMonth);
+                }
+            }
+        }
+        $(function () {
+            $("#tblCategory").DataTable({ "aaSorting": [] });
+        });
+        function BeforeDeleteExpence(sender) {
+            return confirm('Do you really want to delete Expance!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->

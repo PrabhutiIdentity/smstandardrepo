@@ -1,0 +1,154 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using Newtonsoft.Json;
+@{
+    ViewBag.Title = "Question";
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+   
+}
+@model SMEnterprise.Models.TeacherQuestionBankModel
+@section IncludeCss
+{
+    <title>Question Bank</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+
+    <link href="@Url.Content("~/css/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Gent/custom.min.css")" rel="stylesheet" />
+    <!-- bootstrap-wysiwyg -->
+    <link href="@Url.Content("~/css/prettify.min.css")" rel="stylesheet">
+}
+
+<div>
+    <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Update Question</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+
+        <div class="row">
+            <input type="hidden" name="QuestionID" id="hdnQuestionID" />
+           
+           
+            <div class="form-group col-md-12">
+                <label>Question</label>
+                <div class="btn-toolbar editor" data-role="editor-toolbar" data-target="#editor-one">
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font"><i class="fa fa-font"></i><b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                        </ul>
+                    </div>
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" title="Font Size"><i class="fa fa-text-height"></i>&nbsp;<b class="caret"></b></a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a data-edit="fontSize 5">
+                                    <p style="font-size:17px">Huge</p>
+                                </a>
+                            </li>
+                            <li>
+                                <a data-edit="fontSize 3">
+                                    <p style="font-size:14px">Normal</p>
+                                </a>
+                            </li>
+                            <li>
+                                <a data-edit="fontSize 1">
+                                    <p style="font-size:11px">Small</p>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="btn-group">
+                        <a class="btn" data-edit="bold" title="Bold (Ctrl/Cmd+B)"><i class="fa fa-bold"></i></a>
+                        <a class="btn" data-edit="italic" title="Italic (Ctrl/Cmd+I)"><i class="fa fa-italic"></i></a>
+                        <a class="btn" data-edit="strikethrough" title="Strikethrough"><i class="fa fa-strikethrough"></i></a>
+                        <a class="btn" data-edit="underline" title="Underline (Ctrl/Cmd+U)"><i class="fa fa-underline"></i></a>
+                    </div>
+
+                    <div class="btn-group">
+                        <a class="btn" data-edit="insertunorderedlist" title="Bullet list"><i class="fa fa-list-ul"></i></a>
+                        <a class="btn" data-edit="insertorderedlist" title="Number list"><i class="fa fa-list-ol"></i></a>
+                        <a class="btn" data-edit="outdent" title="Reduce indent (Shift+Tab)"><i class="fa fa-dedent"></i></a>
+                        <a class="btn" data-edit="indent" title="Indent (Tab)"><i class="fa fa-indent"></i></a>
+                    </div>
+
+                    <div class="btn-group">
+                        <a class="btn" data-edit="justifyleft" title="Align Left (Ctrl/Cmd+L)"><i class="fa fa-align-left"></i></a>
+                        <a class="btn" data-edit="justifycenter" title="Center (Ctrl/Cmd+E)"><i class="fa fa-align-center"></i></a>
+                        <a class="btn" data-edit="justifyright" title="Align Right (Ctrl/Cmd+R)"><i class="fa fa-align-right"></i></a>
+                        <a class="btn" data-edit="justifyfull" title="Justify (Ctrl/Cmd+J)"><i class="fa fa-align-justify"></i></a>
+                    </div>
+
+                    <div class="btn-group">
+                        <a class="btn dropdown-toggle" data-toggle="dropdown" title="Hyperlink"><i class="fa fa-link"></i></a>
+                        <div class="dropdown-menu input-append">
+                            <input class="span2" placeholder="URL" type="text" data-edit="createLink" />
+                            <button class="btn" type="button">Add</button>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div id="editor-one" class="editor-wrapper"></div>
+                @*  <textarea name="descr" id="descr" style="display:none;"></textarea> *@
+
+                <textarea class="form-control" rows="3" style="resize:none;" name="QuestionText" id="txtQuestionText"></textarea>
+            </div>
+            <div class="form-group col-md-6 qoptions">
+                <label>Option 1</label>
+                <input type="text" class="form-control" name="Option1" id="txtOption1" />
+            </div>
+            <div class="form-group col-md-6 qoptions">
+                <label>Option 2</label>
+                <input type="text" class="form-control" name="Option2" id="txtOption2" />
+            </div>
+            <div class="form-group col-md-6 qoptions">
+                <label>Option 3</label>
+                <input type="text" class="form-control" name="Option3" id="txtOption3" />
+            </div>
+            <div class="form-group col-md-6 qoptions">
+                <label>Option 4</label>
+                <input type="text" class="form-control" name="Option4" id="txtOption4" />
+            </div>
+            <div class="form-group col-md-6 qoptions">
+                <label>Correct Answer</label>
+                <select class="form-control" name="AnswerOp" id="ddlAnswerOp">
+                    <option value="A">Option 1</option>
+                    <option value="B">Option 2</option>
+                    <option value="C">Option 3</option>
+                    <option value="D">Option 4</option>
+                </select>
+            </div>
+            <div class="form-group col-md-12 qsubjective">
+                <label>Answer</label>
+                <textarea class="form-control" rows="3" style="resize:none;" name="AnswerSub" id="txtSubjectiveAnswer"></textarea>
+            </div>
+            <input type="hidden" name="Answer" id="hdnAnswer" />
+            <div class="form-group col-md-12">
+                <label>Explaination</label>
+                <textarea class="form-control" rows="3" style="resize:none;" name="Explaination" id="txtExplaination"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary" onclick="return SaveQuestion();">Save changes</button>
+    </div>
+</div>
+
+
+@section scripts
+{
+
+    <!-- bootstrap-wysiwyg -->
+    <script src="@Url.Content("~/js/bootstrap-wysiwyg.min.js")"></script>
+    <script src="@Url.Content("~/js/jquery.hotkeys.js")"></script>
+    <script src="@Url.Content("~/js/Editor/prettify.js")"></script>
+    <!-- Switchery -->
+    <script src="@Url.Content("~/js/Editor/switchery.min.js")"></script>
+
+}

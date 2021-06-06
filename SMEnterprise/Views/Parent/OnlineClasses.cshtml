@@ -1,0 +1,348 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+    var SectionID = 0;
+    var SubjectID = 0;
+}
+@model SMEnterprise.Models.BBBOnlineClassStudentPageModel
+@section IncludeCss
+{
+    <title>Online Classes</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .Undone .slider-bar {
+        background-color: rgba(255, 0, 0, 0.52) !important;
+    }
+
+    .Leave .slider-bar {
+        background-color: rgba(96, 109, 115, 0.61) !important;
+    }
+
+    .holiday .slider-bar {
+        background-color: rgba(255, 102, 0, 0.69) !important;
+    }
+
+    .normal .slider-bar {
+        background-color: rgba(219, 199, 180, 0.68) !important;
+    }
+
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("OnlineClasses", "Parent", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "width:100%" }))
+                {
+                    <div class="col-md-3">
+                        <h3 class="box-title">Online Classes </h3>
+                    </div>
+                    <div class="row std-mng-head col-md-9">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                    <div class="col-md-8">
+                                        <input type="date" class="form-control col-md-8" id="txtStartDate" name="ClassDate" value="@Model.ClassDate.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <a href="javascript:void(0);" class="btn btn-info" onclick="$('#frmGetStudents').submit();">Search</a>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th>Class / Section </th>
+                                <th>Subject</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Recordings</th>
+                                <th>Option</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.Classes)
+                            {
+                                <tr>
+                                    <td>@(count + 1)</td>
+                                    <td>
+                                        @c.ClassSection
+                                    </td>
+                                    <td>
+                                        @c.SubjectName
+                                    </td>
+
+                                    <td>
+                                        @(SMEnterprise.Repository.CommonUsage.ConvertToDateTime("2020-08-01 " + c.StartTime).ToString("hh:mm tt"))
+                                    </td>
+                                    <td>
+                                        @(SMEnterprise.Repository.CommonUsage.ConvertToDateTime("2020-08-01 " + c.EndTime).ToString("hh:mm tt"))
+                                    </td>
+                                    <td>
+                                        @c.Recordings.Count()
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-outline bg-slate-600 text-slate-600 border-slate dropdown-toggle" data-toggle="dropdown">Options</button>
+                                            <ul class="dropdown-menu dropdown-menu-right">
+                                                @if (c.Status == 0)
+                                                {
+                                                    <li>
+                                                        <a href="Javascript:void(0);" class="dropdown-item"><i class="icon-pencil4"></i> Not Started</a>
+                                                    </li>
+                                                }
+                                                else if (c.Status == 1)
+                                                {
+                                                    <li>
+                                                        <a href="/Parent/JoinClass/@c.OCID" target="_blank" class="dropdown-item"><i class="icon-pencil4"></i> Join Class</a>
+                                                    </li>
+                                                }
+                                                else
+                                                {
+                                                    var ctr = 1;
+                                                    foreach (var r in c.Recordings)
+                                                    {
+                                                        <li>
+                                                            <form action="PlayRecording" method="post">
+                                                                <input type="hidden" name="url" value="@r.PlaybackURL" />
+                                                                <a href="Javascript:void(0);" onclick="$(this).closest('form').submit();" class="dropdown-item"><i class="icon-pencil4"></i> Play Recording @ctr</a>
+                                                            </form>
+                                                        </li>
+                                                        ctr++;
+                                                    }
+                                                }
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
+
+    <script>
+
+
+        var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/OnlineClassHub")
+        .build();
+
+    connection.on("OnlineClassEnded", function (message) {
+        ShowNotification('Class Ended', 'Thank you for presenting Online Class', 'info');
+        CloseSidePanel();
+    });
+
+    connection.start();
+    async function TestEndMeeting(Group, MeetingID) {
+        await connection.invoke("OnlineClassEnded", "OClass-" + Group, MeetingID);
+    }
+
+    var pMeetingID = '';
+    var MOCID = 0;
+    var secid =@SectionID;
+    var subID =@SubjectID;
+    function SectionChanged(sender) {
+        var secid = $(sender).val();
+        subID = 0;
+        $("#ddlSubjects > option").each(function () {
+            var osecid = $(this).attr('secID');
+            if (osecid == secid) {
+                if (subID == 0) {
+                    subID = this.value;
+                }
+                $(this).css('display', '');
+            }
+            else {
+                $(this).css('display', 'none');
+            }
+        });
+        $("#ddlSubjects").val(subID);
+    }
+    function ScheduleClass(sender, ID) {
+        $('#mdlAddOnlineClass').modal('toggle');
+
+    }
+    function ReJoinClass(sender, OCID) {
+        MOCID = OCID;
+        BlockUI();
+        if ($('#hdnClassJoinURL').val() == "") {
+            $.ajax({
+                url: "/Teacher/JoinClass/" + OCID,
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                success: function (URL) {
+                    var iframe = ' <embed  id="meetingFrame" src="' + URL + '" style="width: 100%;height:100%" allowfullscreen="" allow="camera *; microphone *; fullscreen *;" frameborder="0">' +
+                        '</embed>';
+                    $('#divEdit').html($('#divBBBContainer').html());
+                    $('#divEdit').find('.card-body').html(iframe);
+                    $('#panel').css('-webkit-transform', 'scaleX(1)');
+                    $('#panel').css('padding', '0');
+                    $('#hdnClassJoinURL').val(URL);
+                    UnBlockUI();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        else {
+            var URL = $('#hdnClassJoinURL').val();
+            $('#panel').css('-webkit-transform', 'scaleX(1)');
+            UnBlockUI();
+        }
+    }
+    function TestSlider() {
+        $('#divEdit').html($('#divBBBContainer').html());
+        $('#panel').css('-webkit-transform', 'scaleX(1)');
+    }
+    function StartClass(sender, OCID,MeetingID) {
+        MOCID = OCID;
+        pMeetingID = MeetingID;
+            BlockUI();
+                $.ajax({
+                    url: "/Teacher/JoinClass/" + OCID,
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    success: async function (URL) {
+                        await connection.invoke("AddToGroup", "OClass-" + MeetingID);
+                        var iframe = ' <iframe id="meetingFrame" src="' + URL + '" style="width: 100%;height:100%" allowfullscreen="" allow="camera *; microphone *; fullscreen *;" frameborder="0">' +
+                            '</iframe >';
+                        $('#divEdit').html($('#divBBBContainer').html());
+                        $('#divEdit').find('.card-body').html(iframe);
+                        $('#panel').css('-webkit-transform', 'scaleX(1)');
+                        $('#panel').css('padding', '0');
+                        $('#hdnClassJoinURL').val(URL);
+                        UnBlockUI();
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                    },
+                    async: true,
+                    processData: false
+                });
+
+    }
+    function EndClass() {
+        BlockUI();
+        $.ajax({
+            url: "/Teacher/EndClass/" + MOCID,
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            success: function (URL) {
+                CloseSidePanel();
+                window.location.reload();
+                $('#hdnClassJoinURL').val('');
+                UnBlockUI();
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+
+    }
+
+    function PlayRecording(URL) {
+        $('#divEdit').find('.card-body').html('');
+        var iframe = ' <iframe id="meetingFrame" src="' + URL + '" style="width: 100%;height:100%" allowfullscreen="" allow="camera *; microphone *; fullscreen *;" frameborder="0">' +
+            '</iframe >';
+        $('#divEdit').html($('#divBBBRecordingContainer').html());
+        $('#divEdit').find('.card-body').html(iframe);
+        $('#panel').css('padding', '0');
+        $('#panel').css('-webkit-transform', 'scaleX(1)');
+    }
+    $(function () {
+        var startpicker = $('#txtStartDate').pickadate();
+        var EClassDate = $('#txtEClassDate').pickadate();
+
+        Ladda.bind('.btn-ladda-spinner', {
+            dataSpinnerSize: 16
+        });
+    });
+    function ViewDetails(sender, OCID) {
+        MOCID = OCID;
+        BlockUI();
+            $.ajax({
+                url: "/Teacher/GetOnlineClassDetails/" + OCID,
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+                    $('#divEdit').html(html);
+                    $('#panel').css('-webkit-transform', 'scaleX(1)');
+                    UnBlockUI();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+    }
+    </script>
+}
+<!-- /.content -->

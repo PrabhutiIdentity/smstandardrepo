@@ -1,0 +1,308 @@
+﻿@using SMEnterprise.Models;
+@model SMEnterprise.Models.FeePaymentModel
+<style>
+    .switch-input:checked ~ .switch-handle {
+        left: 37px;
+    }
+
+    .switch-label {
+        font-size: 7px;
+    }
+
+    .switch {
+        width: 60px;
+    }
+
+    sa {
+        font-size: 12px;
+    }
+</style>
+<div class="x_panel">
+
+    <div class="x_content">
+        @{
+            decimal TotalRemaining = 0;
+            <div class="row monthList">
+                <input type="hidden" id="hdnMonth" value="@Model.Month" />
+                <input type="hidden" id="hdnYear" value="@Model.Year" />
+                <input type="hidden" id="hdnSaveSessionID" value="@Model.SessionID" />
+                <div class="block">
+                    <div id='radios' style='width: 100%!important;'>
+                        @{
+                            var Status = 0;
+                            var counter = 1;
+                            var MonthsName = "";
+                            var lastMonth = Model.Months.LastOrDefault();
+                            if (lastMonth == null)
+                            {
+                                lastMonth = new PayDetailMonthsModel();
+                            }
+                            while (Model.SessionStartDate < Model.SessionEndDate)
+                            {
+
+                                if (Status == 0 && Model.SessionStartDate.Month == Model.Months[0].FeeMonth)
+                                {
+                                    Status = 1;
+                                }
+                                if (counter <= Model.FeePaymentMode)
+                                {
+                                    if (MonthsName != "")
+                                    {
+                                        MonthsName = MonthsName + ", ";
+                                    }
+                                    MonthsName = MonthsName + Model.SessionStartDate.ToString("MMM");
+                                }
+                                if (counter == Model.FeePaymentMode)
+                                {
+                                    counter = 0;
+                                    <input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.AddMonths(-Model.FeePaymentMode + 1).Month == lastMonth.FeeMonth && Model.SessionStartDate.AddMonths(-Model.FeePaymentMode + 1).Year == lastMonth.FeeYear ? "checked" : "") @(Status == 0 ? "disabled" : "") type="radio">
+                                    <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>
+                                    MonthsName = "";
+                                }
+                                //MonthsName = Model.SessionStartDate.ToString("MMM");
+                                @*<input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.Month == Model.Month ? "checked" : "" ) @(Status == 0 ? "disabled" : "") type="radio">
+                    <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>*@
+
+
+                                counter++;
+                                Model.SessionStartDate = Model.SessionStartDate.AddMonths(1);
+                            }
+                        }
+                        <script>
+                            $("div[id^='radios']").radiosToSlider({ animation: true });
+                            $("ins[class^='slider-level']").on('click', function () {
+                                var $radio = $('#' + $(this).attr('data-radio'));
+                                MonthChanged($radio, $radio.attr('month'), $radio.attr('year'));
+                            });
+                            $('.slider-label').on('click', function () {
+                                MonthChanged($(this), $(this).attr('month'), $(this).attr('year'));
+
+                            });
+                        </script>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row" style="padding-top: 5px;">
+                <table id="tblCategory" class="table table-bordered table-hover">
+                    <thead>
+                        <tr style="background-color: #e0e0e057;">
+                            <th style="vertical-align: middle;">Fee Type</th>
+                            @{
+                                MonthsName = "";
+                                var adjuster = 0;
+                                foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                {
+                                    for (int i = 0; i < Model.FeePaymentMode; i++)
+                                    {
+                                        if (MonthsName != "")
+                                        {
+                                            MonthsName = MonthsName + ", ";
+                                        }
+                                        MonthsName = MonthsName + new DateTime(pm.FeeYear, pm.FeeMonth, 1).AddMonths(i).ToString("MMM");
+                                    }
+                                    // MonthsName = new DateTime(pm.Year, pm.Month, 1).ToString("MMM");
+                                    if (pm.PaymentRecieved == 0)
+                                    {
+                                        <th style="vertical-align: middle;">
+                                            <div class="icheckbox_flat-blue checked" onclick="ExcludeMonth(this,@pm.FeeMonth);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                            </div>
+                                            @MonthsName <label class='badge bg-red'>Due</label><br />
+                                            <a href="javascript:void(0);" onclick="OpenFeeDiscountForm(@pm.FeeMonth,@pm.FeeYear);">Request Discount</a>
+                                        </th>
+
+                                    }
+                                    else if (pm.PaymentRecieved >= pm.ApplicableFee - pm.Waiver)
+                                    {
+                                        <th style="vertical-align: middle;">@MonthsName <label class='badge bg-green'>Paid</label></th>
+                                    }
+                                    else
+                                    {
+                                        <th style="vertical-align: middle;">
+                                            @MonthsName <label class='badge bg-blue'>Partial</label><br />
+                                            <a href="javascript:void(0);" onclick="OpenFeeDiscountForm(@pm.FeeMonth,@pm.FeeYear);">Request Discount</a>
+                                        </th>
+                                    }
+
+                                    MonthsName = "";
+                                }
+                            }
+                            <th style="vertical-align: middle;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (SMEnterprise.Models.PayDetailFeeTypesModel ft in Model.FeeTypeSummery.Where(c => c.ApplicableFee > 0))
+                        {
+                            decimal TotalAmount = 0;
+                            <tr>
+                                <td>
+                                    @ft.FeeTypeName
+                                </td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        var isFound = false;
+                                        FeeDetailsModel feedetail = Model.PaymentDetails.Where(c => c.FeeMonth == pm.FeeMonth && c.FeeTypeID == ft.FeeTypeID).SingleOrDefault();
+
+                                        if (feedetail != null)
+                                        {
+                                            var NetFee = (feedetail.IsPayment == 1 ? feedetail.PayApplicableAmount : feedetail.IsCustomFee == 1 ? feedetail.CustomFee : (feedetail.FeeAmount - feedetail.FeeAmount * feedetail.QDiscount / 100));
+                                            var PayableAmount = NetFee - feedetail.RDiscount;
+                                            //TotalAmount = TotalAmount +feedetail.IsPayment==1?feedetail.PayApplicableAmount - feedetail.DiscAmt;
+                                            isFound = true;
+                                            <td>
+                                                <input type="hidden" id="hdnFeeApplicable" value="@PayableAmount" />
+                                                @if (Math.Round(PayableAmount - feedetail.PaidAmount) == 0)
+                                                {
+                                                    <sa>
+                                                        Fee : @(NetFee.ToString("0"))
+                                                        @if (feedetail.RDiscount > 0)
+                                                        {
+                                                            <br /> <sp>Disc: @feedetail.RDiscount.ToString("0")</sp>
+                                                        }
+                                                        @if (feedetail.PaidAmount > 0)
+                                                        {
+                                                            <br /><sp>Paid: @feedetail.PaidAmount.ToString("0")</sp>
+                                                        }
+                                                    </sa>
+                                                }
+                                                else
+                                                {
+                                                    <sa>
+                                                        Fee : @(NetFee.ToString("0"))
+                                                        @if (feedetail.RDiscount > 0)
+                                                        {
+                                                            <br /> <sp>Disc: @feedetail.RDiscount.ToString("0")</sp>
+                                                        }
+                                                        @if (feedetail.PaidAmount > 0)
+                                                        {
+                                                            <br /><sp>Paid: @feedetail.PaidAmount.ToString("0")</sp>
+                                                        }
+                                                    </sa>
+                                                }
+                                                @if (feedetail.FeeTypeApplicable == 7)
+                                                {
+                                                    if (PayableAmount - feedetail.PaidAmount - feedetail.RDiscount > 0)
+                                                    {
+                                                        <label class="switch switch-green">
+                                                            <input type="checkbox" class="switch-input" @(pm.Waiver == 0 ? "checked" : "") />
+                                                            <span class="switch-label" onclick="FeeStatusChanged(this)" id="@pm.FeeMonth" data-on="Add" data-off="Waiver"></span>
+                                                            <span class="switch-handle" onclick="FeeStatusChanged(this)" id="shTranding"></span>
+                                                            <input type="hidden" id="hdnMonthID" value="@pm.FeeMonth">
+                                                            <input type="hidden" id="hdnYearID" value="@pm.FeeYear">
+                                                            <input type="hidden" name="Status" id="hdnFeeStatus" value="@(pm.Waiver==0?1:0)">
+                                                        </label>
+                                                        <div class="icheckbox_flat-blue checked pull-right pMonth_@pm.FeeMonth" onclick="ExcludeMonthFee(this,@pm.FeeMonth,@feedetail.FeeTypeID);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                            <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                        </div>
+                                                    }
+                                                }
+                                                else if (Math.Round(PayableAmount - feedetail.PaidAmount) > 0)
+                                                {
+                                                    <div class="icheckbox_flat-blue checked pull-right pMonth_@pm.FeeMonth" onclick="ExcludeMonthFee(this,@pm.FeeMonth,@feedetail.FeeTypeID);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                        <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                    </div>
+                                                }
+                                            </td>
+                                        }
+
+                                        if (!isFound)
+                                        {
+                                            <td>-</td>
+                                        }
+                                    }
+
+                                }
+                                <td id="RowTotal">@((ft.ApplicableFee).ToString("0.00"))</td>
+                            </tr>
+                        }
+                        @{
+
+                            decimal TotalTotal = 0;
+                            <tr style="background-color: beige;">
+                                <td>Total Amount</td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        <td id="MonthTotal_@pm.FeeMonth">@((pm.ApplicableFee).ToString("0.00"))</td>
+                                    }
+                                    <td id="TotalTotal">@Model.Months.Sum(c => c.ApplicableFee).ToString("0.00")</td>
+                                }
+                            </tr>
+                            <tr style="background-color: aliceblue;">
+                                <td>Total Paid</td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        <td>@pm.PaymentRecieved.ToString("0.00")</td>
+                                    }
+                                    <td>@Model.Months.Sum(c => c.PaymentRecieved).ToString("0.00")</td>
+                                }
+                            </tr>
+                            <tr style="background-color: rgba(255, 0, 0, 0.52);color: white;">
+                                <td>Total Remaining</td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        <td id="MonthRemainingTotal_@pm.FeeMonth">@((pm.ApplicableFee - pm.PaymentRecieved).ToString("0.00"))</td>
+                                    }
+                                    <td id="tdTotalRemainingAmount">@Model.Months.Sum(c => c.ApplicableFee - c.PaymentRecieved).ToString("0.00")</td>
+                                }
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+            <div class="row amount-paid">
+                <div class="col-md-4">
+                    <input type="hidden" name="ExcludedFees" id="hdnExcludedFees" value="" />
+                    Net Total Amount
+                    <h4 id="NetTotal">@Model.Months.Sum(c => c.ApplicableFee - c.PaymentRecieved).ToString("0.00")</h4>
+                </div>
+                <div class="col-md-4">
+                    Amount Paid
+                    <input type="text" id="txtNetPaid" onchange="TotalAmountPayingChanged(this,@Model.Months.Sum(c => c.ApplicableFee - c.PaymentRecieved).ToString("0.00"))" value="@Model.Months.Sum(c => c.ApplicableFee - c.PaymentRecieved).ToString("0.00")" style="resize:none" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    Payment Mode
+                    <select class="form-control" name="PaymentMode" id="ddlPaymentMode">
+                        <option value="0" selected="">Cash Payment</option>
+                        <option value="1">Cheque Payment</option>
+                        <option value="2">NEFT Payment</option>
+                        <option value="3">Other Payment</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row amount-paid">
+                <div class="col-md-3">
+                    @*@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy")*@
+                    Fee Date
+                    <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    Ref No.
+                    <input type="text" id="txtReferanceNumber" value="" style="resize:none" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    Remarks
+                    <input type="text" id="txtRemark" value="" style="resize:none" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    Collected By
+                    <input type="text" id="txtCollectedBy" value="" style="resize:none" class="form-control">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 col-md-offset-4">
+                    <button type="submit" class="btn btn-lg btn-block btn-success" onclick="ShowConfirmation(this);">Submit</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>

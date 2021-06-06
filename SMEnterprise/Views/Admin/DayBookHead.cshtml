@@ -1,0 +1,199 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Day Book Head";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/bootstrap-colorpicker.min.css")">
+    <title>Product Category Management</title>
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+
+    
+}
+@model IEnumerable<SMEnterprise.Models.DayBookHeadModel>
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Day Book Head 
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Day Book Head</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 20%">Name</th>
+                                <th style="width: 15%">Code</th>
+                                <th style="width: 30%">Description</th>
+                                <th style="width: 10%">Count</th>
+                                <th style="width: 15%">Edit/Delete</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @(count + 1)
+                                        <input type="hidden" name="ID" id="hdnID" value="@c.DayBookID" />
+                                    </td>
+                                    <td>
+
+                                        <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' id="txtName" name="Name" value="@c.Name" />
+                                    </td>
+
+                                    <td>
+
+                                        <input type="text" class="form-control" id="txtCode" onchange='$(this).closest("tr").find("#hdnCode").val($(this).val())' name="Code" value="@c.Code">
+                                       
+
+
+
+                                    </td>
+                                  
+                                    <td>
+                                        <input type="text" class="form-control" id="txtDesc" onchange='$(this).closest("tr").find("#hdndesc").val($(this).val())' name="Description" value="@c.Description" />
+                                    </td>
+                                    <td>
+                                        <input type="hidden" id="hdnHeadCount" value="@c.HeadCount" />
+                                        @c.HeadCount
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            @using (Html.BeginForm("UpdateDayBookHead", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+
+
+                                                <input type="hidden" id="hdnID" name="ID" value="@c.DayBookID" />
+                                                <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+                                                <input type="hidden" id="hdnCode" name="Code" value="@c.Code" />
+                                                <input type="hidden" id="hdndesc"  name="Description" value="@c.Description" />
+                                                <input type="hidden" id="hdnHeadCount" name="HeadCount" value="@c.HeadCount" />
+
+                                                <input type="submit" onclick="return BeforeHouseUpdate(this);" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Save" />
+                                            }
+                                            @using (Html.BeginForm("UpdateDayBookHead", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="ID" value="@c.DayBookID" />
+                                                <button onclick="return DayBookHeadDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+                            <tr>
+
+                                <td>
+                                    @(count + 1)
+                                    <input type="hidden" name="ID" id="hdnID" value="0" />
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' id="txtName" name="Name" value="" />
+                                </td>
+
+                                <td>
+
+                                    <input type="text" class="form-control" name="code" id="txtCode" onchange='$(this).closest("tr").find("#hdnCode").val($(this).val())' value="">
+
+                                </td>
+                                <td>
+                                    <input type="text"  class="form-control" id="txtDesc" onchange='$(this).closest("tr").find("#hdndesc").val($(this).val())' value="" />
+                                </td>
+                                <td>
+                                    0
+                                </td>
+
+                                <td>
+                                    <div class="btn-group">
+                                        @using (Html.BeginForm("UpdateDayBookHead", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                        {
+                                            <input type="hidden" id="hdnID" name="ID" value="0" />
+                                            <input type="hidden" id="hdnName" name="Name" value=""/>
+                                            <input type="hidden" id="hdnCode" name="Code" value=""/>
+                                            <input type="hidden" id="hdndesc" name="Description" value=""/>
+                                            <input type="hidden" id="hdnHeadCount" name="HeadCount" value=""/>
+
+                                            <input type="submit" onclick="return BeforeDayBookUpdate(this);" class="btn btn-default" style="background-color: #605ca8;color: white;" value="Add New" />
+                                        }
+
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/bootstrap-colorpicker.min.js")"></script>
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable({
+                "ordering": false
+            });
+            $('#liDayBookHead').closest('ul').closest('li').addClass('active');
+            $('#liDayBookHead').addClass('active');
+           
+        });
+        function DayBookHeadDelete(sender) {
+
+            var Daybookcount = $(sender).closest('tr').find('#hdnHeadCount').val();
+
+
+            if (Daybookcount > 0) {
+                ShowClosingNotification('Error', 'This Day Book Head has Item, so can\'t be deleted!!!!', 'error');
+                return false
+            }
+            else {
+                return confirm("Do you Really Want to  Book Head this Day Book????");
+            }
+        }
+
+  
+        function BeforeDayBookUpdate(sender) {
+          //  alert("Hi");
+            if ($(sender).closest('tr').find('#txtName').val() == "" || $(sender).closest('tr').find('#txtCode').val() == "") {
+                ShowClosingNotification('Error', 'Plese Fill Required Details!!!!', 'error');
+                return false;
+            }
+            else {
+                $(sender).closest('td').find('#hdnName').val($(sender).closest('tr').find('#txtName').val());
+                return true;
+            }
+        }
+    </script>
+}<!-- /.content -->

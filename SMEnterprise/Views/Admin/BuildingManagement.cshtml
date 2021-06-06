@@ -1,0 +1,348 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Building Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<script>
+
+    function ToggleDetails(sender) {
+
+
+        if ($(sender).hasClass("FloorClosed")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetBuildingFloors/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        var ele = document.getElementsByClassName("FloorOpened");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+        }
+
+        $(sender).removeClass("FloorClosed");
+        $(sender).addClass("FloorOpened");
+        $(sender).text("Close");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("FloorOpened");
+            $(sender).addClass("FloorClosed");
+            $(sender).closest("tr").next().remove();
+            $(sender).text("Manage");
+        }
+
+    }
+    function SavePollOption(sender) {
+        UpdatePollOption(sender, 1);
+    }
+    function DeleteFloor(sender) {
+        if ($(sender).closest('tr').find('#hdnRoomCount').val() != '0') {
+            ShowClosingNotification('Error', 'Rooms are added in Floor, It can\'t be deleted!!!!', 'error');
+        }
+        else {
+            if (confirm("Do you Really Want to Delete this Floor????")) {
+                UpdateFloor(sender, -1);
+            }
+        }
+    }
+
+    function UpdateFloor(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateFloor", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+                OpType: OpType,
+                Name: $(sender).closest('tr').find('#hdnName').val(),
+                Status: $(sender).closest('tr').find('#hdnFloorStatus').val(),
+                ID: $(sender).closest('tr').find('#hdnID').val(),
+                BuildingID: $(sender).closest('tr').find('#hdnBuildingID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+                $(sender).closest('table').closest('td').html(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+    function DeleteRoom(sender) {
+        if ($(sender).closest('tr').find('#tdSection').text().trim() != 'Empty') {
+            ShowClosingNotification('Error', 'Room is assigned to a Section, It can\'t be deleted!!!!', 'error');
+        }
+        else {
+            if (confirm("Do you Really Want to Delete this Room????")) {
+                UpdateRoom(sender, -1);
+            }
+        }
+    }
+
+    function UpdateRoom(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateRoom", "Admin")",
+            type: 'POST',
+        data: JSON.stringify({
+            OpType: OpType,
+            Name: $(sender).closest('tr').find('#txtRoomName').val(),
+            RoomNo: $(sender).closest('tr').find('#txtRoomNo').val(),
+            Status: $(sender).closest('tr').find('#hdnRoomStatus').val(),
+            ID: $(sender).closest('tr').find('#hdnID').val(),
+            SizeID: $(sender).closest('tr').find('#hdnRoomSizeID').val(),
+            FloorID: $(sender).closest('tr').find('#hdnFloorID').val()
+        }),
+        contentType: 'application/json; charset=utf-8',
+        success: function (html) {
+            ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+            $(sender).closest('table').closest('td').html(html);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+        },
+        async: true,
+        processData: false
+    });
+    }
+    function DeleteBuilding(sender) {
+        var Floors = $(sender).closest('tr').find('#hdnFloorCount').val();
+        if (Floors > 0) {
+            ShowClosingNotification('Error', 'This Building has Floors, so can\'t be deleted!!!!', 'error');
+            return false
+        }
+        else {
+            return confirm("Do you Really Want to Delete this Building????");
+        }
+
+    }
+
+</script>
+<script>
+    function ToggleFloorDetails(sender) {
+
+
+        if ($(sender).hasClass("RoomsClosed")) {
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetBuildingFloorRooms/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        var ele = document.getElementsByClassName("RoomsOpened");
+        if (ele.length > 0) {
+            if ($(ele).hasClass('Floor-Rooms')) {
+                $(ele[0]).click();
+            }
+        }
+
+        $(sender).removeClass("RoomsClosed");
+        $(sender).text('Close');
+        $(sender).addClass("RoomsOpened");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("RoomsOpened");
+            $(sender).addClass("RoomsClosed");
+            $(sender).closest("tr").next().remove();
+            $(sender).text('Manage')
+        }
+
+    }
+</script>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Building Management
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Building Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">#</th>
+                                <th style="width: 40%">Building Name</th>
+                                <th style="width: 10%">#Floors</th>
+                                <th style="width: 15%">#Rooms</th>
+                                <th style="width: 15%">Status</th>
+                                <th style="width: 20%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                            var bCounter = 1;
+                                            foreach (var c in Model)
+                                            {
+                                    <tr>
+                                        <td>
+                                            @bCounter
+
+                                        </td>
+                                        <td>
+                                            <input type="hidden" name="ID" value="@c.ID" />
+                                            <span class="ViewCopy visible">@c.Name</span>
+                                            <input class="form-control editCopy hidden" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="@c.Name" />
+                                        </td>
+                                       
+                                        <td>
+                                            @c.FloorCount
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.ID" class="FloorClosed Poll-Options">Manage</a>
+)
+                                            <input type="hidden" id="hdnFloorCount" value="@c.FloorCount" />
+                                        </td>
+                                        <td>@c.RoomCount</td>
+                                        <td>
+                                            <span class="ViewCopy visible"><label class='badge bg-@(c.Status == 0 ? "red" : "green")'>@(c.Status == 0 ? "Inactive" : "Active")</label></span>
+                                            <label class="switch switch-green editCopy hidden">
+                                                @if (c.Status == 1)
+                                        {
+                                                    <input type="checkbox" class="switch-input" Checked>
+                                                }
+                                                else
+                                                {
+                                                    <input type="checkbox" class="switch-input">
+                                                }
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnBuildingStatus").val($(this).closest("tr").find("#hdnBuildingStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row" style="margin-right: 0px;">
+                                                <div class="col-md-6">
+                                                   <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateBuilding", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "BuildingUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                                        <input type="hidden" id="hdnBuildingStatus" name="Status" value="@c.Status" />
+                                                        <input type="hidden" id="hdnName" name="Name" value="@c.Name" />
+
+                                                        <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" />
+                                                    }
+
+                                                    @using (Html.BeginForm("UpdateBuilding", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "BuildingUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ID" id="hdnID" value="@c.ID" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                        <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteBuilding(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+
+
+
+                                    </tr>
+                                    bCounter++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot style="border-width: 2px;border-style: groove;display:none;">
+                            <tr>
+                                <td></td>
+                                <td>
+                                    <input type="hidden" name="ID" value="0" />
+                                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="" />
+                                </td>
+                                <td>
+                                    0
+                                </td>
+                                <td>0</td>
+                                <td>
+                                    <label class="switch switch-green">
+                                       
+                                            <input type="checkbox" class="switch-input" Checked>
+                                       
+                                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnBuildingStatus").val($(this).closest("tr").find("#hdnBuildingStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("UpdateBuilding", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "BuildingUpdate" }))
+                                            {
+                                                <input type="hidden" name="ID" id="hdnID" value="0" />
+                                                        <input type="hidden" id="hdnBuildingStatus" name="Status" value="1" />
+                                                        <input type="hidden" id="hdnName" name="Name" value="" />
+                                                       
+                                                        <input type="submit" class="btn btn-link" value="Add New" />
+                                            }
+
+                                        </div>
+                                       
+                                    </div>
+                                </td>
+
+
+
+
+
+                            </tr>
+
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable({
+                "aoColumns": [{ "bSortable": false }, null, null, null, null,  { "bSortable": false }]
+            });
+            $('#liBuildingManagement').closest('ul').closest('li').addClass('active');
+            $('#liBuildingManagement').addClass('active');
+        });
+       
+    </script>
+
+<!-- /.content -->

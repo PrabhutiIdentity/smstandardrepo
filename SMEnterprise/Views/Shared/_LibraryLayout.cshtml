@@ -1,0 +1,418 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="icon" type="image/png" href="@Url.Content("~/favicon.ico")">
+    <!-- Meta, title, CSS, favicons, etc. -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script src="@Url.Content("~/js/jquery.min.js")"></script>
+    <link href="@Url.Content("~/css/Gent/jquery.mCustomScrollbar.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Admin/jquery.dataTables.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap-progressbar-3.3.4.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/font-awesome.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.buttons.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/pnotify.nonblock.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/Gent/custom.css")" rel="stylesheet" />
+    <script>
+        var AlterNativeMaleImg = "@Url.Content("~/Images/MaleNoImage.png")";
+        var AlterNativeFemaleImg = "@Url.Content("~/Images/FemaleNoImage.png")";
+        var AlterNativeDocImg = "@Url.Content("~/Images/NoDocImage.jpg")";
+        function OnImageError(me, Type) {
+            if (Type == 1) {
+                me.src = AlterNativeFemaleImg;
+                return true;
+            }
+            if (Type == 3) {
+                me.src = AlterNativeDocImg;
+                return true;
+            }
+            else {
+                me.src = AlterNativeMaleImg;
+                return true;
+            }
+        }
+
+        function EditCopy(sender) {
+            if ($(sender).text() == "Edit") {
+                $(sender).closest('tr').find('.editCopy').removeClass('hidden');
+                $(sender).closest('tr').find('.ViewCopy').addClass('hidden');
+                $(sender).text('Cancel');
+                $(sender).closest('table').find('.editbtnOpen').click();
+                $(sender).addClass('editbtnOpen');
+            }
+            else {
+                $(sender).closest('tr').find('.editCopy').addClass('hidden');
+                $(sender).closest('tr').find('.ViewCopy').removeClass('hidden');
+                $(sender).text('Edit');
+                $(sender).removeClass('editbtnOpen');
+            }
+        }
+        function OpenAddNewCopy(sender) {
+            if ($(sender).text() == "Add New") {
+                $(sender).closest('table').find('tfoot').css('display', '');
+                $(sender).closest('table').find('.editbtnOpen').click();
+                $(sender).text('Cancel');
+            }
+            else {
+                $(sender).closest('table').find('tfoot').css('display', 'none');
+                $(sender).text('Add New');
+            }
+            try
+            {
+                SpecificAddFunctionalities(sender);
+
+            }
+            catch(e){}
+        }
+    </script>
+    <style>
+        .sbtn {
+        }
+
+            .sbtn:hover {
+                color: orangered;
+            }
+        .hidden {
+            display: none;
+        }
+        .dropdown-menu > li > form > a {
+            color: #5A738E;
+        }
+
+        .ImageReportLogo {
+            max-width: 125px;
+            max-height: 125px;
+        }
+
+
+        *html .ImageReportLogo {
+            width: expression((this.width/this.height)>=1?125:'auto');
+            height: expression((this.width/this.height)<1?125:'auto');
+        }
+
+        .dropdown-menu > li > form > a {
+            display: block;
+            padding: 3px 20px;
+            clear: both;
+            font-weight: 400;
+            line-height: 1.42857143;
+            color: #333;
+            white-space: nowrap;
+        }
+    </style>
+    <script>
+
+
+    </script>
+
+    <script src="@Url.Content("~/js/icheck.min.js")"></script>
+    @RenderSection("IncludeCss", required: false)
+    <!--[if lt IE 9]>
+        <script src="../assets/js/ie8-responsive-file-warning.js"></script>
+        <![endif]-->
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+          <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+          <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+        <![endif]-->
+    <script>
+
+    </script>
+</head>
+
+<body class="nav-md">
+    <div class="container body">
+
+        <div class="main_container">
+            <div class="col-md-3 left_col menu_fixed">
+                <div class="left_col scroll-view">
+                    <div class="profile">
+                        <div class="">
+                            <img onerror="OnImageError(this,2)" src="@Url.Content("~/Images/SBranchLogo/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(@SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)" alt="..." class="img-circle profile_img">
+                        </div>
+
+                    </div>
+                    <!-- /menu prile quick info -->
+                    <br />
+                    <!-- sidebar menu -->
+                    <div id="sidebar-menu" class="main_menu_side hidden-print main_menu">
+                        <div class="menu_section" style="margin-bottom:0px;">
+                            <h3></h3>
+                            <ul class="nav side-menu">
+                                <li></li>
+                            </ul>
+                        </div>
+                        <div class="menu_section">
+                            <ul class="nav side-menu">
+                                <li>
+                                    <a href="/Library/Dashboard"><i class="fa fa-home"></i> Home </a>
+
+                                </li>
+                                <li>
+                                    <a href="/Library/LibraryStructure"><i class="fa fa-building"></i> Library Structure </a>
+
+                                </li>
+                                <li>
+                                    <a><i class="fa fa-book"></i> Book Section <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <li>
+                                            <a href="/Library/BookCategories"> Book Categories</a>
+                                        </li>
+                                        <li>
+                                            <a href="/Library/Books"> Books</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <a><i class="fa fa-file-excel-o"></i> Issue Register <span class="fa fa-chevron-down"></span></a>
+                                    <ul class="nav child_menu" style="display: none">
+                                        <li>
+                                            <a href="/Library/LibraryRegister"> Issue Register</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+
+                    </div>
+                    <!-- /sidebar menu -->
+                    <!-- /menu footer buttons -->
+                    <div class="sidebar-footer hidden-small" style="display:none;">
+                        <a data-toggle="tooltip" data-placement="top" title="Settings">
+                            <span class="glyphicon glyphicon-cog" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="FullScreen">
+                            <span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="Lock">
+                            <span class="glyphicon glyphicon-eye-close" aria-hidden="true"></span>
+                        </a>
+                        <a data-toggle="tooltip" data-placement="top" title="Logout">
+                            <span class="glyphicon glyphicon-off" aria-hidden="true"></span>
+                        </a>
+                    </div>
+                    <!-- /menu footer buttons -->
+                </div>
+            </div>
+            <!-- top navigation -->
+            <div class="top_nav">
+                <div class="nav_menu">
+                    <nav class="" role="navigation">
+                        <div class="nav toggle">
+                            <a id="menu_toggle"><i class="fa fa-bars"></i></a>
+                        </div>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li class="">
+                                <a href="javascript:;" class="user-profile dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+                                    <img src="@Url.Content("~/Images/SBranchLogo/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(@SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)" alt="">Library
+                                    <span class="fa fa-angle-down"></span>
+                                </a>
+                                <ul class="dropdown-menu dropdown-usermenu pull-right">
+                                    <li><a href="/Teacher/ChangePassword"> Change Password</a></li>
+                                    <li>
+                                        @using (Html.BeginForm("logout", "Login", FormMethod.Post, new { id = "logoutForm" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <a href="#" onclick="$('#logoutForm').submit();"><i class="fa fa-sign-out pull-right"></i> Log off</a>
+                                        }
+                                    </li>
+                                </ul>
+                            </li>
+                            <li role="presentation" class="dropdown" style="display:none;">
+                                <a href="javascript:;" class="dropdown-toggle info-number" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa fa-envelope-o"></i>
+                                    <span class="badge bg-green">6</span>
+                                </a>
+                                <ul id="menu1" class="dropdown-menu list-unstyled msg_list animated fadeInDown" role="menu">
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a>
+                                            <span class="image">
+                                                <img src="images/img.jpg" alt="Profile Image" />
+                                            </span>
+                                            <span>
+                                                <span>John Smith</span>
+                                                <span class="time">3 mins ago</span>
+                                            </span>
+                                            <span class="message">
+                                                Film festivals used to be do-or-die moments for movie makers. They were where...
+                                            </span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <div class="text-center">
+                                            <a>
+                                                <strong>See All Alerts</strong>
+                                                <i class="fa fa-angle-right"></i>
+                                            </a>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            <!-- /top navigation -->
+            <!-- page content -->
+            <div class="right_col" role="main" style="min-height:590px;">
+                @RenderBody()
+
+            </div>
+            <footer>
+                <div class="">
+                    <p class="pull-right">
+                        School Management System By <a href="http://www.prabhutisystems.com" target="_blank">Prabhuti Systems</a>. |
+                        <span class="lead"> <i class="fa fa-graduation-cap"></i> PSchool!</span>
+                    </p>
+                </div>
+                <div class="clearfix"></div>
+            </footer>
+            <!-- /footer content -->
+            <!-- /page content -->
+        </div>
+    </div>
+    <div id="custom_notifications" class="custom-notifications dsp_none">
+        <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group"></ul>
+        <div class="clearfix"></div>
+        <div id="notif-group" class="tabbed_notifications"></div>
+    </div>
+    <script src="@Url.Content("~/js/bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/Gent/jquery.mCustomScrollbar.concat.min.js")"></script>
+    <script src="@Url.Content("~/js/bootstrap-progressbar.min.js")"></script>
+    <script src="@Url.Content("~/js/nprogress.js")"></script>
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.buttons.js")"></script>
+    <script src="@Url.Content("~/js/pnotify.nonblock.js")"></script>
+    <script src="@Url.Content("~/js/fastclick.js")"></script>
+    <script src="@Url.Content("~/js/custom.min.js")"></script>
+
+
+    @RenderSection("scripts", required: false)
+    <script>
+        //    function CheckSession()
+        //    {
+        //        var seconds = 1;
+        //        setTimeout(function () {
+        //            $.ajax(
+        //{
+        //    type: "POST",
+        //    url: "/Account/GetSessionState/",
+        //    cache: false,
+        //    processData: false,
+        //    contentType: false,
+        //    success: function (data) {
+        //        $('#aSessionStatus').html(data);
+        //    },
+        //    error: function (e) {
+        //        alert("errorn");
+        //    }
+        //});
+        //        }, seconds * 1000);
+        //    }
+        $(document).ready(function () {
+            (function () {
+                $.ajax(
+                        {
+                            type: "POST",
+                            url: "/Account/GetSessionState/",
+                            cache: false,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                            },
+                            error: function (e) {
+
+                            }
+                        });
+                setTimeout(arguments.callee, 60000);
+            })();
+            //var notice=  new PNotify({
+            //      title: "PNotify",
+            //      type: "info",
+            //      text: "Welcome. Try hovering over me. You can click things behind me, because I'm non-blocking.",
+
+            //      addclass: 'dark',
+            //      styling: 'bootstrap3'
+
+            //});
+            //notice.get().click(function () {
+            //    notice.remove();
+            //});
+
+        });
+        function ShowNotification(Title, Text, Type) {
+            //var Notifi = document.getElementsByClassName('ui-pnotify-text');
+            //var isNotiExist = 0;
+            //for (var i = 0; i < Notifi.length; i++) {
+            //    if (Notifi[i].textContent == Text) {
+            //        isNotiExist = 1
+            //        break;
+            //    }
+            //}
+            //if (isNotiExist == 0) {
+            var notice = new PNotify({
+                title: Title,
+                text: Text,
+                type: Type,
+                addclass: 'dark',
+                styling: 'bootstrap3',
+            });
+            notice.get().click(function () {
+                notice.remove();
+            });
+            //}
+
+
+        }
+
+    </script>
+</body>
+</html>

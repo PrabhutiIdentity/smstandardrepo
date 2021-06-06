@@ -1,0 +1,133 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 5%"></th>
+            <th style="width: 20%">Period</th>
+            <th style="width: 15%">Start</th>
+            <th style="width: 15%">End</th>
+            <th style="width: 15%">Type</th>
+            <th style="width: 10%">Status</th>
+            <th style="width: 20%">Edit/Delete</th>
+        </tr>
+    </thead>
+
+    @{
+        var counter = 1;
+        <tbody>
+            
+            @foreach (var c in Model.PeriodList)
+            {
+            <tr>
+                <td>
+                    @counter
+
+                </td>
+                <td>
+                    <input type="hidden" id="hdnPeriodID" name="PeriodID" value="@c.PeriodID" />
+                    <input class="form-control" id="txtPeriodName" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="@c.Name" />
+                </td>
+
+
+                <td>
+                    <input type="time" id="txtStartTime" name="StartTime" value="@c.StartTime" />
+                </td>
+                <td>
+                    <input type="time" id="txtEndTime" name="EndTime" value="@c.EndTime" />
+                </td>
+                <td>
+                    <select id="ddlPeriodTypes" onchange="$(this).closest('tr').find('#hdnPeriodTypeID').val($(this).val());" class="form-control">
+                        @foreach (var pt in Model.PeriodTypeList)
+                        {
+                            <option value="@pt.PeriodTypeID" @(c.PeriodType == @pt.PeriodTypeID ? "Selected" : "")>@pt.PeriodTypeName</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <label class="switch switch-green">
+                        @if (c.Status == 1)
+                        {
+                            <input type="checkbox" class="switch-input" Checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" class="switch-input">
+                        }
+                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnPeriodStatus").val($(this).closest("tr").find("#hdnPeriodStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                        <span class="switch-handle" id="shTranding"></span>
+                        <input type="hidden" id="hdnPeriodStatus" value="@c.Status" />
+                    </label>
+                </td>
+                <td>
+                    <div class="row" style="margin-right: 0px;">
+                        <div class="col-md-6">
+                         <input type="submit" class="btn btn-link" value="Save" onclick="UpdatePeriod(this,1);" />
+                        </div>
+                        <div class="col-md-6">
+
+                            <input type="hidden" name="EducationLevelID" id="hdnEducationLevelID" value="@Model.ID" />
+                            <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                            <input type="submit" class="btn btn-link" value="Delete" onclick="return DeletePeriod(this,-1);" />
+
+                        </div>
+                    </div>
+                </td>
+
+
+
+            </tr>
+            counter++;
+            }
+
+        </tbody>
+        <tfoot style="border-width: 2px;border-style: groove;">
+            <tr>
+                <td>
+                    @counter
+
+                </td>
+                <td>
+                    <input type="hidden" id="hdnEducationLevelID" name="ID" value="@Model.ID" />
+                    <input type="hidden" id="hdnPeriodID" name="PeriodID" value="0" />
+                    <input class="form-control" id="txtPeriodName" type="text" onchange='$(this).closest("tr").find("#hdnName").val($(this).val())' name="Name" value="" />
+                </td>
+
+
+                <td>
+                    <input type="time" id="txtStartTime" name="StartTime" value="" />
+                </td>
+                <td>
+                    <input type="time" id="txtEndTime" name="EndTime" value="" />
+                </td>
+                <td>
+                    <select id="ddlPeriodTypes" onchange="$(this).closest('tr').find('#hdnPeriodTypeID').val($(this).val());" class="form-control">
+                        @foreach (var pt in Model.PeriodTypeList)
+                        {
+                            <option value="@pt.PeriodTypeID" >@pt.PeriodTypeName</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <label class="switch switch-green">
+                       
+                            <input type="checkbox" class="switch-input" Checked>
+                        
+                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnPeriodStatus").val($(this).closest("tr").find("#hdnPeriodStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                        <span class="switch-handle" id="shTranding"></span>
+                        <input type="hidden" id="hdnPeriodStatus" value="1" />
+                    </label>
+                </td>
+                <td>
+                    <div class="row" style="margin-right: 0px;">
+                        <div class="col-md-6">
+                            <input type="submit" class="btn btn-link" value="Add New" onclick="UpdatePeriod(this, 1);" />
+                        </div>
+                        
+                    </div>
+                </td>
+            </tr>
+
+        </tfoot>
+    }
+</table>
+

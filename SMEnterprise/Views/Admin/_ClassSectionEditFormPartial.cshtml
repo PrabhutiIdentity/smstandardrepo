@@ -1,0 +1,139 @@
+﻿
+<div class="box box-danger">
+    <div class="box-header">
+        <h3 class="box-title">Section Details</h3>
+    </div>
+    <div class="box-body">
+        <input type="hidden" id="hdnSectionID" value="@Model.Section.ID" />
+        <input type="hidden" id="hdnClassID" value="@Model.Section.ClassID" />
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <span>Name</span>
+                        </div>
+                        <input type="text" class="form-control" name="Name" id="txtSectionName" value="@Model.Section.Name">
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <span>Group</span>
+                        </div>
+                        <input type="hidden" id="hdnEditEducationLevelID" />
+                        <select class="form-control" id="ddlSectionGroup" onchange="GroupChanged(this);">
+                            @foreach (var g in Model.Groups)
+                            {
+                                <option value="@g.GroupID" @(Model.Section.GroupID == g.GroupID ? "selected" : "")>@g.GroupName</option>
+                            }
+
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <span>Teacher</span>
+                        </div>
+                        <select class="form-control" id="ddlSectionTeacher">
+                            <option value="0">--Select Teacher--</option>
+                            @foreach (var g in Model.Teachers)
+                            {
+                                <option value="@g.EmployeeID" @(Model.Section.TeacherID == g.EmployeeID ? "selected" : "")>@g.EmployeeName</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <span>Capacity</span>
+                    </div>
+                    <input type="text" id="txtSectionCapacity" class="form-control" value="@Model.Section.Capacity" />
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <div class="input-group col-md-4">
+                    <div class="input-group-addon">
+                        <span>Status</span>
+                    </div>
+                    <label class="switch switch-green">
+                        @if (Model.Section.Status == 1)
+                        {
+                            <input type="checkbox" class="switch-input" Checked>
+                        }
+                        else
+                        {
+                            <input type="checkbox" class="switch-input">
+                        }
+                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnSectionEditStatus").val($(this).closest("label").find("#hdnSectionEditStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                        <span class="switch-handle" id="shTranding"></span>
+                        <input type="hidden" id="hdnSectionEditStatus" value="@Model.Section.Status" />
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        @* <div class="row">
+            <div class="form-group col-md-4">
+                <label>Location</label>
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <span>Building</span>
+                    </div>
+                    <select class="form-control" id="ddlSectionBuildings" onchange="BuildingChanged(this);">
+                        <option value="0">Select Building</option>
+                        @foreach (var g in Model.Buildings)
+                        {
+                            <option value="@g.ID" @(Model.Section.BuildingID == g.ID ? "selected" : "")>@g.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label>.</label>
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <span>Floor</span>
+                    </div>
+                    <select class="form-control" id="ddlSectionFloors" onchange="FloorChanged(this);">
+                        <option value="0">Select Floor</option>
+                        @foreach (var g in Model.Floors)
+                        {
+                            <option value="@g.ID" @(Model.Section.FloorID == g.ID ? "selected" : "")>@g.Name</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-4">
+                <label>.</label>
+                <div class="input-group">
+                    <div class="input-group-addon">
+                        <span>Room</span>
+                    </div>
+                    <select class="form-control" id="ddlSectionRooms">
+                        <option value="0">Select Room</option>
+                        @foreach (var g in Model.Rooms)
+                        {
+                            <option value="@g.ID" @(Model.Section.RoomID == g.ID ? "selected" : "")>@g.Name (@g.RoomNo)-(@g.RoomSize)</option>
+                        }
+                    </select>
+                </div>
+
+            </div>
+        </div>*@
+        <div class="row">
+            <div class="col-md-12">
+                <a href="javascript:void(0);" class="btn btn-info pull-right" onclick="UpdateSection(this,1)">Save</a>
+            </div>
+        </div>
+    </div>
+</div>

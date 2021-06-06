@@ -1,0 +1,212 @@
+﻿@using SMEnterprise.Models;
+@{
+    ViewBag.Title = "You Tube Videos";
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+    var SectionID = 0;
+    var SubjectID = 0;
+}
+@section IncludeCss
+{
+    <title>Online Classes</title>
+    <script src="/content/global_assets/js/plugins/tables/datatables/datatables.min.js"></script>
+    <script src="/content/global_assets/js/plugins/tables/datatables/extensions/select.min.js"></script>
+    <script src="/content/global_assets/js/plugins/forms/selects/select2.min.js"></script>
+    <script src="/content/global_assets/js/plugins/tables/datatables/extensions/jszip/jszip.min.js"></script>
+    <script src="/content/global_assets/js/plugins/tables/datatables/extensions/pdfmake/pdfmake.min.js"></script>
+    <script src="/content/global_assets/js/plugins/tables/datatables/extensions/pdfmake/vfs_fonts.min.js"></script>
+    <script src="/content/global_assets/js/plugins/tables/datatables/extensions/buttons.min.js"></script>
+}
+@model SMEnterprise.Models.BBBOnlineClassStudentPageModel
+<style>
+</style>
+
+@section pageHeader{
+    <div class="page-header card">
+        <div class="page-header-content header-elements-md-inline">
+            <div class="page-title d-flex">
+                <h4 class="card-title">Online Classes</h4><br />
+
+                <a href="#" class="header-elements-toggle text-default d-md-none"><i class="icon-cog3"></i></a>
+            </div>
+
+            <div class="header-elements d-none py-0 mb-3 mb-md-0" style="min-width:80%;background-color: white;">
+                @using (Html.BeginForm("OnlineClasses", "Parent", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "width:100%" }))
+                {
+                    <div class="row">
+                        <div class="col-md-6 form-group row">
+                            <label class="col-form-label col-md-4">Class Date</label>
+                            <input type="text" class="form-control col-md-8" id="txtStartDate" name="ClassDate" value="@Model.ClassDate.ToString("dd MMMM, yyyy")" />
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn bg-blue btn-icon  rounded-round legitRipple"><b><i class="icon-search4"></i> Search</b></button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+<div class="content">
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table id="tblCategory" class="table table-striped payments datatable-button-print-columns">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%">#</th>
+                            <th>Teacher </th>
+                            <th>Subject</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th>Recordings</th>
+                            <th>Option</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.Classes)
+                            {
+                                <tr>
+                                    <td>@(count + 1)</td>
+                                    <td>
+                                        @c.TeacherName
+                                    </td>
+                                    <td>
+                                        @c.SubjectName
+                                    </td>
+
+                                    <td>
+                                        @(SMEnterprise.Repository.CommonUsage.ConvertToDateTime("2020-08-01 "+c.StartTime).ToString("hh:mm tt"))
+                                    </td>
+                                    <td>
+                                        @(SMEnterprise.Repository.CommonUsage.ConvertToDateTime("2020-08-01 "+c.EndTime).ToString("hh:mm tt"))
+                                    </td>
+                                    <td>
+                                        @c.Recordings.Count()
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-outline bg-slate-600 text-slate-600 border-slate dropdown-toggle" data-toggle="dropdown">Options</button>
+                                            <div class="dropdown-menu dropdown-menu-right">
+                                                @if (c.Status == 0)
+                                                {
+                                                    <a href="Javascript:void(0);" class="dropdown-item"><i class="icon-pencil4"></i> Not Started</a>
+
+                                                }
+                                                else if (c.Status == 1)
+                                                {
+                                                    <a href="Javascript:void(0);" onclick="ReJoinClass(this,@c.OCID,'@c.MeetingID')" class="dropdown-item"><i class="icon-pencil4"></i> Join Class</a>
+                                                }
+                                                else
+                                                {
+                                                    var ctr = 1;
+                                                    foreach (var r in c.Recordings)
+                                                    {
+                                                        <a href="Javascript:void(0);" onclick="PlayRecording('@r.PlaybackURL')" class="dropdown-item"><i class="icon-pencil4"></i> Play Recording @ctr</a>
+                                                        ctr++;
+                                                    }
+                                                }
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+@section pageBottom{
+    <div style="display:none;" id="divBBBContainer">
+        <div class="card">
+            <div class="card-body" style="padding:0">
+            </div>
+            <input type="hidden" id="hdnClassJoinURL" />
+        </div>
+    </div>
+    <div style="display:none;" id="divBBBRecordingContainer">
+        <div class="card">
+            <ul class="fab-menu fab-menu-absolute fab-menu-top-left" data-fab-toggle="hover" id="fab-menu-affixed-demo-right" style="top: 0.5rem;right:0.5rem">
+                @*right:0.5rem*@
+                <li>
+                    <a href="javascript:void(0);" onclick="CloseSidePanel();" class="fab-menu-btn btn btn-danger btn-float legitRipple">
+                        Close Recording
+                    </a>
+                </li>
+            </ul>
+            <div class="card-body" style="padding:0">
+            </div>
+        </div>
+    </div>
+}
+<script src="/content/global_assets/js/demo_pages/datatables_extension_buttons_print.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/OnlineClassHub")
+        .build();
+
+    connection.on("OnlineClassEnded", function (message) {
+        if (message == pMeetingID) {
+            ShowNotification('Class Ended', 'Thank you for attending Online Class', 'info');
+            CloseSidePanel();
+            connection.invoke("RemoveFromGroup", "OClass-" + pMeetingID);
+        }
+    });
+
+    connection.start();
+    var MOCID = 0;
+    var pMeetingID = '';
+    function ReJoinClass(sender, OCID, MeetingID) {
+        MOCID = OCID;
+        BlockUI();
+        if ($('#hdnClassJoinURL').val() == "") {
+            $.ajax({
+                url: "/Parent/JoinClass/" + OCID,
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                success: async function (URL) {
+                    await connection.invoke("AddToGroup", "OClass-" + MeetingID);
+                    var iframe = ' <iframe id="meetingFrame" src="' + URL + '" style="width: 100%;height:100%" allowfullscreen="" allow="camera *; microphone *; fullscreen *;" frameborder="0">' +
+                        '</iframe >';
+                    $('#divEdit').html($('#divBBBContainer').html());
+                    $('#divEdit').find('.card-body').html(iframe);
+                    $('#panel').css('padding', '0');
+                    $('#panel').css('-webkit-transform', 'scaleX(1)');
+                    $('#hdnClassJoinURL').val(URL);
+                    pMeetingID = MeetingID;
+                    UnBlockUI();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        else {
+            var URL = $('#hdnClassJoinURL').val();
+            $('#panel').css('-webkit-transform', 'scaleX(1)');
+            UnBlockUI();
+        }
+    }
+    function PlayRecording(URL) {
+        $('#divEdit').find('.card-body').html('');
+        var iframe = ' <iframe id="meetingFrame" src="' + URL + '" style="width: 100%;height:100%" allowfullscreen="" allow="camera *; microphone *; fullscreen *;" frameborder="0">' +
+            '</iframe >';
+        $('#divEdit').html($('#divBBBRecordingContainer').html());
+        $('#divEdit').find('.card-body').html(iframe);
+        $('#panel').css('padding', '0');
+        $('#panel').css('-webkit-transform', 'scaleX(1)');
+    }
+    $(function () {
+        var startpicker = $('#txtStartDate').pickadate();
+    });
+</script>
+<!-- /.content -->

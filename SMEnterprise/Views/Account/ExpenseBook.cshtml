@@ -1,0 +1,266 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Expense Book Head";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model CollectionReportModel
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/bootstrap-colorpicker.min.css")">
+    <title>Expense Book</title>
+
+}
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Day Book Report
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+        <li class="active">Expense Book Report</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("ExpenseBook", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+
+                                    <div class="col-md-3">
+
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="row">
+                                            <label class="col-md-3 text-right padding-R">Month : </label>
+                                            <div class="col-md-9 padding-L" style="padding-left: 10px;">
+
+                                                <input type="month" class="form-control" name="FromDate" value="@Model.FromDate.ToString("yyyy-MM")" />
+                                                <input type="hidden" name="ReportType" value="1" />
+                                                <input type="hidden" name="PaymentMode" value="-1" />
+
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search fa-5"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="PaymentsTable" class="table table-striped payments">
+                        <thead>
+
+
+                            <tr>
+                                <th style="width:13%">Date</th>
+                                <th style="width:13%">Particular <br /></th>
+                                @*@foreach (var com in Model.FeeType)
+                                    {
+                                        <th>@com.Name</th>
+                                    }*@
+                                <th style="width:10%">Amount (Income/CR.)</th>
+                                @*<th style="width:13%">Date</th>
+                                <th style="width:13%">Expense Type <br /></th>
+                                <th style="width:10%">Amount (Expense/DR.)</th>*@
+                            </tr>
+                        </thead>
+                        @*<tr style="">
+                                <td>Date</td>
+                                <td>Particular</td>
+                                <td>Amount</td>
+                                <td>Date</td>
+                                <td>Particular</td>
+                                <td>Amount</td>
+
+                            </tr>*@
+                        @{
+                            int count = 0;
+                            decimal TotalPayment = 0;
+                            decimal TotalExpense = 0;
+                            string expensename;
+                            // string expp;
+                            for (var ld = Model.FromDate; ld <= Model.ToDate; ld = ld.AddDays(1))
+                            {
+
+                                decimal dTotalPayment = 0;
+                                decimal ExpTotalPayment = 0;
+                                <tr>
+                                    <td>@ld.ToString("dd MMM,yyyy")</td>
+                                    @{
+                                        var td = Model.FeeReportType.Where(d => d.PaymentDate == ld).FirstOrDefault();
+                                        if (td != null)
+                                        {
+                                            <td>@td.PaymentNoRange</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
+                                    }
+                                    @foreach (var FeeT in Model.FeeType)
+                                    {
+                                        var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentDate == ld).Sum(x => x.PaymentRecieved);
+
+                                        FeeT.Sum = FeeT.Sum + rep;
+                                        dTotalPayment = dTotalPayment + rep;
+                                        TotalPayment = TotalPayment + dTotalPayment;
+                                        @*<td> <i class="fa fa-inr" aria-hidden="true"></i> @rep</td>*@
+
+                                    }
+                                    <td>
+                                        <i class="fa fa-inr" aria-hidden="true"></i> @dTotalPayment.ToString("N2")
+                                    </td>
+
+                                    @*<td>@ld.ToString("dd MMM,yyyy")</td>
+
+                                    @{
+                                        var exp = Model.ExpenseReportType.Where(d => d.ExpenceDate == ld).FirstOrDefault();
+                                        if (exp != null)
+                                        {
+                                            <td>@exp.ExpenseNoRange</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
+                                    }
+
+                                  
+
+
+                                    <td>
+                                        @{
+                                            var expsmt = Model.ExpenseReportType.Where(x => x.ExpenceDate == ld).FirstOrDefault();
+
+                                        }
+                                        <i class="fa fa-inr" aria-hidden="true"></i> @(expsmt == null ? "0.0" : expsmt.ExpenceAmount.ToString("0.0"))
+
+                                    </td>*@
+                                </tr>
+                                count++;
+                            }
+
+                        }
+                        <tfoot>
+                            <tr style="background-color: #606d73;color: white;">
+                                <td colspan="2">
+                                    <b> Total Collection</b>
+                                </td>
+                                @*@foreach (var com in Model.FeeType)
+                                    {
+                                        <td>@com.Sum</td>
+                                    }*@
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @((Model.FeeType.Sum(x => x.Sum)).ToString("N2"))</b></td>
+                                @*<td colspan="2">
+                                    <b> Total Expenses</b>
+                                </td>
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i>@((Model.ExpenseReportType.Sum(x => x.ExpenceAmount)).ToString("N2"))</b></td>*@
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        $(document).ready(function () {
+               var repname = '@PermissionManager.GetLoggedInUser().Description' + '<br /> Date wise Student Records ';
+            var handleDataTableButtons = function () {
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+                        "paging": true,
+                        "pageLength": 31,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                footer: true,
+                                title: repname
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                footer: true,
+                                title: repname
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                footer: true,
+                                title: repname
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                footer: true,
+                                title: repname
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                footer: true,
+                                title: repname
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
+        });
+        $(function () {
+            $('#liReportDatewiseMonthlyFeeCollection').closest('ul').closest('li').addClass('active');
+            $('#liReportDatewiseMonthlyFeeCollection').addClass('active');
+
+        });
+    </script>
+}
+<!-- /.content -->

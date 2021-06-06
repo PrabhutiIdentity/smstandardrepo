@@ -1,0 +1,231 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model SMEnterprise.Models.EvaluationSchemePageModel
+<link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Evaluation Scheme Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Evaluation Scheme Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("EvaluationSchemeManagement", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-5 text-right" style="padding-right: 0px;">Session :</label>
+                                        <div class="col-md-7">
+                                            <select class="form-control" name="ID" ID="ddlEvaluations">
+                                                @foreach (SchoolSessionModel e in Model.Sessions)
+                                                {
+                                                    <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+
+                                            <div class="col-md-2">
+                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 30%">Name</th>
+                                <th style="width: 45%">Classes</th>
+                                <th style="width: 15%">
+                                    <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditScheme" onclick="EditScheme(0,'0','');">Add New</a>
+                                </th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.Schemes)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @(count + 1)
+                                        <input type="hidden" name="ID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                        <input type="hidden" name="ClassIDs" id="hdnEvaluationSchemeClasses" value="@c.ClassIDs" />
+                                    </td>
+                                    <td>
+                                        @c.EvaluationSchemeName
+                                    </td>
+
+                                    <td>
+                                        @c.Classes
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="javascript:void(0)" data-toggle="modal" data-target="#mdlEditScheme" class="btn btn-link" onclick="EditScheme(@c.EvaluationSchemeID,'@c.ClassIDs',' @c.EvaluationSchemeName');">Edit</a>
+                                            @using (Html.BeginForm("UpdateEvaluationScheme", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="EvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                                <button onclick="return EvaluationSchemeDelete(this,' @c.EvaluationSchemeName');" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section pageBottom{
+    <div id="mdlEditScheme" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Evaluation Scheme</h4>
+                </div>
+                <div class="modal-body">
+                    <form role="form" action="/admin/UpdateEvaluationScheme">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
+                                <input type="hidden" name="ClassIDs" id="hdnClassIDs" />
+                                <input type="hidden" name="EvaluationSchemeID" id="hdnEditEvaluationSchemeID" />
+                                <label for="txtSchemeTitle">Scheme Title</label>
+                                <input type="text" required name="EvaluationSchemeName" class="form-control" id="txtSchemeTitle" placeholder="Enter Evaluation Scheme Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Classes</label>
+                                <div class="row EClassList">
+                                    @foreach (var cls in Model.Classes)
+                                    {
+                                        <div class="col-md-6">
+                                            <input type="checkbox" clsid="@cls.ClassID" esid="@cls.EvaluationSchemeID" id="chkClass_@cls.ClassID" class="minimal class-checkbox">@cls.ClassName <span class="eSchemeName">(@cls.EducationLevelName)</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary pull-right" onclick="return SaveEvaluationScheme();">Submit</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+    function SaveEvaluationScheme() {
+        var classes = '';
+        $(".EClassList").find('.class-checkbox').each(function () {
+            if ($(this).is(':checked')==true) {
+                if (classes != '') {
+                    classes = classes + ',';
+                }
+                classes = classes + $(this).attr('clsid');
+            }
+        });
+        $('#hdnClassIDs').val(classes);
+        return true;
+    }
+    function EditScheme(SchemeID, classes, title) {
+    alert ("SchemeID"+SchemeID);
+    alert ("classes"+classes);
+    alert ("title"+title);
+        $('#txtSchemeTitle').val(title);
+        var cls = classes.split(",");
+    var clsdone=[];
+        $('#hdnEditEvaluationSchemeID').val(SchemeID);
+        $(".EClassList").find('.class-checkbox').each(function () {
+        if($.inArray($(this).attr('clsid'), clsdone) == -1)
+        {   
+                if($(this).attr('esid')==SchemeID)
+                {
+                    clsdone.push(cls);
+                        if ($.inArray($(this).attr('clsid'), cls) != -1) {
+                            $(this).attr('checked', 'checked');
+                        }
+                        else {
+                            $(this).removeAttr('checked');
+                            if ($(this).attr('esid') != '0') {
+                                 $(this).attr('disabled', 'disabled');
+                            }
+                        }
+                }
+        }
+        });
+    }
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liEvaluationSchemeManagement').closest('ul').closest('li').addClass('active');
+        $('#liEvaluationSchemeManagement').addClass('active');
+    });
+    function EvaluationSchemeDelete(sender,EvaluationName) {
+
+        if (confirm('Are you sure you wish to delete '+EvaluationName+' Evaluation Scheme?')) {
+
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+    function BeforeEvaluationSchemeUpdate(sender) {
+        if ($(sender).closest('tr').find('#txtEvaluationSchemeName').val() == "") {
+            alert("Plese Fill Required Details!!!!");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+</script>
+<!-- /.content -->

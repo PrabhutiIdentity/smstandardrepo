@@ -1,0 +1,59 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover jambo_table">
+    <thead>
+        <tr>
+            <th width="15%">Class/Section</th>
+            <th width="10%">Session</th>
+            <th width="13%">From</th>
+            <th width="12%">To</th>
+            <th width="10%">Roll No.</th>
+            <th width="10%">Quota</th>
+            <th width="10%">Fee Mode</th>
+            <th width="10%">House</th>
+            <th width="8%">Status</th>
+            <th width="7%">Edit</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            foreach (SMEnterprise.Models.SessionModel c in Model.Sessions)
+            {
+                <tr>
+
+                    <td>
+                        <input type="hidden" id="StudentSessionUID" name="ID" value="@c.StudentSessionUID" />
+                        @c.ClassName / @c.SectionName
+                    </td>
+                    <td>
+                        @c.SessionName
+                    </td>
+                    <td>@c.FromDate.ToString("dd MMM, yyyy")</td>
+                    <td>@c.ToDate.ToString("dd MMM, yyyy")</td>
+
+                    <td>@c.RollNo</td>
+                    <td>@c.QuotaName</td>
+                    <td>@(c.FeePaymentMode == 1 ? "Monthly" : c.FeePaymentMode == 3 ? "Quarterly" : "Half Yearly")</td>
+                    <td>@c.HouseName</td>
+                    <td>
+                        @if (c.Status == 1)
+                        {
+                            <label class='badge bg-green'>Active</label>
+                        }
+                        else
+                        {
+                            <label class='badge bg-red'>Inactive</label>
+                        }
+
+                    </td>
+                    <td>
+                        <input type="hidden" id="hdnStudentID" value="@Model.Student.StudentID" />
+                        <a href="javascript:void(0);" id="@c.StudentSessionUID" class="btn-link EditSectionClose" onclick="EditSession(this);">Edit</a>
+
+
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+
+</table>
+

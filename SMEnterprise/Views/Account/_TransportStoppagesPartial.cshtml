@@ -1,0 +1,59 @@
+﻿
+@{
+            int rcount = 0;
+            foreach (SMEnterprise.Models.RouteStoppageModel c in Model.Stops)
+            {
+                rcount++;
+        <tr>
+            <td>@rcount</td>
+
+            <td>
+                @c.AreaName
+            </td>
+            <td style="text-align:center">
+                @c.SequenceNo
+            </td>
+            <td style="text-align:center">@c.Time</td>
+            <td style="text-align:center">@c.HaltDuration min</td>
+            <td style="text-align:center">
+                @c.SequenceNoR
+            </td>
+            <td style="text-align:center">@c.TimeR</td>
+
+            <td style="text-align:center">@c.HaltDurationR min</td>
+            <td style="text-align:center">
+                <div class="radio">
+                    <label>
+                        @{
+                            var chk = "";
+                            if (Model.StopDetails.StopID == 0)
+                            {
+                                if (c.AreaID == Model.StopDetails.AreaID)
+                                {
+                                    chk = "checked";
+                                }
+                            }
+                            else if (Model.StopDetails.StopID == c.StopID)
+                            {
+                                chk = "checked";
+                            }
+                            <div class="iradio_flat-blue @chk" style="position: relative;">
+                                <input type="radio" name="rStopID" class="flat icheckRadio" @chk value="@c.StopID" style="position: absolute; opacity: 0;">
+                                <ins class="iCheck-helper" onclick="TransportCheckChanged(this,@c.StopID);" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                            </div>
+                        }
+                    </label>
+                </div>
+            </td>
+        </tr>
+                            }
+                            <script>
+                                $('input.flat').iCheck({
+                                    checkboxClass: 'icheckbox_flat-blue',
+                                    radioClass: 'iradio_flat-blue'
+                                });
+
+                            </script>
+}
+
+

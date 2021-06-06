@@ -1,0 +1,546 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Education Level/Period Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Route Management</title>
+}
+<script>
+    function DeleteRoute(sender, type) {
+        if ($(sender).closest('tr').find('#hdnStoppages').val() != "0") {
+            ShowClosingNotification('Error', 'This Route has Stoppages, So it can\'t be Deleted!!!!', 'error');
+            return false;
+        }
+        else {
+            return confirm("Do you Really Want to Delete this Section????");
+
+        }
+    }
+    function DeleteStop(sender) {
+        if (confirm('Do you Really want to delete this stop!!!!')) {
+            $.ajax({
+                url: "@Url.Action("UpdateStop", "Admin")",
+                type: 'POST',
+            data: JSON.stringify({
+                OpType: -1,
+                StopID: $(sender).closest('tr').find('#hdnStopID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+                $(sender).closest('table').closest('td').html(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+        }
+    }
+    function SaveStop(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateStop", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+                OpType: OpType,
+                StopID: $(sender).closest('.box-body').find('#hdnStopID').val(),
+                RouteID: $(sender).closest('.box-body').find('#hdnRouteID').val(),
+                CountryID: $(sender).closest('.box-body').find('#ddlRouteStoppageCountry').val(),
+                StateID: $(sender).closest('.box-body').find('#ddlRouteStoppageState').val(),
+                CityID: $(sender).closest('.box-body').find('#ddlRouteStoppageCity').val(),
+                AreaID: $(sender).closest('.box-body').find('#ddlRouteStoppageArea').val(),
+                Time: $(sender).closest('.box-body').find('#txtRouteStoppageTime').val(),
+                HaltDuration: $(sender).closest('.box-body').find('#txtRouteStoppageHalt').val(),
+                SequenceNo: $(sender).closest('.box-body').find('#txtRouteStoppageSequence').val(),
+                TimeR: $(sender).closest('.box-body').find('#txtRouteStoppageTimeR').val(),
+                HaltDurationR: $(sender).closest('.box-body').find('#txtRouteStoppageHaltR').val(),
+                SequenceNoR: $(sender).closest('.box-body').find('#txtRouteStoppageSequenceR').val(),
+                Rate: $(sender).closest('.box-body').find('#txtRate').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+                $(sender).closest('table').closest('td').html(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+    function EditStop(sender) {
+
+
+        if ($(sender).hasClass("EditSectionClose")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/EditTransportRouteStop/" + $(sender).attr('id') + "/" + $(sender).closest('tr').find('#hdnRouteID').val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        html = html.replace('id="hdnRouteID"', 'id="hdnRouteID" value="' + $(sender).closest("tr").find('#hdnRouteID').val() + '"');
+        if ($(sender).text().trim() == "Add New Stop") {
+            $(sender)
+                .closest("thead")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+
+        }
+        else {
+            $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+
+        }
+        var ele = document.getElementsByClassName("EditSectionOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            if ($(ele[0]).text() == 'Cancel') {
+                $(ele[0]).text('Add New Stop');
+            }
+            else {
+                $(ele[0]).text('Edit');
+            }
+        }
+        if ($(sender).text() == 'Add New Stop') {
+            $(sender).text('Cancel');
+        }
+        else {
+
+            $(sender).text('Close');
+        }
+        $(sender).removeClass("EditSectionClose");
+        $(sender).addClass("EditSectionOpen");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel') {
+                $(sender).text('Add New Stop');
+                $(sender).closest("thead").next().remove();
+            }
+            else {
+                $(sender).text('Edit');
+                $(sender).closest("tr").next().remove();
+            }
+
+
+        }
+
+    }
+</script>
+<script>
+    function ToggleDetails(sender) {
+
+
+        if ($(sender).hasClass("StopsClosed")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetTransportRouteStops/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+        var ele = document.getElementsByClassName("StopsOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            $(ele[0]).closest("tr").css('background-color', 'white');
+        }
+
+        $(sender).text("Close");
+        $(sender).removeClass("StopsClosed");
+        $(sender).addClass("StopsOpen");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).text("Manage");
+            $(sender).removeClass("StopsOpen");
+            $(sender).closest("tr").css('background-color', 'white');
+            $(sender).addClass("StopsClosed");
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    function DeleteEducationLevel(sender) {
+        return confirm("Do you Really Want to Delete this Section????");
+
+    }
+</script>
+<script>
+    function ViewVehicles(sender) {
+
+
+        if ($(sender).hasClass("RouteVehicleClose")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetTransportRouteVehicles/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+        var ele = document.getElementsByClassName("RouteVehicleOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            $(ele[0]).closest("tr").css('background-color', 'white');
+        }
+        $(sender).text('Close');
+        $(sender).removeClass("RouteVehicleClose");
+        $(sender).addClass("RouteVehicleOpen");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).text('Manage');
+            $(sender).removeClass("RouteVehicleOpen");
+            $(sender).closest("tr").css('background-color', 'white');
+            $(sender).addClass("RouteVehicleClose");
+            $(sender).closest("tr").next().remove();
+
+        }
+    }
+    function ViewRouteTimings(sender) {
+
+
+        if ($(sender).hasClass("RouteVehicleTimingClose")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetTransportRouteVehicleStops/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+        var ele = document.getElementsByClassName("RouteVehicleTimingOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            $(ele[0]).closest("tr").css('background-color', 'white');
+        }
+
+        $(sender).text('Close');
+        $(sender).removeClass("RouteVehicleTimingClose");
+        $(sender).addClass("RouteVehicleTimingOpen");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).text('ViewRoute');
+            $(sender).removeClass("RouteVehicleTimingOpen");
+            $(sender).closest("tr").css('background-color', 'white');
+            $(sender).addClass("RouteVehicleTimingClose");
+            $(sender).closest("tr").next().remove();
+
+        }
+    }
+    function DeleteRouteVehicle(sender, OpType) {
+        if ($(sender).closest('tr').find('#hdnPassengerCount').val() != "0") {
+            ShowClosingNotification('Error', 'This Vehicle have Passengers, so it can\'t be Deleted!!!!', 'error');
+        }
+        else {
+            if (confirm("Do you really want to delete this Vehicle!!!!")) {
+                SaveRouteVehicle(sender, -1);
+            }
+        }
+    }
+    function SaveRouteVehicle(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateRouteVehicle", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+                OpType: OpType,
+                VehicleRouteID: $(sender).closest('tr').find('#hdnVehicleRouteID').val(),
+                VehicleID: $(sender).closest('tr').find('#ddlVehicles').val(),
+                RouteID: $(sender).closest('tr').find('#hdnRouteID').val(),
+                DelayFromRouteTime: $(sender).closest('tr').find('#txtDelayFromRouteTime').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
+                ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+                $(sender).closest('table').closest('td').html(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+</script>
+<script>
+    function LocationChanged(sender, type) {
+
+        $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetLocationLists/" + $(sender).val() + "/" + type,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        if (type == 0) {
+            $(sender).closest('tr').find('#ddlRouteStoppageState').html(html);
+            $(sender).closest('tr').find('#ddlRouteStoppageCity').html('<Option value="0">--Select--</option>');
+            $(sender).closest('tr').find('#ddlRouteStoppageArea').html('<Option value="0">--Select--</option>');
+        }
+        else if (type == 1) {
+            $(sender).closest('tr').find('#ddlRouteStoppageCity').html(html);
+            $(sender).closest('tr').find('#ddlRouteStoppageArea').html('<Option value="0">--Select--</option>');
+        }
+        else {
+            $(sender).closest('tr').find('#ddlRouteStoppageArea').html(html);
+        }
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+
+    }
+</script>
+<style>
+    .table thead tr th {
+        text-align: center !important;
+        vertical-align: middle !important;
+        background-color: rgba(57, 221, 183, 0.72);
+        color: white;
+    }
+
+    #tblCategory table thead tr th a {
+        color: #b26c33;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Route Management
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Route Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                @if (((StartupModel)Session["StartupModel"]).TransportFeeMode == -1)
+                                {
+                                    <th style="width: 25%">Route Name</th>
+                                    <th style="width: 15%">Route Fee</th>
+                                }
+                                else
+                                {
+                                    <th style="width: 40%">Route Name</th>
+                                }
+                                <th style="width: 15%">#Stoppages</th>
+                                <th style="width: 15%">#Vehicles</th>
+                                <th style="width: 15%">Status</th>
+                                <th style="width: 15%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                foreach (RouteModel c in Model)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <input type="hidden" name="ID" value="@c.RouteID" />
+                                            <span class="ViewCopy visible">@c.RouteName</span>
+                                            <input class="form-control editCopy hidden" type="text" onchange='$(this).closest("tr").find("#hdnRouteName").val($(this).val())' name="RouteName" value="@c.RouteName" />
+                                        </td>
+                                        @if (((StartupModel)Session["StartupModel"]).TransportFeeMode == -1)
+                                        {
+                                            <td>
+                                                <span class="ViewCopy visible">@c.TwoWayFees</span>
+                                                <input class="form-control editCopy hidden" type="number" onchange='$(this).closest("tr").find("#hdnTwoWayFees").val($(this).val())' name="TwoWayFees" value="@c.TwoWayFees" />
+                                            </td>
+                                        }
+                                        <td style="text-align:center">
+                                            @c.Stoppages
+                                            (<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.RouteID" class="StopsClosed">Manage</a>)
+                                            <input type="hidden" id="hdnStoppages" value="@c.Stoppages" />
+                                        </td>
+
+                                        <td style="text-align:center">
+                                            <b>@c.VehicleCount</b>  (<a href="javascript:void(0);" onclick="ViewVehicles(this);" id="@c.RouteID" class="RouteVehicleClose">Manage</a>)
+                                        </td>
+                                        <td>
+                                            <span class="ViewCopy visible"><label class='badge bg-@(c.IsApproved == 0 ? "red" : "green")'>@(c.IsApproved == 0 ? "Inactive" : "Active")</label></span>
+
+                                            <label class="switch switch-green editCopy hidden" style="padding-top: 3px;">
+                                                @if (c.IsApproved == 1)
+                                                {
+                                                    <input id="chkType" type="checkbox" class="switch-input" checked>
+                                                }
+                                                else
+                                                {
+                                                    <input id="chkType" type="checkbox" class="switch-input">
+                                                }
+                                                <span class="switch-label" onclick='$(this).closest("tr").find("#hdnIsApproved").val($(this).closest("tr").find("#hdnIsApproved").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+                                            </label>
+                                        </td>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateRoute", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" id="hdnIsApproved" name="IsApproved" value="@c.IsApproved" />
+                                                        <input type="hidden" id="hdnRouteName" name="RouteName" value="@c.RouteName" />
+                                                        <input type="hidden" id="hdnRouteID" name="RouteID" value="@c.RouteID" />
+                                                        <input type="hidden" id="hdnOneWayFees" name="OneWayFees" value="@c.OneWayFees" />
+                                                        <input type="hidden" id="hdnTwoWayFees" name="TwoWayFees" value="@c.TwoWayFees" />
+                                                        <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" />
+                                                    }
+                                                    @using (Html.BeginForm("UpdateRoute", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" id="hdnRouteID" name="RouteID" value="@c.RouteID" />
+                                                        <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                        <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteRoute(this);" />
+                                                    }
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                        <tfoot style="border-width: 2px;border-style: groove;display:none;">
+                            <tr>
+                                <td>
+                                    <input type="hidden" name="ID" value="0" />
+                                    <input class="form-control" type="text" onchange='$(this).closest("tr").find("#hdnRouteName").val($(this).val())' name="RouteName" value="" />
+                                </td>
+                                @if (((StartupModel)Session["StartupModel"]).TransportFeeMode == -1)
+                                {
+                                    <td>
+                                        <input class="form-control" type="number" onchange='$(this).closest("tr").find("#hdnTwoWayFees").val($(this).val())' name="TwoWayFees" value="0" />
+                                    </td>
+                                }
+                                <td>0
+
+                                <td>
+                                    0
+                                </td>
+                                <td>
+                                    <label class="switch switch-green" style="padding-top: 3px;">
+
+                                        <input id="chkType" type="checkbox" class="switch-input" checked>
+
+                                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnIsApproved").val($(this).closest("tr").find("#hdnIsApproved").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                    </label>
+                                </td>
+                                <td>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("UpdateRoute", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" id="hdnIsApproved" name="IsApproved" value="1" />
+                                                <input type="hidden" id="hdnRouteName" name="RouteName" value="" />
+                                                <input type="hidden" id="hdnRouteID" name="RouteID" value="0" />
+                                                <input type="hidden" id="hdnOneWayFees" name="OneWayFees" value="0" />
+                                                <input type="hidden" id="hdnTwoWayFees" name="TwoWayFees" value="0" />
+                                                <input type="submit" class="btn btn-link" value="Add New" />
+                                            }
+
+                                        </div>
+
+                                    </div>
+                                </td>
+                            </tr>
+
+
+
+
+
+
+
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+
+        $('#liRouteManagement').closest('ul').closest('li').addClass('active');
+        $('#liRouteManagement').addClass('active');
+    });
+
+</script>
+
+<!-- /.content -->

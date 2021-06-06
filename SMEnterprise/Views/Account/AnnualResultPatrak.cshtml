@@ -1,0 +1,225 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model ClassGenderCategoryCountPageModel
+@section IncludeCss
+{
+    <title>Class wise Gender Category Students Count</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .centertd {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("AnnualResultPatrak", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <label class="col-md-4 text-right">Evaluation Scheme :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SchemeID" id="ddlSchemeID" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Schemes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SchemeID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right">Evaluation :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="EvaluationID" id="ddlEvaluationID" onchange="$('#frmGetStudents').submit();">
+                                            @foreach (NameIDModel el in Model.Evaluations)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th rowspan="2" class="centertd">कक्षा</th>
+                                    <th rowspan="2" class="centertd">विवरण</th>
+                                    <th rowspan="2" class="centertd">नामांकित</th>
+                                    <th rowspan="2" class="centertd">सम्मिलित</th>
+                                    <th rowspan="2" class="centertd">ए ग्रेड</th>
+                                    <th rowspan="2" class="centertd">बी ग्रेड</th>
+                                    <th rowspan="2" class="centertd">सी ग्रेड</th>
+                                    <th rowspan="2" class="centertd">डी ग्रेड</th>
+                                    <th colspan="@Model.RGroupSubjects.Count()" style="text-align:center;">
+                                        इ ग्रेड ( ३३ प्रति. से कम)<br /><small>विशेष शिक्षण की आवश्यकता</small>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    @foreach (var r in Model.RGroupSubjects)
+                                    {
+                                        <th>@r.Name</th>
+                                    }
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (ClassModel c in Model.Classes)
+                                {
+                                    <tr>
+                                        <td rowspan="6">@c.ClassName</td>
+                                    </tr>
+                                    <tr>
+                                        <td>बालक</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0).Sum(it => it.Students)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0).Sum(it => it.IsExamAttended)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0).Sum(it => it.AGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0).Sum(it => it.BGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0).Sum(it => it.CGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 0).Sum(it => it.DGrade)</td>
+                                        @foreach (var g in Model.RGroupSubjects)
+                                        {
+                                            <td>@Model.SubjectData.Where(r => r.ClassID == c.ClassID && r.Gender == 0 && r.GSubjectID == g.ID).Sum(it => it.CNT)</td>
+                                        }
+                                    </tr>
+
+                                    <tr>
+                                        <td>बालिका</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1).Sum(it => it.Students)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1).Sum(it => it.IsExamAttended)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1).Sum(it => it.AGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1).Sum(it => it.BGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1).Sum(it => it.CGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Gender == 1).Sum(it => it.DGrade)</td>
+                                        @foreach (var g in Model.RGroupSubjects)
+                                        {
+                                            <td>@Model.SubjectData.Where(r => r.ClassID == c.ClassID && r.Gender == 1 && r.GSubjectID == g.ID).Sum(it => it.CNT)</td>
+                                        }
+                                    </tr>
+
+                                    <tr>
+                                        <td>कुल</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID).Sum(it => it.Students)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID).Sum(it => it.IsExamAttended)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID).Sum(it => it.AGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID).Sum(it => it.BGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID).Sum(it => it.CGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID).Sum(it => it.DGrade)</td>
+                                        @foreach (var g in Model.RGroupSubjects)
+                                        {
+                                            <td>@Model.SubjectData.Where(r => r.ClassID == c.ClassID && r.GSubjectID == g.ID).Sum(it => it.CNT)</td>
+                                        }
+                                    </tr>
+
+                                    <tr>
+                                        <td>कुल में SC</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 2).Sum(it => it.Students)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 2).Sum(it => it.IsExamAttended)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 2).Sum(it => it.AGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 2).Sum(it => it.BGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 2).Sum(it => it.CGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 2).Sum(it => it.DGrade)</td>
+                                        @foreach (var g in Model.RGroupSubjects)
+                                        {
+                                            <td>@Model.SubjectData.Where(r => r.ClassID == c.ClassID && r.Category == 2 && r.GSubjectID == g.ID).Sum(it => it.CNT)</td>
+                                        }
+                                    </tr>
+
+                                    <tr>
+                                        <td>कुल में ST</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 3).Sum(it => it.Students)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 3).Sum(it => it.IsExamAttended)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 3).Sum(it => it.AGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 3).Sum(it => it.BGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 3).Sum(it => it.CGrade)</td>
+                                        <td>@Model.Data.Where(r => r.ClassID == c.ClassID && r.Category == 3).Sum(it => it.DGrade)</td>
+                                        @foreach (var g in Model.RGroupSubjects)
+                                        {
+                                            <td>@Model.SubjectData.Where(r => r.ClassID == c.ClassID && r.Category == 3 && r.GSubjectID == g.ID).Sum(it => it.CNT)</td>
+                                        }
+                                    </tr>
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+
+
+    </script>
+}
+<!-- /.content -->

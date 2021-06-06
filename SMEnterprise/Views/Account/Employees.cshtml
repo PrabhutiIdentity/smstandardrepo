@@ -1,0 +1,221 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeListPageModel
+@section IncludeCss
+{
+    <title>Employee Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("Employees", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetEmployees" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding">
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <a href="/Account/EmployeeDetails/0/1" target="_blank" class="btn btn-link" style="color:white;">Add Employee</a>
+                                </div>
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-4 text-right">Employee Type :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="EmployeeType" id="ddlClass" onchange="$('#frmGetEmployees').submit();">
+                                            <option value="0" @(Model.EmployeeType == 0 ? "selected" : "")>All</option>
+                                            @foreach (EmployeeTypeModel el in Model.EmployeeTypes)
+                                            {
+                                                <option value="@el.EmployeeTypeID" @(el.EmployeeTypeID == Model.EmployeeType ? "selected" : "")>@el.EmployeeTypeName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 8%">Photo</th>
+                                    <th style="width: 13%">Name</th>
+                                    <th style="width: 13%">Joining Date</th>
+                                    <th style="width: 12%">Birth Date</th>
+                                    <th style="width: 5%">BG</th>
+                                    <th style="width: 12%">Aadhar Number</th>
+                                    <th style="width: 10%">Contact</th>
+                                    <th style="width: 7%">Status</th>
+                                    <th style="width: 10%">Designation</th>
+                                    <th style="width: 10%">View</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (EmployeeModel c in Model.Employees)
+                                {
+                            <tr>
+
+                                <td>
+                                    @*~/Images/EmployeeImage/Thumb/*@
+                                    <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/EmployeeImage/")@(c.EmployeeID)_@c.Photo" />
+                                </td>
+                                <td>
+                                    @c.EmployeeName
+                                    <br />
+                                    @c.EmployeeSID
+                                </td>
+
+                                <td>
+                                    @c.DOJ.ToString("dd MMM, yyyy")
+
+                                </td>
+                                <td>
+                                    @c.DOB.ToString("dd MMM, yyyy")
+
+                                </td>
+                                <td>@c.BloodGroup</td>
+                                <td>
+                                    @c.AadharNumber
+                                </td>
+                                <td>
+                                    @c.MobileNumber
+                                </td>
+
+                                <td>
+                                    @if (c.Status != 0)
+                                    {
+                                        <label class='badge bg-green'>Active</label>
+                                    }
+                                    else
+                                    {
+                                        <label class='badge bg-red'>No</label>
+                                    }
+                                </td>
+                                <td>
+                                    @c.EmployeeTypeName
+                                </td>
+                                <td>
+                                    <div class="row" style="margin-right: 10px;">
+                                        <div class="col-md-6">
+                                            <a href="/Account/EmployeeDetails/@c.EmployeeID/1" target="_blank" class="btn btn-link">View</a>
+                                        </div>
+                                        <div class="col-md-6">
+                                            @using (Html.BeginForm("DeleteEmployee", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                            {
+                                                <input type="hidden" name="EmployeeType" value="@Model.EmployeeType" />
+                                                <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
+
+                                                <button type="submit" onclick="return DeleteEmployee(this);" class="btn btn-link">Delete</button>
+                                            }
+                                        </div>
+                                    </div>
+
+                                </td>
+                            </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+
+        $(function () {
+            $("#tblCategory").DataTable({
+         "paging": true,
+                        "pageLength": 50,
+         responsive: true
+        });
+        });
+        function DeleteEmployee(sender) {
+            return confirm('Do you really want to delete Employee!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->

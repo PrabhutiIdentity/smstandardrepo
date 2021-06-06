@@ -1,0 +1,227 @@
+﻿@{
+    ViewBag.Title = "MailBox";
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>P-School | Payments</title>
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+<link rel="stylesheet" href="@Url.Content("~/css/RecieptStyle.css")">
+
+
+}
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+        
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>Payments</h2>
+
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+
+                        <!-- start project list -->
+                        <table id="PaymentsTable" class="table table-striped payments">
+                            <thead>
+                                <tr>
+                                    <th style="width: 1%">#</th>
+                                    <th style="width: 20%">Payment For</th>
+                                    <th>Referance No.</th>
+                                    <th>Pay Mode</th>
+                                    <th>Amount</th>
+                                    <th>Fee Month</th>
+                                    <th>Payment Date</th>
+                                    @*<th>Status</th>*@
+                                    <th @*style="width: 15%"*@></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var counter = 1;
+                                    foreach (SMEnterprise.Models.PaymentModel p in Model)
+                                    {
+                                        <tr>
+                                            <td>@counter</td>
+                                            <td>
+                                                @p.PayeeName
+                                            </td>
+                                            <td>
+                                                @p.ReferanceNumber
+                                            </td>
+                                            <td>
+                                                @(p.PaymentMode == 0 ? "Cash" : p.PaymentMode == 1 ? "Cheque" : "Online")
+                                            </td>
+                                            <td>
+                                                @p.PaymentAmount
+                                            </td>
+                                            <td>
+                                                @p.MonthName , @p.Year
+                                            </td>
+                                            <td>
+                                                @p.PaymentDate.ToString("dd MMM, yyyy")
+                                            </td>
+                                            @*<td>
+                                                @if (p.PaymentStatus == 1)
+                                                {
+                                                    <label class='badge bg-green'>Paid</label>
+                                                }
+                                                else if (p.PaymentStatus == 2)
+                                                {
+                                                    <label class='badge bg-blue'>Partial</label>
+                                                }
+                                                else
+                                                {
+                                                    <label class='badge bg-red'>Pending</label>
+                                                }
+                                            </td>*@
+                                            <td>
+                                                <a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@p.PaymentID" class="btn btn-primary btn-xs Closed"><i class="fa fa-folder"></i> View Recipt </a>
+                                                @*<a href="#" class="btn btn-info btn-xs"><i class="fa fa-print"></i> Print </a>*@
+                                            </td>
+                                        </tr>
+                                        counter++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                        <!-- end project list -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+<script src="@Url.Content("~/js/jszip.min.js")"></script>
+<script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+<script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+                        dom: "Bfrtip",
+                        buttons: [
+                          {
+                              extend: "copy",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "csv",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "excel",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "pdfHtml5",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "print",
+                              className: "btn-sm"
+                          },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
+        });
+        function ToggleDetails(sender) {
+
+
+            if ($(sender).hasClass("Closed")) {
+
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Parent/GetFeeReciept/" + $(sender).attr('id'),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        // fill the div with the html returned by action
+                        $(sender)
+                            .closest("tr")
+                            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;'>" + html + "</td></tr>");
+                        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+                        var ele = document.getElementsByClassName("Open");
+                        if (ele.length > 0) {
+                            $(ele[0]).click();
+                            $(ele[0]).closest("tr").css('background-color', 'white');
+                            $(ele[0]).html('Close ');
+                        }
+
+                        $(sender).removeClass("Closed");
+                        $(sender).addClass("Open");
+
+                        $(sender).html('Close ');
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+            else {
+                $(sender).removeClass("Open");
+                $(sender).closest("tr").css('background-color', 'white');
+                $(sender).addClass("Closed");
+                $(sender).closest("tr").next().remove();
+                $(sender).html('<i class="fa fa-folder"></i> View Recipt');
+
+            }
+
+        }
+        function PrintRecipt() {
+            var contents = $("#divRecipt").html();//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}

@@ -1,0 +1,145 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.AbsentStudentReportModel
+@section IncludeCss
+{
+    <title>Absent Student Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }    
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("AbsentStudentReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="col-md-5">
+                        <h3 class="box-title">Absent Student Report </h3>
+                    </div>
+                    <div class="row std-mng-head col-md-7">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-7 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Date : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" value="@Model.SelectedDate.ToString("yyyy-MM-dd")" name="SelectedDate" id="dtDate" class="form-control" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R"> Print : </label>
+                                        <div class="col-md-9">
+                                            <a href="javascript:void(0);" onclick="printAbsentList();"><i class="fa fa-print"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+                    <div class="x_content" id="divMainContainer">
+                        @{
+                            var StudentIndex = 0;
+                            foreach (ClassModel c in Model.Classes)
+                            {
+                                var classAbsentCount = 0;
+                                <div class="row classContainer">
+                                    <div class="col-md-12 classNamediv">
+                                        <h2> Class : @c.ClassName</h2> <small id="divClassAbsCount"></small>
+                                    </div>
+                                    <ul class="list-unstyled top_profiles scroll-view">
+
+                                        @for (int i = StudentIndex; i < Model.Students.Count; i++)
+                                        {
+                                            var student = Model.Students[i];
+                                            if (student.ClassID == c.ClassID)
+                                            {
+                                                classAbsentCount = classAbsentCount + 1;
+                                                StudentIndex = StudentIndex + 1;
+                                                <li class="media event col-md-4">
+                                                    <a class="pull-left border-aero profile_thumb">
+                                                    </a>
+                                                    <div class="media-body">
+                                                        <a class="title" href="#">@student.Name (@student.StudentSID)</a>
+                                                        <p>@c.ClassName / @student.SectionName </p>
+                                                        <p>
+                                                            Roll No. <small>@student.RollNo</small>
+                                                        </p>
+                                                    </div>
+                                                </li>
+                                            }
+                                        }
+                                    </ul>
+
+                                    <input type="hidden" id="hdnClassAbsentCount" value="@classAbsentCount" />
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+
+    <script>
+        $(document).ready(function () {
+            $(".classContainer").each(function () {
+                var count = $(this).find('#hdnClassAbsentCount').val();
+                if (count == 0) {
+                    $(this).remove();
+                }
+                else {
+                    $(this).find('#divClassAbsCount').html('Total Absent : ' + count);
+                }
+            });
+        });
+        function printAbsentList() {
+            var Date = $('#dtDate').val();
+            var contents = $(".right_col").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title>Absent For ' + Date + '</title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/Gent/custom.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/studentStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 1000);
+        }
+    </script>
+}
+<!-- /.content -->

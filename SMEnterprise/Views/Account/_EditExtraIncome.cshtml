@@ -1,0 +1,98 @@
+﻿@model SMEnterprise.Models.ExtraIncomePageModel
+    @{ 
+        if(Model.IncomeDetail==null)
+        {
+            Model.IncomeDetail = new SMEnterprise.Models.ExtraIncomeModel();
+            Model.IncomeDetail.PaidDate = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+        }
+    }
+<div class="">
+    <div class="row">
+        @using (Html.BeginForm("UpdateExtraIncome", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+        {
+            <input type="hidden" id="hdnVendorID" name="ID" value="@Model.IncomeDetail.ID" />
+            <div class="form-horizontal form-label-left">
+                <div class="">
+                    <div class="col-md-4">
+                        <label class="">Payer</label>
+                        <input type="text" name="PaidBy" value="@Model.IncomeDetail.PaidBy" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Contact No</label>
+                        <input type="text" name="PayerContact" value="@Model.IncomeDetail.PayerContact" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Pan Number</label>
+                        <input type="text" name="PayerPAN" value="@Model.IncomeDetail.PayerPAN" required class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label class="">City</label>
+                                <input type="text" name="PayerCity" value="@Model.IncomeDetail.PayerCity" required class="form-control" />
+                            </div>
+                            <div class="col-md-12">
+                                <label class="">State</label>
+                                <input type="text" name="PayerState" value="@Model.IncomeDetail.PayerState" required class="form-control" />
+                            </div>
+                            <div class="col-md-12">
+                                <label class="">PIN Code</label>
+                                <input type="text" name="PayerPin" value="@Model.IncomeDetail.PayerPin" required class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="">Address</label>
+                        <textarea class="form-control" required name="PayerAddress" rows="7" style="resize:none">@Model.IncomeDetail.PayerAddress</textarea>
+                    </div>
+                    <div class="col-md-12">
+                        <label class="">Payment Title</label>
+                        <input type="text" name="Title" value="@Model.IncomeDetail.Title" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Extra Income Head</label>
+                        <select class="form-control" name="EIHeadID" id="ddlEIHeadID">
+                            @foreach (var PH in Model.Heads)
+                            {
+                                <option @(Model.IncomeDetail.EIHeadID == PH.ID ? "selected" : "") value="@PH.ID">@PH.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Payment Mode</label>
+                        <select class="form-control" name="PaymentMode" id="ddlPaymentMode">
+                            <option @(Model.IncomeDetail.PaymentMode == 0 ? "selected" : "") value="0">Cash Payment</option>
+                            <option @(Model.IncomeDetail.PaymentMode == 1 ? "selected" : "") value="1">Cheque Payment</option>
+                            <option @(Model.IncomeDetail.PaymentMode == 2 ? "selected" : "") value="2">NEFT Payment</option>
+                            <option @(Model.IncomeDetail.PaymentMode == 3 ? "selected" : "") value="3">Other Payment</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Referance No</label>
+                        <input type="text" name="ReferanceNo" value="@Model.IncomeDetail.ReferanceNo" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Date<small>(MM/DD/YYYY)</small></label>
+                        <input type="date" name="PaidDate" required value="@Model.IncomeDetail.PaidDate.ToString("yyyy-MM-dd")" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Amount</label>
+                        <input type="number" name="Amount" required value="@Model.IncomeDetail.Amount" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Recieved By</label>
+                        <input type="text" name="RecievedBy" required value="@Model.IncomeDetail.RecievedBy" class="form-control" />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="">Details</label>
+                        <textarea class="form-control" name="Description" rows="4" style="resize:none">@Model.IncomeDetail.Description</textarea>
+                    </div>
+                    <div class="col-md-12">
+                        <input class="pf-button btn btn-primary pull-right" type="submit" onclick="SaveExtraIncome(this)" name="submit" value="Save" />
+                    </div>
+                </div>
+                
+            </div>
+        }
+    </div>
+</div>

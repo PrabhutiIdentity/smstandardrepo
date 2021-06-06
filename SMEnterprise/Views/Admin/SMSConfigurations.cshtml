@@ -1,0 +1,110 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/bootstrap-colorpicker.min.css")">
+    <title>SMS Gateway Configuration</title>
+}
+@model List<SMSConfigirationModel>
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+    .form-inline{
+        display: inline;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        SMS Gateway Configuration
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">SMS Gateway Configuration</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 10%">Sl. No.</th>
+                                <th style="width: 55%">Configuration</th>
+                                <th style="width: 10%">Status</th>
+                                <th style="width: 10%">Is Default</th>
+                                <th style="width: 15%">Edit/Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                int count = 1;
+                                foreach (SMSConfigirationModel c in Model)
+                                {
+                                    <tr>
+                                        <td>@count</td>
+                                        <td>@c.Title<br />@c.baseurl</td>
+                                        <td><span class="pull-right badge bg-@(c.Status==1?"green":"red")">@(c.Status == 1 ? "Active" : "Inactive")</span></td>
+                                        <td><span class="pull-right badge bg-@(c.IsDefault==1?"green":"red")">@(c.IsDefault == 1 ? "Yes" : "No")</span></td>
+                                        <td>
+                                            <a href="/Admin/SMSConfigurationDetails/@c.SMSConfigID">Edit</a>
+                                            @using (Html.BeginForm("UpdateSMSConfiguration", "Admin", FormMethod.Post, new { @class = "form-horizontal form-inline", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="SMSConfigID" id="hdnSMSConfigID" value="@c.SMSConfigID" />
+                                                <input type="hidden" name="OpType" id="hdnOpType" value="-1" />
+
+                                                <input type="submit" class="btn btn-link" value="Delete" onclick="return DeleteSMSConfig(this);" />
+                                            }
+                                        </td>
+                                    </tr>
+                                    count++;
+                                }
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="10"> <a class="btn btn-link pull-right" href="/Admin/SMSConfigurationDetails/0">Add New</a></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section scripts
+{
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable({
+                "ordering": false
+            });
+            $('#liSMSConfiguration').closest('ul').closest('li').addClass('active');
+            $('#liSMSConfiguration').addClass('active');
+        });
+        function DeleteSMSConfig(sender) {
+            if (confirm('Are you sure you wish to delete this SMS Configuration?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    </script>
+}
+<!-- /.content -->

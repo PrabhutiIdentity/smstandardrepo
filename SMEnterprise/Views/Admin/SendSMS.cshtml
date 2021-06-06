@@ -1,0 +1,303 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>SMS Send Progress</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Admin/plugins/select2/select2.min.css")">
+    <link href="@Url.Content("~/Parent/vendors/iCheck/skins/flat/green.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/newStyle.min.css")" rel="stylesheet" />
+    <script>
+        var Count = 0;
+        (function () {
+            // Defining a connection to the server hub.
+            var myHub = $.connection.myHub;
+            // Start the hub
+            $.connection.hub.start();
+            //myHub.client.SendServerTime = function (serverTime) {
+            //    // Set the received serverTime in the span to show in browser
+            //    $("#divHead").html(serverTime);
+            //};
+            // This is the client method which is being called inside the MyHub constructor method every 3 seconds
+
+            // Client method to broadcast the message
+            myHub.client.GetStatus = function (id, Status) {
+                //var count = parseInt($('#hdnResponded').val()) + 1;
+                //$('#hdnResponded').val(count);
+                Count = Count + 1;
+                if (Status == 1) {
+
+                    $("#li_" + id).find('.progress-bar').css('width', '100%').removeClass('bg-red').addClass('bg-green');
+                    $('#asdSuccessSMS').html(parseInt($('#asdSuccessSMS').html().trim()) + 1);
+                }
+                else {
+                    $("#li_" + id).css('background-color', 'red;');
+                    $('#asdFailedSMS').html(parseInt($('#asdSuccessSMS').html().trim()) + 1);
+                }
+
+                var SMSSendingID = id.split("-")[0];
+                if (SMSSendingID == $('#hdnSMSSendingID').val()) {
+                    var Total = parseInt($('#hdnTotalCount').val());
+                    var Per = parseFloat(Count) * 100 / Total;
+                    $('#divMainProgress').css('width', Per + '%');
+                    if (Per > 30 && Per <= 50) {
+                        $('#divMainProgress').removeClass('bg-red').addClass('bg-yellow');
+                    }
+                    else if (Per > 50 && Per < 75) {
+                        $('#divMainProgress').removeClass('bg-yellow').addClass('bg-blue');
+                    }
+                    else {
+                        $('#divMainProgress').removeClass('bg-blue').addClass('bg-green');
+                    }
+
+                    $('#ssProgressPer').html(Per.toFixed(0) + "%");
+                }
+            };
+        }());
+    </script>
+
+}
+@model SMEnterprise.Models.SMSSendTaskModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+
+
+    .dd-option {
+        position: relative;
+        padding: 5px;
+        width: 90%;
+        padding-left: 5px;
+        display: inline-table;
+        border-bottom: solid 1px #ddd;
+        overflow: hidden;
+        text-decoration: none;
+        color: #333;
+        cursor: pointer;
+        -webkit-transition: all 0.25s ease-in-out;
+        -moz-transition: all 0.25s ease-in-out;
+        -o-transition: all 0.25s ease-in-out;
+        -ms-transition: all 0.25s ease-in-out;
+    }
+
+    .dd-option-image, .dd-selected-image {
+        vertical-align: middle;
+        float: left;
+        margin-right: 5px;
+        max-width: 40px;
+    }
+
+    .dd-container {
+        position: relative;
+    }
+
+
+
+    .dd-desc {
+        color: #f7f7f7;
+        display: block;
+        overflow: hidden;
+        font-weight: normal;
+        line-height: 1.4em;
+    }
+
+    .templateListItem {
+        background-color: rgba(255, 153, 0, 0.32);
+        border-radius: 5px;
+        padding: 10px;
+        margin-right: 5px;
+        margin-left: 5px;
+        border-style: outset;
+    }
+</style>
+
+
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Session / Class Strength Matrix
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Session / Class Strength Matrix</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+
+                </div>
+                <div class="box-body fixed-th-table-wrapper">
+                    <input type="hidden" id="hdnResponded" value="0" />
+                    <div class="clearfix"></div>
+                    <div class="row">
+                        <input type="hidden" id="hdnSMSSendingID" value="@Model.SMSSendingID" />
+                        <div class="col-md-12">
+
+                            <div class="row">
+
+                                <div class="text-center" id="divHead">
+                                    <p> SMS Sending Progress <ss id="ssProgressPer">0%</ss></p>
+                                </div>
+                            </div>
+                            <div class="x_panel">
+
+                                <div class="x_content">
+                                    <div class="row" style="padding:3px 0;">
+                                        <div class="col-md-12">
+                                            <strong>
+                                                Title
+                                            </strong>: @Model.Title
+
+                                        </div>
+                                    </div>
+                                    <div class="row" style="padding:3px 0;">
+                                        <div class="col-md-3">
+                                            <strong>
+                                                Created Date
+                                            </strong>: @Model.SMSSendDate.ToString("dd MMM,yyyy")
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>SMS Total : </strong>@Model.Recievers.Count
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>SMS Success : </strong><asd id="asdSuccessSMS">0</asd>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>SMS Failed : </strong><asd id="asdFailedSMS">0</asd>
+                                        </div>
+
+                                    </div>
+                                    <div class="row" style="padding:3px 0;">
+                                        <div class="col-md-12">
+                                            <strong>Template Used : </strong>@Model.TemplateText
+                                        </div>
+                                    </div>
+
+                                    <div class="row" style="padding:3px 0;">
+
+                                        <div class="col-md-12">
+                                            <strong> Progress:</strong>
+                                            <div class="progress">
+                                                <div id="divMainProgress" class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" style="width:5%;"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="text-align: center;">
+                                        <strong>Students</strong>
+                                    </div>
+
+                                    <div class="row">
+
+                                        <div class="dd-container" id="divRecieverContainer">
+
+                                            @{
+                                                int count = 0;
+                                                int Completed = 0;
+                                                int Failed = 0;
+                                                <ul class="dd-options dd-click-off-close row" id="ulSchoolList">
+
+                                                    @foreach (var c in Model.Recievers)
+                                                    {
+                                                        if (c.Status != 0)
+                                                        {
+                                                            Completed = Completed + 1;
+                                                        }
+                                                        if (c.Status == -1)
+                                                        {
+                                                            Failed++;
+                                                        }
+                                                        <li class="col-md-3" id="li_@Model.SMSSendingID-@c.RecieverID">
+
+                                                            <div class="sendSms" style="background-color: @(c.Status==-1?"rgb(231, 76, 60)":"rgba(2, 128, 0, 0.42)");">
+
+                                                                <div class="dd-option">
+
+                                                                    <img onerror="return OnImageError(this,@c.Gender);" class="dd-option-image" src="@Url.Content("~/Images/StudentImage/")@(c.RecieverID)_@c.Photo">
+                                                                    <label class="dd-option-text">@c.Name</label>
+                                                                    <small class="dd-option-description dd-desc">@c.Details</small>
+                                                                </div>
+                                                                @if (c.Status != 0)
+                                                                {
+                                                                    <a href="javascript:void(0);" title="@c.SMSDateTime.ToString("dd MMM,yyyy HH:mm") : @c.ReasonFailure"><i class="fa fa-info-circle" aria-hidden="true" style="color: white;font-size: 1.38em;"></i></a>
+                                                                }
+                                                                <div class="progress">
+                                                                    <div class="progress-bar progress-bar-success progress-bar-striped active" role="progressbar" style="width:@(c.Status==1?100:0)%;"></div>
+                                                                </div>
+                                                            </div>
+                                                        </li>
+
+                                                        count++;
+                                                    }
+                                                </ul>
+                                                <input type="hidden" id="hdnTotalCount" value="@count" />
+                                                <input type="hidden" id="hdnTotalProc" value="@Completed" />
+                                                <input type="hidden" id="hdnFailed" value="@Failed" />
+                                                <input type="hidden" id="hdnSuccess" value="@(Completed-Failed)" />
+                                            }
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts
+{
+    <script>
+        $(function () {
+            var per = parseFloat($('#hdnTotalProc').val()) * 100 / parseFloat($('#hdnTotalCount').val()).toFixed(0);
+            $('#divMainProgress').css('width', per + '%');
+            $('#ssProgressPer').html(per + '%');
+            $('#asdFailedSMS').html($('#hdnFailed').val());
+            $('#asdSuccessSMS').html($('#hdnSuccess').val());
+        });
+    </script>
+
+
+}
+<!-- /.content -->

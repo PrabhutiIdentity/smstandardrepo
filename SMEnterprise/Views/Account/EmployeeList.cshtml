@@ -1,0 +1,268 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeListPageModel
+@section IncludeCss
+{
+    <title>Employee List</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("EmployeeList", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetEmployees" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-4 text-right">Employee Type :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="EmployeeType" id="ddlClass" onchange="$('#frmGetEmployees').submit();">
+                                            <option value="0" @(Model.EmployeeType == 0 ? "selected" : "")>All</option>
+                                            @foreach (EmployeeTypeModel el in Model.EmployeeTypes)
+                                            {
+                                                <option value="@el.EmployeeTypeID" @(el.EmployeeTypeID == Model.EmployeeType ? "selected" : "")>@el.EmployeeTypeName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Joining Date</th>
+                                    <th>Birth Date</th>
+                                    <th>Father</th>
+                                    <th>Contact</th>
+                                    <th>Regination Date</th>
+                                    <th>Status</th>
+                                    <th>Designation</th>
+
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 1;
+                                foreach (EmployeeModel c in Model.Employees)
+                                {
+                            <tr>
+                                <td>@count</td>
+                                <td>
+                                    @c.EmployeeSID
+                                </td>
+                                <td>
+                                    @c.EmployeeName
+                                </td>
+
+                                <td>
+                                    @c.DOJ.ToString("dd MMM, yyyy")
+
+                                </td>
+                                <td>
+                                    @c.DOB.ToString("dd MMM, yyyy")
+
+                                </td>
+                                <td>@c.FatherHubName</td>
+
+                                <td>
+                                    @c.MobileNumber
+                                </td>
+                                <td>
+                                    @if (c.IsLeft != 1)
+                                    {
+                                        <label class='badge bg-red'> @c.DOR.ToString("dd MMM, yyyy")</label>
+                                    }
+                                    else
+                                    {
+
+                                    }
+
+
+                                </td>
+                                <td>
+                                    @if (c.Status != 0)
+                                    {
+                                        <label class='badge bg-green'>Active</label>
+                                    }
+                                    else
+                                    {
+                                        if (c.IsLeft != 1)
+                                        {
+                                            <label class='badge bg-danger'>Left</label>
+                                        }
+                                        else
+                                        {
+
+                                            <label class='badge bg-red'>Not</label>
+                                        }
+
+                                    }
+                                </td>
+                                <td>
+                                    @c.EmployeeTypeName
+                                </td>
+                                
+
+                            </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+
+        $(function () {
+            var repname = 'Employee List';
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+
+                        bSort: false,
+                         "paging": true,
+                        "pageLength": 50,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+        });
+        function DeleteEmployee(sender) {
+            return confirm('Do you really want to delete Employee!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+}
+<!-- /.content -->

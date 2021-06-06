@@ -1,0 +1,84 @@
+﻿<div class="inbox-body">
+    <div class="mail_heading row">
+        <div class="col-md-8">
+            <div class="btn-group">
+                <input type="hidden" id="hdnMessageID" value="@Model.MessageID" />
+                <input type="hidden" id="hdnMainMailThreadID" value="@Model.MainMailThreadID" />
+                <input type="hidden" id="hdnParentMessageID" value="@Model.ParentMessageID" />
+                <input type="hidden" id="hdnvSenderID" value="@Model.CurrUserID" />
+                <input type="hidden" id="hdnvSenderType" value="@Model.CurrUserType" />
+                <a class="btn btn-sm btn-primary" href="javascript:void(0);" onclick="ReplyToMail(this);"><i class="fa fa-reply"></i> Reply</a>
+                <a class="btn btn-sm btn-default"  href="javascript:void(0);" onclick="ForwardMail(this);" data-placement="top" data-toggle="tooltip" data-original-title="Forward"><i class="fa fa-share"></i></a>
+                @*<button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Print"><i class="fa fa-print"></i></button>
+                    <button class="btn btn-sm btn-default" type="button" data-placement="top" data-toggle="tooltip" data-original-title="Trash"><i class="fa fa-trash-o"></i></button>*@
+            </div>
+        </div>
+        <div class="col-md-4 text-right">
+             <p class="date" id="pMessageDate">Sent On : @Model.SendDate.ToString("hh:mm tt dd MMM yyyy")</p>
+            @if (Model.CurrUserType == Model.SenderType && Model.CurrUserID == Model.SenderID && Model.IsRead==1)
+            {
+               <p class="date">Read On : @Model.ReadDate.ToString("hh:mm tt dd MMM yyyy")</p>
+            }
+        </div>
+        <div class="col-md-12">
+            <h4 id="hMessageTitle"> @Model.MessageTitle</h4>
+        </div>
+    </div>
+    <div class="sender-info">
+        <div class="row">
+            <div class="col-md-12">
+                @if (Model.CurrUserType == Model.SenderType && Model.CurrUserID == Model.SenderID)
+                {
+                    <input type="hidden" id="hdnRecieverType" value="@Model.RecieverType" />
+                    <input type="hidden" id="hdnRecieverID" value="@Model.RecieverID" />
+                    <strong>me</strong> <span>to</span>
+                    <strong>@Model.Name</strong>
+
+                    <input type="hidden" id="hdnSenderName" value="@Model.SenderName" />
+                    <input type="hidden" id="hdnRecieverName" value="@Model.Name" />
+                }
+                else
+                {
+                    <input type="hidden" id="hdnRecieverType" value="@Model.SenderType" />
+                    <input type="hidden" id="hdnRecieverID" value="@Model.SenderID" />
+                    <strong>@Model.SenderName</strong><span>to</span>
+                    <strong>me</strong>
+                    <input type="hidden" id="hdnSenderName" value="@Model.Name" />
+                    <input type="hidden" id="hdnRecieverName" value="@Model.SenderName" />
+                }
+                <a class="sender-dropdown"><i class="fa fa-chevron-down"></i></a>
+            </div>
+        </div>
+    </div>
+    <div class="view-mail" id="divMessageBody">
+        @if (Model.MessageBody != null)
+        {
+            @Html.Raw(HttpUtility.HtmlDecode(Model.MessageBody.Replace("\n", "<br/>")))
+        }
+    </div>
+    @if (Model.Attachments != null && Model.Attachments != "")
+    {
+        var att = Model.Attachments.Trim().Split(new string[] { "<na>" }, StringSplitOptions.None);
+        var attcount = att.Length;
+        <div class="attachment">
+            <p>
+                <span><i class="fa fa-paperclip"></i> @attcount attachments — </span>
+
+            </p>
+            <ul>
+                @for (var tipi = 0; tipi < attcount; tipi++)
+                {
+                    <li>
+                        <div class="file-name">
+                            @att[tipi]
+                        </div>
+                        <div class="links">
+                            <a onclick="DownloadAttachment('@att[tipi]');" href="javascript:void(0);">Download</a>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+</div>

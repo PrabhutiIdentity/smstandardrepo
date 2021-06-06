@@ -1,0 +1,194 @@
+﻿@using (Html.BeginForm("UpdateLeave", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+{
+    <div class="box box-danger">
+        <div class="box-header">
+            <h3 class="box-title">Leave Details</h3>
+
+        </div>
+        <div class="box-body">
+            <input type="hidden" id="hdnLeaveID" name="LeaveID" value="@Model.Leave.LeaveID" />
+            <input type="hidden" id="hdnLeaveType" name="LeaveType" value="@Model.Leave.LeaveType" />
+            <input type="hidden" id="hdnApplicantType" name="ApplicantType" value="@Model.Leave.ApplicantType" />
+            <input type="hidden" id="hdnApplicantID" name="ApplicantID" value="@Model.Leave.ApplicantID" />
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                <span>Applicant Type</span>
+                            </div>
+                            <label style="margin-left: 10px;padding-top: 3px;">
+                                <input type="radio" name="rApplicantType" onchange="ApplicantTypeChanged(this)" class="flat-red" id="rbApplicantTypeEmp" @(Model.Leave.ApplicantType == 0 ? "checked" : "")>
+                                Employee
+                            </label>
+                            <label style="margin-left: 10px;">
+                                <input type="radio" name="rApplicantType" class="flat-red" id="rbApplicantTypeStu" @(Model.Leave.ApplicantType == 1 ? "checked" : "")>
+                                Student
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="input-group" style="border: 1px solid #ddd;">
+                        <div class="input-group-addon">
+                            <span>Status</span>
+                        </div>
+                        <label class="switch switch-green" style="padding-top: 3px;">
+                            @if (Model.Leave.IsApproved == 1)
+                            {
+                                <input type="checkbox" class="switch-input" Checked>
+                            }
+                            else
+                            {
+                                <input type="checkbox" class="switch-input">
+                            }
+                            <span class="switch-label" onclick='$(this).closest("label").find("#hdnLeaveEditStatus").val($(this).closest("tr").find("#hdnLeaveEditStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+                            <input type="hidden" id="hdnLeaveEditStatus" name="IsApproved" value="@Model.Leave.IsApproved" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-5">
+                    <div class="input-group" style="border: 1px solid #ddd;">
+                        <div class="input-group-addon">
+                            <span>Leave Type</span>
+                        </div>
+                        <label style="margin-left: 10px;padding-top: 3px;">
+                            <input type="radio" name="rLeaveType" class="flat-red" id="rbLeaveType1" @(Model.Leave.LeaveType == 0 ? "checked" : "")>
+                            Full Day
+                        </label>
+                        <label style="margin-left: 10px;">
+                            <input type="radio" name="rLeaveType" class="flat-red" id="rbLeaveType2" @(Model.Leave.LeaveType == 1 ? "checked" : "")>
+                            First Half
+                        </label>
+                        <label style="margin-left: 10px;">
+                            <input type="radio" name="rLeaveType" class="flat-red" id="rbLeaveType3" @(Model.Leave.LeaveType == 2 ? "checked" : "")>
+                            Second Half
+                        </label>
+                    </div>
+                </div>
+                <div class="form-group col-md-7">
+                    <div class="input-group" style="border: 1px solid #ddd;">
+                        <div class="input-group-addon">
+                            <span>Start Date</span>
+                        </div>
+                        <input type="date" name="StartDate" onchange="EmployeeChanged(this);" id="txtStartDate" class="form-control" value="@Convert.ToDateTime(Model.Leave.StartDate).ToString("yyyy-MM-dd")" />
+                        <div class="input-group-addon">
+                            <span>End Date</span>
+                        </div>
+                        <input type="date" name="EndDate" class="form-control" value="@Convert.ToDateTime(Model.Leave.EndDate).ToString("yyyy-MM-dd")" />
+
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row" style="margin-left:0px;margin-right:0px;@(Model.Leave.ApplicantType==0?"display:none;":"")" id="divStudent">
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <span>Class</span>
+                        </div>
+                        <select class="form-control select2" onchange="ClassChanged(this)" name="ClassesIncluded" data-placeholder="Select Classes" id="ddlClasses" style="width: 100%;">
+                            @foreach (var g in Model.Classes)
+                            {
+                                <option value="@g.ID" @(Model.ClassID == g.ID ? "selected" : "")>@g.Name</option>
+                            }
+                        </select>
+                        <div class="input-group-addon">
+                            <span>Section</span>
+                        </div>
+                        <select class="form-control select2" onchange="SectionChanged(this);" name="ClassesIncluded" data-placeholder="Select Classes" id="ddlSections" style="width: 100%;">
+
+                            @foreach (var g in Model.Sections)
+                            {
+                                <option value="@g.ID" @(Model.SectionID == g.ID ? "selected" : "")>@g.Name</option>
+                            }
+                        </select>
+                        <div class="input-group-addon">
+                            <span>Student</span>
+                        </div>
+                        <select class="form-control select2" name="ClassesIncluded" data-placeholder="Select Classes" id="ddlStudents" style="width: 100%;">
+
+                            @foreach (var g in Model.Students)
+                            {
+                                <option value="@g.ID" @(Model.Leave.ApplicantID == g.ID ? "selected" : "")>@g.Name</option>
+                            }
+                        </select>
+
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="row" style="margin-left:0px;margin-right:0px;@(Model.Leave.ApplicantType==1?"display:none;":"")" id="divEmployee" >
+                <div class="form-group">
+                    <div class="input-group">
+                        <div class="input-group-addon">
+                            <span>Employees</span>
+                        </div>
+                        <div style="width:250px;">
+                            <select class="form-control select2" onchange="EmployeeChanged(this);" name="ClassesIncluded" data-placeholder="Select Classes" id="ddlEmployees" style="width: 100%;">
+
+                                @foreach (var g in Model.Employees)
+                                {
+                                    <option etype="@g.Extra1" value="@g.ID" @(Model.Leave.ApplicantID == g.ID && Model.Leave.EmployeeType.ToString()==g.Extra1 ? "selected" : "")>@g.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="input-group-addon">
+                            <span>CL</span>
+                        </div>
+                        <input type="text" name="CLApplied" class="form-control" value="@Model.Leave.CLApplied" />
+                        <span id="sCLDetails">M:(@Model.CLMApplied/@Model.CLMQuota) Y:(@Model.CLYApplied/@Model.CLYQuota)</span>
+                        <div class="input-group-addon">
+                            <span>EL</span>
+                        </div>
+                        <input type="text" name="ELApplied" class="form-control" value="@Model.Leave.ELApplied" />
+                        <span id="sELDetails">M:(@Model.ELMApplied/@Model.ELMQuota) Y:(@Model.ELYApplied/@Model.ELYQuota)</span>
+                        <div class="input-group-addon">
+                            <span>PL</span>
+                        </div>
+                        <input type="text" name="PLApplied" class="form-control" value="@Model.Leave.PLApplied" />
+                        <span id="sPLDetails">M:(@Model.PLMApplied/@Model.PLMQuota) Y:(@Model.PLYApplied/@Model.PLYQuota)</span>
+                    </div>
+                </div>
+
+
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-12">
+                    <span>Leave Reason</span>
+                    <textarea rows="5" class="form-control" style="resize: none;" name="LeaveReason">@Model.Leave.LeaveReason</textarea>
+                </div>
+            </div>
+            <hr />
+            <div class="row">
+                <div class="col-md-12">
+                    <button href="javascript:void(0);" class="btn btn-info pull-right" onclick="SaveLeave(this);">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        $(".select2").select2();
+        $('#rbApplicantTypeStu').on("ifChanged", function () {
+            if ($(this).is(":checked")) {
+                $(this).closest('.box-body').find('#divStudent').css('display', '');
+                $(this).closest('.box-body').find('#divEmployee').css('display', 'none');
+            }
+            else {
+                $(this).closest('.box-body').find('#divStudent').css('display', 'none');
+                $(this).closest('.box-body').find('#divEmployee').css('display', '');
+            }
+        });
+    </script>
+}

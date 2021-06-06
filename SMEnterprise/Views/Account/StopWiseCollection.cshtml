@@ -1,0 +1,189 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.BusStudentListModel
+@section IncludeCss
+{
+    <title>Stop Wise Collection</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StopWiseCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetReport" }))
+                {
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-6 padding">
+                                <label class="col-md-4 text-right"></label>
+                                <div class="col-md-8">
+
+                                </div>
+                            </div>
+                            <div class="col-md-5 padding">
+                                <div class="row">
+                                    <label class="col-md-3 text-right padding-R">Month : </label>
+                                    <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                        <input type="month" value="@Model.SelectedDate.ToString("yyyy-MM")" name="SelectedDate" id="dtMonth" class="form-control" onchange="ExpenceMonthChanged();" />
+                                    </div>
+                                    <div class="col-md-2">
+                                        <a href="javascript:void(0);" onclick="$('#frmGetReport').submit();"><i class="fa fa-search"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                   
+                   
+                </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Sr.No</th>
+                                    
+                                    <th>Stopage Name </th>
+                                    <th>Amount</th>
+                                  
+                                    <th>No. Of Student</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StopWiseStudentAmountModel c in Model.StopWiseReport)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            @(count + 1)
+                                        </td>
+                                        <td>
+                                            @c.AreaName
+                                        </td>
+                                        <td>
+                                            @c.Amount.ToString("0.00")
+                                        </td>
+                                      
+                                      
+                                        <td>
+                                            @c.Students
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        function ExpenceMonthChanged() {
+            var monthyear = $('#dtMonth').val().split('-');
+            var sMonth = parseInt(monthyear[1]);
+            var sYear = parseInt(monthyear[0]);
+
+            var cMonth = parseInt($('#hdnCurrentMonth').val());
+            var cYear = parseInt($('#hdnCurrentYear').val());
+            if (sMonth + sYear * 12 > cMonth + cYear * 12) {
+                ShowNotification('error', 'Month Should be less then Current Month', 'error');
+                if (cMonth < 10) {
+                    $('#dtMonth').val(cYear + '-0' + cMonth);
+                }
+                else {
+                    $('#dtMonth').val(cYear + '-' + cMonth);
+                }
+            }
+        }
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy", footer: 'true',
+                                className: "btn-sm", footer: true
+                            },
+                            {
+                                extend: "csv", footer: 'true',
+                                className: "btn-sm", footer: true
+                            },
+                            {
+                                extend: "excel", footer: 'true',
+                                className: "btn-sm", footer: true
+                            },
+                            {
+                                extend: "pdfHtml5", footer: 'true',
+                                className: "btn-sm", footer: true
+                            },
+                            {
+                                extend: "print",
+                                footer: 'true',
+                                className: "btn-sm", footer: true
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
+        });
+
+    </script>
+
+}

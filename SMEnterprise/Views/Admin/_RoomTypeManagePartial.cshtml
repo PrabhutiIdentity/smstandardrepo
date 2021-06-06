@@ -1,0 +1,93 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 10%">Sl.No.</th>
+            <th style="width: 40%">Room Type</th>
+            <th style="width: 15%">#Capacity</th>
+            @if (((SMEnterprise.Models.StartupModel)HttpContext.Current.Session["StartupModel"]).HostelFeeMode == 0)
+            {
+                <th style="width: 15%">#Rent</th>
+            }
+            <th style="width: 20%"><a class="sbtn" href="javascript:void(0);" onclick="OpenAddNewCopy(this)">Add New</a></th>
+        </tr>
+    </thead>
+
+    @{
+        var count = 0;
+        <tbody>
+
+            @foreach (SMEnterprise.Models.HostalRoomTypeModel c in Model.RoomTypes)
+            {
+                count++;
+                <tr>
+                    <td>@count</td>
+
+                    <td>
+                        <span class="ViewCopy visible">@c.RoomTypeName</span>
+                        <input type="hidden" id="hdnHostalID" name="HostelID" value="@Model.ID" />
+                        <input type="hidden" id="hdnRoomTypeID" name="ID" value="@c.ID" />
+                        <input type="text" class="form-control editCopy hidden" name="RoomTypeName" id="txtRoomTypeName" value="@c.RoomTypeName" />
+                    </td>
+                    <td>
+                        <span class="ViewCopy visible">@c.Capacity</span>
+                        <input type="number" class="form-control editCopy hidden" name="Capacity" id="txtCapacity" value="@c.Capacity" />
+                    </td>
+                    @if (((SMEnterprise.Models.StartupModel)HttpContext.Current.Session["StartupModel"]).HostelFeeMode == 0)
+                    {
+                        <td>
+                            <span class="ViewCopy visible">@c.Rate</span>
+                            <input type="number" class="form-control editCopy hidden" name="Rate" id="txtRate" value="@c.Rate" />
+                        </td>
+                    }
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+                                <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="submit" class="btn btn-link sbtn editCopy hidden" value="Save" onclick="SaveHostelRoomType(this, 1);" />
+                                <input type="submit" class="btn btn-link sbtn ViewCopy visible" value="Delete" onclick="return DeleteHostelRoomType(this, -1);" />
+                            </div>
+                        </div>
+                    </td>
+
+
+
+                </tr>
+            }
+
+        </tbody>
+        <tfoot style="border-width: 2px;border-style: groove;display:none;">
+            <tr>
+                <td>@(count + 1)</td>
+
+                <td>
+                    <input type="hidden" id="hdnHostalID" name="HostelID" value="@Model.ID" />
+                    <input type="hidden" id="hdnRoomTypeID" name="ID" value="0" />
+                    <input type="text" class="form-control" name="RoomTypeName" id="txtRoomTypeName" value="" />
+                </td>
+                <td>
+                    <input type="number" class="form-control" name="Capacity" id="txtCapacity" value="0" />
+                </td>
+                @if (((SMEnterprise.Models.StartupModel)HttpContext.Current.Session["StartupModel"]).HostelFeeMode == 0)
+                {
+                    <td>
+                        <input type="number" class="form-control" name="Rate" id="txtRate" value="0" />
+                    </td>
+                }
+                <td>
+                    <div class="row" style="margin-right: 0px;">
+                        <div class="col-md-12">
+                            <input type="submit" class="btn btn-link" value="Add New" onclick="SaveHostelRoomType(this, 1);" />
+                        </div>
+
+                    </div>
+                </td>
+
+
+
+            </tr>
+
+        </tfoot>
+    }
+</table>

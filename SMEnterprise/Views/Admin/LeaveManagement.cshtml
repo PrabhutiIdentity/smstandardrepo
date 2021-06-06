@@ -1,0 +1,217 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/Admin/plugins/select2/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/Admin/plugins/iCheck/all.css")">
+    <title>Leave Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Leave Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Leave Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate()" />
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%">Sl.No.</th>
+                                <th style="width: 27%">Applicant</th>
+                                <th style="width: 10%">Type</th>
+                                <th style="width: 10%">Duration</th>
+                                <th style="width: 15%">Start Date</th>
+                                <th style="width: 15%">End Date</th>
+                                <th style="width: 5%">Status</th>
+                                <th style="width: 13%">View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var count = 1;
+                                foreach (LeaveModel c in Model)
+                                {
+                                    <tr>
+                                        <td>
+                                            @count
+                                        </td>
+                                        <td>
+                                            @c.ApplicantName
+                                            <input type="hidden" name="LeaveID" id="hdnLeaveID" value="@c.LeaveID" />
+                                        </td>
+                                        <td>
+                                            @(c.ApplicantType == 1 ? "Student" : c.EmployeeType == -1 ? "Transport" : "Employee")
+                                        </td>
+                                        <td>
+                                            @(c.LeaveType == 1 ? "Full Day" : c.LeaveType == 2 ? "First Half" : "Second Half")
+                                        </td>
+                                        <td>
+                                            <input type="hidden" id="hdnStartDate" value="@c.StartDate" />
+                                            @Convert.ToDateTime(c.StartDate).ToString("dd MMM, yy")
+                                        </td>
+
+                                        <td>
+
+                                            @Convert.ToDateTime(c.EndDate).ToString("dd MMM, yy")
+                                        </td>
+
+                                        <td>
+                                            @if (c.IsApproved == 1)
+                                            {
+                                                <label class='badge bg-green'>Approved</label>
+                                            }
+                                            else if (c.IsApproved == 2)
+                                            {
+                                                <label class='badge bg-orange'>Pending</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-red'>Unapproved</label>
+                                            }
+                                        </td>
+                                        <td>
+
+                                            <input type="hidden" name="OpType" id="hdnOpType" value="0" />
+                                            <a href="javascript:void(0);" style="background-color: cornflowerblue;color: white;" onclick="ViewLeave(this);" class="btn btn-default EditSectionClose" value="Edit">View</a>
+
+
+                                        </td>
+                                    </tr>
+                                    count++;
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section scripts
+{
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script src="@Url.Content("~/Admin/plugins/iCheck/icheck.min.js")"></script>
+
+}
+@section pageBottom{
+    <div id="mdlViewLeaveDetails" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liLeaveManagement').closest('ul').closest('li').addClass('active');
+        $('#liLeaveManagement').addClass('active');
+
+
+    });
+    function ViewLeave(sender) {
+        var LeaveID = $(sender).closest('tr').find('#hdnLeaveID').val();
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetLeaveDetails/" + LeaveID,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#mdlViewLeaveDetails').find('.modal-body').html(html);
+                    $('#mdlViewLeaveDetails').modal('toggle');
+
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+    function EditLeave(sender) {
+
+
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+
+                $(sender).text("View");
+            }
+
+            $(sender).text("Close");
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+            $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $(sender).closest('tr').find("#divDetails").html() + "</td></tr>");
+
+
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            $(sender).text("View");
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    function SaveLeave(sender) {
+        $(sender).closest('.box-body').find('#hdnApplicantType').val($(sender).closest('.box-body').find('#rbApplicantTypeEmp').is(":checked") ? "0" : "1");
+
+        $(sender).closest('.box-body').find('#hdnLeaveType').val($(sender).closest('.box-body').find('#rbLeaveType1').is(":checked") ? "0" : $(sender).closest('.box-body').find('#rbLeaveType2').is(":checked") ? "1" : "2");
+
+        if ($(sender).closest('.box-body').find('#hdnApplicantType').val() == "1") {
+            $(sender).closest('.box-body').find('#hdnApplicantID').val($('#ddlStudents').val());
+        }
+        else {
+            $(sender).closest('.box-body').find('#hdnApplicantID').val($('#ddlEmployees').val());
+        }
+    }
+    function ApplicantTypeChanged(sender) {
+
+        if ($(sender).is(":checked")) {
+            alert('checked');
+            $(sender).closest('.box-body').find('#divStudent').css('display', 'none');
+            $(sender).closest('.box-body').find('#divEmployee').css('display', '');
+        }
+        else {
+            alert('Notchecked');
+            $(sender).closest('.box-body').find('#divStudent').css('display', '');
+            $(sender).closest('.box-body').find('#divEmployee').css('display', 'none');
+        }
+    }
+</script>
+<!-- /.content -->

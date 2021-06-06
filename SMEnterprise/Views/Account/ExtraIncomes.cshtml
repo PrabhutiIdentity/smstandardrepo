@@ -1,0 +1,184 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.ExtraIncomePageModel
+@section IncludeCss
+{
+    <title>Extra Income Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("ExtraIncomes", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right">Payment Mode :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="PaymentMode" id="ddlPaymentMode">
+                                            <option @(Model.PaymentMode == -1 ? "selected" : "") value="-1">All Modes</option>
+                                            <option @(Model.PaymentMode == 0 ? "selected" : "") value="0">Cash Payment</option>
+                                            <option @(Model.PaymentMode == 1 ? "selected" : "") value="1">Cheque Payment</option>
+                                            <option @(Model.PaymentMode == 2 ? "selected" : "") value="2">NEFT Payment</option>
+                                            <option @(Model.PaymentMode == 3 ? "selected" : "") value="3">Other Payment</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Start Date :</label>
+                                    <div class="col-md-8">
+                                        <input type="date" name="StartDate" class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">End Date :</label>
+                                    <div class="col-md-8">
+                                        <input type="date" name="EndDate" class="form-control" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                </div>
+                                <div class="col-md-1 padding">
+                                    <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 20%">Payer</th>
+                                    <th style="width: 20%">Details</th>
+                                    <th style="width: 10%">Head </th>
+                                    <th style="width: 10%">Date</th>
+                                    <th style="width: 10%">Amount</th>
+                                    <th style="width: 10%">Status</th>
+                                    <th style="width: 10%"><a href="javascript:void(0);" onclick="AddExtraIncome(this,0)">Add New</a></th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (ExtraIncomeModel c in Model.Incomes)
+                                {
+                                    <tr>
+                                        <td>@c.PaidBy<br />@c.PayerPAN</td>
+                                        <td>@(c.PaymentMode == 0 ? "Cash" : c.PaymentMode == 1 ? "Cheque" : c.PaymentMode == 2 ? "NEFT" : "Other")<br />@c.ReferanceNo</td>
+                                        <td>@c.HeadName</td>
+                                        <td>@c.PaidDate.ToString("dd MMM, yyyy")</td>
+                                        <td>@c.Amount.ToString("0.00")</td>
+                                        <td>@(c.Status == 0 ? "Active" : "Inactive")</td>
+                                        <td><a href="javascript:void(0);" onclick="AddExtraIncome(this,@c.ID)">Edit</a></td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="mdlEditVendor" class="modal fade bs-example-modal-lg" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Update Extra Income Details</h4>
+            </div>
+            <div class="modal-body">
+
+            </div>
+            @*<div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>*@
+        </div>
+
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function DeleteStudent(sender) {
+            return confirm('Do you really want to delete Extra Income!!!!');
+        }
+        function AddExtraIncome(sender,ID) {
+            $('.se-pre-con').css('display', '');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetExtraIncomeDetails/" + ID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#mdlEditVendor').find('.modal-body').html(html);
+                        $('#mdlEditVendor').modal('toggle');
+                        $('.se-pre-con').css('display', 'none');
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+}
+<!-- /.content -->

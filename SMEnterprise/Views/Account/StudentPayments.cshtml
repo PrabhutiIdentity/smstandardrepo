@@ -1,0 +1,347 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentsPageModel
+@section IncludeCss
+{
+    <title>Students Payments</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+<link rel="stylesheet" href="@Url.Content("~/css/RecieptStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+    .RClosebtn
+    {
+        display:none;
+    }
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentPayments", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding">
+                                </div>
+                                <div class="col-md-3 padding">
+
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                            <option value="0">--Select Class--</option>
+                                            @foreach (ClassModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                            <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                <option value="0">--Select Section--</option>
+                                                @foreach (SectionModel el in Model.Sections)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Photo</th>
+                                    <th style="width: 15%">Name</th>
+                                    <th style="width: 13%">Roll. No.</th>
+                                    <th style="width: 7%">BG</th>
+                                    <th style="width: 10%">Access Card</th>
+                                    <th style="width: 12%">Contact</th>
+                                    <th style="width: 7%">Hostel</th>
+                                    <th style="width: 7%">Transport</th>
+                                    <th style="width: 10%">Payments</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StudentModel c in Model.Students)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                            @c.Name
+                                            <br />
+                                            @c.StudentSID
+                                        </td>
+
+                                        <td>
+                                            @c.RollNo
+
+                                        </td>
+                                        <td>@c.BloodGroup</td>
+                                        <td>
+                                            @c.AccessCardNo
+                                        </td>
+                                        <td>
+                                            G :  @c.GuardianMobileNo <br />
+                                            F :  @c.FatherMobileNo<br />
+                                            M :  @c.MotherMobileNo
+                                        </td>
+                                        <td>
+                                            @if (c.HostelRoomID != 0)
+                                            {
+                                                <label class='badge bg-green'>Yes</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-blue'>No</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (c.StopID != 0)
+                                            {
+                                                <label class='badge bg-green'>Yes</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-blue'>No</label>
+                                            }
+                                        </td>
+
+                                        <td>
+                                            <a href="javascript:void(0);" onclick="ViewPayments(this,@c.StudentID);" class="btn btn-link Closed">Payments</a>
+
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+        function ViewPayments(sender, StudentID) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                $.ajax({
+                    url: "/Account/GetStudentPaymentList/" + StudentID,
+                    type: 'POST',                    
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                        $(sender).text('Close');
+                        $(sender).removeClass('Closed');
+                        $(sender).addClass('Open');
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                    },
+                    async: true,
+                    processData: false
+                });
+            }
+            else {
+                $(sender).text('Payments');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function DeleteStudent(sender) {
+            return confirm('Do you really want to delete Student!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function ClosePrintRecipt(sender, SIDi) {
+            $("#trFee_" + SIDi).find('#btnRecipt').text('Recipt');
+            $("#trFee_" + SIDi).find('#btnRecipt').removeClass('Open').addClass('Closed');
+
+            $(sender).closest('tr').remove();
+        }
+        function PrintRecipt() {
+            var contents = $("#divRecipt").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+        function SendPaymentSMS(PayID) {
+            if (confirm('Do you really want to send SMS, SMS cost will be applicable....')) {
+                $.ajax(
+         {
+             type: "POST",
+             url: "/Account/SendFeeCollectionSMS/" + PayID,
+             cache: false,
+             processData: false,
+             contentType: false,
+             success: function (data) {
+                 ShowNotification('SMS Submitted', 'SMS has been submitted and will be delivered within few minuts!');
+             },
+             error: function (e) {
+                 alert("errorn");
+             }
+         });
+            }
+        }
+        function ViewReciept(sender, PayID) {
+            if ($(sender).hasClass('RClosed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("ROpen");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                $.ajax(
+        {
+            type: "POST",
+            url: "/Account/GetFeeReciept/" + PayID,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (html) {
+                $(sender).closest("tr").next().remove();
+                $(sender)
+               .closest("tr")
+               .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + html + "</td></tr>");
+                $(sender).text('Close');
+                $(sender).removeClass('RClosed');
+                $(sender).addClass('ROpen');
+            },
+            error: function (e) {
+                alert("errorn");
+            }
+        });
+            }
+            else {
+                $(sender).text('View');
+                $(sender).removeClass('ROpen');
+                $(sender).addClass('RClosed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+    </script>
+}
+<!-- /.content -->

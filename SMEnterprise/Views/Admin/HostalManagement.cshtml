@@ -1,0 +1,547 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Hostal Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Hostal Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Hostal Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 3%">Sl.</th>
+                                <th style="width: 15%">Name</th>
+                                <th style="width: 12%">Type</th>
+                                <th style="width: 13%">Warden</th>
+                                <th style="width: 10%">Contact</th>
+                                <th style="width: 10%">#Floors</th>
+                                <th style="width: 10%">#Rooms</th>
+                                <th style="width: 12%">#Room Types</th>
+                                <th style="width: 4%">Status</th>
+                                <th style="width: 11%"><a href="javascript:void(0);" onclick="EditHostal(this);" class="EditSectionClose" value="Edit">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{
+                            var counter = 0;
+                            foreach (HostalModel c in Model.Hostals)
+                            {
+                                counter++;
+                                <tr>
+                                    <td>
+                                        @counter
+                                    </td>
+                                    <td id="tdHostalName">
+                                        @c.Name
+                                        <input type="hidden" name="ID" id="hdnHostalID" value="@c.ID" />
+                                        <input type="hidden" name="Address" id="hdnAddress" value="@c.Address" />
+                                    </td>
+                                    <td>
+                                        @c.HostelTypeName
+                                        <input type="hidden" id="hdnHostelTypeID" value="@c.HostelType" />
+                                    </td>
+
+                                    <td id="tdWardenName">
+                                        @c.WardenName
+                                    </td>
+                                    <td id="tdHostalContactNo">
+                                        @c.ContactNumber
+                                    </td>
+                                    <td>
+                                        <input type="hidden" id="hdnFloorCount" value="@c.FloorCount" />
+                                        @c.FloorCount
+                                        (<a href="javascript:void(0);" onclick="ViewFloors(this);" id="@c.ID" class="FloorClosed">Manage</a>)
+                                    </td>
+                                    <td>
+                                        @c.RoomCount
+                                    </td>
+                                    <td>
+                                        @c.RoomTypeCount
+                                        (<a href="javascript:void(0);" onclick="ViewRoomTypes(this);" id="@c.ID" class="FloorClosed">Manage</a>)
+                                    </td>
+                                    <td>
+                                        <input type="hidden" id="hdnHostalStatus" value="@c.Status" />
+                                        @if (c.Status == 1)
+                                        {
+                                            <label class='badge bg-green'>Active</label>
+                                        }
+                                        else
+                                        {
+                                            <label class='badge bg-red'>Inactive</label>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="row" style="margin-right: 0px;">
+                                            <div class="col-md-6">
+                                                <a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditHostal(this);">Edit</a>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <a href="/Admin/DeleteHostal/@c.ID" class="btn btn-link" onclick="return DeleteHostal(this);">Delete</a>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divEditHostalForm" style="display:none;">
+        @using (Html.BeginForm("UpdateHostal", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateHostal" }))
+        {
+            <div class="box box-danger" id="divEditFormDetails">
+                <div class="box-header">
+                    <h3 class="box-title">Details</h3>
+
+                </div>
+                <div class="box-body">
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 14px 0px 14px;">Name</span>
+                                    </div>
+                                    <input type="hidden" id="hdnHostalID" name="ID" value="0"/>
+                                    <input type="text" id="txtName" name="Name" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span>Type</span>
+                                    </div>
+                                    <select id="ddlHostalTypes" name="HostelType" class="form-control">
+                                        @foreach(HostalTypeModel h in Model.HostalTypes)
+                                        {
+                                            <option value="@h.ID">@h.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 10px 0px 10px;">Varified</span>
+                                    </div>
+                                    <label class="switch switch-green" style="padding-top: 3px;">
+                                        
+                                        <input id="chkVarified" type="checkbox" class="switch-input">
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnHostalStatus").val($(this).closest("tr").find("#hdnHostalStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" id="hdnHostalStatus" name="Status" value="1" />
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 13px 0px 14px;">Warden</span>
+                                    </div>
+                                    <input type="text" id="txtWardenName" name="WardenName" class="form-control" value="" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon">
+                                        <span style="padding: 0px 13px 0px 14px;">Phone</span>
+                                    </div>
+                                    <input type="text" id="txtContactNumber" name="ContactNumber" class="form-control" value="" />
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <p>Address</p>
+                            <textarea rows="5" style="resize:none;" class="form-control" name="Address" id="txtAddress"></textarea>
+                        </div>
+                    </div>
+
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button class="btn btn-info pull-right">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liHostalManagement').closest('ul').closest('li').addClass('active');
+        $('#liHostalManagement').addClass('active');
+    });
+    function DeleteHostal(sender) {
+
+        var fCounbt =$(sender).closest('tr').find('#hdnFloorCount').val();
+
+        if (fCounbt !="0") {
+            alert("Hostal Has Floors, It can't be deleted!!!!")
+            return false;
+        }
+        else {
+            if (confirm('Are you sure you wish to delete this Hostal?')) {
+
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
+    function EditHostal(sender) {
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+                if ($(ele[0]).text() == 'Cancel New') {
+                    $(ele[0]).text('Add New');
+                }
+                else {
+                    $(sender).text('Edit');
+                }
+            }
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+
+            if ($(sender).text() == 'Add New') {
+                $(sender).text('Cancel New');
+
+                $('#divEditFormDetails').find('#hdnHostalID').val(0);
+                $('#divEditFormDetails').find('#ddlHostalTypes').val(0);
+                $('#divEditFormDetails').find('#txtName').val('');
+                $('#divEditFormDetails').find('#txtWardenName').val('');
+                $('#divEditFormDetails').find('#txtContactNumber').val('');
+                $('#divEditFormDetails').find('#txtAddress').val('');
+                $('#divEditFormDetails').find('#hdnHostalStatus').val(0);
+                $('#divEditFormDetails').find('#chkVarified').removeProp('checked');
+                $(sender)
+                  .closest("tr")
+                  .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditHostalForm').html() + "</td></tr>");
+
+            }
+            else {
+                $(sender).text('Cancel');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditHostalForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnHostalID').val($(sender).closest('tr').find('#hdnHostalID').val());
+                $('#divEditFormDetails').find('#ddlHostalTypes').val($(sender).closest('tr').find('#hdnHostelTypeID').val());
+                $('#divEditFormDetails').find('#txtName').val($(sender).closest('tr').find('#tdHostalName').text().trim());
+                $('#divEditFormDetails').find('#txtWardenName').val($(sender).closest('tr').find('#tdWardenName').text().trim());
+                $('#divEditFormDetails').find('#txtContactNumber').val($(sender).closest('tr').find('#tdHostalContactNo').text().trim());
+                $('#divEditFormDetails').find('#txtAddress').val($(sender).closest('tr').find('#hdnAddress').val());
+                $('#divEditFormDetails').find('#hdnHostalStatus').val($(sender).closest('tr').find('#hdnHostalStatus').val());
+                $('#divEditFormDetails').find('#chkVarified').removeProp('checked');
+                if ($(sender).closest('tr').find('#hdnHostalStatus').val() == "1") {
+                    $('#divEditFormDetails').find('#chkVarified').prop('checked', 'checked');
+                }
+
+
+            }
+
+
+
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel New') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).text('Edit');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    function ViewRoomTypes(sender) {
+
+
+        if ($(sender).hasClass("FloorClosed")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetHostelRoomTypes/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        var ele = document.getElementsByClassName("FloorOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            $(ele[0]).closest("tr").css('background-color', 'white');
+        }
+        $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+
+
+        $(sender).text("Close");
+        $(sender).removeClass("FloorClosed");
+        $(sender).addClass("FloorOpen");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).text("Manage");
+            $(sender).removeClass("FloorOpen");
+            $(sender).closest("tr").css('background-color', 'white');
+            $(sender).addClass("FloorClosed");
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    function DeleteHostelRoomType(sender,OpType)
+    {
+        if(confirm("Do You Really Want To Delete this Room type!!!!"))
+        {
+            SaveHostelRoomType(sender, -1);
+        }
+    }
+    function SaveHostelRoomType(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateHostelRoomType", "Admin")",
+            type: 'POST',
+        data: JSON.stringify({
+            OpType: OpType,
+            ID: $(sender).closest('tr').find('#hdnRoomTypeID').val(),
+            HostelID: $(sender).closest('tr').find('#hdnHostalID').val(),
+            Capacity: $(sender).closest('tr').find('#txtCapacity').val(),
+            RoomTypeName: $(sender).closest('tr').find('#txtRoomTypeName').val(),
+            Rate: $(sender).closest('tr').find('#txtRate').val()
+        }),
+        contentType: 'application/json; charset=utf-8',
+        success: function (html) {
+            ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+            $(sender).closest('table').closest('td').html(html);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+        },
+        async: true,
+        processData: false
+    });
+    }
+
+    function ViewFloors(sender) {
+
+
+        if ($(sender).hasClass("FloorClosed")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetHostelFloors/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        var ele = document.getElementsByClassName("FloorOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            $(ele[0]).closest("tr").css('background-color', 'white');
+        }
+        $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+
+
+        $(sender).text("Close");
+        $(sender).removeClass("FloorClosed");
+        $(sender).addClass("FloorOpen");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).text("Manage");
+            $(sender).removeClass("FloorOpen");
+            $(sender).closest("tr").css('background-color', 'white');
+            $(sender).addClass("FloorClosed");
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+
+    function DeleteHostelFloor(sender,OpType)
+    {
+        if ($(sender).closest("tr").find('#hdnRoomCount').val() != "0") {
+            ShowClosingNotification('Error', 'This floor has rooms added, so it can\'t be deleted!!!!', 'error');
+        }
+        else {
+            if (confirm("Do You Really Want To Delete this Floor!!!!")) {
+                SaveHostelFloor(sender, -1);
+            }
+        }
+    }
+    function SaveHostelFloor(sender, OpType) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateHostelFloor", "Admin")",
+            type: 'POST',
+        data: JSON.stringify({
+            OpType: OpType,
+            ID: $(sender).closest('tr').find('#hdnFloorID').val(),
+            HostelID: $(sender).closest('tr').find('#hdnHostalID').val(),
+            Name: $(sender).closest('tr').find('#txtFloorName').val(),
+            Status: $(sender).closest('tr').find('#hdnIsApproved').val()
+        }),
+        contentType: 'application/json; charset=utf-8',
+        success: function (html) {
+            ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+            $(sender).closest('table').closest('td').html(html);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+        },
+        async: true,
+        processData: false
+    });
+    }
+
+    function ViewFloorRooms(sender) {
+
+
+        if ($(sender).hasClass("RoomClosed")) {
+            var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+
+            $.ajax(
+{
+    type: "POST",
+    url: "/Admin/GetHostelFloorRooms/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        notice.remove();
+        // fill the div with the html returned by action
+        var ele = document.getElementsByClassName("RoomOpen");
+        if (ele.length > 0) {
+            $(ele[0]).click();
+            $(ele[0]).closest("tr").css('background-color', 'white');
+        }
+        $(sender)
+            .closest("tr")
+            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+
+
+        $(sender).text("Close");
+        $(sender).removeClass("RoomClosed");
+        $(sender).addClass("RoomOpen");
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
+        }
+        else {
+            $(sender).text("Manage");
+            $(sender).removeClass("RoomOpen");
+            $(sender).closest("tr").css('background-color', 'white');
+            $(sender).addClass("RoomClosed");
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+
+    function DeleteHostelFloorRoom(sender,OpType)
+    {
+        if ($(sender).closest("tr").find('#hdnRoomOccupants').val() != "0") {
+            ShowClosingNotification('Error', 'This Room has Occupants, so it can\'t be deleted!!!!', 'error');
+        }
+        else {
+            if (confirm("Do You Really Want To Delete this Room!!!!")) {
+                SaveHostelFloorRoom(sender, -1);
+            }
+        }
+    }
+    function SaveHostelFloorRoom(sender, OpType) {
+        $.ajax({
+            url: "@Url.Action("UpdateHostelFloorRoom", "Admin")",
+            type: 'POST',
+        data: JSON.stringify({
+            OpType: OpType,
+            ID: $(sender).closest('tr').find('#hdnRoomID').val(),
+            FloorID: $(sender).closest('tr').find('#hdnFloorID').val(),
+            Name: $(sender).closest('tr').find('#txtRoomName').val(),
+            RoomTypeID: $(sender).closest('tr').find('#ddlRoomType').val(),
+            RoomNo: $(sender).closest('tr').find('#txtRoomNo').val(),
+            Status: $(sender).closest('tr').find('#hdnIsApproved').val()
+        }),
+        contentType: 'application/json; charset=utf-8',
+        success: function (html) {
+            ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+            $(sender).closest('table').closest('td').html(html);
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+        },
+        async: true,
+        processData: false
+    });
+    }
+
+</script>
+<!-- /.content -->

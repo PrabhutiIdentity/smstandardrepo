@@ -1,0 +1,493 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_LibraryLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Books Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+<link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+}
+<style>
+   
+    .btn {
+        padding: 3px 6px;
+    }
+   
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 235px;
+        max-height: 235px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?235:'auto');
+        height: expression((this.width/this.height)<1?235:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+    .form-inline .form-control
+    {
+        width:100%!important;
+    }
+    .row {
+        margin-bottom: 3px;
+        margin-top: 2px;
+    }
+    .form-group {
+        margin-bottom: 3px;
+        margin-top: 2px;
+    }
+    .input-sm {
+        width: auto !important;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("Books", "Library", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetBooks" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding">
+                                    <a href="javascript:void(0);" onclick="AddBook(this);" class="btn btn-success pull-right" style="color:white;">Add Book</a>
+                                </div>
+                                <div class="col-md-4 padding">
+                                    <label class="col-md-4 text-right">Category :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="CategoryID" id="ddlCategories">
+                                            <option value="0">--All--</option>
+                                            @foreach (NameIDModel el in Model.Categories)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.CategoryID ? "selected" : "")>@el.Name </option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass">
+                                            <option value="0">--All--</option>
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetBooks').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr id="trHeader">
+                                    <th style="width: 10%">Image</th>
+                                    <th style="width: 25%">Title</th>
+                                    <th style="width: 15%">Detail</th>
+                                    <th style="width: 10%">Classes</th>
+                                    <th style="width: 20%">Categories</th>
+                                    <th style="width: 10%">Price</th>
+                                    <th style="width: 10%">View</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (BookModel c in Model.Books)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnBookImageError(this, 2);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/BookImage/")@(c.BookID)_@c.Image" />
+                                        </td>
+                                        <td>
+                                            @c.Title<br />
+                                            @c.BookCode<br />
+                                            Copies :@c.Copies <br />
+                                            <a class="sbtn Closed" href="javascript:void(0);" onclick="ViewBookCopies(this,@c.BookID);">Manage Copies</a>
+                                        </td>
+
+                                        <td>
+                                           @c.Publisher<br />
+                                            @c.Author
+
+                                        </td>
+                                        <td>@c.Classes</td>
+                                        <td>
+                                            @c.CategoryNames
+                                        </td>
+                                        <td>
+                                            @c.Price.ToString("0.00")
+                                        </td>
+                                        
+
+                                        <td>
+                                            <div class="row" style="margin-right: 10px;">
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" onclick="ViewBookDetails(this,@c.BookID);" class="btn btn-link Closed EditBookLink">View</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("UpdateBook", "Library", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                    {
+                                                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                                                        <input type="hidden" name="CategoryID" value="@Model.CategoryID" />
+                                                        <input type="hidden" name="BookID" value="@c.BookID" />
+                                                        <input type="hidden" id="hdnIssued" value="@c.Issued" />
+                                                        <button type="submit" onclick="return DeleteBook(this,@c.BookID);" class="btn btn-link">Delete</button>
+                                                    }
+                                                </div>
+                                            </div>
+
+
+
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+<script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script>
+        function OnBookImageError(me, Type) {
+          
+            me.src = '@Url.Content("~/Images/NoDocImage.jpg")';
+           
+        }
+        var isAddStarted = false;
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function DeleteBook(sender, ID) {
+            var isucnt = $(sender).closest('td').find('#hdnIssued').val();
+            if (isucnt > 0) {
+                ShowNotification('Error', 'Book is already issued to students, so can\'t be deleted', 'error');
+                return false;
+            }
+            else {
+                var rst = confirm('Do you really want to delete Book!!!!');
+                if (rst) {
+                    if (ID == 0) {
+                        if ($(sender).closest('.row').find('.EditBookLink').hasClass('Open')) {
+                            $(sender).closest('tr').next().remove();
+                        }
+                        $(sender).closest('tr').remove();
+                        return false;
+                    }
+                    else {
+                        $.ajax(
+                           {
+                               type: "POST",
+                               url: "/Library/DeleteBookDetails/" + ID,
+                               cache: false,
+                               processData: false,
+                               contentType: false,
+                               success: function (data) {
+                                   if ($(sender).closest('.row').find('.EditBookLink').hasClass('Open')) {
+                                       $(sender).closest('tr').next().remove();
+                                   }
+                                   $(sender).closest('tr').remove();
+
+                                   ShowNotification('Deleted', 'Book Deleted Successfully', 'info');
+                               },
+                               error: function (e) {
+                                   alert("errorn");
+                               }
+                           });
+                        return false;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        }
+        function ViewBookDetails(sender, ID) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Library/GetBookDetails/" + ID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        var $tr = $(sender).closest("tr");
+                        $(sender).closest("tr").replaceWith(html);                      
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+            else {
+                $(sender).text('View');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+                if($(sender).closest('td').find('#hdnBookID').val()=='0')
+                {
+                    $(sender).closest("tr").remove();
+                }
+            }
+        }
+        function AddBook(sender) {
+            if (!isAddStarted) {
+                isAddStarted = true;
+                $('#trHeader')
+                           .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Library/GetBookDetails/" + 0,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#trHeader').next().replaceWith(html);
+                      
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+        }
+        function LocationChanged(sender,type)
+        {
+            var ID = $(sender).val();
+            var chld;
+            if (type == 0)
+            {
+                chld = $('#ddlFloors');
+            }
+            else if (type == 1) {
+                chld = $('#ddlBlocks');
+            }
+            else if (type == 2) {
+                chld = $('#ddlBays');
+            }
+            $(chld).html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Library/GetLibraryDetailList/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(chld).html('');
+                        $(chld).append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function ImageChanged(fileBox, Type) {
+
+            if (fileBox.files && fileBox.files[0]) {
+                MainImageName = fileBox.files[0].name;
+                if (fileBox.files[0].size / 1024 < 1000) {
+
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $('#imgBookImage').attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(fileBox.files[0]);
+                }
+                else {
+                    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 1MB', 'error');
+                    //clearFileInput(fileBox);
+                }
+            }
+        }
+        function clearFileInput(ctrl) {
+            try {
+                ctrl.value = null;
+            } catch (ex) { }
+            if (ctrl.value) {
+                ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+            }
+        }
+        function SaveBookDetails(sender)
+        {            
+            $('#hdnCategoryIDs').val(','+$('#ddlDCategories').select2().val()+',');
+            $('#hdnClassesIDs').val(',' + $('#ddlDClasses').select2().val() + ',');
+            if ($('#hdnCategoryIDs').val() == ',null,') {
+                $('#hdnCategoryIDs').val(',0,');
+            }
+            if ($('#hdnClassesIDs').val() == ',null,') {
+                $('#hdnClassesIDs').val(',0,');
+            }
+            var $this = $('#frmSaveBook');
+
+            var form = $('#frmSaveBook');
+            var formdata = false;
+            if (window.FormData) {
+                formdata = new FormData(form[0]);
+            }
+
+                $.ajax({
+                    type: $this.attr('method'),
+                    url: $this.attr('action'),
+                    data: formdata ? formdata : form.serialize(),
+                    contentType: false,
+                    processData: false,
+                    method: 'POST'
+                })
+                .done(function (html) {
+                    ShowNotification('Updated', 'Book Successfully Updated', 'success');
+                    var $row = $(sender).closest('tr');
+                    $row.prev().replaceWith(html);
+                    $row.remove();
+                })
+                .fail(function () {
+                    $("#para").text("An error occured");
+                });
+                event.preventDefault();
+         return false;
+        }
+
+        function ViewBookCopies(sender, ID) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Library/GetBookCopies/" + ID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        $(sender)
+                        .closest("tr")
+                        .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                        $(sender).text('Close');
+                        $(sender).removeClass('Closed');
+                        $(sender).addClass('Open');
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+            else {
+                $(sender).text('Manage Copies');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        function UpdateBookCopy(sender, OpType) {
+            var asts = $(sender).closest('tr').find('#ddlStatus').val();
+            if (asts == 1 && OpType == -1) {
+                ShowNotification('Issued', 'This Book Copy has been issued so can\'t be deleted....', 'error');
+            }
+            else {
+                var sts = true;
+                if (OpType == -1)
+                {
+                    sts=confirm('Do you really want to delete Book copy!!!!');
+                }
+                if (sts) {
+                    $.ajax({
+                        url: "@Url.Action("UpdateBookCopies", "Library")",
+                        type: 'POST',
+                        data: JSON.stringify({
+                            OpType: OpType,
+                            CopyID: $(sender).closest('tr').find('#hdnCopyID').val(),
+                            BookID: $(sender).closest('tr').find('#hdnBookID').val(),
+                            AStatus: $(sender).closest('tr').find('#ddlStatus').val(),
+                            BarCode: $(sender).closest('tr').find('#txtBarCode').val(),
+                            RFID: $(sender).closest('tr').find('#txtRFID').val(),
+                            Code: $(sender).closest('tr').find('#txtCode').val()
+                        }),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (html) {
+                            ShowNotification('Success', 'Changes updated successfully', 'info');
+                            $(sender).closest('table').closest('td').html(html);
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                        },
+                        async: true,
+                        processData: false
+                    });
+                }
+            }
+        }
+    </script>
+}
+<!-- /.content -->

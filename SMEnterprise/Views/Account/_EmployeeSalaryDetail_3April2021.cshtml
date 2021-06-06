@@ -1,0 +1,408 @@
+﻿@model SMEnterprise.Models.EmployeeSalaryDetailsPageModel
+<style>
+    .form-control {
+        width: 100% !important;
+    }
+</style>
+@using (Html.BeginForm("SaveEmployeeSalaryPayment", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+{
+    <div class="x_content" id="divSalaryDetails">
+
+        <input type="hidden" name="EmployeeID" value="@Model.Employee.EmployeeID" />
+        <input type="hidden" name="EmployeeType" value="@Model.Employee.EmployeeType" />
+        <input type="hidden" name="ProcessingDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+        <input type="hidden" name="SMonth" value="@Model.SalaryMonth" />
+        <input type="hidden" name="SYear" value="@Model.SalaryYear" />
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-12" style="text-align: center;border: 1px;border-style: double;">
+                <img class="thumbImageGrid" style="max-width: 75px;max-height: 75px;" src="@Url.Content("~/Images/SBranchLogo/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)" alt="">
+                <br /><span><b>@Model.Branch.BranchSchoolName</b></span>
+                <br /><span>@Html.Raw(Model.Branch.Address.Replace("\n", "<br/>"))</span>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-md-6" style="border-right: 1px solid;">
+                <span>
+                    Month : @SMEnterprise.Repository.CommonUsage.MonthNames[Model.SalaryMonth - 1], @Model.SalaryYear
+                </span><br />
+                <span> Name : @Model.Employee.EmployeeName</span><br />
+                <span>Designation : @Model.Employee.EmployeeTypeName</span><br />
+            </div>
+            <div class="col-md-6" style="border-left: 1px solid;">
+                <span>  Employee Code : @Model.Employee.EmployeeSID</span><br />
+                <span> Joining Date : @Model.Employee.DOJ.ToString("dd MMM, yyyy")</span><br />
+
+            </div>
+        </div>
+
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-12" style="border-right: 1px solid;text-align:center">
+                <span class="col-md-2">Total Days : @Model.Summery.MonthDays</span>
+                <span class="col-md-2"> Paid Days : @Model.Summery.Present</span>
+                <span class="col-md-2"> LWP : @(Model.Summery.WorkingDays - Model.Summery.PubHolidays - Model.Summery.Present - Model.Summery.Leaves) </span>
+                <span class="col-md-2"> Paid Leaves : @Model.Summery.Leaves</span>
+                <span class="col-md-2"> Holidays : @Model.Summery.PubHolidays</span>
+                <span class="col-md-2"> Week Offs : @Model.Summery.WeekOffs</span>
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-6" style="border-right: 1px solid;text-align:center">
+                <span style="font-weight: bold;font-size: 1.2em;"> Earnings</span>
+            </div>
+            <div class="col-md-6" style="border-left: 1px solid;text-align:center">
+                <span style="font-weight: bold;font-size: 1.2em;"> Deductions</span>
+            </div>
+        </div>
+        @{
+            decimal GrossEarning = 0;
+            decimal TotalDeduction = 0;
+            decimal NetPayble = 0;
+            int index = 0;
+        }
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-6" style="border-right: 1px solid;">
+                <table style="width:100%;" id="tblAdditions">
+
+                    @foreach (var s in Model.Categories.Where(c => c.IsDeduction == 0))
+                    {
+                        if (s.AttendanceType == 2)
+                        {
+
+                            if (Model.Summery.Present >= s.MinDays)
+                            {
+                                GrossEarning = GrossEarning + s.Amount;
+                            }
+                            <tr class="mindays" style="@(Model.Summery.Present >= s.MinDays?"":"display:none")">
+                                <td style="width:70%;">
+                                    <span> @s.TypeName</span>
+                                    <input type="hidden" id="hdnStatus" name="Details[@index].Status" value="@(Model.Summery.Present >= s.MinDays?1:0)" />
+                                    <input type="hidden" name="Details[@index].SalaryCategoryID" value="@s.TypeID" />
+                                    <input type="hidden" name="Details[@index].Type" value="0" />
+                                    <input type="hidden" name="Details[@index].Title" value="@s.TypeName" />
+                                    <input type="hidden" id="hdnAmount" name="Details[@index].Amount" value="@s.Amount" />
+                                    <input type="hidden" name="Details[@index].Paid" value="@s.Amount" />
+                                    <input type="hidden" id="hdnMinDays" value="@s.MinDays" />
+                                    <input type="hidden" id="hdnIsAttandance" value="@s.AttendanceType" />
+                                </td>
+                                <td>
+
+                                    <span> @s.Amount.ToString("N2")</span>
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td style="width:70%;">
+                                    <span> @s.TypeName</span>
+                                    <input type="hidden" name="Details[@index].Status" value="1" />
+                                    <input type="hidden" name="Details[@index].SalaryCategoryID" value="@s.TypeID" />
+                                    <input type="hidden" name="Details[@index].Type" value="0" />
+                                    <input type="hidden" name="Details[@index].Title" value="@s.TypeName" />
+                                    <input type="hidden" id="hdnAmount" name="Details[@index].Amount" value="@s.Amount" />
+                                    <input type="hidden" name="Details[@index].Paid" value="@s.Amount" />
+                                    <input type="hidden" id="hdnIsAttandance" value="@s.AttendanceType" />
+                                </td>
+                                <td>
+
+                                    <span> @s.Amount.ToString("N2")</span>
+                                </td>
+                            </tr>
+                            GrossEarning = GrossEarning + s.Amount;
+                        }
+                        index++;
+                    }
+
+                </table>
+            </div>
+            <div class="col-md-6" style="border-left: 1px solid;">
+                @{
+                    var totalLeaveDeductableIncome = Model.Categories.Where(c => c.AttendanceType == 0).Sum(c => c.Amount);
+                    var leavededuction = totalLeaveDeductableIncome * (Model.Summery.WorkingDays - Model.Summery.Leaves - Model.Summery.Present) / Model.Summery.MonthDays;
+                    TotalDeduction = leavededuction;
+                }
+                <input type="hidden" id="hdnTotalLeaveDeductableIncome" value="@totalLeaveDeductableIncome" />
+                <table style="width:100%;" id="tblDeductions">
+                    <tr class="leaveDeduction">
+
+                        <td style="width:70%;">
+                            <span>Leave Deduction</span>
+
+                            <input type="hidden" name="Details[@index].Status" value="1" />
+                            <input type="hidden" name="Details[@index].SalaryCategoryID" value="0" />
+                            <input type="hidden" name="Details[@index].Type" value="1" />
+                            <input type="hidden" name="Details[@index].Title" value="Leave Deduction" />
+                            <input type="hidden" id="hdnAmount" name="Details[@index].Amount" value="@leavededuction.ToString("0.00")" />
+                            <input type="hidden" id="hdnAmount" name="Details[@index].Paid" value="@leavededuction.ToString("0.00")" />
+                            <input type="hidden" id="hdnIsAttandance" value="3" />
+                        </td>
+                        <td><span>@leavededuction.ToString("N2")</span></td>
+                    </tr>
+
+                    @{
+                        index++;
+                        foreach (var s in Model.Categories.Where(c => c.IsDeduction == 1))
+                        {
+                            <tr>
+                                <td style="width:70%;">
+                                    <span> @s.TypeName</span>
+                                    <input type="hidden" name="Details[@index].Status" value="1" />
+                                    <input type="hidden" name="Details[@index].SalaryCategoryID" value="@s.TypeID" />
+                                    <input type="hidden" name="Details[@index].Type" value="1" />
+                                    <input type="hidden" name="Details[@index].Title" value="@s.TypeName" />
+                                    <input type="hidden" id="hdnAmount" name="Details[@index].Amount" value="@s.Amount" />
+                                    <input type="hidden" name="Details[@index].Paid" value="@s.Amount" />
+                                    <input type="hidden" id="hdnIsAttandance" value="@s.AttendanceType" />
+                                </td>
+                                <td>
+                                    <span>@(s.Amount.ToString("N2"))</span>
+                                </td>
+                            </tr>
+                            TotalDeduction = TotalDeduction + s.Amount;
+                            index++;
+                        }
+                        if (Model.AdvancePayments.Count() > 0)
+                        {
+                            <tr class="leaveDeduction">
+                                <td colspan="2" style="text-align:center;">
+                                    Advance Payment EMIs
+                                </td>
+                            </tr>
+                            foreach (var s in Model.AdvancePayments)
+                            {
+                                <tr class="leaveDeduction">
+                                    <td style="width:70%;">
+                                        <span> @s.TypeName</span>
+                                    </td>
+                                    <td>
+                                        <span>@((s.Amount * (-1)).ToString("N2"))</span>
+                                    </td>
+                                </tr>
+                                TotalDeduction = TotalDeduction + s.Amount * -1;
+                            }
+                        }
+                    }
+                </table>
+
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-4">
+                <span> <b>Gross Earnings :</b>@GrossEarning.ToString("N2")</span>
+                <input type="hidden" name="GrossEarning" value="@GrossEarning" id="hdnGrossEarning" />
+            </div>
+            <div class="col-md-4">
+                <span>Total Deductions :@((TotalDeduction).ToString("N2"))</span>
+                <input type="hidden" name="TotalDeductions" value="@TotalDeduction" id="hdnTotalDeduction" />
+            </div>
+            <div class="col-md-4">
+                <span> Net Payble :@((GrossEarning - TotalDeduction).ToString("N2"))</span>
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-12" style="text-align:-webkit-center;">
+                <span><b> @SMEnterprise.Repository.CommonUsage.SpellDecimal(GrossEarning - TotalDeduction) Only</b></span>
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-10" style="text-align: right;margin-top: 70px;margin-bottom: 20px;">
+                <span><b> Account</b></span>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="col-md-12 pull-right">
+        <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+            <label id="lblError" style="color: red;"></label>
+            <button type="button" onclick="ProcessSalary()" class="btn btn-primary pull-right">Process Salary</button>
+        </div>
+    </div>
+
+    <div id="myConfirmSalarySubmit" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Confirm Salary Payment Details</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="form-group col-md-5">
+                            <label>Processing Date<small> (mm/dd/yyyy)</small></label>
+                            <input type="date" id="txtProcessingDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Payment Mode</label>
+                            <select class="form-control" id="ddlPaymentMode" name="PaymentMode">
+                                <option value="0">Cash</option>
+                                <option value="1">Cheque</option>
+                                <option value="2">NEFT</option>
+                                <option value="3">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Referance Number</label>
+                            <input type="text" id="txtReferanceNumber" name="ReferanceNumber" class="form-control" value="" />
+                        </div>
+                        <div class="form-group col-md-12">
+                            <label>Remark</label>
+                            <input type="text" id="txtRemark" name="Remark" class="form-control" value="" />
+                        </div>
+
+                        <div class="form-group col-md-3">
+                            <label>Total Days</label>
+                            <input type="hidden" name="Holidays" value="@Model.Summery.PubHolidays" />
+                            <input type="hidden" id="hdnLWP" name="LWP" value="@Model.Summery.LWP" />
+                            <input type="hidden" name="WeekOffs" value="@Model.Summery.WeekOffs" />
+                            <input readonly type="number" step="0.5" id="txtTotalDays" name="TotalDays" class="form-control" value="@Model.Summery.MonthDays" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Leave/HoliDays</label>
+                            <input type="number" step="0.5" id="txtLeaveHolidays" readonly class="form-control" value="@(Model.Summery.PubHolidays+Model.Summery.WeekOffs+Model.Summery.Leaves)" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Present Days</label>
+                            <input type="number" step="0.5" id="txtPresentDays" max="@(Model.Summery.MonthDays-Model.Summery.PubHolidays+Model.Summery.WeekOffs+Model.Summery.Leaves)" onkeyup="CalculateNetPayble();" name="PresentDays" class="form-control" value="@Model.Summery.Present" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Salary Amount</label>
+                            <input readonly type="text" step="0.5" name="NetPayble" id="txtSalaryAmount" class="form-control" value="@((GrossEarning - TotalDeduction).ToString("N2"))" />
+                        </div>
+                        <div class="col-md-12">
+                            <label>Advance Payment EMIs</label>
+                            <table class="table table-bordered" id="tblAdvancePayments">
+                                @foreach (var s in Model.AdvancePayments)
+                                {
+                                    <tr>
+                                        <td>
+                                            <input type="checkbox" class="clsSelected" name="Details[@index].Status" value="1" checked onchange="EMISelectedChanged(this);" />
+                                        </td>
+                                        <td style="width:60%;">
+                                            <span> @s.TypeName</span>
+                                            <input type="hidden" name="Details[@index].SalaryCategoryID" value="@s.TypeID" />
+                                            <input type="hidden" name="Details[@index].Type" value="2" />
+                                            <input type="hidden" name="Details[@index].Title" value="@s.TypeName" />
+                                            <input type="hidden" id="hdnAmount" name="Details[@index].Amount" value="@(s.Amount* (-1))" />
+                                            <input type="hidden" name="Details[@index].Paid" value="@(s.Amount* (-1))" />
+                                        </td>
+                                        <td>
+                                            <span>@((s.Amount * (-1)).ToString("N2"))</span>
+                                        </td>
+                                    </tr>
+                                    index++;
+                                }
+                            </table>
+                        </div>
+                        <div class="col-md-12">
+                            <label>Misc Payment/Deduction <small>(use "-" in amount for deduction)</small></label>
+                            <table class="table table-bordered" id="tblAdvancePayments">
+                                <tr>
+                                    <td>Description</td>
+                                    <td>Amount</td>
+                                </tr>
+                                <tr id="trMiscAmount">
+                                    <td style="width:60%;">
+                                        <span> <input type="text" class="form-control" name="Details[@index].Title" /></span>
+                                        <input type="hidden" name="Details[@index].Status" value="1" />
+                                        <input type="hidden" name="Details[@index].SalaryCategoryID" value="0" />
+                                        <input type="hidden" name="Details[@index].Type" value="3" />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="form-control" id="txtMiscAmount" onkeyup="CalculateNetPayble();" title="please use '-' if you are deducting an amount eg. -1000" name="Details[@index].Paid" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-default">Submit</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+    var totworkDays =@(Model.Summery.MonthDays-Model.Summery.PubHolidays+Model.Summery.WeekOffs+Model.Summery.Leaves);
+    function CalculateNetPayble() {
+        var grossEarning = 0;
+        var netAmount = 0;
+        var TotalDeductions = 0;
+        $('#tblAdvancePayments').find('tr').each(function (index) {
+            if ($(this).find('.clsSelected').is(':checked') == true) {
+                netAmount = netAmount - parseFloat($(this).find('#hdnAmount').val());
+                TotalDeductions = TotalDeductions + parseFloat($(this).find('#hdnAmount').val());
+            }
+        });
+        var LeaveDeduction = 0;
+        var totalDays = parseFloat($('#txtTotalDays').val());
+        totalDays = totalDays -@(Model.Summery.PubHolidays + Model.Summery.WeekOffs + Model.Summery.Leaves);
+       
+        var dayspresent = parseFloat($('#txtPresentDays').val());
+        if (dayspresent > totalDays) {
+            dayspresent = totalDays;
+            $('#txtPresentDays').val(dayspresent);
+        }
+        var lwp = totalDays - dayspresent;
+        $('#hdnLWP').val(lwp);
+        $('#tblAdditions').find('tr').each(function (index) {
+            if ($(this).hasClass('mindays')) {
+                var mindays = parseFloat($(this).find('#hdnMinDays').val());
+                if (dayspresent >= mindays) {
+                    $(this).find('#hdnStatus').val(1);
+                    netAmount = netAmount + parseFloat($(this).find('#hdnAmount').val());
+                    grossEarning = grossEarning + parseFloat($(this).find('#hdnAmount').val());
+                }
+                else {
+                    $(this).find('#hdnStatus').val(0);
+                    //$(this).css('display', 'none');
+                }
+            }
+            else {
+                if ($(this).find('#hdnIsAttandance').val() == 0) {
+                    netAmount = netAmount + (parseFloat($(this).find('#hdnAmount').val()) * dayspresent / totalDays);
+                    LeaveDeduction = LeaveDeduction + (parseFloat($(this).find('#hdnAmount').val())) - (parseFloat($(this).find('#hdnAmount').val()) * dayspresent / totalDays)
+                }
+                else {
+                    netAmount = netAmount + parseFloat($(this).find('#hdnAmount').val());
+                }
+                grossEarning = grossEarning + parseFloat($(this).find('#hdnAmount').val());
+            }
+        });
+        $('#tblDeductions').find('tr').each(function (index) {
+            if (!$(this).hasClass('leaveDeduction')) {
+                if ($(this).find('#hdnIsAttandance').val() == 0) {
+                    netAmount = netAmount - (parseFloat($(this).find('#hdnAmount').val()) * dayspresent / totalDays);
+                    TotalDeductions = TotalDeductions + (parseFloat($(this).find('#hdnAmount').val()) * dayspresent / totalDays);
+                }
+                else {
+                    netAmount = netAmount - parseFloat($(this).find('#hdnAmount').val());
+                    TotalDeductions = TotalDeductions + parseFloat($(this).find('#hdnAmount').val());
+                }
+            }
+        });
+        if ($('#trMiscAmount').find('#txtMiscAmount').val() != '') {
+            if (parseFloat($('#trMiscAmount').find('#txtMiscAmount').val()) < 0) {
+                TotalDeductions = TotalDeductions + parseFloat($('#trMiscAmount').find('#txtMiscAmount').val());
+            }
+            else {
+                grossEarning = grossEarning + parseFloat($('#trMiscAmount').find('#txtMiscAmount').val());
+            }
+            netAmount = netAmount + parseFloat($('#trMiscAmount').find('#txtMiscAmount').val());
+        }
+        TotalDeductions = TotalDeductions + LeaveDeduction;
+        $('.leaveDeduction').find('#hdnAmount').val(LeaveDeduction.toFixed(2));
+        $('#txtSalaryAmount').val(netAmount.toFixed(2));
+        $('#hdnGrossEarning').val(grossEarning.toFixed(2));
+        $('#hdnTotalDeduction').val(TotalDeductions.toFixed(2));
+    }
+    function EMISelectedChanged(sender) {
+        CalculateNetPayble();
+    }
+    function ProcessSalary() {
+        $('#myConfirmSalarySubmit').modal('toggle');
+    }
+</script>

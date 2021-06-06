@@ -1,0 +1,392 @@
+﻿<div class="">
+@using (Html.BeginForm("UpdateIssueRegisterDetails", "Library", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmUpdateRegister" }))
+{
+    <div class="clearfix"></div>
+    <div class="row" id="IssueDetail">
+        <input id="hdnSelectedID" name="BorrowerID" type="hidden" value="@Model.BorrowerID" />
+        <input id="hdnIssueID" name="IssueID" type="hidden" value="@Model.IssueID" />
+        <input id="hdnLibraryID" name="LibraryID" type="hidden" value="[LibraryID]" />
+        <input id="hdnSessionID" name="SessionID" type="hidden" value="@Model.SessionID" />
+        <input id="hdnBorrowerType" name="BorrowerType" type="hidden" value="@Model.BorrowerType" />
+        <div class="x_panel">
+            <a class="btn btn-dark pull-right editIssueRegister" href="javascript:void(0);" onclick="OnEditClick(this);">Edit</a>
+            <div class="x_content">
+                <div class="x_panel ViewIssueDetail">
+                    <div class="x_content">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <p><b>@(Model.BorrowerType == 0 ? "Teacher" : "Student") : </b>@Model.BorrowerName</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <b> Issue Date : </b><span>@Model.IssueDate.ToString("dd MMM, yyyy")</span>
+                            </div>
+                            <div class="col-md-5">
+                                <b>Status : </b>   @if (Model.Books == Model.ReturnedBooks)
+                                {
+                                    <label class='badge bg-green'>Returned</label>
+                                }
+                                else if (Model.ReturnedBooks == 0)
+                                {
+                                    <label class='badge bg-reg'>Issue</label>
+                                }
+                                else if (Model.Books > Model.ReturnedBooks)
+                                {
+                                    <label class='badge bg-blue'>Partial</label>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-1">
+                                <b> Remark :</b>
+                            </div>
+                            <div class="col-md-11">
+                                <p class="ViewIssueDetail">@Model.Remark</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row EditIssueDetail Hidden">
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="col-md-2">
+                                <div class="iradio_flat-blue @(Model.BorrowerType == 0 ? "checked" : "")" value="0" onclick="BorrowerTypeChanged(this);" aria-checked="false" aria-disabled="false" style="position: relative;">
+
+                                    <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                    <small style="padding-left: 25px;">
+                                        Teacher
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="iradio_flat-blue @(Model.BorrowerType == 1 ? "checked" : "")" value="1" onclick="BorrowerTypeChanged(this);" aria-checked="false" aria-disabled="false" style="position: relative;">
+
+                                    <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                    <small style="padding-left: 25px;">
+                                        Student
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row  EditIssueDetail Hidden" id="divTeacherB" @(Model.BorrowerType == 0 ? "" : "style=display:none;")>
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <select class="form-control" onchange="$(this).closest('#IssueDetail').find('#hdnSelectedID').val($(this).val());">
+                                <option value="0" >Select Teacher</option>
+                                @foreach (var t in Model.Teachers)
+                                {
+                                    <option value="@t.ID" @(Model.BorrowerType == 0 && Model.BorrowerID == t.ID ? "selected" : "")>@t.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row EditIssueDetail Hidden" id="divStudentB" @(Model.BorrowerType == 1 ? "" : "style=display:none;")>
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="x_panel">
+                                <div class="x_content">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="iradio_flat-blue checked" value="0" onclick="StuSearchTypeChanged(this);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                <small style="padding-left: 25px;width: 200px;display: block;">
+                                                    Search by Class
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="iradio_flat-blue" value="1" onclick="StuSearchTypeChanged(this);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                <ins class="iCheck-helper" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                <small style="padding-left: 25px;width: 400px;display: block;">
+                                                    Search by Name/StudentID/School UID
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="x_panel" id="divSearchStuByClass">
+                                <div class="x_content">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <div class="col-md-3">
+                                                    <div class="col-md-4">
+                                                        Class :
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control" id="ddlClasses" onchange="ClassChanged(this);">
+                                                            <option value="0">Select Class</option>
+                                                            @foreach (var c in Model.Classes)
+                                                            {
+                                                                <option value="@c.ID">@c.Name</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="col-md-4">
+                                                        Section :
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control" id="ddlSections" onchange="SectionChanged(this);">
+                                                            <option value="0">--Select--</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="col-md-4">
+                                                        Student :
+                                                    </div>
+                                                    <div class="col-md-8">
+                                                        <select class="form-control" id="ddlStudents" onchange="$(this).closest('#IssueDetail').find('#hdnSelectedID').val($(this).val());">
+                                                            <option value="0">--Select--</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="x_panel" id="divSearchStuByName" style="display:none;">
+                                <div class="x_content">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <select class="form-control select2" id="ddlSelectSearchStudent"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row  EditIssueDetail Hidden">
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="col-md-2">
+                                <b>Issue Date:</b>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" id="txtIssueDate" class="form-control" name="IssueDate" value="@Model.IssueDate.ToString("yyyy-MM-dd")" />
+
+                            </div>
+                            <div class="col-md-2" style="text-align: right;">
+                                <b>Status :</b>
+                            </div>
+                            <div class="col-md-4">
+                                @if (Model.Books == Model.ReturnedBooks)
+                                {
+                                    <label class='badge bg-green'>Returned</label>
+                                }
+                                else if (Model.ReturnedBooks == 0)
+                                {
+                                    <label class='badge bg-reg'>Issue</label>
+                                }
+                                else if (Model.Books > Model.ReturnedBooks)
+                                {
+                                    <label class='badge bg-blue'>Partial</label>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row EditIssueDetail Hidden">
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <div class="col-md-1">
+                                <b>Remark :</b>  
+                            </div>
+                            <div class="col-md-11">
+                                <textarea class="form-control" id="txtRemark" name="Remark">@Model.Remark</textarea>
+                                <p class="ViewIssueDetail">@Model.Remark</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="x_panel">
+                        <div class="x_content">
+                            <table id="tblCategory" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr id="trHeader">
+                                        <th style="width: 7%">Image</th>
+                                        <th style="width: 35%">Book</th>
+                                        <th style="width: 15%">Bar Code</th>
+                                        <th style="width: 10%">Issue Date</th>
+                                        <th style="width: 10%">Days</th>
+                                        <th style="width: 13%">Status</th>
+                                        <th style="width: 10%" class="EditIssueDetail Hidden"><a class="sbtn" href="javascript:void(0);" id="btnIssueNew" onclick="OpenAddNewCopy(this)">Add New</a></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var ctr = 0;
+                                        foreach (var b in Model.IssuedBooks)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <img id="imgPhoto" onerror="return OnBookImageError(this, 2);" class="thumbImageList" alt="Photo" src="@Url.Content("~/Images/BookImage/")@(b.BookID)_@b.Image" />
+                                                    <input type="hidden" id="hdnBookIssueID" name="IssuedBooks[@ctr].BookIssueID" value="@b.BookIssueID" />
+                                                    <input type="hidden" id="hdnCopyID" name="IssuedBooks[@ctr].CopyID" value="@b.CopyID" />
+                                                    <input type="hidden" id="hdnBookID" name="IssuedBooks[@ctr].BookID" value="@b.BookID" />
+                                                    <input type="hidden" id="hdnOpType" name="IssuedBooks[@ctr].OpType" value="1" />
+                                                    <input type="hidden" id="hdnIssueDays" name="IssuedBooks[@ctr].IssueDays" value="@b.IssueDays" />
+                                                    <input type="hidden" id="hdnIssueDate" name="IssuedBooks[@ctr].IssueDate" value="@b.IssueDate" />
+                                                </td>
+                                                <td>
+                                                    @b.Title
+                                                </td>
+                                                <td>
+                                                    @b.BarCode
+                                                </td>
+                                                <td>
+                                                    @b.IssueDate.ToString("dd MMM, yyyy")
+                                                </td>
+                                                <td>
+                                                    @b.IssueDays
+                                                </td>
+                                                <td>
+                                                    <span class="ViewCopy visible bStatus">@(b.AStatus == 0 ? "Issue" : b.AStatus == 1 ? "Return" : "Lost")</span>
+                                                    <select class="form-control editCopy hidden" id="ddlBookStatus" name="IssuedBooks[@ctr].AStatus">
+                                                        <option value="0" @(b.AStatus == 0 ? "selected" : "")>Issue</option>
+                                                        <option value="1" @(b.AStatus == 1 ? "selected" : "")>Return</option>
+                                                        <option value="2" @(b.AStatus == 2 ? "selected" : "")>Lost</option>
+                                                    </select>
+                                                </td>
+                                                <td class="EditIssueDetail Hidden">
+                                                    <a href="javascript:void(0);" class="sbtn" onclick="EditCopy(this);">Edit</a> <aa>|</aa>
+                                                    <a href="javascript:void(0);" class="sbtn ViewCopy visible" onclick="RemoveBook(this);">Remove</a>
+                                                    <a href="javascript:void(0);" class="sbtn editCopy hidden" onclick="UpdateIssuedBook(this, 1);">Save</a>
+                                                </td>
+                                            </tr>
+                                            ctr++;
+                                        }
+                                    }
+                                </tbody>
+                                <tfoot class="EditIssueDetail Hidden" style="display:none;">
+                                    <tr>
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnBookImageError(this, 2);" class="thumbImageList" alt="Photo" src="" />
+                                            <input type="hidden" id="hdnBookIssueID" value="0" />
+                                            <input type="hidden" id="hdnCopyID" value="0" />
+                                            <input type="hidden" id="hdnBookID" value="0" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control select2" id="ddlNewBook"></select>
+                                        </td>
+                                        <td>
+                                            <input type="text" class="form-control" id="txtBarCode" onchange="BarCodeChanged(this);" />
+                                        </td>
+                                        <td>
+                                            <input type="date" class="form-control" id="txtDate" />
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control" id="txtDays" />
+                                        </td>
+                                        <td>
+                                            <select class="form-control" id="ddlBookStatus">
+                                                <option value="0">Issue</option>
+                                                <option value="1">Return</option>
+                                                <option value="2">Lost</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0);" class="sbtn" onclick="AddIssueBook(this, 1);">Add New</a>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 EditIssueDetail Hidden">
+                <button class="btn btn-success pull-right" type="submit" onclick="SaveRegisterDetails(this);" value="Save">Save</button>
+            </div>
+        </div>
+    </div>
+                                        }
+</div>
+<script>
+    $('#ddlSelectSearchStudent').on("change", function (e) {
+        $('#hdnSelectedID').val(e.target.value);
+    });
+		
+		
+    $("#ddlSelectSearchStudent").select2({
+        placeholder: "Type to find a Student",
+        allowClear: true,
+        minimumInputLength: 3,
+        ajax: {
+            cache: false,
+            dataType: "json",
+            type: "GET",
+            url: "@Url.Action("GetSearchedStudents", "Library")",
+        data: function (search) {
+            return { query: search.term };
+        },
+        results: function (data) {
+            console.log(data);
+            return { results: data };
+        }
+    },
+        formatResult: contractFormatResult,
+    formatSelection: contractFormatSelection,
+    escapeMarkup: function (m) { return m; }
+    });
+
+    $('#ddlSelectSearchStudent').on("change", function (e) {
+        $('#hdnSelectedID').val(e.target.value);
+    });
+    $("#ddlNewBook").select2({
+        placeholder: "Type to find a Book",
+        allowClear: true,
+        minimumInputLength: 3,
+        ajax: {
+            cache: false,
+            dataType: "json",
+            type: "GET",
+            url: "@Url.Action("GetBooksForIssue", "Library")",
+        data: function (search) {
+            return { id: search.term };
+        },
+        results: function (data) {
+            return { results: data };
+        }
+    },
+        formatResult: contractFormatBookResult,
+    formatSelection: contractFormatBookSelection,
+    escapeMarkup: function (m) { return m; }
+    });
+
+    var bpath='@Url.Content("~/")';
+    $('#ddlNewBook').on("change", function (e) {
+        var details = e.target.value.split('^');
+        var imgPath = window.location.protocol +'//' + window.location.host + '/Images/BookImage/' + details[0] + '_' + details[6];
+        $(e.target).closest('tr').find('img').attr('src', imgPath);
+        $(e.target).closest('tr').find('#hdnCopyID').val(details[1]);
+        $(e.target).closest('tr').find('#hdnBookID').val(details[0]);
+
+        $(e.target).closest('tr').find('#hdnIssueDays').val(details[2]);
+        $(e.target).closest('tr').find('#txtBarCode').val(details[3]);
+        $(e.target).closest('tr').find('#txtDays').val(details[2]);
+    });
+</script>

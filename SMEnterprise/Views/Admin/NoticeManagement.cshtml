@@ -1,0 +1,425 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+    <title>Notice Management</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Notice Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Notice Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 4%">Sl.</th>
+                                <th style="width: 39%">Title</th>
+                                <th style="width: 10%">Date</th>
+                                <th style="width: 10%">Applicable</th>
+                                <th style="width: 10%">Level</th>
+                                <th style="width: 7%">Status</th>
+                                <th style="width: 15%"><a href="javascript:void(0);" class="btn btn-link EditSectionClose" onclick="EditNotice(this);">Add New</a></th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (NoticeModel c in Model.Notices)
+                            {
+                                <tr>
+                                    <td>
+                                        @(count + 1)
+
+                                        <input type="hidden" name="NoticeID" id="hdnNoticeID" value="@c.NoticeID" />
+                                        <input type="hidden" name="NoticeDescription" id="hdnNoticeDescription" value="@c.NoticeDescription" />
+                                        <input type="hidden" name="ClassesIncludedIDs" id="hdnClassesIncludedIDs" value="@c.ClassesIncludedIDs" />
+                                        <input type="hidden" name="ApplicableFor" id="hdnApplicableFor" value="@c.ApplicableFor" />
+                                        <input type="hidden" name="NoticeLevel" id="hdnNoticeLevel" value="@c.NoticeLevel" />
+                                    </td>
+                                    <td id="tdTitle">
+                                        @c.NoticeTitle
+                                    </td>
+                                    <td>
+                                        <input type="hidden" id="hdnNoticeStartDate" value="@Convert.ToDateTime(c.NoticeStartDate).ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" id="hdnNoticeEndDate" value="@Convert.ToDateTime(c.NoticeEndDate).ToString("yyyy-MM-dd")" />
+
+                                        @Convert.ToDateTime(c.NoticeStartDate).ToString("dd MMM -")
+                                        @Convert.ToDateTime(c.NoticeEndDate).ToString("dd MMM, yy")
+                                    </td>
+
+                                    <td>
+                                        @(c.ApplicableFor == 0 ? "Everyone" : c.ApplicableFor == 1 ? "Employee" : c.ApplicableFor == 2 ? "Student" : "Parents")
+                                    </td>
+                                    <td>
+                                        @(c.NoticeLevel == 0 ? "High" : c.NoticeLevel == 1 ? "Medium" : "Low")
+                                    </td>
+                                    <td>
+                                        <input type="hidden" name="Status" id="hdnNoticeStatus" value="@c.Status" />
+                                        @if (c.Status == 1)
+                                        {
+                                            <label class='badge bg-green'>Active</label>
+                                        }
+                                        else
+                                        {
+                                            <label class='badge bg-red'>Inactive</label>
+                                        }
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <input type="hidden" name="OpType" id="hdnOpType" value="0" />
+                                            <a href="javascript:void(0);" style="background-color: cornflowerblue;color: white;" onclick="EditNotice(this);" class="btn btn-default EditSectionClose" value="Edit"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a>
+
+                                            <a target="_blank" href="/Admin/NoticePrint/@c.NoticeID" style="display:none;background-color: #00a65a;color: white;" class="btn btn-default" value="Edit"><i class="fa fa-print" aria-hidden="true"></i></a>
+                                            @using (Html.BeginForm("UpdateNotice", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="NoticeID" value="@c.NoticeID" />
+                                                <button onclick="return NoticeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit"><i class="fa fa-trash-o" aria-hidden="true"></i></button>
+                                            }
+                                            @using (Html.BeginForm("SendNoticeSMS", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                            {
+                                                <input type="hidden" name="OpType" value="-1" />
+                                                <input type="hidden" name="SMSText" value="@c.NoticeTitle" />
+                                                <input type="hidden" name="ID" value="@c.NoticeID" />
+                                                <input type="hidden" name="RecieverType" value="@c.ApplicableFor" />
+                                                <input type="hidden" name="AssociatedIDs" value="@c.ClassesIncludedIDs" />
+                                                if (c.NoticeEndDate >= SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(-1) || c.IsSMSSent==1)
+                                                {
+                                                 <button onclick="return NoticeSendSMS(this);" msgSend="@c.IsSMSSent" style="background-color: @(c.IsSMSSent == 0 ? "gray" : "green");color: white;" class="btn btn-default" title="@(c.IsSMSSent == 0 ? "SMS Not Sent For This Notice" : "SMS Already Sent For This Notice")">SMS</button>
+                                                }
+                                            }
+
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="divEditForm" style="display:none;">
+        @using (Html.BeginForm("UpdateNotice", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateNotice" }))
+        {
+            <div class="box box-danger" id="divEditFormDetails">
+                <div class="box-header">
+                    <h3 class="box-title">Notice Details</h3>
+
+                </div>
+                <div class="box-body">
+                    <input type="hidden" id="hdnNoticeID" name="NoticeID" value="" />
+
+                    <div class="row">
+
+                        <div class="form-group col-md-6">
+                            <div class="input-group" style="border: 1px solid #ddd;">
+                                <div class="input-group-addon">
+                                    <span>Applicable For</span>
+                                </div>
+                                <label style="margin-left: 10px;padding-top: 3px;">
+                                    <input type="radio" value="0" name="iApplicableFor" class="flat-red" id="rbAppEveryone">
+                                    Everyone
+                                </label>
+
+                                <label style="margin-left: 10px;padding-top: 3px;">
+                                    <input type="radio" value="1" name="iApplicableFor" class="flat-red" id="rbAppEmployees">
+                                    Employees
+                                </label>
+
+
+                                <label style="margin-left: 10px;padding-top: 3px;">
+                                    <input type="radio" value="3" name="iApplicableFor" class="flat-red" id="rbAppParants">
+                                    Parents
+                                </label>
+                            </div>
+                            <input type="hidden" id="hdnApplicableFor" value="1" name="ApplicableFor" />
+                        </div>
+
+                        <div class="form-group col-md-2">
+                            <div class="input-group" style="border: 1px solid #ddd;">
+                                <div class="input-group-addon">
+                                    <span>Status</span>
+                                </div>
+                                <label class="switch switch-green" style="padding-top: 3px;">
+
+                                    <input type="checkbox" id="chkNoticeStatus" class="switch-input">
+
+                                    <span class="switch-label" onclick='$(this).closest("label").find("#hdnNoticeEditStatus").val($(this).closest("tr").find("#hdnNoticeEditStatus").val() == "0" ? "1" : "0");' data-on="Active" data-off="Inactive"></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" id="hdnNoticeEditStatus" name="Status" value="1" />
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <div class="input-group" style="border: 1px solid #ddd;">
+                                <div class="input-group-addon">
+                                    <span>Level</span>
+                                </div>
+                                <select id="ddlNoticeLevel" name="NoticeLevel" class="form-control">
+                                    <option value="0">High</option>
+                                    <option value="1">Medium</option>
+                                    <option value="2">Low</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" style="margin-left:0px;margin-right:0px;">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <span>Classes</span>
+                                </div>
+                                <select class="form-control select2" id="ddlSelectionList" multiple="multiple" name="ClassesIncluded" data-placeholder="Select Classes" style="width: 100%;">
+                                    <option value="0" selected>All Classes</option>
+                                    @foreach (var g in Model.SelectionList)
+                                    {
+                                        <option value="@g.ID">@g.Name</option>
+                                    }
+                                </select>
+                                <input type="hidden" id="hdnClassesIncluded" name="ClassesIncludedIDs" />
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <span>Start Date</span>
+                                </div>
+                                <input type="date" id="txtStartDate" name="NoticeStartDate" class="form-control" value="" />
+                            </div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <span>End Date</span>
+                                </div>
+                                <input type="date" id="txtEndDate" name="NoticeEndDate" class="form-control" value="" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row" style="margin-left:0px;margin-right:0px;">
+                        <div class="form-group">
+                            <div class="input-group">
+                                <div class="input-group-addon">
+                                    <span>Title</span>
+                                </div>
+                                <input type="text" class="form-control" onkeyup="TitleChanged(this)" name="NoticeTitle" id="txtNoticeTitle" value="">
+                                <div class="input-group-addon">
+                                    <span><ss id="ssTitleCharCount"></ss>/160</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <textarea rows="5" class="form-control" id="txtNoticeDescription" style="resize: none;" name="NoticeDescription"></textarea>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-12">
+                            <button href="javascript:void(0);" class="btn btn-info pull-right" onclick="return BeforeSaveNotice(this);">Save</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+@section scripts
+{
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script src="@Url.Content("~/js/icheck.min.js")"></script>
+
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+        $('#liNoticeBoard').closest('ul').closest('li').addClass('active');
+        $('#liNoticeBoard').addClass('active');
+
+    });
+</script>
+<script>
+    function TitleChanged(sender)
+    {
+        $(sender).closest('.input-group').find('#ssTitleCharCount').html($(sender).val().length);
+    }
+    function NoticeDelete(sender) {
+        return confirm('Do you really want to delete Notice!!!!');
+    }
+    function NoticeSendSMS(sender) {
+        if ($(sender).attr('msgSend') == "1") {
+            alert('SMS is already sent for this Notice....');
+            ShowClosingNotification('SMS', 'SMS is already sent for this Notice....', 'info');
+            return false;
+        }
+        else {
+            return confirm('Do you really want to Send SMS!!!!');
+        }
+    }
+    function EditNotice(sender) {
+        if ($(sender).hasClass("EditSectionClose")) {
+            var ele = document.getElementsByClassName("EditSectionOpen");
+            if (ele.length > 0) {
+                $(ele[0]).click();
+                if ($(ele[0]).text() == 'Cancel New') {
+                    $(ele[0]).text('Add New');
+                }
+                else {
+                    $(sender).find('i').addClass('fa-pencil-square-o');
+                    $(sender).find('i').removeClass('fa-times-circle-o');
+                }
+            }
+            $(sender).removeClass("EditSectionClose");
+            $(sender).addClass("EditSectionOpen");
+
+            if ($(sender).text() == 'Add New') {
+                $(sender).text('Cancel New');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+
+                $('#divEditFormDetails').find('#hdnNoticeID').val(0);
+                $('#divEditFormDetails').find('#hdnApplicableFor').val(0);
+                $('#divEditFormDetails').find('#hdnNoticeEditStatus').val(1);
+                $('#divEditFormDetails').find('#ddlSelectionList').val(0);
+                $('#divEditFormDetails').find('#ddlNoticeLevel').val(1);
+                $('#divEditFormDetails').find('#hdnClassesIncluded').val('');
+                $('#divEditFormDetails').find('#txtNoticeTitle').val('');
+                $('#divEditFormDetails').find('#ssTitleCharCount').html(0);
+                $('#divEditFormDetails').find('#txtNoticeDescription').val('');
+                $('#divEditFormDetails').find('#txtStartDate').val(new Date());
+                $('#divEditFormDetails').find('#txtEndDate').val(new Date());
+                $('#divEditFormDetails').find('#chkNoticeStatus').prop('checked','checked');
+                $('#divEditFormDetails').find('#rbAppEveryone').removeProp('checked');
+                $('#divEditFormDetails').find('#rbAppEmployees').removeProp('checked');
+                $('#divEditFormDetails').find('#rbAppStudents').removeProp('checked');
+                $('#divEditFormDetails').find('#rbAppParants').removeProp('checked');
+                $('#divEditFormDetails').find("#ddlSelectionList").select2();
+                $('input[type="radio"].flat-red').iCheck({
+                    radioClass: 'iradio_flat-blue'
+                });
+                $('input[type="radio"].flat-red').on('ifChanged', function (event) {
+                    if ($(this).is(":checked")) {
+                        $(this).closest('.form-group').find('#hdnApplicableFor').val($(this).val());
+                    }
+                });
+            }
+            else {
+                $(sender).find('i').removeClass('fa-pencil-square-o');
+                $(sender).find('i').addClass('fa-times-circle-o');
+                $(sender)
+                .closest("tr")
+                .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditForm').html() + "</td></tr>");
+                //alert($(sender).closest('tr').find('#hdnClassesIncludedIDs').val());
+                var selectedClasses = $(sender).closest('tr').find('#hdnClassesIncludedIDs').val() == '' ? '0' : $(sender).closest('tr').find('#hdnClassesIncludedIDs').val().split(',');
+                $('#divEditFormDetails').find('#hdnNoticeID').val($(sender).closest('tr').find('#hdnNoticeID').val());
+                $('#divEditFormDetails').find('#hdnApplicableFor').val($(sender).closest('tr').find('#hdnApplicableFor').val());
+                $('#divEditFormDetails').find('#hdnNoticeEditStatus').val($(sender).closest('tr').find('#hdnNoticeStatus').val());
+                $('#divEditFormDetails').find('#ddlNoticeLevel').val($(sender).closest('tr').find('#hdnNoticeLevel').val());
+                $('#divEditFormDetails').find('#ddlSelectionList').val(selectedClasses);
+                $('#divEditFormDetails').find('#hdnClassesIncluded').val($(sender).closest('tr').find('#hdnClassesIncludedIDs').val());
+                $('#divEditFormDetails').find('#txtStartDate').val($(sender).closest('tr').find('#hdnNoticeStartDate').val());
+                $('#divEditFormDetails').find('#txtEndDate').val($(sender).closest('tr').find('#hdnNoticeEndDate').val());
+                $('#divEditFormDetails').find('#txtNoticeTitle').val($(sender).closest('tr').find('#tdTitle').text().trim());
+                $('#divEditFormDetails').find('#txtNoticeDescription').val($(sender).closest('tr').find('#hdnNoticeDescription').val().replace('<br>', '\n'));
+                var titText = $(sender).closest('tr').find('#tdTitle').text().trim();
+                $('#divEditFormDetails').find('#ssTitleCharCount').html(titText.length);
+
+                if ($(sender).closest('tr').find('#hdnApplicableFor').val() == 0) {
+                    $('#divEditFormDetails').find('#rbAppEveryone').prop('checked', 'checked');
+                }
+                else if ($(sender).closest('tr').find('#hdnApplicableFor').val() == 1) {
+                    $('#divEditFormDetails').find('#rbAppEmployees').prop('checked', 'checked');
+                }
+                else if ($(sender).closest('tr').find('#hdnApplicableFor').val() == 2) {
+                    $('#divEditFormDetails').find('#rbAppStudents').prop('checked', 'checked');
+                }
+                else {
+                    $('#divEditFormDetails').find('#rbAppParants').prop('checked', 'checked');
+                }
+                if ($(sender).closest('tr').find('#hdnNoticeStatus').val() == 1) {
+                    $('#divEditFormDetails').find('#chkNoticeStatus').prop('checked', 'checked');
+                }
+                $("#ddlSelectionList").select2();
+                $('input[type="radio"].flat-red').iCheck({
+                    radioClass: 'iradio_flat-blue'
+                });
+                $('input[type="radio"].flat-red').on('ifChanged', function (event) {
+                    if ($(this).is(":checked")) {
+                        $(this).closest('.form-group').find('#hdnApplicableFor').val($(this).val());
+                    }
+                });
+            }
+
+
+
+        }
+        else {
+            $(sender).removeClass("EditSectionOpen");
+            $(sender).addClass("EditSectionClose");
+            if ($(sender).text() == 'Cancel New') {
+                $(sender).text('Add New');
+            }
+            else {
+                $(sender).find('i').removeClass('fa-times-circle-o');
+                $(sender).find('i').addClass('fa-pencil-square-o');
+            }
+            $(sender).closest("tr").next().remove();
+
+        }
+
+    }
+    function BeforeSaveNotice(sender) {
+        if ($('#txtStartDate').val() == '' || $('#txtStartDate').val() == '') {
+            ShowClosingNotification('Error', 'Please Enter Valid Dates', 'error');
+            return false;
+
+        }
+        else {
+            $(sender).closest('.box-body').find('#hdnClassesIncluded').val($(sender).closest('.box-body').find('#ddlSelectionList').val());
+
+            return true;
+        }
+    }
+</script>
+}
+
+<!-- /.content -->

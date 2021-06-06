@@ -1,0 +1,206 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model ClassFeeStructureEditModel
+@section IncludeCss
+{
+    <title>Fee Structure Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Fee Structure Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Fee Structure Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("FeeStructureManagement", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-4 text-right">Session :</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" ID="ddlMainSessions" name="SessionID">
+                                                @foreach (SchoolSessionModel e in Model.Sessions)
+                                                {
+                                                    <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-4 text-right">Class :</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" ID="ddlMainClass" name="ClassID" onchange="ClassMainChanged(this);">
+                                                @foreach (ClassModel e in Model.Classes)
+                                                {
+                                                    <option value="@e.ClassID" @(e.ClassID == Model.ClassID ? "Selected" : "")>@e.ClassName</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+                                            <label class="col-md-3 text-right padding-R">Groups : </label>
+                                            <div class="col-md-7 padding-L" style="padding-left: 10px;">
+
+                                                <select class="form-control" name="GroupID" ID="ddlGroups">
+                                                    @foreach (GroupModel e in Model.Groups)
+                                                    {
+                                                        <option value="@e.GroupID" @(e.GroupID == Model.GroupID ? "Selected" : "")>@e.GroupName</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                            <div class="col-md-2">
+                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    @using (Html.BeginForm("UpdateClassFee", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <input type="hidden" value="@Model.ClassID" name="ClassID" />
+                        <input type="hidden" value="@Model.GroupID" name="GroupID" />
+                        <input type="hidden" value="@Model.SBranchID" name="SBranchID" />
+                        <input type="hidden" value="@Model.SessionID" name="SessionID" />
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">#</th>
+                                    <th style="width: 20%">Fee Category</th>
+                                    <th style="width: 20%">Fee Occurance</th>
+                                    <th style="width: 20%">Is Applicable</th>
+                                    <th style="width: 30%">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbdFeeCategories">
+                                @{
+                                    var Counter = 0;
+                                    foreach (ClassFeeStructureModel e in Model.FeeStructure)
+                                    {
+                                        if (e.FeeTypeApplicable != 5 || ((StartupModel)Session["StartupModel"]).TransportFeeMode == 1)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <input type="hidden" value="@Model.ClassID" name="FeeStructure[@Counter].ClassID" />
+                                                    <input type="hidden" value="@e.ID" name="FeeStructure[@Counter].ID" />
+                                                    <input type="hidden" value="@Model.GroupID" name="FeeStructure[@Counter].GroupID" />
+                                                    <input type="hidden" value="@e.FeeTypeID" name="FeeStructure[@Counter].FeeTypeID" />
+                                                    <input type="hidden" value="@Model.SBranchID" name="FeeStructure[@Counter].SBranchID" />
+                                                    <input type="hidden" value="@Model.UserID" name="FeeStructure[@Counter].UserID" />
+                                                    <input type="hidden" value="@Model.OperationDate" name="FeeStructure[@Counter].CreatedDate" />
+                                                    <input type="hidden" value="@Model.OperationDate" name="FeeStructure[@Counter].ModifiedDate" />
+                                                    <input type="hidden" value="@e.FeeTypeApplicable" id="hdnFeeTypeApplicable" />
+                                                    <input type="hidden" value="@e.Months" id="hdnMonths" />
+                                                    @(Counter + 1)
+                                                </td>
+                                                <td>
+                                                    @e.FeeTypeName
+                                                </td>
+                                                <td>
+                                                    @e.FeeApplicableName <br /><small id="spnMonthNames"></small>
+                                                </td>
+                                                <td>
+                                                    <label class="switch switch-green">
+                                                        @if (e.Status == 1)
+                                                        {
+                                                            <input type="checkbox" class="switch-input" Checked>
+                                                        }
+                                                        else
+                                                        {
+                                                            <input type="checkbox" class="switch-input">
+                                                        }
+                                                        <span class="switch-label" onclick='$(this).closest("tr").find("#hdnFeeStatus").val($(this).closest("tr").find("#hdnFeeStatus").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
+                                                        <span class="switch-handle" id="shTranding"></span>
+                                                        <input type="hidden" name="FeeStructure[@Counter].Status" id="hdnFeeStatus" value="@e.Status" />
+                                                    </label>
+                                                </td>
+                                                <td>
+                                                    <input type="number" class="form-control" name="FeeStructure[@Counter].FeeAmount" value="@e.FeeAmount" />
+                                                </td>
+
+                                            </tr>
+                                            Counter++;
+                                        }
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                        <div>
+                            <button type="submit" class="btn btn-block btn-info pull-right">Save</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    var monthList = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+    $(function () {
+        $('#tbdFeeCategories').find('tr').each(function () {
+            if ($(this).find('#hdnFeeTypeApplicable').val() == 9) {
+                var months = '';
+                var cls = $(this).find('#hdnMonths').val().split(",");
+                $.each(cls, function (i, month) {
+                    if (months != '') {
+                        months = months + ',';
+                    }
+                    months = months + monthList[month - 1];
+                });
+                $(this).find('#spnMonthNames').html(' (' + months + ')');
+            }
+        });
+        $('#liFeeStructureManagement').closest('ul').closest('li').addClass('active');
+        $('#liFeeStructureManagement').addClass('active');
+    });
+
+    function ClassMainChanged(sender) {
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetClassGroupList/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlGroups').html(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+</script>
+<!-- /.content -->

@@ -1,0 +1,238 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentFeeModel
+@section IncludeCss
+{
+<title>Monthly Fee Collection  <br/> Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/mm/yyyy")</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("MonthlyFeeCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExpences" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-4 text-right"></label>
+                                    <div class="col-md-8">
+
+                                    </div>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Month : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="month" value="@(Model.Year + "-" + Model.Month.ToString().PadLeft(2,'0'))" name="SelectedDate" id="dtMonth" class="form-control" onchange="ExpenceMonthChanged();" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetExpences').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="hdnCurrentMonth" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().Month" />
+                        <input type="hidden" id="hdnCurrentYear" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().Year" />
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="PaymentsTable" class="table table-striped payments">
+                            <thead>
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Payee</th>
+                                    <th>SR No:</th>
+                                    <th>Class</th>
+                                    <th>Section</th>
+                                    <th>Session</th>
+                                    <th>Details</th>
+                                    <th>Date</th>
+
+                                    <th>Collected By</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 1;
+                                decimal TotalPayment = 0;
+                                foreach (FeePaymentModel c in Model.FeePayments)
+                                {
+                                    var PayMode = "";
+                                    TotalPayment = TotalPayment + c.PaymentAmount;
+                            <tr>
+                                <td> @count</td>
+                                <td>
+                                    @c.Name<br />
+                                    @*@c.RollNo<br />*@
+                                    @*@if (!string.IsNullOrEmpty(c.SchoolUID))
+                                    {
+                                        <b>SR No:</b> @c.SchoolUID
+                                    }*@
+                                </td>
+                                <td>@c.SchoolUID</td>
+                                <td>
+                                    @c.ClassName
+                                </td>
+                                <td>
+                                    @c.SectionName
+                                </td>
+                                <td>
+                                    @c.SessionName
+                                </td>
+                                <td>
+                                    @if (c.PaymentMode == 0)
+                                    {
+                                        PayMode = "Cash Payment";
+                                    }
+                                    else if (c.PaymentMode == 1)
+                                    {
+                                        PayMode = "Cheque Payment";
+                                    }
+                                    else if (c.PaymentMode == 2)
+                                    {
+                                        PayMode = "NEFT Payment";
+                                    }
+                                    else if (c.PaymentMode == 2)
+                                    {
+                                        PayMode = "Other Payment";
+                                    }
+                                    @PayMode
+                                    <br />
+                                    @c.ReferanceNumber
+                                    <br />
+                                    @c.Remark
+                                    <br />
+                                    @c.PayMonths
+                                </td>
+                                <td>
+                                    @c.PaymentDate.ToString("dd MMM, yyyy")
+                                </td>
+                                <td>
+                                    @c.CollectedBy
+                                </td>
+                                <td>
+                                    <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
+                                </td>
+                            </tr>
+
+                                    count++;
+                                }
+                                
+                            }
+                            <tfoot>
+                                <tr style="background-color: #606d73;color: white;">
+                                    <td colspan="9">
+                                        <b> Total Collection</b>
+                                    </td>
+                                    <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+   
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        function ExpenceMonthChanged() {
+            var monthyear = $('#dtMonth').val().split('-');
+            var sMonth = parseInt(monthyear[1]);
+            var sYear = parseInt(monthyear[0]);
+
+            var cMonth = parseInt($('#hdnCurrentMonth').val());
+            var cYear = parseInt($('#hdnCurrentYear').val());
+            if (sMonth + sYear * 12 > cMonth + cYear * 12) {
+                ShowNotification('error', 'Month Should be less then Current Month', 'error');
+                if (cMonth < 10) {
+                    $('#dtMonth').val(cYear + '-0' + cMonth);
+                }
+                else {
+                    $('#dtMonth').val(cYear + '-' + cMonth);
+                }
+            }
+        }
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+       
+                        dom: "Bfrtip",
+                        buttons: [
+                          {
+                              extend: "copy",
+                              className: "btn-sm",
+        footer: true
+                          },
+                          {
+                              extend: "csv",
+                              className: "btn-sm",
+        footer: true
+                          },
+                          {
+                              extend: "excel",
+                              className: "btn-sm",
+        footer: true
+                          },
+                          {
+                              extend: "pdfHtml5",
+                              className: "btn-sm",
+        footer: true
+                          },
+                          {
+                              extend: "print",
+                              className: "btn-sm",
+        footer: true
+                          },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
+        });
+
+    </script>
+}
+<!-- /.content -->

@@ -1,0 +1,100 @@
+﻿@model SMEnterprise.Models.EmployeeTransportModel
+@{
+    if (Model.THADetails == null)
+    {
+        Model.THADetails = new SMEnterprise.Models.EmployeeTransportHostelAllocationDelocationModel();
+    }
+}
+<div class="">
+    <div class="row">
+        @using (Html.BeginForm("SaveEmployeeTransport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+        {
+            <input type="hidden" id="hdnEmployeeID" name="UserID" value="@Model.EmployeeID" />
+            <input type="hidden" id="hdnTHChangeID" name="THChangeID" value="@Model.THADetails.THChangeID" />
+            <input type="hidden" id="hdnUserType" name="UserType" value="1" />
+            <div class="form-horizontal form-label-left">
+                <div class="row">
+                    @*<div class="col-md-4">
+                            <label class="">City : </label>
+                            <select class="form-control" id="ddlTCities" onchange="CityChanged(this, 1);">
+                                @foreach (var o in Model.Cities)
+                                {
+                                    <option value="@o.ID" @(o.ID == Model.StopDetails.CityID ? "selected" : "")>@o.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="">Area : </label>
+                            <select class="form-control" id="ddlTAreas" onchange="AreaChanged(this, 1);">
+                                @foreach (var o in Model.Areas)
+                                {
+                                    <option value="@o.ID" @(o.ID == Model.StopDetails.AreaID ? "selected" : "")>@o.Name</option>
+                                }
+                            </select>
+                        </div>*@
+                    <div class="col-md-4">
+                        <label class="">Route : </label>
+                        <select class="form-control" id="ddlTRoutes" onchange="TransportRouteChanged(this);">
+                            @foreach (var o in Model.Routes)
+                            {
+                                <option value="@o.ID" @(o.ID == Model.StopDetails.RouteID ? "selected" : "")>@o.Name</option>
+                            }
+                        </select>
+                    </div>
+                    @{
+                        var Capacity = "NA";
+                        var filled = "NA";
+                        <div class="col-md-4">
+                            <label>Vehicle : </label>
+                            <select class="form-control" id="ddlTVehicles" name="VehicleRouteID" onchange="TransportRouteVehicleChanged(this);">
+                                @foreach (var o in Model.Vehicles)
+                                {
+                                    <option capacity="@o.Extra2" filled="@o.Extra1" value="@o.ID" @(o.ID == Model.StopDetails.VehicleRouteID ? "selected" : "")>@o.Name</option>
+                                    if (o.ID == Model.StopDetails.VehicleRouteID || Capacity == "NA")
+                                    {
+                                        Capacity = o.Extra2;
+                                        filled = o.Extra1;
+                                    }
+                                }
+                            </select>
+                            <div id="divFilledStatus">
+                                Filled Seats :@filled  Capacity : @Capacity
+                            </div>
+                        </div>
+                    }
+                    <div class="col-md-4">
+                        <label>Stops : </label>
+                        <select class="form-control" id="ddlTStops" name="KeyID">
+                            @foreach (var o in Model.Stops)
+                            {
+                                <option value="@o.StopID" @(o.StopID == Model.StopDetails.StopID ? "selected" : "")>@o.AreaName (@o.Time) Rs.@o.Rate.ToString("0")</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4">
+                        <label id="lblTransportChangeDate">From (mm-dd-yyyy) </label>
+                        <input type="date" name="StartDate" class="form-control" value="@((Model.THADetails.THChangeID==0?SMEnterprise.Repository.CommonUsage.GetCurrentDate():Model.THADetails.StartDate).ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="col-md-3" style="padding-left: 40px;">
+                        <label>Continue : </label><br />
+                        <label class="switch switch-green">
+                            <input type="checkbox" class="switch-input" @(Model.StopDetails.Applicable == 1 ? "checked" : "")>
+                            <span class="switch-label" onclick="TransportStatusChanged(this);" data-on="Yes" data-off="No"></span>
+                            <span class="switch-handle" id="shTranding"></span>
+                            <input type="hidden" name="Applicable" id="hdnTransportApplicable" value="@Model.StopDetails.Applicable">
+                        </label>
+                    </div>
+                    <div class="col-md-4" id="dvEndDate" @(Model.StopDetails.Applicable == 1 ? "style=display:none" : "")>
+                        <label id="lblTransportChangeDate">To (mm-dd-yyyy) </label>
+                        <input type="date" name="EndDate" class="form-control" value="@((Model.THADetails.THChangeID==0|| Model.StopDetails.Applicable==1?SMEnterprise.Repository.CommonUsage.GetCurrentDate():Model.THADetails.EndDate).ToString("yyyy-MM-dd"))" />
+                    </div>
+                    <div class="form-group col-md-12">
+                        <button type="submit" class="btn btn-success pull-right">Save</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

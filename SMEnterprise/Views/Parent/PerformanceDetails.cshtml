@@ -1,0 +1,384 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@model SMEnterprise.Models.PerformanceParameterDetailModel
+@section IncludeCss
+{
+    <title>Performance Card | @Model.Student.Name</title>
+    <style>
+        #tblResult > tbody > tr > td {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+    </style>
+}
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_content">
+                    @using (Html.BeginForm("PerformanceDetails", "Parent", FormMethod.Post, new { @class = "form-horizontal form-label-left", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                    {
+                        <div class="form-group col-md-5">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                Evaluation
+                            </label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <select name="EvaluationID" class="form-control col-md-7 col-xs-12">
+                                    @foreach (EvaluationModel ev in Model.MainEvaluations)
+                                    {
+                                        <option value="@ev.EvaluationID" @(ev.EvaluationID==Model.EvaluationID?"selected":"")>@ev.EvaluationName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-5">
+                            <label class="control-label col-md-3 col-sm-3 col-xs-12" for="first-name">
+                                Session
+                            </label>
+                            <div class="col-md-9 col-sm-9 col-xs-12">
+                                <select name="StudentSessionUID" class="form-control col-md-7 col-xs-12">
+                                    @foreach (NameIDModel ss in Model.StudentSessions)
+                                    {
+                                        <option value="@ss.ID" @(ss.ID == Model.StudentSessionUID ? "selected" : "")>@ss.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <button id="send" class="btn btn-sm btn-success" type="submit">Go!</button>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+                <div class="x_content">
+                    <div class="profile_img col-md-2">
+
+                        <!-- end of image cropping -->
+                        <div>
+                            <!-- Current avatar -->
+                            <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" class="img-responsive avatar-view" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+
+
+                        </div>
+                        <!-- end of image cropping -->
+
+                    </div>
+                    <div class="col-md-1">
+
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row">
+                            <h2> Student : @Model.Student.Name</h2>
+                        </div>
+                        <div class="row">
+                            <h2> Roll No. : @Model.Student.RollNo</h2>
+                        </div>
+                        <div class="row">
+                            <h2> Student ID : @Model.Student.StudentSID</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="row">
+                            <h2> Class/Section : @Model.ClassName / @Model.SectionName</h2>
+                        </div>
+                        <div class="row">
+                            <h2> CGPA : @Model.CGPA</h2>
+                        </div>
+                        <div class="row">
+                            <h2> Evaluation : @Model.EvaluationName</h2>
+                        </div>
+                    </div>
+                    <div class="col-md-9">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-11">
+                            @{
+                                var percentage = 0;//(Model.FilledParameter * 100) / Model.TotalParameter;
+                                percentage = percentage > 100 ? 100 : percentage;
+                                <p>Completion @percentage.ToString("N2")%</p>
+                                <div class="progress progress_sm">
+                                    <div class="progress-bar bg-green" role="progressbar" data-transitiongoal="@percentage" aria-valuenow="@(percentage-1)" style="width: @percentage%;"></div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="x_panel">
+                <div class="x_content">
+                    @using (Html.BeginForm("UpdateStudentPerformance", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                    {
+                        <input type="hidden" name="StudentSessionUID" value="@Model.StudentSessionUID" />
+                        <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            @{ var mainCounter = 0;
+                                <table class="table table-hover">
+                                    @foreach (PerformanceParameterModel c in Model.PerformanceParameters)
+                                    {
+                                        if (c.ParamType == 0)
+                                        {
+
+                                            <tr>
+                                                <td colspan="3" style="text-align: center;">
+                                                    @c.ParamName <br /><small>@c.ParamDesc</small>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="3">
+                                                    <table id="tblResult" class="table table-bordered table-hover">
+                                                        @{
+                                                            var sublevels = 1;
+                                                            var TotalHeader = "";
+                                                            <tr>
+                                                                <td @(Model.SubEvaluations.Count > 0 ? "rowspan=2" : "") style="width:20%;">
+                                                                    Subject
+                                                                </td>
+
+                                                                @foreach (EvaluationModel me in Model.MainEvaluations)
+                                                                {
+                                                                    if (sublevels < me.SubEvals)
+                                                                    {
+                                                                        sublevels = me.SubEvals;
+                                                                    }
+                                                                    <td colspan="@(me.SubEvals + 1)">@me.EvaluationName Grade</td>
+                                                                    if (TotalHeader != "")
+                                                                    {
+                                                                        TotalHeader = TotalHeader + " + ";
+                                                                    }
+                                                                    TotalHeader = TotalHeader + " " + me.EvaluationName;
+                                                                }
+                                                                <td colspan="@(sublevels + 1)">Overall @TotalHeader</td>
+                                                            </tr>
+                                                            if (Model.SubEvaluations.Count > 0)
+                                                            {
+                                                                <tr>
+                                                                    @foreach (EvaluationModel tme in Model.MainEvaluations)
+                                                                    {
+                                                                        foreach (EvaluationModel se in Model.SubEvaluations)
+                                                                        {
+                                                                            if (se.EvaluationID == tme.EvaluationID)
+                                                                            {
+                                                                                <td>@se.EvaluationName</td>
+                                                                            }
+                                                                        }
+                                                                        <td>Total</td>
+                                                                    }
+                                                                    <td>FA</td>
+                                                                    <td>SA</td>
+                                                                    <td>Overall<br />Grade</td>
+                                                                    <td>Overall<br />Points <small>(GP)</small></td>
+                                                                </tr>
+                                                            }
+                                                            var privSubID = 0;
+                                                            foreach (ExamResultDetailModel r in Model.Result)
+                                                            {
+                                                                if (privSubID != r.SubjectID)
+                                                                {
+                                                                    decimal FATotalMarks = 0;
+                                                                    decimal SATotalMarks = 0;
+                                                                    <tr>
+                                                                        <td>@r.SubjectName</td>
+                                                                        @foreach (EvaluationModel er in Model.MainEvaluations)
+                                                                        {
+                                                                            decimal EvalTotalMarks = 0;
+                                                                            foreach (EvaluationModel esr in Model.SubEvaluations)
+                                                                            {
+                                                                                if (esr.EvaluationID == er.EvaluationID)
+                                                                                {
+                                                                                    foreach (ExamResultDetailModel err in Model.Result)
+                                                                                    {
+                                                                                        if (esr.SubEvaluationID == err.EvaluationID && r.SubjectID == err.SubjectID)
+                                                                                        {
+                                                                                            <td>@(err.Grade == null ? "NA" : err.Grade)</td>
+                                                                                            EvalTotalMarks = EvalTotalMarks + err.MarksScored;
+                                                                                            if (esr.EvaluationType == 0)
+                                                                                            {
+                                                                                                FATotalMarks = FATotalMarks + (err.MarksScored * esr.Weightage) / 100;
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                SATotalMarks = SATotalMarks + (err.MarksScored * esr.Weightage) / 100;
+                                                                                            }
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                            }
+                                                                            <td>@EvalTotalMarks</td>
+                                                                        }
+
+                                                                        <td>@AcadmicModel.CalculateGrade(FATotalMarks)</td>
+                                                                        <td>@AcadmicModel.CalculateGrade(SATotalMarks)</td>
+                                                                        <td>@AcadmicModel.CalculateGrade(SATotalMarks + FATotalMarks)</td>
+                                                                        <td>@AcadmicModel.CalculateGradePoints(SATotalMarks + FATotalMarks)</td>
+                                                                    </tr>
+                                                                }
+                                                                privSubID = r.SubjectID;
+                                                            }
+                                                        }
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                                            }
+                                                            if (c.ParamType == 1)
+                                                            {
+                                                                <tr>
+                                                                    <td colspan="3" style="text-align: center;">
+                                                                        @c.ParamName <br /><small>@c.ParamDesc</small>
+                                                                    </td>
+                                                                </tr>
+                                                                if (c.Subs != 0)
+                                                                {
+                                                                    var oldParamID = 0;
+                                                                    foreach (PerformanceParameterModel s in Model.PerformanceParameters)
+                                                                    {
+
+                                                                        if ((s.ParamType == 2) && s.MainParamID == c.ParamID)
+                                                                        {
+                                                                            <tr>
+                                                                                <td colspan="3">@s.ParamName</td>
+                                                                            </tr>
+                                                                            if (s.Subs != 0)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td colspan="3">
+                                                                                        <table class="table table-bordered table-hover">
+                                                                                            <thead>
+                                                                                                <tr>
+                                                                                                    @if (s.ParamName.Contains("2(D)"))
+                                                                                                    {
+                                                                                                        <td style="width:30%">Attitude Towards</td>
+                                                                                                    }
+                                                                                                    else
+                                                                                                    {
+                                                                                                        <td style="width:30%">Perticular</td>
+                                                                                                    }
+                                                                                                    <td style="width:50%">Descriptive Indicators</td>
+                                                                                                    <td style="width:20%">Grade</td>
+                                                                                                </tr>
+                                                                                            </thead>
+
+                                                                                            @foreach (PerformanceParameterModel ss in Model.PerformanceParameters)
+                                                                                            {
+                                                                                                if (ss.MainParamID == s.ParamID)
+                                                                                                {
+                                                                                                    <tr>
+                                                                                                        <td>
+                                                                                                            @ss.ParamName
+                                                                                                        </td>
+                                                                                                        <td>
+                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].ParamKey" value="@ss.ParamKey" />
+                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].ParamID" value="@ss.ParamID" />
+                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].ParamValID" value="@ss.ParamValID" />
+                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].EvaluationID" value="@Model.EvaluationID" />
+                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].StudentSessionID" value="@Model.StudentSessionUID" />
+                                                                                                            @ss.ParamValue
+                                                                                                        </td>
+                                                                                                        <td>@ss.Grade</td>
+                                                                                                    </tr>
+                                                                                                    mainCounter++;
+                                                                                                }
+                                                                                            }
+                                                                                        </table>
+
+                                                                                    </td>
+                                                                                </tr>
+                                                                            }
+                                                                        }
+                                                                        else if ((s.ParamType == 4) && s.MainParamID == c.ParamID)
+                                                                        {
+                                                                            if (s.ParamID != oldParamID)
+                                                                            {
+                                                                                <tr>
+                                                                                    <td colspan="3">
+                                                                                        @s.ParamName
+                                                                                    </td>
+                                                                                </tr>
+                                                                                                <tr>
+                                                                                                    <td colspan="3">
+                                                                                                        <table class="table table-bordered table-hover">
+                                                                                                            <thead>
+                                                                                                                <tr>
+                                                                                                                    <td style="width:30%">Activity</td>
+                                                                                                                    <td style="width:50%">Descriptive Indicators</td>
+                                                                                                                    <td style="width:20%">Grade</td>
+                                                                                                                </tr>
+                                                                                                            </thead>
+                                                                                                            @foreach (PerformanceParameterModel st in Model.PerformanceParameters)
+                                                                                                            {
+                                                                                                                if (st.ParamID == s.ParamID && st.ParamKey != null)
+                                                                                                                {
+                                                                                                                    <tr>
+                                                                                                                        <td>
+                                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].ParamID" value="@st.ParamID" />
+                                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].ParamValID" value="@st.ParamValID" />
+                                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].EvaluationID" value="@Model.EvaluationID" />
+                                                                                                                            <input type="hidden" name="PerformanceParameters[@mainCounter].StudentSessionID" value="@Model.StudentSessionUID" />
+                                                                                                                            @st.ParamKey
+                                                                                                                        </td>
+                                                                                                                        <td>@st.ParamValue</td>
+                                                                                                                        <td>@st.Grade</td>
+                                                                                                                    </tr>
+                                                                                                                    mainCounter++;
+                                                                                                                }
+                                                                                                            }
+
+                                                                                                        </table>
+                                                                                                    </td>
+                                                                                                </tr>
+                                                                                    mainCounter++;
+                                                                                    oldParamID = s.ParamID;
+                                                                                }
+
+
+
+                                                                            }
+
+
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                </table>
+                                <input type="hidden" id="hdnCounterCount" value="@mainCounter" />
+                            }
+                        </div>
+
+                                                            }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/jquery.min.js")"></script>
+    <script src="@Url.Content("~/js/Chart.min.js")"></script>
+
+    <script>
+        $(function () {
+
+        });
+    </script>
+    <!-- datepicker -->
+    <script type="text/javascript">
+        function DrawAttandanceChart(data) {
+            new Chart(document.getElementById("canvas000"), {
+                type: 'line',
+                data: data
+            });
+        }
+
+        $(document).ready(function () {
+
+        });
+    </script>
+}

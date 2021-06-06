@@ -1,0 +1,135 @@
+﻿@model SMEnterprise.Models.SalarySlipModel
+<style>
+    .form-control {
+        width: 100% !important;
+    }
+</style>
+<div id="divSalaryDetails">
+    <div style="margin:5px">
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-12" style="text-align: center;border: 1px;border-style: double;">
+                <img class="thumbImageGrid" style="max-width: 75px;max-height: 75px;" src="@Url.Content("~/Images/SBranchLogo/")@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID)_@(SMEnterprise.Models.PermissionManager.GetLoggedInUser().BranchLogo)" alt="">
+                <br /><span><b>@Model.Branch.BranchSchoolName</b></span>
+                <br /><span>@Html.Raw(Model.Branch.Address.Replace("\n", "<br/>"))</span>
+            </div>
+            <div class="clearfix"></div>
+            <div class="col-md-6" style="border-right: 1px solid;">
+                <span>
+                    Month : @SMEnterprise.Repository.CommonUsage.MonthNames[Model.Salary.SMonth - 1], @Model.SalaryYear
+                </span><br />
+                <span> Name : @Model.Employee.EmployeeName</span><br />
+                <span>Designation : @Model.Employee.EmployeeTypeName</span><br />
+            </div>
+            <div class="col-md-6" style="border-left: 1px solid;">
+                <span>  Employee Code : @Model.Employee.EmployeeSID</span><br />
+                <span> Joining Date : @Model.Employee.DOJ.ToString("dd MMM, yyyy")</span><br />
+                <span> Salary Processing Date : @Model.Salary.ProcessingDate.ToString("dd MMM, yyyy")</span><br />
+
+            </div>
+        </div>
+
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-12" style="border-right: 1px solid;text-align:center">
+                <span class="col-md-2">Total Days : @Model.Salary.TotalDays</span>
+                <span class="col-md-2"> Paid Days : @Model.Salary.PresentDays</span>
+                <span class="col-md-2"> LWP : @(Model.Salary.TotalDays - Model.Salary.PresentDays - Model.Salary.WeekOffs- Model.Salary.Holidays) </span>
+                <span class="col-md-2"> Paid Leaves : @Model.Salary.PaidLeaves</span>
+                <span class="col-md-2"> Holidays : @Model.Salary.Holidays</span>
+                <span class="col-md-2"> Week Offs : @Model.Salary.WeekOffs</span>
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-6" style="border-right: 1px solid;text-align:center">
+                <span style="font-weight: bold;font-size: 1.2em;"> Earnings</span>
+            </div>
+            <div class="col-md-6" style="border-left: 1px solid;text-align:center">
+                <span style="font-weight: bold;font-size: 1.2em;"> Deductions</span>
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-6" style="border-right: 1px solid;">
+                <table style="width:100%;" id="tblAdditions">
+
+                    @foreach (var s in Model.Details.Where(c => c.Type == 0 || c.Type == 3 && c.Amount > 0))
+                    {
+                        <tr>
+                            <td style="width:70%;">
+                                <span> @s.Title</span>
+                            </td>
+                            <td>
+                                <span> @s.Amount.ToString("N2")</span>
+                            </td>
+                        </tr>
+                        if(s.Type==3)
+                        {
+                            Model.Salary.NetPayble = Model.Salary.NetPayble + s.Amount;
+                        }
+                    }
+
+                </table>
+            </div>
+            <div class="col-md-6" style="border-left: 1px solid;">
+
+                <table style="width:100%;" id="tblDeductions">
+
+                    @foreach (var s in Model.Details.Where(c => c.Type != 0))
+                    {
+                        if (s.Type == 3 && s.Amount < 0)
+                        {
+                            <tr>
+                                <td style="width:70%;">
+                                    <span> @s.Title</span>
+                                </td>
+                                <td>
+                                    <span>@(s.Type == 3 ? (s.Paid * -1).ToString("N2") : s.Paid.ToString("N2"))</span>
+                                </td>
+                            </tr>
+                            Model.Salary.NetPayble = Model.Salary.NetPayble - s.Paid;
+                        }
+                        else if(s.Type!=3)
+                        {
+                            <tr>
+                                <td style="width:70%;">
+                                    <span> @s.Title</span>
+                                </td>
+                                <td>
+                                    <span>@(s.Type == 3 ? (s.Paid * -1).ToString("N2") : s.Paid.ToString("N2"))</span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </table>
+
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-4">
+                <span> <b>Gross Earnings :</b>@Model.Salary.GrossEarning.ToString("N2")</span>
+            </div>
+            <div class="col-md-4">
+                <span>Total Deductions :@((Model.Salary.TotalDeductions).ToString("N2"))</span>
+            </div>
+            <div class="col-md-4">
+                <span> Net Payble :@Model.Salary.NetPayble.ToString("N2")</span>
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-12" style="text-align:-webkit-center;">
+                <span><b> @SMEnterprise.Repository.CommonUsage.SpellDecimal(Model.Salary.NetPayble) Only</b></span>
+            </div>
+        </div>
+        <div class="row" style="border: 1px;border-style: double;">
+            <div class="col-md-10" style="text-align: right;margin-top: 70px;margin-bottom: 20px;">
+                <span><b> Account</b></span>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<div class="col-md-12 pull-right">
+    <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+        <label id="lblError" style="color: red;"></label>
+        <button type="button" onclick="PrintSalarySlip()" class="btn btn-primary pull-right">Print</button>
+    </div>
+</div>

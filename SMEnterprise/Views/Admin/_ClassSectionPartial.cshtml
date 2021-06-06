@@ -1,0 +1,69 @@
+﻿<table id="tblCategory" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th style="width: 20%">Name</th>
+            <th style="width: 15%">Group Name</th>
+            <th style="width: 15%">Class Teacher</th>
+            <th style="width: 10%">#Students</th>
+            <th style="width: 10%">#Capacity</th>
+            <th style="width: 10%">Status</th>
+            <th style="width: 15%">
+                <input type="hidden" id="hdnHeaderClassID" value="@Model.ClassID" />
+                <input type="hidden" id="hdnEducationLevelID" value="@Model.EducationLevelID" />
+                <a class="EditSectionClose" onclick="EditSection(this, 1);" href="javascript:void(0);">Add New</a>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            foreach (var c in Model.Sections)
+            {
+                <tr>
+                   
+                    <td>
+                        <input type="hidden" id="hdnSectionID" name="ID" value="@c.ID" />
+                        <input type="hidden" id="hdnEducationLevelID" value="@Model.EducationLevelID" />
+                        <input type="hidden" id="hdnClassID" name="ClassID" value="@c.ClassID" />
+                        @c.Name
+                    </td>
+                    <td>@c.GroupName</td>
+                    <td>@c.TeacherName</td>
+
+                    <td id="tdStudentCount">@c.StudentCount</td>
+                    <td>@c.Capacity</td>
+                    <td>
+                            @if (c.Status == 1)
+                            {
+                                <label class='badge bg-green'>Active</label>
+                            }
+                            else
+                            {
+                                <label  class='badge bg-red'>Inactive</label>
+                            }
+                           
+                    </td>
+                    <td>
+                        <div class="row" style="margin-right: 0px;">
+                            <div class="col-md-6">
+                                <input type="hidden" id="hdnHeaderClassID" value="@Model.ClassID" />
+                                <a href="javascript:void(0);" id="@c.ID" class="btn btn-link EditSectionClose" onclick="EditSection(this, 1);" >Edit</a>
+
+
+                            </div>
+                            <div class="col-md-6">
+
+                                <a href="javascript:void(0);" class="btn btn-link" onclick="return DeleteSection(this);" >Delete</a>
+
+                            </div>
+                        </div>
+                    </td>
+
+
+
+                </tr>
+            }
+        }
+    </tbody>
+    
+</table>
+

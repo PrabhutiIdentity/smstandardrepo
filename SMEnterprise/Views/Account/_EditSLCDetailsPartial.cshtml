@@ -1,0 +1,162 @@
+﻿@model SMEnterprise.Models.SLCCertificateDetails
+
+<div class="">
+    <div class="row">
+        @using (Html.BeginForm("UpdateSLCDetails", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+        {
+            <input type="hidden" name="StudentID" value="@Model.StudentID" />
+            <input type="hidden" name="SessionID" value="@Model.SessionID" />
+            <input type="hidden" name="CertID" value="@Model.CertID" />
+            <div class="form-horizontal form-label-left">
+                <div class="">
+                    <h2 class="col-md-12">TC Details</h2>
+                    <div class="col-md-4">
+                        <label class="">TC Serial Number</label>
+                        <input type="text" name="TCSLNo" value="@Model.TCSLNo" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Stream</label>
+                        <input type="text" name="Stream" value="@Model.Stream" required class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="">Character</label>
+                        <input type="text" name="Character" value="@Model.Character" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Is Dues Cleared?</label>
+                        <select class="form-control" name="DuesCleared">
+                            <option value="1" @(Model.DuesCleared == "1" || Model.CertID == 0 ? "selected" : "")>Yes</option>
+                            <option value="0" @(Model.DuesCleared == "0" ? "selected" : "")>No</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Prmotion?</label>
+                        <select class="form-control" name="Promotion">
+                            <option value="Granted" @(Model.Promotion == "Granted" || Model.CertID == 0 ? "selected" : "")>Granted</option>
+                            <option value="Not Granted" @(Model.DuesCleared == "Not Granted" ? "selected" : "")>Not Granted</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">TC Generation Date</label>
+                        <input type="date" name="TCDate" value="@Model.TCDate.ToString("yyyy-MM-dd")" required class="form-control" />
+                    </div>
+
+                    <h2 class="col-md-12">Session Details</h2>
+                    <div class="col-md-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Session</th>
+                                        <th>Class/Section</th>
+                                        <th>From </th>
+                                        <th>To</th>
+                                        <th>Date of Promotion <small>(mm/dd/yyyy)</small></th>
+                                        <th>Conduct </th>
+                                        <th> Work</th>
+                                        <th>Date of Removal <small>(mm/dd/yyyy)</small></th>
+                                        <th>Cause of Removal</th>
+                                        <th>Left School</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var ctr = 0;
+                                        foreach (var ses in Model.Sessions)
+                                        {
+                                    <tr>
+                                        <td>
+                                            @(ctr + 1)
+                                            <input type="hidden" name="Sessions[@ctr].StudentSessionUID" value="@ses.StudentSessionUID" />
+                                        </td>
+                                        <td>@ses.SessionName</td>
+                                        <td>@ses.ClassName/@ses.SectionName</td>
+                                        <td>@ses.FromDate.ToString("dd MMM, yyyy")</td>
+                                        <td>@ses.ToDate.ToString("dd MMM, yyyy")</td>
+                                        <td>
+                                            @if (ses.DateOfPromotion.Year != 1)
+                                            {
+                                                <input type="date" class="form-control" name="Sessions[@ctr].DateOfPromotion" value="@ses.DateOfPromotion.ToString("yyyy-MM-dd")" />
+                                            }
+                                            else
+                                            {
+
+                                            }
+
+                                        </td>
+                                       @*<input type="date" class="form-control" name="Sessions[@ctr].DateOfPromotion" value="@ses.DateOfPromotion.ToString("yyyy-MM-dd")" />*@
+                                        <td><input type="text" class="form-control" name="Sessions[@ctr].ConductWork" value="@ses.ConductWork" /></td>
+                                        <td><input type="text" class="form-control" name="Sessions[@ctr].Work" value="@ses.Work" /></td>
+                                        <td><input type="date" class="form-control" name="Sessions[@ctr].DateOfRemoval" value="@ses.DateOfRemoval.ToString("yyyy-MM-dd")" /></td>
+                                        <td>   <input type="text" class="form-control" name="Sessions[@ctr].CauseOfRemoval" value="@ses.CauseOfRemoval" /></td>
+                                        <td>
+                                            <select class="form-control" name="Sessions[@ctr].IsLeft">
+                                                <option value="0" @(ses.IsLeft == 0 ? "selected" : "")>No</option>
+                                                <option value="1" @(ses.IsLeft == 1 ? "selected" : "")>Yes</option>
+                                            </select>
+                                        </td>
+
+
+                                    </tr>
+                                            ctr++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <h2 class="col-md-12">Student Details Update</h2>
+                    <div class="col-md-4">
+                        <label class="">School Sl. No.</label>
+                        <input type="text" name="SchoolUID" value="@Model.Student.SchoolUID" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Birth Date</label>
+                        <input type="date" name="DOB" value="@Model.Student.DOB.ToString("yyyy-MM-dd")" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Joining Date</label>
+                        <input type="date" name="DOJ" value="@Model.Student.DOJ.ToString("yyyy-MM-dd")" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Previous School Name</label>
+                        <input type="text" name="PSchoolName" value="@Model.Student.PSchoolName" required class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Previous School Medium</label>
+                        <input type="text" name="PSchoolMedium" value="@Model.Student.PSchoolMedium" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Previous School Class Name</label>
+                        <input type="text" name="PClassName" value="@Model.Student.PClassName" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Previous School Result</label>
+                        <input type="text" name="PSResult" value="@Model.Student.PSResult" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Previous School City</label>
+                        <input type="text" name="PSchoolCity" value="@Model.Student.PSchoolCity" class="form-control" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="">Previous School State</label>
+                        <input type="text" name="PSchoolState" value="@Model.Student.PSchoolState" class="form-control" />
+                    </div>
+                    <div class="col-md-12">
+                        <input class="pf-button btn btn-primary pull-right" type="submit" onclick="return SaveSLCDetails(this)" name="submit" value="Save" />
+                    </div>
+                </div>
+
+            </div>
+        }
+    </div>
+</div>
+<script>
+
+    function SaveSLCDetails(sender) {
+        return confirm('Are you Sure you want to save the Details?');
+    }
+</script>

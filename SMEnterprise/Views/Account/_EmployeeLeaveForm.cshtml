@@ -1,0 +1,216 @@
+﻿@model SMEnterprise.Models.EmployeeLeaveDetailModel
+<div class="x_content" id="leaveform">
+    <div class="row">
+        @using (Html.BeginForm("SaveEmployeeLeave", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
+        {
+            <div class="col-md-12">
+                <label class="control-label col-md-12 col-sm-3 col-xs-12" style="text-align: center;font-size: 22px;padding-bottom: 8px;">Leave Details</label>
+            </div>
+            <div class="form-group col-md-6">
+                <label class="control-label col-md-4 col-sm-3 col-xs-12">Employee : </label>
+                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                    <input type="hidden" name="LeaveID" id="hdnLeaveID" value="@Model.Leave.LeaveID" />
+                    <input type="hidden" name="EmployeeType" id="hdnEmployeeType" value="@Model.EmployeeType" />
+                    <select class="form-control" id="ddlEmployee" name="EmployeeID" onchange="EmployeeChanged(this);">
+                        @foreach (SMEnterprise.Models.EmployeeModel q in Model.Employees)
+                        {
+
+                            <option EType="@q.EmployeeType" @(q.EmployeeID == Model.EmployeeID ? "selected" : "") value="@q.EmployeeID">@q.EmployeeSID @q.EmployeeName </option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="form-group col-md-6">
+                <label class="control-label col-md-3 col-sm-3 col-xs-12">Leave Type :</label>
+                <div class="col-md-9 col-sm-9 col-xs-12 input-group LeaveDurationTypes">
+                    <div class="row">
+                        <div class="radio col-md-4">
+                            <label style="padding-left:0px;">
+                                <input type="radio" checked="" class="flat-red" value="1" id="optionsRadios1" name="LeaveType"> Full Day
+                            </label>
+                        </div>
+                        <div class="radio col-md-4">
+                            <label style="padding-left:0px;">
+                                <input type="radio" class="flat-red" value="2" id="optionsRadios2" name="LeaveType"> 1st Half
+                            </label>
+                        </div>
+                        <div class="radio col-md-4">
+                            <label style="padding-left:0px;">
+                                <input type="radio" class="flat-red" value="3" id="optionsRadios3" name="LeaveType"> 2nd Half
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <label class="control-label col-md-4 col-sm-3 col-xs-12">Start Date : <small>(mm/dd/yyyy)</small></label>
+                        <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                            <input type="text" required="" class="form-control has-feedback-left dateinput inpStartDate" id="txtStartDate" placeholder="Date" aria-describedby="inputSuccess2Status" name="StartDate" value="@Model.Leave.StartDate.ToString("MM/dd/yyyy")">
+                            <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                            <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label class="control-label col-md-4 col-sm-3 col-xs-12">End Date : <small>(mm/dd/yyyy)</small></label>
+                        <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                            <input type="text" required="" class="form-control has-feedback-left dateinput inpEndDate" id="txtEndDate" placeholder="Date" aria-describedby="inputSuccess2Status" name="EndDate" value="@Model.Leave.EndDate.ToString("MM/dd/yyyy")">
+                            <span class="fa fa-calendar-o form-control-feedback left" aria-hidden="true"></span>
+                            <span id="inputSuccess2Status" class="sr-only">(success)</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <div class="form-group col-md-12">
+                <div class="row">
+                    <label class="control-label col-md-2 col-sm-3 col-xs-12">Leave Types</label>
+                    <div class="col-md-10">
+                        @{
+                            var lctr = 0;
+                            foreach (var lt in Model.LeaveBalance)
+                            {
+                                <div class="radio col-md-3" id="leavetype_@lt.LeaveTypeID">
+                                    <label style="padding-left:0px;">
+                                        <input type="radio" class="flat-red" value="@lt.LeaveTypeID" @(lt.LeaveTypeID == 0 ? "checked" : "") id="optionsRadios2" name="LeaveTypeApplied"> @lt.LeaveTypeName
+
+                                        @if (lt.LeaveTypeID != 0)
+                                        {
+                                            <span id="spDetails"> M:@(lt.MonthlyQuota == -1 ? "NA" : (lt.MonthlyQuota - lt.MonthlyApplied).ToString())/Y:@(lt.YearlyQuota == -1 ? "NA" : (lt.YearlyQuota - lt.YearlyApplied).ToString())</span>
+                                        }
+                                        @*<input type="hidden" id="hdnIsSalaryDeduct" value="@lt.IsSalaryDeduct" />
+                                            <input type="hidden" id="hdnMAvailable" value="@(lt.MonthlyQuota == -1 ? 10000: lt.MonthlyQuota - lt.MonthlyApplied)" />
+                                            <input type="hidden" id="hdnYAvailable" value="@(lt.YearlyQuota == -1 ? 10000: lt.YearlyQuota - lt.YearlyApplied)" />
+                                            <input type="hidden" name="LeaveBalance[@lctr].LeaveTypeID" id="hdnLeaveTypeID" value="@(lt.LeaveTypeID)" />*@
+                                    </label>
+                                </div>
+                                lctr++;
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group col-md-12">
+                <label class="control-label col-md-2 col-sm-3 col-xs-12">Reason : </label>
+                <div class="col-md-10 col-sm-9 col-xs-12 input-group">
+                    <textarea rows="3" class="form-control" style="resize:none;" required name="LeaveReason">@Model.Leave.LeaveReason</textarea>
+                </div>
+            </div>
+            <div class="col-md-12 pull-right">
+                <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+                    <label id="lblError" style="color: red;"></label>
+                    <button type="submit" class="btn btn-success pull-right" onclick="return BeforePaymentSave();">Submit</button>
+                    <button type="button" onclick="CancelPaymentEdit()" class="btn btn-primary pull-right">Cancel</button>
+                </div>
+            </div>
+            <script>
+                function LeaveDurationChanged(sender, ID) {
+                    if ($(sender).is(":checked") == true) {
+                        if (ID != 1) {
+                            $('#txtEndDate').val($('#txtStartDate').val());
+                            $('#txtEndDate').attr('readonly', 'readonly');
+
+                        }
+                        else {
+                            $('#txtEndDate').removeAttr('readonly');
+                        }
+                    }
+                }
+                var LeaveType = '1';
+                var StartDate = new Date($('#txtStartDate').val());
+                var EndDate = new Date($('#txtEndDate').val());
+                $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
+                    checkboxClass: 'icheckbox_flat-blue',
+                    radioClass: 'iradio_flat-blue'
+                });
+                $('.LeaveDurationTypes').find('input').on('ifChecked', function (event) {
+                    LeaveType = $(this).val();
+                    LeaveDurationChanged(this, LeaveType);
+                });
+                $('.iradio_flat-green').removeClass('iradio_flat-green').addClass('iradio_flat-blue');
+                //$('.iradio_flat-blue').on('ifChecked', function (event) {
+                //    alert(event.type + ' callback');
+                //});
+                $('.inpStartDate').daterangepicker({
+                    singleDatePicker: true,
+                    calender_style: "picker_1"
+                }, function (start, end, label) {
+
+                    if (start > EndDate) {
+                        $('#lblError').text('Start Date can not be greater then End Date....');
+                        $('#txtStartDate').val($('#txtEndDate').val());
+                        setTimeout(function () {
+                            $('#lblError').text('');
+                        }, 5000);
+                    }
+                    else { StartDate = start; }
+                    LeaveDateChanged();
+                    DistributeLeaves();
+                });
+
+                $('.inpEndDate').daterangepicker({
+                    singleDatePicker: true,
+                    calender_style: "picker_1"
+                }, function (start, end, label) {
+                        if (LeaveType == 1) {
+                            if (StartDate > start) {
+                                $('#lblError').text('End Date can not be less then Start Date....');
+                                $('#txtEndDate').val($('#txtStartDate').val());
+                                setTimeout(function () {
+                                    $('#lblError').text('');
+                                }, 5000);
+                            }
+                            else { EndDate = start; }
+                            LeaveDateChanged();
+                            DistributeLeaves();
+                        }
+                        else {
+                             $('#lblError').text('Half Day leaves can not be applied for multiple days....');
+                                $('#txtEndDate').val($('#txtStartDate').val());
+                                setTimeout(function () {
+                                    $('#lblError').text('');
+                                }, 5000);
+                        }
+                });
+                function DistributeLeaves() {
+                    var days = GetDays() + 1;
+                    if (LeaveType != '1') {
+                        days = days / 2;
+                    }
+                    //.leaveinput
+                    $(".leaveTypes").each(function () {
+                        var available = $(this).find('#hdnMAvailable').val();
+                        if (available < days) {
+                            $(this).find('.leaveinput').val(available);
+                            days = days - available;
+                        }
+                        else {
+                            $(this).find('.leaveinput').val(days);
+                            days = 0;
+                        }
+                    });
+                }
+                function GetDays() {
+                    var sDay = new Date($('#txtStartDate').val());
+                    var eDay = new Date($('#txtEndDate').val());
+                    var millisecondsPerDay = 1000 * 60 * 60 * 24;
+
+                    var millisBetween = eDay.getTime() - sDay.getTime();
+                    var days = millisBetween / millisecondsPerDay;
+
+                    return (Math.floor(days));
+
+                }
+            </script>
+            if (Model.LeaveID == 0)
+            {
+                <script>
+                    DistributeLeaves();
+                </script>
+            }
+        }
+    </div>
+</div>

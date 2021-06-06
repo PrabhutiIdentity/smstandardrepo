@@ -1,0 +1,127 @@
+﻿<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header edit-header">
+            <button type="button" class="close edit-close" data-dismiss="modal" aria-label="Close">
+                <a href="javascript:void(0);" style="color:white;" onclick="CancelLactureEdit();">X</a>
+            </button>
+            <h4 class="modal-title" id="myModalLabel" style="text-align: center;">Substitute For (@Model.ClassName - @Model.SectionName)</h4>
+        </div>
+        <div class="modal-body edit-body">
+            <table id="tblCategory" class="table table-bordered table-hover" style="color: black;">
+                <thead>
+                    <tr>
+                        <th style="width: 5%">#</th>
+                        <th style="width: 30%">Subject</th>
+                        <th style="width: 25%">Teacher</th>
+                        <th style="width: 20%">Date</th>
+                        <th style="width: 10%">SMS</th>
+                        <th style="width: 10%">Edit/Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var ctr = 1;
+                        foreach (SMEnterprise.Models.TeacherSubstitutionModel Subs in Model.Substitutions)
+                        {
+                            <tr>
+                                <td>@ctr</td>
+                                <td>
+                                    @Subs.NewSubject
+                                </td>
+                                <td>
+                                    @Subs.TeacherName
+                                    <input type="hidden" id="hdnReplacingTeacherID" value="@Subs.ReplacingTeacherID" />
+                                </td>
+                                <td>
+                                    @Subs.FromDate.ToString("dd MMM, yyyy")
+                                </td>
+                                <td>
+                                    <input type="checkbox" class="flat">
+                                    <input name="SendSMS" id="hdnSelected" type="hidden" value="0">
+
+                                </td>
+                                <td>
+                                    <input type="hidden" id="hdnClassName" value="@Model.ClassName" />
+                                    <input type="hidden" id="hdnSectionName" value="@Model.SectionName" />
+                                    <input type="hidden" name="DayID" id="hdnDayID" value="@Model.DayID" />
+                                    <input type="hidden" id="hdnSubstitutionID" name="SubstitutionID" value="@Subs.SubstitutionID" />
+
+                                    <input type="hidden" name="PeriodID" id="hdnPeriodID" value="@Model.PeriodID" />
+                                    <input type="hidden" name="SectionID" id="hdnSectionID" value="@Model.SectionID" />
+                                    <input type="hidden" name="ReplacedTeacherID" id="hdnReplacedTeacherID" value="@Model.TeacherID" />
+                                    <input type="hidden" name="SubjectID" id="hdnSubjectID" value="@Model.SubjectID" />
+                                    <input type="hidden" name="ClassID" id="hdnClassID" value="@Model.ClassID" />
+                                    <input type="hidden" name="EducationLevelID" id="hdnEducationLevelID" value="@Model.EducationLevelID" />
+                                    <button type="button" class="btn btn-block btn-primary btn-sm" aria-label="Close"  onclick="return InsertSubstitution(this,-1);">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                            ctr++;
+                        }
+                    }
+
+                    <tr>
+
+
+                        <td></td>
+                        <td>
+                            <select class="form-control" id="ddlSubject" onchange="GetSubjectTeacher(this);">
+                                @foreach (var subject in Model.Subjects)
+                                {
+                                    <option value="@subject.SubjectID" @(subject.SubjectID == Model.SubjectID ? "selected" : "")>@subject.SubjectName</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <select class="form-control" id="ddlTeacher">
+                                <option value="0">--Select--</option>
+                                @foreach (var teacher in Model.Teachers)
+                                {
+                                    <option value="@teacher.EmployeeID" @(teacher.EmployeeID == Model.TeacherID ? "selected" : "")>@teacher.EmployeeName</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input type="date" class="form-control" id="txtSubDate" onchange="SubsDateChanged(this,@Model.DayID);" name="FromDate" value="" />
+                        </td>
+                        <td>
+                            <input type="checkbox" class="flat">
+                            <input name="SendSMS" id="hdnSelected" type="hidden" value="0">
+
+                        </td>
+                        <td>
+                                <input type="hidden" id="hdnClassName" value="@Model.ClassName" />
+                                <input type="hidden" id="hdnSectionName" value="@Model.SectionName" />
+                                <input type="hidden" id="hdnSubstitutionID" name="SubstitutionID" value="0" />
+                                <input type="hidden" name="PeriodID" id="hdnPeriodID" value="@Model.PeriodID" />
+                                <input type="hidden" name="DayID" id="hdnDayID" value="@Model.DayID" />
+                                <input type="hidden" name="SectionID" id="hdnSectionID" value="@Model.SectionID" />
+                                <input type="hidden" name="ReplacedTeacherID" id="hdnReplacedTeacherID" value="@Model.TeacherID" />
+                                <input type="hidden" name="SubjectID" id="hdnSubjectID" value="@Model.SubjectID" />
+                                <input type="hidden" name="ClassID" id="hdnClassID" value="@Model.ClassID" />
+                                <input type="hidden" name="EducationLevelID" id="hdnEducationLevelID" value="@Model.EducationLevelID" />
+                                <button type="submit" class="btn btn-block btn-primary btn-sm" aria-label="Close" onclick="return InsertSubstitution(this,1);">
+                                    Update
+                                </button>
+                        </td>
+                    </tr>
+                   
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+                        $('.flat').iCheck({
+                            checkboxClass: 'icheckbox_flat-blue'
+                        });
+                        $('input[type="checkbox"]').on('ifChanged', function (event) {
+                            if ($(this).is(":checked")) {
+                                $(this).closest('td').find('#hdnSelected').val(1);
+                            }
+                            else {
+                                $(this).closest('td').find('#hdnSelected').val(0);
+                            }
+                        });
+</script>

@@ -1,0 +1,244 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@model List<SMEnterprise.Models.AssignmentModel>
+@section IncludeCss
+{
+    <title>Assignments</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    @*<th style="width: 20%">Topic</th>*@
+                                    <th style="width: 40%">Title</th>
+                                    <th style="width: 15%">Start</th>
+                                    <th style="width: 15%">End</th>
+                                    <th style="width: 15%">Type</th>
+                                    <th style="width: 10%">Grace</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (AssignmentModel c in Model)
+                                {
+                                    <tr>
+
+                                        @*<td>
+                                            @c.TopicName
+                                        </td>*@
+                                        <td>
+                                            <a href="javascript:void(0);" class="Closed" onclick="viewDetails(@c.ID,this);"> @c.Title</a>
+                                        </td>
+                                        <td>
+                                            <input type="hidden" id="hdnChapterID" value="@c.ChapterID" />
+                                            <input type="hidden" id="hdnAssignmentID" value="@c.ID" />
+                                            <input type="hidden" id="hdnTopicID" value="@c.TopicID" />
+                                            <input type="hidden" id="hdnTaskType" value="@c.TaskType" />
+                                            <input type="hidden" id="hdnStartDate" value="@c.StartDate.ToString("yyy-MM-dd")" />
+                                            <input type="hidden" id="hdnEndDate" value="@c.EndDate.ToString("yyy-MM-dd")" />
+                                            <input type="hidden" id="hdnDescription" value="@c.Detail" />
+                                            <input type="hidden" id="hdnAttachments" value="@c.Attachments" />
+                                            @c.StartDate.ToString("dd MMM,yy")
+                                        </td>
+
+                                        <td>
+                                            @c.EndDate.ToString("dd MMM,yy")
+                                        </td>
+                                        <td>
+                                            @{
+                                                if (c.TaskType == 0)
+                                                {
+                                                    <ss>Home Work</ss>
+                                                }
+                                                else if (c.TaskType == 1)
+                                                {
+                                                    <ss>
+                                                        Assignment
+                                                    </ss>
+                                                }
+                                                else
+                                                {
+                                                    <ss>Project</ss>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
+                                            @c.GracedDays
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="divAssignmentDetails" style="display:none;">
+    <div class="col-md-12">
+        <div class="row" id="StudentDetail">
+            <label>Description</label>
+            <div class="col-md-12 divDescription" id="divDescription" style="text-wrap:initial">
+
+            </div>
+            <label>Attachments</label>
+            <ul class="col-md-12 divAttachments" id="divAttachments" style="text-wrap:initial">
+
+            </ul>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyy-MM-dd")" />
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
+    <script>
+        function viewDetails(ID, sender) {
+            if ($(sender).hasClass("Closed")) {
+                $('.divDescription').html('')
+                $('.divDescription').html($(sender).closest('tr').find('#hdnDescription').val());
+                var Atts = $(sender).closest('tr').find('#hdnAttachments').val();
+                var arrAtts = Atts.split(',');
+                var lstAssignments = '';
+                $(".divAttachments").html('');
+                if (Atts != '') {
+                    for (var ai = 0; ai < arrAtts.length; ai++) {
+                        if (arrAtts[ai] != '') {
+                            lstAssignments = lstAssignments + '<li id="trAtt_' + ai + '">';
+                            lstAssignments = lstAssignments + '<span>' + arrAtts[ai] + '</span>';
+
+                            var fName = "'" + arrAtts[ai] + "'";
+                            var fDeleName = "'" + arrAtts[ai] + "'";
+                            lstAssignments = lstAssignments + '<span><a href="javascript:void(0);" onclick="DownloadAttachment(' + ID + ',' + fName + ');"><i class="fa fa-download"></i><a></span>';
+                            lstAssignments = lstAssignments + '</li>';
+                        }
+                    }
+                    $(".divAttachments").append(lstAssignments);
+                }
+            }
+            if ($(sender).hasClass("Closed")) {
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+                    $(ele[0]).closest("tr").css('background-color', 'white');
+                }
+
+                $(sender)
+                      .closest("tr")
+                      .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;'>" + $('.divAssignmentDetails').html() + "</td></tr>");
+               // $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+
+                var $container = $("html,body");
+                var $scrollTo = $('.Closed');
+
+                $container.animate({ scrollTop: $scrollTo.offset().top - $container.offset().top - 35, scrollLeft: 0 }, 300);
+
+                $("#tab2").css('display', 'block');
+                var $row = $(sender).closest("tr");
+
+                $(sender).removeClass("Closed");
+                $(sender).addClass("Open");
+
+            }
+            else {
+                $(sender).removeClass("Open");
+                $(sender).closest("tr").css('background-color', 'white');
+                $(sender).addClass("Closed");
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        
+        function DownloadAttachment(ID, AttName) {
+            var arratt = AttName.split(",");
+            var curUrl = window.location.href;
+            var ind = curUrl.indexOf("Parent");
+            var BaseUrl = curUrl.substring(0, ind);
+            for (var i = 0; i < arratt.length; i++) {
+                if (arratt[i] != '') {
+                    var link = BaseUrl + 'Attachments/Assignments/' + ID + '_' + arratt[i];
+                    var a = $("<a>")
+                        .attr("href", link)
+                        .attr("download", arratt[i])
+                        .appendTo("body");
+
+                    a[0].click();
+
+                    a.remove();
+                }
+            }
+            
+        }
+        $(function () {
+
+           
+
+        });
+
+    </script>
+}
+<!-- /.content -->

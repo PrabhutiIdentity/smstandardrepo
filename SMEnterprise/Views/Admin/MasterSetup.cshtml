@@ -1,0 +1,338 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>MasterSetup</title>
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Branch Management
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Branch Management</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                </div>
+                @using (Html.BeginForm("UpdateMasterSetup", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdateMasterSetup", @class = "form-horizontal" }))
+                {
+                    <div class="box-body">
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width:25%">Setting</th>
+                                    <th style="width:25%">Value</th>
+                                    <th style="width:50%">Description</th>
+                                </tr>
+                            </thead>
+
+                            <tr style="display:none;">
+                                <td>Session Start Date</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[0].Type" value="SessionDate" />
+                                    <input type="date" name="MasterSettings[0].Value" class="form-control" value="@Model.SessionStartDate.ToString("yyyy-MM-dd")" />
+                                </td>
+                                <td>Date from which the session starts (MM-DD-YYYY)</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>Session End Date</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[1].Type" value="SessionEndDate" />
+                                    <input type="date" name="MasterSettings[1].Value" class="form-control" value="@Model.SessionEndDate.ToString("yyyy-MM-dd")" />
+                                </td>
+                                <td>Date on which the session End (MM-DD-YYYY)</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>Hostel Fee mode</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[2].Type" value="HostelFeeMode" />
+                                    <label class="switch switch-green">
+                                        @if (Model.HostelFeeMode == 1)
+                                        {
+                                            <input type="checkbox" class="switch-input" Checked>
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="switch-input">
+                                        }
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnHostelFeeMode").val($(this).closest("tr").find("#hdnHostelFeeMode").val() == "0" ? "1" : "0");' data-on="Class" data-off="Hostel"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" name="MasterSettings[2].Value" id="hdnHostelFeeMode" value="@Model.HostelFeeMode" />
+                                    </label>
+                                </td>
+                                <td>Hostel Fee Mode specifies from which hostel fee should be calculate, i.e. from "Class Fee Structure" or from "Hostel Room Type"</td>
+                            </tr>
+                            <tr>
+                                <td>Transport Fee mode</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[3].Type" value="TransportFeeMode" />
+                                    <label class="switch switch-green">
+                                        @if (Model.TransportFeeMode == 1)
+                                        {
+                                            <input type="checkbox" class="switch-input" Checked>
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="switch-input">
+                                        }
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnTransportFeeMode").val($(this).closest("tr").find("#hdnTransportFeeMode").val() == "0" ? "1" : "0");' data-on="Class" data-off="Stop"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" name="MasterSettings[3].Value" id="hdnTransportFeeMode" value="@Model.TransportFeeMode" />
+                                    </label>
+                                </td>
+                                <td>Transport Fee Mode specifies from which Transport fee should be calculate, i.e. from "Class Fee Structure" or from "Transport Stop"</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>Evaluation mode</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[4].Type" value="EvaluationMode" />
+                                    <label class="switch switch-green">
+                                        @if (Model.EvaluationMode == 1)
+                                        {
+                                            <input type="checkbox" class="switch-input" Checked>
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="switch-input">
+                                        }
+                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnEvaluationMode").val($(this).closest("tr").find("#hdnEvaluationMode").val() == "0" ? "1" : "0");' data-on="CBSC" data-off="Other"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" name="MasterSettings[4].Value" id="hdnEvaluationMode" value="@Model.EvaluationMode" />
+                                    </label>
+                                </td>
+                                <td>Whether Evaluations are followed as per CBSC or Other</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>Send SMS for Absent Students</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[5].Type" value="SMSForAbsentStudents" />
+                                    <label class="switch switch-green">
+                                        @if (Model.SMSForAbsentStudents == 1)
+                                        {
+                                            <input type="checkbox" class="switch-input" Checked>
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="switch-input">
+                                        }
+                                        <span class="switch-label" onclick='SMSForAbsentStudentsChanged(this);' data-on="Yes" data-off="No"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" name="MasterSettings[5].Value" id="hdnSMSForAbsentStudents" value="@Model.SMSForAbsentStudents" />
+                                    </label>
+                                </td>
+                                <td>Whether To send SMS Notification to Parents for absent students</td>
+                            </tr>
+                            <tr id="trAbsentNotificationTime" style="display:@(Model.SMSForAbsentStudents == 1 ? "" : "none")">
+                                <td>Abset Student Notice Time</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[6].Type" value="AbsentNotificationTime" />
+                                    <input type="time" name="MasterSettings[6].Value" class="form-control" value="@Model.AbsentNotificationTime" />
+                                </td>
+                                <td>Time at which SMS for Absent without leave application Student Notification will be sent to Parents/Guardians </td>
+                            </tr>
+                            <tr id="trAbsentNotificationTemplate" style="display:@(Model.SMSForAbsentStudents == 1 ? "" : "none")">
+                                <td>Abset Student SMS Template</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[7].Type" value="AbsentSMSTemplate" />
+                                    <p> length <ss>@Model.AbsentSMSTemplate.Length</ss>/160</p>
+                                    <textarea rows="4" class="form-control SMSText" style="resize:none;" name="MasterSettings[7].Value">@Model.AbsentSMSTemplate</textarea>
+                                </td>
+                                <td>Use <b>%0a</b> for New Line,use <b>[Reciever]</b> placeholder for RecieverType i.e. "Parent" or "Guaridian", use <b>[StudentName]</b> place holder for Student Name</td>
+                            </tr>
+                            <tr>
+                                <td>Send SMS for Students In and Out</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[8].Type" value="StudentInOutSMSNotification" />
+                                    <label class="switch switch-green">
+                                        @if (Model.StudentInOutSMSNotification == 1)
+                                        {
+                                            <input type="checkbox" class="switch-input" Checked>
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="switch-input">
+                                        }
+                                        <span class="switch-label" onclick='StudentInOutSMSNotificationChanged(this);' data-on="Yes" data-off="No"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" name="MasterSettings[8].Value" id="hdnStudentInOutSMSNotification" value="@Model.StudentInOutSMSNotification" />
+                                    </label>
+                                </td>
+                                <td>Whether To send SMS Notification to Parents for Students Entry and Exit</td>
+                            </tr>
+                            <tr id="trINNotificationTemplate" style="display:@(Model.StudentInOutSMSNotification == 1 ? "" : "none")">
+                                <td>Student In SMS Template</td>
+                                <td>
+                                    <p> length <ss>@Model.StudentInSMSTemplate.Length</ss>/160</p>
+                                    <input type="hidden" name="MasterSettings[9].Type" value="StudentInSMSTemplate" />
+                                    <textarea rows="4" class="form-control SMSText" style="resize:none;" name="MasterSettings[9].Value">@Model.StudentInSMSTemplate</textarea>
+                                </td>
+                                <td>Use <b>%0a</b> for New Line,use <b>[Reciever]</b> placeholder for RecieverType i.e. "Parent" or "Guaridian", use <b>[StudentName]</b> place holder for Student Name</td>
+                            </tr>
+                            <tr id="trOutNotificationTemplate" style="display:@(Model.StudentInOutSMSNotification == 1 ? "" : "none")">
+                                <td>Student Out SMS Template</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[10].Type" value="StudentOutSMSTemplate" />
+                                    <p> length <ss>@Model.StudentOutSMSTemplate.Length</ss>/160</p>
+                                    <textarea rows="4" class="form-control SMSText" style="resize:none;" name="MasterSettings[10].Value">@Model.StudentOutSMSTemplate</textarea>
+                                </td>
+                                <td>Use <b>%0a</b> for New Line,use <b>[Reciever]</b> placeholder for RecieverType i.e. "Parent" or "Guaridian", use <b>[StudentName]</b> place holder for Student Name</td>
+                            </tr>
+                            <tr>
+                                <td>Last Date of Fee Payment</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[11].Type" value="FeePaymentReminderDate" />
+                                    
+                                    <input type="number" name="MasterSettings[11].Value" class="form-control" value="@Model.FeePaymentReminderDate" />
+                                </td>
+                                <td>Date of every month which is Last day of Fee Payment</td>
+                            </tr>
+                            <tr style="display:none">
+                                <td>Send SMS for Due Fee Notification</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[12].Type" value="FeePaymentReminderSMS" />
+
+                                    <label class="switch switch-green">
+                                        @if (Model.FeePaymentReminderSMS == 1)
+                                        {
+                                            <input type="checkbox" class="switch-input" Checked>
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" class="switch-input">
+                                        }
+                                        <span class="switch-label" onclick='FeePaymentReminderSMSChanged(this);' data-on="Yes" data-off="No"></span>
+                                        <span class="switch-handle" id="shTranding"></span>
+                                        <input type="hidden" name="MasterSettings[12].Value" id="hdnFeePaymentReminderSMS" value="@Model.FeePaymentReminderSMS" />
+                                    </label>
+                                </td>
+                                <td>Do you want to send Fee Due Date Reminder SMS</td>
+                            </tr>
+                            <tr id="trFeePaymentReminderSMSTemplate" style="display:@(Model.FeePaymentReminderSMS == 1 ? "" : "none")">
+                                <td>Fee Payment Reminder SMS Template</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[13].Type" value="FeePaymentReminderSMSTemplate" />
+                                    <p> length <ss>@Model.FeePaymentReminderSMSTemplate.Length</ss>/160</p>
+                                    <textarea rows="4" class="form-control SMSText" style="resize:none;" name="MasterSettings[13].Value">@Model.FeePaymentReminderSMSTemplate</textarea>
+                                </td>
+                                <td>Use <b>%0a</b> for New Line,use <b>[Reciever]</b> placeholder for RecieverType i.e. "Parent" or "Guaridian", use <b>[StudentName]</b> place holder for Student Name</td>
+                            </tr>
+                            <tr>
+                                <td>Fee Payment Notification Template</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[14].Type" value="FeePaymentNotificationSMSTemplate" />
+                                    <p> length <ss>@Model.FeePaymentNotificationSMSTemplate.Length</ss>/160</p>
+                                    <textarea rows="4" class="form-control SMSText" style="resize:none;" name="MasterSettings[14].Value">@Model.FeePaymentNotificationSMSTemplate</textarea>
+                                </td>
+                                <td>Use <b>%0a</b> for New Line,use <b>[Reciever]</b> placeholder for RecieverType i.e. "Parent" or "Guaridian", use <b>[StudentName]</b> place holder for Student Name</td>
+                            </tr>
+                            <tr style="display:none;">
+                                <td>Schema Prefix</td>
+                                <td>
+                                    <input type="hidden" name="MasterSettings[15].Type" value="SchemaPrefix" />
+                                    <input type="text" readonly name="MasterSettings[15].Value" class="form-control" value="@Model.SchemaPrefix" />
+                                </td>
+                                <td>For Technical Team, Do not change.</td>
+                            </tr>
+                        </table>
+                        <div>
+                            <button type="submit" class="btn btn-block btn-info pull-right">Save</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+        $('#liMasterSetup').closest('ul').closest('li').addClass('active');
+        $('#liMasterSetup').addClass('active');
+    });
+    function SMSForAbsentStudentsChanged(sender) {
+        var CurrValue = $("#hdnSMSForAbsentStudents").val();
+        var ChangedValue = CurrValue == "0" ? "1" : "0";
+        $(sender).closest("label").find("#hdnSMSForAbsentStudents").val(ChangedValue);
+        if (ChangedValue == "1") {
+            $('#trAbsentNotificationTime').css("display", "");
+            $('#trAbsentNotificationTemplate').css("display", "");
+        }
+        else {
+            $('#trAbsentNotificationTime').css("display", "none");
+            $('#trAbsentNotificationTemplate').css("display", "none");
+        }
+    }
+    function StudentInOutSMSNotificationChanged(sender) {
+        var CurrValue = $("#hdnStudentInOutSMSNotification").val();
+        var ChangedValue = CurrValue == "0" ? "1" : "0";
+        $(sender).closest("label").find("#hdnStudentInOutSMSNotification").val(ChangedValue);
+        if (ChangedValue == "1") {
+            $('#trINNotificationTemplate').css("display", "");
+            $('#trOutNotificationTemplate').css("display", "");
+        }
+        else {
+            $('#trINNotificationTemplate').css("display", "none");
+            $('#trOutNotificationTemplate').css("display", "none");
+        }
+    }
+    function FeePaymentReminderSMSChanged(sender) {
+        var CurrValue = $("#hdnFeePaymentReminderSMS").val();
+        var ChangedValue = CurrValue == "0" ? "1" : "0";
+        $(sender).closest("label").find("#hdnFeePaymentReminderSMS").val(ChangedValue);
+        if (ChangedValue == "1") {
+            $('#trFeePaymentReminderSMSTemplate').css("display", "");
+        }
+        else {
+            $('#trFeePaymentReminderSMSTemplate').css("display", "none");
+        }
+    }
+    $('.SMSText').bind('input propertychange', function () {
+
+        if (this.value.length) {
+            $(this).closest('td').find('ss').html(this.value.length);
+        }
+    });
+   
+</script>
+<!-- /.content -->
