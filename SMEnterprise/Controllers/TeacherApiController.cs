@@ -1603,6 +1603,35 @@ namespace SMEnterprise.Controllers
             return objWraper;
         }
         [HttpPost]
+        public CommonApiWraperModel GetBBBOnlineMeetings(ParentApiParamModel data)
+        {
+            UserModel user = VerifyUser(data.UUID);
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+            if (user != null)
+            {
+                data.SBranchID = user.SBranchID;
+                var CurDate = CommonUsage.GetCurrentDate();
+                BBBOnlineStaffMeetingData objTeacherData = new BBBOnlineStaffMeetingData();
+                List<OnlineStaffMeetingModel> Data = objTeacherData.GetOnlineStaffMeetings(CurDate, user.SBranchID);
+                if (Data.Count > 0)
+                {
+                    objWraper.Code = 200;
+                    objWraper.List = Data.ToList<object>();
+                }
+                else
+                {
+                    objWraper.Code = 404;
+                }
+                objWraper.Message = "Success";
+            }
+            else
+            {
+                objWraper.Code = 101;
+                objWraper.Message = "Unauthorized";
+            }
+            return objWraper;
+        }
+        [HttpPost]
         public CommonApiWraperModel ScheduleBBBOnlineClass(BBBOnlineClassModel data)
         {
             UserModel user = VerifyUser(data.UUID);
@@ -1978,6 +2007,64 @@ namespace SMEnterprise.Controllers
                     objWraper.Code = 404;
                 }
                 objWraper.Message = "Success";
+            }
+            else
+            {
+                objWraper.Code = 101;
+                objWraper.Message = "Unauthorized";
+            }
+            return objWraper;
+        }
+        [HttpPost]
+        public async Task<CommonApiWraperModel> JoinBBBOnlineMeeting(ParentApiParamModel data)
+        {
+            UserModel user = VerifyUser(data.UUID);
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+            if (user != null)
+            {
+                BBBOnlineStaffMeetingData onlineClassData = new BBBOnlineStaffMeetingData();
+                //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
+                var cModel = (onlineClassData).GetOnlineStaffMeetingDetails(data.OCID,user.SBranchID);
+
+                var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.BBBMeetingID });
+                if (meetingStatus.returncode != Returncode.FAILED)
+                {
+
+                    var joinDate = CommonUsage.GetCurrentDate();
+                    NameIDModel student = await onlineClassData.JoinOnlineStaffMeetingGetDetail(user.UserID, joinDate, data.OCID, 1);
+                    var requestJoin = new JoinMeetingRequest { meetingID = cModel.BBBMeetingID };
+                    requestJoin.userID = student.ID.ToString();
+                    requestJoin.fullName = student.Name;
+                    requestJoin.password = cModel.AttPassword;
+                    var setConfigRequest = new SetConfigXMLRequest
+                    {
+                        meetingID = cModel.BBBMeetingID,
+                        configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+                    };
+                    var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+                    if (setConfigResult.returncode == Returncode.FAILED)
+                    {
+                        objWraper.Code = -1;
+                    }
+                    else
+                    {
+                        requestJoin.configToken = setConfigResult.configToken;
+                        // requestJoin.avatarURL = avatar;
+                        var url = client.GetJoinMeetingUrl(requestJoin);
+                        objWraper.Data = url;
+                    }
+                }
+
+                if (objWraper.Data != null)
+                {
+                    objWraper.Code = 200;
+                    objWraper.Message = "Preparing to join class";
+                }
+                else
+                {
+                    objWraper.Code = 404;
+                    objWraper.Message = "Class is not running now";
+                }
             }
             else
             {

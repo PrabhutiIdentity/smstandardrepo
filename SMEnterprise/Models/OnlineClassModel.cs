@@ -15,12 +15,13 @@ namespace SMEnterprise.Models
         public string JitsiMeetingID { get; set; }
 
         public int MeetingID { get; set; }
-        public string BBMeetingID { get; set; }
+        public string BBBMeetingID { get; set; }
         public string UpdatedOn { get; set; }
         public DateTime MeetingDate { get; set; }
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public string MeetingTitle { get; set; }
+        public string InternalMeetingID { get; set; }
         public string ModPassword { get; set; }
         public string AttPassword { get; set; }
         public string Attendees { get; set; }

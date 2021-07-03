@@ -18,7 +18,7 @@ namespace SMEnterprise.Repository
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@MeetingID", MeetingID);
-                return con.Query<SMSRecieverModel>("spn_GetRecieverListForStaffMeeting", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+                return con.Query<SMSRecieverModel>("spn_GetRecieverListForBBBBStaffMeeting", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
 
             }
         }
@@ -29,18 +29,39 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@CurDate", CurDate);
                 paramater.Add("@SBranchID", SBranchID);
-                return con.Query<OnlineStaffMeetingModel>("sp_GetStaffMeetings", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+                return con.Query<OnlineStaffMeetingModel>("sp_GetBBBStaffMeetings", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
             }
         }
-        public OnlineStaffMeetingModel JoinOnlineStaffMeetingGetDetail(int TeacherID, DateTime CurDate, int MeetingID)
+        public OnlineStaffMeetingModel GetOnlineStaffMeetingDetails(int MeetingId, int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
-                paramater.Add("@UserID", TeacherID);
-                paramater.Add("@CurDate", CurDate);
+                paramater.Add("@MeetingId", MeetingId);
+                paramater.Add("@SBranchID", SBranchID);
+                return con.Query<OnlineStaffMeetingModel>("sp_GetBBBStaffMeetingDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).FirstOrDefault();
+            }
+        }
+        public OnlineStaffMeetingModel GetOnlineStaffMeetingDetailsByMeetingID(string MeetingId, int SBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@MeetingId", MeetingId);
+                paramater.Add("@SBranchID", SBranchID);
+                return con.Query<OnlineStaffMeetingModel>("sp_GetBBBStaffMeetingDetailsByMeetingId", paramater, null, true, 0, commandType: CommandType.StoredProcedure).FirstOrDefault();
+            }
+        }
+        public async Task<NameIDModel> JoinOnlineStaffMeetingGetDetail(int TeacherID, DateTime CurDate, int MeetingID, int AppType)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TeacherID", TeacherID);
+                paramater.Add("@JoinDate", CurDate);
                 paramater.Add("@MeetingID", MeetingID);
-                return con.Query<OnlineStaffMeetingModel>("sp_JoinStaffMeetingGetDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                paramater.Add("@AppType", AppType);
+                return (await con.QueryAsync<NameIDModel>("sp_JoinBBBStaffMeetingGetDetails", paramater, null, 0, commandType: CommandType.StoredProcedure)).SingleOrDefault();
             }
         }
         public int ScheduleOnlineStaffMeeting(OnlineStaffMeetingModel objModel)
@@ -53,7 +74,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@EndTime", objModel.EndTime);
                 paramater.Add("@MeetingTitle", objModel.MeetingTitle);
                 paramater.Add("@SBranchID", objModel.SBranchID);
-                return con.Query<int>("sp_AddStaffMeeting", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                return con.Query<int>("sp_AddBBBStaffMeeting", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
 
         }
@@ -63,13 +84,25 @@ namespace SMEnterprise.Repository
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@MeetingID", objModel.MeetingID);
-                paramater.Add("@Status", objModel.Status);
-                paramater.Add("@BBMeetingID", objModel.BBMeetingID);
-                paramater.Add("@UpdatedOn", objModel.UpdatedOn);
+                paramater.Add("@BBBMeetingID", objModel.BBBMeetingID);
+                paramater.Add("@InternalMeetingID", objModel.InternalMeetingID);
                 paramater.Add("@ModPassword", objModel.ModPassword);
                 paramater.Add("@AttPassword", objModel.AttPassword);
-                paramater.Add("@Attendees", objModel.Attendees);
-                return con.Query<int>("sp_UpdateStaffMeeting", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                paramater.Add("@Status", objModel.Status);
+                paramater.Add("@CurDate", objModel.UpdatedOn);
+                return con.Query<int>("sp_UpdateBBBStaffMeetingDetailonStart", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public int UpdateOnlineStaffMeetingOnEnd(OnlineStaffMeetingModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@MeetingID", objModel.MeetingID);
+                paramater.Add("@BBBMeetingID", objModel.BBBMeetingID);
+                paramater.Add("@CurDate", objModel.UpdatedOn);
+                paramater.Add("@Attendees", objModel.Attendees);                
+                return con.Query<int>("sp_UpdateBBBOnlineMeetionDetailonEnd", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
     }

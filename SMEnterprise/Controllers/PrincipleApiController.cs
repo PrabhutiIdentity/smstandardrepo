@@ -1,4 +1,5 @@
-﻿using BigBlueButtonAPI.Core;
+﻿using BigBlueButtonAPI.Common;
+using BigBlueButtonAPI.Core;
 using SMEnterprise.Models;
 using SMEnterprise.Repository;
 using System;
@@ -19,6 +20,19 @@ namespace SMEnterprise.Controllers
         public PrincipleApiController() : base()
         {
             this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+        }
+        private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
+        {
+            try
+            {
+                var res = await client.IsMeetingRunningAsync(new IsMeetingRunningRequest { meetingID = Guid.NewGuid().ToString() });
+                if (res.returncode == Returncode.FAILED) return false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
         private UserModel VerifyUser(string UUID)
         {
@@ -1435,6 +1449,35 @@ namespace SMEnterprise.Controllers
             return objWraper;
         }
         [HttpPost]
+        public CommonApiWraperModel GetBBBOnlineMeetings(ParentApiParamModel data)
+        {
+            UserModel user = VerifyUser(data.UUID);
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+            if (user != null)
+            {
+                data.SBranchID = user.SBranchID;
+                var CurDate = CommonUsage.GetCurrentDate();
+                BBBOnlineStaffMeetingData objTeacherData = new BBBOnlineStaffMeetingData();
+                List<OnlineStaffMeetingModel> Data = objTeacherData.GetOnlineStaffMeetings(CurDate,user.SBranchID);
+                if (Data.Count > 0)
+                {
+                    objWraper.Code = 200;
+                    objWraper.List = Data.ToList<object>();
+                }
+                else
+                {
+                    objWraper.Code = 404;
+                }
+                objWraper.Message = "Success";
+            }
+            else
+            {
+                objWraper.Code = 101;
+                objWraper.Message = "Unauthorized";
+            }
+            return objWraper;
+        }
+        [HttpPost]
         public CommonApiWraperModel ScheduleOnlineMeeting(OnlineStaffMeetingModel data)
         {
             UserModel user = VerifyUser(data.UUID);
@@ -1448,6 +1491,33 @@ namespace SMEnterprise.Controllers
                 {
                     objWraper.Code = 200;
                     objWraper.Data = data.JitsiMeetingID;
+                }
+                else
+                {
+                    objWraper.Code = 404;
+                }
+                objWraper.Message = "Success";
+            }
+            else
+            {
+                objWraper.Code = 101;
+                objWraper.Message = "Unauthorized";
+            }
+            return objWraper;
+        }
+        [HttpPost]
+        public CommonApiWraperModel ScheduleBBBOnlineMeeting(OnlineStaffMeetingModel data)
+        {
+            UserModel user = VerifyUser(data.UUID);
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+            if (user != null)
+            {
+                data.SBranchID = user.SBranchID;
+                BBBOnlineStaffMeetingData objTeacherData = new BBBOnlineStaffMeetingData();
+                data.MeetingID = objTeacherData.ScheduleOnlineStaffMeeting(data);
+                if (data.MeetingID != 0)
+                {
+                    objWraper.Code = 200;
                 }
                 else
                 {
@@ -1528,6 +1598,211 @@ namespace SMEnterprise.Controllers
                 objWraper.Code = 101;
                 objWraper.Message = "Unauthorized";
             }
+            return objWraper;
+        }
+        [HttpPost]
+        public CommonApiWraperModel UpdateBBBOnlineMeeting(OnlineStaffMeetingModel data)
+        {
+            UserModel user = VerifyUser(data.UUID);
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+            if (user != null)
+            {
+                BBBOnlineStaffMeetingData objTeacherData = new BBBOnlineStaffMeetingData();
+                int List = objTeacherData.UpdateOnlineStaffMeeting(data);
+                if (List > 0)
+                {
+                    List<SMSRecieverModel> recievers = objTeacherData.GetRecieverListOnStafMeeting(data.MeetingID);
+                    OnlineClassNotificationModel message = new OnlineClassNotificationModel();
+                    if (data.Status == 1)
+                    {
+                        message.message = "Online Meeting Started.";
+                        message.type = 1;
+                    }
+                    else
+                    {
+                        message.message = "Online Meeting Ended.";
+                        message.type = 2;
+                    }
+                    message.typeid = data.MeetingID;
+                    string jmessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+                    NotificationModel objModel = new NotificationModel();
+                    objModel.RecieverID = -1;
+                    objModel.NotificationType = 10;
+                    objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
+                    objModel.Recievers = new List<NotificationRecieverModel>();
+
+                    StringBuilder sb = new StringBuilder();
+                    foreach (SMSRecieverModel r in recievers)
+                    {
+                        if (!String.IsNullOrEmpty(r.deviceToken))
+                        {
+                            if (r.deviceToken.Contains("\\n"))
+                            {
+                                r.deviceToken.Replace("\\n", "#");
+                            }
+                            if (sb != null && sb.ToString() != "")
+                            {
+                                sb.Append("#");
+                            }
+                            sb.Append(r.deviceToken);
+                        }
+                    }
+                    string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
+                    string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+                    CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
+
+                    objWraper.Code = 200;
+                    objWraper.Data = List;
+                }
+                else
+                {
+                    objWraper.Code = 404;
+                }
+                objWraper.Message = "Success";
+            }
+            else
+            {
+                objWraper.Code = 101;
+                objWraper.Message = "Unauthorized";
+            }
+            return objWraper;
+        }
+        [HttpPost]
+        public async Task<CommonApiWraperModel> StartBBBOnlineMeeting(ParentApiParamModel data)
+        {
+            UserModel user = VerifyUser(data.UUID);
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+            if (user != null)
+            {
+                string basep = $"{ this.Request.RequestUri.Scheme}://{this.Request.RequestUri.Host}";
+                if (basep.Contains("localhost"))
+                {
+                    basep = "https://node1.pschoolonline.com";
+                }
+                var onlineClassData = (new BBBOnlineStaffMeetingData());
+                var cModel = onlineClassData.GetOnlineStaffMeetingDetails(data.ID,user.SBranchID);
+                string basepath = basep;// $"{ this.Request.RequestUri.Scheme}://{this.Request.RequestUri.Host}";
+                string logo = HttpUtility.UrlEncode(basepath + "/Images/SBranchLogo/" + user.SBranchID + "_" + user.BranchLogo);
+                var setupOk = await isBigBlueButtonAPISettingsOKAsync();
+                var meetingStatus = await this.client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.BBBMeetingID });
+                DateTime startdatetime = DateTime.Parse("2021-02-01 " + cModel.StartTime);
+                DateTime enddatetime = DateTime.Parse("2021-02-01 " + cModel.EndTime);
+                int duration = (enddatetime - startdatetime).Minutes;
+
+                if (duration < 0)
+                {
+                    duration = 30;
+                }
+                else if (duration > 60)
+                {
+                    duration = 60;
+                }
+                if (meetingStatus.returncode == Returncode.FAILED)
+                {
+                    MetaData meta = new MetaData();
+                    meta.Add("BranchID", "1");
+                    string meu = basepath + "/Home/EndOnlineMeeting";
+                    meta.Add("endCallbackUrl", meu);
+
+                    string reccbu = basepath + "/home/bbbrecordingreadystaff/";
+                    meta.Add("bbb-recording-ready-url", reccbu);
+                    meta.Add("bbb_skip_check_audio", "true");
+                    meta.Add("bbb_client_title", "P-School");
+                    meta.Add("bbb_enable_screen_sharing", "false");
+                    meta.Add("bbb_show_public_chat_on_login", "false");
+                    var result = await client.CreateMeetingAsync(new CreateMeetingRequest
+                    {
+                        name = cModel.MeetingTitle + " on " + cModel.MeetingDate.ToString("dd MMM, yyyy"),
+                        meetingID = cModel.BBBMeetingID,
+                        record = true,
+                        //logoutURL = basepath + "/Home/LogoutOnlineClasses/" + cModel.MeetingID,
+                        meta = meta,
+                        guestPolicy = "ALWAYS_ACCEPT",
+                        logo = logo,
+                        lockSettingsDisablePrivateChat = true,
+                        lockSettingsDisableNote = false,
+                        muteOnStart = true,
+                        allowModsToUnmuteUsers = true,
+                        autoStartRecording = true,
+                        duration = duration + 5
+                        //welcome="Welcome to class"
+                        //autoStartRecording = true,
+                        //bannerText = "Online Class for Subject:" + cModel.SubjectName + " Class:" + cModel.ClassSection + " By :" + cModel.TeacherName
+                    }); ;
+                    if (result.returncode == Returncode.FAILED) objWraper.Data = "BB01";
+                    if (result.returncode != Returncode.FAILED)
+                    {
+                        cModel.InternalMeetingID = result.internalMeetingID;
+                        cModel.Status = 1;
+                        cModel.StartedOn = CommonUsage.GetCurrentDate();
+                        cModel.AttPassword = result.attendeePW;
+                        cModel.ModPassword = result.moderatorPW;
+                        (onlineClassData).UpdateOnlineStaffMeeting(cModel);
+                    }
+                }
+
+                var requestJoin = new JoinMeetingRequest { meetingID = cModel.BBBMeetingID };
+                requestJoin.userID = 0.ToString();
+                requestJoin.fullName = "Principal";
+                requestJoin.password = cModel.ModPassword;
+                var setConfigRequest = new SetConfigXMLRequest
+                {
+                    meetingID = cModel.BBBMeetingID,
+                    configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+                };
+                var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+                if (setConfigResult.returncode == Returncode.FAILED)
+                {
+                    objWraper.Data = setConfigResult;
+                }
+                else
+                {
+                    requestJoin.configToken = setConfigResult.configToken;
+                    //requestJoin.avatarURL = avatar;
+                    var url = client.GetJoinMeetingUrl(requestJoin);
+
+                    List<SMSRecieverModel> recievers = (onlineClassData).GetRecieverListOnStafMeeting(data.ID);
+                    OnlineClassNotificationModel message = new OnlineClassNotificationModel();
+                    //message.base_url = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+                    message.message = "Online Meeting Started.";
+                    message.type = 1;
+                    message.typeid = data.ID;
+                    string jmessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+                    NotificationModel objModel = new NotificationModel();
+                    objModel.RecieverID = -1;
+                    objModel.NotificationType = 10;
+                    objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
+                    objModel.Recievers = new List<NotificationRecieverModel>();
+
+                    StringBuilder sb = new StringBuilder();
+                    foreach (SMSRecieverModel r in recievers)
+                    {
+                        if (!String.IsNullOrEmpty(r.deviceToken))
+                        {
+                            if (r.deviceToken.Contains("\\n"))
+                            {
+                                r.deviceToken.Replace("\\n", "#");
+                            }
+                            if (sb != null && sb.ToString() != "")
+                            {
+                                sb.Append("#");
+                            }
+                            sb.Append(r.deviceToken);
+                        }
+                    }
+                    string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
+                    string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+                    CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
+
+                    objWraper.Code = 200;
+                    objWraper.Data = url;
+                }
+            }
+            else
+            {
+                objWraper.Code = 404;
+            }
+            objWraper.Message = "Success";
             return objWraper;
         }
         #endregion
