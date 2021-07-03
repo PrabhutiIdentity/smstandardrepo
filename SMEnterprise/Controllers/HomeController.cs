@@ -30,10 +30,10 @@ namespace SMEnterprise.Controllers
 
                 objcd.InsertLog(0, "Home Page", "Before BBB Client");
                 objcd.InsertLog(0, "BBBConfig", JsonConvert.SerializeObject(MvcApplication.BigBlueButtonAPISettings));
-               // this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+                // this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
                 objcd.InsertLog(0, "Home Page", "After BBB Client");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 DateTime dt = DateTime.Now;
                 string Data = "";
@@ -49,7 +49,7 @@ namespace SMEnterprise.Controllers
         }
         public ActionResult ClassEnded()
         {
-           
+
             return View();
         }
         public ActionResult StopSchedule()
@@ -96,8 +96,8 @@ namespace SMEnterprise.Controllers
         {
             try
             {
-                 var encoded = Request.Form["signed_parameters"].ToString();
-                 var token = new JwtSecurityToken(jwtEncodedString: encoded);
+                var encoded = Request.Form["signed_parameters"].ToString();
+                var token = new JwtSecurityToken(jwtEncodedString: encoded);
                 var MeetingID = "";
                 var RecordingID = "";
                 foreach (var key in token.Payload.Keys)
@@ -115,7 +115,7 @@ namespace SMEnterprise.Controllers
                 var request = new GetRecordingsRequest
                 {
                     recordID = RecordingID,
-                    meetingID=MeetingID
+                    meetingID = MeetingID
                 };
                 var client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
                 var result = await client.GetRecordingsAsync(request);
@@ -163,7 +163,7 @@ namespace SMEnterprise.Controllers
         public async Task<ActionResult> EndOnlineClasses()
         {
             string MeetingID = Request.QueryString["meetingID"];
-          
+
             BBBOnlineClassModel oModel = new BBBOnlineClassModel();
             oModel.EndedOn = CommonUsage.GetCurrentDate();
             oModel.Status = 2;
@@ -212,7 +212,61 @@ namespace SMEnterprise.Controllers
             }
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
+        public async Task<ActionResult> EndOnlineMeeting()
+        {
+            string MeetingID = Request.QueryString["meetingID"];
+
+            OnlineStaffMeetingModel oModel = new OnlineStaffMeetingModel();
+            oModel.EndedOn = CommonUsage.GetCurrentDate();
+            oModel.Status = 2;
+            oModel.BBBMeetingID = MeetingID;
+            BBBOnlineStaffMeetingData bbbdata = new BBBOnlineStaffMeetingData();
+            var cModel = bbbdata.GetOnlineStaffMeetingDetailsByMeetingID(MeetingID,0);
+            var client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+            var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = MeetingID });
+            if (meetingStatus.returncode == Returncode.SUCCESS)
+            {
+                oModel.AttendeesJSON = Newtonsoft.Json.JsonConvert.SerializeObject(meetingStatus.attendees);
+            }
+            var List = bbbdata.UpdateOnlineStaffMeetingOnEnd(oModel);
+            if (List > 0)
+            {
+                List<SMSRecieverModel> recievers = bbbdata.GetRecieverListOnStafMeeting(cModel.MeetingID);
+                OnlineClassNotificationModel message = new OnlineClassNotificationModel();
+                message.message = "Online Meeting Ended.";
+                message.type = 2;
+                message.typeid = cModel.MeetingID;
+                string jmessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+                NotificationModel objModel = new NotificationModel();
+                objModel.RecieverID = -1;
+                objModel.NotificationType = 10;
+                objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
+                objModel.Recievers = new List<NotificationRecieverModel>();
+
+                StringBuilder sb = new StringBuilder();
+                foreach (SMSRecieverModel r in recievers)
+                {
+                    if (!String.IsNullOrEmpty(r.deviceToken))
+                    {
+                        if (r.deviceToken.Contains("\\n"))
+                        {
+                            r.deviceToken.Replace("\\n", "#");
+                        }
+                        if (sb != null && sb.ToString() != "")
+                        {
+                            sb.Append("#");
+                        }
+                        sb.Append(r.deviceToken);
+                    }
+                }
+                string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
+                string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+                CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
+            }
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
+        }
     }
+
     public class StudentResultGetModel
     {
         public DateTime DOB { get; set; }
