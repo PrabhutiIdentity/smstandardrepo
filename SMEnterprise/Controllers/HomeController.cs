@@ -160,6 +160,74 @@ namespace SMEnterprise.Controllers
             }
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
+        public async Task<ActionResult> bbbrecordingreadystaff()
+        {
+            try
+            {
+                var encoded = Request.Form["signed_parameters"].ToString();
+                var token = new JwtSecurityToken(jwtEncodedString: encoded);
+                var MeetingID = "";
+                var RecordingID = "";
+                foreach (var key in token.Payload.Keys)
+                {
+                    if (key == "meeting_id")
+                    {
+                        MeetingID = token.Payload[key].ToString();
+                    }
+                    else if (key == "record_id")
+                    {
+                        RecordingID = token.Payload[key].ToString();
+                    }
+                }
+
+                var request = new GetRecordingsRequest
+                {
+                    recordID = RecordingID,
+                    meetingID = MeetingID
+                };
+                var client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+                var result = await client.GetRecordingsAsync(request);
+                string PlaybackURL = "";
+                string Images = "";
+                var rec = result.recordings[0];
+                if (rec.published)
+                {
+                    foreach (var p in result.recordings[0].playbacks)
+                    {
+                        if (p.type == "presentation")
+                        {
+                            PlaybackURL = p.url;
+                            if (p.previewImages != null && p.previewImages.Count > 0)
+                            {
+                                foreach (var image in p.previewImages)
+                                {
+                                    if (Images != "")
+                                    {
+                                        Images = Images + ",";
+                                    }
+                                    Images = Images + image.url;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                BBBOnlineClassRecording oModel = new BBBOnlineClassRecording();
+                oModel.MeetingID = MeetingID;
+                oModel.RecordingState = rec.published ? "Published" : "UnPublished";
+                oModel.PlaybackURL = PlaybackURL;
+                oModel.Thumbnail = Images;
+                oModel.RawRecordingSize = rec.rawSize;
+                oModel.ProcessedRecordingSize = rec.size;
+
+                (new BBBOnlineStaffMeetingData()).UpdateRecordingReady(oModel);
+            }
+            catch (Exception ex)
+            {
+                (new CommonData()).InsertLog(0, "Recording Exception ", ex.ToString());
+            }
+            return new HttpStatusCodeResult(HttpStatusCode.OK);
+        }
         public async Task<ActionResult> EndOnlineClasses()
         {
             string MeetingID = Request.QueryString["meetingID"];

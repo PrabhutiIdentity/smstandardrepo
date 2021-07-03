@@ -12,6 +12,23 @@ namespace SMEnterprise.Repository
 {
     public class BBBOnlineStaffMeetingData
     {
+        public int UpdateRecordingReady(BBBOnlineClassRecording objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@MeetingID", objModel.MeetingID);
+                paramater.Add("@PlaybackURL", objModel.PlaybackURL);
+                paramater.Add("@RecordingState", objModel.RecordingState);
+                paramater.Add("@RawRecordingSize", objModel.RawRecordingSize);
+                paramater.Add("@ProcessedRecordingSize", objModel.ProcessedRecordingSize);
+                paramater.Add("@Thumbnail", objModel.Thumbnail);
+                paramater.Add("@RecordingStartTime", objModel.RecordingStartTime);
+                paramater.Add("@RecordingEndTime", objModel.RecordingEndTime);
+                return con.Query<int>("sp_UpdateBBBMeetingRecordingStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+
+        }
         public List<SMSRecieverModel> GetRecieverListOnStafMeeting(int MeetingID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
