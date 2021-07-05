@@ -86,6 +86,7 @@ namespace SMEnterprise.Repository
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
+                paramater.Add("@BBBMeetingID", objModel.BBBMeetingID);
                 paramater.Add("@MeetingDate", objModel.MeetingDate);
                 paramater.Add("@StartTime", objModel.StartTime);
                 paramater.Add("@EndTime", objModel.EndTime);

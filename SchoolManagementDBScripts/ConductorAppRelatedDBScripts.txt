@@ -1,0 +1,79 @@
+Create Procedure dbo.sp_GetConductorRoutesVehicle
+(
+@ConductorID int
+)
+as 
+BEGIN
+	SELECT TVR.VehicleRouteID,isnull(VD.VehicleNumber,'')+' ('+isnull(VD.RegistrationNumber,'')+')' as Vehicle,TRM.RouteName
+	 FROM  [dbo].[Transport_Vehicle_Route] TVR left outer join [dbo].[VehicleDetails] VD on VD.VehicleID=TVR.VehicleID
+	left outer join [dbo].[TransportRouteMaster] TRM on TRM.RouteID=TVR.RouteID
+	where VD.ConductorID=@ConductorID
+END
+
+GO
+
+
+ALTER proc [dbo].[spn_GetVehicleRouteStoppages]
+(
+	@VehicleRouteID int
+)
+AS
+BEGIN
+	Select StopID,VehicleRouteID,TRD.AreaID,AM.AreaName,AM.Latitude,AM.Longitude,
+	cast(DATEADD(MINUTE,  TVR.DelayFromRouteTime, [time]  ) as nvarchar(8))as [Time],HaltDuration,HaltDurationR,SequenceNo,SequenceNoR
+	,cast(DATEADD(MINUTE,  TVR.DelayFromRouteTime, [timeR]  ) as nvarchar(8)) as [TimeR],
+	HaltDurationR,SequenceNoR from TransportRouteDetails TRD left outer join Transport_Vehicle_Route TVR on TVR.RouteID=TRD.RouteID
+	left outer join AreaMaster AM on AM.AreaID=TRD.AreaID
+	where tvr.VehicleRouteID=@VehicleRouteID	
+	order by SequenceNo
+END
+
+GO
+
+CREATE TABLE [dbo].[TransportAttendance](
+	[TAID] [int] IDENTITY(1,1) NOT NULL,
+	[TRID] [int] NULL,
+	[StopID] [int] NULL,
+	[UType] [int] NULL,
+	[UID] [int] NULL,
+	[UpDatetime] [datetime] NULL,
+	[DownDateTime] [datetime] NULL
+) ON [PRIMARY]
+GO
+
+
+Create proc [dbo].[spn_UpdatePassengerAttendance]
+(
+	@VehicleRouteID int,
+	@CDate datetime,
+	@TRID int,
+	@StopID int,
+	@UType int,
+	@UID int
+)
+AS
+BEGIN
+	Update [TransportAttendance] set DownDateTime=@CDate where TRID=@TRID and UType=@UType and UID=@UID and UpDatetime=@CDate
+	if(@@ROWCOUNT=0)
+	begin
+		Insert into [TransportAttendance](TRID,StopID,UType,UID,UpDatetime) values(@TRID,@StopID,@UType,@UID,@CDate)
+	end
+END
+
+GO
+
+
+Create  proc [dbo].[spn_GetVehicleRoutePassengers] 
+(
+	@VehicleRouteID int,
+	@CDate date
+)
+AS
+BEGIN
+	select StudentID,'/Images/StudentImage/'+cast(StudentID as nvarchar(10))+'_'+Photo as Photo,Name,TRD.StopID,VehicleRouteID,'Student' as PType
+	,(select AreaName from AreaMaster AM where AM.AreaID=TRD.AreaID)  as StopName,isnull(TA.TAID,0) as Status,0 as UType
+	 from StudentMaster SM left outer join TransportRouteDetails TRD on TRD.StopID=SM.StopID
+	 left outer join [dbo].[TransportAttendance] TA on TA.UID=StudentID and TA.UType=0 and cast(TA.UpDatetime as date)=@CDate
+	where SM.VehicleRouteID=@VehicleRouteID	and SM.StopID is not null and TRD.StopID is not null
+	order by TRD.SequenceNo
+END
