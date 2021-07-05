@@ -588,6 +588,7 @@ END
 GO
 Create procedure dbo.sp_AddBBBStaffMeeting  
 (  
+@BBBMeetingID nvarchar(50),
 @MeetingDate date,  
 @StartTime nvarchar(50),  
 @EndTime nvarchar(50),  
@@ -596,8 +597,8 @@ Create procedure dbo.sp_AddBBBStaffMeeting
 )  
 AS  
 BEGIN  
-Insert into [dbo].[BBBOnlineStaffMeetings](MeetingDate,StartTime,EndTime,MeetingTitle,Status,SBranchID)  
-values(@MeetingDate,@StartTime,@EndTime,@MeetingTitle,0,@SBranchID)  
+Insert into [dbo].[BBBOnlineStaffMeetings](BBBMeetingID,MeetingDate,StartTime,EndTime,MeetingTitle,Status,SBranchID)  
+values(@BBBMeetingID,@MeetingDate,@StartTime,@EndTime,@MeetingTitle,0,@SBranchID)  
 select Cast(Scope_Identity() as int)  
 END  
 
