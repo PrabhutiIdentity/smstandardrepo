@@ -1604,6 +1604,7 @@ namespace SMEnterprise.Controllers
         public CommonApiWraperModel UpdateBBBOnlineMeeting(OnlineStaffMeetingModel data)
         {
             UserModel user = VerifyUser(data.UUID);
+
             CommonApiWraperModel objWraper = new CommonApiWraperModel();
             if (user != null)
             {
