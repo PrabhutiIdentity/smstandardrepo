@@ -587,6 +587,10 @@ namespace SMEnterprise.Controllers
             meta.Add("BranchID", "1");
             meta.Add("meta_endCallbackUrl", basepath + "/Home/meetingEnded");
             meta.Add("meta_bbb-recording-ready-url", basepath + "/Home/redordingavailable");
+            meta.Add("meta_bbb_skip_check_audio", "true");
+            meta.Add("meta_bbb_client_title", "P-School");
+            meta.Add("meta_bbb_enable_screen_sharing", "false");
+            meta.Add("meta_bbb_show_public_chat_on_login", "false");
             //meta.Add("meta_bbb-recording-ready-url", "URL");
             var client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
             var result = await client.CreateMeetingAsync(new CreateMeetingRequest

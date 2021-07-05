@@ -1,0 +1,165 @@
+CommonData.cs
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+        public int AddYoutubeVideo(YouTubeVideoModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TeacherID", oModel.TeacherID);
+                paramater.Add("@UploadDate", oModel.UploadDate);
+                paramater.Add("@SubjectID", oModel.SubjectID);
+                paramater.Add("@Title", oModel.Title);
+                paramater.Add("@Description", oModel.Description);
+                paramater.Add("@YoutubeID", oModel.YouTubeID);
+                paramater.Add("@ClassID", oModel.ClassID);
+                paramater.Add("@SectionID", oModel.SectionID);
+                paramater.Add("@SequenceNo", oModel.SequenceNo);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                paramater.Add("@VideoDate", oModel.VideoDate);
+                return con.Query<int>("sp_AddYouTubeVideo", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public List<YouTubeVideoModel> GetYoutubeVideos(int SBranchID, int ClassID, int SectionID, int SubjectID, int TeacherID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TeacherID", TeacherID);
+                paramater.Add("@SubjectID", SubjectID);
+                paramater.Add("@ClassID", ClassID);
+                paramater.Add("@SectionID", SectionID);
+                paramater.Add("@SBranchID", SBranchID);
+                return con.Query<YouTubeVideoModel>("sp_GetYouTubeVideo", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+            }
+        }
+        public List<YouTubeVideoModel> GetYoutubeVideosParent(int StudentID, int SubjectID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SubjectID", SubjectID);
+                return con.Query<YouTubeVideoModel>("sp_GetYouTubeVideoParent", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+            }
+        }
+		
+------------------------------------------------------------------------------------------------------------------------------------------------
+TeacherData.cs
+  #region BlackBoardSection
+        public TeacherBlackBoardPageModel GetBlackBoardPageModel(TeacherBlackBoardPageModel objModel)
+        {
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TeacherID", objModel.TeacherID);
+                paramater.Add("@EntryDate", objModel.EntryDate);
+                paramater.Add("@SubjectID", objModel.SubjectID);
+                paramater.Add("@ClassID", objModel.ClassID);
+                paramater.Add("@SectionID", objModel.SectionID);
+                paramater.Add("@PeriodID", objModel.PeriodID);
+                using (var multi = con.QueryMultiple("sp_GetTeacherBlackBoardEditData", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel = multi.Read<TeacherBlackBoardPageModel>().SingleOrDefault();
+                    objModel.SelectionList = multi.Read<object>().ToList();
+                }
+            }
+            return objModel;
+        }
+        public BlackBoardModel GetBlackBoardDetail(string BlackBoardID)
+        {
+            BlackBoardModel objModel = new BlackBoardModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@BlackBoardID", BlackBoardID);
+                using (var multi = con.QueryMultiple("sp_GetBlackBoardDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel = multi.Read<BlackBoardModel>().SingleOrDefault();
+                    objModel.BBImages = multi.Read<BlackBoardImageModel>().ToList();
+                }
+            }
+            return objModel;
+        }
+        public TeacherBlackBoardPageModel GetBlackBoardListModel(TeacherBlackBoardPageModel objModel)
+        {
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TeacherID", objModel.TeacherID);
+                paramater.Add("@EntryDate", objModel.EntryDate);
+                paramater.Add("@SubjectID", objModel.SubjectID);
+                paramater.Add("@ClassID", objModel.ClassID);
+                paramater.Add("@SectionID", objModel.SectionID);
+                paramater.Add("@PeriodID", objModel.PeriodID);
+                using (var multi = con.QueryMultiple("sp_GetTeacherBlackBoardEntryList", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel = multi.Read<TeacherBlackBoardPageModel>().SingleOrDefault();
+                    objModel.BlackBoardEntries = multi.Read<object>().ToList();
+                }
+            }
+            return objModel;
+        }
+        public int AddBlackBoardEntry(BlackBoardModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@BlackBoardID", oModel.BlackBoardID);
+                paramater.Add("@TeacherID", oModel.TeacherID);
+                paramater.Add("@SectionID", oModel.SectionID);
+                paramater.Add("@ClassID", oModel.ClassID);
+                paramater.Add("@PeriodID", oModel.PeriodID);
+                paramater.Add("@SubjectID", oModel.SubjectID);
+                paramater.Add("@Title", oModel.Title);
+                paramater.Add("@BDate", oModel.BDate);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+
+                return con.Query<int>("sp_InsertBlackBoardEntry", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public int AddBlackBoardImage(BlackBoardImageModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@BlackBoardID", oModel.BlackBoardID);
+                paramater.Add("@BBMIID", oModel.BBMIID);
+                paramater.Add("@Photo", oModel.Photo);
+                paramater.Add("@Detail", oModel.Detail);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+
+                return con.Query<int>("sp_InsertBlackBoardImage", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        #endregion
+--------------------------------------------------------------------------------------------------------------------------------------------------
+ParantData.cs
+
+        public List<NameIDModel> GetSubjectsForStudent(int StudentID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                return con.Query<NameIDModel>("sp_GetSubjectsForStudent", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+            }
+        }
+
+        public TeacherBlackBoardPageModel GetBlackBoardListModel(int StudentID)
+        {
+            TeacherBlackBoardPageModel objModel = new TeacherBlackBoardPageModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SubjectID", 0);
+                using (var multi = con.QueryMultiple("sp_GetBlackBoardByStudent", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.BlackBoardEntries = multi.Read<object>().ToList();
+                }
+            }
+            return objModel;
+        }
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
