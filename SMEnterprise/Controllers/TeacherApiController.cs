@@ -1514,7 +1514,8 @@ namespace SMEnterprise.Controllers
             CommonApiWraperModel objWraper = new CommonApiWraperModel();
             if (user != null)
             {
-                data.SBranchID = user.SBranchID; if (data.RDate.Year == 1)
+                data.SBranchID = user.SBranchID;
+                if (data.RDate.Year == 1)
                 {
                     data.RDate = CommonUsage.GetCurrentDate();
                 }
