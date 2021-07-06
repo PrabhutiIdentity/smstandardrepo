@@ -1719,7 +1719,7 @@ namespace SMEnterprise.Controllers
                         name = cModel.MeetingTitle + " on " + cModel.MeetingDate.ToString("dd MMM, yyyy"),
                         meetingID = cModel.BBBMeetingID,
                         record = true,
-                        //logoutURL = basepath + "/Home/LogoutOnlineClasses/" + cModel.MeetingID,
+                        logoutURL = basepath + "/Home/ClassEnded/" + cModel.MeetingID,
                         meta = meta,
                         guestPolicy = "ALWAYS_ACCEPT",
                         logo = logo,
