@@ -9,6 +9,7 @@ using SMEnterprise.Filters;
 using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
+using BigBlueButtonAPI.Core;
 
 namespace SMEnterprise.Controllers
 {
@@ -18,6 +19,24 @@ namespace SMEnterprise.Controllers
         AdminData objAdminData = new AdminData();
         AccountData objAccountData = new AccountData();
 
+        private readonly BigBlueButtonAPIClient client;
+        public AdminController()
+        {
+            this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+        }
+        private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
+        {
+            try
+            {
+                var res = await client.IsMeetingRunningAsync(new IsMeetingRunningRequest { meetingID = Guid.NewGuid().ToString() });
+                if (res.returncode == Returncode.FAILED) return false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
         [PermissionFilter]
         public ActionResult ParentAppInstalSMS(string ID = null)
         {
@@ -3265,6 +3284,70 @@ namespace SMEnterprise.Controllers
         //}
         #endregion
 
+
+        #region OnlineClasses
+        [HttpPost]
+        public ActionResult PlayRecording(string url)
+        {
+            if (url == null)
+            {
+                return RedirectToAction("OnlineClasses");
+            }
+            ViewBag.URL = url;
+            return View();
+        }
+        public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
+        {
+
+           
+            if (oModel.ClassDate.Year == 1)
+            {
+                oModel.ClassDate = CommonUsage.GetCurrentDate();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            oModel.Classes = await (new BBBOnlineClassData()).GetPrincipalBBBOnlineClassesSchedules(SBranchID, oModel.ClassDate);
+            return View(oModel);
+
+        }
+        public async Task<ActionResult> JoinClass(string ID = null)
+        {
+            var onlienClassData = new BBBOnlineClassData();
+            var user = PermissionManager.GetLoggedInUser();
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            int OCID = CommonUsage.ConvertToInt(ID);
+            BBBOnlineClassModel cModel = onlienClassData.GetOnlineClassDetailsByOCID(OCID);
+
+            string basepath = $"{this.Request.Url.Scheme}://{this.Request.Url.Host}";
+            var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
+            if (meetingStatus.returncode != Returncode.FAILED)
+            {
+                var joinDate = CommonUsage.GetCurrentDate();
+                //NameIDModel student = await onlienClassData.StudentJoinOnlineClass(StudentID, joinDate, OCID, ParentID, 0);
+                // StudentModel Student = objStudents.Where(x => x.StudentID == StudentID).FirstOrDefault();
+               // string avatar = basepath + student.Extra1;
+                var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
+                requestJoin.userID =SBranchID.ToString();
+                requestJoin.fullName = "Principle";
+                requestJoin.password = cModel.AttPassword;
+                var setConfigRequest = new SetConfigXMLRequest
+                {
+                    meetingID = cModel.MeetingID,
+                    configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+                };
+                var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+                if (setConfigResult.returncode == Returncode.FAILED) return Json(0);
+                requestJoin.configToken = setConfigResult.configToken;
+              
+                var url = client.GetJoinMeetingUrl(requestJoin);
+                ViewBag.URL = url;
+                return View();
+            }
+            else
+            {
+                return View(-1);
+            }
+        }
+        #endregion
     }
 
 }
