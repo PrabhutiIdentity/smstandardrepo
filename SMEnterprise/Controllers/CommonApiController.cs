@@ -17,7 +17,7 @@ namespace SMEnterprise.Controllers
         private UserModel VerifyUser(string UUID)
         {
             UserModel objUserModel = new UserModel();
-            List<ApiAuthenticationModel> objapiModel = LuceneData.Search(UUID, "UUID").ToList();
+            List<ApiAuthenticationModel> objapiModel = (new CommonData()).GetAppUser(UUID);
             bool isFound = false;
             if (objapiModel.Count > 0)
             {
@@ -434,15 +434,15 @@ namespace SMEnterprise.Controllers
                     string NewHash = CommonUsage.EncryptPassword(AttemptedUser.Password + svalue);
                     if (login.password == NewHash)
                     {
-                        objapiModel[0].UserID = AttemptedUser.UserID;
-                        objapiModel[0].UserName = AttemptedUser.UserName;
-                        objapiModel[0].UUID = login.UUID;
-                        objapiModel[0].UserType = AttemptedUser.RoleID;
-                        objapiModel[0].SBranchID = AttemptedUser.SBranchID;
-                        objapiModel[0].LastLoginDate = CommonUsage.GetCurrentDate();
-                        objapiModel[0].deviceType = login.deviceType == null ? "" : login.deviceType;
-                        objapiModel[0].deviceToken = login.deviceToken == null ? "" : login.deviceToken;
-                        LuceneData.AddUpdateLuceneIndex(objapiModel[0]);
+                        //objapiModel[0].UserID = AttemptedUser.UserID;
+                        //objapiModel[0].UserName = AttemptedUser.UserName;
+                        //objapiModel[0].UUID = login.UUID;
+                        //objapiModel[0].UserType = AttemptedUser.RoleID;
+                        //objapiModel[0].SBranchID = AttemptedUser.SBranchID;
+                        //objapiModel[0].LastLoginDate = CommonUsage.GetCurrentDate();
+                        //objapiModel[0].deviceType = login.deviceType == null ? "" : login.deviceType;
+                        //objapiModel[0].deviceToken = login.deviceToken == null ? "" : login.deviceToken;
+                        //LuceneData.AddUpdateLuceneIndex(objapiModel[0]);
                         AttemptedUser.Password = "";
                         objApiWrapper.Data = AttemptedUser;
                         objApiWrapper.Code = 200;
@@ -497,7 +497,7 @@ namespace SMEnterprise.Controllers
                 objModel.deviceToken = user.AppToken;
                 objModel.UserID = user.UserID;
                 objCommonData.InsertUpdateAppUser(objModel);
-                LuceneData.ClearLuceneIndexRecord(data.UUID);
+                //LuceneData.ClearLuceneIndexRecord(data.UUID);
             }
             else
             {

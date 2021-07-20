@@ -14,94 +14,48 @@
     <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
 }
 <style>
-    .btn-outline {
-        border: 1px solid #fff;
-        background: transparent;
-        color: #000;
-    }
-    .Undone .slider-bar {
-        background-color: rgba(255, 0, 0, 0.52) !important;
-    }
-
-    .Leave .slider-bar {
-        background-color: rgba(96, 109, 115, 0.61) !important;
-    }
-
-    .holiday .slider-bar {
-        background-color: rgba(255, 102, 0, 0.69) !important;
-    }
-
-    .normal .slider-bar {
-        background-color: rgba(219, 199, 180, 0.68) !important;
-    }
-
-    .btn {
-        padding: 3px 6px;
-    }
-
-    .thumbImageGrid {
-        max-width: 75px;
-        max-height: 75px;
-    }
-
-
-    *html1 .thumbImageGrid {
-        width: expression((this.width/this.height)>=1?75:'auto');
-        height: expression((this.width/this.height)<1?100:'auto');
-    }
-
-    .thumbImageMain {
-        max-width: 125px;
-        max-height: 125px;
-    }
-
-
-    *html .thumbImageMain {
-        width: expression((this.width/this.height)>=1?125:'auto');
-        height: expression((this.width/this.height)<1?125:'auto');
-    }
-
-
-    .slider-bar.transition-enabled {
-    }
-
-    .radios-to-slider {
-        margin-bottom: 40px !important;
-    }
 </style>
-<div class="">
+<section class="content-header">
+    <h1>
+        Online Classes
 
-    <div class="clearfix"></div>
-    <div class="">
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Online Classes</li>
+    </ol>
+</section>
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("OnlineClasses", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "width:100%" }))
+                    {
+                        <div class="col-md-3">
+                            <h3 class="box-title">Online Classes </h3>
+                        </div>
+                        <div class="row std-mng-head col-md-9">
 
-        <div class="clearfix"></div>
-        <div class="row">
-            <div class="col-md-12">
-                @using (Html.BeginForm("OnlineClasses", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "width:100%" }))
-                {
-                    <div class="col-md-3">
-                        <h3 class="box-title">Online Classes </h3>
-                    </div>
-                    <div class="row std-mng-head col-md-9">
-
-                        <div class="col-md-12 class-section">
-                            <div class="row">
-                                <div class="col-md-6 padding">
-                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
-                                    <div class="col-md-8">
-                                        <input type="date" class="form-control col-md-8" id="txtStartDate" name="ClassDate" value="@Model.ClassDate.ToString("yyyy-MM-dd")" />
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-6 padding">
+                                        <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                        <div class="col-md-8">
+                                            <input type="date" class="form-control col-md-8" id="txtStartDate" name="ClassDate" value="@Model.ClassDate.ToString("yyyy-MM-dd")" />
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <a href="javascript:void(0);" class="btn btn-info" onclick="$('#frmGetStudents').submit();">Search</a>
-                                </div>
+                                    <div class="col-md-3">
+                                        <a href="javascript:void(0);" class="btn btn-info" onclick="$('#frmGetStudents').submit();">Search</a>
+                                    </div>
 
+                                </div>
                             </div>
                         </div>
-                    </div>
-                }
-                <div class="x_panel">
-
+                    }
+                </div>
+                <div class="box-body">
                     <table id="tblCategory" class="table table-bordered table-hover">
                         <thead>
                             <tr>
@@ -110,6 +64,7 @@
                                 <th>Subject</th>
                                 <th>Start Time</th>
                                 <th>End Time</th>
+                                <th>Status</th>
                                 <th>Recordings</th>
                                 <th>Option</th>
                             </tr>
@@ -134,11 +89,14 @@
                                         @(SMEnterprise.Repository.CommonUsage.ConvertToDateTime("2020-08-01 " + c.EndTime).ToString("hh:mm tt"))
                                     </td>
                                     <td>
+                                        @(c.Status==0?"Not Started":c.Status==1?"Running":"Ended")
+                                    </td>
+                                    <td>
                                         @c.Recordings.Count()
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <button type="button" class="btn btn-outline bg-slate-600 text-slate-600 border-slate dropdown-toggle" data-toggle="dropdown">Options</button>
+                                            <button type="button" class="btn bg-slate-600 text-slate-600 border-slate dropdown-toggle" data-toggle="dropdown">Options</button>
                                             <ul class="dropdown-menu dropdown-menu-right">
                                                 @if (c.Status == 0)
                                                 {
@@ -179,7 +137,7 @@
             </div>
         </div>
     </div>
-</div>
+</section>
 
 @section scripts
 {
