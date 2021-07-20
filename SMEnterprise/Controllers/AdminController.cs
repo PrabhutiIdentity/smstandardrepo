@@ -3287,6 +3287,7 @@ namespace SMEnterprise.Controllers
 
         #region OnlineClasses
         [HttpPost]
+        [PermissionFilter]
         public ActionResult PlayRecording(string url)
         {
             if (url == null)
@@ -3296,6 +3297,7 @@ namespace SMEnterprise.Controllers
             ViewBag.URL = url;
             return View();
         }
+        [PermissionFilter]
         public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
         {
 
@@ -3309,6 +3311,7 @@ namespace SMEnterprise.Controllers
             return View(oModel);
 
         }
+        [PermissionFilter]
         public async Task<ActionResult> JoinClass(string ID = null)
         {
             var onlienClassData = new BBBOnlineClassData();
