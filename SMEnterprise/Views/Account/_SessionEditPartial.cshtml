@@ -111,7 +111,8 @@
                     <div class="col-md-8 col-sm-9 col-xs-12 input-group">
                         <label class="switch switch-green">
                             <input type="checkbox" class="switch-input" @(Model.Session.Status == 1 ? "checked" : "" )>
-                            <span class="switch-label" onclick="$(this).closest('div').find('#hdnSessionStatus').val($(this).closest('label').find('#hdnSessionStatus').val() == '0' ? '1' : '0');" data-on="Active" data-off="Inactive"></span>
+                            @*<span class="switch-label" onclick="$(this).closest('div').find('#hdnSessionStatus').val($(this).closest('label').find('#hdnSessionStatus').val() == '0' ? '1' : '0');" data-on="Active" data-off="Inactive"></span>*@
+                            <span class="switch-label" onclick="StatusChanged(this);" data-on="Active" data-off="Inactive"></span>
                             <span class="switch-handle" id="shTranding"></span>
                             <input type="hidden" name="Status" id="hdnSessionStatus" value="@Model.Session.Status">
                         </label>
@@ -127,59 +128,67 @@
             </div>
 
             <div class="row">
-                <label class="control-label col-md-2 col-sm-3 col-xs-12">Optional Subjects : </label>
-                <div class="col-md-8 col-sm-9 col-xs-12 input-group">
-                    <div class="row">
-                        <div class="col-md-12" style="padding-top: 5px;" id="divOptionalSubjects">
-                            @{
-                                var cnt = 0;
-                                var atlest = ((List<SMEnterprise.Models.NameIDModel>)Model.OptionalSubjects).Where(x => x.Extra1 != "0").Count();
-                                foreach (var subs in Model.OptionalSubjects)
-                                {
-                                    if ("0" != subs.Extra1 || atlest == 0)
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-2 col-sm-3 col-xs-12">Optional Subjects : </label>
+                    <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                        <div class="row">
+                            <div class="col-md-12" style="padding-top: 5px;" id="divOptionalSubjects">
+                                @{
+                                    var cnt = 0;
+                                    var atlest = ((List<SMEnterprise.Models.NameIDModel>)Model.OptionalSubjects).Where(x => x.Extra1 != "0").Count();
+                                    foreach (var subs in Model.OptionalSubjects)
                                     {
-                                        <label class='badge bg-green OptedSubjects' onclick="OptionalSubjectClicked(this);" title="Student Opted for this subject">
-                                            <input type="hidden" id="hdnSSOSID" name="SubjectsOpted[@cnt].Extra1" value="@subs.Extra1" />
-                                            <input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[@cnt].ID" value="@subs.ID" />
-                                            <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[@cnt].Name" value="@Model.Session.StudentSessionUID" />
-                                            <input type="hidden" id="hdnOpType" name="SubjectsOpted[@cnt].Extra2" value="1" />
-                                            @subs.Name
-                                        </label>
+                                        if ("0" != subs.Extra1 || atlest == 0)
+                                        {
+                                            <label class='badge bg-green OptedSubjects' onclick="OptionalSubjectClicked(this);" title="Student Opted for this subject">
+                                                <input type="hidden" id="hdnSSOSID" name="SubjectsOpted[@cnt].Extra1" value="@subs.Extra1" />
+                                                <input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[@cnt].ID" value="@subs.ID" />
+                                                <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[@cnt].Name" value="@Model.Session.StudentSessionUID" />
+                                                <input type="hidden" id="hdnOpType" name="SubjectsOpted[@cnt].Extra2" value="1" />
+                                                @subs.Name
+                                            </label>
+                                        }
+                                        else
+                                        {
+                                            <label class='badge bg-red OptedSubjects' onclick="OptionalSubjectClicked(this);" title="This subject is not opted">
+                                                <input type="hidden" id="hdnSSOSID" name="SubjectsOpted[@cnt].Extra1" value="0" />
+                                                <input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[@cnt].ID" value="@subs.ID" />
+                                                <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[@cnt].Name" value="@Model.Session.StudentSessionUID" />
+                                                <input type="hidden" id="hdnOpType" name="SubjectsOpted[@cnt].Extra2" value="0" />
+                                                @subs.Name
+                                            </label>
+                                        }
+                                        cnt++;
                                     }
-                                    else
-                                    {
-                                        <label class='badge bg-red OptedSubjects' onclick="OptionalSubjectClicked(this);" title="This subject is not opted">
-                                            <input type="hidden" id="hdnSSOSID" name="SubjectsOpted[@cnt].Extra1" value="0" />
-                                            <input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[@cnt].ID" value="@subs.ID" />
-                                            <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[@cnt].Name" value="@Model.Session.StudentSessionUID" />
-                                            <input type="hidden" id="hdnOpType" name="SubjectsOpted[@cnt].Extra2" value="0" />
-                                            @subs.Name
-                                        </label>
-                                    }
-                                    cnt++;
                                 }
-                            }
+                            </div>
                         </div>
                     </div>
                 </div>
-
-            </div>
-            <div class="row">
-                <div class="col-md-12 pull-right">
-                    <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
-                        <button type="submit" class="btn btn-success pull-right" onclick="return CheckSessionEditForm(this)">Submit</button>
-                        <button type="button" onclick="CancelSessionEdit()" class="btn btn-primary pull-right">Cancel</button>
+                <div class="form-group col-md-6">
+                   
+                    <div class="col-md-12" id="dvSessionStatus" @(Model.Session.Status == 1 ? "style=display:none" : "")>
+                        <label id="lblInactiveChange"> In-Active Reason </label>
+                        <input type="text" class="form-control" placeholder="Inactive Reason" id="txtInReason"  name="ReasonforInactive" value="@Model.Session.ReasonforInactive" />
+                     </div>
+                </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 pull-right">
+                        <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3">
+                            <button type="submit" class="btn btn-success pull-right" onclick="return CheckSessionEditForm(this)">Submit</button>
+                            <button type="button" onclick="CancelSessionEdit()" class="btn btn-primary pull-right">Cancel</button>
+                        </div>
                     </div>
                 </div>
+                <script>
+                    $('.dateinput').daterangepicker({
+                        singleDatePicker: true,
+                        calender_style: "picker_1"
+                    }, function (start, end, label) {
+                        console.log(start.toISOString(), end.toISOString(), label);
+                    });
+                </script>
+                }
             </div>
-            <script>
-                $('.dateinput').daterangepicker({
-                    singleDatePicker: true,
-                    calender_style: "picker_1"
-                }, function (start, end, label) {
-                    console.log(start.toISOString(), end.toISOString(), label);
-                });
-            </script>
-        }
-    </div>
 </div>

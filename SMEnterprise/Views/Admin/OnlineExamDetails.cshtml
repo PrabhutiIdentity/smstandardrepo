@@ -1,0 +1,557 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using Newtonsoft.Json;
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var MyID = PermissionManager.GetLoggedInUser().UserID;
+}
+@model SMEnterprise.Models.OnlineExamEditModel
+@section IncludeCss
+{
+    <title>Question Bank</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="x_title">
+            <h2>Exam Details <small>Create Exam Paper by entering details and selecting subjects</small></h2>
+            <ul class="nav navbar-right panel_toolbox">
+                <li>
+                    @using (Html.BeginForm("OnlineExams", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline-table" }))
+                    {
+                        <input type="hidden" name="OExamID" value="0" />
+                        <input type="hidden" name="ClassID" value="@Model.Exam.ClassID" />
+                        <input type="hidden" name="SectionID" value="@Model.Exam.SectionID" />
+                        <input type="hidden" name="SubjectID" value="@Model.Exam.SubjectID" />
+                        <input type="hidden" name="SessionID" value="@Model.Exam.SessionID" />
+                        <input type="hidden" name="GroupID" value="@Model.Exam.GroupID" />
+                        <button type="submit" href="javascript:void(0);" class="btn btn-sm btn-primary">Cancel and Back</button>
+                    }
+                </li>
+            </ul>
+            <div class="clearfix"></div>
+        </div>
+        <div class="clearfix"></div>
+        @using (Html.BeginForm("UpdateOnlineExam", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+        {
+            <div class="row">
+                <div class="col-md-12">
+
+
+                    <div class="row std-mng-head col-md-12">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <input type="hidden" name="OExamID" value="@Model.Exam.OExamID" />
+                                <input type="hidden" name="TeacherID" value="@Model.Exam.TeacherID" />
+                                <input type="hidden" name="SubjectID" value="@Model.Exam.SubjectID" />
+                                <input type="hidden" name="ClassID" value="@Model.Exam.ClassID" />
+                                <input type="hidden" name="SectionID" value="@Model.Exam.SectionID" />
+                                <input type="hidden" name="SessionID" value="@Model.Exam.SessionID" />
+                                <input type="hidden" name="GroupID" value="@Model.Exam.GroupID" />
+                                <div class="form-group col-md-12">
+                                    <label>Online Exam for class @Model.Exam.ClassName/@Model.Exam.SectionName and @Model.Exam.SubjectName Subject for session @Model.Exam.SessionName by @Model.Exam.TeacherName</label>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label>Exam Title</label>
+                                    <input type="text" class="form-control" required name="ExamTitle" value="@Model.Exam.ExamTitle" />
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label>Exam Description</label>
+                                    <textarea rows="3" style="resize:none;" required class="form-control" name="ExamDescription">@Model.Exam.ExamDescription</textarea>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Exam Start Time</label>
+                                    <input type="datetime-local" class="form-control" id="txtStartDate" required name="OExamStartDate" value="@Model.Exam.OExamStartDate.ToString("yyyy-MM-ddTHH:mm")" />
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Exam End Time</label>
+                                    <input type="datetime-local" class="form-control" id="txtEndDate" required name="OExamEndDate" value="@Model.Exam.OExamEndDate.ToString("yyyy-MM-ddTHH:mm")" />
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Priority</label>
+                                    <select class="form-control" name="ExamPriority">
+                                        <option value="0" @(Model.Exam.ExamPriority == 0 ? "selected" : "")>M.C.Q</option>
+                                        <option value="1" @(Model.Exam.ExamPriority == 1 ? "selected" : "")>Fill in the blanks</option>
+                                        <option value="2" @(Model.Exam.ExamPriority == 2 ? "selected" : "")>True or False</option>
+                                        <option value="3" @(Model.Exam.ExamPriority == 3 ? "selected" : "")>One Word</option>
+                                        <option value="4" @(Model.Exam.ExamPriority == 4 ? "selected" : "")>Short Type</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Online Exam Type</label><a href="javascript:void(0);" style=" max-width: 50px; color: white;max-height: 16px;" onclick="OnlineExamTypeImage()" class="btn btn-sm">See Demo</a>
+                                    <select class="form-control" required name="OnlineExamType">
+                                        <option value="0" @(Model.Exam.ExamPriority == 0 ? "selected" : "")>One Page Paper </option>
+                                        <option value="1" @(Model.Exam.ExamPriority == 1 ? "selected" : "")>One by One</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label>Status</label>
+                                    <select class="form-control" name="Status">
+                                        <option value="1" @(Model.Exam.Status == 1 ? "selected" : "")>Active</option>
+                                        <option value="0" @(Model.Exam.Status == 0 ? "selected" : "")>Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h2>Questions <small>Questions that are included for this exam</small></h2>
+                            <ul class="nav navbar-right panel_toolbox">
+                                <li>
+                                    <button type="button" onclick="AddQuestion()" class="btn btn-sm btn-primary">Add Question</button>
+                                </li>
+                            </ul>
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            <ul class="messages" id="ulExamQuestions">
+                                @{
+                                    var ctr = 1;
+                                    foreach (var q in Model.ExamQuestions)
+                                    {
+                                        <li class="queli">
+                                            <div class="message_date">
+                                                <h3 class="date text-error">@q.Marks</h3>
+                                                <p class="month">Marks</p>
+                                            </div>
+                                            <div class="message_wrapper" style="margin-left: 0;">
+                                                <input type="hidden" name="Questions[@(ctr - 1)].Name" value="@q.QuestionID" />
+                                                <input type="hidden" name="Questions[@(ctr - 1)].ID" value="@q.OXQID" />
+                                                <input type="hidden" name="Questions[@(ctr - 1)].Extra1" value="@q.Marks" />
+                                                <input type="hidden" name="Questions[@(ctr - 1)].OpType" id="hdnOpType" value="1" />
+                                                <h4 class="heading searchable"><ctr>@(ctr).</ctr> @Html.Raw(q.QuestionText) @*@q.QuestionText*@</h4>
+                                                @if (q.QuestionType != 2)
+                                                {
+
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">A. @Html.Raw(q.Option1)@*@q.Option1*@</blockquote>
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">B. @Html.Raw(q.Option2)@*@q.Option2*@</blockquote>
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">C. @Html.Raw(q.Option3)@*@q.Option3*@</blockquote>
+                                                    <blockquote class="message col-md-6" style="font-size: 12px;">D. @Html.Raw(q.Option4)@*@q.Option4*@</blockquote>
+                                                }
+                                                <br />
+                                                <div class="row">
+                                                    <div class="col-md-7">
+                                                        <label class="badge bg-blue">@q.TeacherName</label>
+                                                        <label class="badge bg-@(q.Complexity == 0 ? "yellow" : q.Complexity == 1 ? "blue" : "red")">@(q.Complexity == 0 ? "Easy" : q.Complexity == 1 ? "Medium" : "Difficult")</label>
+
+                                                    </div>
+                                                    <div class="col-md-5" style="text-align: right;">
+                                                        <a href="javascript:void(0);" onclick="RemoveQuestion(this);" class="btn btn-sm btn-danger">Remove</a>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        </li>
+                                        ctr++;
+                                    }
+                                }
+                            </ul>
+                            <div class="row">
+                                <div class="col-md-12">
+
+                                    <button type="submit" class="btn btn-info pull-right" onclick="return UpdateExam();">Update</button>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<div class="modal fade" id="mdlQuestions" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Add Question</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                     
+                    <div class="form-group col-md-12">
+                        <label>Question</label>
+                        <table class="table">
+
+                            @{
+                                var ctr2 = 1;
+                                foreach (var q in Model.Questions)
+                                {
+                                    <tr class="quelis">
+                                        <td>
+                                            @(ctr2).
+                                            <input type="hidden" id="hdnQuestionID" name="QuestionID" value="@q.QuestionID" />
+                                            <input type="hidden" id="hdnOXQID" name="OXQID" value="@q.OXQID" />
+                                        </td>
+                                        <td class="qText">
+                                            @Html.Raw(q.QuestionText)
+                                        </td>
+                                        <td><input type="number" step="0.5" class="form-control questionMarksinput" id="txtMarks" value="@q.Marks" /></td>
+                                    </tr>
+
+                                    ctr2++;
+                                }
+                            }
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" onclick="return AddQuestions();">Add Question</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="mdlOnlineExamType" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Online Exam Type Images</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <p><b>One Page Paper</b></p>
+                        <img style="max-height: 500px; max-width: 850px;" src="~/Images/StudentImage/OnePagePaper.png" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-md-6">
+                        <p><b>One By One</b></p>
+                        <img style="max-height: 500px; max-width: 850px;" src="~/Images/StudentImage/stepbystep.png" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyy-MM-dd")" />
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+     <script>
+
+        function AddQuestions() {
+            var tbodyhtml = '';
+            $('#tableExamQuestions').find('tbody').html('');
+            var qcount = 0;
+            $('#mdlQuestions').find(".quelis").each(function () {
+                var marks = $(this).find('#txtMarks').val();
+                var queText = $(this).find('.qText').html();
+                if (marks > 0) {
+                    var OXQID = $(this).find('#hdnOXQID').val();
+                    var questionID = $(this).find('#hdnQuestionID').val();
+                    var que =
+                        '<li class="queli">' +
+                        '	<div class="message_date">' +
+                        '		<h3 class="date text-error">' + marks + '</h3>' +
+                        '	</div>' +
+                        '	<div class="message_wrapper" style="margin-left: 0;">' +
+                        '		<input type="hidden" name="Questions[' + (qcount) + '].Name" value="' + questionID + '">' +
+                        '		<input type="hidden" name="Questions[' + (qcount) + '].ID" value="0">' +
+                        '		<input type="hidden" name="Questions[' + (qcount) + '].Extra1" value="' + marks + '">' +
+                        '		<input type="hidden" name="Questions[' + (qcount) + '].OpType" id="hdnOpType" value="1">' +
+                        '		<h4 class="heading searchable"><ctr>' + (qcount + 1) + '.</ctr> ' + queText + '</h4>';
+
+                    '		<div class="row">' +
+                        '			<div class="col-md-5" style="text-align: right;">' +
+                        '				<a href="javascript:void(0);" onclick="RemoveQuestion(this);" class="btn btn-sm btn-danger">Remove</a>' +
+                        '			</div>' +
+                        '		</div>	' +
+                        '	</div>' +
+                        '</li>';
+                    tbodyhtml = tbodyhtml + que;
+                    qcount++;
+                }
+            });
+
+
+            $('#ulExamQuestions').html(tbodyhtml);
+            $('#mdlQuestions').modal('toggle');
+        }
+
+        $(document).ready(function () {
+
+            $('#txtExplaination').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('.summernote1').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+
+
+            //$('#txtQuestionText').summernote();
+            //$('#txtOption1').summernote();
+            //$('#txtOption2').summernote();
+            //$('#txtOption3').summernote();
+            //$('#txtOption4').summernote();
+        });
+    </script>
+
+    <script>
+        function UpdateExam() {
+            var ques = $('.queli').length;
+            var date = new Date($('#txtStartDate').val());
+            var syear = date.getFullYear();
+            var edate = new Date($('#txtEndDate').val());
+            var eyear = edate.getFullYear();
+            if (ques == 0) {
+                alert('Exam can not be declared without adding questions.');
+                return false;
+            }
+            else if (syear == 1) {
+                alert('Please enter a valid start date and time.');
+                return false;
+            }
+            else if (eyear == 1) {
+                alert('Please enter a valid end date and time.');
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+        function RemoveQuestion(sender) {
+            if (confirm('do you really want to remove this Question ?')) {
+                $(sender).closest('li').css('display', 'none');
+                $(sender).closest('li').addClass('liremoved');
+                $(sender).closest('li').find('#hdnOpType').val(-1);
+                var ctr = 1;
+                $('.queli').each(function () {
+                    var opt = $(this).find('#hdnOpType').val();
+                    if (opt != -1) {
+                        $(this).find('ctr').html(ctr + '. ');
+                        ctr++;
+                    }
+                });
+            }
+        }
+        function InsertQuestion() {
+            var jsn = $('#ddlQuestions').val();
+            var data = JSON.parse(jsn);
+            var marks = $('#txtMarks').val();
+            var qcount = $('.queli').length + 1;
+            var qrcount = $('.liremoved').length;
+           // var complexity = data.Complexity == 0 ? "Easy" : data.Complexity == 1 ? "Medium" : "difficult";
+            var complexity = data.Complexity == 0 ? "M.C.Q" : data.Complexity == 1 ? "Fill in the blanks" : data.Complexity == 2 ? "True or False" : data.Complexity == 3 ? "One Word" : "Short Type";
+            var que =
+                '<li class="queli">' +
+                '	<div class="message_date">' +
+                '		<h3 class="date text-error">' + marks + '</h3>' +
+                '		<p class="month">Marks</p>' +
+                '	</div>' +
+                '	<div class="message_wrapper" style="margin-left: 0;">' +
+                '		<input type="hidden" name="Questions[' + (qcount - 1) + '].Name" value="' + data.QuestionID + '">' +
+                '		<input type="hidden" name="Questions[' + (qcount - 1) + '].ID" value="0">' +
+                '		<input type="hidden" name="Questions[' + (qcount - 1) + '].Extra1" value="' + marks + '">' +
+                '		<input type="hidden" name="Questions[' + (qcount - 1) + '].OpType" id="hdnOpType" value="1">' +
+                '		<h4 class="heading searchable"><ctr>' + (qcount - qrcount) + '.</ctr> ' + data.QuestionText + '</h4>';
+            if (data.QuestionType != 2) {
+                que = que + '	<blockquote class="message col-md-6" style="font-size: 12px;">A.' + data.Option1 + '</blockquote>   ' +
+                    '			<blockquote class="message col-md-6" style="font-size: 12px;">B. ' + data.Option2 + '</blockquote>   ' +
+                    '			<blockquote class="message col-md-6" style="font-size: 12px;">C. ' + data.Option3 + '</blockquote>   ' +
+                    '			<blockquote class="message col-md-6" style="font-size: 12px;">D. ' + data.Option4 + '</blockquote>  ';
+            }
+            que = que + '		<br>' +
+                '		<div class="row">' +
+                '			<div class="col-md-7">' +
+                '				<label class="badge bg-blue">' + data.TeacherName + '</label>' +
+                '				<label class="badge bg-yellow">' + complexity + '</label>' +
+                '			</div>' +
+                '			<div class="col-md-5" style="text-align: right;">' +
+                '				<a href="javascript:void(0);" onclick="RemoveQuestion(this);" class="btn btn-sm btn-danger">Remove</a>' +
+                '			</div>' +
+                '		</div>	' +
+                '	</div>' +
+                '</li>';
+            $('#ulExamQuestions').append(que);
+            $('#mdlQuestions').modal('toggle');
+        }
+        function AddQuestion() {
+            $('#mdlQuestions').modal('toggle');
+        }
+        function OnlineExamTypeImage() {
+            $('#mdlOnlineExamType').modal('toggle');
+        }
+        function SaveQuestion() {
+            if ($('#ddlQuestionType').val() == 0) {
+                $('#hdnAnswer').val($('#ddlAnswerOp').val())
+            }
+            else if ($('#ddlQuestionType').val() == 1) {
+                $('#hdnAnswer').val($('#ddlAnswerOp').val())
+            }
+            else {
+                $('#hdnAnswer').val($('#txtSubjectiveAnswer').val())
+            }
+        }
+        var subjectid = 0;
+        function ClassChanged() {
+            var clsID = $('#ddlClassID').val();
+            $("#ddlSubjects option").each(function () {
+                if ($(this).attr('classid') == clsID) {
+                    if (subjectid == 0) {
+                        subjectid = this.value;
+                    }
+                    $(this).css('display', '');
+                }
+                else {
+                    $(this).css('display', 'none');
+                }
+            });
+            $('#ddlSubjects').val(subjectid);
+        }
+        function QuestionTypeChanged() {
+            if ($('#ddlQuestionType').val() == 0) {
+                $('.qsubjective').css('display', 'none');
+                $('.qoptions').css('display', '');
+                $('#ddlAnswerOp').removeAttr('multiple');
+            }
+            else if ($('#ddlQuestionType').val() == 1) {
+                $('.qsubjective').css('display', 'none');
+                $('.qoptions').css('display', '');
+                $('#ddlAnswerOp').attr('multiple', 'multiple');
+            }
+            else {
+                $('.qsubjective').css('display', '');
+                $('.qoptions').css('display', 'none');
+            }
+        }
+        function EditQuestion(sender, Type, Detail) {
+            if (Type == 1) {
+                var data = JSON.parse(Detail);
+                $('#ddlQuestionType').val(data.QuestionType);
+                QuestionTypeChanged();
+                $('#ddlComplexity').val(data.Complexity);
+                $('#ddlClassID').val(data.ClassID);
+                subjectid = data.SubjectID;
+                $('#txtQuestionText').val(data.QuestionText);
+
+                $('#txtOption1').val(data.Option1);
+                $('#txtOption2').val(data.Option2);
+                $('#txtOption3').val(data.Option3);
+                $('#txtOption4').val(data.Option4);
+                if (data.Answer == null) {
+                    data.Answer = "";
+                }
+                $('#ddlAnswerOp').val(data.Answer.split(','));
+                $('#txtSubjectiveAnswer').val(data.Answer);
+                $('#txtExplaination').val(data.Explaination);
+                $('#hdnQuestionID').val(data.QuestionID);
+                ClassChanged();
+                $('#mdlQuestion').modal('toggle');
+            }
+            else if (Type == 0) {
+                $('#hdnQuestionID').val(0);
+                $('#ddlQuestionType').val(0);
+                $('#ddlComplexity').val(0);
+                $('#ddlClassID').val($('#ddlClass').val());
+                $('#ddlSubjects').val(0);
+                $('#txtQuestionText').val('');
+                subjectid = 0;
+                $('#txtOption1').val('');
+                $('#txtOption2').val('');
+                $('#txtOption3').val('');
+                $('#txtOption4').val('');
+
+                $('#ddlAnswerOp').val('');
+                $('#txtSubjectiveAnswer').val('');
+                $('#txtExplaination').val('');
+                QuestionTypeChanged();
+                ClassChanged();
+                $('#mdlQuestion').modal('toggle');
+            }
+            else {
+                return confirm('Do you really want to delete this Question?');
+            }
+        }
+        function Search(sender) {
+            var sText = $(sender).val().split(',');
+            if (sText[0] == "") {
+                $('.queli').css('display', '');
+            }
+            else {
+                $(".queli").each(function () {
+                    var isExist = false;
+
+                    $(this).find(".searchable").each(function () {
+                        $srch = $(this);
+                        $.each(sText, function (index, value) {
+                            if ($srch.html().toLowerCase().includes(value.toLowerCase()) == true) {
+                                isExist = true;
+                            }
+                        });
+
+                    });
+                    if (isExist == true) {
+                        $(this).css('display', '');
+                    }
+                    else {
+                        $(this).css('display', 'none');
+                    }
+                });
+            }
+        }
+
+    </script>
+}
+<!-- /.content -->
