@@ -56,6 +56,7 @@ namespace SMEnterprise.Repository
 
             }
             data.Recievers = finalSendingList;
+            
             int TotalRecievers = data.Recievers.Count;
            
             int TotalThreads = 1;
@@ -73,7 +74,7 @@ namespace SMEnterprise.Repository
             CurrentTasks.TryAdd(data.SMSSendingID + "-" + 0, objTask);
 
             var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
-            hubContext.Clients.All.TaskAdded(data.SMSSendingID, data.Title, data.RecieverList, TotalRecievers);
+            hubContext.Clients.All.TaskAdded(data.SMSSendingID, data.Title, data.RecieverList, TotalRecievers,data.Content_id);
             //DelegatBulkSMS smsdeligate = SendSMSMini;
             SendSMSMini(data, 0, TotalRecievers, 0, SMSConfiguration);
 
@@ -83,6 +84,7 @@ namespace SMEnterprise.Repository
         {
             foreach (SMSRecieverDetailModel r in data.Recievers)
             {
+               
                 #region Task Cancellation Handeling
                 //if (CanceledTasks.Keys.Contains(data.SMSSendingID.ToString()) && CanceledTasks[data.SMSSendingID.ToString()] == "1")
                 //{
@@ -145,7 +147,8 @@ namespace SMEnterprise.Repository
 
                 if (r.Mobile != null && r.Mobile != "")
                 {
-                    SubmitSMS(SMSText, r.Mobile, 1, data.SMSTypeID, r.RecieverType, r.RecieverID, data.SMSSendingID, SMSConfiguration);
+                    SubmitSMS(SMSText.TrimStart(), r.Mobile, data.SBranchID, data.SMSTypeID, r.RecieverType, r.RecieverID, data.SMSSendingID,data.Content_id, SMSConfiguration);
+                    
                 }
                 else
                 {
@@ -159,6 +162,7 @@ namespace SMEnterprise.Repository
                     objModel.SMSText = SMSText;
                     objModel.SMSType = data.SMSTypeID;
                     objModel.SMSID = data.SMSSendingID;
+                    objModel.Content_id = data.Content_id;
                     objModel.Status = 1;
                     objData.UpdateSMSProcessingStatus(objModel);
                     var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
@@ -176,12 +180,14 @@ namespace SMEnterprise.Repository
                 }
             }
         }
-        public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID,SMSConfigirationModel SMSConfiguration)
+        public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID,string ContentID,SMSConfigirationModel SMSConfiguration)
         {
             if (SMSConfiguration == null)
             {
                 SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             }
+          
+            SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             string s = "";
             
                 WebClient httpclient = new WebClient();
@@ -200,7 +206,11 @@ namespace SMEnterprise.Repository
                     {
                         httpclient.QueryString.Add(param.ParamName, text);
                     }
+                else if (param.ParamType == 3)
+                {
+                    httpclient.QueryString.Add(param.ParamName,Convert.ToString(ContentID).ToString());
                 }
+            }
                 string baseurl = SMSConfiguration.baseurl;
                 Stream data = httpclient.OpenRead(baseurl);
                 StreamReader reader = new StreamReader(data);
@@ -222,6 +232,7 @@ namespace SMEnterprise.Repository
                 objModel.SMSText = text;
                 objModel.SMSType = SMSType;
                 objModel.SMSID = SMSID;
+                objModel.Content_id = ContentID;
                 objModel.Status = 1;
                 hubContext.Clients.All.GetStatus(SMSID + "-" + RecieverID, 1);
                 try

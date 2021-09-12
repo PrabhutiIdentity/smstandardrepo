@@ -891,6 +891,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@HouseID", objData.HouseID);
                 paramater.Add("@OptedSubjects", objData.GetSubjectOptedDataTable());
                 paramater.Add("@IsAdmissionFeeApplicable", objData.IsAdmissionFeeApplicable);
+                paramater.Add("@ReasonforInactive", objData.ReasonforInactive);
 
                 return con.Query<int>("spn_InsertUpdateStudentSessionDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
@@ -1099,6 +1100,34 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
+        public BusStudentListModel GetStopWiseStudents(int SBranchID, int StopID)
+        {
+
+            BusStudentListModel objModel = new BusStudentListModel();
+            objModel.ID = StopID;
+            objModel.SBranchID = SBranchID;
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@StopID", StopID);
+
+                using (var multi = con.QueryMultiple("sp_GetStopWiseStudents", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Students = multi.Read<StudentModel>().ToList();
+                    objModel.Stops = multi.Read<NameIDModel>().ToList();
+                    try
+                    {
+                        objModel.ID = multi.Read<int>().SingleOrDefault();
+                    }
+                    catch { }
+                    //objModel.ID = multi.Read<int>().SingleOrDefault();
+                }
+                return objModel;
+            }
+        }
+
+
         public BusStudentListModel BusStopWiseStudents(int SBranchID, int BusID)
         {
 
@@ -3690,6 +3719,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Title", objModel.Title);
                 paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
                 paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@content_id", objModel.Content_id);
                 return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
 
@@ -3761,6 +3791,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ReasonFailure", data.ReasonFailure);
                 paramater.Add("@SMSDateTime", data.SMSDateTime);
                 paramater.Add("@Status", data.Status);
+                paramater.Add("@Content_id", data.SMSContentID);
 
                 return con.Query<int>("spn_UpdateSMSProcessingLog", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
 

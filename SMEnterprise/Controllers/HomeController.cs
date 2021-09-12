@@ -276,10 +276,12 @@ namespace SMEnterprise.Controllers
                 }
                 string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
                 string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+                
                 CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
             }
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
+
         public async Task<ActionResult> EndOnlineMeeting()
         {
             string MeetingID = Request.QueryString["meetingID"];

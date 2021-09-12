@@ -101,8 +101,10 @@ namespace SMEnterprise.Controllers
                     meta = meta,
                     guestPolicy = "ALWAYS_ACCEPT",
                     logo = logo,
+                    
                     lockSettingsDisablePrivateChat = true,
                     lockSettingsDisableNote = false,
+                    lockSettingsLockedLayout = false,
                     muteOnStart = true,
                     allowModsToUnmuteUsers = true,
                     //autoStartRecording = true,
@@ -1731,21 +1733,25 @@ namespace SMEnterprise.Controllers
                 {
                     MetaData meta = new MetaData();
                     meta.Add("BranchID", "1");
-                    string meu = basepath+ "/Home/EndOnlineClasses";
-                    meta.Add("meta_endCallbackUrl", meu);
+                    //string meu = basepath+ "/Home/EndOnlineClasses";
+                    string meu = basepath + "/Home/EndOnlineClasses";
+                    meta.Add("endCallbackUrl", meu);
 
                     string reccbu = basepath + "/home/bbbrecordingready/";
-                    meta.Add("meta_bbb-recording-ready-url", reccbu);
-                    meta.Add("meta_bbb_skip_check_audio", "true");
-                    meta.Add("meta_bbb_client_title", "P-School");
-                    meta.Add("meta_bbb_enable_screen_sharing", "false");
-                    meta.Add("meta_bbb_show_public_chat_on_login", "false");
+                    meta.Add("bbb-recording-ready-url", reccbu);
+                    meta.Add("bbb_skip_check_audio", "true");
+                    meta.Add("bbb_client_title", "P-School");
+                    meta.Add("bbb_enable_screen_sharing", "false");
+                    meta.Add("bbb_show_public_chat_on_login", "false");
                     var result = await client.CreateMeetingAsync(new CreateMeetingRequest
                     {
                         name = cModel.SubjectName + " (" + cModel.ClassSection + "), by " + cModel.TeacherName + " on " + cModel.ClassDate.ToString("dd MMM, yyyy"),
                         meetingID = cModel.MeetingID,
                         record = true,
+
                         logoutURL = basepath + "/Home/ClassEnded/" + cModel.MeetingID,
+                       // logoutURL = basepath + "/Home/EndOnlineClasses/" + cModel.MeetingID,
+                        
                         //logoutURL = basepath + "/Home/LogoutOnlineClasses/" + cModel.MeetingID,
                         meta = meta,
                         guestPolicy = "ALWAYS_ACCEPT",
@@ -1755,7 +1761,7 @@ namespace SMEnterprise.Controllers
                         muteOnStart = true,
                         allowModsToUnmuteUsers = true,
                         autoStartRecording = true,
-                        duration = duration + 5
+                        //duration = duration + 5
                         //welcome="Welcome to class"
                         //autoStartRecording = true,
                         //bannerText = "Online Class for Subject:" + cModel.SubjectName + " Class:" + cModel.ClassSection + " By :" + cModel.TeacherName
