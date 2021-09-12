@@ -1733,12 +1733,11 @@ namespace SMEnterprise.Controllers
                 {
                     MetaData meta = new MetaData();
                     meta.Add("BranchID", "1");
-<<<<<<< HEAD
-                    //string meu = basepath+ "/Home/EndOnlineClasses";
+
+                    
                     string meu = basepath + "/Home/EndOnlineClasses";
-=======
-                    string meu = basepath+ "/Home/EndOnlineClasses";
->>>>>>> master
+
+
                     meta.Add("endCallbackUrl", meu);
 
                     string reccbu = basepath + "/home/bbbrecordingready/";
