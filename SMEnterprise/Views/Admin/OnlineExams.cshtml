@@ -1,7 +1,7 @@
 ﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
 
     TempData["OnlineExams"] = null;
 }
@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
     <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
     <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
-  
+
 }
 <style>
     .btn {
@@ -69,8 +69,9 @@
                         <div class="row">
                             <div class="col-md-10">
                                 <div class="row">
-                                    @using (Html.BeginForm("OnlineExams", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                                    @using (Html.BeginForm("OnlineExams", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
                                     {
+                                        <input type="hidden" name="GroupID" value="@Model.GroupID" />
                                         <div class="col-md-3 padding">
                                             <label class="col-md-4 text-right" style="padding-right: 0px;">Session</label>
                                             <div class="col-md-8">
@@ -93,18 +94,18 @@
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="col-md-3 padding">
+                                        @*<div class="col-md-3 padding">
                                             <label class="col-md-4 text-right">Section</label>
                                             <div class="col-md-8">
                                                 <select name="SectionID" class="form-control padding smallfont" id="ddlSection" onchange="SectionChanged();">
-                                                    <option value="0">--Select--</option>
+                                                     <option value="0">--Select--</option>
                                                     @foreach (NameIDModel el in Model.Sections)
                                                     {
-                                                        <option value="@el.ID" classid="@el.Extra1" @(el.Extra1 == Model.ClassID.ToString() ? "" : "style=display:none") @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                        <option value="@el.ID" classid="@el.Extra1" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
                                                     }
                                                 </select>
                                             </div>
-                                        </div>
+                                        </div>*@
                                         <div class="col-md-3 padding">
                                             <label class="col-md-4 text-right">Subject</label>
                                             <div class="col-md-8">
@@ -112,7 +113,7 @@
                                                     <option value="0">--Select Subject--</option>
                                                     @foreach (NameIDModel el in Model.Subjects)
                                                     {
-                                                        <option value="@el.ID" classid="@el.Extra1" sectionid="@el.Extra2" @(el.Extra2 == Model.SectionID.ToString() ? "" : "style=display:none") @(el.ID == Model.SubjectID ? "selected" : "")>@el.Name</option>
+                                                        <option value="@el.ID" classid="@el.Extra1" sectionid="@el.Extra2" @(el.ID == Model.SubjectID ? "selected" : "")>@el.Name</option>
                                                     }
                                                 </select>
                                             </div>
@@ -122,13 +123,15 @@
                             </div>
                             <div class="col-md-2 padding">
                                 <a href="javascript:void(0);" onclick="$('#frmGetExams').submit();"><i class="fa fa-search"></i></a>
-                                @using (Html.BeginForm("OnlineExamDetails", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline-table" }))
+                                @using (Html.BeginForm("OnlineExamDetails", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline-table" }))
                                 {
                                     <input type="hidden" name="OExamID" value="0" />
                                     <input type="hidden" name="ClassID" value="@Model.ClassID" />
                                     <input type="hidden" name="SectionID" value="@Model.SectionID" />
                                     <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
                                     <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                                    <input type="hidden" name="GroupID" value="@Model.GroupID" />
+                                    <input type="hidden" name="TeacherID" value="@Model.TeacherID" />
                                     <button type="submit" href="javascript:void(0);" class="btn btn-sm btn-primary">Add New Exam</button>
                                 }
                             </div>
@@ -139,7 +142,7 @@
 
                     <div class="x_content">
 
-                        <ul class="messages">
+                        <ul class="messages" style=" margin-top: 65px;">
                             @{
                                 var ctr = 1;
                                 foreach (var q in Model.Exams)
@@ -159,25 +162,26 @@
                                                 </div>
                                                 @if (q.SubmissionCount == 0)
                                                 {
-                                                <div class="col-md-2" style="text-align: right;">
+                                                    <div class="col-md-2" style="text-align: right;">
 
-                                                    @using (Html.BeginForm("OnlineExamDetails", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline-table" }))
-                                                    {
-                                                        <input type="hidden" name="OExamID" value="@q.OExamID" />@*@q.OExamID*@
-                                                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
-                                                        <input type="hidden" name="SectionID" value="@Model.SectionID" />
-                                                        <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
-                                                        <input type="hidden" name="SessionID" value="@Model.SessionID" />
-                                                        <button type="submit" href="javascript:void(0);" class="btn btn-sm btn-primary">Edit</button>
-                                                    } |
+                                                        @using (Html.BeginForm("OnlineExamDetails", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline-table" }))
+                                                        {
+                                                            <input type="hidden" name="OExamID" value="@q.OExamID" />@*@q.OExamID*@
+                                                            <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                                                            <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                                                            <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
+                                                            <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                                                            <input type="hidden" name="GroupID" value="@Model.GroupID" />
+                                                            <button type="submit" href="javascript:void(0);" class="btn btn-sm btn-primary">Edit</button>
+                                                        } |
 
-                                                    @using (Html.BeginForm("DeleteOnlineExam", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline" }))
-                                                    {
-                                                        <input type="hidden" name="OpType" value="-1" />
-                                                        <input type="hidden" name="OExamID" value="@q.OExamID" />
-                                                        <button type="submit" href="javascript:void(0);" onclick="DeleteOnlineExam(this);" class="btn btn-sm btn-danger">Delete</button>
-                                                    }
-                                                </div>
+                                                        @using (Html.BeginForm("DeleteOnlineExam", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline" }))
+                                                        {
+                                                            <input type="hidden" name="OpType" value="-1" />
+                                                            <input type="hidden" name="OExamID" value="@q.OExamID" />
+                                                            <button type="submit" href="javascript:void(0);" onclick="DeleteOnlineExam(this);" class="btn btn-sm btn-danger">Delete</button>
+                                                        }
+                                                    </div>
                                                 }
                                                 else
                                                 {
@@ -213,13 +217,13 @@
 {
     <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
     <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
-  
+
     <script>
         function OpenSubmissions(sender, ID) {
             $.ajax(
                 {
                     type: "POST",
-                    url: "/Teacher/GetOnlineExamSubmissions/" + ID+"/"+@Model.SectionID,
+                    url: "/Teacher/GetOnlineExamSubmissions/" + ID,
                     cache: false,
                     processData: false,
                     contentType: false,

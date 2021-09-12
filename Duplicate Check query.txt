@@ -1,0 +1,47 @@
+
+--Check Duplicate Record
+select examid,studentid,marksscored,Grade,status,GradePoints,count(*)
+from [dbo].[ExamResultMaster]
+group by examid,studentid,marksscored,Grade,Status,GradePoints
+having count(*)>1
+
+--Delete Duplicate Record
+WITH CTE(examid,studentid,marksscored,Grade,status,GradePoints,DuplicateCount)
+AS (SELECT examid,studentid,marksscored,Grade,status,GradePoints,
+           ROW_NUMBER() OVER(PARTITION BY examid,studentid,marksscored,Grade,status,GradePoints
+           ORDER BY examid) AS DuplicateCount
+    FROM [dbo].[ExamResultMaster] )
+DELETE FROM CTE
+WHERE DuplicateCount > 1;
+
+
+-- --Check Duplicate Record
+select evaluationid,classid,groupid,subjectid,sbranchid,userid,count(*)
+from [dbo].exammaster
+group by evaluationid,classid,groupid,subjectid,sbranchid,userid
+having count(*)>1
+
+--Delete Duplicate Record
+WITH CTE(evaluationid,classid,groupid,subjectid,sbranchid,userid,DuplicateCount)
+AS (SELECT evaluationid,classid,groupid,subjectid,sbranchid,userid,
+           ROW_NUMBER() OVER(PARTITION BY evaluationid,classid,groupid,subjectid,sbranchid,userid
+           ORDER BY evaluationid) AS DuplicateCount
+    FROM [dbo].exammaster )
+DELETE FROM CTE
+WHERE DuplicateCount > 1;
+
+
+--Check Duplicate ClassSessionDetails Record
+select classid,sessionid,schemeid,count(*)
+from [dbo].ClassSessionDetails
+group by classid,sessionid,schemeid
+having count(*)>1
+
+--Delete Duplicate ClassSessionDetails Record
+WITH CTE(classid,sessionid,schemeid,DuplicateCount)
+AS (SELECT classid,sessionid,schemeid,
+           ROW_NUMBER() OVER(PARTITION BY classid,sessionid,schemeid
+           ORDER BY classid) AS DuplicateCount
+    FROM [dbo].ClassSessionDetails )
+DELETE FROM CTE
+WHERE DuplicateCount > 1;

@@ -2,7 +2,7 @@
 @using System.Web.Mvc;
 @using Newtonsoft.Json;
 @{
-    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var MyID = ViewBag.UserID;
     TempData["QuestionBank"] = null;
 }
@@ -74,7 +74,7 @@
         <div class="clearfix"></div>
         <div class="row">
             <div class="col-md-12">
-                @using (Html.BeginForm("QuestionBank", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                @using (Html.BeginForm("QuestionBank", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
                 {
 
                     <div class="row std-mng-head col-md-12">
@@ -82,12 +82,13 @@
                         <div class="col-md-12 class-section">
                             <div class="row">
                                 <div class="col-md-3 padding">
-                                    <label class="col-md-6 text-right" style="padding-right: 0px;">Questions by?</label>
+                                    <label class="col-md-6 text-right" style="padding-right: 0px;">Session</label>
                                     <div class="col-md-6">
-                                        <select class="form-control smallfont" name="QuestionsBy" onchange="$('#frmGetStudents').submit();">
-
-                                            <option value="0" @(0 == Model.QuestionsBy ? "selected" : "")>Me</option>
-                                            <option value="1" @(1 == Model.QuestionsBy ? "selected" : "")>Other Teachers As Well</option>
+                                        <select class="form-control smallfont" name="SessionID" id="ddlSessions" onchange="$('#frmGetExams').submit();">
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
                                         </select>
                                     </div>
                                 </div>
@@ -102,17 +103,18 @@
                                         </select>
                                     </div>
                                 </div>
-                                @*<div class="col-md-3 padding">
-                                    <label class="col-md-6 text-right" style="padding-right: 0px;">Class</label>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-6 text-right" style="padding-right: 0px;">Subjects</label>
                                     <div class="col-md-6">
-                                        <select class="form-control smallfont" name="ClassID" id="ddlClass" onchange="$('#frmGetStudents').submit();">
+                                        <select class="form-control smallfont" name="SubjectID" onchange="$('#frmGetStudents').submit();">
                                             @foreach (NameIDModel el in Model.Subjects)
                                             {
-                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                                <option value="@el.ID" @(el.ID == Model.SubjectID ? "selected" : "")>@el.Name</option>
+
                                             }
                                         </select>
                                     </div>
-                                </div>*@
+                                </div>
                                 <div class="col-md-3 padding">
                                     <div class="row">
                                         <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Search List : </label>
@@ -135,13 +137,13 @@
                                 {
                                     <li class="queli">
                                         <div class="message_wrapper" style="margin-left: 0;">
-                                                                        <h4 class="heading searchable" style="margin-top:70px;">@(ctr). @Html.Raw(q.QuestionText) @*@q.QuestionText*@</h4>
+                                            <h4 class="heading searchable">@(ctr). @Html.Raw(q.QuestionText) @*@q.QuestionText*@</h4>
                                             @if (q.QuestionType != 2)
                                             {
-                                        <blockquote class="message col-md-6" style="font-size: 12px;">A. @Html.Raw(q.Option1)@*@q.Option1*@</blockquote>
-                                        <blockquote class="message col-md-6" style="font-size: 12px;">B. @Html.Raw(q.Option2)@*@q.Option2*@</blockquote>
-                                        <blockquote class="message col-md-6" style="font-size: 12px;">C. @Html.Raw(q.Option3)@*@q.Option3*@</blockquote>
-                                        <blockquote class="message col-md-6" style="font-size: 12px;">D. @Html.Raw(q.Option4)@*@q.Option4*@</blockquote>
+                                                <blockquote class="message col-md-6" style="font-size: 12px;">A. @Html.Raw(q.Option1)@*@q.Option1*@</blockquote>
+                                                <blockquote class="message col-md-6" style="font-size: 12px;">B. @Html.Raw(q.Option2)@*@q.Option2*@</blockquote>
+                                                <blockquote class="message col-md-6" style="font-size: 12px;">C. @Html.Raw(q.Option3)@*@q.Option3*@</blockquote>
+                                                <blockquote class="message col-md-6" style="font-size: 12px;">D. @Html.Raw(q.Option4)@*@q.Option4*@</blockquote>
                                             }
                                             <br />
                                             <p class="url">
@@ -150,8 +152,7 @@
                                             <p class="url">
                                                 Explaination :  @Html.Raw(q.Explaination)@*@q.Explaination*@
                                             </p>
-                                            @if (q.TeacherID == MyID)
-                                            {
+                                            
                                                 <div class="row">
                                                     <div class="col-md-7">
                                                         <label class="badge bg-green">@q.SubjectName</label>
@@ -161,7 +162,7 @@
                                                     </div>
                                                     <div class="col-md-5" style="text-align: right;">
                                                         <a href="javascript:void(0);" onclick="EditQuestion(this,1,'@HttpUtility.JavaScriptStringEncode(JsonConvert.SerializeObject(q))');" class="btn btn-sm btn-primary">Edit</a> |
-                                                        @using (Html.BeginForm("UpdateQuestionBank", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline" }))
+                                                        @using (Html.BeginForm("UpdateQuestionBank", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline" }))
                                                         {
                                                             <input type="hidden" name="OpType" value="-1" />
                                                             <input type="hidden" name="QuestionID" value="@q.QuestionID" />
@@ -169,9 +170,7 @@
                                                         }
                                                     </div>
                                                 </div>
-                                            }
-                                            else
-                                            {
+                                           
 
                                                 <p class="url">
                                                     <div>
@@ -181,7 +180,7 @@
                                                         <label class="badge bg-blue-gradient">Created on :@q.CreatedDate.ToString("dd MMM, yyyy")</label>
                                                     </div>
                                                 </p>
-                                            }
+
                                         </div>
                                     </li>
                                     ctr++;
@@ -201,7 +200,7 @@
 <div class="modal fade" id="mdlQuestion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            @using (Html.BeginForm("UpdateQuestionBank", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            @using (Html.BeginForm("UpdateQuestionBank", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
             {
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Update Question</h5>
@@ -216,6 +215,8 @@
                     <div class="row">
                         <input type="hidden" name="QuestionID" id="hdnQuestionID" />
                         <input type="hidden" name="QuestionsBy" value="@Model.QuestionsBy" />
+                        <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
+                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
                         <div class="form-group col-md-3">
                             <label>Question Type</label>
                             <select class="form-control" name="QuestionType" id="ddlQuestionType" onchange="QuestionTypeChanged();">
@@ -227,33 +228,34 @@
                         <div class="form-group col-md-3">
                             <label>Question Complexity</label>
                             <select class="form-control" name="Complexity" id="ddlComplexity">
-                                <option value="0">Easy</option>
-                                <option value="1">Medium</option>
-                                <option value="2">Difficult</option>
-
+                                <option value="0">M.C.Q</option>
+                                <option value="1">Fill in the blanks</option>
+                                <option value="2">True or False</option>
+                                <option value="3">One Word</option>
+                                <option value="4">Short Type</option>
                             </select>
                         </div>
-                        <div class="form-group col-md-3">
-                            <label>Class</label>
-                            <select class="form-control" name="ClassID" id="ddlClassID" onchange="ClassChanged();">
-                                @foreach (NameIDModel el in Model.Classes)
-                                {
-                                    <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
-                                }
-                            </select>
-                        </div>
-                        <div class="form-group col-md-3">
-                            <label>Subjects</label>
-                            <select class="form-control" name="SubjectID" id="ddlSubjects">
-                                @foreach (NameIDModel el in Model.Subjects)
-                                {
-                                    <option value="@el.ID" classid="@el.Extra1">@el.Name</option>
-                                }
-                            </select>
-                        </div>
+                        @* <div class="form-group col-md-3">
+                                <label>Class</label>
+                                <select class="form-control" name="ClassID" id="ddlClassID" onchange="ClassChanged();">
+                                    @foreach (NameIDModel el in Model.Classes)
+                                    {
+                                        <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label>Subjects</label>
+                                <select class="form-control" name="SubjectID" id="ddlSubjects">
+                                    @foreach (NameIDModel el in Model.Subjects)
+                                    {
+                                        <option value="@el.ID" classid="@el.Extra1">@el.Name</option>
+                                    }
+                                </select>
+                            </div>*@
                         <div class="form-group col-md-12">
                             <label>Question</label>
-                            
+
                             <textarea class="form-control" rows="3" style="resize:none;" name="QuestionText" id="txtQuestionText"></textarea>
                         </div>
                         <div class="form-group col-md-6 qoptions">
@@ -309,79 +311,79 @@
 @section scripts
 {
     <script>
-    
-            $(document).ready(function () {
-                $('#txtQuestionText').summernote({
-                  
-                    height: 100,
-                    toolbar: [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['insert', ['picture', 'link', 'math']],
-                        ['para', ['paragraph']],
-                        ['misc', ['codeview']]
-                    ],
-                });
-                $('#txtOption1').summernote({
 
-                    height: 50,
-                    toolbar: [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['insert', ['picture', 'link', 'math']],
-                        ['para', ['paragraph']],
-                        ['misc', ['codeview']]
-                    ],
-                });
-                $('#txtOption2').summernote({
+        $(document).ready(function () {
+            $('#txtQuestionText').summernote({
 
-                    height: 50,
-                    toolbar: [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['insert', ['picture', 'link', 'math']],
-                        ['para', ['paragraph']],
-                        ['misc', ['codeview']]
-                    ],
-                });
-                $('#txtOption3').summernote({
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('#txtOption1').summernote({
 
-                    height: 50,
-                    toolbar: [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['insert', ['picture', 'link', 'math']],
-                        ['para', ['paragraph']],
-                        ['misc', ['codeview']]
-                    ],
-                });
-                $('#txtOption4').summernote({
+                height: 50,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('#txtOption2').summernote({
 
-                    height: 50,
-                    toolbar: [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['insert', ['picture', 'link', 'math']],
-                        ['para', ['paragraph']],
-                        ['misc', ['codeview']]
-                    ],
-                });
-                $('#txtExplaination').summernote({
+                height: 50,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('#txtOption3').summernote({
 
-                    height: 100,
-                    toolbar: [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['insert', ['picture', 'link', 'math']],
-                        ['para', ['paragraph']],
-                        ['misc', ['codeview']]
-                    ],
-                });
-                $('#txtSubjectiveAnswer').summernote({
+                height: 50,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('#txtOption4').summernote({
 
-                    height: 100,
-                    toolbar: [
-                        ['style', ['bold', 'italic', 'underline', 'clear']],
-                        ['insert', ['picture', 'link', 'math']],
-                        ['para', ['paragraph']],
-                        ['misc', ['codeview']]
-                    ],
-                });
-           
+                height: 50,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('#txtExplaination').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('#txtSubjectiveAnswer').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+
 
             //$('#txtQuestionText').summernote();
             //$('#txtOption1').summernote();
@@ -454,7 +456,7 @@
                 //$('#txtOption2').val(data.Option2);
                 //$('#txtOption3').val(data.Option3);
                 //$('#txtOption4').val(data.Option4);
-              
+
 
                 if (data.Answer == null) {
                     data.Answer = "";
@@ -462,8 +464,8 @@
                 $('#ddlAnswerOp').val(data.Answer.split(','));
                 //$('#txtSubjectiveAnswer').val(data.Answer);
                 //$('#txtExplaination').val(data.Explaination);
-                $('#txtSubjectiveAnswer').summernote('code',data.Answer);
-                $('#txtExplaination').summernote('code',data.Explaination);
+                $('#txtSubjectiveAnswer').summernote('code', data.Answer);
+                $('#txtExplaination').summernote('code', data.Explaination);
                 $('#hdnQuestionID').val(data.QuestionID);
                 ClassChanged();
                 $('#mdlQuestion').modal('toggle');
