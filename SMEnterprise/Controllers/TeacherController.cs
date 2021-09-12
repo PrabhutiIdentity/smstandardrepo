@@ -519,6 +519,7 @@ namespace SMEnterprise.Controllers
         {
             return View();
         }
+        [PermissionFilter]
         [HttpPost]
         public ActionResult PlayRecording(string url)
         {
@@ -529,6 +530,7 @@ namespace SMEnterprise.Controllers
             ViewBag.URL = url;
             return View();
         }
+        [PermissionFilter]
         public ActionResult OnlineClasses(BBBOnlineClassListModel oModel)
         {
             if (TempData["OnlineClassState"] != null)
@@ -548,7 +550,7 @@ namespace SMEnterprise.Controllers
             //oModel.OnlineClassURL = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == BranchID).FirstOrDefault().Name;
             return View(oModel);
         }
-
+        [PermissionFilter]
         public ActionResult UpdateOnlineClass(BBBOnlineClassModel objModel)
         {
             objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
@@ -568,6 +570,7 @@ namespace SMEnterprise.Controllers
 
             return Redirect("~/Teacher/OnlineClasses/");
         }
+        [PermissionFilter]
         public async Task<ActionResult> CreateAndStartClass(string ID = null)
         {
             var user = PermissionManager.GetLoggedInUser();
@@ -630,6 +633,7 @@ namespace SMEnterprise.Controllers
             return Json(1);
             //return Redirect("~/Teacher/OnlineClasses/");
         }
+        [PermissionFilter]
         public async Task<ActionResult> JoinClass(string ID = null)
         {
             var user = PermissionManager.GetLoggedInUser();
@@ -662,14 +666,14 @@ namespace SMEnterprise.Controllers
                 MetaData meta = new MetaData();
                 meta.Add("BranchID", "1");
                 string meu = basepath + "/Home/EndOnlineClasses";
-                meta.Add("meta_endCallbackUrl", meu);
+                meta.Add("endCallbackUrl", meu);
 
                 string reccbu = basepath + "/home/bbbrecordingready/";
-                meta.Add("meta_bbb-recording-ready-url", reccbu);
-                meta.Add("meta_bbb-skip-check-audio", "true");
-                meta.Add("meta_bbb_client_title", "P-School");
-                meta.Add("meta_bbb_enable_screen_sharing", "false");
-                meta.Add("meta_bbb_show_public_chat_on_login", "false");
+                meta.Add("bbb-recording-ready-url", reccbu);
+                meta.Add("bbb-skip-check-audio", "true");
+                meta.Add("bbb_client_title", "P-School");
+                meta.Add("bbb_enable_screen_sharing", "false");
+                meta.Add("bbb_show_public_chat_on_login", "false");
                 var result = await client.CreateMeetingAsync(new CreateMeetingRequest
                 {
                     name = cModel.SubjectName + " (" + cModel.ClassSection + "), by " + cModel.TeacherName + " on " + cModel.ClassDate.ToString("dd MMM, yyyy"),
