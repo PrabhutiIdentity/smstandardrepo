@@ -15,6 +15,7 @@ namespace SMEnterprise.Models
         public string FCMToken { get; set; }
         public int RecieverID { get; set; }
         public int RecieverType { get; set; }
+        public string ContentID { get; set; }
     }
     public class ClassFeeCollectionChartModel
     {
@@ -76,6 +77,8 @@ namespace SMEnterprise.Models
         public int StudentID { get; set; }
         public int SessionID { get; set; }
         public string SessionName { get; set; }
+        public string ReasonforInactive { get; set; }
+        
         public SBranchModel BranchDetails { get; set; }
         public int SBranchID { get; set; }
         public List<ClassModel> Classes { get; set; }

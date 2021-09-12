@@ -2872,8 +2872,10 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Description", objData.Description);
                 paramater.Add("@ActiveDate", objData.ActiveDate);
                 paramater.Add("@Status", objData.Status);
-                paramater.Add("@OpType", objData.OpType);
+                paramater.Add("@OpType",  objData.OpType);
                 paramater.Add("@Attachment", objData.Attachment);
+                paramater.Add("@SBranchID", objData.SBranchID);
+                paramater.Add("@SessionID", objData.SessionID);
 
                 return con.Query<int>("sp_InsertUpdateNews", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
@@ -3603,10 +3605,12 @@ namespace SMEnterprise.Repository
                 paramater.Add("@TeacherID", oModel.TeacherID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
                 paramater.Add("@UploadDate", oModel.UploadDate);
+                paramater.Add("@ClassID", oModel.ClassID);
                 using (var multi = con.QueryMultiple("sp_GetAdminYouTubeVideo", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.Videos = multi.Read<YouTubeVideoModel>().ToList();
                     oModel.Teachers = multi.Read<NameIDModel>().ToList();
+                    oModel.Classes = multi.Read<NameIDModel>().ToList();
                 }
             }
             return oModel;
@@ -3974,6 +3978,124 @@ namespace SMEnterprise.Repository
         //        return con.Query<ProductModel>("sp_GetLowStockProducts", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
         //    }
         //}
+        #endregion
+
+        #region OnlineExam
+
+        public void GetTeacherQuestionBank(TeacherQuestionBankModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ClassID", objModel.ClassID);
+                paramater.Add("@SubjectID", objModel.SubjectID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                using (var multi = con.QueryMultiple("sp_GetAdminQuestionBank", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Questions = multi.Read<QuestionBankModel>().ToList();
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    objModel.Subjects = multi.Read<NameIDModel>().ToList();
+                    objModel.SubjectID = multi.Read<int>().SingleOrDefault();
+                    objModel.GroupID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+        }
+
+        public void GetAdminOnlineExams(OnlineExamPageModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ClassID", objModel.ClassID);
+                paramater.Add("@SectionID", objModel.SectionID);
+                paramater.Add("@SubjectID", objModel.SubjectID);
+                paramater.Add("@GroupID", objModel.GroupID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                using (var multi = con.QueryMultiple("sp_GetAdminOnlineExams", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Exams = multi.Read<OnlineExamModel>().ToList();
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    objModel.Subjects = multi.Read<NameIDModel>().ToList();
+                    objModel.SubjectID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sections = multi.Read<NameIDModel>().ToList();
+                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    objModel.GroupID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    //objModel.TeacherID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+        }
+
+
+
+
+
+
+        public OnlineExamEditModel GetAdminOnlineExamDetails(OnlineExamModel objModel)
+        {
+            OnlineExamEditModel oData = new OnlineExamEditModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TeacherID", objModel.TeacherID);
+                paramater.Add("@ClassID", objModel.ClassID);
+                paramater.Add("@SectionID", objModel.SectionID);
+                paramater.Add("@SubjectID", objModel.SubjectID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@OExamID", objModel.OExamID);
+                using (var multi = con.QueryMultiple("sp_GetTeacherOnlineExamsDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    oData.Exam = multi.Read<OnlineExamModel>().SingleOrDefault();
+                    oData.ExamQuestions = multi.Read<QuestionBankModel>().ToList();
+                    oData.Questions = multi.Read<QuestionBankModel>().ToList();
+                }
+            }
+            if (oData.Exam.OExamID == 0)
+            {
+                oData.Exam.OExamStartDate = CommonUsage.GetCurrentDate();
+                oData.Exam.OExamEndDate = oData.Exam.OExamStartDate.AddMinutes(30);
+                oData.Exam.Status = 1;
+            }
+            return oData;
+        }
+
+
+
+        public int UpdateOnlineExam(OnlineExamModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@OExamID", oModel.OExamID);
+                paramater.Add("@OExamStartDate", oModel.OExamStartDate);
+                paramater.Add("@OExamEndDate", oModel.OExamEndDate);
+                paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@ClassID", oModel.ClassID);
+                paramater.Add("@SectionID", oModel.SectionID);
+                paramater.Add("@SubjectID", oModel.SubjectID);
+                paramater.Add("@TeacherID", oModel.TeacherID);
+                paramater.Add("@CreatedDate", oModel.CreatedDate);
+                paramater.Add("@Status", oModel.Status);
+                paramater.Add("@ExamTitle", oModel.ExamTitle);
+                paramater.Add("@ExamDescription", oModel.ExamDescription);
+                paramater.Add("@ExamPriority", oModel.ExamPriority);
+                paramater.Add("@OnlineExamType", oModel.OnlineExamType);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                paramater.Add("@Questions", oModel.GetQuestionsDatatable());
+                paramater.Add("@OpType", oModel.OpType);
+
+                return con.Query<int>("sp_UpdateOnlineExam", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
         #endregion
     }
 

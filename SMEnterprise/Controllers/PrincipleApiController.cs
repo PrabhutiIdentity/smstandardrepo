@@ -368,13 +368,14 @@ namespace SMEnterprise.Controllers
                 if (data.FromDate.Year == 1)
                 {
                     data.FromDate = CommonUsage.GetCurrentDate();
-                    data.PaymentMode = -1;
+                   // data.PaymentMode = -1;
                 }
                 if (data.ToDate.Year == 1)
                 {
                     data.ToDate = CommonUsage.GetCurrentDate();
                 }
                 AccountData objAccountData = new AccountData();
+                data.PaymentMode = data.PaymentMode - 1;
                 CollectionReportModel objModel = objAccountData.GetCollectionReport(data); ;
                 if (objModel != null)
                 {
@@ -813,7 +814,7 @@ namespace SMEnterprise.Controllers
                 objModel.NotificationText = data.NoticeTitle;
                 objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
                 objModel.Recievers = new List<NotificationRecieverModel>();
-
+                string ContentID = "0";
                 StringBuilder sb = new StringBuilder();
                 foreach (SMSRecieverModel r in recievers)
                 {
@@ -841,7 +842,7 @@ namespace SMEnterprise.Controllers
                         if (r.MobileNo != null && r.MobileNo != "")
                         {
                             SMSSender objSender = new SMSSender();
-                            objSender.SendSMSAsync(data.NoticeTitle, r.MobileNo, data.SBranchID, 1, r.RecieverType, r.ID);
+                            objSender.SendSMSAsync(data.NoticeTitle, r.MobileNo, data.SBranchID, 1, r.RecieverType, r.ID, ContentID);
                         }
                     }
                     objAdminData.UpdateSenderSMSSentStatus(1, NoticeID, data.ClassesIncludedIDs, data.ApplicableFor);
@@ -969,7 +970,7 @@ namespace SMEnterprise.Controllers
                 TeacherSubstitutionEditModel objData = objAdminData.UpdateTeacherSubstitutionDetails(data);
                 TeacherSubstitutionSMSModel objSMS = objAdminData.GetTeacherSubstitutionSMSDetails(data);
                 string ReplacingSMS = "";
-
+                string ContentID = "0";
                 if (data.OpType == -1)
                 {
                     ReplacingSMS = StartupModel.sTeacherRemoveSubstitutedSMSTemplate.Replace("[NamePlaceHolder]", objSMS.ReplacingTeacher.EmployeeName)
@@ -992,7 +993,7 @@ namespace SMEnterprise.Controllers
                     if (objSMS.ReplacingTeacher.MobileNumber != null && objSMS.ReplacingTeacher.MobileNumber != "")
                     {
                         SMSSender objSender = new SMSSender();
-                        objSender.SendSMSAsync(ReplacingSMS, objSMS.ReplacingTeacher.MobileNumber, data.SBranchID, 3, 3, data.ReplacingTeacherID);
+                        objSender.SendSMSAsync(ReplacingSMS, objSMS.ReplacingTeacher.MobileNumber, data.SBranchID, 3, 3, data.ReplacingTeacherID, ContentID);
                     }
 
                 }

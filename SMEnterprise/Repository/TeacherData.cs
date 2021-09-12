@@ -1140,13 +1140,14 @@ namespace SMEnterprise.Repository
             }
         }
 
-        public StudentOnlineExamSubmissionPageModel GetOnlineExamSubmissions(string OExamID)
+        public StudentOnlineExamSubmissionPageModel GetOnlineExamSubmissions(string OExamID,string sectionId)
         {
             StudentOnlineExamSubmissionPageModel oModel = new StudentOnlineExamSubmissionPageModel();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@OExamID", OExamID);
+                paramater.Add("@SectionId", sectionId);
                 using (var multi = con.QueryMultiple("sp_GetTeacherOnlineExamSubmissions", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.Exam = multi.Read<OnlineExamModel>().SingleOrDefault();

@@ -1,0 +1,249 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.BusStudentListModel
+@section IncludeCss
+{
+    <title>Bus Wise Students</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("StopWiseStudents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Stop :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ID" id="ddlstop" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0" @(Model.ID == 0 ? "selected" : "")>All</option>
+                                            @foreach (NameIDModel el in Model.Stops)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory"  class="table table-bordered table-hover display nowrap">
+                            <thead>
+                                <tr>
+                                    @*<th>Photo</th>*@
+                                    <th>SR.No.</th>
+                                    <th>Student Name </th>
+                                    <th>StudentID</th>
+                                    <th>Class</th>
+                                    <th>Section</th>
+
+                                    <th>Gender</th>
+                                    <th>Father Name </th>
+                                    <th>Mother Name </th>
+                                    <th>Phone Number</th>
+                                    <td>Stop Name</td>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (StudentModel c in Model.Students)
+                                {
+                            <tr>
+
+                                @*<td>
+            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+        </td>*@
+                                <td>
+                                    @c.SchoolUID
+                                </td>
+                                <td>
+                                    @c.Name
+                                </td>
+                                <td>
+                                    @c.StudentSID
+                                </td>
+                                <td>
+                                    @c.ClassName
+                                </td>
+                                <td>
+
+                                    @c.SectionName
+                                </td>
+
+                                <td>
+                                    @if (@c.Gender != 0)
+                                    {
+                                        <label>Female</label>
+                                    }
+                                    else
+                                    {
+                                        <label>Male</label>
+                                    }
+                                </td>
+                                <td>
+                                    @c.FatherName
+                                </td>
+                                <td>
+                                    @c.MotherName
+                                </td>
+
+                                <td>
+                                    @*G :  @c.GuardianMobileNo <br />*@
+                                    @c.FatherMobileNo<br />
+                                    @*M :  @c.MotherMobileNo*@
+                                </td>
+                                <td>@c.PSchoolCity</td>
+                            </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+<script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+<script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+<script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+<script src="@Url.Content("~/js/jszip.min.js")"></script>
+<script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+<script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    
+    <script>
+        $(document).ready(function () {
+            var repname = '@PermissionManager.GetLoggedInUser().Description' + '<br /> Bus wise Student Records ' + $('#ddlBus option:selected').text();
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+
+                        bSort: false,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                title: repname
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+
+        });
+</script>
+    <script>
+
+             
+        function ClassChanged(sender) {
+            $('#ddlstop').html('<option value="0">Loading....</option>');
+            $.ajax(
+
+                url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlstop').html('');
+            $('#ddlstop').html('<option value="0">--Select Section--</option>');
+            $('#ddlstop').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+    </script>
+}
+<!-- /.content -->
