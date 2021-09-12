@@ -3289,7 +3289,7 @@ namespace SMEnterprise.Controllers
         //}
         #endregion
 
-<<<<<<< HEAD
+
         #region OnlineExam
 
         [PermissionFilter]
@@ -3376,7 +3376,7 @@ namespace SMEnterprise.Controllers
 
         #endregion
 
-=======
+
 
         #region OnlineClasses
         [HttpPost]
@@ -3444,7 +3444,7 @@ namespace SMEnterprise.Controllers
             }
         }
         #endregion
->>>>>>> master
+
     }
 
 }
