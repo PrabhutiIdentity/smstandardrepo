@@ -7,7 +7,7 @@
     <div class="wrapper">
         <div class="header-1">
             <div class="col-3" style="text-align: right;">
-                @(Model.Transfer.TrType==0?"Purchase": Model.Transfer.TrType == 1 ?"Sale":"Allocate")   Receipt No:-  @Model.Transfer.InvoiceNumber
+                @(Model.Transfer.TrType == 0 ? "Purchase" : Model.Transfer.TrType == 1 ? "Sale" : "Allocate")   Receipt No:-  @Model.Transfer.InvoiceNumber
             </div>
         </div>
         <div class="header-1">
@@ -19,7 +19,7 @@
             <div class="col-1">
                 [CopyPlaceHolder]
                 <h1>
-                    @Model.SBranchDetails.BranchSchoolName <br /> <ad style="font-size:16px!important;">
+                    @Model.SBranchDetails.BranchSchoolName <br /> <ad style="font-size:14px!important;">
                         @Html.Raw(Model.SBranchDetails.Address == null ? "" : Model.SBranchDetails.Address.Replace("\n", "<br/>"))
                     </ad>
                 </h1>
@@ -31,91 +31,121 @@
                 <div class="col-sm-9" style="border-bottom: 1px dashed #888;min-height: 14px;">@Model.Customer.Name</div>
             </div>
 
-            <div class="row form-box name">
-                <label class="col-sm-2">Date : </label>
-                <div class="col-sm-9">@Model.Transfer.TrDate.ToString("dd MMM, yyyy")</div>
+            @*<div class="row form-box name">
+                <label class="col-sm-2">Student ID : </label>
+                <div class="col-sm-8" style="border-bottom: 1px dashed #888;min-height: 14px;">@Model.Transfer.StudentSID</div>
+            </div>*@
+        </div>
+        <div class="row form-name">
+            <div class="col-sm-6">
+                <div class="row f-sec">
+                    <label class="col-sm-5">Student ID : </label>
+                    <div class="col-sm-7">@Model.Transfer.StudentSID</div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="row f-sec">
+                    <label class="col-sm-4"></label>
+                    <div class="col-sm-8"></div>
+                </div>
             </div>
         </div>
-        <div class="fee-table">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>S No.</th>
-                        <th>Product</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Net Amount</th>
-                    </tr>
-                </thead>
-                @{
-                    var counter = 1;
-                    decimal TotalAmount = 0;
-                    decimal Totalsgst = 0;
-                    decimal Totalcgst = 0;
-                    decimal Totaligst = 0;
-                    <tbody>
+            <div class="row form-name">
 
-
-
-                        @foreach (SMEnterprise.Models.StockTransaferDetailModel f in Model.Products)
-                        {
-
-                            <tr>
-                                <td>@(counter).</td>
-                                <td>@f.ProductName</td>
-                                <td>₹ @f.Cost</td>
-                                <td>₹ @f.Quantity</td>
-                                <td>₹ @((f.Quantity* f.Cost).ToString("0.00"))</td>
-                            </tr>
-                            TotalAmount = TotalAmount + f.Quantity * f.Cost;
-                            Totalsgst = Totalsgst + f.Quantity * f.Cost * f.SGST / 100;
-                            Totalcgst = Totalcgst + f.Quantity * f.Cost * f.CGST / 100;
-                            Totaligst = Totaligst + f.Quantity * f.Cost * f.IGST / 100;
-                            counter++;
-                        }
-
-
-                    </tbody>
-                    <tbody>
-                        <tr>
-                            <td colspan="4" align="right"><strong>Taxable Amount</strong></td>
-                            <td>₹ @TotalAmount.ToString("0.00")</td>
-                        </tr>
-                        @if (Totalsgst != 0)
-                        {
-                            <tr>
-                                <td colspan="4" align="right"><strong>SGST</strong></td>
-                                <td>₹ @Totalsgst.ToString("0.00")</td>
-                            </tr>
-                        }
-
-                        @if (Totalcgst != 0)
-                        {
-                            <tr>
-                                <td colspan="4" align="right"><strong>CGST</strong></td>
-                                <td>₹ @Totalcgst.ToString("0.00")</td>
-                            </tr>
-                        }
-                        @if (Totaligst != 0)
-                        {
-                            <tr>
-                                <td colspan="4" align="right"><strong>IGST</strong></td>
-                                <td>₹ @Totaligst.ToString("0.00")</td>
-                            </tr>
-                        }
-                        <tr>
-                            <td colspan="4" align="right"><strong>Net Amount</strong></td>
-                            <td>₹ @((TotalAmount + Totalcgst +Totalcgst+Totaligst).ToString("0.00"))</td>
-                        </tr>
-                    </tbody>
-                }
-            </table>
-        </div>
-        <div class="row bottom-sec">
-            <div class="col-sm-8">
+                <div class="col-sm-6">
+                    <div class="row f-sec">
+                        <label class="col-sm-4">Class : </label>
+                        <div class="col-sm-8">@Model.Transfer.ClassName / @Model.Transfer.SectionName</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="row f-sec">
+                        <label class="col-sm-4">Date : </label>
+                        <div class="col-sm-8">@Model.Transfer.TrDate.ToString("dd MMM, yyyy")</div>
+                    </div>
+                </div>
 
             </div>
-            <div class="col-sm-4 principle">Accountant</div>
+            <div class="fee-table">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>S No.</th>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Net Amount</th>
+                        </tr>
+                    </thead>
+                    @{
+                        var counter = 1;
+                        decimal TotalAmount = 0;
+                        decimal Totalsgst = 0;
+                        decimal Totalcgst = 0;
+                        decimal Totaligst = 0;
+                        <tbody>
+
+
+
+                            @foreach (SMEnterprise.Models.StockTransaferDetailModel f in Model.Products)
+                            {
+
+                                <tr>
+                                    <td>@(counter).</td>
+                                    <td>@f.ProductName</td>
+                                    <td>₹ @f.Cost</td>
+                                    <td>₹ @f.Quantity</td>
+                                    <td>₹ @((f.Quantity * f.Cost).ToString("0.00"))</td>
+                                </tr>
+                                TotalAmount = TotalAmount + f.Quantity * f.Cost;
+                                Totalsgst = Totalsgst + f.Quantity * f.Cost * f.SGST / 100;
+                                Totalcgst = Totalcgst + f.Quantity * f.Cost * f.CGST / 100;
+                                Totaligst = Totaligst + f.Quantity * f.Cost * f.IGST / 100;
+                                counter++;
+                            }
+
+
+                        </tbody>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" align="right"><strong>Taxable Amount</strong></td>
+                                <td>₹ @TotalAmount.ToString("0.00")</td>
+                            </tr>
+                            @if (Totalsgst != 0)
+                            {
+                                <tr>
+                                    <td colspan="4" align="right"><strong>SGST</strong></td>
+                                    <td>₹ @Totalsgst.ToString("0.00")</td>
+                                </tr>
+                            }
+
+                            @if (Totalcgst != 0)
+                            {
+                                <tr>
+                                    <td colspan="4" align="right"><strong>CGST</strong></td>
+                                    <td>₹ @Totalcgst.ToString("0.00")</td>
+                                </tr>
+                            }
+                            @if (Totaligst != 0)
+                            {
+                                <tr>
+                                    <td colspan="4" align="right"><strong>IGST</strong></td>
+                                    <td>₹ @Totaligst.ToString("0.00")</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td colspan="4" align="right"><strong>Net Amount</strong></td>
+                                <td>₹ @((TotalAmount + Totalcgst + Totalcgst + Totaligst).ToString("0.00"))</td>
+                            </tr>
+                        </tbody>
+                    }
+                </table>
+            </div>
+            <div class="row bottom-sec">
+                <div class="col-sm-8">
+
+                </div>
+                <div class="col-sm-4 principle">Accountant</div>
+            </div>
         </div>
     </div>
-</div>
