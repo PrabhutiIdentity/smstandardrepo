@@ -215,6 +215,11 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Students { get; set; }
         public List<ProductModel> Products { get; set; }
         public List<StockTransaferDetailModel> Details { get; set; }
+        public string StudentSID { get; set; }      
+        public string ClassName { get; set; }
+        public string SectionName { get; set; }
+       
+
         public DataTable GetDetailsDataTable()
         {
 

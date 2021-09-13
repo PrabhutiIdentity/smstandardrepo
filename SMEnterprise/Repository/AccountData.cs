@@ -3719,7 +3719,9 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Title", objModel.Title);
                 paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
                 paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@content_id", objModel.Content_id);
+               
+                    paramater.Add("@content_id", objModel.Content_id);
+              
                 return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
 

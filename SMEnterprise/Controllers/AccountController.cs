@@ -2785,7 +2785,7 @@ namespace SMEnterprise.Controllers
             {
                 objData.DemandMonth = CommonUsage.GetCurrentDate();
             }
-            //   DemandReciptListModel objModel = objAccountData.GetDemandReciptData1(SBranchID, objData.DemandMonth.Month, objData.DemandMonth.Year, objData.ClassID, objData.SectionID);
+          //     DemandReciptListModel objModel = objAccountData.GetDemandReciptData1(SBranchID, objData.DemandMonth.Month, objData.DemandMonth.Year, objData.ClassID, objData.SectionID);
 
             DemandReciptListModel objModel = objAccountData.GetDemandReciptDataNew(SBranchID, objData.DemandMonth, objData.ClassID, objData.SectionID, objData.SessionID);
             return View(objModel);
