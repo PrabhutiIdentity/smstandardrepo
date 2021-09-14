@@ -27,3 +27,66 @@ BEGIN
  where cast(TrDate as date) between @StartDate and @EndDate and TrType=@TrType and SBranchID=@SBranchID    
  order by TrDate desc  
 END 
+
+go
+
+
+alter  Procedure [dbo].[sp_GetStockTransactionPrintDetails]      
+(      
+@STID int,      
+@SBranchID int      
+)      
+AS      
+BEGIN      
+  select * from SBranchMaster where SBranchID=@SBranchID      
+      
+  declare @ClassID int=0,@SessionID int=0,@SectionID int=0,@RefID int=0,@RefType int=0,@EmployeeTypeID int=0,@TrType int=0,@VendorID int=0,      
+  @Address nvarchar(max),@ContactNo nvarchar(20)      
+      
+  Select @ClassID=ClassID,@SessionID=SessionID,@SectionID=SectionID,@RefID=RefID,@RefType=RefType,      
+  @EmployeeTypeID=EmployeeTypeID,@TrType=TrType,@VendorID=VendorID from StockTransactionMaster where STID=@STID      
+        
+  Select *,'STUD'+RIGHT(REPLICATE('0',6)+CAST(RefID AS VARCHAR(6)),6) as StudentSID,      
+ CAST(STM.STID AS VARCHAR(10))+'/'+CAST(STM.SbranchID AS VARCHAR(10))+'/'+CAST(STM.SessionID AS VARCHAR(10))+'/'+ CAST(STM.RefID AS VARCHAR(10)) as InvoiceNumber,
+ (Select ClassName from classmaster CM where CM.ClassID=STM.Classid) as ClassName,     
+ (Select Name from class_sections CS where CS.ID=STM.SectionID and CS.ClassID=STM.ClassID ) as SectionName      
+ from StockTransactionMaster STM where STID=@STID      
+      
+  Select STDID,STID,STType,ProductID,Quantity,SBranchID,Cost,MRP,SGST,CGST,IGST,      
+  (Select Name from ProductMaster PM where STD.ProductID=PM.ProductID) as ProductName       
+  from StockTransactionDetails STD where STID=@STID      
+      
+  if(@TrType=0)      
+  begin      
+   select CompanyName as Name,ContactNumber as ContactNo, Address,GSTIN,StateID,      
+   (select StateName+' ('+StateCode+')' from GSTStateMaster GSM where GSM.StateID=VM.StateID) as StateName      
+     from VendorMaster VM where VendorID=@VendorID      
+  end      
+  else if(@RefType=0)      
+  begin      
+   Declare @StudentName nvarchar(100),@ClassSectionName nvarchar(100),      
+   @FatherName nvarchar(1000),@Gender int,@SessionName nvarchar(50),@ParentID int      
+         
+   --select @StudentName=Name +' ('+isnull(SchoolUID,'')+')',@Gender=Gender,@Address=MiniAddress,@ParentID=ParentID from StudentMaster where StudentID=@RefID    
+   select @StudentName=Name +' ('+isnull('STUD'+RIGHT(REPLICATE('0',6)+CAST(StudentID AS VARCHAR(6)),6),'')+')',@Gender=Gender,@Address=MiniAddress,@ParentID=ParentID from StudentMaster where StudentID=@RefID      
+         
+   select @ClassSectionName=ClassName+'->'+SectionName from v_ClassSectionNames where SectionID=@SectionID      
+   select @FatherName=FatherName,@ContactNo=FatherMobileNo from ParentMaster where ParentID=@ParentID      
+   select @SessionName=SessionName from SessionMaster where SessionID=@SessionID      
+         
+   select @StudentName+' '+(case when @Gender=1 then 'D/o' else 'S/o' end)+' '+@FatherName as Name,@ContactNo as ContactNo,'Local State' as StateName,      
+   @ClassSectionName+' ('+@SessionName+')' as ExtraData,@Address as Address      
+  end      
+  else      
+  begin      
+   Declare @EmployeeName nvarchar(50),@EmpTypeName nvarchar(50)      
+   Select @EmpTypeName=EmployeeTypeName from EmployeeTypeMaster where EmployeeTypeID=@EmployeeTypeID      
+      
+   select @EmployeeName=EmployeeName+' ('+isnull(@EmpTypeName,'')+')' ,@ContactNo=MobileNumber      
+   from EmployeeMaster where EmployeeID=@RefID       
+      
+   select @EmployeeName as Name,@ContactNo as ContactNo,'Local State' as StateName      
+  end      
+END 
+
+go

@@ -13,7 +13,9 @@ namespace SMEnterprise.Controllers
 {
     public class AccountController : Controller
     {
-
+        AccountData objAccountData = new AccountData();
+        TeacherData objTeacherData = new TeacherData();
+        AdminData objAdminData = new AdminData();
         [PermissionFilter]
         public ActionResult ParentAppDetail(StudentsPageModel objModel)
         {
@@ -58,9 +60,7 @@ namespace SMEnterprise.Controllers
 
             return Json(data, JsonRequestBehavior.AllowGet);
         }
-        AccountData objAccountData = new AccountData();
-        TeacherData objTeacherData = new TeacherData();
-        AdminData objAdminData = new AdminData();
+       
         // GET: Account
         [PermissionFilter]
         public ActionResult Dashboard(AccountDashboardModel objData)

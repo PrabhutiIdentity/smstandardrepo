@@ -6,9 +6,11 @@
 @section IncludeCss
 {
     <title>Demand Recipt</title>
-<link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
     <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+  
+
 }
 @model SMEnterprise.Models.DemandReciptListModel
 <div class="" style="background-color: white;">
@@ -61,21 +63,25 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="col-md-4 padding">
-                                <div class="row">
-                                    <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Search List : </label>
-                                    <div class="col-md-7 padding-L" style="padding-left: 10px;">
-                                        <input type="text" class="form-control" id="txtsearch" placeholder="comma separated text for multiple" onkeyup="Search(this);" />
-                                    </div>
 
-                                </div>
-                            </div>
                             <div class="col-md-1 padding">
                                 <div class="row">
 
                                     <div class="col-md-12">
                                         <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 padding">
+
+                                <div class="row">
+                                    <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Search List : </label>
+                                    <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                        <input type="text" class="form-control" id="txtsearch" placeholder="comma separated text for multiple" onkeyup="Search(this);" />
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -95,13 +101,14 @@
 
             <div class="row">
                 @foreach (SMEnterprise.Models.DemandReciptModel d in Model.Recipts)
-            {
+                {
+                <div class="listitem">
                     <div class="col-6">
                         <div class="reciept-box">
                             <h4><span>Demand Reciept</span></h4>
                             <h4>@Model.Branch.BranchName</h4>
                             <h5 style="text-align: center;">@Model.Branch.Address</h5>
-                            <p><strong>Name</strong><span>@d.Name</span></p>
+                            <p class="searchable"><strong>Name</strong><span><b>@d.Name</b></span></p>
                             <p><strong>Father's Name</strong><span>@d.FatherName</span></p>
                             <p><strong>Registration Number</strong><span>@d.StudentSID</span></p>
                             <p><strong>Class</strong><span>@d.ClassName  </span></p>
@@ -109,9 +116,11 @@
                             <p><strong>Previous </strong><span>@(d.PreviousDues)</span></p>
                             <p><strong>Fee </strong><span>@(d.ApplicableFee + d.LateFee) (@d.MonthName.ToString()</span></p>
                             <p><strong>Payment </strong><span>@d.PaymentAmount</span></p>
-                            <p><strong>Total </strong><span>@(d.PreviousDues + d.ApplicableFee + d.LateFee - d.PaymentAmount)</span></p>
+                            <p><strong>Total </strong><span><b>@(d.PreviousDues + d.ApplicableFee + d.LateFee - d.PaymentAmount)</b></span></p>
+                            <p><strong>Remark: </strong></p>
                         </div>
                     </div>
+                </div>
                 }
             </div>
         </div>
@@ -119,26 +128,10 @@
 </div>
 @section scripts
 {
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+
     <script>
-        function ClassChanged(sender) {
-            $('#ddlSection').html('<option value="0">Loading....</option>');
-            $.ajax(
-    {
-        type: "POST",
-        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
-        cache: false,
-        processData: false,
-        contentType: false,
-        success: function (html) {
-            $('#ddlSection').html('');
-            $('#ddlSection').html('<option value="0">--Select Section--</option>');
-            $('#ddlSection').append(html);
-        },
-        error: function (e) {
-            alert("errorn");
-        }
-    });
-        }
         function Search(sender) {
             var sText = $(sender).val().split(',');
             console.log(sText);
@@ -167,6 +160,25 @@
                 });
             }
         }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax({
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+
         function PrintDemantRecipt() {
             var contents = $("#divList").html();
             var frame1 = $('<iframe />');
