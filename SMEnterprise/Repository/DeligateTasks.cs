@@ -182,6 +182,7 @@ namespace SMEnterprise.Repository
         }
         public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID,string ContentID,SMSConfigirationModel SMSConfiguration)
         {
+            string msg="";
             if (SMSConfiguration == null)
             {
                 SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
@@ -241,7 +242,7 @@ namespace SMEnterprise.Repository
                 }
                 catch (Exception ex)
                 {
-
+                    msg=ex.Message;
                 }
             }
             else
