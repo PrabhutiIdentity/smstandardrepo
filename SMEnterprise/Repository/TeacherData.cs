@@ -1134,6 +1134,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ExamPriority", oModel.ExamPriority);
                 paramater.Add("@SBranchID", oModel.SBranchID);
                 paramater.Add("@Questions", oModel.GetQuestionsDatatable());
+                paramater.Add("@OnlineExamType", oModel.OnlineExamType);
                 paramater.Add("@OpType", oModel.OpType);
 
                 return con.Query<int>("sp_UpdateOnlineExam", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
