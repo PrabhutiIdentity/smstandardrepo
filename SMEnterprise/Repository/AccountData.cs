@@ -330,6 +330,17 @@ namespace SMEnterprise.Repository
 
             }
         }
+        public int BlockUnblockStudent(int StudentID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                return con.Query<int>("spn_DeleteStudent", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+            }
+        }
+        
         public StudentPromotionModel GetSessionClassSectionOnBranch(int SBranchID)
         {
 

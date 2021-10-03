@@ -96,6 +96,7 @@
                                     <label class="col-md-6 text-right" style="padding-right: 0px;">Class</label>
                                     <div class="col-md-6">
                                         <select class="form-control smallfont" name="ClassID" id="ddlClass" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0" @(Model.ClassID == 0 ? "Selected" : "")>--Select Class--</option>
                                             @foreach (NameIDModel el in Model.Classes)
                                             {
                                                 <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
@@ -107,6 +108,7 @@
                                     <label class="col-md-6 text-right" style="padding-right: 0px;">Subjects</label>
                                     <div class="col-md-6">
                                         <select class="form-control smallfont" name="SubjectID" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0" @(Model.SubjectID == 0 ? "Selected" : "")>--Select Subject--</option>
                                             @foreach (NameIDModel el in Model.Subjects)
                                             {
                                                 <option value="@el.ID" @(el.ID == Model.SubjectID ? "selected" : "")>@el.Name</option>
@@ -137,7 +139,7 @@
                                 {
                                     <li class="queli">
                                         <div class="message_wrapper" style="margin-left: 0;">
-                                            <h4 class="heading searchable">@(ctr). @Html.Raw(q.QuestionText) @*@q.QuestionText*@</h4>
+                                            <h4 class="heading searchable" style="margin-top:70px;">@(ctr). @Html.Raw(q.QuestionText) @*@q.QuestionText*@</h4>
                                             @if (q.QuestionType != 2)
                                             {
                                                 <blockquote class="message col-md-6" style="font-size: 12px;">A. @Html.Raw(q.Option1)@*@q.Option1*@</blockquote>
@@ -152,7 +154,7 @@
                                             <p class="url">
                                                 Explaination :  @Html.Raw(q.Explaination)@*@q.Explaination*@
                                             </p>
-                                            
+                                           
                                                 <div class="row">
                                                     <div class="col-md-7">
                                                         <label class="badge bg-green">@q.SubjectName</label>
@@ -166,20 +168,13 @@
                                                         {
                                                             <input type="hidden" name="OpType" value="-1" />
                                                             <input type="hidden" name="QuestionID" value="@q.QuestionID" />
+ <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
+                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
                                                             <button type="submit" href="javascript:void(0);" onclick="EditQuestion(this,-1,@q.QuestionID);" class="btn btn-sm btn-danger">Delete</button>
                                                         }
                                                     </div>
                                                 </div>
-                                           
-
-                                                <p class="url">
-                                                    <div>
-                                                        <label class="badge bg-green">@q.SubjectName</label>
-                                                        <label class="badge bg-@(q.Complexity==0?"yellow":q.Complexity==1?"blue": "red")">@(q.Complexity==0?"Easy":q.Complexity==1?"Medium": "Difficult")</label>
-                                                        <label class="badge bg-blue">@q.TeacherName</label>
-                                                        <label class="badge bg-blue-gradient">Created on :@q.CreatedDate.ToString("dd MMM, yyyy")</label>
-                                                    </div>
-                                                </p>
+                                          
 
                                         </div>
                                     </li>
@@ -217,6 +212,7 @@
                         <input type="hidden" name="QuestionsBy" value="@Model.QuestionsBy" />
                         <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
                         <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                        <input type="hidden" name="GroupID" value="@Model.GroupID" />
                         <div class="form-group col-md-3">
                             <label>Question Type</label>
                             <select class="form-control" name="QuestionType" id="ddlQuestionType" onchange="QuestionTypeChanged();">

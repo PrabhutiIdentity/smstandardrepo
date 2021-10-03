@@ -182,6 +182,13 @@ namespace SMEnterprise.Controllers
             return RedirectToAction("Students", "Account", objModel);
         }
         [PermissionFilter]
+        public ActionResult BlockUnblockStudent(StudentsPageModel objModel)
+        {
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.BlockUnblockStudent(objModel.StudentID);
+            return RedirectToAction("Students", "Account", objModel);
+        }
+        [PermissionFilter]
         public ActionResult GetSessionClassSectionOnBranch(string ID = null)
         {
             int SBranchID = CommonUsage.ConvertToInt(ID);
