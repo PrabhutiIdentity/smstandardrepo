@@ -114,7 +114,7 @@ namespace SMEnterprise.Repository
 
                 data.TemplateText = data.TemplateText.Replace("[Reciever]", "Parent");
 
-                  data.TemplateText = data.TemplateText.Replace("[DueAmount]", r.Amount.ToString("N2"));
+                 // data.TemplateText = data.TemplateText.Replace("[DueAmount]", r.Amount.ToString("N2"));
                 string SMSText = "";
                 //if (data.SMSTypeID == 1)
                 //{
