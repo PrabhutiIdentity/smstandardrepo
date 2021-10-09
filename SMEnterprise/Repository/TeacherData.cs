@@ -1031,7 +1031,7 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_UpdateQuestionBank", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }
-
+        // Principal & Teacher Both 
         public void GetTeacherQuestionBank(TeacherQuestionBankModel objModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -1141,14 +1141,14 @@ namespace SMEnterprise.Repository
             }
         }
 
-        public StudentOnlineExamSubmissionPageModel GetOnlineExamSubmissions(string OExamID,string sectionId)
+        public StudentOnlineExamSubmissionPageModel GetOnlineExamSubmissions(string OExamID, string SectionID)
         {
             StudentOnlineExamSubmissionPageModel oModel = new StudentOnlineExamSubmissionPageModel();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@OExamID", OExamID);
-                paramater.Add("@SectionId", sectionId);
+                paramater.Add("@SectionID",SectionID);
                 using (var multi = con.QueryMultiple("sp_GetTeacherOnlineExamSubmissions", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.Exam = multi.Read<OnlineExamModel>().SingleOrDefault();

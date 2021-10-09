@@ -489,10 +489,10 @@ namespace SMEnterprise.Controllers
             return RedirectToAction("OnlineExams");
         }
         [PermissionFilter]
-        public ActionResult GetOnlineExamSubmissions(string ID = null, string ID2=null)
+        public ActionResult GetOnlineExamSubmissions(string ID = null, string SectionID = null)
         {
 
-            StudentOnlineExamSubmissionPageModel oModel = objTeacherData.GetOnlineExamSubmissions(ID, ID2);
+            StudentOnlineExamSubmissionPageModel oModel = objTeacherData.GetOnlineExamSubmissions(ID, SectionID);
 
             return PartialView("_ViewOnlineExamSubmissions", oModel);
         }
