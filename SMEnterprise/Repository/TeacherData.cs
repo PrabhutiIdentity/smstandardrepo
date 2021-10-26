@@ -388,6 +388,7 @@ namespace SMEnterprise.Repository
             return model;
         }
         // for shine
+
         public StudentPerformanceResultModel GetStudentPerformanceResult(StudentPerformanceResultModel model)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))

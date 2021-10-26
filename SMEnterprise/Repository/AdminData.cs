@@ -3705,6 +3705,8 @@ namespace SMEnterprise.Repository
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
                     oModel.Parents = multi.Read<ParentModel>().ToList();
                     oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    //oModel.Classes = multi.Read<ClassModel>().ToList();
+                    //oModel.Sections = multi.Read<SectionModel>().ToList();
                 }
             }
             return oModel;

@@ -112,7 +112,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-3" @(Model.SelectedSMSType != 2  && Model.SelectedSMSType != 6 ? "style=display:none" : "")>
+                                <div class="col-md-3" @(Model.SelectedSMSType != 2 && Model.SelectedSMSType != 3 && Model.SelectedSMSType != 6 ? "style=display:none" : "")>
                                     <label class="control-label col-md-4 col-sm-3 col-xs-12">From</label>
                                     <div class="col-md-8 col-sm-9 col-xs-12">
                                         <input type="date" id="txtHDate" class="form-control" name="Date" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
@@ -143,168 +143,225 @@
                                 </div>
                             </div>
                         </div>
+                        <!--|| Model.SelectedSMSType == 3 -->
                         var Display = "none;";
-                        if (Model.SelectedSMSType == 2 || Model.SelectedSMSType == 5 || Model.SelectedSMSType == 6)
+                        if (Model.SelectedSMSType == 2 || Model.SelectedSMSType == 3 || Model.SelectedSMSType == 5 || Model.SelectedSMSType == 6)
                         {
                             Display = "";
                         }
-                        <div class="row" style="display:@Display;text-align: center;">
-                            <div class="col-md-12 form-group">
-                                <label class="control-label col-md-1 col-sm-3 col-xs-12">Classes</label>
-                                <div class="col-md-10 col-sm-9 col-xs-12" style="display:@Display">
-                                    <select class="form-control select2" id="ddlClasses" multiple="multiple" name="ReciverCats" onchange="ClassSelectionChanged();">
-                                        @if (Model.ReciverCats != null)
-                                        {
-                                            <option value="0" @(Model.ReciverCats.Contains("0") ? "Selected" : "")>All Classes</option>
-                                        }
-                                        @foreach (NameIDModel cl in Model.Classes)
-                                        {
-                                            <option value="@cl.ID" @(Model.ReciverCats.Contains(cl.ID.ToString()) ? "Selected" : "")>@cl.Name</option>
-                                        }
-                                    </select>
+                                <div class="row" style="display:@Display;text-align: center;">
+                                    <div class="col-md-12 form-group">
+                                        <label class="control-label col-md-1 col-sm-3 col-xs-12">Classes</label>
+                                        <div class="col-md-10 col-sm-9 col-xs-12" style="display:@Display">
+                                            <select class="form-control select2" id="ddlClasses" multiple="multiple" name="ReciverCats" onchange="ClassSelectionChanged();">
+                                                @if (Model.ReciverCats != null)
+                                                {
+                                                    <option value="0" @(Model.ReciverCats.Contains("0") ? "Selected" : "")>All Classes</option>
+                                                }
+                                                @foreach (NameIDModel cl in Model.Classes)
+                                                {
+                                                    <option value="@cl.ID" @(Model.ReciverCats.Contains(cl.ID.ToString()) ? "Selected" : "")>@cl.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
 
 
-                        <div class="clearfix"></div>
-                        <div class="row" style="text-align: center;">
-                            <div class="col-md-12 form-group">
-                                <h2><label class="control-label">Templates</label></h2>
-                            </div>
-                        </div>
-                        <div class="row">
-                            @foreach (SMSTemplateModel t in Model.Templates)
+                                <div class="clearfix"></div>
+                                <div class="row" style="text-align: center;">
+                                    <div class="col-md-12 form-group">
+                                        <h2><label class="control-label">Templates</label></h2>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    @foreach (SMSTemplateModel t in Model.Templates)
+                                    {
+                                    <div class="col-md-4" style="margin-top: 10px;">
+                                        <div class="templateListItem">
+                                            <input type="radio" name="TemplateID" class="flat-red" value="@t.TemplateID" />
+                                            <div name="TemplateText"> @t.Template</div>
+                                            <div name="SMSContentID"> @t.Content_id</div>
+
+                                        </div>
+
+                                    </div>
+                                    }
+                                </div>
+                            }
+
+                            @using (Html.BeginForm("SendSMSList", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSendSMS", @class = "form-horizontal" }))
                             {
-                            <div class="col-md-4" style="margin-top: 10px;">
-                                <div class="templateListItem">
-                                    <input type="radio" name="TemplateID" class="flat-red" value="@t.TemplateID" />
-                                    <div name="TemplateText"> @t.Template</div>
-                                    <div name="SMSContentID"> @t.Content_id</div>
+
+                                <div class="row" style="text-align: center;">
+                                    <div class="col-md-12 form-group">
+                                        <h2><label class="control-label">Students</label></h2>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="icheckbox_flat-green checked " aria-checked="false" aria-disabled="false" style="position: relative;">
+
+                                            <ins class="iCheck-helper selectAll" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                        </div><small>
+                                            Select All
+                                        </small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        Search Student <input type="text" onkeyup="Search(this)" />
+                                    </div>
+                                    <div class="clearfix"></div>
+                                </div>
+                                <div class="row">
+                                    <input type="hidden" id="hdnSSMSTypeID" name="SMSTypeID" value="0" />
+                                    <input type="hidden" id="hdnSSMSTemplateID" name="SMSTemplateID" value="0" />
+                                    <input type="hidden" id="hdnSMSContentID" name="SMSContentID" value="0" />
+                                    <input type="hidden" id="hdnContentID" name="Content_id" value="0" />
+                                    <input type="hidden" id="hdnSRecieverList" name="RecieverList" value="All Classes" />
+                                    <input type="text" style="display:none;" id="txtSTemplateText" name="TemplateText" />
+                                    <input type="text" style="display:none;" id="txtSTitle" name="Title" />
+                                    <input type="hidden" id="hdnSRecieverCats" name="RecieverCats" value="0" />
+                                    <input type="hidden" id="hdnSDate" name="Date" value="0" />
+                                    <input type="hidden" id="hdnStartTiming" name="StartTime" value="0" />
+                                    <input type="hidden" id="hdnEndTiming" name="EndTime" value="0" />
+                                    <input type="hidden" id="hdnSEDate" name="EDate" value="0" />
+                                    <div class="dd-container" id="divRecieverContainer">
+                                        @Html.Partial("_RecieverListPartial", Model.Recievers)
+
+                                    </div>
+                                    <div>
+                                        <button type="submit" id="btnSaveResult" onclick="return SubmitList();" class="btn btn-block btn-info pull-right">Submit</button>
+                                    </div>
 
                                 </div>
-                                        
-                            </div>
                             }
                         </div>
-                    }
-                    
-                    @using (Html.BeginForm("SendSMSList", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSendSMS", @class = "form-horizontal" }))
-                    {
-
-                        <div class="row" style="text-align: center;">
-                            <div class="col-md-12 form-group">
-                                <h2><label class="control-label">Students</label></h2>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="icheckbox_flat-green checked " aria-checked="false" aria-disabled="false" style="position: relative;">
-
-                                    <ins class="iCheck-helper selectAll" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
-                                </div><small>
-                                    Select All
-                                </small>
-                            </div>                           
-                            <div class="col-md-6">
-                                Search Student <input type="text" onkeyup="Search(this)" />
-                            </div>
-                            <div class="clearfix"></div>
-                        </div>
-                        <div class="row">
-                            <input type="hidden" id="hdnSSMSTypeID" name="SMSTypeID" value="0" />
-                            <input type="hidden" id="hdnSSMSTemplateID" name="SMSTemplateID" value="0" />
-                            <input type="hidden" id="hdnSMSContentID" name="SMSContentID" value="0" />
-                            <input type="hidden" id="hdnContentID" name="Content_id" value="0" />
-                            <input type="hidden" id="hdnSRecieverList" name="RecieverList" value="All Classes" />
-                            <input type="text" style="display:none;" id="txtSTemplateText" name="TemplateText" />
-                            <input type="text" style="display:none;" id="txtSTitle" name="Title" />
-                            <input type="hidden" id="hdnSRecieverCats" name="RecieverCats" value="0" />
-                            <input type="hidden" id="hdnSDate" name="Date" value="0" />
-                            <input type="hidden" id="hdnStartTiming" name="StartTime" value="0" />
-                            <input type="hidden" id="hdnEndTiming" name="EndTime" value="0" />
-                            <input type="hidden" id="hdnSEDate" name="EDate" value="0" />
-                            <div class="dd-container" id="divRecieverContainer">
-                                @Html.Partial("_RecieverListPartial", Model.Recievers)
-
-                            </div>
-                            <div>
-                                <button type="submit" id="btnSaveResult" onclick="return SubmitList();" class="btn btn-block btn-info pull-right">Submit</button>
-                            </div>
-
-                        </div>
-                    }
+                    </div>
                 </div>
             </div>
+        </section>
+        <div style="display:none">
+            @*@if (SMEnterprise.Repository.CommonUsage.SMSConfig != null)
+                {
+                    foreach (SMSParamsParamsParam a in SMEnterprise.Repository.CommonUsage.SMSConfig.Params)
+                    {
+                        <a>  @a.Key - @a.Value</a><br />
+                    }
+                }*@
         </div>
-    </div>
-</section>
-<div style="display:none">
-    @*@if (SMEnterprise.Repository.CommonUsage.SMSConfig != null)
+
+
+        @section scripts
         {
-            foreach (SMSParamsParamsParam a in SMEnterprise.Repository.CommonUsage.SMSConfig.Params)
-            {
-                <a>  @a.Key - @a.Value</a><br />
-            }
-        }*@
-</div>
-
-
-@section scripts
-{
-    <script src="@Url.Content("~/Content/select2/select2.full.min.js")"></script>
-    <script src="@Url.Content("~/Content/icheck/icheck.min.js")"></script>
-    <script>
-        function Search(sender) {
-            var sText = $(sender).val().split(',');
-            if (sText[0] == "") {
-                $('.listitem').css('display', '');
-            }
-            else {
-                $(".listitem").each(function () {
-                    var isExist = false;
-
-                    $(this).find(".searchable").each(function () {
-                        $srch = $(this);
-                        $.each(sText, function (index, value) {
-                            if ($srch.html().toLowerCase().includes(value.toLowerCase()) == true) {
-                                isExist = true;
-                            }
-                        });
-
-                    });
-                    if (isExist == true) {
-                        $(this).css('display', '');
+            <script src="@Url.Content("~/Content/select2/select2.full.min.js")"></script>
+            <script src="@Url.Content("~/Content/icheck/icheck.min.js")"></script>
+            <script>
+                function Search(sender) {
+                    var sText = $(sender).val().split(',');
+                    if (sText[0] == "") {
+                        $('.listitem').css('display', '');
                     }
                     else {
-                        $(this).css('display', 'none');
+                        $(".listitem").each(function () {
+                            var isExist = false;
+
+                            $(this).find(".searchable").each(function () {
+                                $srch = $(this);
+                                $.each(sText, function (index, value) {
+                                    if ($srch.html().toLowerCase().includes(value.toLowerCase()) == true) {
+                                        isExist = true;
+                                    }
+                                });
+
+                            });
+                            if (isExist == true) {
+                                $(this).css('display', '');
+                            }
+                            else {
+                                $(this).css('display', 'none');
+                            }
+                        });
                     }
+                }
+                var SelePrevCats = '';
+                function ClassSelectionChanged() {
+                    var selectedCats = '' + $('#ddlClasses').val() + '';
+                    //if(selectedCats.indexOf('0,')>0)
+                    //{
+                    //    selectedCats=selectedCats.replace('0,','');
+                    //}
+                    //$('#ddlClasses').val(selectedCats);
+                    $.ajax({
+                        url: "@Url.Action("GetRecieverList", "Account")",
+                        type: 'POST',
+                        data: JSON.stringify({
+                            SelectedSMSType: $('#ddlSelectedSMSType').val(),
+                            ReciverCats: selectedCats,
+                            Month: 2
+                        }),
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (html) {
+                            $('#divRecieverContainer').html(html);
+                            $('body').iCheck({
+                                checkboxClass: 'icheckbox_flat-green',
+                                radioClass: 'iradio_flat-green'
+                            });
+                            $('.helpcheck').on('click', function (event) {
+                                var RecCount = parseInt($('#lblSMSCount').text());
+                                if ($(this).closest('li').find('#hdnSelected').val() == "0") {
+                                    $(this).closest('li').find('#hdnSelected').val(1);
+                                    $('#lblSMSCount').text(RecCount + 1);
+                                    $(this).find('.icheckbox_flat-green').addClass('active');
+                                    $(this).closest('li').find('.icheckbox_flat-green').addClass('checked');
+                                }
+                                else {
+                                    $(this).closest('li').find('#hdnSelected').val(0);
+                                    $('#lblSMSCount').text(RecCount - 1);
+                                    $(this).find('.icheckbox_flat-green').removeClass('active');
+                                    $(this).closest('li').find('.icheckbox_flat-green').removeClass('checked');
+                                }
+                            });
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                        },
+                        async: true,
+                        processData: false
+                    });
+                }
+                $(function () {
+
+                    InitializeListCheckBox();
+                    $("#ddlClasses").select2();
+                    $('.selectAll').on('click', function (event) {
+                        if (!$(this).closest('.icheckbox_flat-green').hasClass("checked")) {
+                            $("#ulSchoolList").find('li').each(function () {
+                                $(this).find('.dd-option').find('#hdnSelected').val(1);
+                                $(this).find('.slectli').addClass('checked');
+                                $(this).find('.icheckbox_flat-green').addClass('active');
+                                $(this).find('.icheckbox_flat-green').addClass('checked');
+                            });
+                            $('#lblSMSCount').text($('#hdnRecieverCount').val());
+                            $(this).closest('.icheckbox_flat-green').addClass('checked');
+                        }
+                        else {
+                            $("#ulSchoolList").find('li').each(function () {
+                                $(this).find('.dd-option').find('#hdnSelected').val(0);
+                                $(this).find('.icheckbox_flat-green').removeClass('active');
+                                $(this).find('.icheckbox_flat-green').removeClass('checked');
+                            });
+                            $('#lblSMSCount').text(0);
+                            $(this).find('.icheckbox_flat-green').removeClass('active');
+                            $(this).closest('.icheckbox_flat-green').removeClass('checked');
+                        }
+                    });
                 });
-            }
-        }
-        var SelePrevCats = '';
-        function ClassSelectionChanged() {
-            var selectedCats = '' + $('#ddlClasses').val() + '';
-            //if(selectedCats.indexOf('0,')>0)
-            //{
-            //    selectedCats=selectedCats.replace('0,','');
-            //}
-            //$('#ddlClasses').val(selectedCats);
-            $.ajax({
-                url: "@Url.Action("GetRecieverList", "Account")",
-                type: 'POST',
-                data: JSON.stringify({
-                    SelectedSMSType: $('#ddlSelectedSMSType').val(),
-                    ReciverCats: selectedCats,
-                    Month: 2
-                }),
-                contentType: 'application/json; charset=utf-8',
-                success: function (html) {
-                    $('#divRecieverContainer').html(html);
-                    $('body').iCheck({
+                function InitializeListCheckBox() {
+                    $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
                         checkboxClass: 'icheckbox_flat-green',
                         radioClass: 'iradio_flat-green'
                     });
+
                     $('.helpcheck').on('click', function (event) {
                         var RecCount = parseInt($('#lblSMSCount').text());
                         if ($(this).closest('li').find('#hdnSelected').val() == "0") {
@@ -320,128 +377,72 @@
                             $(this).closest('li').find('.icheckbox_flat-green').removeClass('checked');
                         }
                     });
-                },
-                error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
-                },
-                async: true,
-                processData: false
-            });
-        }
-        $(function () {
+                }
+                function SubmitList() {
 
-            InitializeListCheckBox();
-            $("#ddlClasses").select2();
-            $('.selectAll').on('click', function (event) {
-                if (!$(this).closest('.icheckbox_flat-green').hasClass("checked")) {
-                    $("#ulSchoolList").find('li').each(function () {
-                        $(this).find('.dd-option').find('#hdnSelected').val(1);
-                        $(this).find('.slectli').addClass('checked');
-                        $(this).find('.icheckbox_flat-green').addClass('active');
-                        $(this).find('.icheckbox_flat-green').addClass('checked');
-                    });
-                    $('#lblSMSCount').text($('#hdnRecieverCount').val());
-                    $(this).closest('.icheckbox_flat-green').addClass('checked');
-                }
-                else {
-                    $("#ulSchoolList").find('li').each(function () {
-                        $(this).find('.dd-option').find('#hdnSelected').val(0);
-                        $(this).find('.icheckbox_flat-green').removeClass('active');
-                        $(this).find('.icheckbox_flat-green').removeClass('checked');
-                    });
-                    $('#lblSMSCount').text(0);
-                    $(this).find('.icheckbox_flat-green').removeClass('active');
-                    $(this).closest('.icheckbox_flat-green').removeClass('checked');
-                }
-            });
-        });
-        function InitializeListCheckBox() {
-            $('input[type="checkbox"].flat-red, input[type="radio"].flat-red').iCheck({
-                checkboxClass: 'icheckbox_flat-green',
-                radioClass: 'iradio_flat-green'
-            });
 
-            $('.helpcheck').on('click', function (event) {
-                var RecCount = parseInt($('#lblSMSCount').text());
-                if ($(this).closest('li').find('#hdnSelected').val() == "0") {
-                    $(this).closest('li').find('#hdnSelected').val(1);
-                    $('#lblSMSCount').text(RecCount + 1);
-                    $(this).find('.icheckbox_flat-green').addClass('active');
-                    $(this).closest('li').find('.icheckbox_flat-green').addClass('checked');
-                }
-                else {
-                    $(this).closest('li').find('#hdnSelected').val(0);
-                    $('#lblSMSCount').text(RecCount - 1);
-                    $(this).find('.icheckbox_flat-green').removeClass('active');
-                    $(this).closest('li').find('.icheckbox_flat-green').removeClass('checked');
-                }
-            });
-        }
-        function SubmitList() {
-      
-           
-            if ($(".iradio_flat-green.checked").find('.flat-red').attr('value')) {
+                    if ($(".iradio_flat-green.checked").find('.flat-red').attr('value')) {
 
-                $('#hdnSSMSTemplateID').val($(".iradio_flat-green.checked").find('.flat-red').attr('value'));
-                $('#hdnSSMSTypeID').val($('#ddlSelectedSMSType').val());
-                $('#hdnSRecieverCats').val($('#ddlClasses').val());
-                $('#hdnSDate').val($('#txtHDate').val());
-                $('#hdnSEDate').val($('#txtHEDate').val());
-                $('#hdnStartTiming').val($('#txtStartTiming').val());
-                $('#hdnEndTiming').val($('#txtEndTiming').val());
-                $('#txtSTitle').val($('#txtTitle').val());
-               
-            
-                var SelectedList = '';
-                $('.select2-selection__choice').each(function () {
-                    if (SelectedList != '') {
-                        SelectedList = SelectedList + ',';
+                        $('#hdnSSMSTemplateID').val($(".iradio_flat-green.checked").find('.flat-red').attr('value'));
+                        $('#hdnSSMSTypeID').val($('#ddlSelectedSMSType').val());
+                        $('#hdnSRecieverCats').val($('#ddlClasses').val());
+                        $('#hdnSDate').val($('#txtHDate').val());
+                        $('#hdnSEDate').val($('#txtHEDate').val());
+                        $('#hdnStartTiming').val($('#txtStartTiming').val());
+                        $('#hdnEndTiming').val($('#txtEndTiming').val());
+                        $('#txtSTitle').val($('#txtTitle').val());
+
+
+                        var SelectedList = '';
+                        $('.select2-selection__choice').each(function () {
+                            if (SelectedList != '') {
+                                SelectedList = SelectedList + ',';
+                            }
+                            SelectedList = SelectedList + $(this).attr('title');
+                        });
+                        $('#hdnSRecieverList').val(SelectedList);
+                        $('#hdnSMSContentID').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="SMSContentID"]').text().trim());
+                        $('#hdnContentID').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="SMSContentID"]').text().trim());
+                        $('#txtSTemplateText').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="TemplateText"]').text());
+                        if ($('#lblSMSCount').text().trim() == "0") {
+                            ShowClosingNotification('No Recipient', 'Please select atleast one recipient', 'error');
+                            return false;
+                        }
+                        else {
+                            return true;
+                        }
                     }
-                    SelectedList = SelectedList + $(this).attr('title');
-                });
-                $('#hdnSRecieverList').val(SelectedList);
-                $('#hdnSMSContentID').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="SMSContentID"]').text().trim());
-                $('#hdnContentID').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="SMSContentID"]').text().trim());
-                $('#txtSTemplateText').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="TemplateText"]').text());
-                if ($('#lblSMSCount').text().trim() == "0") {
-                    ShowClosingNotification('No Recipient', 'Please select atleast one recipient', 'error');
-                    return false;
-                }
-                else {
-                    return true;
-                }
-            }
-            else {
-               
-                ShowClosingNotification('SMS Template', 'Please select an SMS Template First!!!!', 'error');
-                return false;
-            }
-        }
-        var IsSendByMe = 0;
-        $('#frmSendSMS').submit(function (e) {
-          
-            IsSendByMe = 1;
-            e.preventDefault();
-            ShowClosingNotification('Adding....', 'Please wait the Task is being added', 'info');
-            //do some verification
-            $.ajax({
-                url: '/api/SMSApi/SendSMSList',
-                type: 'POST',
-                dataType: 'json',
-                data: $(this).serialize(),
-                success: function (data, textStatus, xhr) {
-                    console.log(data);
-                    SuccessAddingTask(0);
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    console.log(textStatus);
-                }
-            });
-        });
-        function SuccessAddingTask(id) {
+                    else {
 
-            window.location = "/Admin/SMSHistory";
+                        ShowClosingNotification('SMS Template', 'Please select an SMS Template First!!!!', 'error');
+                        return false;
+                    }
+                }
+                var IsSendByMe = 0;
+                $('#frmSendSMS').submit(function (e) {
+
+                    IsSendByMe = 1;
+                    e.preventDefault();
+                    ShowClosingNotification('Adding....', 'Please wait the Task is being added', 'info');
+                    //do some verification
+                    $.ajax({
+                        url: '/api/SMSApi/SendSMSList',
+                        type: 'POST',
+                        dataType: 'json',
+                        data: $(this).serialize(),
+                        success: function (data, textStatus, xhr) {
+                            console.log(data);
+                            SuccessAddingTask(0);
+                        },
+                        error: function (xhr, textStatus, errorThrown) {
+                            console.log(textStatus);
+                        }
+                    });
+                });
+                function SuccessAddingTask(id) {
+
+                    window.location = "/Admin/SMSHistory";
+                }
+            </script>
         }
-    </script>
-}
-<!-- /.content -->
+        <!-- /.content -->

@@ -27,8 +27,11 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
         public int ClassID { get; set; }
+        
         public List<NameIDModel> Sessions { get; set; }
         public List<ParentModel> Parents { get; set; }
+        public List<ClassModel> Classes { get; set; }
+        public List<NameIDModel> Sections { get; set; }
     }
 
     #region Youtube 

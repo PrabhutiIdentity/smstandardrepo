@@ -330,17 +330,19 @@ namespace SMEnterprise.Repository
 
             }
         }
-        public int BlockUnblockStudent(int StudentID)
+        public int UpdateIsBlock(int isBlock, int studentID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
-                paramater.Add("@StudentID", StudentID);
-                return con.Query<int>("spn_DeleteStudent", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                paramater.Add("@isBlock", isBlock);
+                paramater.Add("@studentID", studentID);
+                return con.Query<int>("SP_UpdateIsBlock", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
 
             }
+
         }
-        
+
         public StudentPromotionModel GetSessionClassSectionOnBranch(int SBranchID)
         {
 
@@ -1382,16 +1384,7 @@ namespace SMEnterprise.Repository
             return objNew;
         }
 
-        public List<FeePaymentModel> GetParentPayments(int ParentID, int SessionID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ParentID", ParentID);
-                paramater.Add("@SessionID", SessionID);
-                return con.Query<FeePaymentModel>("sp_GetParentFeePayments", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
-            }
-        }
+       
         public FeeDiscountRequestMaster GetFeeDiscountRequestDetails(FeeDiscountRequestMaster objModel)
         {
             FeeDiscountRequestMaster objNew;
@@ -3400,77 +3393,7 @@ namespace SMEnterprise.Repository
 
         }
         #endregion
-        public void GetBranchParents(ParentPageModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@SText", oModel.SText);
-                paramater.Add("@SessionID", oModel.SessionID);
-
-                using (var multi = con.QueryMultiple("sp_GetParentList", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.Parents = multi.Read<ParentModel>().ToList();
-                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-        }
-        public void GetParentWiseFeeDetails(ParentFeeDetailsPageModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ParentID", objModel.ParentID);
-                paramater.Add("@PaymentID", objModel.PaymentID);
-                paramater.Add("@Day", objModel.Day);
-                paramater.Add("@Month", objModel.Month);
-                paramater.Add("@Year", objModel.Year);
-                paramater.Add("@QDate", CommonUsage.GetCurrentDate());
-                paramater.Add("@SessionID", objModel.SessionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("spn_GetParentChildsFeeDetailsNEW", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-                    objModel.FeeDetails = multi.Read<ParentStudentFeeDetails>().ToList();
-                    objModel.Session = multi.Read<SchoolSessionModel>().SingleOrDefault();
-                    objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                }
-            }
-        }
-
-        public void UpdateParentFeePayment(ParentFeeDetailsPageModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-
-                paramater.Add("@ParentID", oModel.ParentID);
-                paramater.Add("@ReferanceNumber", oModel.ReferanceNumber);
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@Month", oModel.Month);
-                paramater.Add("@Year", oModel.Year);
-                paramater.Add("@QDate", oModel.QDate);
-                paramater.Add("@Remark", oModel.Remark);
-                paramater.Add("@PaymentMode", oModel.PaymentMode);
-                paramater.Add("@CollectedBy", oModel.CollectedBy);
-                paramater.Add("@PaymentAmount", oModel.PaymentAmount);
-                paramater.Add("@ApplicableAmount", oModel.ApplicableAmount);
-                paramater.Add("@DiscountAmount", oModel.DiscountAmount);
-                paramater.Add("@PaymentDetail", oModel.GetFeePaymentsDataTable());
-
-                using (var multi = con.QueryMultiple("sp_SaveParentPayemnt", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    oModel.PaymentRecieptNo = multi.Read<string>().SingleOrDefault();
-                    oModel.PaymentID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-        }
+     
         #region Stock Management
         public StockManagementModel GetStockTransfers(StockManagementModel objModel)
         {
@@ -3777,6 +3700,7 @@ namespace SMEnterprise.Repository
             return objModel;
         }
         public List<SMSRecieverDetailModel> GetSMSRecieverList(SMSCreateModel objModel)
+
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -3821,6 +3745,63 @@ namespace SMEnterprise.Repository
 
             }
         }
+        #endregion
+
+        #region onlinePayment
+
+        public StudentOnlineFeeDetailModel GetStudentDetailsForPayment(int StudentID, int SBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SBranchID", SBranchID);
+
+                return con.Query<StudentOnlineFeeDetailModel>("sp_GetStudentDetailForOnlinePayment", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public int InsertOrderID(OrderModel obj)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@OrderID", obj.OrderID);
+                paramater.Add("@Amount", obj.Amount);
+                paramater.Add("@Date", obj.Date);
+                paramater.Add("@Name", obj.Name);
+                paramater.Add("@PGOrderID", obj.PGOrderID);
+                paramater.Add("@Status", obj.Status);
+
+
+                return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public int UpdateStudentFeePaymentStatus(OrderModel obj)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@PGOrderID", obj.PGOrderID);
+                paramater.Add("@PGPaymentID", obj.PGPaymentID);
+                paramater.Add("@StudentID", obj.StudentID);
+                paramater.Add("@QDate", obj.QDate);
+                paramater.Add("@CurDate", obj.CurDate);
+                paramater.Add("@PaymentDate", obj.PaymentDate);
+                paramater.Add("@PaymentAmount", obj.PaymentAmount);
+                paramater.Add("@Remark", obj.Remark);
+                paramater.Add("@ReferanceNumber", obj.ReferanceNumber);
+                paramater.Add("@PaymentMode", obj.PaymentMode);
+                paramater.Add("@CollectedBy", obj.CollectedBy);
+                paramater.Add("@SBranchID", obj.SBranchID);
+                paramater.Add("@Status", obj.Status);
+                paramater.Add("@FeeMonth", obj.FeeMonth);
+                paramater.Add("@FeeYear", obj.FeeYear);
+                //paramater.Add("@ApplicableFee", obj.ApplicableFee);
+
+                return con.Query<int>("sp_UpdateStudentFeePaymentStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
         #endregion
 
         #region TC Related
@@ -4262,6 +4243,97 @@ namespace SMEnterprise.Repository
 
             }
         }
+        #endregion
+
+        #region Parent Fee Details
+
+        public void GetBranchParents(ParentPageModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                paramater.Add("@SText", oModel.SText);
+                paramater.Add("@SessionID", oModel.SessionID);
+
+                using (var multi = con.QueryMultiple("sp_GetParentList", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    oModel.Parents = multi.Read<ParentModel>().ToList();
+                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+        }
+
+        public void GetParentWiseFeeDetails(ParentFeeDetailsPageModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ParentID", objModel.ParentID);
+                paramater.Add("@PaymentID", objModel.PaymentID);
+                paramater.Add("@Day", objModel.Day);
+                paramater.Add("@Month", objModel.Month);
+                paramater.Add("@Year", objModel.Year);
+                paramater.Add("@QDate", CommonUsage.GetCurrentDate());
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                using (var multi = con.QueryMultiple("spn_GetParentChildsFeeDetailsNEW", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+
+                    objModel.Students = multi.Read<StudentModel>().ToList();
+                    objModel.FeeDetails = multi.Read<ParentStudentFeeDetails>().ToList();
+                    objModel.Session = multi.Read<SchoolSessionModel>().SingleOrDefault();
+                    objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                }
+            }
+        }
+
+        public void UpdateParentFeePayment(ParentFeeDetailsPageModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+
+                paramater.Add("@ParentID", oModel.ParentID);
+                paramater.Add("@ReferanceNumber", oModel.ReferanceNumber);
+                paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                paramater.Add("@Month", oModel.Month);
+                paramater.Add("@Year", oModel.Year);
+                paramater.Add("@QDate", oModel.QDate);
+                paramater.Add("@Remark", oModel.Remark);
+                paramater.Add("@PaymentMode", oModel.PaymentMode);
+                paramater.Add("@CollectedBy", oModel.CollectedBy);
+                paramater.Add("@PaymentAmount", oModel.PaymentAmount);
+                paramater.Add("@ApplicableAmount", oModel.ApplicableAmount);
+                paramater.Add("@DiscountAmount", oModel.DiscountAmount);
+                paramater.Add("@PaymentDetail", oModel.GetFeePaymentsDataTable());
+
+                using (var multi = con.QueryMultiple("sp_SaveParentPayemnt", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+
+                    oModel.PaymentRecieptNo = multi.Read<string>().SingleOrDefault();
+                    oModel.PaymentID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+        }
+
+        public List<FeePaymentModel> GetParentPayments(int ParentID, int SessionID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ParentID", ParentID);
+                paramater.Add("@SessionID", SessionID);
+                return con.Query<FeePaymentModel>("sp_GetParentFeePayments", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+            }
+        }
+
+
+
+
         #endregion
     }
 }

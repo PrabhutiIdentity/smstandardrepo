@@ -129,104 +129,94 @@
                             int count = 0;
                             foreach (StudentModel c in Model.Students)
                             {
-                                <tr>
+                        <tr>
 
-                                    <td>
-                                        <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
-                                    </td>
-                                    <td>
-                                        Name : @c.Name
-                                        <br />
-                                        SID : @c.StudentSID  <br />
-                                        SR. No. :@c.SchoolUID<br />
-                                        Roll No. : @c.RollNo<br />
-                                        SSSID :@c.SSSID
-                                    </td>
+                            <td>
+                                <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                            </td>
+                            <td>
+                                Name : @c.Name
+                                <br />
+                                SID : @c.StudentSID  <br />
+                                SR. No. :@c.SchoolUID<br />
+                                Roll No. : @c.RollNo<br />
+                                SSSID :@c.SSSID
+                            </td>
 
-                                    <td>
-                                        User ID: @c.SParentID <br />
-                                        F Name: @c.FatherName<br />
-                                        M Name: @c.MotherName<br />
-                                        G Name: @c.GuardianName
-                                    </td>
-                                    <td>@c.BloodGroup</td>
-                                    <td>
-                                        @c.AadharCardNo
-                                    </td>
-                                    <td>
+                            <td>
+                                User ID: @c.SParentID <br />
+                                F Name: @c.FatherName<br />
+                                M Name: @c.MotherName<br />
+                                G Name: @c.GuardianName
+                            </td>
+                            <td>@c.BloodGroup</td>
+                            <td>
+                                @c.AadharCardNo
+                            </td>
+                            <td>
 
-                                        F :  @c.FatherMobileNo<br />
-                                        M :  @c.MotherMobileNo <br />
-                                        G :  @c.GuardianMobileNo
-                                    </td>
-                                    <td>
-                                        @if (c.HostelRoomID != 0)
-                                        {
-                                            <label class='badge bg-green'>Yes</label>
-                                        }
-                                        else
-                                        {
-                                            <label class='badge bg-blue'>No</label>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (c.StopID != 0)
-                                        {
-                                            <label class='badge bg-green'>Yes</label>
-                                        }
-                                        else
-                                        {
-                                            <label class='badge bg-blue'>No</label>
-                                        }
-                                    </td>
+                                F :  @c.FatherMobileNo<br />
+                                M :  @c.MotherMobileNo <br />
+                                G :  @c.GuardianMobileNo
+                            </td>
+                            <td>
+                                @if (c.HostelRoomID != 0)
+                                {
+                                    <label class='badge bg-green'>Yes</label>
+                                }
+                                else
+                                {
+                                    <label class='badge bg-blue'>No</label>
+                                }
+                            </td>
+                            <td>
+                                @if (c.StopID != 0)
+                                {
+                                    <label class='badge bg-green'>Yes</label>
+                                }
+                                else
+                                {
+                                    <label class='badge bg-blue'>No</label>
+                                }
+                            </td>
 
-                                    <td>
-                                        <div class="row">
+                            <td>
+                                <div class="row">
 
-                                            <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
-                                            <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
-                                            <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
-
-
-                                        </div>
-                                    </td>
+                                    <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
+                                    <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
+                                    <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
 
 
-                                    <td>
-                                        <div class="row">
+                                </div>
+                            </td>
 
-                                            @using (Html.BeginForm("DeleteStudent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
-                                            {
-                                                <input type="hidden" name="ClassID" value="@Model.ClassID" />
-                                                <input type="hidden" name="SectionID" value="@Model.SectionID" />
-                                                <input type="hidden" name="StudentID" value="@c.StudentID" />
 
-                                                <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>
-                                            }
+                            <td>
+                                <div class="row">
 
-                                        </div>
-                                    </td>
-                                    @* <td>
-                                                                       <div class="row">
+                                    @using (Html.BeginForm("DeleteStudent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                    {
+                                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                                        <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                                        <input type="hidden" name="StudentID" value="@c.StudentID" />
 
-                                                    @using (Html.BeginForm("BlockUnblockStudent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
-                                                    {
-                                                        <label class="switch switch-green col-md-6">
-                                                            <input type="checkbox" class="switch-input" @(c.IsBlock == 0 ? "checked" : "")>
-                                                            <span class="switch-label" onclick="$(this).closest('label').find('#hdnStudentIsBlock').val($(this).closest('label').find('#hdnStudentIsBlock').val() == '0' ? '1' : '0');" data-on="Male" data-off="Female"></span>
-                                                            <span class="switch-handle" id="shTranding"></span>
-                                                            <input type="hidden" name="Gender" id="hdnStudentGender" value="@Model.Student.Gender">
-                                                        </label>
-                                                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
-                                                        <input type="hidden" name="SectionID" value="@Model.SectionID" />
-                                                        <input type="hidden" name="StudentID" value="@c.StudentID" />
+                                        <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>
+                                    }
 
-                                                        <button type="submit" onclick="return BlockUnblockStudent(this);" class="btn btn-link bg-red">Delete</button>
-                                                    }
+                                </div>
+                            </td>
+                            <td>
 
-                                                </div>
-                                        </td>*@
-                                </tr>
+                                <label class="switch switch-candy-yellow col-md-6">
+                                    <input type="checkbox" class="switch-input" @(c.IsBlock == 1 ? "checked" : "")>
+                                    <span class="switch-label IsBlock" id="mdlIsBlock" onclick="$(this).closest('label').find('#hdnIsBlock').val($(this).closest('label').find('#hdnIsBlock').val() == '0' ? '1' : '0');" data-on="Block" data-off="UnBlock" ></span>
+                                    <span class="switch-handle" id="shTranding"></span>
+                                    <input type="hidden" name="StudentID" id="hdnStudentID" value="@c.StudentID" />
+                                    <input type="hidden" name="IsBlock" id="hdnIsBlock" value="@c.IsBlock">
+                                </label>
+                            </td>
+                        </tr>
 
                                 count++;
                             }
@@ -321,6 +311,20 @@
 
         });
 
+        $('.IsBlock').click(function () {
+            debugger;
+            var isblock = $(this).closest('label').find('#hdnIsBlock').val();
+            var studentID = $(this).closest('label').find('#hdnStudentID').val();
+            $.ajax
+                ({
+                    type: 'post',
+                    url: '/Account/UpdateIsBlock/' + isblock + "/" + studentID,
+                    success: function (result) {
+                        alert("IsBlock Status Updated");
+                        window.location.reload();
+                    }
+                });
+        })
         $(document).ready(function () {
             $("input[type='search']").wrap("<form>");
             $("input[type='search']").closest("form").attr("autocomplete", "off");

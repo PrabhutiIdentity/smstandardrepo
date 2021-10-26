@@ -182,12 +182,14 @@ namespace SMEnterprise.Controllers
             return RedirectToAction("Students", "Account", objModel);
         }
         [PermissionFilter]
-        public ActionResult BlockUnblockStudent(StudentsPageModel objModel)
+        public ActionResult UpdateIsBlock(string ID = null, string ID2 = null)
         {
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objAccountData.BlockUnblockStudent(objModel.StudentID);
-            return RedirectToAction("Students", "Account", objModel);
+            int isBlock = CommonUsage.ConvertToInt(ID);
+            int studentID = CommonUsage.ConvertToInt(ID2);
+            objAccountData.UpdateIsBlock(isBlock, studentID);
+            return Json(JsonRequestBehavior.AllowGet);
         }
+
         [PermissionFilter]
         public ActionResult GetSessionClassSectionOnBranch(string ID = null)
         {
@@ -2982,7 +2984,63 @@ namespace SMEnterprise.Controllers
             objAccountData.GetClassWiseDueFeeDetailsNew(objModel);
             return View(objModel);
         }
-       
+
+        #endregion
+
+        #region Parent Fee Details
+        [PermissionFilter]
+        public ActionResult Parents(ParentPageModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.GetBranchParents(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult ParentFeeDetails(ParentFeeDetailsPageModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.QDate = CommonUsage.GetCurrentDate();
+            objModel.Day = objModel.QDate.Day;
+            if (String.IsNullOrEmpty(objModel.YearMonth))
+            {
+                objModel.Month = objModel.QDate.Month;
+                objModel.Year = objModel.QDate.Year;
+            }
+            else
+            {
+                string[] ym = objModel.YearMonth.Split("-".ToCharArray());
+                objModel.Month = CommonUsage.ConvertToInt(ym[0]);
+                objModel.Year = CommonUsage.ConvertToInt(ym[1]);
+            }
+            objAccountData.GetParentWiseFeeDetails(objModel);
+
+            //if (objModel.Year * 12 + objModel.Month > objModel.Session.SessionEndDate.Year * 12 + objModel.Session.SessionEndDate.Month)
+            //{
+            objModel.Year = objModel.Session.SessionEndDate.Year;
+            objModel.Month = objModel.Session.SessionEndDate.Month;
+            //}
+            return View(objModel);
+        }
+
+        [PermissionFilter]
+        public ActionResult ProcessParentFeeDetails(ParentFeeDetailsPageModel objModel)
+        {
+            objModel.QDate = CommonUsage.GetCurrentDate();
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.UpdateParentFeePayment(objModel);
+            TempData["PaymentMessage"] = "Payment is successfull for ParentID PAR" + objModel.ParentID.ToString().PadLeft(6, '0') + " Payment Receipt No is " + objModel.PaymentRecieptNo + " Total Amount Received is Rs." + objModel.PaymentAmount.ToString("0.00")
+                + "<a href='javascript:void(0);' class='PrintReceiptClick' onclick='PrintReciept(" + objModel.PaymentID + ")'> Click Here</a> to print receipt";
+            return RedirectToAction("Parents");
+        }
+
+        [PermissionFilter]
+        public ActionResult GetParentPayments(string ID = null, string ID2 = null)
+        {
+            int iID = CommonUsage.ConvertToInt(ID);
+            int iID2 = CommonUsage.ConvertToInt(ID2);
+            List<FeePaymentModel> model = objAccountData.GetParentPayments(iID, iID2);
+            return PartialView("_ParentPayments", model);
+        }
         #endregion
     }
 }
