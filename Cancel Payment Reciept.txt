@@ -1,0 +1,17 @@
+alter table PaymentMaster
+add CancelDate datetime
+go
+
+alter procedure dbo.sp_DeletePayment    
+(    
+@PaymentID int    
+)    
+AS    
+BEGIN 
+
+ --Delete from PaymentMaster where PaymentID=@PaymentID   
+  Update PaymentMaster set PaymentAmount=0,CancelDate=getdate() where PaymentID=@PaymentID 
+  Delete from PaymentDetails where PaymentID=@PaymentID    
+ 
+END 
+go

@@ -88,7 +88,7 @@
                                 <th style="width:15%">Date</th>
                                 <th style="width:15%">Collected By</th>
                                 <th style="width:15%">Amount</th>
-                                @*<th style="width:15%">Delete</th>*@
+                                <th style="width:15%">Action</th>
                             </tr>
                         </thead>
                         @{
@@ -101,7 +101,8 @@
                         <tr>
 
                             <td>
-                                @c.Name
+                                @c.Name<br/>
+                                @c.PaymentRecieptNo
                             </td>
                             <td>
                               
@@ -140,12 +141,21 @@
                                 <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
                             </td>
                             <td>
+
                                 @using (Html.BeginForm("DeletePayment", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
                                 {
                                     <input type="hidden" name="PaymentID" value="@c.PaymentID" />
                                     <input type="hidden" name="PaymentMode" value="@c.PaymentMode" />
                                     <input type="hidden" name="PaymentDate" value="@c.PaymentDate.ToString("yyyy-MM-dd")" />
-                                    <button type="submit" style="display:none;" value="Delete" class="btn btn-danger" onclick="return DeletePayment(this);">Delete</button>
+                                    if (c.PaymentAmount == 0)
+                                    {
+                                      
+                                        <a href="javascript:void(0);" class="btn btn-success Closed">Cancelled</a>
+                                    }
+                                    else
+                                    {
+                                        <button type="submit"  value="Delete" class="btn btn-danger" onclick="return DeletePayment(this);">Cancel Receipt</button>
+                                    }
                                 }
                             </td>
                         </tr>
@@ -156,7 +166,7 @@
                         }
                         <tfoot>
                             <tr style="background-color: #606d73;color: white;">
-                                <td colspan="7">
+                                <td colspan="6">
                                     <b> Total Collection</b>
                                 </td>
                                 <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
