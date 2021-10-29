@@ -1,0 +1,846 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentFeeModel
+@section IncludeCss
+{
+    @*<style>
+            .row {
+                margin: auto !important;
+            }
+        </style>*@
+    <title>Students Fee Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/RecieptStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+    <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
+    <link href="@Url.Content("~/css/Admin/blue.css")" rel="stylesheet" />
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .paid {
+        background-color: rgba(144, 238, 144, 0.31);
+    }
+
+    .monthList {
+        text-align: center;
+        margin-bottom: 15px !important;
+    }
+
+        .monthList .col-md-1 {
+            border: 1px solid #ccc;
+            padding: 1px 10px;
+            /*input[type="checkbox"]{
+            width:18px;
+            height:18px;
+        }*/
+        }
+
+            .monthList .col-md-1 p {
+                margin-bottom: 0px;
+            }
+
+            .monthList .col-md-1.foucs {
+                background-color: #f1f1f1;
+            }
+
+    .amount-paid .col-md-4 {
+        margin-bottom: 15px;
+    }
+
+        .amount-paid .col-md-4 h4 {
+            height: 27px;
+            margin: 0px;
+        }
+
+    .dropdown-menu > li > form > a {
+        display: block;
+        padding: 3px 20px;
+        clear: both;
+        font-weight: 400;
+        line-height: 1.42857143;
+        color: #333;
+        white-space: nowrap;
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .slider-label-active {
+        color: red;
+    }
+
+    .radios-to-slider.medium .slider-label {
+        width: 60px !important;
+    }
+</style>
+<div class="">
+    <div class="clearfix"></div>
+    <div class="">
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Photo</th>
+                                    <th style="width: 12%">SR.No.</th>
+                                    <th style="width: 20%">Student</th>
+                                    <th style="width: 9%">Quota</th>
+                                    <th style="width: 20%">Amount</th>
+                                    <th style="width: 9%">Status</th>
+                                    <th style="width: 20%">View Details</th>
+                                </tr>
+                            </thead>
+                            @{
+                                decimal TotalDue = 0;
+                                var TotalPayment = 0;
+                                int count = 0;
+                                foreach (FeePaymentModel c in Model.FeePayments)
+                                {
+                                    TotalDue = TotalDue + ((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid - c.Discounts);
+                                    <tr id="trFee_@c.StudentID">
+                                        <input type="hidden" id="hdnSelMonth" value="@Model.SelectedDate.ToString("MM")" />
+                                        <input type="hidden" id="hdnSelYear" value="@Model.SelectedDate.ToString("yyyy")" />
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                        </td>
+                                        <td>  @c.SchoolUID</td>
+                                        <td>
+                                            Name :<nam id="sName"> @c.Name</nam>
+                                            <br />
+                                            ID :<nam id="sSID">  @c.StudentSID </nam>
+                                            <br />
+                                            Roll No : @c.RollNo
+                                            <br />
+                                            Mode : @(c.FeePaymentMode == 1 ? "Monthly" : c.FeePaymentMode == 3 ? "Quarterly" : "Half Yearly")<br />
+                                            Father : @c.FatherName<br />
+                                            Mother : @c.MotherName
+                                        </td>
+                                        <td>
+                                            @(c.IsCustomFee==1?"Custom Fee": c.QuotaName)
+                                        </td>
+
+                                        <td>
+
+                                            Fee Amount : @(c.FeeAmount.ToString("N2"))<br />
+                                            Previous Dues :@c.PreviousDue.ToString("N2")<br />
+                                            Late Fee Fine :@c.LateFee.ToString("N2")<br />
+                                            Fee Concession :@c.Discounts.ToString("N2")<br />
+                                            Paid Amount :@c.Paid.ToString("N2")<br />
+
+                                            <label class='badge bg-red'> Net Amount :@((((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid) - c.Discounts).ToString("N2"))</label>
+                                        </td>
+                                        <td>
+                                            @if ((((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid) - c.Discounts) == 0)
+                                            {
+                                                <label class='badge bg-green'>Paid</label>
+                                            }
+                                            else if (c.Paid != 0)
+                                            {
+                                                <label class='badge bg-blue'>Partial</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-red'>Pending</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <input type="hidden" value="@c.PaymentID" id="hdnPaymentID" />
+                                                    <input type="hidden" value="@c.ClassID" id="hdnClassID" />
+                                                    <input type="hidden" value="@c.SectionID" id="hdnSectionID" />
+                                                    <input type="hidden" value="@c.GroupID" id="hdnGroupID" />
+                                                    <input type="hidden" value="@c.StudentID" id="hdnStudentID" />
+                                                    <input type="hidden" value="@Model.SessionID" id="hdnSessionID" />
+                                                    <input type="hidden" value="@c.Month" id="hdnMonth" />
+
+                                                    @*<a href="javascript:void(0);" onclick="ViewPaymentDetails(this);" class="btn btn-danger Closed">Pay Now</a>*@
+
+                                                    @if ((c.FeeAmount + c.PreviousDue + c.LateFee - c.Paid - c.Discounts) > 0)
+                                                    {
+
+                                                        <a href="javascript:void(0);" onclick="ViewPaymentDetails(this);" class="btn btn-danger Closed">Pay Now</a>
+                                                    }
+                                                    @if ((c.FeeAmount + c.PreviousDue + c.LateFee - c.Paid - c.Discounts) <= 0)
+                                                    {
+                                                        @*<a href="javascript:void(0);" id="btnRecipt" onclick="PrintReciept(this,@c.PaymentID);" class="btn btn-success Closed">Receipt</a>*@
+                                                        <a href="javascript:void(0);" onclick="ViewPaymentDetails(this);" class="btn btn-danger Closed">Pay Now</a>
+                                                    }
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <a href="javascript:void(0);" onclick="ViewPayments(this,@c.StudentID);" class="btn btn-primary Closed">Payments</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+                                <tfoot>
+                                    <tr style="background-color: #606d73;color: white;">
+                                        <td colspan="6">
+                                            Total Due :
+                                        </td>
+                                        <td>
+                                            <i class="fa fa-inr"></i>  @TotalDue
+                                        </td>
+                                    </tr>
+                                </tfoot>
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade bs-example-modal-sm" id="modelConfirmPayment" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <h4 class="modal-title" id="myModalLabel2">Confirm Payment</h4>
+            </div>
+            <div class="modal-body">
+                <h6>Please confirm below details</h6>
+                <div class="row">
+                    <label class="col-md-6">ID</label> <div class="col-md-6" id="divStudentID">Sourabh Sharma</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-6">Student</label> <div class="col-md-6" id="divPaymentFor">Sourabh Sharma</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-6">Payment Date</label> <div class="col-md-6" id="divPaymentDate">25/08/2019</div>
+                </div>
+                <div class="row">
+                    <label class="col-md-6">Payment Amount</label> <div class="col-md-6" id="divPaymentAmount">1200</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" id="btnSubmitPayment" class="btn btn-primary" onclick="SavePayment();">Save Payment</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade bs-example-modal-sm" id="modelFeeDiscount" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            @using (Html.BeginForm("SubmitFeeDiscountRequest", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSubmitDiscountRequest" }))
+            {
+                <div class="modal-body" id="feeDiscountModelBody">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="btnSubmitDiscountRequest">Submit Request</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div id="divPaymentSuccess" style="display:none;">
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Payment Saved</h2>
+
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content">
+            <input type="hidden" id="hdnSavedPaymentID" value="0" />
+            <button type="button" onclick="PrintPaidRecipt(this)" class="btn btn-round btn-success">Print Recipt</button>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script>
+        function TotalAmountPayingChanged(sender,NetAmt)
+        {
+            var payingamt=parseFloat($(sender).val());
+            if(payingamt>NetAmt)
+            {
+                ShowNotification('Error!!!!', 'Please enter an amount less then or equal to Payable amount....', 'error');
+                $(sender).val(NetAmt);
+            }
+        }
+        $('#frmSubmitDiscountRequest').submit(function (e) {
+            e.preventDefault();
+            ShowNotification('Requesting....', 'Please wait the Request is being submitted', 'info');
+            //do some verification
+            $.ajax({
+                url: '/Account/SubmitFeeDiscountRequest',
+                type: 'POST',
+                dataType: 'json',
+                data: $(this).serialize(),
+                success: function (data, textStatus, xhr) {
+                    $("#trFee_" + SID).find('.btn-danger').click();
+
+                    $('#modelFeeDiscount').modal('hide');
+                    ShowNotification('Success','Discount Request is Successfully added, once approved, fee amount will be updated!!!!','success');
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    console.log(textStatus);
+                }
+            });
+        });
+        function ViewReciept(sender, PayID) {
+            if ($(sender).hasClass('RClosed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("ROpen");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                $.ajax(
+        {
+            type: "POST",
+            url: "/Account/GetFeeReciept/" + PayID,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (html) {
+                $(sender).closest("tr").next().remove();
+                $(sender)
+               .closest("tr")
+               .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + html + "</td></tr>");
+                $(sender).text('Close');
+                $(sender).removeClass('RClosed');
+                $(sender).addClass('ROpen');
+            },
+            error: function (e) {
+                alert("errorn");
+            }
+        });
+            }
+            else {
+                $(sender).text('View');
+                $(sender).removeClass('ROpen');
+                $(sender).addClass('RClosed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        function ViewPayments(sender, StudentID) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                $.ajax({
+                    url: "/Account/GetStudentPaymentListPaymentPage/" + StudentID+"/"+@Model.SessionID,
+                    type: 'POST',
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                        $(sender).text('Close');
+                        $(sender).removeClass('Closed');
+                        $(sender).addClass('Open');
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                    },
+                    async: true,
+                    processData: false
+                });
+            }
+            else {
+                $(sender).text('Payments');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function PrintPaidRecipt(sender)
+        {
+            var PayID = $(sender).closest('.x_content').find('#hdnSavedPaymentID').val();
+
+            $.ajax(
+     {
+         type: "POST",
+         url: "/Account/GetFeeReciept/" + PayID,
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function (html) {
+             $(sender).closest("tr").closest('tr')
+            .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + html + "</td></tr>");
+
+             $(sender).closest("tr").remove();
+         },
+         error: function (e) {
+             alert("errorn");
+         }
+     });
+
+        }
+        function SendPaymentSMS(PayID) {
+            if (confirm('Do you really want to send SMS, SMS cost will be applicable....')) {
+                $.ajax(
+         {
+             type: "POST",
+             url: "/Account/SendFeeCollectionSMS/" + PayID,
+             cache: false,
+             processData: false,
+             contentType: false,
+             success: function (data) {
+                 ShowNotification('SMS Submitted', 'SMS has been submitted and will be delivered within few minuts!');
+             },
+             error: function (e) {
+                 alert("errorn");
+             }
+         });
+            }
+        }
+        function PrintReciept(sender, PayID) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                $.ajax(
+        {
+            type: "POST",
+            url: "/Account/GetFeeReciept/" + PayID,
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (html) {
+                $(sender).closest("tr").next().remove();
+                $(sender)
+               .closest("tr")
+               .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: white'>" + html + "</td></tr>");
+                $(sender).text('Close');
+                $(sender).removeClass('Closed');
+                $(sender).addClass('Open');
+            },
+            error: function (e) {
+                alert("errorn");
+            }
+        });
+            }
+            else {
+                $(sender).text('Receipt');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        var StudentName = 'Sourabh Sharma';
+        var StudentID = 'STUD000001';
+        var SID = 0;
+        var SessionID = 0;
+        var feeDetailsSender;
+        function ViewPaymentDetails(sender) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+
+                StudentName = $(sender).closest('tr').find('#sName').html().trim();
+                StudentID = $(sender).closest('tr').find('#sSID').html().trim();
+                SID = $(sender).closest('tr').find('#hdnStudentID').val();
+                SessionID = $(sender).closest('tr').find('#hdnSessionID').val();
+                //var dt = $('#dtMonth').val().split('-');
+                $.ajax({
+                    url: "@Url.Action("GetFeePaymentDetails", "Account")",
+                    type: 'POST',
+                    data: JSON.stringify({
+                        StudentID: $(sender).closest('tr').find('#hdnStudentID').val(),
+                        PaymentID: $(sender).closest('tr').find('#hdnPaymentID').val(),
+                        ClassID: $(sender).closest('tr').find('#hdnClassID').val(),
+                        SectionID: $(sender).closest('tr').find('#hdnSectionID').val(),
+                        SessionID: $(sender).closest('tr').find('#hdnSessionID').val(),
+                        Month:$('#hdnSelMonth').val(),
+                        Year:$('#hdnSelYear').val(),
+                    }),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (html) {
+                        $('#btnSubmitPayment').removeAttr('disabled')
+                        $(sender).closest("tr").next().remove();
+                        $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                        $(sender).text('Close');
+                        $(sender).removeClass('Closed');
+                        $(sender).addClass('Open');
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                    },
+                    async: true,
+                    processData: false
+                });
+            }
+            else {
+                $(sender).text('Pay Now');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+
+
+        function SavePayment() {
+            $('#btnSubmitPayment').attr('disabled','disabled');
+            var WaiverMonths = '';
+            $(".switch").each(function () {
+                if ($(this).find('#hdnFeeStatus').val() == "0") {
+                    if (WaiverMonths != '') {
+                        WaiverMonths = WaiverMonths + ',';
+                    }
+                    WaiverMonths = WaiverMonths + $(this).find('#hdnMonthID').val();
+                }
+            });
+            $.ajax({
+                url: "@Url.Action("SaveFeePayment", "Account")",
+                type: 'POST',
+                data: JSON.stringify({
+                    StudentID: SID,
+
+                    // Entry selected feature month fee with due
+                  //   Month: $(feeDetailsSender).closest('.x_content').find('#hdnMonth').val(),
+                 //   Year: $(feeDetailsSender).closest('.x_content').find('#hdnYear').val(),
+
+                    //Entry only paid month fee
+
+                   Month: $('#hdnSelMonth').val(),
+                    Year: $('#hdnSelYear').val(),
+
+                    WaiverMonths: WaiverMonths,
+                    PaymentAmount: $('#txtNetPaid').val(),
+                    PaymentDate: $('#dtDate').val(),
+                    CollectedBy: $('#txtCollectedBy').val(),
+                    PaymentMode: $('#ddlPaymentMode').val(),
+                    Remark: $('#txtRemark').val(),
+                    ReferanceNumber: $('#txtReferanceNumber').val(),
+                    SessionID: SessionID,
+                    ExcludedFees:$('#hdnExcludedFees').val()
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+                    $('#btnSubmitPayment').removeAttr('disabled');
+                    $("#trFee_" + SID).next().remove();
+                    $("#trFee_" + SID).replaceWith(html);
+
+                    $('#modelConfirmPayment').modal('hide');
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        function ClosePrintRecipt(sender,SIDi)
+        {
+            $("#trFee_" + SIDi).find('#btnRecipt').text('Recipt');
+            $("#trFee_" + SIDi).find('#btnRecipt').removeClass('Open').addClass('Closed');
+
+            $(sender).closest('tr').remove();
+        }
+        function ShowConfirmation(sender) {
+
+            if(parseFloat($('#txtNetPaid').val())>0)
+            {
+                feeDetailsSender = sender;
+                $('#divStudentID').html(StudentID);
+                $('#divPaymentFor').html(StudentName);
+                $('#divPaymentDate').html($('#dtDate').val());
+                $('#divPaymentAmount').html($('#txtNetPaid').val() + ' <i class="fa fa-rupee"></i>');
+                $('#modelConfirmPayment').modal('show');
+            }
+            else
+            {
+                ShowNotification('info', 'can\'t Submit a payment with 0 amount!!!!','info');
+            }
+        }
+        function FeeStatusChanged(sender) {
+            id = $(sender).closest('label').find('#hdnMonthID').val();
+            var Status = $(sender).closest('label').find('#hdnFeeStatus').val() == "1" ? 0 : 1;
+            $(sender).closest('label').find('#hdnFeeStatus').val(Status);
+            var TotalRow = parseFloat($(sender).closest('tr').find('#RowTotal').html().trim());
+            var TotalRemainingMonth = parseFloat($('#MonthRemainingTotal_' + id).html().trim());
+            var TotalMonth = parseFloat($('#MonthTotal_' + id).html().trim());
+            var TotalAmount = parseFloat($('#TotalTotal').html().trim());
+            var TotalRemainingAmount = parseFloat($('#tdTotalRemainingAmount').html().trim());
+            var FeeAmt = parseFloat($(sender).closest('td').find('#hdnFeeApplicable').val())
+            if (Status == 0) {
+                $(sender).closest('tr').find('#RowTotal').html(TotalRow - FeeAmt);
+                $('#tdTotalRemainingAmount').html(TotalRemainingAmount - FeeAmt);
+                $('#TotalTotal').html(TotalAmount - FeeAmt);
+                $('#MonthTotal_' + id).html(TotalMonth - FeeAmt);
+                $('#MonthRemainingTotal_' + id).html(TotalRemainingMonth - FeeAmt);
+                $('#NetTotal').html(TotalRemainingAmount - FeeAmt);
+                $('#txtNetPaid').val(TotalRemainingAmount - FeeAmt);
+            }
+            else {
+                $(sender).closest('tr').find('#RowTotal').html(TotalRow + FeeAmt);
+                $('#tdTotalRemainingAmount').html(TotalRemainingAmount + FeeAmt);
+                $('#TotalTotal').html(TotalAmount + FeeAmt);
+                $('#MonthTotal_' + id).html(TotalMonth + FeeAmt);
+                $('#MonthRemainingTotal_' + id).html(TotalRemainingMonth + FeeAmt);
+                $('#NetTotal').html(TotalRemainingAmount + FeeAmt);
+                $('#txtNetPaid').val(TotalRemainingAmount + FeeAmt);
+            }
+        }
+
+        function MonthChanged(sender, Month, Year) {
+            $('#tdDetails').html(' Loading.... ');
+            $.ajax({
+                url: "@Url.Action("GetFeePaymentDetails", "Account")",
+                type: 'POST',
+                data: JSON.stringify({
+                    StudentID: SID,
+                    Month: Month,
+                    Year: Year,
+                    SessionID: $(sender).closest('.monthList').find('#hdnSaveSessionID').val()
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+
+                    $('#tdDetails').html(html);
+                    $tr.after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        function PrintRecipt() {
+            var nDiv='<table>';
+          //  nDiv=nDiv+'<tr><td>'+$('#divRecipt').html()+'</td><td>'+$('#divRecipt').html()+'</td></tr>';
+   nDiv = nDiv + '<tr><td>' + $('#divRecipt').html().replace('[CopyPlaceHolder]', 'School Copy') + '</td><td>' + $('#divRecipt').html().replace('[CopyPlaceHolder]', 'Student Copy') + '</td></tr>';
+            nDiv=nDiv+'</table>';
+            var contents =nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+
+        function OpenFeeDiscountForm(FeeMonth,FeeYear) {
+            var noti= ShowNotification('wait....', 'Kindly wait while the details are being analyzed!!!!', 'info');
+            $.ajax({
+                url: "@Url.Action("GetFeeDiscountDetails", "Account")",
+                type: 'POST',
+                data: JSON.stringify({
+                    StudentID: SID,
+                    FeeMonth: FeeMonth,
+                    FeeYear: FeeYear,
+                    SessionID: $('#ddlSessions').val()
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+                    html=html.replace('[StudentIDPlaceHolder]',SID);
+                    noti.remove();
+                    $('#feeDiscountModelBody').html(html);
+                    var Status=$('#feeDiscountModelBody').find('#hdnRequestStatus').val();
+                    if(Status!='0')
+                    {
+                        $('#btnSubmitDiscountRequest').attr('disabled','disabled');
+                    }
+                    else
+                    {
+                        {
+                            $('#btnSubmitDiscountRequest').removeAttr('disabled');
+                        }
+                    }
+                    $('#modelFeeDiscount').modal('show');
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+        function ExcludeMonth(sender,Month)
+        {
+            if($(sender).hasClass('checked'))
+            {
+                $(sender).removeClass('checked');
+                $('.pMonth_'+Month).each(function( index ) {
+                    if($(this).hasClass('checked'))
+                    {
+                        $(this).click();
+                    }
+                });
+            }
+            else
+            {
+                $(sender).addClass('checked');
+                $('.pMonth_'+Month).each(function( index ) {
+                    if(!$(this).hasClass('checked'))
+                    {
+                        $(this).click();
+                    }
+                });
+            }
+        }
+        function ExcludeMonthFee(sender,month,feetype)
+        {
+            var feeapplicable = 0;
+            if ($(sender).closest('td').find('.switch').length != 0) {
+                feeapplicable = parseFloat($(sender).closest('td').find('#hdnFeeApplicable').val());
+                if ($(sender).closest('td').find('#hdnFeeStatus').val() == 0) {
+                    feeapplicable = 0;
+                }
+            }
+            else {
+                feeapplicable=parseFloat($(sender).closest('td').find('#hdnFeeApplicable').val());
+            }
+            var RowTotal=parseFloat($(sender).closest('tr').find('#RowTotal').html());
+            var TotalRemaining= parseFloat($(sender).closest('table').find('#tdTotalRemainingAmount').html());
+            var TotalMonth= parseFloat($(sender).closest('table').find('#MonthRemainingTotal_'+month).html());
+            var ActMonthTotal=parseFloat($(sender).closest('table').find('#MonthTotal_'+month).html());
+            var TotalTotal=parseFloat($(sender).closest('table').find('#TotalTotal').html());
+            if($(sender).hasClass('checked'))
+            {
+                 if ($(sender).closest('td').find('.switch').length != 0) {
+                    $(sender).closest('td').find('.switch').css('display','none')
+                 }
+                $(sender).removeClass('checked');
+                var ExFees= $("#hdnExcludedFees").val();
+                ExFees=ExFees+","+month+"^"+feetype;
+                $("#hdnExcludedFees").val(ExFees);
+                $(sender).closest('table').find('#tdTotalRemainingAmount').html(TotalRemaining-feeapplicable);
+                $(sender).closest('tr').find('#RowTotal').html(RowTotal-feeapplicable);
+                $(sender).closest('table').find('#MonthRemainingTotal_'+month).html(TotalMonth-feeapplicable);
+                $('#NetTotal').html(TotalRemaining-feeapplicable);
+                $('#txtNetPaid').val(TotalRemaining-feeapplicable);
+                $(sender).closest('table').find('#MonthTotal_'+month).html(ActMonthTotal-feeapplicable);
+                $(sender).closest('table').find('#TotalTotal').html(TotalTotal-feeapplicable)
+            }
+            else
+            {
+                 if ($(sender).closest('td').find('.switch').length != 0) {
+                    $(sender).closest('td').find('.switch').css('display','')
+                 }
+                $(sender).addClass('checked');
+                var ExFees= $("#hdnExcludedFees").val();
+                ExFees=ExFees.replace(","+month+"^"+feetype,"");
+                $("#hdnExcludedFees").val(ExFees);
+                $(sender).closest('tr').find('#RowTotal').html(RowTotal+feeapplicable);
+                $(sender).closest('table').find('#tdTotalRemainingAmount').html(TotalRemaining+feeapplicable);
+                $(sender).closest('table').find('#MonthRemainingTotal_'+month).html(TotalMonth+feeapplicable);
+                $('#NetTotal').html(TotalRemaining+feeapplicable);
+                $('#txtNetPaid').val(TotalRemaining+feeapplicable);
+                $(sender).closest('table').find('#MonthTotal_'+month).html(ActMonthTotal+feeapplicable);
+                $(sender).closest('table').find('#TotalTotal').html(TotalTotal+feeapplicable)
+            }
+        }
+    </script>
+}
+<!-- /.content -->

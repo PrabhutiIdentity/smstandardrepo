@@ -407,6 +407,7 @@ namespace SMEnterprise.Models
         public int Day { get; set; }
         public int ClassID { get; set; }
         public int SectionID { get; set; }
+        public int ParentID { get; set; }
         public int Month { get; set; }
         public int SessionID { get; set; }
         public int Year { get; set; }             
