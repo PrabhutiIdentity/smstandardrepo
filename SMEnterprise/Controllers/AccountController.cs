@@ -3042,5 +3042,23 @@ namespace SMEnterprise.Controllers
             return PartialView("_ParentPayments", model);
         }
         #endregion
+
+        #region New Student Addmission Month
+        [PermissionFilter]
+        public ActionResult StudentAdmissionReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (oModel.StartDate.Year == 1)
+            {
+                oModel.StartDate = CommonUsage.GetCurrentDate();
+                oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
+            }
+            objAccountData.GetStudentAdmssionDetail(oModel);
+            return View(oModel);
+        }
+
+        #endregion
+
+        
     }
 }
