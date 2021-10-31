@@ -27,16 +27,9 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
         public int ClassID { get; set; }
-        
         public List<NameIDModel> Sessions { get; set; }
         public List<ParentModel> Parents { get; set; }
-        public List<ClassModel> Classes { get; set; }
-        public List<NameIDModel> Sections { get; set; }
     }
-
-    #region Youtube 
-   
-
     public class YoutubeAdminEditPageData
     {
         public int VideoID { get; set; }
@@ -86,12 +79,10 @@ namespace SMEnterprise.Models
     public class YouTubeAdminPageModel
     {
         public int SBranchID { get; set; }
-        public int TeacherID { get; set; }       
+        public int TeacherID { get; set; }
         public DateTime UploadDate { get; set; }
         public List<YouTubeVideoModel> Videos { get; set; }
         public List<NameIDModel> Teachers { get; set; }
-        public int ClassID { get; set; }
-        public List<NameIDModel> Classes { get; set; }
     }
     public class YouTubeVideoModel
     {
@@ -144,8 +135,6 @@ namespace SMEnterprise.Models
             }
         }
     }
-
-    #endregion
     public class PaymentModeModel
     {
         public int PaymentModeID { get; set; }
@@ -263,8 +252,6 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase AttachmentFile { get; set; }
         public int Status { get; set; }
         public int OpType { get; set; }
-        public int SBranchID { get; set; }
-        public int SessionID { get; set; }
     }
     public class GalleryModel
     {

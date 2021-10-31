@@ -226,10 +226,10 @@
                                             Fee Concession :@c.Discounts.ToString("N2")<br />
                                             Paid Amount :@c.Paid.ToString("N2")<br />
 
-                                            <label class='badge bg-red'> Net Amount :@((((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid) - c.Discounts).ToString("N2"))</label>
+                                            <label class='badge bg-red'> Net Amount :@(((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid - c.Discounts).ToString("N2"))</label>
                                         </td>
                                         <td>
-                                            @if ((((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid) - c.Discounts) == 0)
+                                            @if ((c.FeeAmount + c.PreviousDue + c.LateFee - c.Paid - c.Discounts) == 0)
                                             {
                                                 <label class='badge bg-green'>Paid</label>
                                             }
@@ -649,16 +649,10 @@
                 type: 'POST',
                 data: JSON.stringify({
                     StudentID: SID,
-
-                    // Entry selected feature month fee with due
-                  //   Month: $(feeDetailsSender).closest('.x_content').find('#hdnMonth').val(),
-                 //   Year: $(feeDetailsSender).closest('.x_content').find('#hdnYear').val(),
-
-                    //Entry only paid month fee
-
-                   Month: $('#hdnSelMonth').val(),                   
+                    //Month: $(feeDetailsSender).closest('.x_content').find('#hdnMonth').val(),
+                    //Year: $(feeDetailsSender).closest('.x_content').find('#hdnYear').val(),
+                    Month: $('#hdnSelMonth').val(),
                     Year: $('#hdnSelYear').val(),
-
                     WaiverMonths: WaiverMonths,
                     PaymentAmount: $('#txtNetPaid').val(),
                     PaymentDate: $('#dtDate').val(),

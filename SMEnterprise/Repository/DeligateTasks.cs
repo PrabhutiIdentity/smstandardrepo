@@ -44,7 +44,7 @@ namespace SMEnterprise.Repository
                 return _CanceledTasks;
             }
         }
-        public string StartSending(SMSSendTaskModel data, SMSConfigirationModel SMSConfiguration)
+        public string StartSending(SMSSendTaskModel data,SMSConfigirationModel SMSConfiguration)
         {
             List<SMSRecieverDetailModel> finalSendingList = new List<SMSRecieverDetailModel>();
             foreach (SMSRecieverDetailModel r in data.Recievers)
@@ -56,9 +56,8 @@ namespace SMEnterprise.Repository
 
             }
             data.Recievers = finalSendingList;
-
             int TotalRecievers = data.Recievers.Count;
-
+           
             int TotalThreads = 1;
             int SMSPerThread = TotalRecievers / TotalThreads;
             int SMSOverHead = TotalRecievers % TotalThreads;
@@ -74,17 +73,16 @@ namespace SMEnterprise.Repository
             CurrentTasks.TryAdd(data.SMSSendingID + "-" + 0, objTask);
 
             var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
-            hubContext.Clients.All.TaskAdded(data.SMSSendingID, data.Title, data.RecieverList, TotalRecievers, data.Content_id);
+            hubContext.Clients.All.TaskAdded(data.SMSSendingID, data.Title, data.RecieverList, TotalRecievers);
             //DelegatBulkSMS smsdeligate = SendSMSMini;
             SendSMSMini(data, 0, TotalRecievers, 0, SMSConfiguration);
 
             return "1";
         }
-        public void SendSMSMini(SMSSendTaskModel data, int StartIndex, int EndIndex, int DeligateID, SMSConfigirationModel SMSConfiguration)
+        public void SendSMSMini(SMSSendTaskModel data, int StartIndex, int EndIndex, int DeligateID,SMSConfigirationModel SMSConfiguration)
         {
             foreach (SMSRecieverDetailModel r in data.Recievers)
             {
-
                 #region Task Cancellation Handeling
                 //if (CanceledTasks.Keys.Contains(data.SMSSendingID.ToString()) && CanceledTasks[data.SMSSendingID.ToString()] == "1")
                 //{
@@ -112,9 +110,9 @@ namespace SMEnterprise.Repository
                 CurrentTasks[data.SMSSendingID + "-" + DeligateID].ProcessCount = _CurrentTasks[data.SMSSendingID + "-" + DeligateID].ProcessCount + 1;
 
 
-                data.TemplateText = data.TemplateText.Replace("[Reciever]", "Parent");
+                data.TemplateText= data.TemplateText.Replace("[Reciever]", "Parent");
 
-                 // data.TemplateText = data.TemplateText.Replace("[DueAmount]", r.Amount.ToString("N2"));
+              //  data.TemplateText = data.TemplateText.Replace("[DueAmount]", r.Amount.ToString("N2"));
                 string SMSText = "";
                 //if (data.SMSTypeID == 1)
                 //{
@@ -126,7 +124,7 @@ namespace SMEnterprise.Repository
                 }
                 else if (data.SMSTypeID == 2)
                 {
-                    SMSText = data.TemplateText.Replace("[StudentName]", r.Name).Replace("[StartDate]", data.Date.ToString("dd MMM,yyyy")).Replace("[EndDate]", data.EDate.ToString("dd MMM,yyyy")).Replace("[Reason]", data.Title);
+                    SMSText = data.TemplateText.Replace("[StudentName]", r.Name).Replace("[StartDate]", data.Date.ToString("dd MMM,yyyy")).Replace("[EndDate]", data.EDate.ToString("dd MMM,yyyy")).Replace("[Reason]",data.Title);
                 }
                 else if (data.SMSTypeID == 6)
                 {
@@ -147,8 +145,7 @@ namespace SMEnterprise.Repository
 
                 if (r.Mobile != null && r.Mobile != "")
                 {
-                    SubmitSMS(SMSText.TrimStart(), r.Mobile, data.SBranchID, data.SMSTypeID, r.RecieverType, r.RecieverID, data.SMSSendingID, data.Content_id, SMSConfiguration);
-
+                    SubmitSMS(SMSText, r.Mobile, 1, data.SMSTypeID, r.RecieverType, r.RecieverID, data.SMSSendingID, SMSConfiguration);
                 }
                 else
                 {
@@ -162,7 +159,6 @@ namespace SMEnterprise.Repository
                     objModel.SMSText = SMSText;
                     objModel.SMSType = data.SMSTypeID;
                     objModel.SMSID = data.SMSSendingID;
-                    objModel.Content_id = data.Content_id;
                     objModel.Status = 1;
                     objData.UpdateSMSProcessingStatus(objModel);
                     var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
@@ -180,45 +176,38 @@ namespace SMEnterprise.Repository
                 }
             }
         }
-        public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID, string ContentID, SMSConfigirationModel SMSConfiguration)
+        public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID,SMSConfigirationModel SMSConfiguration)
         {
-            string msg = "";
             if (SMSConfiguration == null)
             {
                 SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             }
-
-            SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             string s = "";
-
-            WebClient httpclient = new WebClient();
-            httpclient.Headers.Add("user-agent", SMSConfiguration.header);
-            foreach (SMSConfigirationParamModel param in SMSConfiguration.Params)
-            {
-                if (param.ParamType == 0)
+            
+                WebClient httpclient = new WebClient();
+                httpclient.Headers.Add("user-agent", SMSConfiguration.header);
+                foreach (SMSConfigirationParamModel param in SMSConfiguration.Params)
                 {
-                    httpclient.QueryString.Add(param.ParamName, param.ParamValue);
+                    if (param.ParamType == 0)
+                    {
+                        httpclient.QueryString.Add(param.ParamName, param.ParamValue);
+                    }
+                    else if (param.ParamType == 1)
+                    {
+                        httpclient.QueryString.Add(param.ParamName, mobileNo);
+                    }
+                    else if (param.ParamType == 2)
+                    {
+                        httpclient.QueryString.Add(param.ParamName, text);
+                    }
                 }
-                else if (param.ParamType == 1)
-                {
-                    httpclient.QueryString.Add(param.ParamName, mobileNo);
-                }
-                else if (param.ParamType == 2)
-                {
-                    httpclient.QueryString.Add(param.ParamName, text);
-                }
-                else if (param.ParamType == 3)
-                {
-                    httpclient.QueryString.Add(param.ParamName, Convert.ToString(ContentID).ToString());
-                }
-            }
-            string baseurl = SMSConfiguration.baseurl;
-            Stream data = httpclient.OpenRead(baseurl);
-            StreamReader reader = new StreamReader(data);
-            s = reader.ReadToEnd();
-            data.Close();
-            reader.Close();
-
+                string baseurl = SMSConfiguration.baseurl;
+                Stream data = httpclient.OpenRead(baseurl);
+                StreamReader reader = new StreamReader(data);
+                s = reader.ReadToEnd();
+                data.Close();
+                reader.Close();
+            
             AccountData objData = new AccountData();
 
             var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
@@ -233,7 +222,6 @@ namespace SMEnterprise.Repository
                 objModel.SMSText = text;
                 objModel.SMSType = SMSType;
                 objModel.SMSID = SMSID;
-                objModel.Content_id = ContentID;
                 objModel.Status = 1;
                 hubContext.Clients.All.GetStatus(SMSID + "-" + RecieverID, 1);
                 try
@@ -242,7 +230,7 @@ namespace SMEnterprise.Repository
                 }
                 catch (Exception ex)
                 {
-                    msg = ex.Message;
+
                 }
             }
             else

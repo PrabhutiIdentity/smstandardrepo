@@ -306,7 +306,6 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ReasonFailure", data.ReasonFailure);
                 paramater.Add("@SMSDateTime", data.SMSDateTime);
 
-
                 return con.Query<int>("sp_InsertSMSFailure", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
 
             }
