@@ -1178,6 +1178,34 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+        public StudentFeeModel GetNewFeePaymentsParentWise(StudentFeeModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                DateTime qdate = new DateTime(objModel.Year, objModel.Month, 1).AddMonths(1).AddDays(-1);
+                if (qdate.Day < objModel.Day)
+                {
+                    objModel.Day = qdate.Day;
+                }
+                var paramater = new DynamicParameters();
+                paramater.Add("@ParentID", objModel.ParentID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@QDate", new DateTime(objModel.Year, objModel.Month, objModel.Day));
+
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                using (var multi = con.QueryMultiple("sp_GetFeeSummeryForParentWise", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    //objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    //objModel.Sections = multi.Read<NameIDModel>().ToList();
+                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
         public StudentFeeModel GetFeePaymentsOld(StudentFeeModel objModel)
         {
 

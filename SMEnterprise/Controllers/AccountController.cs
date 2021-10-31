@@ -710,6 +710,25 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult ParentsFeeDetailsNew(StudentFeeModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentFeeModel();
+
+            }
+            if (objModel.SelectedDate.Year == 1)
+            {
+                objModel.SelectedDate = CommonUsage.GetCurrentDate();//.AddMonths(-1);
+            }
+            objModel.Month = objModel.SelectedDate.Month;
+            objModel.Year = objModel.SelectedDate.Year;
+            objModel.Day = objModel.SelectedDate.Day;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetNewFeePaymentsParentWise(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
         public ActionResult FeeDetails(FeePaymentModel objData)
         {
             objData.Day = 10;
