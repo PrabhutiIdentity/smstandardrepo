@@ -1,0 +1,177 @@
+  select * from ExpenceTypeMaster
+go  
+
+ Set Identity_Insert ExpenceTypeMaster On
+  -- --------------------------------------------
+ insert into ExpenceTypeMaster (ExpenceTypeID,ExpenceTypeName,ExpenceTypeApplicable,ChartColor,UserID,IsBaseType,CreatedDate,ModifiedDate)
+values(1,'Salary',2,'#7f30e3',0,NULL,'2020-12-14 11:56:54.283',NULL)
+
+  -- ---- Don't forget to turn it back off ------
+  Set Identity_Insert ExpenceTypeMaster Off
+go
+
+
+alter proc [dbo].[sp_GetExpenceTypes]    
+@SBranchID int=0  
+AS    
+BEGIN    
+  
+select [ExpenceTypeID]    
+      ,[ExpenceTypeName]    
+      ,[ExpenceTypeApplicable],    
+   (Select FeeApplicableName from FeeApplicableMaster where FeeApplicableID=ExpenceTypeApplicable) as ExpenceTypeApplicableName    
+      ,[ChartColor],[IsBaseType],userid    
+  FROM [dbo].[ExpenceTypeMaster]   where userid=@SBranchID  or userid=0
+END 
+  go
+    
+alter proc [dbo].[sp_InsertUpdateExpenceTypes]  
+(  
+@ExpenceTypeID int,  
+@ExpenceTypeName nvarchar(50),  
+@ExpenceTypeApplicable int,  
+@ChartColor nvarchar(50),  
+@UserID int,  
+@OperationDate datetime,  
+@OpType int  
+)  
+AS  
+BEGIN  
+ if(@OpType=-1)  
+ begin  
+  delete from ExpenceTypeMaster where ExpenceTypeID=@ExpenceTypeID  and UserID=@UserID
+ end  
+ else if(@ExpenceTypeID=0)  
+ begin  
+  insert into ExpenceTypeMaster ([ExpenceTypeName]  
+    ,[ExpenceTypeApplicable]  
+    ,[ChartColor],UserID,CreatedDate)  
+    values(@ExpenceTypeName,@ExpenceTypeApplicable,@ChartColor,@UserID,@OperationDate)  
+ end  
+ else  
+ begin  
+  update ExpenceTypeMaster set [ExpenceTypeName]=@ExpenceTypeName,[ExpenceTypeApplicable]=@ExpenceTypeApplicable,  
+  [ChartColor]=@ChartColor,ModifiedDate=@OperationDate,UserID=@UserID where ExpenceTypeID=@ExpenceTypeID  
+ end  
+END  
+go
+
+  alter proc [dbo].[sp_GetDayBookReport]  -- '2020-03-01','2020-03-31',9       
+@FromDate date,          
+@ToDate date,        
+@SBranchID int         
+as          
+begin          
+Select PaymentModeID,PaymentModeName from PaymentModeMaster          
+select FeeTypeID as ID,FeeTypeName as Name from FeeTypeMaster where SBranchID=@SBranchID          
+  select ExpenceTypeID as ID, ExpenceTypeName as Name from [dbo].[ExpenceTypeMaster] where UserID=@SBranchID or ExpenceTypeID=1   --ExpenceTypeID<>1           
+      
+select cast(PM.PaymentDate as Date) as PaymentDate,PM.FeeTypeID,sum(PM.PaymentRecieved) as PaymentRecieved,          
+ (select min(PaymentRecieptNo)+' TO '+Max(PaymentRecieptNo) from PaymentMaster PMM where cast(PMM.PaymentDate as date)=cast(PM.PaymentDate as Date) and PMM.SBranchID=@SBranchID) as PaymentNoRange          
+  from PaymentDetails PM           
+ where PaymentID in (Select PaymentID from PaymentMaster PMM where  cast(PMM.PaymentDate as date) between cast(@FromDate as date) and cast(@ToDate as date) and PMM.SBranchID=@SBranchID )          
+ group by cast(PM.PaymentDate as Date),FeeTypeID          
+       
+      
+ --Select cast(EM.PaymentDate as Date) as ExpenceDate,ETM.ExpenceTypeID,ETM.ExpenceTypeName,      
+ --  sum(PM.Amount) as[ExpenceAmount]       
+ -- FROM [dbo].[ExpenceDetails] PM left outer join [ExpenceMaster] EM on EM.ExpenceID= PM.ExpenceID       
+ -- left Outer Join ExpenceTypeMaster ETM on ETM.ExpenceTypeID= EM.ExpenceTypeID       
+ --  where PM.ExpenceID in (Select PMM.ExpenceID from ExpenceMaster PMM where  cast(PMM.PaymentDate as date) between cast(@FromDate as date) and cast(@ToDate as date) and PMM.SBranchID=@SBranchID )          
+ --  group by cast(EM.PaymentDate as Date),ETM.ExpenceTypeID,ETM.ExpenceTypeName           
+ --   union    
+ --Select cast(SP.processingdate as Date) as ExpenceDate,ETM.ExpenceTypeID,ETM.ExpenceTypeName,      
+ --  sum(SP.NetPayble) as[ExpenceAmount]       
+ -- FROM [dbo].SalaryProcessingMaster SP left outer join SalaryProcessingMaster EM on EM.SPMID= SP.SPMID       
+ -- left Outer Join ExpenceTypeMaster ETM on ETM.ExpenceTypeID=1 and ETM.userid=0      
+ --  where EM.SPMID in (Select PMM.SPMID from SalaryProcessingMaster PMM where  cast(PMM.processingdate as date) between cast(@FromDate as date) and cast(@ToDate as date) and PMM.SBranchID=@SBranchID )          
+ --   group by cast(SP.processingdate as Date),ExpenceTypeID,ExpenceTypeName     
+ declare @ExpanceReport Table(ExpenceDate date,ExpenceTypeID int,ExpenceTypeName nvarchar(50),ExpenceAmount numeric(10,2))    
+    
+  insert into @ExpanceReport    
+ Select cast(EM.PaymentDate as Date) as ExpenceDate,ETM.ExpenceTypeID,ETM.ExpenceTypeName,      
+   sum(PM.Amount) as[ExpenceAmount]       
+  FROM [dbo].[ExpenceDetails] PM left outer join [ExpenceMaster] EM on EM.ExpenceID= PM.ExpenceID       
+  left Outer Join ExpenceTypeMaster ETM on ETM.ExpenceTypeID= EM.ExpenceTypeID       
+   where PM.ExpenceID in (Select PMM.ExpenceID from ExpenceMaster PMM where  cast(PMM.PaymentDate as date) between cast(@FromDate as date) and cast(@ToDate as date) and PMM.SBranchID=@SBranchID )          
+   group by cast(EM.PaymentDate as Date),ETM.ExpenceTypeID,ETM.ExpenceTypeName           
+    union    
+ Select cast(SP.processingdate as Date) as ExpenceDate,ETM.ExpenceTypeID,ETM.ExpenceTypeName,      
+   sum(SP.NetPayble) as[ExpenceAmount]       
+  FROM [dbo].SalaryProcessingMaster SP left outer join SalaryProcessingMaster EM on EM.SPMID= SP.SPMID       
+  left Outer Join ExpenceTypeMaster ETM on ETM.ExpenceTypeID=1 and ETM.userid=0      
+   where EM.SPMID in (Select PMM.SPMID from SalaryProcessingMaster PMM where  cast(PMM.processingdate as date) between cast(@FromDate as date) and cast(@ToDate as date) and PMM.SBranchID=@SBranchID )          
+    group by cast(SP.processingdate as Date),ExpenceTypeID,ExpenceTypeName     
+    
+    
+ select ExpenceDate,sum([ExpenceAmount]) as ExpenceAmount,  
+  ExpenseNoRange = STUFF((SELECT ', ' + ExpenceTypeName    
+           FROM @ExpanceReport b   WHERE b.ExpenceDate = a.ExpenceDate     
+          FOR XML PATH('')), 1, 2, '')    
+ from @ExpanceReport a    
+ group by ExpenceDate    
+ order by ExpenceDate   
+End
+go
+
+
+alter proc [dbo].[sp_GetExpences]  
+(  
+@SBranchID int,  
+@Month int,  
+@Year int,  
+@ExpenceType int  
+)  
+AS  
+BEGIN  
+ select ExpenceTypeID as ID, ExpenceTypeName as Name from [dbo].[ExpenceTypeMaster] where userid=0 or userid=@SBranchID 
+
+ if(@ExpenceType<>0)  
+ begin  
+ Select ExpenceID ,[ReferanceNumber] ,[ExpenceTypeID] ,[PaymentMode] ,[Remark]  
+      ,(select sum(Amount) from [dbo].[ExpenceDetails] PD where PD.[ExpenceID] = PM.[ExpenceID]) as[PaymentAmount] ,[PaymentStatus] ,[Year] ,[Month] ,[PaymentDate] ,[SBranchID]  
+      ,[ExpenceTitle] ,[EnteredDate]  
+  FROM [dbo].[ExpenceMaster] PM  
+  where SBranchID=@SBranchID and Month=@Month and Year=@Year  and ExpenceTypeID=@ExpenceType  and    SBranchID=@SBranchID 
+  order by [PaymentDate] desc  
+  end  
+  else  
+  begin  
+ Select ExpenceID ,[ReferanceNumber] ,PM.[ExpenceTypeID] ,[PaymentMode] ,[Remark]  
+      ,(select sum(Amount) from [dbo].[ExpenceDetails] PD where PD.[ExpenceID] = PM.[ExpenceID]) as[PaymentAmount] ,[PaymentStatus] ,[Year] ,[Month] ,[PaymentDate] ,[SBranchID]  
+      ,[ExpenceTitle] ,[EnteredDate],ETM.ExpenceTypeName as ExpenceType,ETM.ChartColor  
+         
+  FROM [dbo].[ExpenceMaster] PM left outer join [ExpenceTypeMaster] ETM on ETM.ExpenceTypeID= PM.ExpenceTypeID   
+  where SBranchID=@SBranchID and Month=@Month and Year=@Year  and  (SBranchID=@SBranchID or ETM.Userid=0) 
+  order by [PaymentDate] desc  
+  end  
+END  
+  go
+  
+  
+  
+alter proc [dbo].[sp_GetExpenceDetails]          
+(        
+@ExpenceID int,  
+@SBranchID int      
+)        
+AS       
+--declare @SBranchID int       
+BEGIN        
+ Select ExpenceID ,[ReferanceNumber] ,[ExpenceTypeID] ,[PaymentMode] ,[Remark]        
+      ,[PaymentStatus] ,[Year] ,[Month] ,[PaymentDate] ,[SBranchID]        
+      ,[ExpenceTitle] ,[EnteredDate]        
+  FROM [dbo].[ExpenceMaster] PM      
+   where ExpenceID=@ExpenceID       
+   -- select @SBranchID=SBranchID from [dbo].[ExpenceMaster]where ExpenceID=@ExpenceID     
+ --select ExpenceTypeID as ID, ExpenceTypeName as Name from [dbo].[ExpenceTypeMaster] where ExpenceTypeID<>1        
+    select distinct(ETM.ExpenceTypeID  ) as ID, ETM.ExpenceTypeName as Name from [dbo].[ExpenceTypeMaster] ETM       
+   left outer join ExpenceMaster Em on EM.ExpenceTypeID=ETM.ExpenceTypeID      
+   where   EM.SBranchID=@SBranchID or ETM.userid=@SBranchID    
+         
+ select CollectionID,ExpenceID,ItemName,Amount, Quantity, Rate        
+ from [dbo].[ExpenceDetails] where ExpenceID=@ExpenceID        
+        
+ select BillID,ExpenceID, BillFor, ImageName from ExpenceBillImages where ExpenceID=@ExpenceID        
+END 
+go

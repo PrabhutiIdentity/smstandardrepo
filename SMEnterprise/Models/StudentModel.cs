@@ -232,7 +232,6 @@ namespace SMEnterprise.Models
         public string AccountNumber { get; set; }
         public string IFSCCode { get; set; }
         public string BranchName { get; set; }
-        public string ReasonforInactive { get; set; }
 
         public HttpPostedFileBase StudentImageUploader { get; set; }
         public HttpPostedFileBase BirthCertificateUploader { get; set; }
@@ -324,7 +323,6 @@ namespace SMEnterprise.Models
         public string SectionName { get; set; }
         public int HouseID { get; set; }
         public int IsAdmissionFeeApplicable { get; set; }
-        public string ReasonforInactive { get; set; }
         public List<NameIDModel> SubjectsOpted { get; set; }
         public DataTable GetSubjectOptedDataTable()
         {

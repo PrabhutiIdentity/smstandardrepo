@@ -5,65 +5,6 @@
 </div>
 <div id="divRecipt">
     <div class="wrapper">
-        @*<table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
-                <tr>
-                    <td style="text-align: center;">
-                        [CopyPlaceHolder]
-                    </td>
-                    <td colspan="2" style="text-align: center;border-bottom: 0px solid #ddd;">
-
-                        <p style="margin-bottom: 2px;text-align: right;">
-
-                            Receipt No:-  @(Model.PaymentRecieptNo != null ? Model.PaymentRecieptNo : "PAY" + Model.PaymentID.ToString().PadLeft(6, '0'))
-                        </p>
-
-
-                    </td>
-                </tr>
-                <tr style="width:100%">
-                    <td style="width:20%;text-align:left;">
-                        <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
-                    </td>
-
-                    <td style="width:60%;text-align:center;">
-                        <table style="width:100%">
-                            <tr>
-                                <td style="text-align: left;vertical-align: middle;">
-                                    <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.SBranchDetails.BranchSchoolName</p>
-
-                                    <p style="margin-bottom: 2px;font-size: 16px;text-align: center;">
-                                        @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
-
-                                    </p>
-
-                                </td>
-                            </tr>
-
-                        </table>
-                    </td>
-                    <td style="width:20%;text-align:right;">
-                        <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" />
-                    </td>
-
-                </tr>
-                <tr>
-                    <t
-                       d colspan="3">
-                        <p style="margin-bottom: 2px;text-align: center;">       <b>Contact:</b>    @Model.SBranchDetails.ContactNo &nbsp;&nbsp;&nbsp;   <b>Email:</b>  @Model.SBranchDetails.EmailID</p>
-
-                    </td>
-                </tr>
-
-                <tr>
-                    <td colspan="3" style="text-align: center;border-bottom: 0px solid #ddd;">
-
-                       <p style="font-size: 22px;text-align: center;">Academic Session : @Model.SessionName</p>
-
-                    </td>
-                </tr>
-
-            </table>*@
-
         <div class="header-1">
             <div class="col-3" style="text-align: right;">
                 Receipt No:-  @(Model.PaymentRecieptNo != null ? Model.PaymentRecieptNo : "PAY" + Model.PaymentID.ToString().PadLeft(6, '0'))
@@ -80,7 +21,7 @@
                 <h1>
                     @Model.SBranchDetails.BranchSchoolName <br /><ad style="font-size:21px!important;"> @Html.Raw(Model.SBranchDetails.Address == null ? "" : Model.SBranchDetails.Address.Replace("\n", "<br/>"))</ad>
                 </h1>
-
+               
             </div>
             <div class="col-3" style="text-align: right;    width: 95px;">
                 <img src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" />
@@ -171,26 +112,21 @@
 
                         @foreach (SMEnterprise.Models.FeeDetailsModel f in Model.PaymentDetails)
                         {
-
-                            <tr>
-                                <td>@(counter).</td>
-                                <td>@f.FeeTypeName</td>
-                                <td>₹ @f.NetApplicablePayment</td>
-                                <td>₹ @f.DiscAmt</td>
-                                <td>₹ @f.PaymentRecieved</td>
-                            </tr>
+                          
+                        <tr>
+                            <td>@(counter).</td>
+                            <td>@f.FeeTypeName</td>
+                            <td>₹ @f.NetApplicablePayment</td>
+                            <td>₹ @f.DiscAmt</td>
+                            <td>₹ @f.PaymentRecieved</td>
+                        </tr>
                             counter++;
 
-                            // Feature selected Month Fee Calculaion
 
-                            //  TotalAmount = TotalAmount + f.PaymentRecieved;
-                            //  TotalPayable = TotalPayable + f.NetApplicablePayment;
-
-                            // Current Month Fee Calculaion
-
-                            TotalAmount = f.PaymentRecieved;
+                            //TotalAmount = TotalAmount + f.PaymentRecieved;
+                            TotalAmount =  f.PaymentRecieved;
+                            // TotalPayable = TotalPayable + f.NetApplicablePayment;
                             TotalPayable = f.NetApplicablePayment;
-
                             Discount = Discount + f.DiscAmt;
                         }
 
@@ -205,7 +141,7 @@
                         </tr>
                         <tr>
                             <td colspan="4" align="right"><strong>Due Amount</strong></td>
-                            <td>₹ @((TotalPayable - TotalAmount - Discount).ToString("0.00"))</td>
+                            <td>₹ @((TotalPayable-TotalAmount-Discount).ToString("0.00"))</td>
                         </tr>
                     </tbody>
                 }
@@ -216,7 +152,6 @@
         </div>
         <div class="row bottom-sec">
             <div class="col-sm-8">
-              
                 Note : - Fee must be paid up to @(Model.LastPayDay)th date of every month otherwise student will have to pay fine Rs. @Model.LateFee/-.
             </div>
             <b>@Model.CollectedBy</b>
