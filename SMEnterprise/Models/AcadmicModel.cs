@@ -73,9 +73,14 @@ namespace SMEnterprise.Models
         public string StudentName { get; set; }
         public int StudentID { get; set; }
         public TCModel TCDetails { get; set; }
+        public SBranchModel Branch { get; set; }
         public StudentModel StudentDetails { get; set; }
         public List<ClassModel> Classes { get; set; }
-        public List<SubjectModel> Subjects { get; set; }
+        //public List<SubjectModel> Subjects { get; set; }
+        public List<string> Subjects { get; set; }
+
+        public List<SessionModel> Sessions { get; set; }
+
     }
     public class TCListModel
     {

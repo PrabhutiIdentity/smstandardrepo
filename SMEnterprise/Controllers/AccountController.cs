@@ -159,21 +159,7 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
 
-        [PermissionFilter]
-        public ActionResult SearchStudentsForTC(StudentSearchListModel objModel)
-        {
-            if (objModel == null)
-            {
-                objModel = new StudentSearchListModel();
-            }
-            if (objModel.SearchText != null)
-            {
-                objModel.SearchText = objModel.SearchText.Trim();
-            }
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
-            return View(objModel);
-        }
+
         [PermissionFilter]
         public ActionResult DeleteStudent(StudentsPageModel objModel)
         {
@@ -1737,7 +1723,51 @@ namespace SMEnterprise.Controllers
             int Res = objAccountData.InsertUpdateSLC(objModel);
             return Redirect("ViewStudentSLC/" + objModel.StudentID + "/" + objModel.SessionID);
         }
+        [PermissionFilter]
+        public ActionResult SearchStudentsForTC(StudentSearchListModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentSearchListModel();
+            }
+            if (objModel.SearchText != null)
+            {
+                objModel.SearchText = objModel.SearchText.Trim();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (objModel.TCType == 0)
+            {
+                objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
+                return View(objModel);
+            }
+            else
+            {
+                return RedirectToAction("New", objModel);
+            }
 
+        }
+        [PermissionFilter]
+        public ActionResult New(StudentSearchListModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentSearchListModel();
+            }
+            if (objModel.SearchText != null)
+            {
+                objModel.SearchText = objModel.SearchText.Trim();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (objModel.TCType == 1)
+            {
+                objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
+                return RedirectToAction("GenerateTC", objModel);
+            }
+            else
+            {
+                return RedirectToAction("SearchStudentsForTC", objModel);
+            }
+        }
         [PermissionFilter]
         public ActionResult GenerateTC(TCDetailsModel objModel)
         {
@@ -1752,9 +1782,22 @@ namespace SMEnterprise.Controllers
             {
                 objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
                 objAccountData.GetTCDetails(objModel);
-                ViewBag.Message = "Success";
-                return View(objModel);
+                //ViewBag.Message = "Success";
+                //return View(objModel);
+                return RedirectToAction("GetTCForStudent", objModel);
+                //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
             }
+        }
+        [PermissionFilter]
+        public ActionResult GetTCForStudent(TCDetailsModel oModel)
+        {
+            if (oModel.DOB.Year == 1)
+            {
+                oModel.DOB = CommonUsage.GetCurrentDate();
+            }
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.GetTCDetails(oModel);
+            return View(oModel);
         }
         #endregion
         #region Reports
@@ -2782,6 +2825,15 @@ namespace SMEnterprise.Controllers
             //  return View(objModel);
            // return RedirectToAction("Students", "Account");
         }
+        public ActionResult UpdateEmployeePassword(string ID = null, string employeeid = null)
+        {
+            string Password = ID;
+            int UserID = CommonUsage.ConvertToInt(employeeid);
+            int UserType = 3;
+            CommonData objCommonData = new CommonData();
+            int i = objAccountData.UpdatePassword(UserID, UserType, Password);
+            return Json(i, JsonRequestBehavior.AllowGet);
+        }
 
         #endregion
 
@@ -3061,5 +3113,21 @@ namespace SMEnterprise.Controllers
             return PartialView("_ParentPayments", model);
         }
         #endregion
+
+        #region studentadmissionreport
+        [PermissionFilter]
+        public ActionResult StudentAdmissionReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (oModel.StartDate.Year == 1)
+            {
+                oModel.StartDate = CommonUsage.GetCurrentDate();
+                oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
+            }
+            objAdminData.GetStudentAdmssionDetail(oModel);
+            return View(oModel);
+        }
+        #endregion
+
     }
 }

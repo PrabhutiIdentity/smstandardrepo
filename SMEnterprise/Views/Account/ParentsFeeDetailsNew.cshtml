@@ -137,6 +137,7 @@
                                 {
                                     TotalDue = TotalDue + ((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid - c.Discounts);
                                     <tr id="trFee_@c.StudentID">
+                                        <input type="hidden" id="ddlSessions" value="@Model.SessionID" />
                                         <input type="hidden" id="hdnSelMonth" value="@Model.SelectedDate.ToString("MM")" />
                                         <input type="hidden" id="hdnSelYear" value="@Model.SelectedDate.ToString("yyyy")" />
                                         <td>
@@ -151,8 +152,9 @@
                                             Roll No : @c.RollNo
                                             <br />
                                             Mode : @(c.FeePaymentMode == 1 ? "Monthly" : c.FeePaymentMode == 3 ? "Quarterly" : "Half Yearly")<br />
-                                            Father : @c.FatherName<br />
-                                            Mother : @c.MotherName
+                                            Class : @c.Class<br />
+                                            Section : @c.Section
+                                           
                                         </td>
                                         <td>
                                             @(c.IsCustomFee==1?"Custom Fee": c.QuotaName)
@@ -301,6 +303,9 @@
     <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
     <script>
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
         function TotalAmountPayingChanged(sender,NetAmt)
         {
             var payingamt=parseFloat($(sender).val());
@@ -409,9 +414,7 @@
                 $(sender).closest("tr").next().remove();
             }
         }
-        $(function () {
-            $("#tblCategory").DataTable();
-        });
+        
         function ClassChanged(sender) {
             $('#ddlSection').html('<option value="0">Loading....</option>');
             $.ajax(
@@ -591,13 +594,13 @@
                     StudentID: SID,
 
                     // Entry selected feature month fee with due
-                  //   Month: $(feeDetailsSender).closest('.x_content').find('#hdnMonth').val(),
-                 //   Year: $(feeDetailsSender).closest('.x_content').find('#hdnYear').val(),
+                    Month: $(feeDetailsSender).closest('.x_content').find('#hdnMonth').val(),
+                   Year: $(feeDetailsSender).closest('.x_content').find('#hdnYear').val(),
 
                     //Entry only paid month fee
 
-                   Month: $('#hdnSelMonth').val(),
-                    Year: $('#hdnSelYear').val(),
+                   //Month: $('#hdnSelMonth').val(),
+                    //Year: $('#hdnSelYear').val(),
 
                     WaiverMonths: WaiverMonths,
                     PaymentAmount: $('#txtNetPaid').val(),

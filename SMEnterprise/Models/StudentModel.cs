@@ -96,6 +96,7 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public List<StudentSearchModel> Students { get; set; }
         public List<NameIDModel> Sessions { get; set; }
+        public int TCType { get; set; }
     }
     public class StudentSearchModel
     {
