@@ -1,15 +1,15 @@
-﻿using BigBlueButtonAPI.Core;
-using SMEnterprise.Filters;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.Mvc;
 using SMEnterprise.Models;
 using SMEnterprise.Repository;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
+using SMEnterprise.Filters;
 using System.Text;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
-using System.Web.Mvc;
+using BigBlueButtonAPI.Core;
 
 namespace SMEnterprise.Controllers
 {
@@ -56,7 +56,6 @@ namespace SMEnterprise.Controllers
             oModel.EncryptedPassword = CommonUsage.EncryptPassword(oModel.Password + CommonUsage.FixedPrimaryEncryptionSalt);
           //  objModel = objAdminData.GetParentsForLoginSMS(objModel.SessionID, objModel.SBranchID);
             string PlayLink = objAdminData.GetPlayStoreLink(SBranchID);
-            string ContentID = "0";
             foreach (ParentModel r in oModel.Parents.Where(c => c.IsSelected == 1))
             {
                 if (r.FatherMobileNo != null && r.FatherMobileNo != "")
@@ -64,7 +63,7 @@ namespace SMEnterprise.Controllers
                     string smsText = CommonUsage.ParentAppSMSTemplate.Replace("[Reciever]", r.FatherName).Replace("[PlayStoreLink]", PlayLink)
                         .Replace("[UserName]", r.ParentSID).Replace("[Password]", oModel.Password);
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(smsText, r.FatherMobileNo, SBranchID, -1, 4, r.ParentID, ContentID);
+                    objSender.SendSMSAsync(smsText, r.FatherMobileNo, SBranchID, -1, 4, r.ParentID);
                     objAdminData.UpdateIndividualPassword(SBranchID, r.ParentSID, oModel.EncryptedPassword, r.ParentID);
                 }
             }
@@ -430,7 +429,6 @@ namespace SMEnterprise.Controllers
         public ActionResult SendHolidaySMS(SMSSendingModel data)
         {
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            string ContentID = "0";
             if (data.AssociatedIDs == "")
             {
                 data.AssociatedIDs = "0";
@@ -441,7 +439,7 @@ namespace SMEnterprise.Controllers
                 if (r.MobileNo != null && r.MobileNo != "" && String.IsNullOrEmpty(r.deviceToken))
                 {
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 2, r.RecieverType, r.ID,ContentID);
+                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 2, r.RecieverType, r.ID);
                 }
             }
             objAdminData.UpdateSenderSMSSentStatus(2, data.ID, data.AssociatedIDs, data.RecieverType);
@@ -658,7 +656,6 @@ namespace SMEnterprise.Controllers
             TeacherSubstitutionEditModel objData = objAdminData.UpdateTeacherSubstitutionDetails(objModel);
             TeacherSubstitutionSMSModel objSMS = objAdminData.GetTeacherSubstitutionSMSDetails(objModel);
             string ReplacingSMS = "";
-            string ContentID = "0";
             StartupModel objStartupModel = (StartupModel)Session["StartupModel"];
             if (objModel.OpType == -1)
             {
@@ -682,7 +679,7 @@ namespace SMEnterprise.Controllers
                 if (objSMS.ReplacingTeacher.MobileNumber != null && objSMS.ReplacingTeacher.MobileNumber != "")
                 {
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(ReplacingSMS, objSMS.ReplacingTeacher.MobileNumber, objModel.SBranchID, 3, 3, objModel.ReplacingTeacherID, ContentID);
+                    objSender.SendSMSAsync(ReplacingSMS, objSMS.ReplacingTeacher.MobileNumber, objModel.SBranchID, 3, 3, objModel.ReplacingTeacherID);
                 }
 
             }
@@ -1245,14 +1242,13 @@ namespace SMEnterprise.Controllers
                 data.AssociatedIDs = "0";
             }
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            string ContentID = "0";
             List<SMSRecieverModel> recievers = objAdminData.GetSMSRecieverList(SBranchID, data.AssociatedIDs, data.RecieverType);
             foreach (SMSRecieverModel r in recievers)
             {
                 if (r.MobileNo != null && r.MobileNo != "" && String.IsNullOrEmpty(r.deviceToken))
                 {
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 1, r.RecieverType, r.ID, ContentID);
+                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 1, r.RecieverType, r.ID);
                 }
             }
             NotificationModel objModel = new NotificationModel();
@@ -1918,7 +1914,7 @@ namespace SMEnterprise.Controllers
             int year = CommonUsage.GetCurrentDate().Year;
             int month = CommonUsage.GetCurrentDate().Month;
 
-           
+            if (Session["SBranchID"] == null)
                 if (Session["SBranchID"] == null)
                 {
                     Session["SBranchID"] = 1;
@@ -2220,7 +2216,6 @@ namespace SMEnterprise.Controllers
         {
 
             objData.ActiveDate = CommonUsage.GetCurrentDate();
-            objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             if (objData.AttachmentFile != null)
             {
                 if (objData.Attachment != null && objData.NewsID != 0)
@@ -3290,94 +3285,6 @@ namespace SMEnterprise.Controllers
         #endregion
 
 
-        #region OnlineExam
-
-        [PermissionFilter]
-        public ActionResult QuestionBank(TeacherQuestionBankModel objModel)
-        {
-            if (TempData["QuestionBank"] != null)
-            {
-                objModel = (TeacherQuestionBankModel)TempData["QuestionBank"];
-            }
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objAdminData.GetTeacherQuestionBank(objModel);
-            return View(objModel);
-        }
-        [PermissionFilter]
-        public ActionResult UpdateQuestionBank(QuestionBankModel objModel)
-        {
-            //objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
-            objModel.CreatedDate = CommonUsage.GetCurrentDate();
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            TeacherData objTeacherData = new TeacherData();
-            int QuestionID = objTeacherData.UpdateQuestionBank(objModel);
-            TeacherQuestionBankModel objFD = new TeacherQuestionBankModel();
-            objFD.QuestionsBy = objModel.QuestionsBy;
-            objFD.ClassID = objModel.ClassID;
-            objFD.SubjectID = objModel.SubjectID;
-            TempData["QuestionBank"] = objFD;
-            return RedirectToAction("QuestionBank");
-        }
-
-        [PermissionFilter]
-        public ActionResult OnlineExams(OnlineExamPageModel objModel)
-        {
-            if (TempData["OnlineExams"] != null)
-            {
-                objModel = (OnlineExamPageModel)TempData["OnlineExams"];
-            }
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            //TeacherData objTeacherData = new TeacherData();
-            objAdminData.GetAdminOnlineExams(objModel);
-            return View(objModel);
-        }
-
-
-
-
-        [PermissionFilter]
-        public ActionResult OnlineExamDetails(OnlineExamModel objModel)
-        {
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            OnlineExamEditModel oData = objAdminData.GetAdminOnlineExamDetails(objModel);
-            oData.Exam.GroupID = objModel.GroupID;
-            return View(oData);
-        }
-
-
-        [PermissionFilter]
-        public ActionResult UpdateOnlineExam(OnlineExamModel objModel)
-        {
-            objModel.CreatedDate = CommonUsage.GetCurrentDate();
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            int QuestionID = objAdminData.UpdateOnlineExam(objModel);
-            OnlineExamPageModel objFD = new OnlineExamPageModel();
-            objFD.SectionID = objModel.SectionID;
-            objFD.ClassID = objModel.ClassID;
-            objFD.SessionID = objModel.SessionID;
-            objFD.SubjectID = objModel.SubjectID;
-            objFD.GroupID = objModel.GroupID;
-            TempData["OnlineExams"] = objFD;
-            return RedirectToAction("OnlineExams");
-        }
-
-
-
-        [PermissionFilter]
-        public ActionResult DeleteOnlineExam(OnlineExamModel objModel)
-        {
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            TeacherData objTeacherData = new TeacherData();
-            objTeacherData.DeleteOnlineExam(objModel.OExamID, SBranchID);
-            OnlineExamPageModel objFD = new OnlineExamPageModel();
-            TempData["OnlineExams"] = objFD;
-            return RedirectToAction("OnlineExams");
-        }
-
-        #endregion
-
-
-
         #region OnlineClasses
         [HttpPost]
         [PermissionFilter]
@@ -3445,21 +3352,6 @@ namespace SMEnterprise.Controllers
         }
         #endregion
 
-
-        #region studentadmissionreport
-        [PermissionFilter]
-        public ActionResult StudentAdmissionReport(StudentAdmissionReportModel oModel)
-        {
-            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            if (oModel.StartDate.Year == 1)
-            {
-                oModel.StartDate = CommonUsage.GetCurrentDate();
-                oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
-            }
-            objAdminData.GetStudentAdmssionDetail(oModel);
-            return View(oModel);
-        }
-        #endregion
     }
 
 }

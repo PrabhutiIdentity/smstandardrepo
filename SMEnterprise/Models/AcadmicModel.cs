@@ -697,7 +697,7 @@ namespace SMEnterprise.Models
         public int IsOptionalSubject { get; set; }
         public int IsApplicable { get; set; }
         public int IsGradeMarking { get; set; }
-        public string FatherName { get; set; }
+
     }
     public class StudentPerformanceListModel
     {

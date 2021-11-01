@@ -54,7 +54,6 @@ namespace SMEnterprise.Models
         public List<SchoolSessionModel> Sessions { get; set; }
         public List<StopWiseStudentAmountModel> StopWiseReport { get; set; }
         public List<NameIDModel> Busses { get; set; }
-        public List<NameIDModel> Stops { get; set; }
         public List<ClassSectionModel> ClassSections { get; set; }
         public List<StudentModel> Students { get; set; }
     }

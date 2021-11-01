@@ -31,12 +31,8 @@ namespace SMEnterprise.Models
         public int StudentID { get; set; }
         public int OExamID { get; set; }
         public int QuestionCount { get; set; }
-        public int SubAnsID { get; set; }
         public decimal TotalMarks { get; set; }
         public decimal MarksObtained { get; set; }
-        public NameIDModel QuesAnswers { get; set; }
-       
-        
         public DateTime SubmissionDate { get; set; }
         public List<NameIDModel> Answers { get; set; }
         public DataTable GetAnswersDatatable()
@@ -91,7 +87,6 @@ namespace SMEnterprise.Models
         public int SectionID { get; set; }
         public int TeacherID { get; set; }
         public int SubjectID { get; set; }
-        public int GroupID { get; set; }
     }
     public class OnlineExamModel
     {
@@ -125,8 +120,6 @@ namespace SMEnterprise.Models
         public int QuestionCount { get; set; }
         public decimal TotalMarks { get; set; }
         public List<NameIDModel> Questions { get; set; }
-        public int OnlineExamType { get; set; }
-        public int GroupID { get; set; }
         public DataTable GetQuestionsDatatable()
         {
             DataTable dtSubjectOpted = new DataTable();
@@ -160,11 +153,6 @@ namespace SMEnterprise.Models
         public int TeacherID { get; set; }
         public int QuestionsBy { get; set; }
         public int ClassID { get; set; }
-        public int SBranchID { get; set; }
-        public int SubjectID { get; set; }
-        public int SessionID { get; set; }
-        public List<NameIDModel> Sessions { get; set; }
-        public int GroupID { get; set; }
         public List<QuestionBankModel> Questions { get; set; }
         public List<NameIDModel> Classes { get; set; }
         public List<NameIDModel> Subjects { get; set; }
@@ -222,7 +210,5 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase ExplainationImageFile { get; set; }
         public int SBranchID { get; set; }
         public int OpType { get; set; }
-        
-        
     }
 }
