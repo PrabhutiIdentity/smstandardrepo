@@ -172,7 +172,6 @@ namespace SMEnterprise.Repository
         public static string GioIndexBasePath = "GioIndex";
         public static string StopIndexBasePath = "StopIndex";
         public static string DatabasebackupDirecotry = "~/Backup/Database";
-        //public static string ParentAppSMSTemplate = "Dear [Reciever],\nPlease download our Mobile App from https://play.google.com/store/apps/details?id=com.crsecondaryschool.android to stay updated with school activities, Your Username is [UserName] and Password is [Password].";
         public static string ParentAppSMSTemplate = "Hello [Reciever],%0a Please download our app from [PlayStoreLink] to stay updated with school activities, your Username is [UserName] and Password is [Password]";
         //  public static string ParentAppSMSTemplate = "Hello [Reciever],%0  your Username is [UserName] and Password is [Password]";
         public static string[] MonthNames = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
@@ -193,8 +192,7 @@ namespace SMEnterprise.Repository
             TimeSpan tsIndia = tzi.GetUtcOffset(new DateTime());
             TimeSpan tsDifference = tsIndia.Subtract(tsLocal);
             return DateTime.Now.Add(tsDifference).AddHours(-1);
-           //   return DateTime.Now.Add(tsDifference).AddHours(0);
-          //    return DateTime.Now.Add(tsDifference).AddHours(+1);
+            //    return DateTime.Now.Add(tsDifference).AddHours(0);
         }
         public static DateTime GetServerDate()
         {

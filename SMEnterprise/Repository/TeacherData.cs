@@ -388,7 +388,6 @@ namespace SMEnterprise.Repository
             return model;
         }
         // for shine
-
         public StudentPerformanceResultModel GetStudentPerformanceResult(StudentPerformanceResultModel model)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -1032,7 +1031,7 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_UpdateQuestionBank", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }
-        // Principal & Teacher Both 
+
         public void GetTeacherQuestionBank(TeacherQuestionBankModel objModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -1135,21 +1134,19 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ExamPriority", oModel.ExamPriority);
                 paramater.Add("@SBranchID", oModel.SBranchID);
                 paramater.Add("@Questions", oModel.GetQuestionsDatatable());
-                paramater.Add("@OnlineExamType", oModel.OnlineExamType);
                 paramater.Add("@OpType", oModel.OpType);
 
                 return con.Query<int>("sp_UpdateOnlineExam", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }
 
-        public StudentOnlineExamSubmissionPageModel GetOnlineExamSubmissions(string OExamID, string SectionID)
+        public StudentOnlineExamSubmissionPageModel GetOnlineExamSubmissions(string OExamID)
         {
             StudentOnlineExamSubmissionPageModel oModel = new StudentOnlineExamSubmissionPageModel();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@OExamID", OExamID);
-                paramater.Add("@SectionID",SectionID);
                 using (var multi = con.QueryMultiple("sp_GetTeacherOnlineExamSubmissions", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.Exam = multi.Read<OnlineExamModel>().SingleOrDefault();

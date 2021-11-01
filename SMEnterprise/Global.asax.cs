@@ -140,10 +140,10 @@ namespace SMEnterprise
         }
         protected void Application_PostAuthorizeRequest()
         {
-            if (IsWebApiRequest())
-            {
-                HttpContext.Current.SetSessionStateBehavior(SessionStateBehavior.Required);
-            }
+            //if (IsWebApiRequest())
+            //{
+            //    HttpContext.Current.SetSessionStateBehavior(SessionStateBehavior.Required);
+            //}
         }
 
         private bool IsWebApiRequest()

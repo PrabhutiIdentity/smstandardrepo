@@ -300,38 +300,7 @@ namespace SMEnterprise.Controllers
         public ActionResult StartOnlineExam(OnlineExamModel oModel)
         {
             OnlineExamEditModel objModel = objParentData.GetStudentOnlineExamDetails(oModel.OExamID);
-            if (objModel.Exam.OnlineExamType == 1)
-            {
-                TempData["OExamID"] = oModel.OExamID;
-                return RedirectToAction("StartOnlineExamNew");
-            }
-            else
-            {
-                return View(objModel);
-            }
-        }
-        [PermissionFilter]
-        public ActionResult StartOnlineExamNew(OnlineExamModel oModel)
-        {
-            if (TempData["OExamID"] != null)
-            {
-                oModel.OExamID = (int)TempData["OExamID"];
-            }
-            OnlineExamEditModel objModel = objParentData.GetStudentOnlineExamDetails(oModel.OExamID);
-
             return View(objModel);
-
-        }
-        [PermissionFilter]
-        public ActionResult SubmitAnswer(StudentOnlineExamSubmitModel oModel)
-        {
-            oModel.StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
-            oModel.SubmissionDate = CommonUsage.GetCurrentDate();
-            StudentOnlineExamSubmitModel obj = objParentData.SubmitOnlineExamAnswerSheetNew(oModel);
-            int res = obj.SubAnsID;
-            TempData["SubmissionID"] = obj.SubmissionID;
-            TempData["OExamID"] = oModel.OExamID;
-            return Json(res, JsonRequestBehavior.AllowGet);
         }
         [PermissionFilter]
         public ActionResult SubmitOnlineTest(StudentOnlineExamSubmitModel oModel)
@@ -419,7 +388,6 @@ namespace SMEnterprise.Controllers
             }
             else
             {
-               
                 return View(-1);
             }
         }
