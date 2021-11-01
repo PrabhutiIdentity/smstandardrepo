@@ -715,6 +715,13 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult Parents(ParentPageModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.GetBranchParents(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
         public ActionResult FeeDetails(FeePaymentModel objData)
         {
             objData.Day = 10;

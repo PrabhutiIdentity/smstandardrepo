@@ -8,17 +8,20 @@ using System.Web.Mvc;
 
 namespace SMEnterprise.Models
 {
-    
+
     public class StudentOnlineExamSubmissionPageModel
     {
         public int OExamID { get; set; }
+        public int SubmissionID { get; set; }
         public OnlineExamModel Exam { get; set; }
         public List<StudentOnlineExamSubmitModel> Submissions { get; set; }
+
+        public List<QuestionBankModel> ExamQuestions { get; set; }
     }
 
     public class StudentOnlineExamSubmitModel
     {
-
+        public int SubAnsID { get; set; }
         public string TeacherRemark { get; set; }
         public int TeacherID { get; set; }
         public string TeacherName { get; set; }
@@ -34,6 +37,7 @@ namespace SMEnterprise.Models
         public decimal TotalMarks { get; set; }
         public decimal MarksObtained { get; set; }
         public DateTime SubmissionDate { get; set; }
+        public NameIDModel QuesAnswers { get; set; }
         public List<NameIDModel> Answers { get; set; }
         public DataTable GetAnswersDatatable()
         {
@@ -60,6 +64,9 @@ namespace SMEnterprise.Models
 
             return dtSubjectOpted;
         }
+
+
+
     }
     public class StudentOnlineExamListPageModel
     {
@@ -70,6 +77,7 @@ namespace SMEnterprise.Models
     }
     public class OnlineExamEditModel
     {
+        public StudentOnlineExamSubmitModel SubmitID { get; set; }
         public OnlineExamModel Exam { get; set; }
         public List<QuestionBankModel> ExamQuestions { get; set; }
         public List<QuestionBankModel> Questions { get; set; }
@@ -84,12 +92,19 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
         public int ClassID { get; set; }
+        public int GroupID { get; set; }
         public int SectionID { get; set; }
         public int TeacherID { get; set; }
         public int SubjectID { get; set; }
     }
     public class OnlineExamModel
     {
+        public List<OnlineExamModel> Result { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int StudentID { get; set; }
         public int SubmissionStatus { get; set; }
         public DateTime SubmissionDate { get; set; }
         public string TeacherRemark { get; set; }
@@ -108,6 +123,7 @@ namespace SMEnterprise.Models
         public int SectionID { get; set; }
         public string SectionName { get; set; }
         public int SubjectID { get; set; }
+        public int GroupID { get; set; }
         public string SubjectName { get; set; }
         public int TeacherID { get; set; }
         public string TeacherName { get; set; }
@@ -117,6 +133,7 @@ namespace SMEnterprise.Models
         public string ExamTitle { get; set; }
         public string ExamDescription { get; set; }
         public int ExamPriority { get; set; }
+        public int OnlineExamType { get; set; }
         public int QuestionCount { get; set; }
         public decimal TotalMarks { get; set; }
         public List<NameIDModel> Questions { get; set; }
@@ -156,10 +173,15 @@ namespace SMEnterprise.Models
         public List<QuestionBankModel> Questions { get; set; }
         public List<NameIDModel> Classes { get; set; }
         public List<NameIDModel> Subjects { get; set; }
+        public int SubjectID { get; set; }
+        public int SessionID { get; set; }
+        public List<NameIDModel> Sessions { get; set; }
+        public int GroupID { get; set; }
+        public int SBranchID { get; set; }
     }
-    
-    
-  
+
+
+
     public class QuestionBankModel
     {
         [AllowHtml]
@@ -176,6 +198,7 @@ namespace SMEnterprise.Models
         public string TeacherName { get; set; }
         public int ClassID { get; set; }
         public int GroupID { get; set; }
+        //public int SubAnsID { get; set; }
         public int SubjectID { get; set; }
         public string SubjectName { get; set; }
         public int ChapterID { get; set; }
