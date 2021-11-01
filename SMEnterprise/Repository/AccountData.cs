@@ -4247,5 +4247,20 @@ namespace SMEnterprise.Repository
             }
         }
         #endregion
+
+        #region Student Block
+        public int UpdateIsBlock(int isBlock, int studentID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@isBlock", isBlock);
+                paramater.Add("@studentID", studentID);
+                return con.Query<int>("SP_UpdateIsBlock", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+            }
+
+        }
+      
     }
 }

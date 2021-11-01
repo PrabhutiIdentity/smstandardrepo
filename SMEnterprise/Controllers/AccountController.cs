@@ -695,7 +695,7 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetNewFeePayments(objModel);
             return View(objModel);
         }
-        [PermissionFilter]
+               [PermissionFilter]
         public ActionResult ParentsFeeDetailsNew(StudentFeeModel objModel)
         {
             if (objModel == null)
@@ -2808,6 +2808,18 @@ namespace SMEnterprise.Controllers
             CommonData objCommonData = new CommonData();
             int i = objAccountData.UpdatePassword(UserID, UserType, Password);
             return Json(i, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Student Block
+      
+        public ActionResult UpdateIsBlock(string ID = null, string ID2 = null)
+        {
+            int isBlock = CommonUsage.ConvertToInt(ID);
+            int studentID = CommonUsage.ConvertToInt(ID2);
+            objAccountData.UpdateIsBlock(isBlock, studentID);
+            return Json(JsonRequestBehavior.AllowGet);
         }
 
         #endregion
