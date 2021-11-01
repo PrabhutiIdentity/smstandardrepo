@@ -3445,6 +3445,21 @@ namespace SMEnterprise.Controllers
         }
         #endregion
 
+
+        #region studentadmissionreport
+        [PermissionFilter]
+        public ActionResult StudentAdmissionReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (oModel.StartDate.Year == 1)
+            {
+                oModel.StartDate = CommonUsage.GetCurrentDate();
+                oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
+            }
+            objAdminData.GetStudentAdmssionDetail(oModel);
+            return View(oModel);
+        }
+        #endregion
     }
 
 }

@@ -1,0 +1,153 @@
+﻿
+@{
+    ViewBag.Title = "StudentAdmissionReport";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Student New Admission Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+@model SMEnterprise.Models.StudentAdmissionReportModel
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    .thumbImage {
+        max-width: 235px;
+        max-height: 250px;
+    }
+
+    *html .thumbImage {
+        width: expression((this.width/this.height)>=1?250:'auto');
+        height: expression((this.width/this.height)<1?250:'auto');
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Student New Admission Report
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href=""><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Student New Admission Report</li>
+    </ol>
+</section>
+
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    @using (Html.BeginForm("StudentAdmissionReport", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+    {
+        <div class="row">
+            <div class="col-md-3 form-group">
+                <label>Session</label>
+                <select class="form-control" name="SessionID">
+                    @foreach (var s in Model.Sessions)
+                    {
+                        <option value="@s.ID" @(s.ID == Model.SessionID ? "selected" : "")>@s.Name @(s.Extra1 == "1" ? "(Active)" : "")</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3 form-group">
+                <label>Select Month:<small>(mm/yyyy)</small><span class="tx-danger">*</span></label>
+                <input type="month" name="StartDate" class="form-control" id="txtStartDate" placeholder="Enter Name" value="@Model.StartDate.ToString("yyyy-MM")" required>
+            </div>
+            @*<div class="col-md-3 form-group">
+                    <label>Class</label>
+                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                        @foreach (var s in Model.Classes)
+                        {
+                            <option value="@s.ID" @(s.ID == Model.ClassID ? "selected" : "")>@s.Name</option>
+                        }
+                    </select>
+                </div>*@
+
+            <div class="col-md-3 form-group">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    }
+    <div class="row">
+        <div class="col-xs-12">
+           
+                <div class="box-body">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 4%">Sl.</th>
+                                <th style="width: 10%">Student Name</th>
+                                <th style="width: 10%">Father Name</th>
+                                <th style="width: 10%">Mother Name</th>
+                                <th style="width: 10%">Class</th>
+                                <th style="width: 10%">Section</th>
+                                <th style="width: 10%">Admission Date</th>
+                                <th style="width: 10%">Date of Birth</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.StudentDetail)
+                            {
+                                <tr>
+                                    <td>@(count + 1)</td>
+                                    <td>
+                                        @c.Name
+                                    </td>
+                                    <td>
+                                        @c.FatherName
+                                    </td>
+
+                                    <td>
+                                        @c.MotherName
+                                    </td>
+                                    <td>
+                                        @c.ClassName
+                                    </td>
+                                    <td>@c.SectionName</td>
+                                    <td>@c.DOJ.ToString("dd/MM/yyyy")</td>
+                                    <td>@c.DOB.ToString("dd/MM/yyyy")</td>
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+         </div>
+    </div>
+
+</section>
+
+<script>
+    $(function () {
+        $("#tblCategory").DataTable({
+            "ordering": false
+        });
+    });
+</script>

@@ -449,6 +449,10 @@ namespace SMEnterprise.Models
         public int Students { get; set; }
         public HttpPostedFileBase BranchLogo { get; set; }
         public HttpPostedFileBase PrincipalSignatureFile { get; set; }
+        public string SchoolNo { get; set; }
+        public string AffiliationNo { get; set; }
+        public string BookNo { get; set; }
+        public string RenewedUpto { get; set; }
         public int OpType { get; set; }
     }
     public class SubSubjectTypeEditModel

@@ -4268,7 +4268,6 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Password", Password);
 
                 return con.Query<int>("sp_ChangePassword", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-
             }
         }
         #endregion
