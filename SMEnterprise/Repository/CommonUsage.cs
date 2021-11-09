@@ -191,8 +191,8 @@ namespace SMEnterprise.Repository
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
             TimeSpan tsIndia = tzi.GetUtcOffset(new DateTime());
             TimeSpan tsDifference = tsIndia.Subtract(tsLocal);
-            return DateTime.Now.Add(tsDifference).AddHours(-1);
-            //    return DateTime.Now.Add(tsDifference).AddHours(0);
+           //   return DateTime.Now.Add(tsDifference).AddHours(-1);
+              return DateTime.Now.Add(tsDifference).AddHours(0);
         }
         public static DateTime GetServerDate()
         {
