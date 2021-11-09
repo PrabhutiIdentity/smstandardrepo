@@ -1917,6 +1917,23 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult StudentsIDCardsV(StudentsPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentsPageModel();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStudents(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
+            if (objModel.ClassID != 0)
+            {
+                objModel.ClassName = objModel.Classes.Where(c => c.ClassID == objModel.ClassID).SingleOrDefault().ClassName;
+                objModel.SectionName = objModel.Sections.Where(c => c.ID == objModel.SectionID).SingleOrDefault().Name;
+                objModel.SessionName = objModel.Sessions.Where(c => c.ID == objModel.SessionID).SingleOrDefault().Name;
+            }
+            return View(objModel);
+        }
+        [PermissionFilter]
         public ActionResult StudentsIDCardsHorizontal(StudentsPageModel objModel)
         {
             if (objModel == null)
