@@ -324,7 +324,9 @@ namespace SMEnterprise.Models
         public string SectionName { get; set; }
         public int HouseID { get; set; }
         public int IsAdmissionFeeApplicable { get; set; }
+        public string ReasonforInactive { get; set; }
         public List<NameIDModel> SubjectsOpted { get; set; }
+        
         public DataTable GetSubjectOptedDataTable()
         {
 
