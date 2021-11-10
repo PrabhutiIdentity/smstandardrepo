@@ -891,6 +891,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@HouseID", objData.HouseID);
                 paramater.Add("@OptedSubjects", objData.GetSubjectOptedDataTable());
                 paramater.Add("@IsAdmissionFeeApplicable", objData.IsAdmissionFeeApplicable);
+                paramater.Add("@ReasonforInactive", objData.ReasonforInactive);
 
                 return con.Query<int>("spn_InsertUpdateStudentSessionDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
