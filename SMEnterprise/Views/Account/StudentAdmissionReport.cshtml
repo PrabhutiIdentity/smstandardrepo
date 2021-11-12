@@ -51,7 +51,7 @@
 <section class="content-header">
     <h1>
         Student New Admission Report
-        <small>Control panel</small>
+      
     </h1>
     <ol class="breadcrumb">
         <li><a href=""><i class="fa fa-dashboard"></i> Dashboard</a></li>
@@ -96,12 +96,14 @@
         <div class="col-xs-12">
 
             <div class="box-body">
-                <table id="tblCategory" class="table table-bordered table-hover">
+                <table id="tblAdmission" class="table table-bordered table-hover">
                     <thead>
                         <tr>
+                            <th>Seq</th>
+
+                            <th>Student Name  </th>
+                            <th>Student ID  </th>
                             <th>SR.No.</th>
-                            <th>Student Name </th>
-                            <th>StudentID</th>
                             <th>Gender</th>
                             <th>Class</th>
                             <th>Section</th>
@@ -121,15 +123,15 @@
                         {
                                         <tr>
                                             <td>@(count + 1)</td>
-                                            <td>  @c.SchoolUID</td>
                                             <td>
-                                                @c.Name
+                                                @c.Name 
                                             </td>
                                             <td>
-
                                                 @c.StudentSID
-
                                             </td>
+                                            <td>  @c.SchoolUID</td>
+
+
                                             <td>
                                                 @if (@c.Gender != 0)
                                                 {
@@ -166,7 +168,7 @@
                                             <td>
                                                 @c.MotherMobileNo
                                             </td>
-                                           
+
 
                                         </tr>
 
@@ -182,10 +184,69 @@
 
 </section>
 
-<script>
-    $(function () {
-        $("#tblCategory").DataTable({
-            "ordering": false
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#tblAdmission").length) {
+                    $("#tblAdmission").DataTable({
+                        dom: "Bfrtip",
+                        "paging": true,
+                     //   "ordering": false
+                        "pageLength": 50,
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
         });
-    });
-</script>
+       
+    </script>
+}
