@@ -79,6 +79,7 @@ namespace SMEnterprise.Models
         public string ReciverCats { get; set; }
         public string RecieverList { get; set; }
         public string Title { get; set; }
+        public string Content_id { get; set; }
     }
     public class SMSSendTaskModel
     {
@@ -103,6 +104,8 @@ namespace SMEnterprise.Models
         public string StartTime { get; set; }
         public string EndTime { get; set; }
         public int SBranchID { get; set; }
+        public string Content_id { get; set; }
+        public string SMSContentID { get; set; }
         public DataTable GetRecieverDetailsDataTable()
         {
 
@@ -117,6 +120,7 @@ namespace SMEnterprise.Models
             dtDetails.Columns.Add("ReasonFailure");
             dtDetails.Columns.Add("SMSDateTime");
             dtDetails.Columns.Add("Status");
+            dtDetails.Columns.Add("Content_id");
 
             foreach (SMSRecieverDetailModel e in Recievers)
             {
@@ -126,6 +130,7 @@ namespace SMEnterprise.Models
                     dr["RecieverType"] = e.RecieverType;
                     dr["RecieverID"] = e.RecieverID;
                     dr["MobileNumber"] = e.Mobile;
+                    dr["Content_id"] = e.Content_id;
 
                     dtDetails.Rows.Add(dr);
                 }
@@ -149,6 +154,8 @@ namespace SMEnterprise.Models
         public int Status { get; set; }
         public string ReasonFailure { get; set; }
         public DateTime SMSDateTime { get; set; }
+        public string SMSContentID { get; set; }
+        public string Content_id { get; set; }
     }
     public class SMSRequestModel
     {

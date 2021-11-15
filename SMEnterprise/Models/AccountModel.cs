@@ -15,6 +15,7 @@ namespace SMEnterprise.Models
         public string FCMToken { get; set; }
         public int RecieverID { get; set; }
         public int RecieverType { get; set; }
+        public string ContentID { get; set; }
     }
     public class ClassFeeCollectionChartModel
     {

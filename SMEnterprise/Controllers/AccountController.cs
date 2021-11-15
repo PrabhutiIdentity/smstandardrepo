@@ -812,13 +812,14 @@ namespace SMEnterprise.Controllers
             {
                 int PaymentID = CommonUsage.ConvertToInt(ID);
                 int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                string ContentID = "0";
                 NotificationSMSModel objModel = objAccountData.GetFeePaymentSMSDetails(PaymentID);
-
+              
                 if (objModel.Number != null && objModel.Number != "" && !String.IsNullOrEmpty(objModel.SMSText) && String.IsNullOrEmpty(objModel.FCMToken))
                 {
                     SMSSender objSender = new SMSSender();
 
-                    objSender.SendSMSAsync(objModel.SMSText, objModel.Number, SBranchID, 4, 1, PaymentID);
+                    objSender.SendSMSAsync(objModel.SMSText, objModel.Number, SBranchID, 4, 1, PaymentID, objModel.ContentID);
                 }
                 if (!String.IsNullOrEmpty(objModel.FCMToken))
                 {
@@ -2087,6 +2088,7 @@ namespace SMEnterprise.Controllers
         {
             int ID = CommonUsage.ConvertToInt(id);
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            string ContentID = "0";
             string OTP = CommonUsage.RandomString(4, false);
             PaymentModel objModel = objAccountData.CancelPaymentReuest(ID, OTP);
 
@@ -2095,7 +2097,7 @@ namespace SMEnterprise.Controllers
             if (objModel.Mobile != null && objModel.Mobile != "")
             {
                 SMSSender objSender = new SMSSender();
-                objSender.SendSMSAsync(SMS, objModel.Mobile, SBranchID, 4, 1, objModel.PaymentID);
+                objSender.SendSMSAsync(SMS, objModel.Mobile, SBranchID, 4, 1, objModel.PaymentID, ContentID);
             }
             objModel.Mobile = "XXXXXX" + objModel.Mobile.Substring(objModel.Mobile.Length - 4);
             return Json(objModel, JsonRequestBehavior.AllowGet);

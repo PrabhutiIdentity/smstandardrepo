@@ -1197,9 +1197,9 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetFeeSummeryForParentWise", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     //objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                //    objModel.ClassID = multi.Read<int>().SingleOrDefault();
                     //objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
+              //      objModel.SectionID = multi.Read<int>().SingleOrDefault();
                     objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
@@ -3720,6 +3720,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Title", objModel.Title);
                 paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
                 paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@content_id", objModel.Content_id);
                 return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
 
@@ -3791,7 +3792,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ReasonFailure", data.ReasonFailure);
                 paramater.Add("@SMSDateTime", data.SMSDateTime);
                 paramater.Add("@Status", data.Status);
-
+                paramater.Add("@Content_id", data.SMSContentID);
                 return con.Query<int>("spn_UpdateSMSProcessingLog", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
 
             }

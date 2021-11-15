@@ -36,18 +36,18 @@ namespace SMEnterprise.Repository
             return lst;
         }
         //SMSType 1-Notice, 2-Holiday
-        public delegate void DelegatSMSSender(string text, string mobile, int SBranchID,int SMSType,int RecieverType,int RecieverID);
+        public delegate void DelegatSMSSender(string text, string mobile, int SBranchID, int SMSType, int RecieverType, int RecieverID, string ContentID);
 
-        public void SendSMSAsync(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID)
+        public void SendSMSAsync(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, string ContentID)
         {
-            
+
             DelegatSMSSender smsdeligate = this.SendSMS;
-            smsdeligate.BeginInvoke(text, mobileNo, SBranchID,  SMSType,  RecieverType,  RecieverID, null, null);
+            smsdeligate.BeginInvoke(text, mobileNo, SBranchID, SMSType, RecieverType, RecieverID, ContentID, null, null);
         }
-       
-        public void SendSMS(string text,string mobileNo,int SBranchID, int SMSType, int RecieverType, int RecieverID)
+        public void SendSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, string ContentID)
         {
-            SMSConfigirationModel SMSConfigiration= (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
+
+            SMSConfigirationModel SMSConfigiration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             CommonData objData = new CommonData();
             try
             {
@@ -66,6 +66,8 @@ namespace SMEnterprise.Repository
                     objModel.SMSDateTime = CommonUsage.GetCurrentDate();
                     objModel.SMSText = text;
                     objModel.SMSType = SMSType;
+                    objModel.Content_id = ContentID;
+
                     objData.UpdateSMSFailure(objModel);
                 }
                 foreach (SMSConfigirationParamModel param in SMSConfigiration.Params)
@@ -101,6 +103,7 @@ namespace SMEnterprise.Repository
                     objModel.SMSDateTime = CommonUsage.GetCurrentDate();
                     objModel.SMSText = text;
                     objModel.SMSType = SMSType;
+                    objModel.Content_id = ContentID;
                     objData.UpdateSMSFailure(objModel);
 
                     objData.UpdateSMSCount(SBranchID);
@@ -115,6 +118,7 @@ namespace SMEnterprise.Repository
                     objModel.SMSDateTime = CommonUsage.GetCurrentDate();
                     objModel.SMSText = text;
                     objModel.SMSType = SMSType;
+                    objModel.Content_id = ContentID;
                     objData.UpdateSMSFailure(objModel);
                 }
             }
@@ -128,6 +132,7 @@ namespace SMEnterprise.Repository
                 objModel.SMSDateTime = CommonUsage.GetCurrentDate();
                 objModel.SMSText = ex.Message;
                 objModel.SMSType = SMSType;
+                objModel.Content_id = ContentID;
                 objData.UpdateSMSFailure(objModel);
             }
         }
@@ -203,6 +208,8 @@ namespace SMEnterprise.Repository
         public DateTime SMSDateTime { get; set; }
         public int Status { get; set; }
         public int SMSID { get; set; }
+        public string Content_id { get; set; }
+        public string SMSContentID { get; set; }
     }
     public class SMSRecieverModel
     {
@@ -211,6 +218,8 @@ namespace SMEnterprise.Repository
         public string Name { get; set; }
         public string MobileNo { get; set; }
         public string deviceToken { get; set; }
+        public string Content_id { get; set; }
+        public string SMSContentID { get; set; }
     }
     public class StudentBirthdaySMSModel
     {
