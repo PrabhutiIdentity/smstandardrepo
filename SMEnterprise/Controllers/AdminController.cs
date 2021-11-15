@@ -56,6 +56,7 @@ namespace SMEnterprise.Controllers
             oModel.EncryptedPassword = CommonUsage.EncryptPassword(oModel.Password + CommonUsage.FixedPrimaryEncryptionSalt);
           //  objModel = objAdminData.GetParentsForLoginSMS(objModel.SessionID, objModel.SBranchID);
             string PlayLink = objAdminData.GetPlayStoreLink(SBranchID);
+            string ContentID = "0";
             foreach (ParentModel r in oModel.Parents.Where(c => c.IsSelected == 1))
             {
                 if (r.FatherMobileNo != null && r.FatherMobileNo != "")
@@ -63,7 +64,7 @@ namespace SMEnterprise.Controllers
                     string smsText = CommonUsage.ParentAppSMSTemplate.Replace("[Reciever]", r.FatherName).Replace("[PlayStoreLink]", PlayLink)
                         .Replace("[UserName]", r.ParentSID).Replace("[Password]", oModel.Password);
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(smsText, r.FatherMobileNo, SBranchID, -1, 4, r.ParentID);
+                    objSender.SendSMSAsync(smsText, r.FatherMobileNo, SBranchID, -1, 4, r.ParentID, ContentID);
                     objAdminData.UpdateIndividualPassword(SBranchID, r.ParentSID, oModel.EncryptedPassword, r.ParentID);
                 }
             }
@@ -429,6 +430,7 @@ namespace SMEnterprise.Controllers
         public ActionResult SendHolidaySMS(SMSSendingModel data)
         {
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            string ContentID = "0";
             if (data.AssociatedIDs == "")
             {
                 data.AssociatedIDs = "0";
@@ -439,7 +441,7 @@ namespace SMEnterprise.Controllers
                 if (r.MobileNo != null && r.MobileNo != "" && String.IsNullOrEmpty(r.deviceToken))
                 {
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 2, r.RecieverType, r.ID);
+                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 2, r.RecieverType, r.ID, ContentID);
                 }
             }
             objAdminData.UpdateSenderSMSSentStatus(2, data.ID, data.AssociatedIDs, data.RecieverType);
@@ -656,6 +658,7 @@ namespace SMEnterprise.Controllers
             TeacherSubstitutionEditModel objData = objAdminData.UpdateTeacherSubstitutionDetails(objModel);
             TeacherSubstitutionSMSModel objSMS = objAdminData.GetTeacherSubstitutionSMSDetails(objModel);
             string ReplacingSMS = "";
+            string ContentID = "0";
             StartupModel objStartupModel = (StartupModel)Session["StartupModel"];
             if (objModel.OpType == -1)
             {
@@ -679,7 +682,7 @@ namespace SMEnterprise.Controllers
                 if (objSMS.ReplacingTeacher.MobileNumber != null && objSMS.ReplacingTeacher.MobileNumber != "")
                 {
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(ReplacingSMS, objSMS.ReplacingTeacher.MobileNumber, objModel.SBranchID, 3, 3, objModel.ReplacingTeacherID);
+                    objSender.SendSMSAsync(ReplacingSMS, objSMS.ReplacingTeacher.MobileNumber, objModel.SBranchID, 3, 3, objModel.ReplacingTeacherID, ContentID);
                 }
 
             }
@@ -1242,13 +1245,14 @@ namespace SMEnterprise.Controllers
                 data.AssociatedIDs = "0";
             }
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            string ContentID = "0";
             List<SMSRecieverModel> recievers = objAdminData.GetSMSRecieverList(SBranchID, data.AssociatedIDs, data.RecieverType);
             foreach (SMSRecieverModel r in recievers)
             {
                 if (r.MobileNo != null && r.MobileNo != "" && String.IsNullOrEmpty(r.deviceToken))
                 {
                     SMSSender objSender = new SMSSender();
-                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 1, r.RecieverType, r.ID);
+                    objSender.SendSMSAsync(data.SMSText, r.MobileNo, SBranchID, 1, r.RecieverType, r.ID, ContentID);
                 }
             }
             NotificationModel objModel = new NotificationModel();
