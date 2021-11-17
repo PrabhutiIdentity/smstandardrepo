@@ -2752,6 +2752,7 @@ namespace SMEnterprise.Repository
             return objModel;
         }
 
+        #region Exam Related
         public void GetAdmitCards(AdmitCardListModel objModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -2836,7 +2837,48 @@ namespace SMEnterprise.Repository
                 }
             }
         }
+        // Shishupal Work on Exam Date Sheet For School
+        // Date : 17 Nov 2021
+        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID, int SessionID)
+        {
+            EvaluationTypePageModelExam objModel = new EvaluationTypePageModelExam();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                return con.Query<NameIDModel>("sp_GetEvaluationTypesExam", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
 
+            }
+        }
+        public StudentExamDatesheetModel ExamDateSheet(StudentExamDatesheetModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@EvaluationSchemeID", objModel.EvaluationSchemeID);
+                paramater.Add("@EvaluationID", objModel.EvaluationID);
+                //paramater.Add("@SectionID", objModel.SectionID);
+                using (var multi = con.QueryMultiple("sp_DateSheetTest", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    //objModel.EvaluationSchemes = multi.Read<EvaluationSchemeModel>().ToList();
+                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                    objModel.ExamList = multi.Read<ExamDateListModel>().ToList();
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.Exams = multi.Read<ExamModel>().ToList();
+                    //objModel.SubjectsE = multi.Read<SubjectModel>().ToList();
+
+                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
+        // End Shihupal  Exam Date Sheet
+
+        #endregion
         public ClassGenderCategoryCountPageModel GetClassGenderCategoryCount(ClassGenderCategoryCountPageModel objModel)
         {
 

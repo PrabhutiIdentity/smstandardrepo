@@ -1,0 +1,273 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    //List<NameIDModel> EvaluationSubjectTotals = new List<NameIDModel>();
+}
+@model SMEnterprise.Models.StudentExamDatesheetModel
+@section IncludeCss
+{
+    <title>Student Performance</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .tblResult {
+        text-align: center;
+        margin-bottom: 5px;
+    }
+
+        .tblResult > tbody > tr > td {
+            padding: 0px;
+        }
+
+        .tblResult > thead > tr > td {
+            padding: 0px;
+        }
+
+        .tblResult thead {
+            font-weight: bold;
+        }
+
+    .tblResultEvName {
+        font-weight: bold;
+    }
+
+    .tblTopRow {
+        background-color: rgba(61, 83, 104, 0.9);
+        border: 1px solid #3D5368;
+        color: #fff;
+        vertical-align: middle;
+        text-transform: uppercase;
+    }
+
+    .tblExamDate {
+        border-left: 1 px solid #e2e2e2;
+        background-color: rgba(0, 87, 162, 0.6);
+        color: #fff;
+    }
+
+    .tblMainDateSheet {
+        height: 100px;
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("ExamDateSheet", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+            {
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right" style="padding-right: 0px;">Session :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="SessionID" id="ddlSessions" onchange="SessionChanged(this);">
+                                        @*onchange="javascript:SessionChanged(this);"*@
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (SchoolSessionModel e in Model.Sessions)
+                                        {
+                                            <option value="@e.SessionID" Selected="@(e.SessionID == Model.SessionID ? "Selected" : "")">@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right padding-R">Evaluation : </label>
+                                <div class="col-md-8 padding-L" style="padding-left: 10px;">
+                                    <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetExams').submit();">
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (var el in Model.Evaluations)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="x_panel">
+
+                <a class="btn btn-dark" onclick="PrintReport();">Print</a>
+                <div class="x_content">
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <td style="width:20%">Examination Date Sheet</td>
+                                <td colspan="@Model.Classes.Count" style="width:80%"><strong> @Model.Branch.BranchSchoolName </strong> <br /> Exam : @Model.Branch.TagLine</td>
+                               
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td colspan="@Model.Classes.Count" class="text-center">CLASSESS       </td>
+                            </tr>
+                            <tr>
+                                <td class="tblTopRow text-center">
+                                    <span>EXAM DATE</span><br />
+                                    <span>EXAM DAY</span>
+                                </td>
+
+                                @if (Model.ExamList.Count < 1)
+                                {
+                                    <td colspan="3" class="tblMainDateSheet">
+                                        <span>--No Exams Scheduled--</span>
+                                    </td>
+                                }
+                                else
+                                {
+                                    foreach (var cls in Model.Classes)
+                                    {
+
+                                        <td class="tblTopRow text-center"> @(cls.Name)</td>
+                                    }
+                                }
+
+                            </tr>
+                        </thead>
+                        @*@foreach (var doe in Model.Exams.Select(x => x.ExamDate).Distinct().ToList())
+                            {*@
+
+
+                        @foreach (var doe in Model.ExamList)
+                        {
+                            <tr class="text-center">
+                                <td class="tblExamDate text-uppercase">
+                                    <span>@doe.ExamDate.ToString("dd/MM/yyyy")</span><br />
+                                    <span>(@doe.ExamDay)</span>
+                                </td>
+                                @foreach (var cls in Model.Classes)
+                                {
+                                    <td class="tblMainDateSheet">
+
+                                        @foreach (var ex in Model.Exams.Where(c => c.ExamDate == doe.ExamDate && c.ClassID == cls.ID))
+                                        {
+
+
+                                            @*@ex.ExamID
+                                                @ex.SubjectName*@
+                                            if (Model.Classes.Count> 0)
+                                            {
+                                                <span style="color:darkcyan;text-transform:uppercase">@ex.SubjectName</span><br />
+                                                <span>@ex.StartTime to </span> <span>@ex.EndTime</span><hr />
+                                            }
+                                            else
+                                            {
+                                                <span>No Exam Here</span>
+                                            }
+                                        }
+                                    </td>
+                                }
+
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts
+{
+
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+    <script>
+
+        function SessionChanged(sender) {
+            $('#ddlEvaluation').html('<option value="0">Loading....</option>');
+            //alert((sender).val())
+            $.ajax({
+                type: "POST",
+                url: "/Account/EvaluationTypeManagementExam/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlEvaluation').html('');
+                    $('#ddlEvaluation').html('<option value="0">--Select Evaluation--</option>');
+                    $('#ddlEvaluation').append(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+        }
+
+
+        function PrintReport() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<html><head><title></title><style type = "text/css" > ' +
+                'table th, table td {' +
+                'border-bottom:1px solid #000;' +
+                'border-top:1px solid #000;' +
+                '}' +
+                '</style>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/ResultScrutiny.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}
+<!-- /.content -->
