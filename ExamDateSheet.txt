@@ -1,0 +1,51 @@
+
+create proc [dbo].[sp_DateSheetTest]         
+(        
+@SBranchID int,         
+@SessionID int,        
+@EvaluationSchemeID int,        
+@EvaluationID int        
+)          
+AS          
+BEGIN         
+   declare @EvaluationName nvarchar(50)          
+      
+if(@SessionID=0)                  
+Begin                  
+Select @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID and SessionStatus=1                  
+End         
+        
+--select @ClassID =min(ClassID) from ClassMaster where Status=1 and SBranchID=@SBranchID        
+--declare @SchemeID int        
+--select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@SessionID         
+        
+select SessionID, SessionName, SessionStatus from SessionMaster where SBranchID=@SBranchID 
+
+Select @EvaluationName=        
+(case when isnull(MasterID,0)=0 then EvaluationName else        
+(Select EvaluationName from EvaluationMaster ED where ED.EvaluationID=EM.MasterID)+'->'+EvaluationName end)        
+from EvaluationMaster EM where EvaluationID=@EvaluationID        
+        
+       
+        
+Select EvaluationID as ID, (case when isnull(MasterID,0)=0 then EvaluationName else (Select EvaluationName from EvaluationMaster ED where ED.EvaluationID=EM.MasterID)+'->'+EvaluationName end) as Name from EvaluationMaster      
+ EM where SBranchID=@SBranchID and EvaluationSchemeID in (select EvaluationSchemeID from evaluationschememaster         
+where Sessionid=@sessionid)  and EvaluationID not in (Select isnull(MasterID,0) from EvaluationMaster)                  
+        
+Select distinct CONVERT(varchar,ExamDate,101) as ExamDate,DATENAME(DW,ExamDate) as ExamDay              
+from ExamMaster EM where IsApplicable=1  and EvaluationID=@EvaluationID order by ExamDate asc        
+        
+Select  Distinct(Select ClassName from ClassMaster cm where cm.ClassID=em.ClassID) as Name, ClassID as ID from ExamMaster em        
+where IsApplicable=1 and EvaluationID=@EvaluationID  
+order by ID asc       
+       
+       
+Select ExamID,EvaluationID,ClassID, (Select ClassName from ClassMaster CM where CM.ClassID=EM.ClassID) ClassName,   
+SubjectID,(select SubjectName from SubjectMaster SM where SM.SubjectID=EM.SubjectID) as SubjectName, 
+ExamDate, convert(varchar(8), Cast(StartTime as time), 100) as StartTime,convert(varchar(8), Cast(EndTime as time), 100) as EndTime  
+from ExamMaster EM where IsApplicable=1 and EvaluationID=@EvaluationID order by ExamDate asc       
+  
+select *,@EvaluationName as TagLine   from SBranchMaster where SBranchID=@SBranchID      
+      
+END
+go

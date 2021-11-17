@@ -1871,7 +1871,10 @@ namespace SMEnterprise.Controllers
 
             return View(objModel);
         }
+
+        #region Exam Related
         [PermissionFilter]
+            
         public ActionResult AdmitCard(AdmitCardListModel objData = null)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -1899,6 +1902,35 @@ namespace SMEnterprise.Controllers
 
             return View(objData);
         }
+
+        // Shishupal Work on Exam Date Sheet For School
+        // Date : 17 Nov 2021
+        [PermissionFilter]
+        public ActionResult EvaluationTypeManagementExam(string ID = null)
+        {
+            int SessionID = CommonUsage.ConvertToInt(ID);
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID);
+            //EvaluationTypePageModelExam objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID);
+            return PartialView("_EvaluationsPartial", objModel);
+            //return Json(objModel);
+        }
+
+        [PermissionFilter]
+        public ActionResult ExamDateSheet(StudentExamDatesheetModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.ExamDateSheet(objModel);
+            return View(objModel);
+        }
+
+        // End Shihupal  Exam Date Sheet
+        #endregion
+
 
         [PermissionFilter]
         public ActionResult StudentsIDCards(StudentsPageModel objModel)
