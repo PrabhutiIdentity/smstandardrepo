@@ -4307,5 +4307,72 @@ namespace SMEnterprise.Repository
         }
         #endregion
 
+
+        #region TransportFee
+
+
+        public async Task<FeePaymentModel> GetFeeDetailsNewForTransport(FeePaymentModel objModel)
+        {
+            FeePaymentModel objNew = new FeePaymentModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                DateTime qdate = new DateTime(objModel.Year, objModel.Month, 1).AddMonths(1).AddDays(-1);
+                if (qdate.Day < objModel.Day)
+                {
+                    objModel.Day = qdate.Day;
+                }
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", objModel.StudentID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@QDate", new DateTime(objModel.Year, objModel.Month, objModel.Day));
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+
+                using (var multi = await con.QueryMultipleAsync("sp_GetStudentFeeViewDataForTransport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
+                    objModel.Months = multi.Read<PayDetailMonthsModel>().ToList();
+                    objModel.PaymentDetails = multi.Read<FeeDetailsModel>().ToList();
+                    objModel.SessionStartDate = multi.Read<DateTime>().SingleOrDefault();
+                    objModel.SessionEndDate = multi.Read<DateTime>().SingleOrDefault();
+                    objModel.FeePaymentMode = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
+
+
+        public FeePaymentRowModel SaveStudentTransportFeePayments(FeePaymentModel objData)
+        {
+            FeePaymentRowModel obj = new FeePaymentRowModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+
+                paramater.Add("@StudentID", objData.StudentID);
+                paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                paramater.Add("@PaymentDate", objData.PaymentDate);
+                paramater.Add("@PaymentAmount", objData.PaymentAmount);
+                paramater.Add("@WaiverMonths", objData.WaiverMonths);
+                paramater.Add("@Remark", objData.Remark);
+                paramater.Add("@ReferanceNumber", objData.ReferanceNumber);
+                paramater.Add("@PaymentMode", objData.PaymentMode);
+                paramater.Add("@CollectedBy", objData.CollectedBy);
+                paramater.Add("@SessionID", objData.SessionID);
+                paramater.Add("@ExcludedFees", objData.ExcludedFees);
+                paramater.Add("@UserID", objData.UserID);
+                paramater.Add("@SBranchID", objData.SBranchID);
+
+                using (var multi = con.QueryMultiple("spn_SaveTransportFeePaymentV2", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    obj.StudentDetails = multi.Read<FeePaymentModel>().SingleOrDefault();
+                    obj.PaymentID = multi.Read<int>().SingleOrDefault();
+                }
+
+                return obj;
+            }
+        }
+        #endregion
     }
 }
