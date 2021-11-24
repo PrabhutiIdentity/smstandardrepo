@@ -151,7 +151,8 @@
                                 </td>
                             </tr>
                             <tr style="width:100%">
-                                <th>Student Name</th>
+                               
+                                <th>Student Details</th>
                                 <th>Exam</th>
                                 @foreach (var sub in Model.Subjects2)
                                 {
@@ -170,151 +171,156 @@
                                 EvaluationSubjectTotals.Clear();
                                 Model.Subjects2 = Model.Subjects2.Select(c => { c.MaxMarks = 0; return c; }).ToList();
                                 Model.Subjects2 = Model.Subjects2.Select(c => { c.ScoredMarks = 0; return c; }).ToList();
-                            <tr>
-                                <td style="page-break-before: avoid;page-break-inside:avoid" rowspan="@(Model.SubEvaluations.Count() + 3 + (Model.EvaluationID==-1?Model.Evaluations.Count():0))">
-                                    @stu.Name<br />@stu.SchoolUID
-                                </td>
-                            </tr>
-                            foreach (var me in Model.Evaluations.Where(x => x.ID == Model.EvaluationID || Model.EvaluationID == -1))
-                            {
 
-                                foreach (var ex in Model.SubEvaluations.Where(x => x.Extra1 == me.ID.ToString()))
+                               
+                                <tr>
+                                  
+                                    <td style="page-break-before: avoid;page-break-inside:avoid" rowspan="@(Model.SubEvaluations.Count() + 3 + (Model.EvaluationID==-1?Model.Evaluations.Count():0))">
+                                        <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(stu.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(stu.StudentID)_@stu.Photo" /><br/>
+
+                                        <b>@stu.Name</b><br />@stu.StudentSID<br />SR No.: @stu.SchoolUID<br />Roll No.:@stu.RollNo<br />F: @stu.FatherName<br />M: @stu.MotherName<br />
+                                    </td>
+                                </tr>
+                                foreach (var me in Model.Evaluations.Where(x => x.ID == Model.EvaluationID || Model.EvaluationID == -1))
                                 {
-                                    decimal TotalScored = 0;
-                                    decimal TotalMarks = 0;
-                                    <tr>
-                                        <td>@ex.Name</td>
-                                        @foreach (var sub in Model.Subjects2)
-                                        {
-                                            var exam = Model.Exams.Where(e => e.SubjectID == sub.SubjectID && e.EvaluationID == ex.ID).SingleOrDefault();
-                                            if (exam != null)
+
+                                    foreach (var ex in Model.SubEvaluations.Where(x => x.Extra1 == me.ID.ToString()))
+                                    {
+                                        decimal TotalScored = 0;
+                                        decimal TotalMarks = 0;
+                                        <tr>
+                                            <td>@ex.Name</td>
+                                            @foreach (var sub in Model.Subjects2)
                                             {
-
-
-                                                var result = Model.Result.Where(c => c.ExamID == exam.ExamID && c.StudentID == stu.StudentID).SingleOrDefault();
-                                                if (result != null)
+                                                var exam = Model.Exams.Where(e => e.SubjectID == sub.SubjectID && e.EvaluationID == ex.ID).SingleOrDefault();
+                                                if (exam != null)
                                                 {
-                                                    sub.MaxMarks = sub.MaxMarks + exam.MaxMarks;
-                                                    TotalMarks = TotalMarks + exam.MaxMarks;
-                                                    sub.ScoredMarks = sub.ScoredMarks + result.MarksScored;
-                                                    TotalScored = TotalScored + result.MarksScored;
-                                                    var est = EvaluationSubjectTotals.Where(x => x.ID == me.ID && x.Name == sub.SubjectID.ToString()).SingleOrDefault();
-                                                    if (est == null)
+
+
+                                                    var result = Model.Result.Where(c => c.ExamID == exam.ExamID && c.StudentID == stu.StudentID).SingleOrDefault();
+                                                    if (result != null)
                                                     {
-                                                        est = new NameIDModel();
-                                                        est.ID = me.ID;
-                                                        est.Name = sub.SubjectID.ToString();
-                                                        est.Extra1 = result.MarksScored.ToString();
-                                                        est.Extra2 = exam.MaxMarks.ToString();
-                                                        EvaluationSubjectTotals.Add(est);
+                                                        sub.MaxMarks = sub.MaxMarks + exam.MaxMarks;
+                                                        TotalMarks = TotalMarks + exam.MaxMarks;
+                                                        sub.ScoredMarks = sub.ScoredMarks + result.MarksScored;
+                                                        TotalScored = TotalScored + result.MarksScored;
+                                                        var est = EvaluationSubjectTotals.Where(x => x.ID == me.ID && x.Name == sub.SubjectID.ToString()).SingleOrDefault();
+                                                        if (est == null)
+                                                        {
+                                                            est = new NameIDModel();
+                                                            est.ID = me.ID;
+                                                            est.Name = sub.SubjectID.ToString();
+                                                            est.Extra1 = result.MarksScored.ToString();
+                                                            est.Extra2 = exam.MaxMarks.ToString();
+                                                            EvaluationSubjectTotals.Add(est);
+                                                        }
+                                                        else
+                                                        {
+                                                            est.Extra1 = (Convert.ToDecimal(est.Extra1) + result.MarksScored).ToString("0.00");
+                                                            est.Extra2 = (Convert.ToDecimal(est.Extra2) + exam.MaxMarks).ToString("0.00");
+                                                        }
+                                                        <td>@result.MarksScored</td>
                                                     }
                                                     else
                                                     {
-                                                        est.Extra1 = (Convert.ToDecimal(est.Extra1) + result.MarksScored).ToString("0.00");
-                                                        est.Extra2 = (Convert.ToDecimal(est.Extra2) + exam.MaxMarks).ToString("0.00");
+                                                        <td>-</td>
                                                     }
-                                                    <td>@result.MarksScored</td>
                                                 }
                                                 else
                                                 {
                                                     <td>-</td>
                                                 }
                                             }
-                                            else
+                                            <td>@TotalScored.ToString("0.00")</td>
+                                            <td>@TotalMarks.ToString("0.00")</td>
+                                            <td>@((TotalMarks != 0 ? (TotalScored * 100 / TotalMarks).ToString("0.00") + "%" : "-"))</td>
+                                        </tr>
+                                    }
+                                    if (Model.EvaluationID == -1)
+                                    {
+                                        <tr style="font-weight: bold;">
+                                            <td>@me.Name Total</td>
+                                            @foreach (var sub in Model.Subjects2)
                                             {
-                                                <td>-</td>
+                                                var estt = EvaluationSubjectTotals.Where(x => x.ID == me.ID && x.Name == sub.SubjectID.ToString()).SingleOrDefault();
+                                                if (estt != null && estt.Extra1 != "0")
+                                                {
+                                                    <td>@estt.Extra1</td>
+                                                }
+                                                else
+                                                {
+                                                    <td>-</td>
+                                                }
                                             }
-                                        }
-                                        <td>@TotalScored.ToString("0.00")</td>
-                                        <td>@TotalMarks.ToString("0.00")</td>
-                                        <td>@((TotalMarks != 0 ? (TotalScored * 100 / TotalMarks).ToString("0.00") + "%" : "-"))</td>
-                                    </tr>
-                                }
-                                if (Model.EvaluationID == -1)
-                                {
-                                    <tr style="font-weight: bold;">
-                                        <td>@me.Name Total</td>
-                                        @foreach (var sub in Model.Subjects2)
-                                        {
-                                            var estt = EvaluationSubjectTotals.Where(x => x.ID == me.ID && x.Name == sub.SubjectID.ToString()).SingleOrDefault();
-                                            if (estt != null && estt.Extra1 != "0")
-                                            {
-                                                <td>@estt.Extra1</td>
-                                            }
-                                            else
-                                            {
-                                                <td>-</td>
-                                            }
-                                        }
-                                        <td>@EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra1))</td>
-                                        <td>@EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra2))</td>
-                                        @{
-                                            var metotal = EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra2));
+                                            <td>@EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra1))</td>
+                                            <td>@EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra2))</td>
+                                            @{
+                                                var metotal = EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra2));
 
-                                            var mescored = EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra1));
-                                            if (metotal != 0)
-                                            {
-                                                <td>@((mescored * 100 / metotal).ToString("0.00"))%</td>
+                                                var mescored = EvaluationSubjectTotals.Where(c => c.ID == me.ID).Sum(x => Convert.ToDecimal(x.Extra1));
+                                                if (metotal != 0)
+                                                {
+                                                    <td>@((mescored * 100 / metotal).ToString("0.00"))%</td>
+                                                }
                                             }
-                                        }
-                                    </tr>
-                                }
-                            }
-                            <tr style="font-weight: bold;">
-                                <td>Total</td>
-                                @foreach (var sub in Model.Subjects2)
-                                {
-                                    if (sub.ScoredMarks != 0)
-                                    {
-                                        <td>@sub.ScoredMarks.ToString("0.00")</td>
-                                    }
-                                    else
-                                    {
-                                        <td>-</td>
-                                    }
-                                    @*<td>@sub.ScoredMarks.ToString("0.00")</td>*@
-                                }
-                                <td>@Model.Subjects2.Sum(x => x.ScoredMarks)</td>
-                                <td>@Model.Subjects2.Sum(x => x.MaxMarks)</td>
-                                @{
-                                    var totaltoalmarks = Model.Subjects2.Sum(x => x.MaxMarks);
-                                    var scoredtotalmarks = Model.Subjects2.Sum(x => x.ScoredMarks);
-                                    if (totaltoalmarks != 0)
-                                    {
-                                        <td>@((scoredtotalmarks * 100 / totaltoalmarks).ToString("0.00"))%</td>
+                                        </tr>
                                     }
                                 }
-                            </tr>
-                            <tr style="font-weight: bold;">
-                                <td>Grade</td>
-                                @foreach (var sub in Model.Subjects2)
-                                {
-                                    if (sub.ScoredMarks != 0)
+                                <tr style="font-weight: bold;">
+                                    <td>Total</td>
+                                    @foreach (var sub in Model.Subjects2)
                                     {
-                                        <td>@AcadmicModel.CalculateGrade(sub.ScoredMarks, sub.MaxMarks)</td>
-                                    }
-                                    else
-                                    {
-                                        <td>-</td>
-                                    }
-                                    @*<td>@AcadmicModel.CalculateGrade(sub.ScoredMarks, sub.MaxMarks)</td>*@
-                                }
-                                <td>@AcadmicModel.CalculateGrade(Model.Subjects2.Sum(x => x.ScoredMarks), Model.Subjects2.Sum(x => x.MaxMarks))</td>
-                                <td></td>
-                                @{
-                                    if (totaltoalmarks != 0)
-                                    {
-                                        <td>@AcadmicModel.CalculateGrade(scoredtotalmarks, totaltoalmarks)</td>
-                                    }
-                                }
-                            </tr>
-                            <tr></tr>
-                                        }
-                                        catch (Exception ex)
+                                        if (sub.ScoredMarks != 0)
                                         {
-                                           
+                                            <td>@sub.ScoredMarks.ToString("0.00")</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
+                                        @*<td>@sub.ScoredMarks.ToString("0.00")</td>*@
+                                    }
+                                    <td>@Model.Subjects2.Sum(x => x.ScoredMarks)</td>
+                                    <td>@Model.Subjects2.Sum(x => x.MaxMarks)</td>
+                                    @{
+                                        var totaltoalmarks = Model.Subjects2.Sum(x => x.MaxMarks);
+                                        var scoredtotalmarks = Model.Subjects2.Sum(x => x.ScoredMarks);
+                                        if (totaltoalmarks != 0)
+                                        {
+                                            <td>@((scoredtotalmarks * 100 / totaltoalmarks).ToString("0.00"))%</td>
                                         }
                                     }
+                                </tr>
+                                <tr style="font-weight: bold;">
+                                    <td>Grade</td>
+                                    @foreach (var sub in Model.Subjects2)
+                                    {
+                                        if (sub.ScoredMarks != 0)
+                                        {
+                                            <td>@AcadmicModel.CalculateGrade(sub.ScoredMarks, sub.MaxMarks)</td>
+                                        }
+                                        else
+                                        {
+                                            <td>-</td>
+                                        }
+                                        @*<td>@AcadmicModel.CalculateGrade(sub.ScoredMarks, sub.MaxMarks)</td>*@
+                                    }
+                                    <td>@AcadmicModel.CalculateGrade(Model.Subjects2.Sum(x => x.ScoredMarks), Model.Subjects2.Sum(x => x.MaxMarks))</td>
+                                    <td></td>
+                                    @{
+                                        if (totaltoalmarks != 0)
+                                        {
+                                            <td>@AcadmicModel.CalculateGrade(scoredtotalmarks, totaltoalmarks)</td>
+                                        }
+                                    }
+                                </tr>
+                                <tr></tr>
+                            }
+                            catch (Exception ex)
+                            {
+
+                            }
+                        }
 
                     </table>
                 </div>

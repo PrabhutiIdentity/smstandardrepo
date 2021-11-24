@@ -418,6 +418,7 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Sections { get; set; }
         public List<SchoolSessionModel> Sessions { get; set; }
         public List<FeePaymentModel> FeePayments { get; set; }
+        public int SchoolID { get; set; }
     }
     public class StudentLeaveModel
     {

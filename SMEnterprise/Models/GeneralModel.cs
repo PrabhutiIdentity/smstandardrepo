@@ -394,6 +394,7 @@ namespace SMEnterprise.Models
         public string Password { get; set; }
         public string BranchLogo { get; set; }
         public int SBranchID { get; set; }
+        public int SchoolID { get; set; }
         public string AppToken { get; set; }
         public Role Role
         {

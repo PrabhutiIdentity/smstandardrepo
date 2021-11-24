@@ -8,8 +8,10 @@
 {
     <title>Student Performance</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
-    <link href="@Url.Content("~/Parent/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css")" rel="stylesheet">
-    <link href="@Url.Content("~/Parent/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+    @*<link href="@Url.Content("~/Parent/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css")" rel="stylesheet">
+        <link href="@Url.Content("~/Parent/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css")" rel="stylesheet">*@
 }
 <style>
     .btn {
@@ -136,8 +138,9 @@
                         <table id="tblCategory" class="table table-bordered table-hover" style="font-size: 10px;">
                             <thead>
                                 <tr>
-                                    <th style="width: 4%">S. Id.</th>
+                                    <th style="width: 4%">SR No.</th>
                                     <th style="width: 15%">Student's Name</th>
+                                    <th style="width: 5%">Roll No.</th>
                                     @foreach (var sub in Model.Subjects)
                                     {
                                         <th>@sub.Name</th>
@@ -156,8 +159,11 @@
                                     <tr>
                                         <td> @c.SchoolUID</td>
                                         <td>
-                                            @c.Name
+                                            <b> @c.Name</b><br />
+                                            F: @c.FatherName<br />
+                                            M: @c.MotherName
                                         </td>
+                                        <td>@c.RollNo</td>
                                         @foreach (var sub in Model.Subjects)
                                         {
                                             var result = Model.Result.Where(x => x.SubjectID == sub.ID && x.StudentID == c.StudentID).FirstOrDefault();
@@ -213,6 +219,9 @@
     <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
     <script>
         $(document).ready(function () {
+            $('#sClassName').html(' For : ' + $('#ddlClass option:selected').text() + '-' + $('#ddlSection option:selected').text() + ' (' + $('#ddlEvaluation option:selected').text() + ') - ' + $('#ddlSessions option:selected').text());
+
+
             var handleDataTableButtons = function () {
                 if ($("#tblCategory").length) {
                     $("#tblCategory").DataTable({
@@ -258,11 +267,7 @@
             TableManageButtons.init();
         });
 
-    </script>
-    <script>
-        $(document).ready(function () {
-            $('#sClassName').html(' For : ' + $('#ddlClass option:selected').text() + '-' + $('#ddlSection option:selected').text() + ' (' + $('#ddlEvaluation option:selected').text() + ') - ' + $('#ddlSessions option:selected').text());
-        });
+
 
         function ClassChanged(sender) {
             $('#ddlSection').html('<option value="0">Loading....</option>');

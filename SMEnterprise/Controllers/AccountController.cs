@@ -676,6 +676,7 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetFeePayments(objModel);
             return View(objModel);
         }
+
         [PermissionFilter]
         public ActionResult StudentsFee(StudentFeeModel objModel)
         {
@@ -692,7 +693,16 @@ namespace SMEnterprise.Controllers
             objModel.Year = objModel.SelectedDate.Year;
             objModel.Day = objModel.SelectedDate.Day;
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.GetNewFeePayments(objModel);
+            objModel.SchoolID = PermissionManager.GetLoggedInUser().SchoolID;
+            if(objModel.SBranchID == 2 && objModel.SchoolID==1068)
+            {
+
+            }
+            else
+            {
+                objModel = objAccountData.GetNewFeePayments(objModel);
+            }
+          
             return View(objModel);
         }
                [PermissionFilter]
