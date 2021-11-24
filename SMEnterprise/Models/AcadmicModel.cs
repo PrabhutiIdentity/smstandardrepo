@@ -782,6 +782,8 @@ namespace SMEnterprise.Models
         public string Photo { get; set; }
         public decimal CGPA { get; set; }
         public string ResultDetails { get; set; }
+        public string FatherName { get; set; }
+        public string MotherName { get; set; }
     }
     public class PerformanceParameterModel
     {

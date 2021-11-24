@@ -67,7 +67,6 @@
         background-color: rgba(61, 83, 104, 0.9);
         border: 1px solid #3D5368;
         color: #fff;
-        text-align: center;
         vertical-align: middle;
         text-transform: uppercase;
     }
@@ -100,40 +99,25 @@
                             <div class="col-md-3 padding">
                                 <label class="col-md-4 text-right" style="padding-right: 0px;">Session :</label>
                                 <div class="col-md-8">
-                                    <select class="form-control" name="SessionID" id="ddlSessions" onchange="javascript:SessionChanged(this);">
+                                    <select class="form-control" name="SessionID" id="ddlSessions" onchange="SessionChanged(this);">
+                                        @*onchange="javascript:SessionChanged(this);"*@
                                         <option value="0">--Select Session--</option>
-                                        @foreach (SchoolSessionModel el in Model.Sessions)
+                                        @foreach (SchoolSessionModel e in Model.Sessions)
                                         {
-                                            <option value="@el.SessionID" @(el.SessionID == Model.SessionID ? "selected" : "")>@el.SessionName @(el.SessionStatus == 1 ? "(Active)" : "")</option>
+                                            <option value="@e.SessionID" Selected="@(e.SessionID == Model.SessionID ? "Selected" : "")">@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
                                         }
                                     </select>
                                 </div>
                             </div>
 
-                            <div class="col-md-4 padding">
-                                <label class="col-md-6 text-right padding-R">Evaluation Scheme : </label>
-                                <div class="col-md-6 padding-L" style="padding-left: 10px;">
-
-                                    <select class="form-control" name="EvaluationSchemeID" id="ddlEvaluationScheme" onchange="javascript:SchemeChanged(this);">
-                                        @*onchange="$('#frmGetExams').submit();">*@
-                                        <option value="0">--Select Scheme--</option>
-                                        @foreach (var el in Model.EvaluationSchemes)
-                                        {
-                                            <option value="@el.ID" @(el.ID == Model.EvaluationSchemeID ? "selected" : "")>@el.Name</option>
-                                        }
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-md-4 padding">
-                                <label class="col-md-6 text-right padding-R">Evaluation : </label>
-                                <div class="col-md-6 padding-L" style="padding-left: 10px;">
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right padding-R">Evaluation : </label>
+                                <div class="col-md-8 padding-L" style="padding-left: 10px;">
                                     <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetExams').submit();">
-                                        <option value="0">--Select Evaluation--</option>
-                                        @foreach (NameIDModel el in Model.Evaluations)
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (var el in Model.Evaluations)
                                         {
                                             <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
-                                        }
                                         }
                                     </select>
                                 </div>
@@ -151,12 +135,12 @@
                         <thead>
                             <tr>
                                 <td style="width:20%">Examination Date Sheet</td>
-                                <td colspan="@Model.Classes.Count" style="width:80%"><strong> @Model.Branch.BranchSchoolName </strong></td>
-
+                                <td colspan="@Model.Classes.Count" style="width:80%"><strong> @Model.Branch.BranchSchoolName </strong> <br /> Exam : @Model.Branch.TagLine</td>
+                               
                             </tr>
                             <tr>
                                 <td></td>
-                                <td colspan="@Model.Classes.Count" class="text-center">CLASSESS</td>
+                                <td colspan="@Model.Classes.Count" class="text-center">CLASSESS       </td>
                             </tr>
                             <tr>
                                 <td class="tblTopRow text-center">
@@ -181,6 +165,9 @@
 
                             </tr>
                         </thead>
+                        @*@foreach (var doe in Model.Exams.Select(x => x.ExamDate).Distinct().ToList())
+                            {*@
+
 
                         @foreach (var doe in Model.ExamList)
                         {
@@ -199,8 +186,15 @@
 
                                             @*@ex.ExamID
                                                 @ex.SubjectName*@
-                                            <span style="color:blue;text-transform:uppercase">@ex.SubjectName</span><br />
-                                            <span>@ex.StartTime to </span> <span>@ex.EndTime</span><br /><hr />
+                                            if (Model.Classes.Count> 0)
+                                            {
+                                                <span style="color:darkcyan;text-transform:uppercase">@ex.SubjectName</span><br />
+                                                <span>@ex.StartTime to </span> <span>@ex.EndTime</span><hr />
+                                            }
+                                            else
+                                            {
+                                                <span>No Exam Here</span>
+                                            }
                                         }
                                     </td>
                                 }
@@ -223,51 +217,24 @@
 
     <script>
 
-
-
         function SessionChanged(sender) {
-
-            $('#ddlEvaluationScheme').html('<option value="0">Loading....</option>');
+            $('#ddlEvaluation').html('<option value="0">Loading....</option>');
+            //alert((sender).val())
             $.ajax({
                 type: "POST",
-                url: "/Account/EvaluationSchemeManagementExam/" + $(sender).val(),
+                url: "/Account/EvaluationTypeManagementExam/" + $(sender).val(),
                 cache: false,
                 processData: false,
                 contentType: false,
                 success: function (html) {
-                    $('#ddlEvaluationScheme').html('');
-                    $('#ddlEvaluationScheme').html('<option value="0">--Select Scheme--</option>');
-                    $('#ddlEvaluationScheme').append(html);
                     $('#ddlEvaluation').html('');
-                    $('#ddlEvaluation').html('<option value="0">--Select Evaluation --</option>');
+                    $('#ddlEvaluation').html('<option value="0">--Select Evaluation--</option>');
+                    $('#ddlEvaluation').append(html);
                 },
                 error: function (e) {
                     alert("errorn");
                 }
             });
-        }
-        function SchemeChanged(sender) {
-            $('#ddlEvaluation').html('<option value="0">Loading....</option>');
-            $.ajax(
-                {
-                    type: "POST",
-                    url: "/Account/EvaluationTypeManagementExam/" + $(sender).val(),
-                    cache: false,
-                    processData: false,
-                    contentType: false,
-                    success: function (html) {
-                        $('#ddlEvaluation').html('');
-                        $('#ddlEvaluation').html('<option value="0">--Select Section--</option>');
-                        $('#ddlEvaluation').append(html);
-                    },
-                    error: function (e) {
-                        alert("errorn");
-                    }
-                });
-        }
-
-        function EvaluationChanged(sender) {
-            window.location.href = "/Admin/ExamDateSheet/" + $(sender).val();
         }
 
 
