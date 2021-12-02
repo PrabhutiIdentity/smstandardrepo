@@ -48,10 +48,9 @@
     <div class="row">
         <div class="col-xs-12">
             <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate()" />
-            <div class="box">
+            <div class="box" style="height:100%">
                 <div class="box-header">
                     <div class="row std-mng-head">
-
                         <div class="col-md-12 class-section">
                             <div class="row">
                                 <div class="col-md-4 padding">
@@ -69,64 +68,66 @@
                                 <div class="col-md-7 padding ">
 
                                 </div>
-
                                 <div class="col-md-1 padding ">
                                     <a href="javascript:void(0);" title="Print Time Table" onclick="printTimeTable();"><i class="fa fa-print"></i></a>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
                 <div class="box-body" id="dvTimeTableContainer">
                     @{
-                        <div class="ClassSectionHeader">
+                        <div class="ClassSectionHeader" style="margin-top: -10px;">
                             <k2> <sk id="skTeacherName"></sk> </k2>
                         </div>
-                        var width = 100 / (Model.TimeTable.Periods.Count + 1);
+                        //var width = 100 / (Model.TimeTable.Periods.Count + 1);
+                        //var rowsCount = Model.TimeTable.Days;
                         <div class="time-table-dates">
                             <div class="row" id="divTimeTableFrame" style="margin-left: 5px;">
-
-                                <ul class="days day" style="width:@width%;">
-                                    <li class="period" style="color: #fff;height: 75px;">
-                                        <p>Days</p>
-                                    </li>
-                                    @for (var day = 0; day < Model.TimeTable.Days; day++)
-                                    {
-                                        <li>
-                                            <span>@Model.TimeTable.DayNames[day]</span>
-                                        </li>
-                                    }
-                                </ul>
-                                @foreach (PeriodModel period in Model.TimeTable.Periods)
-                                {
-                                    var ulClass = "period-01 day";
-                                    var PeriodDone = 0;
-                                    if (period.PeriodType == 4)
-                                    {
-                                        ulClass = "lunch-break day lunch";
-                                    }
-                                    <ul class="@ulClass" style="width:@width%">
-                                        <li class="period" style="height: 75px;">
-                                            <p> @period.EducationLevelName </p>
-                                            <p> @period.Name </p>
-                                            <p class="period-time">
-                                                <span>@period.StartTime.Substring(0, 5)</span><span> - </span><span>@period.EndTime.Substring(0, 5)</span>
-                                            </p>
-                                        </li>
-                                        @if (period.PeriodType == 4)
-                                        {
-                                            for (var day = 0; day < Model.TimeTable.Days; day++)
+                                <table style="width: 100%; color: aliceblue; text-align: center; border:1px;">
+                                    <thead>
+                                        <tr style=" height: 90px; ">
+                                            <td style="padding: 1px; width: 10%; background-color: rgba(61, 83, 104, 0.9); border: 1px solid #c2d0af; padding-top: 10px; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">
+                                                <p>Period Name</p>
+                                            </td>
+                                            @for (var day = 0; day < Model.TimeTable.Days; day++)
                                             {
-                                                <li>
-                                                    <p>Lunch Break</p>
-                                                </li>
+                                                <td style="width: 13%; background-color: rgba(61, 83, 104, 0.9); border: 1px solid #c2d0af; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png);">
+                                                    <span>@Model.TimeTable.DayNames[day]</span>
+                                                </td>
                                             }
-                                        }
-                                        else
+                                        </tr>
+                                    </thead>
+                                    @foreach (PeriodModel period in Model.TimeTable.Periods)
+                                    {
+                                        var ulClass = "period-01 day";
+                                        var PeriodDone = 0;
+                                        if (period.PeriodType == 4)
                                         {
-                                            for (var day = 0; day < Model.TimeTable.Days; day++)
+                                            ulClass = "lunch-break day lunch";
+                                        }
+                                        <tr>
+                                            <td style="height: 90px; border: 1px solid #c2d0af; ">
+                                                @if (period.PeriodType == 4)
+                                                {
+                                                    <div>
+                                                        <p>Lunch Break</p>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div style="width: 100%; background-color: rgba(0, 87, 162, 0.6); border: 1px solid white; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png);">
+                                                        <p> @period.EducationLevelName </p>
+                                                        <p> @period.Name </p>
+                                                        <p class="period-time">
+                                                            <span>@period.StartTime.Substring(0, 5)</span><span> - </span><span>@period.EndTime.Substring(0, 5)</span>
+                                                        </p>
+                                                    </div>
+                                                }
+                                            </td>
+                                            @for (var day = 0; day < Model.TimeTable.Days; day++)
                                             {
+
                                                 if (day < period.DaysCount)
                                                 {
                                                     PeriodDone = 0;
@@ -196,7 +197,8 @@
                                                         }
                                                         if (PeriodDone == 1)
                                                         {
-                                                            <li class="" id="li-@period.PeriodID-@(day + 1)">
+
+                                                            <td class="@ulClass" id="li-@period.PeriodID-@(day + 1)" style="border: 1px solid #c2d0af; background-color: #ffffff; border-style: double; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">
                                                                 <p class="subject">
                                                                     @{
                                                                         <span id="pSubject">@subjectName</span>
@@ -210,7 +212,6 @@
                                                                     <input type="hidden" id="hdnClassName" value="@lac.ClassName" />
                                                                     <input type="hidden" id="hdnSectionName" value="@lac.SectionName" />
                                                                     <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
-                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
                                                                     <input type="hidden" id="hdnSubjectID" value="@tSubjectID" />
                                                                     <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
                                                                     <input type="hidden" id="hdnDayID" value="@(day + 1)" />
@@ -222,44 +223,43 @@
                                                                 <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
                                                                 <a href="javascript:void(0)" title="Manage Substitutions" onclick="ViewSubstitutions(this);" class="Tlink_2"><i class="fa fa-exchange"></i></a>
 
-                                                            </li>
-                                                                            break;
-                                                                        }
+                                                            </td>
+                                                            break;
+                                                        }
 
-                                                                    }
-                                                                    if (PeriodDone == 0)
-                                                                    {
-                                                                        <li class="EmptyPeriod" id="li-@period.PeriodID-@(day + 1)">
-                                                                            <p class="subject">
+                                                    }
+                                                    if (PeriodDone == 0)
+                                                    {
+                                                        <td class="@ulClass" id="li-@period.PeriodID-@(day + 1)" style="border: 1px solid #c2d0af; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">
+                                                            <p class="subject">
 
-                                                                                <span id="pSubject">No Subject</span>
+                                                                <span id="pSubject">No Subject</span>
 
-                                                                            </p>
-                                                                            <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
+                                                            </p>
+                                                            <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
 
-                                                                            <div class="liBG"></div>
-                                                                            <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
-                                                                            <input type="hidden" id="hdnSubjectID" value="0" />
-                                                                            <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
-                                                                            <input type="hidden" id="hdnDayID" value="@(day+1)" />
-                                                                            <input type="hidden" id="hdnSectionID" value="0" />
-                                                                            <input type="hidden" id="hdnClassID" value="0" />
-                                                                            <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
-                                                                            <input type="hidden" id="hdnIsMergedSubject" value="0" />
-                                                                            <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
+                                                            <div class="liBG"></div>
+                                                            <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                            <input type="hidden" id="hdnSubjectID" value="0" />
+                                                            <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                            <input type="hidden" id="hdnDayID" value="@(day+1)" />
+                                                            <input type="hidden" id="hdnSectionID" value="0" />
+                                                            <input type="hidden" id="hdnClassID" value="0" />
+                                                            <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
+                                                            <input type="hidden" id="hdnIsMergedSubject" value="0" />
+                                                            <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
 
-                                                                        </li>
-                                                                        }
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        <li>Leave Applicable</li>
-                                                                            }
-
-                                                                        }
-                                                                    }
-                                    </ul>
-                                                                    }
+                                                        </td>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <td style="border: 1px solid #c2d0af;; border-style: double; color: black; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">Leave Applicable</td>
+                                                }
+                                            }
+                                        </tr>
+                                    }
+                                </table>
                             </div>
                         </div>
                     }
@@ -273,7 +273,6 @@
     <div class="modal fade customwidth" style="left: 46%; width: 650px !important;" id="modelMergeSection" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 
     </div>
-
 </section>
 <style>
     .EditLactureModel {
