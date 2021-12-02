@@ -798,7 +798,9 @@ namespace SMEnterprise.Controllers
         {
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             //  objModel.QDate = CommonUsage.GetCurrentDate();
-            objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+         //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+
+           
             //string FeeDate= objModel.FeeDate.ToShortDateString();
             //if (FeeDate.Length>0)
             //{
