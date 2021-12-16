@@ -192,7 +192,7 @@
                                                 <td>
                                                     @if (Model.IsLocked == 0)
                                                     {
-                                                    <input type="number" step="0.01" class="form-control StudentScore" name="ExamResults[@count].MarksScored" value="@c.MarksScored" />
+                                                        <input type="number" step="0.01" class="form-control StudentScore" name="ExamResults[@count].MarksScored" value="@c.MarksScored" />
                                                     }
                                                     else
                                                     {
@@ -235,8 +235,8 @@
 
                                             </tr>
 
-                                                            count++;
-                                                        }
+                                            count++;
+                                        }
 
 
 
@@ -244,13 +244,13 @@
                                 </table>
                                 if (Model.IsLocked == 0)
                                 {
-                                <div>
-                                    <button href="javascript:void(0);" id="btnSaveResult" onclick="$(this).css('display', 'none');" type="submit" class="btn btn-block btn-info pull-right">Save</button>
-                                </div>
-                                    }
+                                    <div>
+                                        <button href="javascript:void(0);" id="btnSaveResult" onclick="$(this).css('display', 'none');" type="submit" class="btn btn-block btn-info pull-right">Save</button>
+                                    </div>
                                 }
+                            }
                         </div>
-                                                        }
+                    }
                 </div>
             </div>
         </div>
@@ -263,63 +263,66 @@
 
     <script>
 
-           function ClassChanged(sender) {
+        function ClassChanged(sender) {
             $('#ddlEvaluations').html('<option value="0">Loading....</option>');
             $('#ddlSection').html('<option value="0">Loading....</option>');
             $.ajax(
-    {
-        type: "POST",
-        url: "/Account/GetSectionEvaluationsOnClass/" + $(sender).val()+"/"+$('#ddlSessions').val(),
-        cache: false,
-        processData: false,
-        contentType: false,
-        success: function (data) {
-            $('#ddlSection').html('');
-            $('#ddlEvaluations').html('');
-            $('#ddlSection').html('<option value="0">--Select--</option>');
-            for (var i = 0; i < data.Sections.length; i++) {
-                $('#ddlSection').append('<option value="' + data.Sections[i].ID + '">' + data.Sections[i].Name + '</option>');
-            }
-            for (var i = 0; i < data.Evaluations.length; i++) {
-                $('#ddlEvaluations').append('<option value="' + data.Evaluations[i].ID + '">' + data.Evaluations[i].Name + '</option>');
-            }
-        },
-        error: function (e) {
-            alert("errorn");
+                {
+                    type: "POST",
+                    url: "/Account/GetSectionEvaluationsOnClass/" + $(sender).val() + "/" + $('#ddlSessions').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        $('#ddlSection').html('');
+                        $('#ddlEvaluations').html('');
+                        $('#ddlSection').html('<option value="0">--Select--</option>');
+                        for (var i = 0; i < data.Sections.length; i++) {
+                            $('#ddlSection').append('<option value="' + data.Sections[i].ID + '">' + data.Sections[i].Name + '</option>');
+                        }
+                        for (var i = 0; i < data.Evaluations.length; i++) {
+                            $('#ddlEvaluations').append('<option value="' + data.Evaluations[i].ID + '">' + data.Evaluations[i].Name + '</option>');
+                        }
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
         }
-    });
-        }
-        function EvaluationChanged()
-        {
+        function EvaluationChanged() {
             $('#ddlSection').trigger('onchange');
         }
         function SectionChanged(sender) {
             $('#ddlSubjects').html('<option value="0">Loading....</option>');
             $.ajax(
-    {
-        type: "POST",
-        url: "/Account/GetSubjectsForSectionEvaluation/" + $(sender).val()+"/"+$('#ddlEvaluations').val(),
-        cache: false,
-        processData: false,
-        contentType: false,
-        success: function (html) {
-            $('#ddlSubjects').html('');
-            $('#ddlSubjects').append(html);
-        },
-        error: function (e) {
-            alert("errorn");
-        }
-    });
+                {
+                    type: "POST",
+                    url: "/Account/GetSubjectsForSectionEvaluation/" + $(sender).val() + "/" + $('#ddlEvaluations').val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSubjects').html('');
+                        $('#ddlSubjects').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
         }
 
         $(function () {
             $(document).ready(function () {
+                $("#tblCategory").dataTable({
+                    "ordering": true
+                });
                 $(window).keydown(function (event) {
                     if (event.keyCode == 13) {
                         event.preventDefault();
                         return false;
                     }
                 });
+               
             });
 
             $("div[id^='radios']").radiosToSlider({
@@ -378,7 +381,7 @@
             //    table.search('').columns().search('').draw();
             //    return true;
             //});
-            
+
             $('.StudentScore').change(function () {
                 var passMarks = parseFloat($(this).closest('tr').find('#hdnPassMarks').val());
                 var BScore = 100 / parseFloat($(this).closest('tr').find('#hdnMaxMarks').val());
@@ -389,8 +392,7 @@
                 else {
                     $(this).closest('tr').find("label[for^='rbFail']").click();
                 }
-                if(score>90)
-                {
+                if (score > 90) {
                     $(this).closest('tr').find('#txtGrade').val('A1');
                     $(this).closest('tr').find('#txtGradePoints').val(10);
                 }
@@ -430,7 +432,7 @@
                     $(this).closest('tr').find('#txtGrade').val('E3');
                     $(this).closest('tr').find('#txtGradePoints').val(1);
                 }
-                else  {
+                else {
                     $(this).closest('tr').find('#txtGrade').val('E4');
                     $(this).closest('tr').find('#txtGradePoints').val(0);
                 }

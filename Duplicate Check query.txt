@@ -1,3 +1,18 @@
+--Check Duplicate Record for Performance Table
+
+select EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade,count(*)
+from [dbo].[PerformanceParameterValues]
+group by EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade
+having count(*)>1
+
+WITH CTE(EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade,DuplicateCount)
+AS (SELECT EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade,
+           ROW_NUMBER() OVER(PARTITION BY EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade
+           ORDER BY EvaluationID) AS DuplicateCount
+    FROM [dbo].[PerformanceParameterValues] )
+DELETE FROM CTE
+WHERE DuplicateCount > 1;
+
 
 --Check Duplicate Record
 select examid,studentid,marksscored,Grade,status,GradePoints,count(*)
