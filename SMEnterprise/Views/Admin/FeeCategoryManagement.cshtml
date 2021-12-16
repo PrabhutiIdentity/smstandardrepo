@@ -74,6 +74,7 @@
                                                 {
                                                     <input type="hidden" name="OpType" value="-1" />
                                                     <input type="hidden" name="FeeTypeID" value="@c.FeeTypeID" />
+                                                    <input type="hidden" id="FeeCount" value="@c.FeeTypeCount" />
                                                     <button onclick="return FeeTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
                                                 }
                                             </div>
@@ -227,13 +228,22 @@
             $(".my-colorpicker2").colorpicker();
         });
         function FeeTypeDelete(sender) {
-            if (confirm('Are you sure you wish to delete this Fee Category?')) {
-
-                return true;
+            var FeeCount = $(sender).closest('tr').find('#FeeCount').val()
+            if (FeeCount > 0) {
+                ShowClosingNotification('Error', 'This Fee Category can\'t be deleted !!!!', 'error');
+                return false
             }
             else {
-                return false;
+                confirm('Are you sure you wish to delete this Fee Category?');
+                return true;
             }
+            //if (confirm('Are you sure you wish to delete this Fee Category?')) {
+
+            //    return true;
+            //}
+            //else {
+            //    return false;
+            //}
         }
         function SaveFeeCategory(sender) {
             if ($(sender).closest('tr').find('#txtFeeTypeName').val() == "") {

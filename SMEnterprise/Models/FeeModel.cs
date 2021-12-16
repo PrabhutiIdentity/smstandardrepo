@@ -220,7 +220,7 @@ namespace SMEnterprise.Models
         public string Months { get; set; }
         public int OpType { get; set; }
         public int SBranchID { get; set; }
-
+        public int FeeTypeCount { get; set; }
         public string ChartColor
         {
             get

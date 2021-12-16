@@ -1,4 +1,5 @@
-﻿using SMEnterprise.Models;
+﻿using SMEnterprise.Filters;
+using SMEnterprise.Models;
 using SMEnterprise.Repository;
 using System;
 using System.Web;
@@ -9,7 +10,7 @@ namespace SMEnterprise.Controllers
     public class SMSApiController : ApiController
     {
         [HttpPost]
-
+        [PermissionFilter]
         public bool SendSMSList(SMSSendTaskModel objModel)
         {
             if (String.IsNullOrEmpty(objModel.StartTime))
@@ -22,13 +23,16 @@ namespace SMEnterprise.Controllers
             }
             AccountData objAccountData = new AccountData();
             objModel.SMSSendDate = CommonUsage.GetCurrentDate();
-            objModel.SMSSendingID = objAccountData.InsertSMSSending(objModel); 
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.SMSSendingID = objAccountData.InsertSMSSending(objModel);
+           int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+           //  int SBranchID = objModel.SBranchID;
             if (HttpContext.Current.Session["SMSConfiguration"] == null)
             {
                 HttpContext.Current.Session["SMSConfiguration"] = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             }
             SMSConfigirationModel SMSConfigiration = (SMSConfigirationModel)HttpContext.Current.Session["SMSConfiguration"];
+
+
             DeligateTasks objDT = new DeligateTasks();
             objDT.StartSending(objModel, SMSConfigiration);
             //return Redirect("/Account/SendSMS/"+ objModel.SMSSendingID);

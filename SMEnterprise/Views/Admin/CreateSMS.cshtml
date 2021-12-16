@@ -180,11 +180,16 @@
                                     <div class="templateListItem">
                                         <input type="radio" name="TemplateID" class="flat-red" value="@t.TemplateID" />
                                         <div name="TemplateText"> @t.Template</div>
+                                        <div name="SMSContentID"> @t.Content_id</div>
+                                        <div name="SBranchID" style="display:none;"> @t.SBranchID</div>
+
                                     </div>
+
                                 </div>
                             }
                         </div>
                     }
+
                     @using (Html.BeginForm("SendSMSList", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSendSMS", @class = "form-horizontal" }))
                     {
 
@@ -201,7 +206,7 @@
                                 </div><small>
                                     Select All
                                 </small>
-                            </div>                           
+                            </div>
                             <div class="col-md-6">
                                 Search Student <input type="text" onkeyup="Search(this)" />
                             </div>
@@ -210,7 +215,8 @@
                         <div class="row">
                             <input type="hidden" id="hdnSSMSTypeID" name="SMSTypeID" value="0" />
                             <input type="hidden" id="hdnSSMSTemplateID" name="SMSTemplateID" value="0" />
-                            <input type="hidden" name="SBranchID" value="@Model.SBranchID" />
+                            <input type="hidden" id="hdnSMSContentID" name="SMSContentID" value="0" />
+                            <input type="hidden" id="hdnContentID" name="Content_id" value="0" />
                             <input type="hidden" id="hdnSRecieverList" name="RecieverList" value="All Classes" />
                             <input type="text" style="display:none;" id="txtSTemplateText" name="TemplateText" />
                             <input type="text" style="display:none;" id="txtSTitle" name="Title" />
@@ -219,6 +225,7 @@
                             <input type="hidden" id="hdnStartTiming" name="StartTime" value="0" />
                             <input type="hidden" id="hdnEndTiming" name="EndTime" value="0" />
                             <input type="hidden" id="hdnSEDate" name="EDate" value="0" />
+                            <input type="hidden" id="hdnSBranchID" name="SBranchID" value="0" />
                             <div class="dd-container" id="divRecieverContainer">
                                 @Html.Partial("_RecieverListPartial", Model.Recievers)
 
@@ -373,6 +380,9 @@
             });
         }
         function SubmitList() {
+
+
+
             if ($(".iradio_flat-green.checked").find('.flat-red').attr('value')) {
 
                 $('#hdnSSMSTemplateID').val($(".iradio_flat-green.checked").find('.flat-red').attr('value'));
@@ -383,6 +393,8 @@
                 $('#hdnStartTiming').val($('#txtStartTiming').val());
                 $('#hdnEndTiming').val($('#txtEndTiming').val());
                 $('#txtSTitle').val($('#txtTitle').val());
+
+
                 var SelectedList = '';
                 $('.select2-selection__choice').each(function () {
                     if (SelectedList != '') {
@@ -391,6 +403,9 @@
                     SelectedList = SelectedList + $(this).attr('title');
                 });
                 $('#hdnSRecieverList').val(SelectedList);
+                $('#hdnSBranchID').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="SBranchID"]').text().trim());
+                $('#hdnSMSContentID').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="SMSContentID"]').text().trim());
+                $('#hdnContentID').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="SMSContentID"]').text().trim());
                 $('#txtSTemplateText').val($(".iradio_flat-green.checked").closest('.templateListItem').find('[name="TemplateText"]').text());
                 if ($('#lblSMSCount').text().trim() == "0") {
                     ShowClosingNotification('No Recipient', 'Please select atleast one recipient', 'error');
@@ -401,12 +416,14 @@
                 }
             }
             else {
+
                 ShowClosingNotification('SMS Template', 'Please select an SMS Template First!!!!', 'error');
                 return false;
             }
         }
         var IsSendByMe = 0;
         $('#frmSendSMS').submit(function (e) {
+
             IsSendByMe = 1;
             e.preventDefault();
             ShowClosingNotification('Adding....', 'Please wait the Task is being added', 'info');

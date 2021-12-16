@@ -119,6 +119,79 @@ namespace SMEnterprise.Models
     }
     public class AcadmicModel
     {
+        public static string CalculateGradeShine(decimal numbers, decimal maxMarks = 100)
+        {
+            if (numbers != 0)
+            {
+                // perform the division only if count is different than 0,
+                // otherwise we know that it will throw an exception 
+                // so why even attempting it?
+                numbers = numbers * 100 / maxMarks;
+            }
+            else
+            {
+
+            }
+            //numbers = numbers * 100 / maxMarks;
+            string Grade = "A";
+            if (numbers >= 80)
+            {
+                Grade = "A";
+            }
+            else if (numbers >= 79)
+            {
+                Grade = "B";
+            }
+            else if (numbers >= 64)
+            {
+                Grade = "C";
+            }
+            else if (numbers >= 49)
+            {
+                Grade = "D";
+            }
+           
+            else
+            {
+                Grade = "E";
+            }
+            return Grade;
+        }
+        public static string CalculateGradePointsShine(decimal numbers, decimal maxMarks = 100)
+        {
+            numbers = numbers * 100 / maxMarks;
+            string Grade = "A";
+            if (numbers >= 80)
+            {
+                Grade = "10";
+            }
+            else if (numbers >= 79)
+            {
+                Grade = "9";
+            }
+            else if (numbers >= 64)
+            {
+                Grade = "8";
+            }
+            else if (numbers >= 49)
+            {
+                Grade = "7";
+            }
+            else if (numbers >= 34)
+            {
+                Grade = "6";
+            }
+            else if (numbers >= 10)
+            {
+                Grade = "5";
+            }
+           
+            else
+            {
+                Grade = "--";
+            }
+            return Grade;
+        }
         public static string CalculateGrade(decimal numbers, decimal maxMarks = 100)
         {
             if (numbers != 0)
