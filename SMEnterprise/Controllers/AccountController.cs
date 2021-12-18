@@ -3123,5 +3123,67 @@ namespace SMEnterprise.Controllers
         }
         #endregion
 
+
+        #region TransportFee
+
+        [PermissionFilter]
+        public ActionResult SaveTranposrtFeePayment(FeePaymentModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            //  objModel.QDate = CommonUsage.GetCurrentDate();
+            objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+            //string FeeDate= objModel.FeeDate.ToShortDateString();
+            //if (FeeDate.Length>0)
+            //{
+            //    objModel.FeeDate = objModel.FeeDate;
+            //}
+            //else
+            //{
+            //    objModel.FeeDate = CommonUsage.GetCurrentDate();
+            //}
+            objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.Day = objModel.QDate.Day;
+            FeePaymentRowModel objData = objAccountData.SaveStudentTransportFeePayments(objModel);
+
+            return PartialView("_StudentFeeRowPartial", objData);
+        }
+
+        [PermissionFilter]
+        public async Task<ActionResult> GetFeePaymentDetailsForTransport(FeePaymentModel objModel)
+        {
+            objModel.QDate = CommonUsage.GetCurrentDate();
+            objModel.Day = objModel.QDate.Day;
+            if (objModel.Month == 0)
+            {
+                objModel.Month = objModel.QDate.Month;
+                objModel.Year = objModel.QDate.Year;
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = await objAccountData.GetFeeDetailsNewForTransport(objModel);
+            objModel.FeeDate = CommonUsage.GetCurrentDate();
+            return PartialView("_TransportFeePaymentDetail", objModel);
+        }
+        [PermissionFilter]
+        public ActionResult StudentTransportFee(StudentFeeModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentFeeModel();
+
+            }
+            if (objModel.SelectedDate.Year == 1)
+            {
+                objModel.SelectedDate = CommonUsage.GetCurrentDate();//.AddMonths(-1);
+            }
+            objModel.Month = objModel.SelectedDate.Month;
+            objModel.Year = objModel.SelectedDate.Year;
+            objModel.Day = objModel.SelectedDate.Day;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetNewFeePayments(objModel);
+            return View(objModel);
+        }
+
+        #endregion
     }
 }
