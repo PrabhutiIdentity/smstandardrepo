@@ -1,4 +1,5 @@
-﻿
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
 @{
     ViewBag.Title = "StudentAdmissionReport";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
@@ -7,6 +8,7 @@
 {
     <title>Student New Admission Report</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+
 }
 
 @model SMEnterprise.Models.StudentAdmissionReportModel
@@ -14,44 +16,22 @@
     .btn {
         padding: 3px 6px;
     }
+ 
 
-    .thumbImageGrid {
-        max-width: 75px;
-        max-height: 75px;
+    #tblAdmission > tbody > tr > td {
+        vertical-align: middle;
     }
 
-
-    *html1 .thumbImageGrid {
-        width: expression((this.width/this.height)>=1?75:'auto');
-        height: expression((this.width/this.height)<1?100:'auto');
-    }
-
-    .thumbImageMain {
-        max-width: 125px;
-        max-height: 125px;
-    }
-
-
-    *html .thumbImageMain {
-        width: expression((this.width/this.height)>=1?125:'auto');
-        height: expression((this.width/this.height)<1?125:'auto');
-    }
-
-    .thumbImage {
-        max-width: 235px;
-        max-height: 250px;
-    }
-
-    *html .thumbImage {
-        width: expression((this.width/this.height)>=1?250:'auto');
-        height: expression((this.width/this.height)<1?250:'auto');
+    table.dataTable tbody td {
+        word-break: break-word;
+        vertical-align: top;
     }
 </style>
 
 <section class="content-header">
     <h1>
         Student New Admission Report
-      
+
     </h1>
     <ol class="breadcrumb">
         <li><a href=""><i class="fa fa-dashboard"></i> Dashboard</a></li>
@@ -59,183 +39,162 @@
     </ol>
 </section>
 
-<section class="content">
-    <!-- Small boxes (Stat box) -->
-    @using (Html.BeginForm("StudentAdmissionReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
-    {
+<!-- Main content -->
+
+    <div class="">
+
+        <div class="clearfix"></div>
         <div class="row">
-            <div class="col-md-3 form-group">
-                <label>Session</label>
-                <select class="form-control" name="SessionID">
-                    @foreach (var s in Model.Sessions)
-                    {
-                        <option value="@s.ID" @(s.ID == Model.SessionID ? "selected" : "")>@s.Name @(s.Extra1 == "1" ? "(Active)" : "")</option>
-                    }
-                </select>
-            </div>
-            <div class="col-md-3 form-group">
-                <label>Select Month:<small>(mm/yyyy)</small><span class="tx-danger">*</span></label>
-                <input type="month" name="StartDate" class="form-control" id="txtStartDate" placeholder="Enter Name" value="@Model.StartDate.ToString("yyyy-MM")" required>
-            </div>
-            @*<div class="col-md-3 form-group">
-                    <label>Class</label>
-                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
-                        @foreach (var s in Model.Classes)
-                        {
-                            <option value="@s.ID" @(s.ID == Model.ClassID ? "selected" : "")>@s.Name</option>
-                        }
-                    </select>
-                </div>*@
-
-            <div class="col-md-3 form-group">
-                <button type="submit" class="btn btn-primary">Search</button>
-            </div>
-        </div>
-    }
-    <div class="row">
-        <div class="col-xs-12">
-
-            <div class="box-body">
-                <table id="tblAdmission" class="table table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>Seq</th>
-
-                            <th>Student Name  </th>
-                            <th>Student ID  </th>
-                            <th>SR.No.</th>
-                            <th>Gender</th>
-                            <th>Class</th>
-                            <th>Section</th>
-                            <th>Admission Date</th>
-                            <th>Date of Birth</th>
-                            <th><b>User Name</b></th>
-                            <th>Father Name </th>
-                            <th>Father Contact No</th>
-                            <th>Mother Name </th>
-                            <th>Mother Contact No</th>
-                        </tr>
-                    </thead>
-                    @{
-                        int count = 0;
-                        foreach (var c in Model.StudentDetail)
-
-                        {
-                                        <tr>
-                                            <td>@(count + 1)</td>
-                                            <td>
-                                                @c.Name 
-                                            </td>
-                                            <td>
-                                                @c.StudentSID
-                                            </td>
-                                            <td>  @c.SchoolUID</td>
+            <div class="col-md-12">
+                @using (Html.BeginForm("StudentAdmissionReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row">
+                        <div class="col-md-3 form-group">
+                            <label>Session</label>
+                            <select class="form-control" name="SessionID" id="ddlSessions">
+                                @foreach (var s in Model.Sessions)
+                                {
+                                    <option value="@s.ID" @(s.ID == Model.SessionID ? "selected" : "")>@s.Name @(s.Extra1 == "1" ? "(Active)" : "")</option>
+                                    @* < option value="@s.ID">@s.Name @(s.Extra1 == "1" ? "(Active)" : "")</option>*@
+                                }
+                            </select>
+                        </div>
+                        @*<div class="col-md-3 form-group">
+                                <label>Select Month:<small>(mm/yyyy)</small><span class="tx-danger">*</span></label>
+                                <input type="month" name="StartDate" class="form-control" id="txtStartDate" placeholder="Enter Name" value="@Model.StartDate.ToString("yyyy-MM")" required>
+                            </div>*@
 
 
-                                            <td>
-                                                @if (@c.Gender != 0)
-                                                {
-                                                    <label>Female</label>
-                                                }
-                                                else
-                                                {
-                                                    <label>Male</label>
-                                                }
-                                            </td>
-                                            <td>
-                                                @c.ClassName
-                                            </td>
-                                            <td>
+                        <div class="col-md-3 form-group">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                }
+                <div class="x_panel">
+                    <div class="x_content">
+                        <table id="tblAdmission" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Seq</th>
+                                    <th style="width:135px;">Student Name  </th>
+                                    <th style="width:115px;">Student ID  </th>
+                                    <th style="width:115px;">SR.No.</th>
+                                    <th style="width:115px;">Gender</th>
+                                    <th style="width:115px;">Class</th>
+                                    <th style="width:115px;">Section</th>
+                                    <th style="width:115px;">Admission Date</th>
+                                    <th style="width:115px;">Date of Birth</th>
+                                    <th style="width:125px;"><b>User Name</b></th>
+                                    <th style="width:115px;">Father Name </th>
+                                    <th style="width:115px;">Father Contact No</th>
+                                    <th style="width:115px;">Mother Name </th>
+                                    <th style="width:115px;">Mother Contact No</th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (var c in Model.StudentDetail)
 
-                                                @c.SectionName
-                                            </td>
-                                            <td>@c.DOJ.ToString("dd/MM/yyyy")</td>
-                                            <td>@c.DOB.ToString("dd/MM/yyyy")</td>
-                                            <td style="color:dodgerblue;">
+                                {
+                                    <tr>
+                                        <td>@(count + 1)</td>
+                                        <td>@c.Name </td>
+                                        <td>@c.StudentSID</td>
+                                        <td>@c.SchoolUID</td>
+                                        <td>
+                                            @if (@c.Gender != 0)
+                                            {
+                                                <label>Female</label>
+                                            }
+                                            else
+                                            {
+                                                <label>Male</label>
+                                            }
+                                        </td>
+                                        <td> @c.ClassName</td>
+                                        <td>@c.SectionName</td>
+                                        <td>@c.DOJ.ToString("dd/MM/yyyy")</td>
+                                        <td>@c.DOB.ToString("dd/MM/yyyy")</td>
+                                        <td style="color:dodgerblue;"><b>@c.SParentID</b></td>
+                                        <td> @c.FatherName</td>
+                                        <td> @c.FatherMobileNo</td>
+                                        <td>@c.MotherName</td>
+                                        <td>@c.MotherMobileNo</td>
 
-                                                <b>@c.SParentID</b>
 
-                                            </td>
-                                            <td>
-                                                @c.FatherName
-                                            </td>
-                                            <td>
-                                                @c.FatherMobileNo
-                                            </td>
-                                            <td>
-                                                @c.MotherName
-                                            </td>
-                                            <td>
-                                                @c.MotherMobileNo
-                                            </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
 
 
-                                        </tr>
-
-                            count++;
-                        }
-
-                    }
-                </table>
-
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-</section>
 
 
 @section scripts
 {
     <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+
     <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
     <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
     <script src="@Url.Content("~/js/jszip.min.js")"></script>
     <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
     <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
     <script>
         $(document).ready(function () {
+           // var repname = '@PermissionManager.GetLoggedInUser().Description' + '<br /> Student New Admission ' + $('#SessionID option:selected').text();
+            var repname = 'Student New Admission';
             var handleDataTableButtons = function () {
                 if ($("#tblAdmission").length) {
                     $("#tblAdmission").DataTable({
-                        dom: "Bfrtip",
-                        "paging": true,
-                     //   "ordering": false
+
                         "pageLength": 50,
+                        "sDom": 'rtp',
+
+                        bSort: true,
+                        dom: "Bfrtip",
                         buttons: [
                             {
                                 extend: "copy",
                                 className: "btn-sm",
-                                footer: true
+                                title: repname
                             },
                             {
                                 extend: "csv",
                                 className: "btn-sm",
-                                footer: true
+                                title: repname
                             },
                             {
                                 extend: "excel",
                                 className: "btn-sm",
-                                footer: true
+                                title: repname
                             },
                             {
                                 extend: "pdfHtml5",
                                 className: "btn-sm",
-                                footer: true
+                                title: repname
                             },
                             {
                                 extend: "print",
                                 className: "btn-sm",
-                                footer: true
+                                title: repname
                             },
                         ],
+
                         responsive: true
                     });
                 }
             };
-
             TableManageButtons = function () {
                 "use strict";
                 return {
@@ -244,9 +203,8 @@
                     }
                 };
             }();
-
             TableManageButtons.init();
+
         });
-       
     </script>
 }
