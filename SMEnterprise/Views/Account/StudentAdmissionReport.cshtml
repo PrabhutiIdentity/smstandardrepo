@@ -4,19 +4,22 @@
     ViewBag.Title = "StudentAdmissionReport";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
+@model SMEnterprise.Models.StudentAdmissionReportModel
 @section IncludeCss
 {
     <title>Student New Admission Report</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
 
 }
 
-@model SMEnterprise.Models.StudentAdmissionReportModel
 <style>
     .btn {
         padding: 3px 6px;
     }
- 
+
 
     #tblAdmission > tbody > tr > td {
         vertical-align: middle;
@@ -41,101 +44,111 @@
 
 <!-- Main content -->
 
-    <div class="">
+<div class="">
 
-        <div class="clearfix"></div>
-        <div class="row">
-            <div class="col-md-12">
-                @using (Html.BeginForm("StudentAdmissionReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
-                {
-                    <div class="row">
-                        <div class="col-md-3 form-group">
-                            <label>Session</label>
-                            <select class="form-control" name="SessionID" id="ddlSessions">
-                                @foreach (var s in Model.Sessions)
-                                {
-                                    <option value="@s.ID" @(s.ID == Model.SessionID ? "selected" : "")>@s.Name @(s.Extra1 == "1" ? "(Active)" : "")</option>
-                                    @* < option value="@s.ID">@s.Name @(s.Extra1 == "1" ? "(Active)" : "")</option>*@
-                                }
-                            </select>
-                        </div>
-                        @*<div class="col-md-3 form-group">
-                                <label>Select Month:<small>(mm/yyyy)</small><span class="tx-danger">*</span></label>
-                                <input type="month" name="StartDate" class="form-control" id="txtStartDate" placeholder="Enter Name" value="@Model.StartDate.ToString("yyyy-MM")" required>
-                            </div>*@
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("StudentAdmissionReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            {
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-1 padding">
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Session :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="SessionID" id="ddlSessions">
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (NameIDModel el in Model.Sessions)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1=="1"?"(Active)":"")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            @*<div class="col-md-3 form-group">
+            <label>Select Month:<small>(mm/yyyy)</small><span class="tx-danger">*</span></label>
+            <input type="month" name="StartDate" class="form-control" id="txtStartDate" placeholder="Enter Name" value="@Model.StartDate.ToString("yyyy-MM")" required>
+        </div>*@
 
 
-                        <div class="col-md-3 form-group">
-                            <button type="submit" class="btn btn-primary">Search</button>
+                            <div class="col-md-3 form-group">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
                         </div>
                     </div>
-                }
-                <div class="x_panel">
-                    <div class="x_content">
-                        <table id="tblAdmission" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;">
-                            <thead>
+
+                </div>
+            }
+            <div class="x_panel">
+                <div class="x_content">
+                    <table id="tblAdmission" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Seq</th>
+                                <th style="width:135px;">Student Name  </th>
+                                <th style="width:115px;">Student ID  </th>
+                                <th style="width:115px;">SR.No.</th>
+                                <th style="width:115px;">Gender</th>
+                                <th style="width:115px;">Class</th>
+                                <th style="width:115px;">Section</th>
+                                <th style="width:115px;">Admission Date</th>
+                                <th style="width:115px;">Date of Birth</th>
+                                <th style="width:125px;"><b>User Name</b></th>
+                                <th style="width:115px;">Father Name </th>
+                                <th style="width:115px;">Father Contact No</th>
+                                <th style="width:115px;">Mother Name </th>
+                                <th style="width:115px;">Mother Contact No</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.StudentDetail)
+
+                            {
                                 <tr>
-                                    <th>Seq</th>
-                                    <th style="width:135px;">Student Name  </th>
-                                    <th style="width:115px;">Student ID  </th>
-                                    <th style="width:115px;">SR.No.</th>
-                                    <th style="width:115px;">Gender</th>
-                                    <th style="width:115px;">Class</th>
-                                    <th style="width:115px;">Section</th>
-                                    <th style="width:115px;">Admission Date</th>
-                                    <th style="width:115px;">Date of Birth</th>
-                                    <th style="width:125px;"><b>User Name</b></th>
-                                    <th style="width:115px;">Father Name </th>
-                                    <th style="width:115px;">Father Contact No</th>
-                                    <th style="width:115px;">Mother Name </th>
-                                    <th style="width:115px;">Mother Contact No</th>
+                                    <td>@(count + 1)</td>
+                                    <td>@c.Name </td>
+                                    <td>@c.StudentSID</td>
+                                    <td>@c.SchoolUID</td>
+                                    <td>
+                                        @if (@c.Gender != 0)
+                                        {
+                                            <label>Female</label>
+                                        }
+                                        else
+                                        {
+                                            <label>Male</label>
+                                        }
+                                    </td>
+                                    <td> @c.ClassName</td>
+                                    <td>@c.SectionName</td>
+                                    <td>@c.DOJ.ToString("dd/MM/yyyy")</td>
+                                    <td>@c.DOB.ToString("dd/MM/yyyy")</td>
+                                    <td style="color:dodgerblue;"><b>@c.SParentID</b></td>
+                                    <td> @c.FatherName</td>
+                                    <td> @c.FatherMobileNo</td>
+                                    <td>@c.MotherName</td>
+                                    <td>@c.MotherMobileNo</td>
+
+
                                 </tr>
-                            </thead>
-                            @{
-                                int count = 0;
-                                foreach (var c in Model.StudentDetail)
 
-                                {
-                                    <tr>
-                                        <td>@(count + 1)</td>
-                                        <td>@c.Name </td>
-                                        <td>@c.StudentSID</td>
-                                        <td>@c.SchoolUID</td>
-                                        <td>
-                                            @if (@c.Gender != 0)
-                                            {
-                                                <label>Female</label>
-                                            }
-                                            else
-                                            {
-                                                <label>Male</label>
-                                            }
-                                        </td>
-                                        <td> @c.ClassName</td>
-                                        <td>@c.SectionName</td>
-                                        <td>@c.DOJ.ToString("dd/MM/yyyy")</td>
-                                        <td>@c.DOB.ToString("dd/MM/yyyy")</td>
-                                        <td style="color:dodgerblue;"><b>@c.SParentID</b></td>
-                                        <td> @c.FatherName</td>
-                                        <td> @c.FatherMobileNo</td>
-                                        <td>@c.MotherName</td>
-                                        <td>@c.MotherMobileNo</td>
-
-
-                                    </tr>
-
-                                    count++;
-                                }
-
+                                count++;
                             }
-                        </table>
+
+                        }
+                    </table>
 
 
-                    </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
 
 
