@@ -89,13 +89,17 @@
                                         <td>
                                             <div class="btn-group">
                                                 <a class="btn btn-link" onclick="EditSalaryCategory(this)">Edit</a>
-                                                @using (Html.BeginForm("UpdateSalaryType", "Admin", FormMethod.Post, 
+                                                @using (Html.BeginForm("UpdateSalaryType", "Admin", FormMethod.Post,
                                                     new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
                                                 {
                                                     <input type="hidden" name="OpType" value="-1" />
                                                     <input type="hidden" name="TypeID" value="@c.TypeID" />
-                                                    <button onclick="return SalaryTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" 
-                                                            value="Edit">Delete</button>
+                                                    <input type="hidden" id="hdnAmount" value="@c.Amount" />
+
+                                                    <button onclick="return SalaryTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default"
+                                                            value="Edit">
+                                                        Delete
+                                                    </button>
                                                 }
                                             </div>
                                         </td>
@@ -277,12 +281,26 @@
             $('#liSalaryTypeManagement').addClass('active');
             $(".my-colorpicker2").colorpicker();
         });
-        function SalaryTypeDelete(sender) {
-            if (confirm('Are you sure you wish to delete this Salary Category?')) {
+        //function SalaryTypeDelete(sender) {
+        //    if (confirm('Are you sure you wish to delete this Salary Category?')) {
 
-                return true;
+        //        return true;
+        //    }
+        //    else {
+        //        return false;
+        //    }
+        //}
+        function SalaryTypeDelete(sender) {
+            if ($(sender).closest('tr').find('#hdnAmount').val() <= 0) {
+                if (confirm('Are you sure you wish to delete this Salary Category?')) {
+                    return true;
+                }
+                else {
+                    return false;
+                }
             }
             else {
+                alert($(sender).closest('tr').find('#hdnAmount').val());
                 return false;
             }
         }
