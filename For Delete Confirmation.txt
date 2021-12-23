@@ -1,0 +1,103 @@
+-- 1. Delete related Salary Type
+
+alter proc [dbo].[sp_GetSalaryTypes]     
+(      
+@SBranchID int      
+)      
+AS      
+BEGIN      
+select [TypeID]      
+      ,[TypeName]      
+      ,[TypeApplicable],      
+   (Select Name from SalaryApplicableMaster where ID=TypeApplicable) as TypeApplicableName      
+      ,[ChartColor],[IsBaseType],Months,IsDeduction,AttendanceType,MinDays  
+   ,(Select SUM(Amount) from EmployeeTypeSalaryDetails ETS where ETS.SalaryTypeID = STM.TypeID and ETS.SBranchID=@SBranchID) as Amount  
+  FROM [dbo].[SalaryTypeMaster] STM where SBranchID is Null or SBranchID=0 or SBranchID=@SBranchID      
+      
+  select * from SalaryApplicableMaster      
+END 
+go
+
+-- Change Page SalaryCategoryManagement.cshtml
+
+
+-- 2. Delete related Group/Subject (subject delete)
+
+alter proc [dbo].[spn_GetGroupSubjectDetails]    
+(    
+@GroupID int    
+)    
+AS    
+BEGIN    
+ Select SubjectID,SubjectName,IsOptionalsubject,Status,GroupID,SubjectCode,    
+ MainSubID,SubSubjectCount,(select Count(*) from Teacher_Subject ST where ST.SubjectID=SM.SubjectID) as TAssigned  
+ from SubjectMaster SM where  GroupID=@GroupID    
+END 
+go
+
+-- Change Partial VIew ( _GroupSubjectsPartial.cshtml )
+-- Change GroupManagment (GroupManagement.cshtml)
+
+--3.  Religion Delete problem
+
+alter Procedure dbo.sp_GetReligions  
+(    
+@SBranchID int    
+)    
+AS    
+BEGIN    
+Select *,(select Count(*) FROM EmployeeMaster where ReligionID=RM.ID) as Extra1  
+ , (select Count(*) FROM StudentMaster where ReligionID=RM.ID) as Extra2  
+ from ReligionMaster RM where SBranchID=@SBranchID   
+ 
+END 
+go
+
+-- Change Page (ReligionManagement.cshtml)
+
+
+
+
+**************************
+
+alter Procedure dbo.sp_GetReligions  
+(    
+@SBranchID int    
+)    
+AS    
+BEGIN    
+Select *,(select Count(*) FROM EmployeeMaster where ReligionID=RM.ID) as Extra1  
+ , (select Count(*) FROM StudentMaster where ReligionID=RM.ID) as Extra2  
+ from ReligionMaster RM where SBranchID=@SBranchID   
+ 
+END 
+go
+alter proc [dbo].[spn_GetGroupSubjectDetails]    
+(    
+@GroupID int    
+)    
+AS    
+BEGIN    
+ Select SubjectID,SubjectName,IsOptionalsubject,Status,GroupID,SubjectCode,    
+ MainSubID,SubSubjectCount,(select Count(*) from Teacher_Subject ST where ST.SubjectID=SM.SubjectID) as TAssigned  
+ from SubjectMaster SM where  GroupID=@GroupID    
+END 
+go
+alter proc [dbo].[sp_GetSalaryTypes]     
+(      
+@SBranchID int      
+)      
+AS      
+BEGIN      
+select [TypeID]      
+      ,[TypeName]      
+      ,[TypeApplicable],      
+   (Select Name from SalaryApplicableMaster where ID=TypeApplicable) as TypeApplicableName      
+      ,[ChartColor],[IsBaseType],Months,IsDeduction,AttendanceType,MinDays  
+   ,(Select SUM(Amount) from EmployeeTypeSalaryDetails ETS where ETS.SalaryTypeID = STM.TypeID and ETS.SBranchID=@SBranchID) as Amount  
+  FROM [dbo].[SalaryTypeMaster] STM where SBranchID is Null or SBranchID=0 or SBranchID=@SBranchID      
+      
+  select * from SalaryApplicableMaster      
+END 
+go
+**************************
