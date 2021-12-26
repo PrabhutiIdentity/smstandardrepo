@@ -119,43 +119,45 @@ namespace SMEnterprise.Models
     }
     public class AcadmicModel
     {
-        public static string CalculateGradeShine(decimal numbers, decimal maxMarks = 100)
-        {
-            if (numbers != 0)
+        public static string CalculateGradeShine(decimal totalscored, decimal totalmax = 100)
+        {   string Grade ;
+            if (totalscored != 0)
             {
                 // perform the division only if count is different than 0,
                 // otherwise we know that it will throw an exception 
                 // so why even attempting it?
-                numbers = numbers * 100 / maxMarks;
-            }
-            else
-            {
+                decimal Num;
+                Num = (totalscored * 100) / totalmax;
+                //numbers = numbers * 100 / maxMarks;
+             
+                if (Num >= 80 && Num <= 100)
+                {
+                    Grade = "A";
+                }
+                else if (Num >= 65 && Num <= 79)
+                {
+                    Grade = "B";
+                }
+                else if (Num >= 49 && Num <= 64)
+                {
+                    Grade = "C";
+                }
+                else if (Num >= 35 && Num <= 48)
+                {
+                    Grade = "D";
+                }
 
+                else
+                {
+                    Grade = "E";
+                }
+             
             }
-            //numbers = numbers * 100 / maxMarks;
-            string Grade = "A";
-            if (numbers >= 80)
-            {
-                Grade = "A";
-            }
-            else if (numbers >= 79)
-            {
-                Grade = "B";
-            }
-            else if (numbers >= 64)
-            {
-                Grade = "C";
-            }
-            else if (numbers >= 49)
-            {
-                Grade = "D";
-            }
-           
             else
             {
-                Grade = "E";
+                Grade = "--";
             }
-            return Grade;
+              return Grade;
         }
         public static string CalculateGradePointsShine(decimal numbers, decimal maxMarks = 100)
         {
@@ -165,19 +167,19 @@ namespace SMEnterprise.Models
             {
                 Grade = "10";
             }
-            else if (numbers >= 79)
+            else if (numbers >= 65 && numbers <= 79)
             {
                 Grade = "9";
             }
-            else if (numbers >= 64)
+            else if (numbers >= 49 && numbers <= 64)
             {
                 Grade = "8";
             }
-            else if (numbers >= 49)
+            else if (numbers >= 35 && numbers <= 48)
             {
                 Grade = "7";
             }
-            else if (numbers >= 34)
+            else if (numbers >= 11 && numbers <= 34)
             {
                 Grade = "6";
             }
