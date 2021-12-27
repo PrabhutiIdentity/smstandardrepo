@@ -920,6 +920,7 @@ namespace SMEnterprise.Models
         public string EvaluationName { get; set; }
         public List<EvaluationTypeModel> EvaluationTypes { get; set; }
         public DateTime ResultDate { get; set; }
+        public List<PerformanceParameterModel> PerformanceParameters { get; set; }
     }
     public class PerformanceParameterDetailModel
     {
