@@ -3075,6 +3075,13 @@ namespace SMEnterprise.Repository
                 {
                     objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
                     objModel.Report = multi.Read<FeePaymentModel>().ToList();
+                    try
+                    {
+
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return objModel;
