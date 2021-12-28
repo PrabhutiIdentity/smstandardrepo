@@ -56,9 +56,9 @@ namespace SMEnterprise.Repository
 
             }
             data.Recievers = finalSendingList;
-            
+
             int TotalRecievers = data.Recievers.Count;
-           
+
             int TotalThreads = 1;
             int SMSPerThread = TotalRecievers / TotalThreads;
             int SMSOverHead = TotalRecievers % TotalThreads;
@@ -74,7 +74,7 @@ namespace SMEnterprise.Repository
             CurrentTasks.TryAdd(data.SMSSendingID + "-" + 0, objTask);
 
             var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
-            hubContext.Clients.All.TaskAdded(data.SMSSendingID, data.Title, data.RecieverList, TotalRecievers,data.Content_id);
+            hubContext.Clients.All.TaskAdded(data.SMSSendingID, data.Title, data.RecieverList, TotalRecievers, data.Content_id);
             //DelegatBulkSMS smsdeligate = SendSMSMini;
             SendSMSMini(data, 0, TotalRecievers, 0, SMSConfiguration);
 
@@ -84,7 +84,6 @@ namespace SMEnterprise.Repository
         {
             foreach (SMSRecieverDetailModel r in data.Recievers)
             {
-               
                 #region Task Cancellation Handeling
                 //if (CanceledTasks.Keys.Contains(data.SMSSendingID.ToString()) && CanceledTasks[data.SMSSendingID.ToString()] == "1")
                 //{
@@ -147,8 +146,8 @@ namespace SMEnterprise.Repository
 
                 if (r.Mobile != null && r.Mobile != "")
                 {
-                    SubmitSMS(SMSText.TrimStart(), r.Mobile, data.SBranchID, data.SMSTypeID, r.RecieverType, r.RecieverID, data.SMSSendingID,data.Content_id, SMSConfiguration);
-                    
+                    SubmitSMS(SMSText.TrimStart(), r.Mobile, data.SBranchID, data.SMSTypeID, r.RecieverType, r.RecieverID, data.SMSSendingID, data.Content_id, SMSConfiguration);
+
                 }
                 else
                 {
@@ -180,15 +179,17 @@ namespace SMEnterprise.Repository
                 }
             }
         }
-        public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID,string ContentID,SMSConfigirationModel SMSConfiguration)
+        public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID, string ContentID, SMSConfigirationModel SMSConfiguration)
         {
+            string msg = "";
             if (SMSConfiguration == null)
             {
                 SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             }
-          
+
             SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             string s = "";
+          
             
                 WebClient httpclient = new WebClient();
                 httpclient.Headers.Add("user-agent", SMSConfiguration.header);
@@ -208,7 +209,7 @@ namespace SMEnterprise.Repository
                     }
                 else if (param.ParamType == 3)
                 {
-                    httpclient.QueryString.Add(param.ParamName,Convert.ToString(ContentID).ToString());
+                    httpclient.QueryString.Add(param.ParamName, Convert.ToString(ContentID).ToString());
                 }
             }
                 string baseurl = SMSConfiguration.baseurl;

@@ -159,21 +159,7 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
 
-        [PermissionFilter]
-        public ActionResult SearchStudentsForTC(StudentSearchListModel objModel)
-        {
-            if (objModel == null)
-            {
-                objModel = new StudentSearchListModel();
-            }
-            if (objModel.SearchText != null)
-            {
-                objModel.SearchText = objModel.SearchText.Trim();
-            }
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
-            return View(objModel);
-        }
+
         [PermissionFilter]
         public ActionResult DeleteStudent(StudentsPageModel objModel)
         {
@@ -650,14 +636,6 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
-        public ActionResult StopWiseStudents(BusStudentListModel objModel)
-        {
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.GetStopWiseStudents(SBranchID, objModel.ID);
-            return View(objModel);
-        }
-        
-        [PermissionFilter]
         public ActionResult ClassWiseBusStudents(BusStudentListModel objModel)
         {
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -698,6 +676,7 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetFeePayments(objModel);
             return View(objModel);
         }
+
         [PermissionFilter]
         public ActionResult StudentsFee(StudentFeeModel objModel)
         {
@@ -714,7 +693,42 @@ namespace SMEnterprise.Controllers
             objModel.Year = objModel.SelectedDate.Year;
             objModel.Day = objModel.SelectedDate.Day;
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.GetNewFeePayments(objModel);
+            objModel.SchoolID = PermissionManager.GetLoggedInUser().SchoolID;
+            if(objModel.SBranchID == 2 && objModel.SchoolID==1068)
+            {
+
+            }
+            else
+            {
+                objModel = objAccountData.GetNewFeePayments(objModel);
+            }
+          
+            return View(objModel);
+        }
+               [PermissionFilter]
+        public ActionResult ParentsFeeDetailsNew(StudentFeeModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentFeeModel();
+
+            }
+            if (objModel.SelectedDate.Year == 1)
+            {
+                objModel.SelectedDate = CommonUsage.GetCurrentDate();//.AddMonths(-1);
+            }
+            objModel.Month = objModel.SelectedDate.Month;
+            objModel.Year = objModel.SelectedDate.Year;
+            objModel.Day = objModel.SelectedDate.Day;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetNewFeePaymentsParentWise(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult Parents(ParentPageModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.GetBranchParents(objModel);
             return View(objModel);
         }
         [PermissionFilter]
@@ -784,7 +798,9 @@ namespace SMEnterprise.Controllers
         {
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             //  objModel.QDate = CommonUsage.GetCurrentDate();
-            objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+         //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+
+           
             //string FeeDate= objModel.FeeDate.ToShortDateString();
             //if (FeeDate.Length>0)
             //{
@@ -810,7 +826,7 @@ namespace SMEnterprise.Controllers
                 int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
                 string ContentID = "0";
                 NotificationSMSModel objModel = objAccountData.GetFeePaymentSMSDetails(PaymentID);
-
+              
                 if (objModel.Number != null && objModel.Number != "" && !String.IsNullOrEmpty(objModel.SMSText) && String.IsNullOrEmpty(objModel.FCMToken))
                 {
                     SMSSender objSender = new SMSSender();
@@ -819,16 +835,10 @@ namespace SMEnterprise.Controllers
                 }
                 if (!String.IsNullOrEmpty(objModel.FCMToken))
                 {
-                    //For Checking
-
-                    //SMSSender objSender = new SMSSender();
-                    //objSender.SendSMSAsync(objModel.SMSText, objModel.Number, SBranchID, 4, 1, PaymentID, objModel.ContentID);
-
                     NotificationModel objNModel = new NotificationModel();
                     CommonData objCommonData = new CommonData();
                     objNModel.RecieverID = objModel.RecieverID;
                     objNModel.SBranchID = SBranchID;
-
                     objNModel.NotificationType = 7;
                     objNModel.RecieverType = objModel.RecieverType;
                     objNModel.NotificationText = objModel.SMSText.Replace("%0a", " ");
@@ -1483,10 +1493,11 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
-        public ActionResult ExpanceDetails(string ID = null)
+        public ActionResult ExpanceDetails(string ID = null,string ID2=null)
         {
             int ExpenceID = CommonUsage.ConvertToInt(ID);
-            ExpenceModel objModel = objAccountData.GetExpenceDetails(ExpenceID);
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            ExpenceModel objModel = objAccountData.GetExpenceDetails(ExpenceID,SBranchID);
             return View(objModel);
         }
         [PermissionFilter]
@@ -1709,7 +1720,51 @@ namespace SMEnterprise.Controllers
             int Res = objAccountData.InsertUpdateSLC(objModel);
             return Redirect("ViewStudentSLC/" + objModel.StudentID + "/" + objModel.SessionID);
         }
+        [PermissionFilter]
+        public ActionResult SearchStudentsForTC(StudentSearchListModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentSearchListModel();
+            }
+            if (objModel.SearchText != null)
+            {
+                objModel.SearchText = objModel.SearchText.Trim();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (objModel.TCType == 0)
+            {
+                objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
+                return View(objModel);
+            }
+            else
+            {
+                return RedirectToAction("New", objModel);
+            }
 
+        }
+        [PermissionFilter]
+        public ActionResult New(StudentSearchListModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentSearchListModel();
+            }
+            if (objModel.SearchText != null)
+            {
+                objModel.SearchText = objModel.SearchText.Trim();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (objModel.TCType == 1)
+            {
+                objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
+                return RedirectToAction("GenerateTC", objModel);
+            }
+            else
+            {
+                return RedirectToAction("SearchStudentsForTC", objModel);
+            }
+        }
         [PermissionFilter]
         public ActionResult GenerateTC(TCDetailsModel objModel)
         {
@@ -1724,9 +1779,22 @@ namespace SMEnterprise.Controllers
             {
                 objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
                 objAccountData.GetTCDetails(objModel);
-                ViewBag.Message = "Success";
-                return View(objModel);
+                //ViewBag.Message = "Success";
+                //return View(objModel);
+                return RedirectToAction("GetTCForStudent", objModel);
+                //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
             }
+        }
+        [PermissionFilter]
+        public ActionResult GetTCForStudent(TCDetailsModel oModel)
+        {
+            if (oModel.DOB.Year == 1)
+            {
+                oModel.DOB = CommonUsage.GetCurrentDate();
+            }
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.GetTCDetails(oModel);
+            return View(oModel);
         }
         #endregion
         #region Reports
@@ -1815,7 +1883,10 @@ namespace SMEnterprise.Controllers
 
             return View(objModel);
         }
+
+        #region Exam Related
         [PermissionFilter]
+            
         public ActionResult AdmitCard(AdmitCardListModel objData = null)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -1844,8 +1915,54 @@ namespace SMEnterprise.Controllers
             return View(objData);
         }
 
+        // Shishupal Work on Exam Date Sheet For School
+        // Date : 17 Nov 2021
+        [PermissionFilter]
+        public ActionResult EvaluationTypeManagementExam(string ID = null)
+        {
+            int SessionID = CommonUsage.ConvertToInt(ID);
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID);
+            //EvaluationTypePageModelExam objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID);
+            return PartialView("_EvaluationsPartial", objModel);
+            //return Json(objModel);
+        }
+
+        [PermissionFilter]
+        public ActionResult ExamDateSheet(StudentExamDatesheetModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.ExamDateSheet(objModel);
+            return View(objModel);
+        }
+
+        // End Shihupal  Exam Date Sheet
+        #endregion
+
+
         [PermissionFilter]
         public ActionResult StudentsIDCards(StudentsPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentsPageModel();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStudents(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
+            if (objModel.ClassID != 0)
+            {
+                objModel.ClassName = objModel.Classes.Where(c => c.ClassID == objModel.ClassID).SingleOrDefault().ClassName;
+                objModel.SectionName = objModel.Sections.Where(c => c.ID == objModel.SectionID).SingleOrDefault().Name;
+                objModel.SessionName = objModel.Sessions.Where(c => c.ID == objModel.SessionID).SingleOrDefault().Name;
+            }
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult StudentsIDCardsV(StudentsPageModel objModel)
         {
             if (objModel == null)
             {
@@ -2024,7 +2141,7 @@ namespace SMEnterprise.Controllers
             if (objModel.Mobile != null && objModel.Mobile != "")
             {
                 SMSSender objSender = new SMSSender();
-                objSender.SendSMSAsync(SMS, objModel.Mobile, SBranchID, 4, 1, objModel.PaymentID,ContentID);
+                objSender.SendSMSAsync(SMS, objModel.Mobile, SBranchID, 4, 1, objModel.PaymentID, ContentID);
             }
             objModel.Mobile = "XXXXXX" + objModel.Mobile.Substring(objModel.Mobile.Length - 4);
             return Json(objModel, JsonRequestBehavior.AllowGet);
@@ -2064,14 +2181,6 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetClassGenderCategoryHouseCount(objModel);
             return View(objModel);
         }
-        [PermissionFilter]
-        public ActionResult ClassGCategoryGenderStudents(ClassGenderCategoryCountPageModel objModel)
-        {
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.GetClassGenderCategoryHouseCount(objModel);
-            return View(objModel);
-        }
-
         #endregion
 
         #region Exam Resulst
@@ -2221,6 +2330,17 @@ namespace SMEnterprise.Controllers
         // for shine
         [PermissionFilter]
         public ActionResult StudentPerformanceResult(string ID = null, string ID2 = null, string ID3 = null)
+        {
+            StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
+            objModel.StudentSessionUID = CommonUsage.ConvertToInt(ID);
+            objModel.EvaluationID = CommonUsage.ConvertToInt(ID2);
+            objModel.SessionID = CommonUsage.ConvertToInt(ID3);
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objTeacherData.GetStudentPerformanceResult(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult StudentPerformanceResult1(string ID = null, string ID2 = null, string ID3 = null)
         {
             StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
             objModel.StudentSessionUID = CommonUsage.ConvertToInt(ID);
@@ -2754,6 +2874,27 @@ namespace SMEnterprise.Controllers
             //  return View(objModel);
            // return RedirectToAction("Students", "Account");
         }
+        public ActionResult UpdateEmployeePassword(string ID = null, string employeeid = null)
+        {
+            string Password = ID;
+            int UserID = CommonUsage.ConvertToInt(employeeid);
+            int UserType = 3;
+            CommonData objCommonData = new CommonData();
+            int i = objAccountData.UpdatePassword(UserID, UserType, Password);
+            return Json(i, JsonRequestBehavior.AllowGet);
+        }
+
+        #endregion
+
+        #region Student Block
+      
+        public ActionResult UpdateIsBlock(string ID = null, string ID2 = null)
+        {
+            int isBlock = CommonUsage.ConvertToInt(ID);
+            int studentID = CommonUsage.ConvertToInt(ID2);
+            objAccountData.UpdateIsBlock(isBlock, studentID);
+            return Json(JsonRequestBehavior.AllowGet);
+        }
 
         #endregion
 
@@ -2977,5 +3118,85 @@ namespace SMEnterprise.Controllers
         }
        
         #endregion
+
+        #region studentadmissionreport
+        [PermissionFilter]
+        public ActionResult StudentAdmissionReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+            //if (oModel.StartDate.Year == 1)
+            //{
+            //    oModel.StartDate = CommonUsage.GetCurrentDate();
+            //    oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
+            //}
+            objAdminData.GetStudentAdmssionDetail(oModel);
+            return View(oModel);
+        }
+        #endregion
+
+
+        #region TransportFee
+
+        [PermissionFilter]
+        public ActionResult SaveTranposrtFeePayment(FeePaymentModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            //  objModel.QDate = CommonUsage.GetCurrentDate();
+            objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+            //string FeeDate= objModel.FeeDate.ToShortDateString();
+            //if (FeeDate.Length>0)
+            //{
+            //    objModel.FeeDate = objModel.FeeDate;
+            //}
+            //else
+            //{
+            //    objModel.FeeDate = CommonUsage.GetCurrentDate();
+            //}
+            objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.Day = objModel.QDate.Day;
+            FeePaymentRowModel objData = objAccountData.SaveStudentTransportFeePayments(objModel);
+
+            return PartialView("_StudentFeeRowPartial", objData);
+        }
+
+        [PermissionFilter]
+        public async Task<ActionResult> GetFeePaymentDetailsForTransport(FeePaymentModel objModel)
+        {
+            objModel.QDate = CommonUsage.GetCurrentDate();
+            objModel.Day = objModel.QDate.Day;
+            if (objModel.Month == 0)
+            {
+                objModel.Month = objModel.QDate.Month;
+                objModel.Year = objModel.QDate.Year;
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = await objAccountData.GetFeeDetailsNewForTransport(objModel);
+            objModel.FeeDate = CommonUsage.GetCurrentDate();
+            return PartialView("_TransportFeePaymentDetail", objModel);
+        }
+        [PermissionFilter]
+        public ActionResult StudentTransportFee(StudentFeeModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentFeeModel();
+
+            }
+            if (objModel.SelectedDate.Year == 1)
+            {
+                objModel.SelectedDate = CommonUsage.GetCurrentDate();//.AddMonths(-1);
+            }
+            objModel.Month = objModel.SelectedDate.Month;
+            objModel.Year = objModel.SelectedDate.Year;
+            objModel.Day = objModel.SelectedDate.Day;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetNewFeePayments(objModel);
+            return View(objModel);
+        }
+
+        #endregion
+
     }
 }

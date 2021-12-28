@@ -119,7 +119,6 @@
                                     <th style="width: 20%">Details</th>
                                     <th style="width: 20%">Contact</th>
                                     <th style="width: 10%">Take Fee</th>
-                                    <th>Payments</th>
                                 </tr>
                             </thead>
                             @{
@@ -135,6 +134,8 @@
                                             <img id="imgPhoto" onerror="return OnImageError(this,1);" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(c.ParentID)_2_@c.MotherImage" />
                                         </td>
                                         <td>
+                                            Parent ID: @c.ParentSID
+                                            <br />
                                             Father : @c.FatherName
                                             <br />
                                             Mother : @c.MotherName
@@ -147,15 +148,14 @@
                                         </td>
 
                                         <td>
-                                            @using (Html.BeginForm("ParentFeeDetails", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                            @using (Html.BeginForm("ParentsFeeDetailsNew", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
                                             {
                                                 <input type="hidden" name="ParentID" value="@c.ParentID" />
                                                 <input type="hidden" name="SessionID" value="@Model.SessionID" />
 
-                                                <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link">Take Payment</button>
+                                                <button type="submit"  class="btn btn-link">Take Payment</button>
                                             }
                                         </td>
-                                        <td><button type="button" data-toggle="modal" data-target="#mdlParentPayments" onclick="return OpenParentPayments(@c.ParentID);" class="btn btn-link">Payments</button></td>
                                     </tr>
 
                                     count++;
@@ -226,7 +226,7 @@
 
         }
         function OpenParentPayments(ParID) {
-            
+
             $('#tbdPayments').html('<tr><td colspan="4" style="text-align:center"><b>Please Wait....</b></td></tr>');
             $.ajax(
       {
@@ -259,19 +259,18 @@
 
                 <!-- Modal body -->
                 <div class="modal-body" id="mdlParPayBody">
-                   <table class="table table-bordered">
-                       <thead>
-                           <tr>
-                               <th>Reciept No.</th>
-                               <th>Date</th>
-                               <th>Amount</th>
-                               <th>Print</th>
-                           </tr>
-                       </thead>
-                       <tbody id="tbdPayments">
-
-                       </tbody>
-                   </table>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Reciept No.</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Print</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbdPayments">
+                        </tbody>
+                    </table>
                 </div>
                 <!-- Modal footer -->
                 <div class="modal-footer">

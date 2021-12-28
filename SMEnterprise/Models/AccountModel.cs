@@ -77,8 +77,6 @@ namespace SMEnterprise.Models
         public int StudentID { get; set; }
         public int SessionID { get; set; }
         public string SessionName { get; set; }
-        public string ReasonforInactive { get; set; }
-        
         public SBranchModel BranchDetails { get; set; }
         public int SBranchID { get; set; }
         public List<ClassModel> Classes { get; set; }

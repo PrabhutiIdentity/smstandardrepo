@@ -220,7 +220,7 @@ namespace SMEnterprise.Models
         public string Months { get; set; }
         public int OpType { get; set; }
         public int SBranchID { get; set; }
-
+        public int FeeTypeCount { get; set; }
         public string ChartColor
         {
             get
@@ -610,8 +610,9 @@ namespace SMEnterprise.Models
         public SBranchModel SBranchDetails { get; set; }
         public int FeeTypeID { get; set; }
         public decimal PaymentRecieved { get; set; }
-        
 
+        public string Class { get; set; }
+        public string Section { get; set; }
         public string ClassName
         {
             get

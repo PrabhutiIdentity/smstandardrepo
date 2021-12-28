@@ -44,6 +44,7 @@ namespace SMEnterprise.Models
         public int ClassID { get; set; }
         public int SectionID { get; set; }
         public string ClassSection { get; set; }
+        public int PeriodCount { get; set; }
     }
     public class PeriodTypeModel
     {

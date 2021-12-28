@@ -96,6 +96,7 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public List<StudentSearchModel> Students { get; set; }
         public List<NameIDModel> Sessions { get; set; }
+        public int TCType { get; set; }
     }
     public class StudentSearchModel
     {
@@ -233,7 +234,6 @@ namespace SMEnterprise.Models
         public string IFSCCode { get; set; }
         public string BranchName { get; set; }
         public string ReasonforInactive { get; set; }
-
         public HttpPostedFileBase StudentImageUploader { get; set; }
         public HttpPostedFileBase BirthCertificateUploader { get; set; }
         public HttpPostedFileBase AddressCertificateUploader { get; set; }
@@ -326,6 +326,7 @@ namespace SMEnterprise.Models
         public int IsAdmissionFeeApplicable { get; set; }
         public string ReasonforInactive { get; set; }
         public List<NameIDModel> SubjectsOpted { get; set; }
+        
         public DataTable GetSubjectOptedDataTable()
         {
 
@@ -407,6 +408,7 @@ namespace SMEnterprise.Models
         public int Day { get; set; }
         public int ClassID { get; set; }
         public int SectionID { get; set; }
+        public int ParentID { get; set; }
         public int Month { get; set; }
         public int SessionID { get; set; }
         public int Year { get; set; }             
@@ -416,6 +418,7 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Sections { get; set; }
         public List<SchoolSessionModel> Sessions { get; set; }
         public List<FeePaymentModel> FeePayments { get; set; }
+        public int SchoolID { get; set; }
     }
     public class StudentLeaveModel
     {

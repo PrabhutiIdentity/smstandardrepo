@@ -108,65 +108,67 @@
                                 int count = 0;
                                 foreach (EmployeeModel c in Model.Employees)
                                 {
-                            <tr>
+                                    <tr>
 
-                                <td>
-                                    @*~/Images/EmployeeImage/Thumb/*@
-                                    <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/EmployeeImage/")@(c.EmployeeID)_@c.Photo" />
-                                </td>
-                                <td>
-                                    @c.EmployeeName
-                                    <br />
-                                    @c.EmployeeSID
-                                </td>
+                                        <td>
+                                            @*~/Images/EmployeeImage/Thumb/*@
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/EmployeeImage/")@(c.EmployeeID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                            @c.EmployeeName
+                                            <br />
+                                            @c.EmployeeSID
+                                        </td>
 
-                                <td>
-                                    @c.DOJ.ToString("dd MMM, yyyy")
+                                        <td>
+                                            @c.DOJ.ToString("dd MMM, yyyy")
 
-                                </td>
-                                <td>
-                                    @c.DOB.ToString("dd MMM, yyyy")
+                                        </td>
+                                        <td>
+                                            @c.DOB.ToString("dd MMM, yyyy")
 
-                                </td>
-                                <td>@c.BloodGroup</td>
-                                <td>
-                                    @c.AadharNumber
-                                </td>
-                                <td>
-                                    @c.MobileNumber
-                                </td>
+                                        </td>
+                                        <td>@c.BloodGroup</td>
+                                        <td>
+                                            @c.AadharNumber
+                                        </td>
+                                        <td>
+                                            @c.MobileNumber
+                                        </td>
 
-                                <td>
-                                    @if (c.Status != 0)
-                                    {
-                                        <label class='badge bg-green'>Active</label>
-                                    }
-                                    else
-                                    {
-                                        <label class='badge bg-red'>No</label>
-                                    }
-                                </td>
-                                <td>
-                                    @c.EmployeeTypeName
-                                </td>
-                                <td>
-                                    <div class="row" style="margin-right: 10px;">
-                                        <div class="col-md-6">
-                                            <a href="/Account/EmployeeDetails/@c.EmployeeID/1" target="_blank" class="btn btn-link">View</a>
-                                        </div>
-                                        <div class="col-md-6">
-                                            @using (Html.BeginForm("DeleteEmployee", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                        <td>
+                                            @if (c.Status != 0)
                                             {
-                                                <input type="hidden" name="EmployeeType" value="@Model.EmployeeType" />
-                                                <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
-
-                                                <button type="submit" onclick="return DeleteEmployee(this);" class="btn btn-link">Delete</button>
+                                                <label class='badge bg-green'>Active</label>
                                             }
-                                        </div>
-                                    </div>
+                                            else
+                                            {
+                                                <label class='badge bg-red'>No</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            @c.EmployeeTypeName
+                                        </td>
+                                        <td>
+                                            <div class="row" style="margin-right: 10px;">
+                                                <div class="col-md-6">
+                                                    <a href="/Account/EmployeeDetails/@c.EmployeeID/1" target="_blank" class="btn btn-link">View</a>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    @using (Html.BeginForm("DeleteEmployee", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                    {
+                                                        <input type="hidden" name="EmployeeType" value="@Model.EmployeeType" />
+                                                        <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
 
-                                </td>
-                            </tr>
+                                                        <button type="submit" onclick="return DeleteEmployee(this);" class="btn btn-link">Delete</button>
+                                                    }
+                                                </div>
+                                                <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.EmployeeID);">Change Password</a>
+
+                                            </div>
+
+                                        </td>
+                                    </tr>
 
                                     count++;
                                 }
@@ -181,18 +183,133 @@
     </div>
 </div>
 
+@section pageBottom{
+    <div id="mdlEditPassword" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Change Password</h4>
+                </div>
+                <div class="modal-body">
+                    @*<form role="form" action="/Common/UpdateStudentPassword">*@
+                    <div class="box-body">
+                        <div class="form-group">
+                            <input type="hidden" name="EmployeeID" id="hdnemployeeid" value="" />
+
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="txtPassword">
+                                Password <span class="required">*</span>
+                            </label>
+                            <div>
+                                <input type="hidden" name="ID" id="hdnPassword" value="" />
+                                <input type="password" id="txtPassword" required="required">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="txtConfirmPassword">
+                                Confirm Password <span class="required">*</span>
+                            </label>
+                            <div>
+                                <input type="password" id="txtConfirmPassword" required="required">
+                            </div>
+                        </div>
+
+                        <div class="ln_solid"></div>
+                        @*<div class="form-group">
+                                <div class="col-md-6 col-sm-6 col-xs-12 col-md-offset-3">
+
+                                </div>
+                            </div>*@
+
+                    </div>
+                    <!-- /.box-body -->
+
+                    <div class="box-footer">
+
+                        <button type="submit" id="btnSave" class="btn btn-success" onclick="return UpdateStudentPassword();">Submit</button>
+                    </div>
+                    @*</form>*@
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
 @section scripts
 {
     <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
     <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
-    <script>
+    <script src="@Url.Content("~/js/MD5.js")" type="text/javascript"></script>
 
+    <script>
+        function EditPassword(employeeid) {
+            $('#hdnemployeeid').val(employeeid);
+
+        }
+        function UpdateStudentPassword() {
+            if ($('#txtPassword').val() == '' || $('#txtConfirmPassword').val() == '') {
+                $('#lblError').css('display', '');
+                $('#lblError').text('Please Enter Password');
+                return false;
+            }
+            else if ($('#txtPassword').val() != $('#txtConfirmPassword').val()) {
+                $('#lblError').css('display', '');
+                $('#lblError').text('Password and Confirm Password do not Match');
+                return false;
+            }
+            else {
+
+                var id = $("#txtPassword").val();
+                var id2 = hex_md5(String(id + 'd2f*jk#g&h'));
+                $("#hdnPassword").val(id2);
+                $("#txtPassword").val('******');
+                $("#txtConfirmPassword").val('******');
+                return true;
+            }
+        }
+        $(document).ready(function () {
+            $("input[type='search']").wrap("<form>");
+            $("input[type='search']").closest("form").attr("autocomplete", "off");
+            $("#btnSave").click(function () {
+
+                var Password = $("#hdnPassword").val();
+                var pid = $("#hdnemployeeid").val();
+
+                $.ajax(
+                    {
+                        type: "POST", //HTTP POST Method
+                        url: '/Account/UpdateEmployeePassword/"', // Controller/View
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ id: Password, employeeid: pid }),
+                        dataType: 'json',
+
+                        // data: JSON.stringify(ai),
+
+                        success: function (d) {
+                            // alert(d);
+                            $("#mdlEditPassword").modal('hide');
+
+                        },
+                        error: function () {
+                            alert("Employee ID Not Created");
+                        },
+
+                    });
+
+            });
+        });
         $(function () {
             $("#tblCategory").DataTable({
-         "paging": true,
-                        "pageLength": 50,
-         responsive: true
-        });
+                "paging": true,
+                "pageLength": 50,
+                responsive: true
+            });
         });
         function DeleteEmployee(sender) {
             return confirm('Do you really want to delete Employee!!!!');
@@ -200,21 +317,21 @@
         function ClassChanged(sender) {
             $('#ddlSection').html('<option value="0">Loading....</option>');
             $.ajax(
-    {
-        type: "POST",
-        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
-        cache: false,
-        processData: false,
-        contentType: false,
-        success: function (html) {
-            $('#ddlSection').html('');
-            $('#ddlSection').html('<option value="0">--Select Section--</option>');
-            $('#ddlSection').append(html);
-        },
-        error: function (e) {
-            alert("errorn");
-        }
-    });
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
         }
     </script>
 }

@@ -2872,10 +2872,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Description", objData.Description);
                 paramater.Add("@ActiveDate", objData.ActiveDate);
                 paramater.Add("@Status", objData.Status);
-                paramater.Add("@OpType",  objData.OpType);
+                paramater.Add("@OpType", objData.OpType);
                 paramater.Add("@Attachment", objData.Attachment);
-                paramater.Add("@SBranchID", objData.SBranchID);
-                paramater.Add("@SessionID", objData.SessionID);
 
                 return con.Query<int>("sp_InsertUpdateNews", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
@@ -3605,12 +3603,10 @@ namespace SMEnterprise.Repository
                 paramater.Add("@TeacherID", oModel.TeacherID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
                 paramater.Add("@UploadDate", oModel.UploadDate);
-                paramater.Add("@ClassID", oModel.ClassID);
                 using (var multi = con.QueryMultiple("sp_GetAdminYouTubeVideo", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.Videos = multi.Read<YouTubeVideoModel>().ToList();
                     oModel.Teachers = multi.Read<NameIDModel>().ToList();
-                    oModel.Classes = multi.Read<NameIDModel>().ToList();
                 }
             }
             return oModel;
@@ -4097,6 +4093,25 @@ namespace SMEnterprise.Repository
         }
 
         #endregion
+
+        public StudentAdmissionReportModel GetStudentAdmssionDetail(StudentAdmissionReportModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+               paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                //paramater.Add("@StartDate", oModel.StartDate);
+
+                using (var multi = con.QueryMultiple("sp_GetSessionStudentAdmissionDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
+                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    //oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return oModel;
+        }
     }
 
 }

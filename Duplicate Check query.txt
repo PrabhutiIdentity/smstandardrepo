@@ -1,3 +1,18 @@
+--Check Duplicate Record for Performance Table
+
+select EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade,count(*)
+from [dbo].[PerformanceParameterValues]
+group by EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade
+having count(*)>1
+
+WITH CTE(EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade,DuplicateCount)
+AS (SELECT EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade,
+           ROW_NUMBER() OVER(PARTITION BY EvaluationID,StudentSessionID,ParamID,ParamKey,ParamValue,Grade
+           ORDER BY EvaluationID) AS DuplicateCount
+    FROM [dbo].[PerformanceParameterValues] )
+DELETE FROM CTE
+WHERE DuplicateCount > 1;
+
 
 --Check Duplicate Record
 select examid,studentid,marksscored,Grade,status,GradePoints,count(*)
@@ -43,5 +58,23 @@ AS (SELECT classid,sessionid,schemeid,
            ROW_NUMBER() OVER(PARTITION BY classid,sessionid,schemeid
            ORDER BY classid) AS DuplicateCount
     FROM [dbo].ClassSessionDetails )
+DELETE FROM CTE
+WHERE DuplicateCount > 1;
+
+
+
+
+--Check Duplicate StudentfeeDetails Record
+select studentid,FeeTypeID,SessionID,FeeAmount,IsApplicable,Count(*)
+from [dbo].StudentFeeDetails
+group by studentid,FeeTypeID,SessionID,FeeAmount,IsApplicable
+having count(*)>1
+
+--Delete Duplicate StudentfeeDetails Record
+WITH CTE(studentid,FeeTypeID,SessionID,FeeAmount,IsApplicable,DuplicateCount)
+AS (SELECT studentid,FeeTypeID,SessionID,FeeAmount,IsApplicable,
+           ROW_NUMBER() OVER(PARTITION BY studentid,FeeTypeID,SessionID,FeeAmount,IsApplicable
+           ORDER BY studentid) AS DuplicateCount
+    FROM [dbo].StudentFeeDetails )
 DELETE FROM CTE
 WHERE DuplicateCount > 1;

@@ -1100,34 +1100,6 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
-        public BusStudentListModel GetStopWiseStudents(int SBranchID, int StopID)
-        {
-
-            BusStudentListModel objModel = new BusStudentListModel();
-            objModel.ID = StopID;
-            objModel.SBranchID = SBranchID;
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@StopID", StopID);
-
-                using (var multi = con.QueryMultiple("sp_GetStopWiseStudents", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-                    objModel.Stops = multi.Read<NameIDModel>().ToList();
-                    try
-                    {
-                        objModel.ID = multi.Read<int>().SingleOrDefault();
-                    }
-                    catch { }
-                    //objModel.ID = multi.Read<int>().SingleOrDefault();
-                }
-                return objModel;
-            }
-        }
-
-
         public BusStudentListModel BusStopWiseStudents(int SBranchID, int BusID)
         {
 
@@ -1200,6 +1172,34 @@ namespace SMEnterprise.Repository
                     objModel.Sections = multi.Read<NameIDModel>().ToList();
                     objModel.ClassID = multi.Read<int>().SingleOrDefault();
                     objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
+        public StudentFeeModel GetNewFeePaymentsParentWise(StudentFeeModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                DateTime qdate = new DateTime(objModel.Year, objModel.Month, 1).AddMonths(1).AddDays(-1);
+                if (qdate.Day < objModel.Day)
+                {
+                    objModel.Day = qdate.Day;
+                }
+                var paramater = new DynamicParameters();
+                paramater.Add("@ParentID", objModel.ParentID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@QDate", new DateTime(objModel.Year, objModel.Month, objModel.Day));
+
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                using (var multi = con.QueryMultiple("sp_GetFeeSummeryForParentWise", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    //objModel.Classes = multi.Read<NameIDModel>().ToList();
+                //    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    //objModel.Sections = multi.Read<NameIDModel>().ToList();
+              //      objModel.SectionID = multi.Read<int>().SingleOrDefault();
                     objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
@@ -2396,13 +2396,14 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
-        public ExpenceModel GetExpenceDetails(int ExpenceID)
+        public ExpenceModel GetExpenceDetails(int ExpenceID,int SBranchID)
         {
             ExpenceModel objModel = new ExpenceModel();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@ExpenceID", ExpenceID);
+                paramater.Add("@SBranchID", SBranchID);
                 using (var multi = con.QueryMultiple("sp_GetExpenceDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel = multi.Read<ExpenceModel>().SingleOrDefault();
@@ -2751,6 +2752,7 @@ namespace SMEnterprise.Repository
             return objModel;
         }
 
+        #region Exam Related
         public void GetAdmitCards(AdmitCardListModel objModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -2835,7 +2837,48 @@ namespace SMEnterprise.Repository
                 }
             }
         }
+        // Shishupal Work on Exam Date Sheet For School
+        // Date : 17 Nov 2021
+        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID, int SessionID)
+        {
+            EvaluationTypePageModelExam objModel = new EvaluationTypePageModelExam();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                return con.Query<NameIDModel>("sp_GetEvaluationTypesExam", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
 
+            }
+        }
+        public StudentExamDatesheetModel ExamDateSheet(StudentExamDatesheetModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@EvaluationSchemeID", objModel.EvaluationSchemeID);
+                paramater.Add("@EvaluationID", objModel.EvaluationID);
+                //paramater.Add("@SectionID", objModel.SectionID);
+                using (var multi = con.QueryMultiple("sp_DateSheetTest", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    //objModel.EvaluationSchemes = multi.Read<EvaluationSchemeModel>().ToList();
+                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                    objModel.ExamList = multi.Read<ExamDateListModel>().ToList();
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.Exams = multi.Read<ExamModel>().ToList();
+                    //objModel.SubjectsE = multi.Read<SubjectModel>().ToList();
+
+                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
+        // End Shihupal  Exam Date Sheet
+
+        #endregion
         public ClassGenderCategoryCountPageModel GetClassGenderCategoryCount(ClassGenderCategoryCountPageModel objModel)
         {
 
@@ -3707,7 +3750,7 @@ namespace SMEnterprise.Repository
         }
         public int InsertSMSSending(SMSSendTaskModel objModel)
         {
-
+           // int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
@@ -3718,7 +3761,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@RecieverCatIDs", objModel.RecieverCats);
                 paramater.Add("@Title", objModel.Title);
                 paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
-                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SBranchID", objModel.SBranchID);               
                 paramater.Add("@content_id", objModel.Content_id);
                 return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
@@ -3792,7 +3835,6 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SMSDateTime", data.SMSDateTime);
                 paramater.Add("@Status", data.Status);
                 paramater.Add("@Content_id", data.SMSContentID);
-
                 return con.Query<int>("spn_UpdateSMSProcessingLog", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
 
             }
@@ -4246,7 +4288,89 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Password", Password);
 
                 return con.Query<int>("sp_ChangePassword", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        #endregion
 
+        #region Student Block
+        public int UpdateIsBlock(int isBlock, int studentID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@isBlock", isBlock);
+                paramater.Add("@studentID", studentID);
+                return con.Query<int>("SP_UpdateIsBlock", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+            }
+
+        }
+        #endregion
+
+
+        #region TransportFee
+
+
+        public async Task<FeePaymentModel> GetFeeDetailsNewForTransport(FeePaymentModel objModel)
+        {
+            FeePaymentModel objNew = new FeePaymentModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                DateTime qdate = new DateTime(objModel.Year, objModel.Month, 1).AddMonths(1).AddDays(-1);
+                if (qdate.Day < objModel.Day)
+                {
+                    objModel.Day = qdate.Day;
+                }
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", objModel.StudentID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@QDate", new DateTime(objModel.Year, objModel.Month, objModel.Day));
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+
+                using (var multi = await con.QueryMultipleAsync("sp_GetStudentFeeViewDataForTransport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
+                    objModel.Months = multi.Read<PayDetailMonthsModel>().ToList();
+                    objModel.PaymentDetails = multi.Read<FeeDetailsModel>().ToList();
+                    objModel.SessionStartDate = multi.Read<DateTime>().SingleOrDefault();
+                    objModel.SessionEndDate = multi.Read<DateTime>().SingleOrDefault();
+                    objModel.FeePaymentMode = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
+
+
+        public FeePaymentRowModel SaveStudentTransportFeePayments(FeePaymentModel objData)
+        {
+            FeePaymentRowModel obj = new FeePaymentRowModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+
+                paramater.Add("@StudentID", objData.StudentID);
+                paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                paramater.Add("@PaymentDate", objData.PaymentDate);
+                paramater.Add("@PaymentAmount", objData.PaymentAmount);
+                paramater.Add("@WaiverMonths", objData.WaiverMonths);
+                paramater.Add("@Remark", objData.Remark);
+                paramater.Add("@ReferanceNumber", objData.ReferanceNumber);
+                paramater.Add("@PaymentMode", objData.PaymentMode);
+                paramater.Add("@CollectedBy", objData.CollectedBy);
+                paramater.Add("@SessionID", objData.SessionID);
+                paramater.Add("@ExcludedFees", objData.ExcludedFees);
+                paramater.Add("@UserID", objData.UserID);
+                paramater.Add("@SBranchID", objData.SBranchID);
+
+                using (var multi = con.QueryMultiple("spn_SaveTransportFeePaymentV2", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    obj.StudentDetails = multi.Read<FeePaymentModel>().SingleOrDefault();
+                    obj.PaymentID = multi.Read<int>().SingleOrDefault();
+                }
+
+                return obj;
             }
         }
         #endregion
