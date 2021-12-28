@@ -1,0 +1,387 @@
+
+
+alter proc [dbo].[sp_GetParentFeePayments]  
+(  
+@ParentID int,  
+@SessionID int  
+)  
+AS  
+BEGIN  
+Declare @Studentid int
+select  @Studentid=studentid from studentmaster where parentid=@ParentID
+ SELECT [PaymentID],[PayeeID],PaymentRecieptNo,[ReferanceNumber],[PaymentType],[PaymentMode]  
+      ,[Remark],[PaymentAmount],[PaymentStatus],[Year] ,[Month],[PaymentDate]  
+  FROM [dbo].[PaymentMaster] where PayeeID =@ParentID and isnull(PayeeType,0)=1  
+ order by PaymentDate desc  
+END  
+
+go
+
+
+  CREATE TYPE [dbo].[ut_PaymentDetails] AS TABLE(
+	[CollectionID] [int] NULL,
+	[PaymentID] [int] NULL,
+	[FeeTypeID] [int] NULL,
+	[PayeeID] [int] NULL,
+	[Amount] [numeric](10, 2) NULL,
+	[DiscPer] [numeric](10, 2) NULL,
+	[DiscAmt] [numeric](10, 2) NULL,
+	[NetApplicablePayment] [numeric](10, 2) NULL,
+	[PaymentRecieved] [numeric](10, 2) NULL,
+	[Year] [nvarchar](5) NULL,
+	[Month] [int] NULL,
+	[PaymentDate] [datetime] NULL,
+	[SBranchID] [int] NULL,
+	[DuesPaidCount] [int] NULL,
+	[PaymentDetails] [nvarchar](max) NULL
+)
+GO
+  
+  go
+CREATE procedure [dbo].[sp_SaveParentPayemnt]  
+(  
+@ParentID int,  
+@ReferanceNumber nvarchar(50),  
+@SessionID int,  
+@SBranchID int,  
+@Month int,  
+@Year int,  
+@QDate datetime,  
+@Remark nvarchar(max),  
+@PaymentMode int,  
+@CollectedBy nvarchar(50),  
+@PaymentAmount numeric(18,2),  
+@ApplicableAmount numeric(18,2),  
+@DiscountAmount numeric(18,2),  
+@PaymentDetail ut_PaymentDetails READONLY  
+)  
+AS  
+BEGIN  
+ Declare @SessionStartDate date  
+ Declare @EndDate date  
+ Declare @PaymentID int  
+ Declare @PreviousDues numeric(18,2)  
+ select @SessionStartDate=SessionStartDate,@EndDate=SessionEndDate from SessionMaster where SessionID=@SessionID  
+  
+ --For PreviousSession Dues  
+ declare @PreSessionID int  
+ select top 1 @PreSessionID=SessionID from SessionMaster where SessionStartDate<@SessionStartDate and SBranchID=@SBranchID order by sessionStartDate desc  
+ --set @PreSessionID=0  
+ if(isnull(@PreSessionID,0)!=0)  
+ begin  
+  Declare @FeeDetailsTable table(FeeTypeID int,FeeTypeName nvarchar(50),NetApplicablePayment numeric(10,2),DiscAmt numeric(10,2),  
+  ApprovedAmount numeric(10,2),PaymentRecieved numeric(10,2),Year int,Month int,PaymentDate date,PayeeID int,SBranchID int,SessionID int)  
+   
+  Declare @StudentID int  
+  DECLARE db_Detailcursor CURSOR FOR   
+  select StudentID from StudentMaster SM where ParentID=@ParentID and SBranchID=@SBranchID  and StudentID in (Select StudentID from Student_Session where SessionID=@SessionID)  
+  OPEN db_Detailcursor     
+   FETCH NEXT FROM db_Detailcursor INTO @StudentID  
+   WHILE @@FETCH_STATUS = 0     
+    BEGIN     
+    Insert into @FeeDetailsTable exec [dbo].[spn_GetStudentFeePaymentMonthwiseDetails] @PaymentID,1,@Month,@Year,@StudentID,@QDate,@PreSessionID  
+     
+    FETCH NEXT FROM db_Detailcursor INTO @StudentID     
+   END   
+  CLOSE db_Detailcursor     
+  DEALLOCATE db_Detailcursor  
+  select @PreviousDues=sum(isnull(NetApplicablePayment,0)-isnull(DiscAmt,0)-isnull(PaymentRecieved,0)) from @FeeDetailsTable  
+ end  
+ --For PreviousSession Dues end  
+ Declare @PreviousPaid numeric(18,2)  
+ select @PreviousPaid=sum(PaymentRecieved) from PaymentDetails where PayeeID in (Select StudentID from StudentMaster where ParentID=@ParentID)  
+  and SessionID=@SessionID --Year*12+Month between Datepart(year,@SessionStartDate)*12+Datepart(month,@SessionStartDate) and Datepart(year,@EndDate)*12+Datepart(month,@EndDate)  
+ Declare @PaymentRecieptNo nvarchar(20)  
+ Declare @PaymentRecieptSeq int  
+ select @PaymentRecieptSeq=max(PaymentRecieptSeq) from PaymentMaster where SessionID=@SessionID and SBranchID=@SBranchID  
+ set @PaymentRecieptSeq=isnull(@PaymentRecieptSeq,0)+1  
+ set  @PaymentRecieptNo=RIGHT('000000' + cast(isnull(@PaymentRecieptSeq,0) as nvarchar(10)), 6)+'/'+right(datepart(year,@SessionStartDate),2)+cast((right(datepart(year,@SessionStartDate),2)+1) as nvarchar(3))+'/'+Case when @SBranchID=2 then 'HS' else 'HS'
+ end  
+ --Insert to Payment Master Start  
+  insert into PaymentMaster (PayeeID,ReferanceNumber,PaymentMode,Remark,PaymentAmount,[Year],[Month],  
+  PaymentDate,SBranchID,CollectedBy,SessionID,PaymentRecieptSeq,PaymentRecieptNo,PayeeType,PreviousDues,ApplicablePayment,PreviousPaid,DiscountAmount)  
+  values (@ParentID,@ReferanceNumber,@PaymentMode,@Remark,@PaymentAmount,@Year,@Month,@QDate,@SBranchID,  
+  @CollectedBy,@SessionID,@PaymentRecieptSeq,@PaymentRecieptNo,1,isnull(@PreviousDues,0),@ApplicableAmount,isnull(@PreviousPaid,0),@DiscountAmount)  
+  select @PaymentID=CAST(SCOPE_IDENTITY() as int)  
+ --Insert to Payment Master End  
+   
+ INSERT INTO PaymentDetails(PaymentID, FeeTypeID, PayeeID,Amount,DiscPer,DiscAmt,NetApplicablePayment,PaymentRecieved,Year,Month,PaymentDate,SBranchID,DuesPaidCount,SessionID)  
+    SELECT @PaymentID, FeeTypeID, PayeeID,Amount,DiscPer,DiscAmt,NetApplicablePayment,PaymentRecieved,Year,Month,@QDate,SBranchID,DuesPaidCount,@SessionID  
+     FROM @PaymentDetail PD  
+ select @PaymentRecieptNo  
+ select @PaymentID  
+END  
+go
+CREATE Procedure [dbo].[spn_GetStudentFeePaymentMonthwiseDetails]   
+(  
+@PaymentID int,  
+@Day int,  
+@Month int,  
+@Year int,  
+@StudentID int,  
+@QDate date,  
+@SessionID int  
+)  
+as  
+begin  
+ Declare @ClassID int  
+ Declare @GroupID int   
+ Declare @SectionID int  
+ Declare @FeePaymentMode int  
+ Declare @SBranchID int  
+ Declare @QuotaID int  
+ Declare @SessionStartDate date  
+ Declare @StudentSessionDate date  
+ Declare @StudentSessionEndDate date  
+ Declare @LateFee numeric(10,2)  
+ Declare @LastPayDay int  
+ Declare @TransportFeeMode int  
+ Declare @HostelFeeMode int  
+ Declare @HostelFee numeric(10,2)  
+ Declare @TransportFee numeric(10,2)  
+ Declare @IsTransport int  
+ Declare @IsHostel int  
+ Declare @StopID int   
+ Declare @PreviousDues numeric(10,2)=0  
+ Declare @StartDate date  
+ Declare @EndDate date  
+ Declare @BaseDate date  
+ Declare @IsAdmissionFee int  
+  
+ select @SBranchID=SBranchID from Student_Session where StudentID=@StudentID and Status=1  
+ Declare @Discounts table(StudentID int,FeeTypeID int,FeeMonth int,FeeYear int,ApprovedAmount decimal(18,2))  
+  
+ Declare @PreviousMonthsTable table(FeeTypeID int,FeeTypeName nvarchar(100),  
+ NetApplicablePayment numeric(10,2),DiscAmt numeric(10,2),PaymentRecieved numeric(10,2)  
+ ,Year int,Month int,PaymentDate date,SBranchID int)  
+   
+ Select @TransportFeeMode=details from MasterSettings where Type='TransportFeeMode' and SBranchID=@SBranchID  
+ Select @HostelFeeMode=details from MasterSettings where Type='HostelFeeMode' and SBranchID=@SBranchID  
+ Select @LastPayDay=details from MasterSettings where Type='FeePaymentReminderDate' and SBranchID=@SBranchID  
+   
+ Declare @CurDate date=cast(cast(@Month as nvarchar(3))+'-'+cast(1 as nvarchar(3))+'-'+cast(@Year as nvarchar(5)) as date)  
+ --if(datepart(day,@QDate)>@LastPayDay)  
+ --begin  
+ -- SELECT @CurDate=EOMonth(@CurDate)-- dateadd(day,1,cast(cast(@Month as nvarchar(3))+'-'+cast(@LastPayDay as nvarchar(3))+'-'+cast(@Year as nvarchar(5)) as date))  
+ --end  
+  
+   
+ Select @IsTransport=StopID,@IsHostel=HostelRoomID,@StopID=StopID from StudentMaster where StudentID=@StudentID  
+  
+ Insert into @Discounts Select StudentID,FeeTypeID,FeeMonth,FeeYear,ApprovedAmount   
+ from [FeeDiscountRequestDetails] FDD left outer join [FeeDiscountRequestMaster] FDM on FDM.DiscRequestID=FDD.DiscRequestID   
+  where StudentID=@StudentID and Status=1  
+  
+ Select @StudentSessionDate=FromDate,@StudentSessionEndDate=ToDate,@ClassID=ClassID,@QuotaID=QuotaID,  
+ @SectionID=SectionID,@SessionID=SessionID,@FeePaymentMode=FeePaymentMode,@SBranchID=SBranchID ,@IsAdmissionFee=isnull(IsAdmissionFeeApplicable,0)  
+ from Student_Session where StudentID=@StudentID and SessionID=@SessionID  
+  
+ Select @GroupID=GroupID from Class_Sections where ID=@SectionID  
+  
+ select @SessionStartDate=SessionStartDate,@EndDate=SessionEndDate from SessionMaster where SessionID=@SessionID  
+ if(@SessionStartDate>@StudentSessionDate)  
+ begin  
+  set @StudentSessionDate=@SessionStartDate  
+ end  
+ if(@EndDate>@StudentSessionEndDate)  
+ begin  
+  set @EndDate=@StudentSessionEndDate  
+ end  
+ if((datepart(month,@EndDate)+datepart(year,@EndDate)*12)<(datepart(month,@CurDate)+datepart(year,@CurDate)*12))  
+ begin  
+  set @CurDate=@EndDate  
+  set @Month=datepart(month,@CurDate)  
+  set @Year=datepart(year,@CurDate)  
+ end  
+  
+ set @StartDate=@StudentSessionDate  
+ set @BaseDate=@StartDate  
+ select @PaymentID=Max(PaymentID) from PaymentDetails   
+ where Month=datepart(month,@QDate) and Year=datepart(year,@QDate) and PayeeID=@StudentID  
+ and PaymentDate>@StartDate  
+  
+  
+  if(@TransportFeeMode=1)  
+  begin  
+   select @TransportFee=sum(isnull(FeeAmount,0)) from ClassFeeStructureMaster   
+   where ClassID=@ClassID and GroupID=@GroupID and SBranchID=@SBranchID   
+   and FeeTypeID in (select FeeTypeID from FeeTypeMaster where FeeTypeApplicable=5) and SessionID=@SessionID  
+  end  
+  if(@HostelFeeMode=1)  
+  begin  
+   select @HostelFee= sum(isnull(FeeAmount,0)) from ClassFeeStructureMaster   
+   where ClassID=@ClassID and GroupID=@GroupID and SBranchID=@SBranchID   
+   and FeeTypeID in (select FeeTypeID from FeeTypeMaster where FeeTypeApplicable=6) and SessionID=@SessionID  
+  end  
+    
+  
+ Declare @LMonth int  
+ Declare @LYear int  
+ While((datepart(month,@StartDate)+datepart(year,@StartDate)*12)<(datepart(month,@CurDate)+datepart(year,@CurDate)*12))  
+ begin  
+     
+  declare @MonthPaymentDate date  
+  set @LMonth=datepart(month,@StartDate)  
+  set @LYear=datepart(Year,@StartDate)  
+  if((select count(*) from SessionClassNoFeeMonths where [Month]=@LMonth and SessionID=@SessionID and ClassID=@ClassID)=0)  
+  Begin  
+   select @MonthPaymentDate = min(PaymentDate) from PaymentDetails where PayeeID=@StudentID and Month=@LMonth and Year=@LYear  
+   if(@MonthPaymentDate is null )--and @LYear*12+@LMonth>datepart(year,@QDate)*12+Datepart(month,@QDate))  
+   begin  
+    set @MonthPaymentDate=@QDate--dateadd(month,-1,@QDate)  
+   end  
+   insert into @PreviousMonthsTable  
+   Select CFG.FeeTypeID ,CFG.FeeTypeName,isnull(PD.NetApplicablePayment,  
+   Case when CFG.FeeTypeApplicable=5 then [dbo].[fn_GetStudentTransportHostalFeeAmount](@LMonth,@LYear,@StudentID,0,0,@HostelFeeMode,@TransportFeeMode,@ClassID,@FeePaymentMode,@GroupID,@SBranchID,@TransportFee,@HostelFee,@SessionID)  
+    else (Case when CFG.FeeTypeApplicable=6 then [dbo].[fn_GetStudentTransportHostalFeeAmount](@LMonth,@LYear,@StudentID,0,1,@HostelFeeMode,@TransportFeeMode,@ClassID,@FeePaymentMode,@GroupID,@SBranchID,@TransportFee,@HostelFee,@SessionID)  
+     else CFG.ApplicableFee end) end   
+   ) as NetApplicablePayment,isnull(PD.DiscAmt,0) as DiscAmt  
+   ,(PD.PaymentRecieved) as PaymentRecieved,@LYear as Year,@LMonth as Month,isnull(PD.PaymentDate,isnull(@MonthPaymentDate,@CurDate)) as PaymentDate,@SBranchID  
+   
+   from  v_PaymentDetails PD right outer join v_ClassGroupQuotaFeeTypeSessionFee CFG   
+   on CFG.FeeTypeID=PD.FeeTypeID and (PD.PayeeID=@StudentID) and PD.Month=@LMonth and PD.Year=@LYear  
+   where (isnull(CFG.QuotaID,@QuotaID)=@QuotaID or CFG.FeeTypeID=2)  
+   and CFG.FeeTypeApplicable not in (Case when isnull(@IsTransport,0)=0 then 5 else 0 end)   
+   and CFG.FeeTypeApplicable not in (Case when isnull(@IsHostel,0)=0 then 6 else 0 end)      
+    and CFG.FeeTypeID not in (case when (@MonthPaymentDate is null and datepart(year,@QDate)*12+datepart(month,@QDate)>@LYear*12+@LMonth)   
+    or @MonthPaymentDate is not null and ((datepart(year,@MonthPaymentDate)*12+datepart(month,@MonthPaymentDate)>@LYear*12+@LMonth or   
+    datepart(year,@MonthPaymentDate)*12+datepart(month,@MonthPaymentDate)=@LYear*12+@LMonth and @Day>@LastPayDay))  
+    then 0 else -2 end)   
+    and CFG.ClassID=@ClassID and CFG.GroupID=@GroupID and CFG.FeePaymentMode=@FeePaymentMode   
+   and CFG.SBranchID=@SBranchID and CFG.SessionID=@SessionID   
+   and CFG.MonthType=(Case when datepart(month,@BaseDate)=@LMonth and (datepart(month,dateadd(month,3,@SessionStartDate))=@LMonth  or datepart(month,dateadd(month,9,@SessionStartDate))=@LMonth) then 5 else  
+   (Case when datepart(month,@BaseDate)=@LMonth and (datepart(month,dateadd(month,6,@SessionStartDate))=@LMonth) then 6 else   
+   (case when datepart(month,@BaseDate)=@LMonth then (case when @IsAdmissionFee=0 then 1 else 0 end)    
+   else (Case when datepart(month,dateadd(month,3,@SessionStartDate))=@LMonth  or datepart(month,dateadd(month,9,@SessionStartDate))=@LMonth then 3  
+   else (case when  datepart(month,dateadd(month,6,@SessionStartDate))=@LMonth then 4 else 2 end) end) end)end)end)  
+  --and isnull(PD.NetApplicablePayment,CFG.ApplicableFee)-isnull(PD.DiscAmt,0)-isnull(PD.PaymentRecieved,0)>0  
+  End  
+  Set @StartDate= DATEADD(month,1,@StartDate)  
+ end  
+ if(@Year*12+@Month>=Datepart(year,@StudentSessionDate)*12+Datepart(month,@StudentSessionDate))  
+ begin  
+  select @MonthPaymentDate = min(PaymentDate) from PaymentDetails where PayeeID=@StudentID and Month=@Month and Year=@Year  
+  if(@MonthPaymentDate is null and @Year*12+@Month>datepart(year,@QDate)*12+Datepart(month,@QDate))  
+  begin  
+   set @MonthPaymentDate=@QDate--dateadd(month,-1,@QDate)  
+  end  
+  if((select count(*) from SessionClassNoFeeMonths where [Month]=@Month and SessionID=@SessionID and ClassID=@ClassID)=0)  
+  Begin  
+   insert into @PreviousMonthsTable  
+   Select CFG.FeeTypeID ,CFG.FeeTypeName,isnull(PD.NetApplicablePayment,   
+    Case when CFG.FeeTypeApplicable=5 then   
+    [dbo].[fn_GetStudentTransportHostalFeeAmount](@Month,@Year,@StudentID,0,0,@HostelFeeMode,@TransportFeeMode,@ClassID,@FeePaymentMode,@GroupID,@SBranchID,@TransportFee,@HostelFee,@SessionID)  
+     else (Case when CFG.FeeTypeApplicable=6 then   
+    [dbo].[fn_GetStudentTransportHostalFeeAmount](@Month,@Year,@StudentID,0,1,@HostelFeeMode,@TransportFeeMode,@ClassID,@FeePaymentMode,@GroupID,@SBranchID,@TransportFee,@HostelFee,@SessionID)  
+     else CFG.ApplicableFee end) end   
+    ) as NetApplicablePayment,isnull(PD.DiscAmt,0) as DiscAmt  
+   ,(PD.PaymentRecieved) as PaymentRecieved,@Year as Year,@Month as Month,isnull(PD.PaymentDate,isnull(@MonthPaymentDate,@CurDate)) as PaymentDate,@SBranchID  
+   
+   from  v_PaymentDetails PD right outer join v_ClassGroupQuotaFeeTypeSessionFee CFG   
+   on CFG.FeeTypeID=PD.FeeTypeID and (PD.PayeeID=@StudentID) and PD.Month=@Month and PD.Year=@Year  
+   where  ((isnull(CFG.QuotaID,@QuotaID)=@QuotaID or CFG.FeeTypeID=2) or(CFG.QuotaID is null and CFG.FeeTypeApplicable in (5,6)))  
+   and CFG.FeeTypeApplicable not in (Case when isnull(@IsTransport,0)=0 then 5 else 0 end)   
+   and CFG.FeeTypeApplicable not in (Case when isnull(@IsHostel,0)=0 then 6 else 0 end)      
+    and CFG.FeeTypeID not in (case when (@MonthPaymentDate is null and datepart(year,@QDate)*12+datepart(month,@QDate)>@LYear*12+@LMonth)   
+    or @MonthPaymentDate is not null and ((datepart(year,@MonthPaymentDate)*12+datepart(month,@MonthPaymentDate)>@LYear*12+@LMonth or   
+    datepart(year,@MonthPaymentDate)*12+datepart(month,@MonthPaymentDate)=@LYear*12+@LMonth and @Day>@LastPayDay))  
+    then 0 else -2 end)   
+    and CFG.ClassID=@ClassID and CFG.GroupID=@GroupID and CFG.FeePaymentMode=@FeePaymentMode   
+   and CFG.SBranchID=@SBranchID and CFG.SessionID=@SessionID   
+   and CFG.FeeTypeApplicable not in (Case when isnull(@IsTransport,0)=0 then 5 else 0 end)   
+   and CFG.FeeTypeApplicable not in (Case when isnull(@IsHostel,0)=0 then 6 else 0 end)   
+   and CFG.MonthType=(Case when datepart(month,@BaseDate)=@Month and (datepart(month,dateadd(month,3,@SessionStartDate))=@Month  or datepart(month,dateadd(month,9,@SessionStartDate))=@Month) then 5 else  
+   (Case when datepart(month,@BaseDate)=@Month and (datepart(month,dateadd(month,6,@SessionStartDate))=@Month) then 6 else   
+   (case when datepart(month,@BaseDate)=@Month then (case when @IsAdmissionFee=0 then 1 else 0 end)    
+   else (Case when datepart(month,dateadd(month,3,@SessionStartDate))=@Month  or datepart(month,dateadd(month,9,@SessionStartDate))=@Month then 3  
+   else (case when  datepart(month,dateadd(month,6,@SessionStartDate))=@Month then 4 else 2 end) end) end)end)end)  
+  End  
+ end  
+ --was deleting some records from temp table but right now cant remember why so commenting 10-10-2017  
+ delete from @PreviousMonthsTable where PaymentRecieved is null and PaymentDate<>@QDate and PaymentDate<>@CurDate  
+  
+ Select p.FeeTypeID,  FeeTypeName,  NetApplicablePayment,  isnull(nullif(DiscAmt,0),ApprovedAmount) as DiscAmt,ApprovedAmount,  PaymentRecieved,  Year,  Month,  PaymentDate,@StudentID as PayeeID,SBranchID,@SessionID as SessionID  
+ from(Select FeeTypeID,  FeeTypeName,  NetApplicablePayment,  DiscAmt,  PaymentRecieved,  Year,  Month,  PaymentDate,SBranchID  
+ from @PreviousMonthsTable where Month in (select Month from @PreviousMonthsTable where (NetApplicablePayment-DiscAmt-isnull(PaymentRecieved,0))>0) or Month=@Month)p  
+ left outer join @Discounts d on d.FeeTypeID=p.FeeTypeID and d.FeeMonth=p.Month and d.FeeYear=p.Year  
+   
+  
+end  
+   
+   go 
+CREATE procedure [dbo].[spn_GetParentChildsFeeDetailsNEW]   
+(  
+@ParentID int,  
+@PaymentID int,  
+@Day int,  
+@Month int,  
+@Year int,  
+@QDate date,  
+@SessionID int,  
+@SBranchID int  
+)  
+AS  
+BEGIN  
+  
+Declare @FeeDetailsTable table(FeeTypeID int,FeeTypeName nvarchar(50),NetApplicablePayment numeric(10,2),DiscAmt numeric(10,2),  
+ApprovedAmount numeric(10,2),PaymentRecieved numeric(10,2),Year int,Month int,PaymentDate date,PayeeID int,SBranchID int,SessionID int)  
+    
+  Declare @SessionStartDate date,@SessionEndDate date  
+  Select @SessionStartDate=SessionStartDate,@SessionEndDate=SessionEndDate from SessionMaster where SessionID=@SessionID  
+  
+  set @Month=datepart(month,@SessionEndDate)  
+  set @Year=datepart(year,@SessionEndDate)  
+select StudentID,Name,Photo from StudentMaster SM where ParentID=@ParentID and StudentID in (Select StudentID from Student_Session where SessionID=@SessionID)  
+  
+ Declare @StudentID int  
+ DECLARE db_Detailcursor CURSOR FOR   
+ select StudentID from StudentMaster SM where ParentID=@ParentID and SBranchID=@SBranchID  
+ OPEN db_Detailcursor     
+  FETCH NEXT FROM db_Detailcursor INTO @StudentID  
+  WHILE @@FETCH_STATUS = 0     
+   BEGIN     
+   Insert into @FeeDetailsTable exec [dbo].[spn_GetStudentFeePaymentMonthwiseDetails] @PaymentID,@Day,@Month,@Year,@StudentID,@QDate,@SessionID  
+     
+   FETCH NEXT FROM db_Detailcursor INTO @StudentID     
+  END   
+  CLOSE db_Detailcursor     
+  DEALLOCATE db_Detailcursor  
+  
+  select * from @FeeDetailsTable where isnull(NetApplicablePayment,0)-isnull(DiscAmt,0)-isnull(PaymentRecieved,0)>0  
+  
+  Select @SessionID as SessionID,@SessionStartDate as SessionStartDate,@SessionEndDate as SessionEndDate  
+  --Select SessionID,SessionStartDate,SessionEndDate from SessionMaster where SessionID=@SessionID  
+  
+  Select  ParentID,FatherName,MotherName,FatherMobileNo,MotherMobileNo,FatherImage,MotherImage from ParentMaster where ParentID=@ParentID  
+    
+  Select SessionID,SessionName,SessionStatus from SessionMaster where SBranchID=@SBranchID  
+END  
+  go
+
+
+Create procedure [dbo].[sp_GetParentList]   
+(  
+@SBranchID int,  
+@SText nvarchar(50),  
+@SessionID int  
+)  
+AS  
+BEGIN  
+ if(@SessionID=0)  
+ begin  
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID  
+ end  
+ if(isnull(@SText,'')='')  
+ begin  
+  select top 50 ParentID,FatherName,MotherName,FatherMobileNo,MotherMobileNo,FatherImage,MotherImage from ParentMaster where ParentID in (Select ParentID from StudentMaster where SBranchID=@SBranchID and StudentID in (select StudentID from Student_Session
+ where SessionID=@SessionID))  
+ end  
+ else  
+ begin  
+  select  top 50 ParentID,FatherName,MotherName,FatherMobileNo,MotherMobileNo,FatherImage,MotherImage from ParentMaster where ParentID in (Select ParentID from StudentMaster where SBranchID=@SBranchID and StudentID in (select StudentID from Student_Sessio
+n where SessionID=@SessionID) )  
+  and (FatherName like '%'+@SText+'%' or MotherName like '%'+@SText+'%' or FatherMobileNo like '%'+@SText+'%' or MotherMobileNo like '%'+@SText+'%'  )  
+ end  
+ Select SessionID as ID,SessionName as Name,SessionStatus as Extra1 from SessionMaster where SBranchID=@SBranchID  
+ select isnull(@SessionID,0)  
+END

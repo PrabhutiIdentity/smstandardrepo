@@ -4,14 +4,13 @@ using SMEnterprise.Repository;
 using System;
 using System.Web;
 using System.Web.Http;
-using System.IO;
 
 namespace SMEnterprise.Controllers
 {
     public class SMSApiController : ApiController
     {
         [HttpPost]
- 
+        [PermissionFilter]
         public bool SendSMSList(SMSSendTaskModel objModel)
         {
             if (String.IsNullOrEmpty(objModel.StartTime))
@@ -25,15 +24,15 @@ namespace SMEnterprise.Controllers
             AccountData objAccountData = new AccountData();
             objModel.SMSSendDate = CommonUsage.GetCurrentDate();
             objModel.SMSSendingID = objAccountData.InsertSMSSending(objModel);
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-           
-            if (HttpContext.Current.Session == null || HttpContext.Current.Session["SMSConfiguration"] == null)
+           int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+           //  int SBranchID = objModel.SBranchID;
+            if (HttpContext.Current.Session["SMSConfiguration"] == null)
             {
-                HttpContext.Current.Session["SMSConfiguration"] = (new AdminData()).GetDefaultSMSConfigurationDetails(objModel.SBranchID);
+                HttpContext.Current.Session["SMSConfiguration"] = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             }
             SMSConfigirationModel SMSConfigiration = (SMSConfigirationModel)HttpContext.Current.Session["SMSConfiguration"];
 
-            //SMSConfigirationModel SMSConfigiration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
+
             DeligateTasks objDT = new DeligateTasks();
             objDT.StartSending(objModel, SMSConfigiration);
             //return Redirect("/Account/SendSMS/"+ objModel.SMSSendingID);

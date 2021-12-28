@@ -19,6 +19,10 @@
         color: #FFFFFF;
         font-size: 18px;
     }
+
+    ul.day li a.Tlink_2 {
+        top: 35px;
+    }
 </style>
 @section IncludeCss
 {
@@ -58,7 +62,7 @@
                                             <option value="0">--Select--</option>
                                             @foreach (EmployeeModel el in Model.Teachers)
                                             {
-                                                <option value="@el.EmployeeID" @(el.EmployeeID == Model.TimeTable.TeacherID ? "selected" : "")>@el.EmployeeName</option>
+                                                <option value="@el.EmployeeID" @(el.EmployeeID == Model.TimeTable.TeacherID ? "selected" : "" )>@el.EmployeeName</option>
                                             }
                                         </select>
                                     </div>
@@ -80,7 +84,7 @@
                         <div class="ClassSectionHeader">
                             <k2> <sk id="skTeacherName"></sk> </k2>
                         </div>
-                        var width = 100 / (Model.TimeTable.Periods.Count + 1) ;
+                        var width = 100 / (Model.TimeTable.Periods.Count + 1);
                         <div class="time-table-dates">
                             <div class="row" id="divTimeTableFrame" style="margin-left: 5px;">
 
@@ -124,26 +128,13 @@
                                         {
                                             for (var day = 0; day < Model.TimeTable.Days; day++)
                                             {
-                                                foreach (var lac in Model.TimeTable.Lactures.Where(c => c.PeriodID == period.PeriodID))
+                                                if (day < period.DaysCount)
                                                 {
-                                                }
-                                            }
-                                            var isAssigned = false;
-                                            var donePeriodID = 0;
-                                            var maxDays = period.DaysCount;
-                                            foreach (var lac in Model.TimeTable.Lactures.Where(c=>c.PeriodID==period.PeriodID))
-                                            {
-                                                //maxDays = lac.DaysCount;
-                                                //if (lac.PeriodID == period.PeriodID && donePeriodID != lac.PeriodID)
-                                                //{
-                                                PeriodDone = 1;
-                                                for (var day = 0; day < Model.TimeTable.Days; day++)
-                                                {
-                                                    if (day < lac.DaysCount)
+                                                    PeriodDone = 0;
+                                                    foreach (var lac in Model.TimeTable.Lactures.Where(c => c.PeriodID == period.PeriodID))
                                                     {
                                                         var subsClass = "";
                                                         var tSubjectID = 0;
-
                                                         foreach (TeacherSubstitutionModel tsm in Model.TimeTable.Substitutions)
                                                         {
                                                             if (tsm.DayID == day + 1 && tsm.PeriodID == period.PeriodID)
@@ -153,165 +144,123 @@
                                                             }
 
                                                         }
+                                                        var tClassName = "No Teacher";
+                                                        var subjectName = "No Subject";
+                                                        var ClsID = 0;
+                                                        var SecID = 0;
+                                                        tSubjectID = 0;
+                                                        var isOptional = 0;
 
-                                                        foreach (var lac2 in Model.TimeTable.Lactures)
+                                                        ClsID = lac.ClassID;
+                                                        SecID = lac.SectionID;
+                                                        tClassName = lac.ClassName + "-" + lac.SectionName;
+                                                        if (day == 0)
                                                         {
-                                                            var tClassName = "No Teacher";
-                                                            var subjectName = "No Subject";
-                                                            var ClsID = 0;
-                                                            var SecID = 0;
-                                                            tSubjectID = 0;
-                                                            var isOptional = 0;
-                                                            if (lac2.PeriodID == lac.PeriodID && lac2.SectionID==lac.SectionID && lac2.ClassID==lac.ClassID)
-                                                            {
-                                                                ClsID = lac2.ClassID;
-                                                                SecID = lac2.SectionID;
-                                                                tClassName = lac2.ClassName + "-" + lac2.SectionName;
-                                                                if (day == 0)
-                                                                {
-                                                                    tSubjectID = lac2.SubjectID1;
+                                                            tSubjectID = lac.SubjectID1;
+                                                        }
+                                                        else if (day == 1)
+                                                        {
+                                                            tSubjectID = lac.SubjectID2;
+
+                                                        }
+                                                        else if (day == 2)
+                                                        {
+                                                            tSubjectID = lac.SubjectID3;
+
+                                                        }
+                                                        else if (day == 3)
+                                                        {
+                                                            tSubjectID = lac.SubjectID4;
+
+                                                        }
+                                                        else if (day == 4)
+                                                        {
+                                                            tSubjectID = lac.SubjectID5;
+
+                                                        }
+                                                        else if (day == 5)
+                                                        {
+                                                            tSubjectID = lac.SubjectID6;
+                                                        }
+                                                        var tsub = Model.TimeTable.Subjects.FirstOrDefault(c => c.SubjectID == tSubjectID);
+                                                        if (tsub != null)
+                                                        {
+                                                            subjectName = tsub.SubjectName;
+                                                            isOptional = tsub.IsOptionalsubject;
+                                                            PeriodDone = 1;
+                                                        }
+                                                        else
+                                                        {
+                                                            subjectName = "No Subject";
+                                                            isOptional = 0;
+                                                            PeriodDone = 0;
+                                                        }
+                                                        if (PeriodDone == 1)
+                                                        {
+                                                            <li class="" id="li-@period.PeriodID-@(day + 1)">
+                                                                <p class="subject">
+                                                                    @{
+                                                                        <span id="pSubject">@subjectName</span>
+                                                                    }
+                                                                </p>
+                                                                <p class="teacher" id="pTeacher">@tClassName</p>
+                                                                @{
+                                                                    var IsMerged = 0;
+
+                                                                    <div class="liBG"></div>
+                                                                    <input type="hidden" id="hdnClassName" value="@lac.ClassName" />
+                                                                    <input type="hidden" id="hdnSectionName" value="@lac.SectionName" />
+                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                                    <input type="hidden" id="hdnSubjectID" value="@tSubjectID" />
+                                                                    <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                                    <input type="hidden" id="hdnDayID" value="@(day + 1)" />
+                                                                    <input type="hidden" id="hdnClassID" value="@ClsID" />
+                                                                    <input type="hidden" id="hdnSectionID" value="@SecID" />
+                                                                    <input type="hidden" id="hdnIsMergedSubject" value="@IsMerged" />
+                                                                    <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
                                                                 }
-                                                                else if (day == 1)
-                                                                {
-                                                                    tSubjectID = lac2.SubjectID2;
+                                                                <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
+                                                                <a href="javascript:void(0)" title="Manage Substitutions" onclick="ViewSubstitutions(this);" class="Tlink_2"><i class="fa fa-exchange"></i></a>
 
-                                                                }
-                                                                else if (day == 2)
-                                                                {
-                                                                    tSubjectID = lac2.SubjectID3;
+                                                            </li>
+                                                            break;
+                                                        }
 
-                                                                }
-                                                                else if (day == 3)
-                                                                {
-                                                                    tSubjectID = lac2.SubjectID4;
+                                                    }
+                                                    if (PeriodDone == 0)
+                                                    {
+                                                        <li class="EmptyPeriod" id="li-@period.PeriodID-@(day + 1)">
+                                                            <p class="subject">
 
-                                                                }
-                                                                else if (day == 4)
-                                                                {
-                                                                    tSubjectID = lac2.SubjectID5;
+                                                                <span id="pSubject">No Subject</span>
 
-                                                                }
-                                                                else if (day == 5)
-                                                                {
-                                                                    tSubjectID = lac2.SubjectID6;
-                                                                }
-                                                                var tsub = Model.TimeTable.Subjects.FirstOrDefault(c => c.SubjectID == tSubjectID);
-                                                                if(tsub!=null)
-                                                                {
-                                                                    subjectName = tsub.SubjectName;
-                                                                    isOptional = tsub.IsOptionalsubject;
-                                                                }
-                                                                else
-                                                                {
-                                                                    subjectName ="No Subject";
-                                                                    isOptional = 0;
-                                                                }
-                                                                if (tSubjectID != 0)
-                                                                {
-                                                                    donePeriodID = lac.PeriodID;
-                                                                    isAssigned = true;
-                                                                        <li class="@subsClass" id="li-@period.PeriodID-@(day + 1)">
-                                                                            <p class="subject">
-                                                                                @{
+                                                            </p>
+                                                            <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
 
-                                                                                    PeriodDone = 1;
-                                                                                    <span id="pSubject">@subjectName</span>
-                                                                                }
-                                                                            </p>
-                                                                            <p class="teacher" id="pTeacher">@tClassName</p>
-                                                                            @{
-                                                                                var IsMerged = 0;
+                                                            <div class="liBG"></div>
+                                                            <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                            <input type="hidden" id="hdnSubjectID" value="0" />
+                                                            <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
+                                                            <input type="hidden" id="hdnDayID" value="@(day+1)" />
+                                                            <input type="hidden" id="hdnSectionID" value="0" />
+                                                            <input type="hidden" id="hdnClassID" value="0" />
+                                                            <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
+                                                            <input type="hidden" id="hdnIsMergedSubject" value="0" />
+                                                            <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
 
-                                                                                <div class="liBG"></div>
-                                                                                    <input type="hidden" id="hdnClassName" value="@lac2.ClassName" />
-                                                                                    <input type="hidden" id="hdnSectionName" value="@lac2.SectionName" />
-                                                                                    <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
-                                                                                    <input type="hidden" id="hdnSubjectID" value="@tSubjectID" />
-                                                                                    <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
-                                                                                    <input type="hidden" id="hdnDayID" value="@(day + 1)" />
-                                                                                    <input type="hidden" id="hdnClassID" value="@ClsID" />
-                                                                                    <input type="hidden" id="hdnSectionID" value="@SecID" />
-                                                                                    <input type="hidden" id="hdnIsMergedSubject" value="@IsMerged" />
-                                                                                    <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
-                                                                            }
-                                                                            <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
-                                                                            <a href="javascript:void(0)" title="Manage Substitutions" onclick="ViewSubstitutions(this);" class="Tlink_2"><i class="fa fa-exchange"></i></a>
+                                                        </li>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <li>Leave Applicable</li>
+                                                }
 
-                                                                        </li>
-                                                                                            break;
-                                                                                        }
-
-                                                                                    }
-                                                                                }
-                                                                                if (tSubjectID == 0)
-                                                                                {
-                                                                                    <li class="EmptyPeriod" id="li-@period.PeriodID-@(day + 1)">
-                                                                                        <p class="subject">
-
-                                                                                            <span id="pSubject">No Subject</span>
-
-                                                                                        </p>
-                                                                                        <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
-
-                                                                                        <div class="liBG"></div>
-                                                                                        <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
-                                                                                        <input type="hidden" id="hdnSubjectID" value="0" />
-                                                                                        <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
-                                                                                        <input type="hidden" id="hdnDayID" value="@(day+1)" />
-                                                                                        <input type="hidden" id="hdnSectionID" value="0" />
-                                                                                        <input type="hidden" id="hdnClassID" value="0" />
-                                                                                        <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
-                                                                                        <input type="hidden" id="hdnIsMergedSubject" value="0" />
-                                                                                        <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
-
-                                                                                    </li>
-                                                                                    }
-                                                                                }
-                                                                                else
-                                                                                {
-                                                                                    <li>Not Applicable</li>
-                                                                                        }
-                                                                                    }
-
-                                                                                    //}
-
-                                                                                }
-                                                                                if (PeriodDone == 0)
-                                                                                {
-                                                                                    for (var day = 0; day < Model.TimeTable.Days; day++)
-                                                                                    {
-                                                                                        if (day < maxDays)
-                                                                                        {
-                                                                                            <li class="EmptyPeriod" id="li-@period.PeriodID-@(day + 1)">
-                                                                                                <p class="subject">
-
-                                                                                                    <span id="pSubject">No Subject</span>
-
-                                                                                                </p>
-                                                                                                <p class="teacher" id="pTeacher" style="color:red;">No Class</p>
-
-                                                                                                <div class="liBG"></div>
-                                                                                                <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
-                                                                                                <input type="hidden" id="hdnSubjectID" value="0" />
-                                                                                                <input type="hidden" id="hdnTeacherID" value="@Model.TeacherID" />
-                                                                                                <input type="hidden" id="hdnDayID" value="@(day+1)" />
-                                                                                                <input type="hidden" id="hdnSectionID" value="@Model.TimeTable.SectionID" />
-                                                                                                <input type="hidden" id="hdnClassID" value="@Model.TimeTable.ClassID" />
-                                                                                                <input type="hidden" id="hdnEducationLevelID" value="@period.EducationLevelID" />
-                                                                                                <input type="hidden" id="hdnIsMergedSubject" value="0" />
-                                                                                                <a href="javascript:void(0)" onclick="EditLacture(this);" class="Tlink_1" title="Change Period"><i class="fa fa-edit"></i></a>
-
-                                                                                            </li>
-                                                                                        }
-                                                                                        else
-                                                                                        {
-                                                                                            <li><p class="teacher">Not Applicable</p></li>
-                                                                                            }
-                                                                                        }
-                                                                                    }
-                                                                                }
+                                            }
+                                        }
                                     </ul>
-                                                                                }
+                                }
                             </div>
                         </div>
                     }
@@ -370,18 +319,15 @@
         $('#skTeacherName').html($("#ddlTeachers option:selected").text());
     });
     var EditLactureForm;
-    function DeleteSubstitution(sender)
-    {
+    function DeleteSubstitution(sender) {
         return confirm('Do You Really want To Delete?');
     }
     function UpdateSubstitution(sender) {
         return confirm('Do You Really want To Delete?');
     }
-    function SubsDateChanged(sender,DayID)
-    {
-        var NDayID=new Date($(sender).val()).getDay();
-        if (NDayID != DayID)
-        {
+    function SubsDateChanged(sender, DayID) {
+        var NDayID = new Date($(sender).val()).getDay();
+        if (NDayID != DayID) {
             $(sender).val('');
             ShowNotification('error', 'Please Select Date of Same day for which want to do Substitution!!!!', 'error');
         }
@@ -391,20 +337,20 @@
         $.ajax({
             url: "@Url.Action("EditTeacherSubstitution", "Admin")",
             type: 'POST',
-        data: JSON.stringify({
+            data: JSON.stringify({
 
-            ClassName: $(sender).closest('li').find('#hdnClassName').val(),
-            SectionName: $(sender).closest('li').find('#hdnSectionName').val(),
-            PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
-            SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
-            SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
-            DayID: $(sender).closest('li').find('#hdnDayID').val(),
-            TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
-            ClassID: $(sender).closest('li').find('#hdnClassID').val(),
-            EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val()
-        }),
-        contentType: 'application/json; charset=utf-8',
-        success: function (html) {
+                ClassName: $(sender).closest('li').find('#hdnClassName').val(),
+                SectionName: $(sender).closest('li').find('#hdnSectionName').val(),
+                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
+                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
+                DayID: $(sender).closest('li').find('#hdnDayID').val(),
+                TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
+                ClassID: $(sender).closest('li').find('#hdnClassID').val(),
+                EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (html) {
                 notice.remove();
                 EditLactureForm = new PNotify({
                     text: html,
@@ -421,14 +367,14 @@
                 });
 
                 $('.').css('margin-right', '100px');
-        },
-        error: function (XMLHttpRequest, textStatus, errorThrown) {
-            alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
                 EditLactureForm.remove();
-        },
-        async: true,
-        processData: false
-    });
+            },
+            async: true,
+            processData: false
+        });
     }
     function EditLacture(sender) {
         var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
@@ -488,13 +434,42 @@
                 SubjectID: $(sender).closest('tr').find('#ddlSubject').val(),
                 TeacherID: $(sender).closest('tr').find('#hdnReplacedTeacherID').val(),
                 DayID: $(sender).closest('tr').find('#hdnDayID').val(),
-                SenderType:1
+                SenderType: 1
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
                 $('#ddlTeacher').html('');
                 $('#ddlTeacher').html('<option value="0">--Select--</option>');
                 $('#ddlTeacher').append(html);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+            },
+            async: true,
+            processData: false
+        });
+    }
+    function RemoveLacture(sender) {
+
+        $.ajax({
+            url: "@Url.Action("UpdateTeacherLacture", "Admin")",
+            type: 'POST',
+            data: JSON.stringify({
+
+                PeriodID: $(sender).closest('.col-md-6').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('.col-md-6').find('#ddlSections').val(),
+                SubjectID: 0,
+                TeacherID: 0,
+                ClassID: $(sender).closest('.col-md-6').find('#ddlClasses').val(),
+                EducationLevelID: $(sender).closest('.col-md-6').find('#hdnEducationLevelID').val(),
+                DayID: $(sender).closest('.col-md-6').find('#hdnDayID').val(),
+                OldClassID: $(sender).closest('.col-md-6').find('#hdnClassID').val(),
+                OldSectionID: $(sender).closest('.col-md-6').find('#hdnSectionID').val()
+            }),
+            contentType: 'application/json; charset=utf-8',
+            success: function (res) {
+                window.location.href = "/Admin/TeacherTimeTableManagement/" + $(sender).closest('.col-md-6').find('#hdnTeacherID').val();
+
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
@@ -536,13 +511,11 @@
     function InsertSubstitution(sender, OpType) {
         var IsContinue = true;
         var tReplacingTeacherID = 0;
-        if (OpType == -1)
-        {
+        if (OpType == -1) {
             IsContinue = confirm('Do you really want to remove the Substitution?');
             tReplacingTeacherID = $(sender).closest('tr').find('#hdnReplacingTeacherID').val();
         }
-        else
-        {
+        else {
 
             tReplacingTeacherID = $(sender).closest('tr').find('#ddlTeacher').val();
         }

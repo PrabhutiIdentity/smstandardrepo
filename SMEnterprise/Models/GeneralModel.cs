@@ -30,10 +30,6 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Sessions { get; set; }
         public List<ParentModel> Parents { get; set; }
     }
-
-    #region Youtube 
-   
-
     public class YoutubeAdminEditPageData
     {
         public int VideoID { get; set; }
@@ -83,12 +79,10 @@ namespace SMEnterprise.Models
     public class YouTubeAdminPageModel
     {
         public int SBranchID { get; set; }
-        public int TeacherID { get; set; }       
+        public int TeacherID { get; set; }
         public DateTime UploadDate { get; set; }
         public List<YouTubeVideoModel> Videos { get; set; }
         public List<NameIDModel> Teachers { get; set; }
-        public int ClassID { get; set; }
-        public List<NameIDModel> Classes { get; set; }
     }
     public class YouTubeVideoModel
     {
@@ -141,8 +135,6 @@ namespace SMEnterprise.Models
             }
         }
     }
-
-    #endregion
     public class PaymentModeModel
     {
         public int PaymentModeID { get; set; }
@@ -260,8 +252,6 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase AttachmentFile { get; set; }
         public int Status { get; set; }
         public int OpType { get; set; }
-        public int SBranchID { get; set; }
-        public int SessionID { get; set; }
     }
     public class GalleryModel
     {
@@ -404,6 +394,7 @@ namespace SMEnterprise.Models
         public string Password { get; set; }
         public string BranchLogo { get; set; }
         public int SBranchID { get; set; }
+        public int SchoolID { get; set; }
         public string AppToken { get; set; }
         public Role Role
         {
@@ -446,6 +437,10 @@ namespace SMEnterprise.Models
         public int Students { get; set; }
         public HttpPostedFileBase BranchLogo { get; set; }
         public HttpPostedFileBase PrincipalSignatureFile { get; set; }
+        public string SchoolNo { get; set; }
+        public string AffiliationNo { get; set; }
+        public string BookNo { get; set; }
+        public string RenewedUpto { get; set; }
         public int OpType { get; set; }
     }
     public class SubSubjectTypeEditModel
@@ -491,6 +486,7 @@ namespace SMEnterprise.Models
         public int EVSectionID { get; set; }
         public decimal MaxMarks { get; set; }
         public decimal ScoredMarks { get; set; }
+        public int TAssigned { get; set; }
     }
     public class HouseModel
     {

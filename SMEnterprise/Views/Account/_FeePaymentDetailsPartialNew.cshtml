@@ -9,53 +9,54 @@
                 <input type="hidden" id="hdnSaveSessionID" value="@Model.SessionID" />
                 <div class="block">
                     <div id='radios' style='width: 100%!important;'>
-                        @{
-                            var Status = 0;
-                            var counter = 1;
-                            var MonthsName = "";
-                            while (Model.SessionStartDate < Model.SessionEndDate)
-                            {
+                       
+                                        @{
+                                            var Status = 0;
+                                            var counter = 1;
+                                            var MonthsName = "";
+                                            while (Model.SessionStartDate < Model.SessionEndDate)
+                                            {
 
-                                if (Status == 0 && Model.SessionStartDate.Month == Model.Months[0].Month)
-                                {
-                                    Status = 1;
-                                }
-                                if (counter <= Model.FeePaymentMode)
-                                {
-                                    if (MonthsName != "")
-                                    {
-                                        MonthsName = MonthsName + ", ";
-                                    }
-                                    MonthsName = MonthsName + Model.SessionStartDate.ToString("MMM");
-                                }
-                                if (counter == Model.FeePaymentMode)
-                                {
-                                    counter = 0;
-                                    <input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.Month == Model.Month ? "checked" : "" ) @(Status == 0 ? "disabled" : "") type="radio">
-                                    <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>
-                                    MonthsName = "";
-                                }
-                                //MonthsName = Model.SessionStartDate.ToString("MMM");
-                                @*<input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.Month == Model.Month ? "checked" : "" ) @(Status == 0 ? "disabled" : "") type="radio">
-                                    <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>*@
+                                                if (Status == 0 && Model.SessionStartDate.Month == Model.Months[0].Month)
+                                                {
+                                                    Status = 1;
+                                                }
+                                                if (counter <= Model.FeePaymentMode)
+                                                {
+                                                    if (MonthsName != "")
+                                                    {
+                                                        MonthsName = MonthsName + ", ";
+                                                    }
+                                                    MonthsName = MonthsName + Model.SessionStartDate.ToString("MMM");
+                                                }
+                                                if (counter == Model.FeePaymentMode)
+                                                {
+                                                    counter = 0;
+                                                    <input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.Month == Model.Month ? "checked" : "" ) @(Status == 0 ? "disabled" : "") type="radio">
+                                                    <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>
+                                                    MonthsName = "";
+                                                }
+                                                //MonthsName = Model.SessionStartDate.ToString("MMM");
+                                                @*<input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.Month == Model.Month ? "checked" : "" ) @(Status == 0 ? "disabled" : "") type="radio">
+                                <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>*@
 
 
-                            counter++;
-                            Model.SessionStartDate = Model.SessionStartDate.AddMonths(1);
-                        }
-                        }
-                        <script>
-                            $("div[id^='radios']").radiosToSlider({ animation: true});
-                            $("ins[class^='slider-level']").on('click', function () {
-                                var $radio = $('#' + $(this).attr('data-radio'));
-                                MonthChanged($radio, $radio.attr('month'), $radio.attr('year'));
-                            });
-                            $('.slider-label').on('click', function () {
-                                MonthChanged($(this), $(this).attr('month'), $(this).attr('year'));
+                                                counter++;
+                                                Model.SessionStartDate = Model.SessionStartDate.AddMonths(1);
+                                            }
+                                        }
+                                        <script>
+                                            $("div[id^='radios']").radiosToSlider({ animation: true });
+                                            $("ins[class^='slider-level']").on('click', function () {
+                                                var $radio = $('#' + $(this).attr('data-radio'));
+                                                MonthChanged($radio, $radio.attr('month'), $radio.attr('year'));
+                                            });
+                                            $('.slider-label').on('click', function () {
+                                                MonthChanged($(this), $(this).attr('month'), $(this).attr('year'));
 
-                            });
-                        </script>
-                    </div>
+                                            });
+                                        </script>
+                                    </div>
                 </div>
 
             </div>
@@ -260,7 +261,9 @@
                 </div>
             </div>
             <div class="row amount-paid">
+
                 <div class="col-md-3">
+                  
                     @*@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy")*@
                     Fee Date
                     <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" />

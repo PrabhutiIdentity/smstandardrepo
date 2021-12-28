@@ -73,9 +73,14 @@ namespace SMEnterprise.Models
         public string StudentName { get; set; }
         public int StudentID { get; set; }
         public TCModel TCDetails { get; set; }
+        public SBranchModel Branch { get; set; }
         public StudentModel StudentDetails { get; set; }
         public List<ClassModel> Classes { get; set; }
-        public List<SubjectModel> Subjects { get; set; }
+        //public List<SubjectModel> Subjects { get; set; }
+        public List<string> Subjects { get; set; }
+
+        public List<SessionModel> Sessions { get; set; }
+
     }
     public class TCListModel
     {
@@ -114,6 +119,81 @@ namespace SMEnterprise.Models
     }
     public class AcadmicModel
     {
+        public static string CalculateGradeShine(decimal totalscored, decimal totalmax = 100)
+        {   string Grade ;
+            if (totalscored != 0)
+            {
+                // perform the division only if count is different than 0,
+                // otherwise we know that it will throw an exception 
+                // so why even attempting it?
+                decimal Num;
+                Num = (totalscored * 100) / totalmax;
+                //numbers = numbers * 100 / maxMarks;
+             
+                if (Num >= 80 && Num <= 100)
+                {
+                    Grade = "A";
+                }
+                else if (Num >= 65 && Num <= 79)
+                {
+                    Grade = "B";
+                }
+                else if (Num >= 49 && Num <= 64)
+                {
+                    Grade = "C";
+                }
+                else if (Num >= 35 && Num <= 48)
+                {
+                    Grade = "D";
+                }
+
+                else
+                {
+                    Grade = "E";
+                }
+             
+            }
+            else
+            {
+                Grade = "--";
+            }
+              return Grade;
+        }
+        public static string CalculateGradePointsShine(decimal numbers, decimal maxMarks = 100)
+        {
+            numbers = numbers * 100 / maxMarks;
+            string Grade = "A";
+            if (numbers >= 80)
+            {
+                Grade = "10";
+            }
+            else if (numbers >= 65 && numbers <= 79)
+            {
+                Grade = "9";
+            }
+            else if (numbers >= 49 && numbers <= 64)
+            {
+                Grade = "8";
+            }
+            else if (numbers >= 35 && numbers <= 48)
+            {
+                Grade = "7";
+            }
+            else if (numbers >= 11 && numbers <= 34)
+            {
+                Grade = "6";
+            }
+            else if (numbers >= 10)
+            {
+                Grade = "5";
+            }
+           
+            else
+            {
+                Grade = "--";
+            }
+            return Grade;
+        }
         public static string CalculateGrade(decimal numbers, decimal maxMarks = 100)
         {
             if (numbers != 0)
@@ -777,6 +857,8 @@ namespace SMEnterprise.Models
         public string Photo { get; set; }
         public decimal CGPA { get; set; }
         public string ResultDetails { get; set; }
+        public string FatherName { get; set; }
+        public string MotherName { get; set; }
     }
     public class PerformanceParameterModel
     {
@@ -838,6 +920,7 @@ namespace SMEnterprise.Models
         public string EvaluationName { get; set; }
         public List<EvaluationTypeModel> EvaluationTypes { get; set; }
         public DateTime ResultDate { get; set; }
+        public List<PerformanceParameterModel> PerformanceParameters { get; set; }
     }
     public class PerformanceParameterDetailModel
     {

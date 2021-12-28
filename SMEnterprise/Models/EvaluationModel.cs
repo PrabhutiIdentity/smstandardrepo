@@ -112,6 +112,7 @@ namespace SMEnterprise.Models
         public decimal PassMarks { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
+        public string EvaluationName { get; set; }
     }
     public class ExamPageModel
     {
@@ -175,4 +176,47 @@ namespace SMEnterprise.Models
             return dtExamDetails;
         }
     }
+
+    // shishupal ExamDate sheet
+    //17Nov2021
+    public class StudentExamDatesheetModel
+    {
+        public SBranchModel Branch { get; set; }
+        public int ClassID { get; set; }
+        public int SBranchID { get; set; }
+        public int SessionID { get; set; }
+        public int EvaluationID { get; set; }
+        public int SubjectID { get; set; }
+        public int EvaluationSchemeID { get; set; }
+        public List<SchoolSessionModel> Sessions { get; set; }
+        //public List<EvaluationSchemeModel> EvaluationSchemes { get; set; }
+        public List<EvaluationSchemeModel> EvaluationSchemes { get; set; }
+        public List<NameIDModel> Evaluations { get; set; }
+        public List<NameIDModel> Classes { get; set; }
+        public List<NameIDModel> Sections { get; set; }
+        public List<SubjectModel> SubjectsE { get; set; }
+        public List<ExamModel> Exams { get; set; }
+
+        public List<ExamDateListModel> ExamList { get; set; }
+        public string SubjectName { get; set; }
+        public string SectionName { get; set; }
+        public string ExamInTime { get; set; }
+        public string ExamOutTime { get; set; }
+    }
+
+    public class ExamDateListModel
+    {
+        public int ExamID { get; set; }
+        public DateTime ExamDate { get; set; }
+        public string ExamDay { get; set; }
+    }
+
+    public class EvaluationTypePageModelExam
+    {
+        public List<NameIDModel> Evaluations { get; set; }
+        public int SessionID { get; set; }
+        public List<SchoolSessionModel> Sessions { get; set; }
+    }
+
+    
 }

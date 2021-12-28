@@ -131,6 +131,7 @@ namespace SMEnterprise.Models
                     dr["RecieverID"] = e.RecieverID;
                     dr["MobileNumber"] = e.Mobile;
                     dr["Content_id"] = e.Content_id;
+
                     dtDetails.Rows.Add(dr);
                 }
             }
@@ -175,8 +176,8 @@ namespace SMEnterprise.Models
         public string SMSTypeName { get; set; }
         public int OpType { get; set; }
         public int IsApproved { get; set; }
-        public string SMSContentID { get; set; }
         public string Content_id { get; set; }
+        public int SBranchID { get; set; }
     }
     public class SMSTemplatePageModel
     {

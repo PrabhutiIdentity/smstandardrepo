@@ -112,8 +112,11 @@
                             </thead>
                             @{
                                 int count = 0;
+
+                                decimal TotalPayment = 0;
                                 foreach (ExpenceModel c in Model.Expences)
                                 {
+                                    TotalPayment = TotalPayment + c.PaymentAmount;
                                     <tr>
 
                                         <td>
@@ -177,6 +180,23 @@
                                 }
 
                             }
+                            <tfoot>
+                                <tr style="background-color: #606d73;color: white;">
+                                    @if (Model.ExpenceType == 0)
+                                    {
+                                        <td colspan="4">
+                                            <b> Total Collection</b>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                    <td colspan="3">
+                                        <b> Total Collection</b>
+                                    </td>
+                                    }
+                                    <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
+                                </tr>
+                            </tfoot>
                         </table>
 
                     </div>
@@ -188,8 +208,7 @@
 
 @section scripts
 {
-    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
-    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    
     <script>
         function ExpenceMonthChanged()
         {

@@ -368,14 +368,13 @@ namespace SMEnterprise.Controllers
                 if (data.FromDate.Year == 1)
                 {
                     data.FromDate = CommonUsage.GetCurrentDate();
-                   // data.PaymentMode = -1;
+                    data.PaymentMode = -1;
                 }
                 if (data.ToDate.Year == 1)
                 {
                     data.ToDate = CommonUsage.GetCurrentDate();
                 }
                 AccountData objAccountData = new AccountData();
-                data.PaymentMode = data.PaymentMode - 1;
                 CollectionReportModel objModel = objAccountData.GetCollectionReport(data); ;
                 if (objModel != null)
                 {
@@ -814,7 +813,7 @@ namespace SMEnterprise.Controllers
                 objModel.NotificationText = data.NoticeTitle;
                 objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
                 objModel.Recievers = new List<NotificationRecieverModel>();
-                string ContentID = "0";
+
                 StringBuilder sb = new StringBuilder();
                 foreach (SMSRecieverModel r in recievers)
                 {
@@ -835,6 +834,7 @@ namespace SMEnterprise.Controllers
                 string ServerNotificationKey = (new CommonData()).GetNotificationServerKey(user.SBranchID);
                 CommonUsage.SendNotificationFCM(Recievers, data.NoticeTitle, "1", ServerNotificationKey);
                 objCommonData.InsertNotification(objModel);
+                string ContentID = "0";
                 if (data.SendSMS == 1 && data.OpType != -1 && data.NoticeID == 0)
                 {
                     foreach (SMSRecieverModel r in recievers)
@@ -1609,7 +1609,6 @@ namespace SMEnterprise.Controllers
         public CommonApiWraperModel UpdateBBBOnlineMeeting(OnlineStaffMeetingModel data)
         {
             UserModel user = VerifyUser(data.UUID);
-
             CommonApiWraperModel objWraper = new CommonApiWraperModel();
             if (user != null)
             {

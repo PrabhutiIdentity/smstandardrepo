@@ -72,7 +72,7 @@
                                         {
                                             <option value="@el.EvaluationID" @(el.EvaluationID == Model.EvaluationID ? "selected" : "")>@el.EvaluationName</option>
                                         }
-                                        }
+
                                     </select>
                                 </div>
                             </div>
@@ -108,8 +108,12 @@
                             <tr>
                                 <td> <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(d.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(d.StudentID)_@d.Photo" /></td>
                                 <td colspan="2">
+
                                     <h2>@Model.Branch.BranchSchoolName</h2>
-                                    <h4>@Model.Branch.Address</h4>
+                                    <p>@Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))</p>
+                                    @*<h4>@Model.Branch.Address</h4>*@
+                                    <p style="margin-top: 2px;text-align: center;"> <b>Ph.</b> @Model.Branch.ContactNo,  <b> Email :</b> @Model.Branch.EmailID</p>
+                                    <br />
                                 </td>
                                 <td> <img id="imgPhoto" class="thumbImageGrid" style="height:120px;width:120px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@Model.Branch.Logo" /></td>
                             </tr>
@@ -117,7 +121,7 @@
                                     <td colspan="2" style="white-space:pre-line"><h4>@Model.Branch.Address</h4>
 
                                     </td>
-                                </tr>*@
+                             </tr>*@
                             <tr style="border-bottom:1px solid black;">
                                 <td colspan="2" style="white-space:pre-line"><b>Admit Card</b></td>
                             </tr>
@@ -148,18 +152,16 @@
                                 <td class="searchable">@d.MotherName</td>
                             </tr>
                             @*<tr style="border-bottom:1px solid black;">
-                                <td>Mother's Name</td>
-                                <td>@d.MotherName</td>
-                            </tr>*@
+                                    <td>Mother's Name</td>
+                                    <td>@d.MotherName</td>
+                              </tr>*@
                             <tr style="border-bottom:1px solid black;">
-                                <td colspan="4">
-                                    
-                                </td>
+                                <td colspan="4"></td>
                             </tr>
                         </table>
                         <table style="width:100%;">
                             <thead>
-                                <tr style="border-bottom:1px solid black; text-align:center;">
+                                <tr style="border-bottom:1px solid black; text-align:left;">
                                     <th>#</th>
                                     <th>Subject</th>
                                     <th>Date</th>
@@ -183,11 +185,39 @@
                                         ctr++;
                                     }
                                 }
-                               
+
                             </tbody>
+                            <div class="row">
+                                <table style="width:100%">
+
+                                    <tr>
+
+                                        @if (Model.Branch.PrincipalSignature == null)
+                                        {
+                                            <td style="width:25%;text-align:right;padding-right: 153px;">
+                                                <br /><br />
+                                                Signature of Principal
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td style="width:25%;text-align:right;padding-right: 153px;">
+                                                <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                                <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Signature of Principal
+                                            </td>
+                                        }
+
+                                    </tr>
+                                </table>
+                            </div>
+
                         </table>
                     </td>
                 </tr>
+                <tr>
+                    <td><br /></td>
+                </tr>
+
                 <tr>
                     <td><br /></td>
                 </tr>

@@ -22,6 +22,7 @@
         .print {
             display: none;
         }
+
         .reportSign {
             max-width: 200px;
             max-height: 90px;
@@ -42,6 +43,7 @@
                         <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
                             <tr style="width:100%">
                                 <td style="width:20%;text-align:left;">
+                                  
                                     <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
                                 </td>
 
@@ -125,7 +127,7 @@
                                                 <div class="col-md-12" style="text-align:right;">
                                                     @if (Model.Student.Photo == null)
                                                     {
-                                                    <p style="width:100px;height:100px;"></p>
+                                                        <p style="width:100px;height:100px;"></p>
                                                     }
                                                     else
                                                     {
@@ -225,18 +227,18 @@
                                                                         <td style="min-width: 110px;"><b>@r.SubjectName</b></td>
                                                                         @foreach (EvaluationModel er in Model.MainEvaluations)
                                                                         {
-                                                                        decimal EvalMaxMarks = 0;
-                                                                        decimal SATotalMarks = 0;
-                                                                        decimal EvalTotalMarks = 0;
-                                                                        foreach (EvaluationModel esr in Model.SubEvaluations)
-                                                                        {
-                                                                            if (esr.MasterID == er.EvaluationID)
+                                                                            decimal EvalMaxMarks = 0;
+                                                                            decimal SATotalMarks = 0;
+                                                                            decimal EvalTotalMarks = 0;
+                                                                            foreach (EvaluationModel esr in Model.SubEvaluations)
                                                                             {
-                                                                                var isFound = false;
-                                                                                foreach (ExamResultDetailModel err in Model.Result)
+                                                                                if (esr.MasterID == er.EvaluationID)
                                                                                 {
-                                                                                    if (err.MasterID == er.EvaluationID && esr.EvaluationType == err.EvaluationID && r.SubjectID == err.SubjectID)
+                                                                                    var isFound = false;
+                                                                                    foreach (ExamResultDetailModel err in Model.Result)
                                                                                     {
+                                                                                        if (err.MasterID == er.EvaluationID && esr.EvaluationType == err.EvaluationID && r.SubjectID == err.SubjectID)
+                                                                                        {
                                                                                             @*<td>@(err.Grade == null ? "NA" : err.Grade)</td>*@
                                                                                             if (Model.SBranchID == 9)
                                                                                             {
@@ -269,17 +271,30 @@
                                                                                 subEve = new NameIDModel();
                                                                                 subEve.ID = r.SubjectID;
                                                                                 subEve.Name = er.EvaluationID.ToString();
-                                                                                subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+
+                                                                                // subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                                if (EvalTotalMarks != 0)
+                                                                                {
+                                                                                    subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    subEve.Extra1 = "Invalid";
+                                                                                }
+
                                                                                 SubjectEvaluationFinalStatus.Add(subEve);
                                                                             }
                                                                             else
                                                                             {
+
                                                                                 subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+
                                                                             }
 
                                                                             totalmarksresult = totalmarksresult + EvalMaxMarks;
                                                                             <td>@Math.Round(EvalTotalMarks, 2)</td>
                                                                             <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>
+
                                                                         }
                                                                         @if (Model.EvaluationID == -1)
                                                                         {
@@ -299,10 +314,10 @@
                                                                     <td><b>@Math.Round(me.MarksObtained, 2)</b></td>
                                                                     @*<td>@Math.Round(me.MarksObtained * 100 / me.TotalMarks, 2)%</td>*@
                                                                     @*<td>@Math.Round(me.TotalMarks == 0 ? 0 : me.MarksObtained * 100 / me.TotalMarks, 2)%</td>*@
-                                                                division = @AcadmicModel.CalculateGradeDivision(me.MarksObtained, me.TotalMarks);
-                                                                TotalMarksT = @Math.Round(me.TotalMarks, 2);
-                                                                TotalObtMarksT = @Math.Round(me.MarksObtained, 2);
-                                                                Grade = @AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks);
+                                                                    division = @AcadmicModel.CalculateGradeDivision(me.MarksObtained, me.TotalMarks);
+                                                                    TotalMarksT = @Math.Round(me.TotalMarks, 2);
+                                                                    TotalObtMarksT = @Math.Round(me.MarksObtained, 2);
+                                                                    Grade = @AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks);
                                                                     <td><b>@Math.Round(me.TotalMarks == 0 ? 0 : me.MarksObtained * 100 / me.TotalMarks, 2)% (@AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks))</b></td>
                                                                 }
                                                                 @if (Model.EvaluationID == -1)
@@ -310,23 +325,23 @@
                                                                     <td>@Model.Result.Sum(x => x.etMarksScored).ToString("0.00")</td>
                                                                     totaltotal = Model.Result.Sum(x => x.etMaxMarks);
                                                                     totalscored = Model.Result.Sum(x => x.etMarksScored);
-                                                                    divisionAll= @AcadmicModel.CalculateGradeDivision(totalscored, totaltotal);
+                                                                    divisionAll = @AcadmicModel.CalculateGradeDivision(totalscored, totaltotal);
                                                                     GradeAll = @AcadmicModel.CalculateGrade(totalscored, totaltotal);
                                                                     <td>
                                                                         @*@if(totaltotal!=0)
-                                                                        {
-                                                                       @Math.Round(totaltotal == 0 ? 0 : totalscored * 100 / totaltotal, 2)% < br /> (@AcadmicModel.CalculateGrade(totalscored, totaltotal));
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                        }*@
+                                                                             {
+                                                                            @Math.Round(totaltotal == 0 ? 0 : totalscored * 100 / totaltotal, 2)% < br /> (@AcadmicModel.CalculateGrade(totalscored, totaltotal));
+                                                                             }
+                                                                             else
+                                                                             {
+                                                                             }*@
 
                                                                         @Math.Round(totaltotal == 0 ? 0 : totalscored * 100 / totaltotal, 2)% <br /> ( @AcadmicModel.CalculateGrade(totalscored, totaltotal))
                                                                     </td>
 
                                                                 }
 
-                                                                  
+
                                                             </tr>
 
 
@@ -336,24 +351,24 @@
                                                     <table style="width:100%;border: 1px solid #ddd;">
                                                         @if (Model.EvaluationID == -1)
                                                         {
-                                                        <tr>
-                                                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@totalscored.ToString("0.00")</b> / <b>@totaltotal.ToString("0.00")</b></td>
-                                                            <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(totaltotal == 0 ? 0 : totalscored * 100 / totaltotal, 2).ToString("0.00") %</b></td>
-                                                            <td style="width:20%;text-align:center;"> Grade : <b>@GradeAll</b> </td>
-                                                            <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@divisionAll</b> </td>
-                                                        </tr>
+                                                            <tr>
+                                                                <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@totalscored.ToString("0.00")</b> / <b>@totaltotal.ToString("0.00")</b></td>
+                                                                <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(totaltotal == 0 ? 0 : totalscored * 100 / totaltotal, 2).ToString("0.00") %</b></td>
+                                                                <td style="width:20%;text-align:center;"> Grade : <b>@GradeAll</b> </td>
+                                                                <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@divisionAll</b> </td>
+                                                            </tr>
                                                         }
                                                         else
                                                         {
-                                                        <tr>
-                                                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalObtMarksT.ToString("0.00")</b> / <b>@TotalMarksT.ToString("0.00")</b></td>
-                                                            <td style="width:25%;text-align:center;">Percentage :<b>@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2).ToString("0.00") %</b></td>
-                                                            <td style="width:20%;text-align:center;"> Grade : <b>@Grade</b> </td>
-                                                            <td style="width:25%;text-align:right;padding-right:20px"> Division :   <b>@division</b>  </td>
-                                                        </tr>
+                                                            <tr>
+                                                                <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalObtMarksT.ToString("0.00")</b> / <b>@TotalMarksT.ToString("0.00")</b></td>
+                                                                <td style="width:25%;text-align:center;">Percentage :<b>@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2).ToString("0.00") %</b></td>
+                                                                <td style="width:20%;text-align:center;"> Grade : <b>@Grade</b> </td>
+                                                                <td style="width:25%;text-align:right;padding-right:20px"> Division :   <b>@division</b>  </td>
+                                                            </tr>
                                                         }
                                                     </table>
-                                                    <br/>
+                                                    <br />
                                                 </td>
                                             </tr>
                                         }
@@ -559,7 +574,7 @@
                                                         <br />
                                                         <br />
                                                         Place : <br />
-                                                        Date  :@Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
+                                                        @*Date  :@Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")*@
                                                     </td>
                                                     <td style="width:25%">
                                                         <br />
@@ -571,14 +586,14 @@
                                                     </td>
                                                     @if (Model.SBranchDetails.SBranchID == 0)
                                                     {
-                                                    <td style="width:25%">
-                                                        <br />
-                                                        <br />
-                                                        <br />
-                                                        <br />
-                                                        Signature of<br />
-                                                        HM
-                                                    </td>
+                                                        <td style="width:25%">
+                                                            <br />
+                                                            <br />
+                                                            <br />
+                                                            <br />
+                                                            Signature of<br />
+                                                            HM
+                                                        </td>
                                                     }
                                                     @if (Model.SBranchDetails.PrincipalSignature == null)
                                                     {
@@ -590,7 +605,7 @@
                                                     else
                                                     {
                                                         <td style="width:25%">
-                                                            <img onerror="return OnImageError(this,2);" style="margin-left: 40px;" class="reportSign" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
+                                                            <img onerror="return OnImageError(this,2);" style="max-height: 35px; max-width: 100px" class="reportSign" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
                                                             <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Signature of Principal
                                                         </td>
                                                     }
@@ -607,150 +622,150 @@
                                     <tr>
                                         <td colspan="@(Model.MainEvaluations.Count)">
                                             @*<table style="font-size: 10px;">
-            <tr>
-                <td style="width:49%">
-                    <b>Grading Scale for scholastic areas :</b> Grades are awarded on a 8-point grading scale as follow -
-                </td>
-                <td style="width:2%"></td>
-                @if (Model.SBranchDetails.SBranchID == 1)
-                {
-                    <td style="width:49%">
-                        <b>Grading Scale for co-scholastic areas :</b> Grades are awarded on a 3-point grading scale
-                    </td>
-                }
-                else
-                {
-                    <td style="width:49%">
-                        <b>Grading Scale for co-scholastic areas :</b> Grades are awarded on a 4-point grading scale
-                    </td>
-                }
-            </tr>
-            <tr>
-                <td>
-                    <table class="table table-bordered" style="font-size: 10px;">
-                        <tr>
-                            <td>
-                                <b>Marks Range</b>
-                            </td>
-                            <td><b>Grade</b></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                91-100
-                            </td>
-                            <td>
-                                A1
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                81-90
-                            </td>
-                            <td>
-                                A2
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                71-80
-                            </td>
-                            <td>
-                                B1
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                61-70
-                            </td>
-                            <td>
-                                B2
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                51-60
-                            </td>
-                            <td>
-                                C1
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                41-50
-                            </td>
-                            <td>
-                                C2
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                33-40
-                            </td>
-                            <td>
-                                D
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                32 & Below
-                            </td>
-                            <td>
-                                E (Needs improvement)
-                            </td>
-                        </tr>
-                    </table>
-                </td>
-                <td></td>
-                <td>
-                    <table class="table table-bordered" style="font-size: 10px;">
-                        <tr>
-                            <td>
-                                <b>Grade</b>
-                            </td>
-                            <td></td>
-                        </tr>
-                        <tr>
-                            <td>
-                                A
-                            </td>
-                            <td>
-                                Outstanding
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                B
-                            </td>
-                            <td>
-                                Very Good
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                C
-                            </td>
-                            <td>
-                                Fair
-                            </td>
-                        </tr>
-                        @if (Model.SBranchDetails.SBranchID == 2)
-                        {
-                            <tr>
-                                <td>
-                                    D
-                                </td>
-                                <td>
-                                    Needs improvement
-                                </td>
-                            </tr>
-                        }
-                        else
-                        {
-                        }
-                    </table>
-                </td>
-            </tr>
-        </table>*@
+                                                    <tr>
+                                                        <td style="width:49%">
+                                                            <b>Grading Scale for scholastic areas :</b> Grades are awarded on a 8-point grading scale as follow -
+                                                        </td>
+                                                        <td style="width:2%"></td>
+                                                        @if (Model.SBranchDetails.SBranchID == 1)
+                                                        {
+                                                            <td style="width:49%">
+                                                                <b>Grading Scale for co-scholastic areas :</b> Grades are awarded on a 3-point grading scale
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td style="width:49%">
+                                                                <b>Grading Scale for co-scholastic areas :</b> Grades are awarded on a 4-point grading scale
+                                                            </td>
+                                                        }
+                                                    </tr>
+                                                    <tr>
+                                                        <td>
+                                                            <table class="table table-bordered" style="font-size: 10px;">
+                                                                <tr>
+                                                                    <td>
+                                                                        <b>Marks Range</b>
+                                                                    </td>
+                                                                    <td><b>Grade</b></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        91-100
+                                                                    </td>
+                                                                    <td>
+                                                                        A1
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        81-90
+                                                                    </td>
+                                                                    <td>
+                                                                        A2
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        71-80
+                                                                    </td>
+                                                                    <td>
+                                                                        B1
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        61-70
+                                                                    </td>
+                                                                    <td>
+                                                                        B2
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        51-60
+                                                                    </td>
+                                                                    <td>
+                                                                        C1
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        41-50
+                                                                    </td>
+                                                                    <td>
+                                                                        C2
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        33-40
+                                                                    </td>
+                                                                    <td>
+                                                                        D
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        32 & Below
+                                                                    </td>
+                                                                    <td>
+                                                                        E (Needs improvement)
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+                                                        <td></td>
+                                                        <td>
+                                                            <table class="table table-bordered" style="font-size: 10px;">
+                                                                <tr>
+                                                                    <td>
+                                                                        <b>Grade</b>
+                                                                    </td>
+                                                                    <td></td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        A
+                                                                    </td>
+                                                                    <td>
+                                                                        Outstanding
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        B
+                                                                    </td>
+                                                                    <td>
+                                                                        Very Good
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>
+                                                                        C
+                                                                    </td>
+                                                                    <td>
+                                                                        Fair
+                                                                    </td>
+                                                                </tr>
+                                                                @if (Model.SBranchDetails.SBranchID == 2)
+                                                                {
+                                                                    <tr>
+                                                                        <td>
+                                                                            D
+                                                                        </td>
+                                                                        <td>
+                                                                            Needs improvement
+                                                                        </td>
+                                                                    </tr>
+                                                                }
+                                                                else
+                                                                {
+                                                                }
+                                                            </table>
+                                                        </td>
+                                                    </tr>
+                                                </table>*@
                                             <table style="font-size: 10px;">
 
                                                 <tr>

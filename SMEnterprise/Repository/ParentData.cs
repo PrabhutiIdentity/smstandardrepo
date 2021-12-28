@@ -465,28 +465,6 @@ namespace SMEnterprise.Repository
             }
             return oData;
         }
-
-        public StudentOnlineExamSubmitModel SubmitOnlineExamAnswerSheetNew(StudentOnlineExamSubmitModel oModel)
-        {
-            TeacherBlackBoardPageModel objModel = new TeacherBlackBoardPageModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@OExamID", oModel.OExamID);
-                paramater.Add("@SubmissionDate", oModel.SubmissionDate);
-                paramater.Add("@StudentID", oModel.StudentID);
-                paramater.Add("@ID", oModel.QuesAnswers.ID);
-                paramater.Add("@Name", oModel.QuesAnswers.Name);
-                paramater.Add("@SubAnsID", oModel.SubAnsID);
-                //return con.Query<int>("sp_StudentSubmitOnlineAnswer", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
-                using (var multi = con.QueryMultiple("sp_StudentSubmitOnlineAnswer", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.SubAnsID = multi.Read<int>().SingleOrDefault();
-                    oModel.SubmissionID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-            return oModel;
-        }
         public int SubmitOnlineExamAnswerSheet(StudentOnlineExamSubmitModel oModel)
         {
             TeacherBlackBoardPageModel objModel = new TeacherBlackBoardPageModel();

@@ -263,17 +263,28 @@
         }
 
     }
+
     function SaveGroupSubject(sender, OpType) {
         var isContinue = true;
         if (OpType == -1)
         {
             var subsubcount = $(sender).closest('tr').find('#hdnSubSubjectCount').val()
+            var IsSubAssigned = $(sender).closest('tr').find('#hdnTAssigned').val()
             if (subsubcount > 0) {
                 isContinue = false;
                 alert('Subject have sub-subjects defined, please delete subsubject first....');
             }
-            else {
-                isContinue = confirm("Do You Really Want To Delete this Subject!!!!");
+            else
+            {
+                if (IsSubAssigned > 0) {
+                    isContinue = false;
+                    alert('Subject already assigned to teacher, please un-assign subject first....');
+                }
+                else
+                {
+                    isContinue = confirm("Do You Really Want To Delete this Subject!!!!");
+                }
+
             }
         }
         if (isContinue) {
