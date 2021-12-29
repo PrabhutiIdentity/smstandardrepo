@@ -1,0 +1,76 @@
+﻿﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+
+}
+@model SMEnterprise.Models.StudentPerformanceListModel
+@section IncludeCss
+{
+    <style>
+
+        #tblResult > tbody > tr > td {
+            text-align: center !important;
+            vertical-align: middle !important;
+        }
+
+        .table > tbody > tr > td {
+            padding-bottom: 1px;
+            padding-top: 2px;
+        }
+
+        .print {
+            display: none;
+        }
+        .reportSign {
+            max-width: 200px;
+            max-height: 90px;
+        }
+    </style>
+}
+    <div class="row">
+        <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
+    </div>
+    <div class="AllStudents">
+        @foreach (StudentPerformanceModel c in Model.StudentPerformances)
+        {
+            <div style="page-break-before: avoid;page-break-inside:avoid;page-break-after: always;">
+                @Html.Action("StudentPerformanceReportPartial", new { id = c.StudentSessionUID, id2 = Model.EvaluationID, id3 = Model.SessionID })
+            </div>
+        }
+    </div>
+
+@section scripts
+{
+    <script type="text/javascript">
+        function DrawAttandanceChart(data) {
+            new Chart(document.getElementById("canvas000"), {
+                type: 'line',
+                data: data
+            });
+        }
+        function PrintReport() {
+            var contents = $(".AllStudents").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}

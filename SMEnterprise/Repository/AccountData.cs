@@ -1197,9 +1197,9 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetFeeSummeryForParentWise", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     //objModel.Classes = multi.Read<NameIDModel>().ToList();
-                //    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    //    objModel.ClassID = multi.Read<int>().SingleOrDefault();
                     //objModel.Sections = multi.Read<NameIDModel>().ToList();
-              //      objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    //      objModel.SectionID = multi.Read<int>().SingleOrDefault();
                     objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
@@ -2396,7 +2396,7 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
-        public ExpenceModel GetExpenceDetails(int ExpenceID,int SBranchID)
+        public ExpenceModel GetExpenceDetails(int ExpenceID, int SBranchID)
         {
             ExpenceModel objModel = new ExpenceModel();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -3371,6 +3371,41 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+
+        public StudentPerformanceListModel GetStudentsPerformanceShine(StudentPerformanceListModel objModel)
+        {
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@EvaluationID", objModel.EvaluationID);
+                paramater.Add("@ClassID", objModel.ClassID);
+                paramater.Add("@SectionID", objModel.SectionID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@EvaluationMode", 0);
+                paramater.Add("@SessionID", objModel.SessionID);
+                //sp_GetClassSectionWiseStudentPerformancesMini
+                using (var multi = con.QueryMultiple("", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.Sections = multi.Read<NameIDModel>().ToList();
+                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                    objModel.StudentPerformances = multi.Read<StudentPerformanceModel>().ToList();
+                    if (objModel.Classes.Count > 0)
+                    {
+                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    }
+                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                    objModel.TotalParameters = multi.Read<int>().SingleOrDefault();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
+                }
+            }
+            return objModel;
+        }
         public StudentPerformanceListModel GetStudentsPerformanceMini(StudentPerformanceListModel objModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -3757,7 +3792,7 @@ namespace SMEnterprise.Repository
         }
         public int InsertSMSSending(SMSSendTaskModel objModel)
         {
-           // int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            // int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
@@ -3768,7 +3803,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@RecieverCatIDs", objModel.RecieverCats);
                 paramater.Add("@Title", objModel.Title);
                 paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
-                paramater.Add("@SBranchID", objModel.SBranchID);               
+                paramater.Add("@SBranchID", objModel.SBranchID);
                 paramater.Add("@content_id", objModel.Content_id);
                 return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }

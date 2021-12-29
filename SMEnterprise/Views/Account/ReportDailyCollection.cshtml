@@ -160,9 +160,10 @@
                     }
                     <tfoot>
                         <tr style="background-color: #606d73;color: white;">
-                            <td colspan="6">
+                            <td>
                                 <b> Total Collection</b>
                             </td>
+                            <td  colspan="5"></td>
                             <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
                         </tr>
                     </tfoot>
@@ -171,7 +172,6 @@
         </div>
     </div>
 </div>
-
 
 
 @section scripts
@@ -186,9 +186,14 @@
     <script>
 
         $(document).ready(function () {
-        var repname = 'Daily Fee Collection Report  @Model.Branch.BranchSchoolName as on Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy")'
+            @*$('#PaymentsTable').append('<caption style="caption-side: top"> @Model.Branch.BranchSchoolName </caption>');*@
+            var rpname ='@Model.Branch.BranchSchoolName   Daily Collection Report as on Date: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy") '
+var repname = '<div class="center col-md-12"> <b> @Model.Branch.BranchSchoolName </b><br/><br/> Daily Collection Report as on Date: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy") </div >'
         var handleDataTableButtons = function () {
             if ($("#PaymentsTable").length) {
+
+
+
                 $("#PaymentsTable").DataTable({
                     dom: "Bfrtip",
                     "paging": true,
@@ -198,41 +203,34 @@
                           extend: "copy",
                             className: "btn-sm",
                             footer: true,
-                            title: function () {
-                                return "<div style='font-size: 16px;'>" + repname + "</div>"
-                            }
+                            messageTop:rpname
+
+
                       },
                       {
                           extend: "csv",
                           className: "btn-sm",
-                          footer: true,
-                          title: function () {
-                              return "<div style='font-size: 16px;'>" + repname + "</div>"
-                          }
+                          footer: true
+
                       },
                       {
                           extend: "excel",
                           className: "btn-sm",
-                          footer: true,
-                          title: function () {
-                              return "<div style='font-size: 16px;'>" + repname + "</div>"
-                          }
+                          footer: true
+
                       },
                       {
                           extend: "pdfHtml5",
                           className: "btn-sm",
                           footer: true,
-                          title: function () {
-                              return "<div style='font-size: 16px;'>" + repname + "</div>"
-                          }
+                          messageTop:rpname
+
                       },
                       {
                           extend: "print",
                           className: "btn-sm",
-                          footer: true,
-                          title: function () {
-                              return "<div style='font-size: 16px;'>" + repname + "</div>"
-                          }
+                          footer: true
+
                       },
                     ],
                     responsive: true
