@@ -2276,6 +2276,14 @@ namespace SMEnterprise.Controllers
             objModel = objTeacherData.GetStudentTotalResult(StudentID, SessionID);
             return View(objModel);
         }
+        
+            [PermissionFilter]
+        public ActionResult StudentPerformanceDetailsClassShine(StudentPerformanceListModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStudentsPerformanceShine(objModel);
+            return View(objModel);
+        }
         [PermissionFilter]
         public ActionResult StudentPerformanceDetailsClass(StudentPerformanceListModel objModel)
         {
@@ -2294,6 +2302,7 @@ namespace SMEnterprise.Controllers
             objModel = objTeacherData.GetStudentPerformanceDetails(objModel);
             return PartialView("_StudentPerformanceDetailsPartial", objModel);
         }
+
         [PermissionFilter]
         public ActionResult StudentPerformanceDetailsESS(string ID = null, string ID2 = null, string ID3 = null)
         {

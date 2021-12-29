@@ -1,12 +1,12 @@
-﻿@using SMEnterprise.Models;
+﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    Layout = null;
+    List<NameIDModel> SubjectEvaluationFinalStatus = new List<NameIDModel>();
 }
-@model SMEnterprise.Models.StudentPerformanceResultModel
+@model SMEnterprise.Models.PerformanceParameterDetailModel
 @section IncludeCss
 {
-    <title>Result Card | @Model.Student.Name</title>
     <style>
         #tblResult > tbody > tr > td {
             text-align: center !important;
@@ -21,7 +21,6 @@
         .print {
             display: none;
         }
-
         .reportSign {
             max-width: 200px;
             max-height: 90px;
@@ -190,9 +189,9 @@
 
                                     }
                                     @*@if (Model.EvaluationID == -1)
-                        {
-                            <td colspan="2" style="font-size: 0.7em; vertical-align: middle; border: 1px solid #808080; padding: 0px;"><b>Sub Total</b></td>
-                        }*@
+                                        {
+                                            <td colspan="2" style="font-size: 0.7em; vertical-align: middle; border: 1px solid #808080; padding: 0px;"><b>Sub Total</b></td>
+                                        }*@
                                 </tr>
 
                                 @if (Model.SubEvaluations.Count > 0)
@@ -216,10 +215,10 @@
                                             <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Grade</td>
                                         }
                                         @*@if (Model.EvaluationID == -1)
-                            {
-                                <td style="vertical-align: middle; border: 1px solid #808080;padding: 0px;" rowspan="3"><b>Marks Obtained</b>  <br /> (@Model.MainEvaluations.Sum(x => x.Weightage)) </td>
-                                <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" rowspan="3"><b>Grade</b></td>
-                            }*@
+                                            {
+                                                <td style="vertical-align: middle; border: 1px solid #808080;padding: 0px;" rowspan="3"><b>Marks Obtained</b>  <br /> (@Model.MainEvaluations.Sum(x => x.Weightage)) </td>
+                                                <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" rowspan="3"><b>Grade</b></td>
+                                            }*@
                                     </tr>
                                     <tr>
                                         @foreach (EvaluationModel eme in Model.MainEvaluations)
@@ -353,8 +352,8 @@
                                         @if (Model.EvaluationID == -1)
                                         {
                                             @*<td style="vertical-align: middle;border:1px solid #808080;text-align:right;" colspan="@(0+1)"> Total </td>
-                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@TotalScoredMarks.ToString("N2")</td>
-                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
+                                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@TotalScoredMarks.ToString("N2")</td>
+                                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
 
                                         }
                                         else
@@ -401,11 +400,11 @@
                                 else
                                 {
                                     @*<tr>
-                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalObtMarksT.ToString("0.00")</b> / <b>@TotalMarksT.ToString("0.00")</b></td>
-                            <td style="width:25%;text-align:center;">Percentage :<b>@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2).ToString("0.00") %</b></td>
-                            <td style="width:20%;text-align:center;"> Grade : <b>@Grade</b> </td>
-                            <td style="width:25%;text-align:right;padding-right:20px"> Division :   <b>@division</b>  </td>
-                        </tr>*@
+                                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalObtMarksT.ToString("0.00")</b> / <b>@TotalMarksT.ToString("0.00")</b></td>
+                                            <td style="width:25%;text-align:center;">Percentage :<b>@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2).ToString("0.00") %</b></td>
+                                            <td style="width:20%;text-align:center;"> Grade : <b>@Grade</b> </td>
+                                            <td style="width:25%;text-align:right;padding-right:20px"> Division :   <b>@division</b>  </td>
+                                        </tr>*@
                                 }
                             </table>
                         }
@@ -447,7 +446,7 @@
                     </div>
                     <p></p>
                     <table style="font-size: 10px;">
-                        
+
                         <tr>
                             <td style="width:50%;text-align:left;">
                                 <table class="table table-bordered" style="font-size: 12px;">
@@ -484,45 +483,9 @@
                 <div class="col-md-12">
                     <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
                 </div>
-                
+
             </div>
         </div>
     </div>
 </div>
 
-@section scripts
-{
-    <script type="text/javascript">
-        function DrawAttandanceChart(data) {
-            new Chart(document.getElementById("canvas000"), {
-                type: 'line',
-                data: data
-            });
-        }
-        function PrintReport() {
-            var StudentName = $('#bStudentNate').html();
-            var ClassSection = $('#bClassSection').html();
-            var contents = $(".x_content").html();
-            var frame1 = $('<iframe />');
-            frame1[0].name = "frame1";
-            frame1.css({ "position": "absolute", "top": "-1000000px" });
-            $("body").append(frame1);
-            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
-            frameDoc.document.open();
-            //Create a new HTML document.
-            frameDoc.document.write('<html><head><title>Result For ' + StudentName + ' Class ' + ClassSection + '</title>');
-            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard1.css")" rel="stylesheet" type="text/css" />');
-            frameDoc.document.write('</head><body>');
-            //Append the external CSS file.
-            //Append the DIV contents.
-            frameDoc.document.write(contents);
-            frameDoc.document.write('</body></html>');
-            frameDoc.document.close();
-            setTimeout(function () {
-                window.frames["frame1"].focus();
-                window.frames["frame1"].print();
-                frame1.remove();
-            }, 500);
-        }
-    </script>
-}
