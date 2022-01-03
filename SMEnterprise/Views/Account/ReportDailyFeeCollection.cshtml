@@ -81,7 +81,11 @@
                     <table id="PaymentsTable" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
                         <thead>
                             <tr>
+
+                                <th>S.No</th>
                                 <th>Reciept No</th>
+                                <th>Student ID</th>
+                                <th>SR No</th>
                                 <th>Payee</th>
 
                                 <th>Class</th>
@@ -93,12 +97,11 @@
                                 {
                                     <th>@com.Name</th>
                                 }
-
                                 <th>Amount</th>
                             </tr>
                         </thead>
                         @{
-                            int count = 0;
+                            int count = 1;
                             decimal TotalPayment = 0;
 
                             foreach (FeePaymentModel c in Model.Report)
@@ -107,63 +110,64 @@
                                 TotalPayment = TotalPayment + c.PaymentAmount;
 
 
-                        <tr>
-                            <td> @c.PaymentRecieptNo</td>
-                            <td>
+                                <tr>
+                                    <td>@count</td>
+                                    <td> @c.PaymentRecieptNo</td>
+                                    <td>
 
-                                <b>Name:</b> @c.Name
-                                @if (!string.IsNullOrEmpty(c.SchoolUID))
-                                {
-                                    <b>SR No:</b> @c.SchoolUID
-                                }
+                                        <b>Name:</b> @c.Name
+                                        @if (!string.IsNullOrEmpty(c.SchoolUID))
+                                        {
+                                            <b>SR No:</b> @c.SchoolUID
+                                        }
 
-                            </td>
-                            <td>
-                                @c.ClassName / @c.SectionName
-                            </td>
-                            <td>
-                                @c.SessionName
-                            </td>
+                                    </td>
+                                    <td>
+                                        @c.ClassName / @c.SectionName
+                                    </td>
+                                    <td>
+                                        @c.SessionName
+                                    </td>
 
-                            <td>
-                                @if (c.PaymentMode == 0)
-                                {
-                                    PayMode = "Cash Payment";
-                                }
-                                else if (c.PaymentMode == 1)
-                                {
-                                    PayMode = "Cheque Payment";
-                                }
-                                else if (c.PaymentMode == 2)
-                                {
-                                    PayMode = "NEFT Payment";
-                                }
-                                else if (c.PaymentMode == 2)
-                                {
-                                    PayMode = "Other Payment";
-                                }
-                                @PayMode<br />
-                                @c.PayMonths
-                            </td>
-                            <td>
-                                @c.PaymentDate.ToString("dd MMM, yyyy")
-                            </td>
-                            <td>
-                                @c.CollectedBy
-                            </td>
-                            @foreach (var FeeT in Model.FeeType)
-                            {
-                                var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentID == c.PaymentID).Sum(x => x.PaymentRecieved);
+                                    <td>
+                                        @if (c.PaymentMode == 0)
+                                        {
+                                            PayMode = "Cash Payment";
+                                        }
+                                        else if (c.PaymentMode == 1)
+                                        {
+                                            PayMode = "Cheque Payment";
+                                        }
+                                        else if (c.PaymentMode == 2)
+                                        {
+                                            PayMode = "NEFT Payment";
+                                        }
+                                        else if (c.PaymentMode == 2)
+                                        {
+                                            PayMode = "Other Payment";
+                                        }
+                                        @PayMode<br />
+                                        @c.PayMonths
+                                    </td>
+                                    <td>
+                                        @c.PaymentDate.ToString("dd MMM, yyyy")
+                                    </td>
+                                    <td>
+                                        @c.CollectedBy
+                                    </td>
+                                    @foreach (var FeeT in Model.FeeType)
+                                    {
+                                        var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentID == c.PaymentID).Sum(x => x.PaymentRecieved);
 
-                                FeeT.Sum = FeeT.Sum + rep;
+                                        FeeT.Sum = FeeT.Sum + rep;
 
-                                <td>@rep</td>
+                                        <td>@rep</td>
 
-                            }
-                            <td>
-                                <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
-                            </td>
-                        </tr>
+                                    }
+                                    <td>
+                                        <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
+                                    </td>
+                                </tr>
 
                                 count++;
                             }

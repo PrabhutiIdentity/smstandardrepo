@@ -376,6 +376,7 @@ namespace SMEnterprise.Repository
                     try
                     {
                         objModel.Branches = multi.Read<NameIDModel>().ToList();
+                        objModel.ForwardSession = multi.Read<NameIDModel>().ToList();
                     }
                     catch
                     {
