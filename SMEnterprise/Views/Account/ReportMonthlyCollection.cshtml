@@ -3,11 +3,12 @@
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
-@model CollectionReportModel
+@model  SMEnterprise.Models.CollectionReportModel
 @section IncludeCss
 {
-    <title>Monthly Collection Report @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/mm/yyyy")
-    
+    <title>
+        Monthly Collection Report
+
     </title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
 }
@@ -20,7 +21,7 @@
 <section class="content-header">
     <h1>
         Monthly Collection Report
-        <small>Control panel</small>
+
     </h1>
     <ol class="breadcrumb">
         <li><a href="/Account/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
@@ -83,25 +84,30 @@
                     <table id="PaymentsTable" class="table table-striped payments">
                         <thead>
                             <tr>
-                                <th style="width:15%">Payee</th>
-                                <th style="width:15%">Class</th>
-                                <th style="width:10%">Session</th>
-                                <th style="width:25%">Details</th>
-                                <th style="width:13%">Date</th>
-                                <th style="width:13%">Collected By</th>
-                                <th style="width:15%">Amount</th>
+                                <th>S.No</th>
+                                <th>Reciept No</th>
+                                <th>Student ID</th>
+                                <th>SR No</th>
+                                <th>Payee</th>
+                                <th>Class</th>
+                                <th>Session</th>
+                                <th>Details</th>
+                                <th>Date</th>
+                                <th>Collected By</th>
+                                <th>Amount</th>
+
                             </tr>
                         </thead>
                         @{
-                            int count = 0;
+                            int count = 1;
                             decimal TotalPayment = 0;
                             foreach (FeePaymentModel c in Model.Report)
                             {
                                 var PayMode = "";
                                 TotalPayment = TotalPayment + c.PaymentAmount;
-                                <tr>
 
-                                    <td>
+                                
+                                @*<td>
                                         <b>Reciept No:</b> @c.PaymentRecieptNo<br />
                                         <b>Name:</b> @c.Name <br />
                                         @if (!string.IsNullOrEmpty(c.SchoolUID))
@@ -110,14 +116,25 @@
                                         }
 
 
-                                    </td>
-                                    <td>
+                                    </td>*@
+                                <tr>
+                                    
+                                    <td>@count</td>
+                                    <td style="width:10%">@c.PaymentRecieptNo</td>
+                                    <td style="width:10%">@c.StudentSID</td>
+                                    <td>@c.SchoolUID</td>
+                                    <td style="width:15%"> @c.Name</td>
+
+
+                                    <td style="width:10%">
+
                                         @c.ClassName / @c.SectionName
                                     </td>
-                                    <td>
+                                    <td style="width:7%">
                                         @c.SessionName
                                     </td>
-                                    <td>
+
+                                    <td style="width:20%">
                                         @if (c.PaymentMode == 0)
                                         {
                                             PayMode = "Cash Payment";
@@ -137,13 +154,15 @@
                                         @PayMode<br />
                                         @c.PayMonths
                                     </td>
-                                    <td>
+
+
+                                    <td style="width:10%">
                                         @c.PaymentDate.ToString("dd MMM, yyyy")
                                     </td>
-                                    <td>
+                                    <td style="width:7%">
                                         @c.CollectedBy
                                     </td>
-                                    <td>
+                                    <td style="width:10%">
                                         <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
                                     </td>
                                 </tr>
@@ -154,10 +173,14 @@
                         }
                         <tfoot>
                             <tr style="background-color: #606d73;color: white;">
-                                <td colspan="6">
-                                    <b> Total Collection</b>
+                                <td>
+                                    <b> Total</b>
                                 </td>
-                                <td colspan="2"><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
+                                <td>
+                                    <b>  Collection</b>
+                                </td>
+                                <td colspan="8"></td>
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -170,42 +193,89 @@
 </section>
 @section scripts
 {
-    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
-    <script src="@Url.Content("~/js/jszip.min.js")"></script>
-    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
-    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js")"></script>
+    @*<script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+        <script src="@Url.Content("~/js/jszip.min.js")"></script>
+        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
+
     <script>
         $(document).ready(function () {
             var handleDataTableButtons = function () {
+                  var rpname ='Monthly Collection Report'
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
                 if ($("#PaymentsTable").length) {
                     $("#PaymentsTable").DataTable({
                         "paging": true,
-         "pagingType": "simple_numbers",
+                        "pagingType": "simple_numbers",
                         dom: "Bfrtip",
                         buttons: [
                             {
-                                extend: "copy",
-                                className: "btn-sm"
+                               extend: "copy",
+                            className: "btn-sm",
+                            footer: true,
+                             messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
                             },
                             {
-                                extend: "csv",
-                                className: "btn-sm"
+                                 extend: "csv",
+                          className: "btn-sm",
+                          footer: true,
+                            messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
                             },
                             {
-                                extend: "excel",
-                                className: "btn-sm"
+                                  extend: "excel",
+                          className: "btn-sm",
+                          footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                             {
                                 extend: "pdfHtml5",
-                                className: "btn-sm"
+                          className: "btn-sm",
+                          footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                          },
+                          messageBottom: repname,
+                          title: rpname
                             },
                             {
                                 extend: "print",
-                                className: "btn-sm"
+                          className: "btn-sm",
+                                footer: true,
+                                orientation: 'landscape',
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                         ],
                         responsive: true

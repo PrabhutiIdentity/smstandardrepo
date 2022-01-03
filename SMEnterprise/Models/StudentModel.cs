@@ -48,6 +48,7 @@ namespace SMEnterprise.Models
         public List<SectionModel> Sections { get; set; }
         public List<NameIDModel> Branches { get; set; }
         public List<NameIDModel> Sessions { get; set; }
+        public List<NameIDModel> ForwardSession { get; set; }
         public DataTable GetPromotedStudentsDataTable()
         {
 
@@ -414,11 +415,12 @@ namespace SMEnterprise.Models
         public int Year { get; set; }             
         public DateTime SelectedDate { get; set; }
         public int SBranchID { get; set; }
+        public int SchoolID { get; set; }
         public List<NameIDModel> Classes { get; set; }
         public List<NameIDModel> Sections { get; set; }
         public List<SchoolSessionModel> Sessions { get; set; }
-        public List<FeePaymentModel> FeePayments { get; set; }
-        public int SchoolID { get; set; }
+        public List<FeePaymentModel> FeePayments { get; set; }       
+        public SBranchModel Branch { get; set; }
     }
     public class StudentLeaveModel
     {
