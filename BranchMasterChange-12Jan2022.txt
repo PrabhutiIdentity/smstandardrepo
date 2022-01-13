@@ -1,0 +1,97 @@
+alter table SBranchMaster
+add UDISECode nvarchar(20),SchoolCode nvarchar(20)
+go
+
+
+alter proc [dbo].[spn_InsertUpdateSBranch]    
+(    
+@SBranchID int,    
+@BranchName nvarchar(50),    
+@UDISECode nvarchar(20),  
+@SchoolCode nvarchar(20),  
+@Logo nvarchar(50),    
+@ContactNo nvarchar(50),    
+@EmailID nvarchar(50),    
+@Address nvarchar(500),    
+@PrincipalName nvarchar(50),    
+@PrincipalMobile nvarchar(50),    
+@PrincipalEmail nvarchar(50),    
+@BranchSchoolName nvarchar(100),    
+@OpType int,    
+@StateID int=0,    
+@PrincipalSignature nvarchar(50),    
+@NotificationServerKey nvarchar(max),    
+@PlayStoreLink nvarchar(500)=''    
+--@AccountUserName nvarchar(50),    
+--@AccountPassword nvarchar(50)    
+)    
+AS    
+BEGIN    
+ if(@OpType=-1)    
+ begin    
+  Delete from SBranchMaster where SBranchID=@SBranchID    
+  Delete from LoginDetails where SBranchID=@SBranchID and UserType=2    
+  select @@ROWCOUNT    
+ end    
+ else    
+ begin    
+  if(@SBranchID=0)    
+  begin    
+   Insert into SBranchMaster(BranchName,[Logo],[ContactNo],[EmailID],[Address],[PrincipalName],[PrincipalMobile]    
+  ,[PrincipalEmail],[BranchSchoolName],UDISECode,SchoolCode,StateID,PrincipalSignature,NotificationServerKey,PlayStoreLink)    
+   values (@BranchName,@Logo,@ContactNo,@EmailID,@Address,@PrincipalName,@PrincipalMobile,@PrincipalEmail,@BranchSchoolName,@UDISECode,@SchoolCode,   
+   @StateID,@PrincipalSignature,@NotificationServerKey,@PlayStoreLink)    
+   SELECT @SBranchID= CAST(SCOPE_IDENTITY() as int)    
+   --Insert into LoginDetails(UserName,Password,UserType,SBranchID,UserID)    
+   -- values(@AccountUserName,@AccountPassword,2,@SBranchID,@SBranchID)    
+   --Insert into LoginDetails(UserType,SBranchID,UserID)    
+    --values(2,@SBranchID,@SBranchID)    
+       
+   select @SBranchID    
+  end    
+  else    
+  begin   
+   Update SBranchMaster set BranchName=@BranchName,[Logo]=@Logo,[ContactNo]=@ContactNo,[EmailID]=@EmailID,[Address]=@Address    
+   ,[PrincipalName]=@PrincipalName,[PrincipalMobile]=@PrincipalMobile,StateID=@StateID,PrincipalSignature=@PrincipalSignature    
+  ,[PrincipalEmail]=@PrincipalEmail,[BranchSchoolName]=@BranchSchoolName,UDISECode=@UDISECode,SchoolCode=@SchoolCode,NotificationServerKey=@NotificationServerKey     
+  ,PlayStoreLink=@PlayStoreLink    
+  where SBranchID=@SBranchID    
+    
+  --if(@AccountPassword<>'')    
+  --begin    
+  -- Update LoginDetails set UserName=@AccountUserName, [Password]=@AccountPassword where UserType=2 and SBranchID=@SBranchID    
+  --end    
+   select @SBranchID    
+  end    
+  end    
+END   
+go
+
+
+alter proc [dbo].[sp_GetAdminSBranches]   
+(    
+@SBranchID int=0    
+)    
+AS    
+BEGIN    
+ if(@SBranchID=0)    
+ begin    
+  Select SBranchID,BranchName,[Logo],[ContactNo],[EmailID],[Address],[PrincipalName],[PrincipalMobile]    
+  ,[PrincipalEmail],[BranchSchoolName],UDISECode,SchoolCode,StateID,PrincipalSignature,NotificationServerKey,PlayStoreLink,    
+  (Select count(*) from Student_Session SS where Status=1 and SS.SBranchID=SBM.SBranchID) as Students,    
+  (Select UserName from LoginDetails LD where LD.SBranchID= SBM.SBranchID and UserType=2) as AccountUserName    
+   from [dbo].[SBranchMaster] SBM    
+    
+ end    
+ else    
+ begin    
+  Select SBranchID,BranchName,[Logo],[ContactNo],[EmailID],[Address],[PrincipalName],[PrincipalMobile]    
+  ,[PrincipalEmail],[BranchSchoolName],UDISECode,SchoolCode,StateID,PrincipalSignature,NotificationServerKey,PlayStoreLink,    
+  (Select count(*) from Student_Session SS where Status=1 and SS.SBranchID=SBM.SBranchID) as Students,    
+  (Select UserName from LoginDetails LD where LD.SBranchID= SBM.SBranchID and UserType=2) as AccountUserName    
+   from [dbo].[SBranchMaster] SBM where SBranchID=@SBranchID    
+    
+ end    
+END
+     
+  

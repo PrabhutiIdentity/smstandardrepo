@@ -442,6 +442,8 @@ namespace SMEnterprise.Models
         public string BookNo { get; set; }
         public string RenewedUpto { get; set; }
         public int OpType { get; set; }
+        public string UDISECode { get; set; }
+        public string SchoolCode { get; set; }
     }
     public class SubSubjectTypeEditModel
     {
