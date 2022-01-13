@@ -2755,7 +2755,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PrincipalSignature", objData.PrincipalSignature);
                 paramater.Add("@NotificationServerKey", objData.NotificationServerKey);
                 paramater.Add("@PlayStoreLink", objData.PlayStoreLink);
-
+                paramater.Add("@UDISECode", objData.UDISECode);
+                paramater.Add("@SchoolCode", objData.SchoolCode);
                 return con.Query<int>("spn_InsertUpdateSBranch", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }

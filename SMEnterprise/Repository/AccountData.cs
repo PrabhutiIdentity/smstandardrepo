@@ -1546,7 +1546,16 @@ namespace SMEnterprise.Repository
                 paramater.Add("@StudentID", objData.StudentID);
                 paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
                 paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-                paramater.Add("@PaymentDate", objData.PaymentDate);
+                // use ORion Public school (Prabh
+                if(objData.SBranchID==4005)
+                {
+                    paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
+                }
+                else
+                {
+                    paramater.Add("@PaymentDate", objData.PaymentDate);
+                }
+              //  paramater.Add("@PaymentDate", objData.PaymentDate);
                 paramater.Add("@PaymentAmount", objData.PaymentAmount);
                 paramater.Add("@WaiverMonths", objData.WaiverMonths);
                 paramater.Add("@Remark", objData.Remark);

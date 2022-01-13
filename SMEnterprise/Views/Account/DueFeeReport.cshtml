@@ -1,11 +1,11 @@
 ﻿
 @{
-  
+
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 @section IncludeCss
 {
-<title> Class and Section wise Due Fee Report </title>
+    <title> Class and Section wise Due Fee Report </title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
     <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
@@ -56,7 +56,7 @@
                                         <option value="0">--Select Session--</option>
                                         @foreach (SMEnterprise.Models.NameIDModel el in Model.Sessions)
                                         {
-                                    <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
                                         }
                                     </select>
                                 </div>
@@ -105,19 +105,19 @@
                 <tbody>
                     @foreach (SMEnterprise.Models.DemandReciptModel d in Model.Recipts)
                     {
-                    <tr>
-                        @*<td>@d.ClassName</td>*@
-                        <td>@d.StudentSID</td>
-                        <td>@d.SchoolUID</td>
-                        <td>@d.Name</td>
-                        <td>@d.FatherName</td>
-                        <td>@d.MobileNo</td>
-                        <td>@d.PreviousDues.ToString("0.00")</td>
-                        <td>@((d.ApplicableFee + d.LateFee).ToString("0.00")) <br/>@d.MonthName</td>
-                        <td>@d.DiscAmt.ToString("0.00")</td>
-                        <td>@d.PaymentAmount.ToString("0.00")</td>
-                        <td>@((d.PreviousDues + d.ApplicableFee + d.LateFee - d.PaymentAmount - d.DiscAmt).ToString("0.00"))</td>
-                    </tr>
+                        <tr>
+                            @*<td>@d.ClassName</td>*@
+                            <td>@d.StudentSID</td>
+                            <td>@d.SchoolUID</td>
+                            <td>@d.Name</td>
+                            <td>@d.FatherName</td>
+                            <td>@d.MobileNo</td>
+                            <td>@d.PreviousDues.ToString("0.00")</td>
+                            <td>@((d.ApplicableFee + d.LateFee).ToString("0.00")) <br />@d.MonthName</td>
+                            <td>@d.DiscAmt.ToString("0.00")</td>
+                            <td>@d.PaymentAmount.ToString("0.00")</td>
+                            <td>@((d.PreviousDues + d.ApplicableFee + d.LateFee - d.PaymentAmount - d.DiscAmt).ToString("0.00"))</td>
+                        </tr>
 
                     }
                     @*<tr>
@@ -138,19 +138,28 @@
 </div>
 @section scripts
 {
-    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
 
-    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
 
-    <script src="@Url.Content("~/js/jszip.min.js")"></script>
-    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
-    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+        <script src="@Url.Content("~/js/jszip.min.js")"></script>
+        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
     <script>
         $(document).ready(function () {
-         var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy")';
-            var repname = '@Model.Branch.BranchSchoolName' + ' Class:' + $('#ddlClass option:selected').text() + ' / '+ $('#ddlSection option:selected').text()+' Due Fee Report'  
+         var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+            var repname = '@Model.Branch.BranchSchoolName' + ' Class:' + $('#ddlClass option:selected').text() + ' / ' + $('#ddlSection option:selected').text() + ' Due Fee Report'
+            var rpname ='Due Fee Report'
+            var repname1 = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
             var handleDataTableButtons = function () {
                 if ($("#tblCategory").length) {
                     $("#tblCategory").DataTable({
@@ -179,6 +188,8 @@
                                 extend: "excel",
                                 className: "btn-sm",
                                 text: '<i class=""fa fa-table fainfo" aria-hidden="true""></i> Excel',
+                                messageTop: rpname,
+                                messageBottom: repname1,
                                 message: printdate,
                                 title: repname
                             },

@@ -201,8 +201,13 @@
                                                 <input type="hidden" name="ClassID" value="@Model.ClassID" />
                                                 <input type="hidden" name="SectionID" value="@Model.SectionID" />
                                                 <input type="hidden" name="StudentID" value="@c.StudentID" />
-                                               
-                                                <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>
+                                                if (Model.ClassID > 0)
+                                                {
+                                                    <button type="submit" disabled onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
+                                                else
+                                                {
+                                                    <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
+                                                @*<button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>*@
                                             }
 
                                         </div>
@@ -321,7 +326,8 @@
                     type: 'post',
                     url: '/Account/UpdateIsBlock/' + isblock + "/" + studentID,
                     success: function (result) {
-                        alert("IsBlock Status Updated");
+                      //  alert("Do you really want to Change student Status");
+                        return confirm('Do you really want to Change student Status!!!!');
                         window.location.reload();
                     }
                 });
