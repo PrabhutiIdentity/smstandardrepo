@@ -949,7 +949,9 @@ public class AssignmentPageModel
         public string SessionName { get; set; }
         public SBranchModel SBranchDetails { get; set; }
         public StudentModel Student { get; set; }
-        public List<SubSubjectTypeModel> SubjectTypes { get; set; }
+        public List<NameIDModel> SubjectTypes { get; set; }
+        public List<SubSubjectTypeModel> SubjectType { get; set; }
+       // public List<SubSubjectTypeModel> SubjectTypes { get; set; }
         public List<ExamModel> Exams { get; set; }
         public List<SubjectModel> Subjects { get; set; }
         public List<EvaluationModel> MainEvaluations { get; set; }

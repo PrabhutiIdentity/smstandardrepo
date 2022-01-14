@@ -99,6 +99,14 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Sessions { get; set; }
         public int TCType { get; set; }
     }
+    public class ActiveInactiveStudentModel
+    {
+        public string TypeName { get; set; }
+        public int AllStudent { get; set; }
+        public int Boys { get; set; }
+        public int Girls { get; set; }
+    }
+
     public class StudentSearchModel
     {
         public string FatherName { get; set; }

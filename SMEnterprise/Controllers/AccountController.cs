@@ -2360,6 +2360,18 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult StudentPerformanceReportPartialShine(string ID = null, string ID2 = null, string ID3 = null)
+        {
+            // PerformanceParameterDetailModel objModel = new PerformanceParameterDetailModel();
+            StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
+            objModel.StudentSessionUID = CommonUsage.ConvertToInt(ID);
+            objModel.EvaluationID = CommonUsage.ConvertToInt(ID2);
+            objModel.SessionID = CommonUsage.ConvertToInt(ID3);
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objTeacherData.GetStudentPerformanceResult(objModel);
+            return PartialView("_StudentPerformanceDetailsPartialShine", objModel);
+        }
+        [PermissionFilter]
         public ActionResult UpdateStudentPerformance(PerformanceParameterDetailModel objModel)
         {
             int id = objTeacherData.UpdateStudentPerformance(objModel);
