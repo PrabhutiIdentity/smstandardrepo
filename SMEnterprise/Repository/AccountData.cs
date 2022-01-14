@@ -119,11 +119,13 @@ namespace SMEnterprise.Repository
                     try
                     {
                         objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                        objModel.ActiveInactive = multi.Read<ActiveInactiveStudentModel>().ToList();
                     }
                     catch
                     {
 
                     }
+                   
                 }
             }
             return objModel;
@@ -3395,7 +3397,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@EvaluationMode", 0);
                 paramater.Add("@SessionID", objModel.SessionID);
                 //sp_GetClassSectionWiseStudentPerformancesMini
-                using (var multi = con.QueryMultiple("", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using (var multi = con.QueryMultiple("sp_GetClassSectionWiseStudentPerformancesMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
 
                     objModel.Classes = multi.Read<NameIDModel>().ToList();
