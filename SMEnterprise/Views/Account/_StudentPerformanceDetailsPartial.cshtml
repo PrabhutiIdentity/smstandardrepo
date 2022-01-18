@@ -213,7 +213,7 @@
 
                                                             foreach (ExamResultDetailModel r in Model.Result)
                                                             {
-
+                                                                Grade = r.Grade;
                                                                 if (privSubID != r.SubjectID)
                                                                 {
                                                                     <tr>
@@ -237,11 +237,28 @@
                                                                                             @*<td>@(err.Grade == null ? "NA" : err.Grade)</td>*@
                                                                                             if (Model.SBranchID == 9)
                                                                                             {
-                                                                                                <td>@err.wMaxMarks.ToString("N2")</td>
+
+                                                                                                @*<td>@err.wMaxMarks.ToString("N2")</td>*@
+                                                                                                if (err.MaxMarks == 0)
+                                                                                                {
+                                                                                                    <td>--</td>
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    <td>@err.wMaxMarks.ToString("N2")</td>
+                                                                                                }
                                                                                             }
                                                                                             else
                                                                                             {
-                                                                                                <td>@err.wMarksScored.ToString("N2")</td>
+                                                                                                @*<td>@err.wMarksScored.ToString("N2")</td>*@
+                                                                                                if (err.MaxMarks == 0)
+                                                                                                {
+                                                                                                    <td>--</td>
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    <td>@err.wMaxMarks.ToString("N2")</td>
+                                                                                                }
                                                                                             }
                                                                                             @*<td>@err.wMarksScored.ToString("N2")</td>*@
                                                                                             EvalTotalMarks = EvalTotalMarks + err.wMarksScored;
@@ -292,13 +309,33 @@
                                                                             }
 
                                                                             totalmarksresult = totalmarksresult + EvalMaxMarks;
-                                                                            <td>@Math.Round(EvalTotalMarks, 2)</td>
-                                                                            <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>
+                                                                            @*<td>@Math.Round(EvalTotalMarks, 2)</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>*@
+                                                                            if (EvalMaxMarks == 0)
+                                                                            {
+                                                                                <td>--</td>
+                                                                                <td>@Grade</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td>@Math.Round(EvalTotalMarks, 2)</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>
+                                                                            }
                                                                         }
                                                                         @if (Model.EvaluationID == -1)
                                                                         {
-                                                                            <td>@r.etMarksScored.ToString("0.00")</td>
-                                                                            <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>
+                                                                            @*<td>@r.etMarksScored.ToString("0.00")</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>*@
+                                                                            if (r.MaxMarks == 0)
+                                                                            {
+                                                                                <td>--</td>
+                                                                                <td>@Grade</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td>@r.etMarksScored.ToString("0.00")</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>
+                                                                            }
                                                                         }
                                                                     </tr>
                                                                 }
