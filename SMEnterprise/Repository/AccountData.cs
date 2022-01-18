@@ -3396,7 +3396,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SBranchID", objModel.SBranchID);
                 paramater.Add("@EvaluationMode", 0);
                 paramater.Add("@SessionID", objModel.SessionID);
-                //sp_GetClassSectionWiseStudentPerformancesMini
+                
                 using (var multi = con.QueryMultiple("sp_GetClassSectionWiseStudentPerformancesMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
 

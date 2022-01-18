@@ -2362,8 +2362,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult StudentPerformanceReportPartialShine(string ID = null, string ID2 = null, string ID3 = null)
         {
-            // PerformanceParameterDetailModel objModel = new PerformanceParameterDetailModel();
-            StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
+            //  PerformanceParameterDetailModel objModel = new PerformanceParameterDetailModel();
+           StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
             objModel.StudentSessionUID = CommonUsage.ConvertToInt(ID);
             objModel.EvaluationID = CommonUsage.ConvertToInt(ID2);
             objModel.SessionID = CommonUsage.ConvertToInt(ID3);

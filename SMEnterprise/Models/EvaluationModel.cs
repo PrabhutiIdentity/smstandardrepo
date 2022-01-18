@@ -113,6 +113,7 @@ namespace SMEnterprise.Models
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
         public string EvaluationName { get; set; }
+        public int MarkingScheme { get; set; }
     }
     public class ExamPageModel
     {
@@ -149,7 +150,9 @@ namespace SMEnterprise.Models
             dtExamDetails.Columns.Add("MaxMarks");
             dtExamDetails.Columns.Add("PassMarks");
             dtExamDetails.Columns.Add("IsLocked");
-
+            // For using Grading Subject
+            dtExamDetails.Columns.Add("MarkingScheme");
+            //
             foreach (ExamModel e in Exams)
             {
                 DataRow dr = dtExamDetails.NewRow();
@@ -169,7 +172,9 @@ namespace SMEnterprise.Models
                 dr["MaxMarks"] = e.MaxMarks;
                 dr["PassMarks"] = e.PassMarks;
                 dr["IsLocked"] = e.IsLocked;
-
+                // Use for Grading Subject 
+                dr["MarkingScheme"] = e.MarkingScheme;
+                //
                 dtExamDetails.Rows.Add(dr);
             }
 

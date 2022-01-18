@@ -131,20 +131,17 @@
                                         <th style="width: 5%">#</th>
                                         <th style="width: 20%">Subject</th>
                                         <th style="width: 20%">Exam Date <sa style="color: cadetblue;">(MM/DD/YYYY)</sa></th>
-                                        <th style="width: 10%">Start Time</th>
-                                        <th style="width: 10%">End Time</th>
-                                        <th style="width: 7%">Marking Scheme</th>
+                                        <th style="width: 13%">Start Time</th>
+                                        <th style="width: 12%">End Time</th>
                                         <th style="width: 11%">Max Marks</th>
                                         <th style="width: 12%">Pass Marks</th>
-                                        <th style="width: 6%">Applicable</th>
-                                        <th style="width: 6%">Lock Result</th>
+                                        <th style="width: 7%">Applicable</th>
+                                        <th style="width: 7%">Lock Result</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @{
                                         var Counter = 0;
-                                        decimal MxMarks = 0;
-                                        decimal MnMarks = 0;
                                         foreach (ExamModel e in Model.Exams)
                                         {
                                             <tr @(e.ExamID == 0 ? "style=color:red" : "")>
@@ -160,14 +157,10 @@
                                                     <input type="hidden" value="@Model.CurrentDate" name="Exams[@Counter].ModifiedDate" />
                                                     @(Counter + 1)
                                                 </td>
-
-
                                                 <td>
 
                                                     @e.SubjectName
                                                 </td>
-
-
                                                 <td>
                                                     @*<input type="date" class="form-control ExamDate" name="Exams[@Counter].ExamDate" value="@e.ExamDate.ToString("yyyy-MM-dd")" />*@
                                                     <input type="date" class="form-control" name="Exams[@Counter].ExamDate" value="@e.ExamDate.ToString("yyyy-MM-dd")" />
@@ -180,48 +173,28 @@
                                                     @*<input type="time" class="form-control EndTime" name="Exams[@Counter].EndTime" value="@e.EndTime" />*@
                                                     <input type="time" class="form-control" name="Exams[@Counter].EndTime" value="@e.EndTime" />
                                                 </td>
-
-
-                                                <td style="vertical-align:middle;">
-                                                    <label class="switch switch-green" style="padding-top: 3px;">
-                                                        <input type="checkbox" id="chkMarkingScheme" @(e.MarkingScheme == 0 ? "checked" : "") class="switch-input MScheme">
-
-                                                        <span class="switch-label" onclick='$(this).closest("label").find("#hdnMarkingScheme").val($(this).closest("tr").find("#hdnMarkingScheme").val() == "0" ? "1" : "0");' data-on="Marks" data-off="Grade"></span>
-                                                        <span class="switch-handle" id="shTranding"></span>
-                                                        <input type="hidden" id="hdnMarkingScheme" name="Exams[@Counter].MarkingScheme" value="@e.MarkingScheme" />
-                                                    </label>
-                                                </td>
-
-                                                @if (@e.MarkingScheme == 1)
-                                                {
-
-                                                    MxMarks = 0;
-                                                    MnMarks = 0;
-                                                }
-                                                else
-                                                {
-                                                    MxMarks = @e.MaxMarks;
-                                                    MnMarks = @e.PassMarks;
-                                                }
                                                 <td>
-                                                    <input type="number" id="inMxMarks" step="0.01" class="form-control maxMarks" name="Exams[@Counter].MaxMarks" value="@MxMarks" />
+                                                    <input type="number" step="0.01" class="form-control maxMarks" name="Exams[@Counter].MaxMarks" value="@e.MaxMarks" />
                                                 </td>
                                                 <td>
-                                                    <input type="number" id="inMxMarks" step="0.01" class="form-control passMarks" name="Exams[@Counter].PassMarks" value="@MnMarks" />
+                                                    <input type="number" step="0.01" class="form-control passMarks" name="Exams[@Counter].PassMarks" value="@e.PassMarks" />
                                                 </td>
-
-                                                <td style="vertical-align:middle;">
+                                                <td>
                                                     <label class="switch switch-green" style="padding-top: 3px;">
+
                                                         <input type="checkbox" id="chkEmailSettingSSL" @(e.IsApplicable == 1 ? "checked" : "") class="switch-input">
+
                                                         <span class="switch-label" onclick='$(this).closest("label").find("#hdnIsApplicable").val($(this).closest("tr").find("#hdnIsApplicable").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
                                                         <span class="switch-handle" id="shTranding"></span>
                                                         <input type="hidden" id="hdnIsApplicable" name="Exams[@Counter].IsApplicable" value="@e.IsApplicable" />
                                                     </label>
                                                 </td>
 
-                                                <td style="vertical-align:middle;">
+                                                <td>
                                                     <label class="switch switch-green" style="padding-top: 3px;">
+
                                                         <input type="checkbox" id="chkIsLocked" @(e.IsLocked == 1 ? "checked" : "") class="switch-input">
+
                                                         <span class="switch-label" onclick='$(this).closest("label").find("#hdnIsLocked").val($(this).closest("tr").find("#hdnIsLocked").val() == "0" ? "1" : "0");' data-on="Yes" data-off="No"></span>
                                                         <span class="switch-handle" id="shLocked"></span>
                                                         <input type="hidden" id="hdnIsLocked" name="Exams[@Counter].IsLocked" value="@e.IsLocked" />
@@ -280,35 +253,6 @@
 
 </section>
 <script>
-    $(document).ready(function () {
-        if ($('.MScheme').val() == 1) {
-            $(this).parents("tr:eq(0)").find(".maxMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".maxMarks").val(0);
-
-            $(this).parents("tr:eq(0)").find(".passMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".passMarks").val(0);
-            alert('Test');
-        }
-    })
-
-    $('.MScheme').change(function () {
-        var isChecked = this.checked;
-        if (!isChecked) {
-            $(this).parents("tr:eq(0)").find(".maxMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".maxMarks").val(0);
-
-            $(this).parents("tr:eq(0)").find(".passMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".passMarks").val(0);
-
-        } else {
-            $(this).parents("tr:eq(0)").find(".maxMarks").prop('disabled', false);
-            $(this).parents("tr:eq(0)").find(".maxMarks").val(100);
-
-            $(this).parents("tr:eq(0)").find(".passMarks").prop('disabled', false);
-            $(this).parents("tr:eq(0)").find(".passMarks").val(35);
-        }
-
-    });
     //function UpdateAllExamDate(sender) {
     //    var val = $(sender).val();
     //    $('.ExamDate').val(val);

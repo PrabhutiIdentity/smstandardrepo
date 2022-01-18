@@ -120,7 +120,8 @@ namespace SMEnterprise.Models
     public class AcadmicModel
     {
         public static string CalculateGradeShine(decimal totalscored, decimal totalmax = 100)
-        { string Grade;
+        {
+            string Grade;
             if (totalscored != 0)
             {
                 // perform the division only if count is different than 0,
@@ -341,10 +342,10 @@ namespace SMEnterprise.Models
             {
 
             }
-            
+
             string Division = "Outstanding";
-            
-             if (numbers >= 80)
+
+            if (numbers >= 80)
             {
                 Division = "Outstanding";
             }
@@ -366,10 +367,10 @@ namespace SMEnterprise.Models
             }
             return Division;
         }
-    
-}
-   
-public class AssignmentPageModel
+
+    }
+
+    public class AssignmentPageModel
     {
         public int SType { get; set; }
         public int SBranchID { get; set; }
@@ -747,6 +748,7 @@ public class AssignmentPageModel
         public List<NameIDModel> Evaluations { get; set; }
         public List<ExamResultDetailModel> ExamResults { get; set; }
         public int IsLocked { get; set; }
+        public int MarkingScheme { get; set; }
         public DataTable GetResultDetailsDataTable()
         {
 
@@ -759,7 +761,9 @@ public class AssignmentPageModel
             dtAttandanceDetails.Columns.Add("Grade");
             dtAttandanceDetails.Columns.Add("Status");
             dtAttandanceDetails.Columns.Add("GradePoints");
-
+            // For Using Grading
+            dtAttandanceDetails.Columns.Add("MarksScored");
+            //
             foreach (ExamResultDetailModel e in ExamResults)
             {
                 DataRow dr = dtAttandanceDetails.NewRow();
@@ -770,6 +774,9 @@ public class AssignmentPageModel
                 dr["Grade"] = e.Grade;
                 dr["Status"] = e.Status;
                 dr["GradePoints"] = e.GradePoints;
+                // For Using Grading
+                dr["MarksScored"] = e.MarksScored;
+                //
 
                 dtAttandanceDetails.Rows.Add(dr);
             }
@@ -871,11 +878,11 @@ public class AssignmentPageModel
         public string SessionName { get; set; }
         public string EvaluationName { get; set; }
         public decimal CGPA { get; set; }
-        public int TotalParameter { get; set; }        
+        public int TotalParameter { get; set; }
         public List<EvaluationTypeModel> EvaluationTypes { get; set; }
 
     }
-  public class StudentResultCheckModel
+    public class StudentResultCheckModel
     {
         public int SubjectID { get; set; }
         public int EvaluationID { get; set; }
@@ -930,7 +937,7 @@ public class AssignmentPageModel
     public class TotalResultModel
     {
         public List<SubjectModel> Subjects { get; set; }
-        public  List<EvaluationModel> Evaluations { get; set; }
+        public List<EvaluationModel> Evaluations { get; set; }
         public List<ExamModel> Exams { get; set; }
         public List<ExamResultDetailModel> Result { get; set; }
 
@@ -951,7 +958,7 @@ public class AssignmentPageModel
         public StudentModel Student { get; set; }
         public List<NameIDModel> SubjectTypes { get; set; }
         public List<SubSubjectTypeModel> SubjectType { get; set; }
-       // public List<SubSubjectTypeModel> SubjectTypes { get; set; }
+        // public List<SubSubjectTypeModel> SubjectTypes { get; set; }
         public List<ExamModel> Exams { get; set; }
         public List<SubjectModel> Subjects { get; set; }
         public List<EvaluationModel> MainEvaluations { get; set; }
