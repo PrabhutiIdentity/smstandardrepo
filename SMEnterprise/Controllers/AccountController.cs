@@ -1886,6 +1886,18 @@ namespace SMEnterprise.Controllers
 
         #region Exam Related
         [PermissionFilter]
+        public ActionResult EvaluationSchemeManagementExam(string ID = null)
+        {
+            int SessionID = CommonUsage.ConvertToInt(ID);
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            IEnumerable<EvaluationSchemeModel> objModel = objAccountData.GetEvaluationSchemeExam(SBranchID, SessionID);
+            return PartialView("_EvaluationsSchemePartial", objModel);
+        }
+        [PermissionFilter]
             
         public ActionResult AdmitCard(AdmitCardListModel objData = null)
         {
