@@ -187,30 +187,34 @@
                                                     @*<label class="switch switch-green" style="padding-top: 3px;">
                                                             <input type="checkbox" id="chkMarkingScheme" @(e.MarkingScheme == 0 ? "checked" : "") class="switch-input MScheme">
 
-                                                            <span class="switch-label" onclick='$(this).closest("label").find("#hdnMarkingScheme").val($(this).closest("tr").find("#hdnMarkingScheme").val() == "0" ? "1" : "0");' data-on="Marks" data-off="Grade"></span>
+                                                            <span class="switch-label" onclick='$(this).closest("label").find("#hdnMarkingScheme").val($(this).closest("tr").find("#hdnMarkingScheme").val() == "0" ? "0" : "1");' data-on="Grade" data-off="Marks"></span>
                                                             <span class="switch-handle" id="shTranding"></span>
-                                                            <input type="hidden" id="hdnMarkingScheme" name="Exams[@Counter].MarkingScheme" value="@e.MarkingScheme" />
-                                                        </label>*@
-                                                </td>
 
+                                                        </label>*@
+                                                    @*<input type="hidden" id="hdnMarkingScheme" name="Exams[@Counter].MarkingScheme" value="@e.MarkingScheme" />*@
+                                                </td>
 
                                                 @if (@e.MarkingScheme == 0)
                                                 {
                                                     MxMarks = @e.MaxMarks;
                                                     MnMarks = @e.PassMarks;
+                                                    <td>
+                                                        <input type="number" id="inMxMarks" step="0.01" class="form-control maxMarks" name="Exams[@Counter].MaxMarks" value="@e.MaxMarks" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" id="inMxMarks" step="0.01" class="form-control passMarks" name="Exams[@Counter].PassMarks" value="@e.PassMarks" />
+                                                    </td>
 
                                                 }
                                                 else
                                                 {
-                                                    MxMarks = 0;
-                                                    MnMarks = 0;
+                                                    <td>
+                                                        <input type="number" id="inMxMarks" step="0.01" class="form-control maxMarks" name="Exams[@Counter].MaxMarks" disabled value="0" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" id="inMxMarks" step="0.01" class="form-control passMarks" name="Exams[@Counter].PassMarks" disabled value="0" />
+                                                    </td>
                                                 }
-                                                <td>
-                                                    <input type="number" id="inMxMarks" step="0.01" class="form-control maxMarks" name="Exams[@Counter].MaxMarks" value="@MxMarks" />
-                                                </td>
-                                                <td>
-                                                    <input type="number" id="inMxMarks" step="0.01" class="form-control passMarks" name="Exams[@Counter].PassMarks" value="@MnMarks" />
-                                                </td>
 
                                                 <td style="vertical-align:middle;">
                                                     <label class="switch switch-green" style="padding-top: 3px;">
@@ -283,34 +287,35 @@
 </section>
 <script>
     $(document).ready(function () {
-        if ($('.MScheme').val() == 1) {
+        if ($(sender).closest('tr').find('#hdnMarkingScheme').val() == 1) {
             $(this).parents("tr:eq(0)").find(".maxMarks").prop("disabled", true);
             $(this).parents("tr:eq(0)").find(".maxMarks").val(0);
 
             $(this).parents("tr:eq(0)").find(".passMarks").prop("disabled", true);
             $(this).parents("tr:eq(0)").find(".passMarks").val(0);
-            alert('Test');
         }
+        alert('Value = ' + $(sender).closest('tr').find('#hdnMarkingScheme').val());
     })
 
-    $('.MScheme').change(function () {
-        var isChecked = this.checked;
-        if (!isChecked) {
-            $(this).parents("tr:eq(0)").find(".maxMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".maxMarks").val(0);
+    //$('.MScheme').change(function () {
+    //    var isChecked = this.checked;
+    //    if (!isChecked) {
+    //        $(this).parents("tr:eq(0)").find(".maxMarks").prop("disabled", true);
+    //        $(this).parents("tr:eq(0)").find(".maxMarks").val(0);
 
-            $(this).parents("tr:eq(0)").find(".passMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".passMarks").val(0);
+    //        $(this).parents("tr:eq(0)").find(".passMarks").prop("disabled", true);
+    //        $(this).parents("tr:eq(0)").find(".passMarks").val(0);
 
-        } else {
-            $(this).parents("tr:eq(0)").find(".maxMarks").prop('disabled', false);
-            $(this).parents("tr:eq(0)").find(".maxMarks").val(100);
+    //    } else {
+    //        $(this).parents("tr:eq(0)").find(".maxMarks").prop('disabled', false);
+    //        $(this).parents("tr:eq(0)").find(".maxMarks").val(100);
 
-            $(this).parents("tr:eq(0)").find(".passMarks").prop('disabled', false);
-            $(this).parents("tr:eq(0)").find(".passMarks").val(35);
-        }
+    //        $(this).parents("tr:eq(0)").find(".passMarks").prop('disabled', false);
+    //        $(this).parents("tr:eq(0)").find(".passMarks").val(35);
+    //    }
 
-    });
+    //});
+
     //function UpdateAllExamDate(sender) {
     //    var val = $(sender).val();
     //    $('.ExamDate').val(val);
