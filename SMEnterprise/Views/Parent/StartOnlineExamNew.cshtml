@@ -1,0 +1,420 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using Newtonsoft.Json;
+@{
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@model SMEnterprise.Models.OnlineExamEditModel
+@section IncludeCss
+{
+    <title>Start Online Test</title>
+    @*<link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+        <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+         KaTeX
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.css" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.9.0/katex.min.js"></script>
+
+        <script src="@Url.Content("~/js/Editor/summernote-math.js")"></script>*@
+    <!-- include libraries(jQuery, bootstrap) -->
+    @*<link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.css" rel="stylesheet">*@
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.11/summernote.css" rel="stylesheet">
+}
+<style>
+    .checkbox, .radio {
+        position: relative;
+        display: block;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .slider-bar.transition-enabled {
+    }
+
+    .radios-to-slider {
+        margin-bottom: 40px !important;
+    }
+
+    .smallfont {
+        font-size: 11px;
+    }
+
+    .active {
+        color: green;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="x_title">
+            <h2>Start Online Test</h2>
+            <h2> <small style="color:red">*Do not press back button or refresh browser, the answers will not be saved, and remember to submit your test by cliking the save button located at the bottom.</small></h2>
+            <h2> <small style="color:red">*Please note that any submission after exam end time will not be considered.</small></h2>
+            @*<ul class="nav navbar-right panel_toolbox">
+                    <li>
+                        @using (Html.BeginForm("OnlineExams", "Parent", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @style = "display:inline-table" }))
+                        {
+                            <input type="hidden" name="SubjectID" value="@Model.Exam.SubjectID" />
+                            <button type="submit" href="javascript:void(0);" class="btn btn-sm btn-primary">Cancel and Back</button>
+                        }
+                    </li>
+                </ul>*@
+            <div class="clearfix"></div>
+        </div>
+        <div class="clearfix"></div>
+        @using (Html.BeginForm("ViewAnswerSheet", "Parent", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSubmitAnswerSheet" }))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row std-mng-head col-md-12">
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <input type="hidden" name="OExamID" id="ExamID" value="@Model.Exam.OExamID" />
+                                <div class="form-group col-md-12">
+                                    <label>Online Exam for class @Model.Exam.ClassName/@Model.Exam.SectionName and @Model.Exam.SubjectName Subject for session @Model.Exam.SessionName by @Model.Exam.TeacherName</label>
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label> @Model.Exam.ExamTitle</label>
+
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label style="text-align:left">@Model.Exam.ExamDescription</label>
+
+                                </div>
+                                <div class="form-group col-md-12">
+                                    <label> Exam Started at @Model.Exam.OExamStartDate.ToString("dd MMM, yyyy hh:mm tt") and will end at @Model.Exam.OExamEndDate.ToString("dd MMM, yyyy hh:mm tt")</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <p>No.Of Questions</p>
+                            <div class="col">
+                                <ul class="quiznav" style="display: inline;">
+                                    @{
+                                        int count = 1;
+                                        foreach (var c in Model.ExamQuestions)
+                                        {
+
+                                            <li id="highlight" class="badge badge-success">
+
+                                                @count
+                                            </li>
+
+                                            count++;
+                                        }
+                                    }
+                                </ul>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h2>Questions <small>Please attempt all questions</small></h2>
+
+                            <div class="clearfix"></div>
+                        </div>
+                        <div class="x_content">
+                            <div class="divs" id="lastAnswer">
+                                <ul class="messages" id="ulExamQuestions">
+                                    @{
+                                        var ctr = 1;
+                                        foreach (var q in Model.ExamQuestions)
+                                        {
+
+                                            <li class="queli">
+                                                <div class="message_date">
+                                                    <h3 class="date text-error">@q.Marks</h3>
+                                                    <p class="month">Marks</p>
+                                                </div>
+                                                <div class="message_wrapper" id="checkans" style="margin-left: 0;">
+
+                                                    <input type="hidden" id="hdnSubAnsID_@q.OXQID" name="SubAnsID" value="" />
+                                                    <input type="hidden" id="hdnAnswer" name="Answers[@(ctr - 1)].Name" value="" />
+                                                    <input type="hidden" name="Answers[@(ctr - 1)].ID" value="@q.OXQID" />
+                                                    <input type="hidden" class="hdnQuestionType" id="hdnQuestionType_@q.OXQID" name="Answers[@(ctr - 1)].Extra1" value="@q.QuestionType" />
+                                                    <h4 class="heading searchable" id="qns"><ctr>@(ctr).</ctr> @Html.Raw(q.QuestionText)@*@q.QuestionText*@</h4>
+                                                    @if (q.QuestionType == 0)
+                                                    {
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="radio">
+                                                                <label>
+                                                                    <input type="radio" name="Answer_@q.OXQID" class="SCOpetion1" id="SCOpetion1_@q.OXQID">  A. @Html.Raw(q.Option1)@*@q.Option1*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="radio">
+                                                                <label>
+                                                                    <input type="radio" name="Answer_@q.OXQID" class="SCOpetion2" id="SCOpetion2_@q.OXQID">  B. @Html.Raw(q.Option2) @*@q.Option2*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="radio">
+                                                                <label>
+                                                                    <input type="radio" name="Answer_@q.OXQID" class="SCOpetion3" id="SCOpetion3_@q.OXQID">  C. @Html.Raw(q.Option3) @*@q.Option3*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="radio">
+                                                                <label>
+                                                                    <input type="radio" name="Answer_@q.OXQID" class="SCOpetion4" id="SCOpetion4_@q.OXQID">  D. @Html.Raw(q.Option4) @*@q.Option4*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+
+                                                        <br />
+                                                        <div class="row">
+                                                            <div class="col-md-7">
+                                                                <label class="badge bg-@(q.Complexity == 0 ? "yellow" : q.Complexity == 1 ? "blue" : "red")">@(q.Complexity == 0 ? "Easy" : q.Complexity == 1 ? "Medium" : "Difficult")</label>
+                                                                <label class="badge bg-red">Select any one option</label>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else if (q.QuestionType == 1)
+                                                    {
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" name="Answer_@q.OXQID" class="SMOpetion1" id="SMOpetion1_@q.OXQID">  A. @Html.Raw(q.Option1)@*@q.Option1*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" name="Answer_@q.OXQID" class="SMOpetion2" id="SMOpetion2_@q.OXQID">  B. @Html.Raw(q.Option2)@*@q.Option2*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" name="Answer_@q.OXQID" class="SMOpetion3" id="SMOpetion3_@q.OXQID">  C. @Html.Raw(q.Option3)@*@q.Option3*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+                                                        <blockquote class="message col-md-6" style="font-size: 12px;">
+                                                            <div class="checkbox">
+                                                                <label>
+                                                                    <input type="checkbox" name="Answer_@q.OXQID" class="SMOpetion4" id="SMOpetion4_@q.OXQID">  D. @Html.Raw(q.Option4)@*@q.Option4*@
+                                                                </label>
+                                                            </div>
+                                                        </blockquote>
+
+                                                        <br />
+                                                        <div class="row">
+                                                            <div class="col-md-7">
+                                                                <label class="badge bg-@(q.Complexity == 0 ? "yellow" : q.Complexity == 1 ? "blue" : "red")">@(q.Complexity == 0 ? "Easy" : q.Complexity == 1 ? "Medium" : "Difficult")</label>
+                                                                <label class="badge bg-red">Select all Correct option(s)</label>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="form-group col-md-12">
+                                                            <label>write your answer</label>
+                                                            <textarea class="form-control summernote1" rows="3" style="resize:none;" name="AnswerSub" id="txtSubjectiveAnswer_@q.OXQID"></textarea>
+                                                        </div>
+                                                        <br />
+                                                        <div class="row">
+                                                            <div class="col-md-7">
+
+                                                                <label class="badge bg-@(q.Complexity == 0 ? "yellow" : q.Complexity == 1 ? "blue" : "red")">@(q.Complexity == 0 ? "Easy" : q.Complexity == 1 ? "Medium" : "Difficult")</label>
+                                                                <label class="badge bg-red">Type your answer in the text area provided above</label>
+                                                            </div>
+                                                        </div>
+                                                    }
+
+                                                    <button type="button" class="btn btn-info pull-right" onclick="SubmitAns('@q.OXQID');">Save & Next </button>
+
+                                                </div>
+
+                                            </li>
+
+
+                                            ctr++;
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                            <br /><br />
+                            <div class="buttons">
+                                <a class="btn btn-primary pull-right" id="next">Next</a>
+                                <a class="btn btn-primary pull-right" id="prev" style="display:none;">Previous</a>
+
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <button type="button" class="btn btn-info pull-right" id="submitsheet" style="display:none;" onclick="return SubmitExam();">Submit Answer Sheet</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<input type="hidden" id="hdnCurrDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyy-MM-dd")" />
+
+@section scripts
+{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.9/summernote.js" defer></script>
+
+    <script src="~/js/onlineexam.js"></script>
+    <script>
+
+
+        //$(function () {
+        //    var links = $('.divs ul li').click(function () {
+        //        debugger;
+
+        //    });
+        //});
+
+
+        $('.divs ul li:last').css('display', 'none');
+
+
+        $(document).ready(function () {
+            $(".divs ul li").each(function (e) {
+                if (e != 0)
+                    $(this).hide();
+            });
+
+
+            $("#next").click(function () {
+                if ($(".divs ul li:visible").next().length != 0) {
+                    $(".divs ul li:visible").next().show().prev().hide();
+
+                    var hasnextelement = $(".divs ul li:visible").next().length;
+                    if (hasnextelement == 0) {
+                        $("#next").hide();
+                        $("#submitsheet").show();
+                        $("#submitans").hide();
+                    }
+                    else {
+                        $("#next").show();
+                        $("#submitsheet").hide();
+                        $("#submitans").show();
+                    }
+
+                    var hasprevelement = $(".divs ul li").prev().length;
+                    if (hasprevelement == 0) {
+                        $("#prev").hide();
+                    }
+                    else {
+                        $("#prev").show();
+                    }
+                }
+                else {
+                    $(".divs ul li:visible").hide();
+                    $(".divs ul li:first").show();
+                }
+                return false;
+            });
+
+            $("#prev").click(function () {
+                 if ($(".divs ul li:visible").prev().length != 0) {
+                    $(".divs ul li:visible").prev().show().next().hide();
+
+                    var hasprevelement = $(".divs ul li:visible").prev().length;
+                    if (hasprevelement == 0) {
+                        $("#prev").hide();
+                    }
+                    else {
+                        $("#prev").show();
+                    }
+
+                    var hasnextelement = $(".divs ul li").next().length;
+                    if (hasnextelement == 0) {
+                        $("#next").hide();
+                        $("#submitsheet").show();
+                        $("#submitans").hide();
+                    }
+                    else {
+                        $("#next").show();
+                        $("#submitsheet").hide();
+                        $("#submitans").show();
+                    }
+                }
+                else {
+                    $(".divs ul li:visible").hide();
+                    $(".divs ul li:last").show();
+                }
+                return false;
+            });
+
+        });
+
+
+
+        $(document).ready(function () {
+
+            $('#txtExplaination').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+            $('.summernote1').summernote({
+
+                height: 100,
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['insert', ['picture', 'link', 'math']],
+                    ['para', ['paragraph']],
+                    ['misc', ['codeview']]
+                ],
+            });
+
+
+            //$('#txtQuestionText').summernote();
+            //$('#txtOption1').summernote();
+            //$('#txtOption2').summernote();
+            //$('#txtOption3').summernote();
+            //$('#txtOption4').summernote();
+        });
+    </script>
+
+    <script>
+
+        function SubmitExam() {
+            if (confirm('Are you sure want to submit the answers?')) {
+
+                $('#frmSubmitAnswerSheet').submit();
+             }
+        }
+
+
+
+    </script>
+
+    <!-- /.content -->
+}
