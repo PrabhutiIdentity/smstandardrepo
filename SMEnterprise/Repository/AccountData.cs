@@ -2865,14 +2865,14 @@ namespace SMEnterprise.Repository
         }
         // Shishupal Work on Exam Date Sheet For School
         // Date : 17 Nov 2021
-        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID, int SessionID, int EvaluationSchemeID)
+        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID,  int EvaluationSchemeID)
         {
             EvaluationTypePageModelExam objModel = new EvaluationTypePageModelExam();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@SessionID", SessionID);
+               
                 paramater.Add("@EvaluationSchemeID", EvaluationSchemeID);
                 return con.Query<NameIDModel>("sp_GetEvaluationTypesExam", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
 
@@ -2887,7 +2887,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SessionID", objModel.SessionID);
                 paramater.Add("@EvaluationSchemeID", objModel.EvaluationSchemeID);
                 paramater.Add("@EvaluationID", objModel.EvaluationID);
-                //paramater.Add("@SectionID", objModel.SectionID);
+            
                 using (var multi = con.QueryMultiple("sp_DateSheetTest", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
@@ -2896,7 +2896,9 @@ namespace SMEnterprise.Repository
                     objModel.ExamList = multi.Read<ExamDateListModel>().ToList();
                     objModel.Classes = multi.Read<NameIDModel>().ToList();
                     objModel.Exams = multi.Read<ExamModel>().ToList();
-                    //objModel.SubjectsE = multi.Read<SubjectModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.EvaluationSchemeID = multi.Read<int>().SingleOrDefault();
+                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
                     objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
                 }
             }

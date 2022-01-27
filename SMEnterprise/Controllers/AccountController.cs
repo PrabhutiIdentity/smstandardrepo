@@ -1936,13 +1936,13 @@ namespace SMEnterprise.Controllers
             StudentExamDatesheetModel objSModel = new StudentExamDatesheetModel();
             int EvaluationSchemeID = CommonUsage.ConvertToInt(ID);
             EvaluationTypeModel objSs = new EvaluationTypeModel();
-            int SessionID = objSs.SessionID;
-            if (Session["SBranchID"] == null)
-            {
-                Session["SBranchID"] = 1;
-            }
+            //  int SessionID = objSs.SessionID;
+            //if (Session["SBranchID"] == null)
+            //{
+            //    Session["SBranchID"] = 1;
+            //}
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID, EvaluationSchemeID);
+            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, EvaluationSchemeID);
             return PartialView("_EvaluationsPartial", objModel);
         }
 
