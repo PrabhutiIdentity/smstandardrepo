@@ -106,6 +106,51 @@
 
                 </div>
             }
+            @*Date: 14 Jan 2022 || Shishupal*@
+            @*Start-- Student Count Information Class Wise*@
+
+
+            <div class="bg-white col-md-12">
+
+                <table style="width:100%; text-align:center;font-size:14px ; vertical-align:middle;">
+                    <tr>
+                        @foreach (ActiveInactiveStudentModel aim in Model.ActiveInactive)
+                        {
+
+                            <td style="text-align: center; padding-top: 10px; padding-bottom: 10px; border-top: 1px dashed; border-bottom: 1px dashed">
+                                @if (aim.TypeName == "Active")
+                                {
+                                    <div class="col-md-3 col-sm-3 col-xs-4 border-1">
+                                        <span class="count green"> @aim.TypeName</span>
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count"><i class="fa fa-graduation-cap green"></i> <span class="count"> @aim.AllStudent</span></div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count">M(<i class="fa fa-male green"></i>) <span class="count"> @aim.Boys </span></div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count">F(<i class="fa fa-female green"></i>) <span class="count"> @aim.Girls</span></div>
+                                }
+                                else if (aim.TypeName == "In-Active")
+                                {
+                                    <div class="col-md-3 col-sm-3 col-xs-4 border-1">
+                                        <span class="count red"> @aim.TypeName</span>
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count"><i class="fa fa-graduation-cap red"></i> <span class="count"> @aim.AllStudent</span></div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count">M(<i class="fa fa-male red"></i>) <span class="count"> @aim.Boys </span></div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count">F(<i class="fa fa-female red"></i>) <span class="count"> @aim.Girls</span></div>
+                                }
+                                else
+                                {
+                                    <div class="col-md-3 col-sm-3 col-xs-4 border-1">
+                                        <span class="count blue"> @aim.TypeName</span>
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count"><i class="fa fa-graduation-cap blue"></i> <span class="count"> @aim.AllStudent</span></div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count">M(<i class="fa fa-male blue"></i>) <span class="count"> @aim.Boys </span></div>
+                                    <div class="col-md-3 col-sm-3 col-xs-4 count">F(<i class="fa fa-female blue"></i>) <span class="count"> @aim.Girls</span></div>
+                                }
+                            </td>
+                        }
+                    </tr>
+                </table>
+            </div>
+            @*End-- Student Count Information Class Wise*@
             <div class="x_panel">
 
                 <div class="x_content">
@@ -201,8 +246,13 @@
                                                 <input type="hidden" name="ClassID" value="@Model.ClassID" />
                                                 <input type="hidden" name="SectionID" value="@Model.SectionID" />
                                                 <input type="hidden" name="StudentID" value="@c.StudentID" />
-                                               
-                                                <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>
+                                                if (Model.ClassID > 0)
+                                                {
+                                                    <button type="submit" disabled onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
+                                                else
+                                                {
+                                                    <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
+                                                @*<button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>*@
                                             }
 
                                         </div>
@@ -321,7 +371,8 @@
                     type: 'post',
                     url: '/Account/UpdateIsBlock/' + isblock + "/" + studentID,
                     success: function (result) {
-                        alert("IsBlock Status Updated");
+                        //  alert("Do you really want to Change student Status");
+                        return confirm('Do you really want to Change student Status!!!!');
                         window.location.reload();
                     }
                 });

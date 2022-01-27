@@ -142,224 +142,357 @@
                     <input type="hidden" name="StudentSessionUID" value="@Model.StudentSessionUID" />
                     <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
                     <div class="col-md-12 col-sm-12 col-xs-12">
+                        @{
+                            decimal TotalMaxMarks = 0;
+                            decimal TotalScoredMarks = 0;
+                            var cols = 0;
+                            var sublevels = 1;
+                            var colsT = 0;
+                            decimal TotalMaxMarksForAll = 0;
+                            decimal totalscoredForAll = 0;
+
+                            var division = "First";
+                            var Grade = "A";
+                            var GradeAll = "A";
+                            decimal TotalMarksT = 0;
+                            decimal TotalObtMarksT = 0;
+                            var divisionAll = "First";
+                            decimal totaltotal = 0;
+                            decimal totalObtscored = 0;
+
+                            <table id="tblResult" class="table table-bordered table-hover" style="width: 100%; padding: 0px;">
 
 
-                        @{ var mainCounter = 0;
+                                <tr style="text-align: center;font-weight: bold;">
+                                    <td @(Model.SubEvaluations.Count > 0 ? "rowspan=4" : "") style="min-width:100px;text-align:left;">
+                                        <b> Subject</b>
+                                    </td>
 
 
-                            <table id="tblResult" class="table table-bordered table-hover">
-                                @foreach (PerformanceParameterModel c in Model.PerformanceParameters)
-                                {
-                                    decimal TotalMaxMarks = 0;
-                                    decimal TotalScoredMarks = 0;
-                                    var cols = 0;
-                                    if (c.ParamType == 0)
+                                    @foreach (var me in Model.MainEvaluations)
                                     {
-                                        <tr>
-                                            <td colspan="3" style="text-align: center;">
-                                                <b>   @c.ParamName</b> <br /><small>@c.ParamDesc</small>
-                                            </td>
-                                        </tr>
+                                        if (sublevels < me.SubEvals)
+                                        {
+                                            sublevels = me.SubEvals;
+                                        }
+                                        foreach (var et in Model.EvaluationTypes)
+                                        {
+                                            var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID);
+                                            foreach (var e in eva)
+                                            {
+                                                cols = cols + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+                                            }
+                                        }
+                                        @*<td colspan="@(me.SubEvals + 2)"><b>@me.EvaluationName</b> (@me.Weightage.ToString("0") marks)</td>*@
 
-                                        <thead style="text-align: center;font-weight: bold;">
+                                        <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" colspan="@(cols+2)"><b>@me.EvaluationName</b> </td>
+                                        cols = 0;
 
-                                        <tr>
-                                            @{
-                                                var sublevels = 1;
-                                                @foreach (var me in Model.MainEvaluations)
+                                    }
+                                    @*@if (Model.EvaluationID == -1)
+                        {
+                            <td colspan="2" style="font-size: 0.7em; vertical-align: middle; border: 1px solid #808080; padding: 0px;"><b>Sub Total</b></td>
+                        }*@
+                                </tr>
+
+                                @if (Model.SubEvaluations.Count > 0)
+                                {
+                                    <tr>
+                                        @foreach (EvaluationModel tme in Model.MainEvaluations)
+                                        {
+                                            foreach (var et in Model.EvaluationTypes)
+                                            {
+                                                var exams = 0;
+                                                var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == tme.EvaluationID);
+                                                foreach (var e in eva)
                                                 {
-                                                    @foreach (var et in Model.EvaluationTypes)
+
+                                                    exams = exams + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+
+                                                }
+                                                <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" colspan="@(exams)">@et.EvaluationTypeName  </td>
+                                            }
+                                            <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Total</td>
+                                            <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Grade</td>
+                                        }
+                                        @*@if (Model.EvaluationID == -1)
+                            {
+                                <td style="vertical-align: middle; border: 1px solid #808080;padding: 0px;" rowspan="3"><b>Marks Obtained</b>  <br /> (@Model.MainEvaluations.Sum(x => x.Weightage)) </td>
+                                <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" rowspan="3"><b>Grade</b></td>
+                            }*@
+                                    </tr>
+                                    <tr>
+                                        @foreach (EvaluationModel eme in Model.MainEvaluations)
+                                        {
+                                            foreach (var et in Model.EvaluationTypes)
+                                            {
+                                                foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == eme.EvaluationID))
+                                                {
+                                                    cols = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+
+                                                    <td style="vertical-align: middle;border:1px solid #808080" colspan="@cols">@set.EvaluationName</td>
+                                                }
+                                            }
+                                        }
+
+                                    </tr>
+                                    <tr>
+                                        @foreach (EvaluationModel Etme in Model.MainEvaluations)
+                                        {
+                                            foreach (var ett in Model.EvaluationTypes)
+                                            {
+                                                foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == ett.EvaluationTypeID && c.MasterID == Etme.EvaluationID))
+                                                {
+
+                                                    foreach (var stype in Model.SubjectType)
                                                     {
-                                                        var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID);
-                                                        foreach (var e in eva)
+                                                        var isappl = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID && c.SubjectType == stype.TypeID).Count();
+                                                        if (isappl > 0)
                                                         {
-                                                            cols = cols + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+                                                            <td style="vertical-align: middle;border:1px solid #808080">@stype.TypeName</td>
                                                         }
                                                     }
-                                                    <td style="vertical-align: middle;border:1px solid #808080" colspan="@(cols + 3)">@me.EvaluationName</td>
-                                                }
-                                            </tr>
-                                            <tr style="border-bottom-width: 2px;">
-                                                <td @(Model.SubEvaluations.Count > 0 ? "rowspan=3" : "") style="min-width:100px;text-align:left;">
-                                                    <b> Subject</b>
-                                                </td>
-                                                @*<td rowspan="3" style="vertical-align: middle;border:0px solid #808080">
 
-                                                        Subject
-                                                    </td>*@
+                                                }
+                                            }
 
-                                                @foreach (var et in Model.EvaluationTypes)
-                                                {
-                                                    var exams = 0;
-                                                    var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID);
-                                                    foreach (var e in eva)
-                                                    {
-                                                        exams = exams + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
-                                                    }
-                                                    <td style="vertical-align: middle;border:1px solid #808080" colspan="@(exams)">@et.EvaluationTypeName</td>
-                                                }
-                                                <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Total</td>
-                                                <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Grade</td>
-                                                @if (Model.EvaluationID == -1)
-                                                {
-                                                    <td colspan="2" style="font-size: 0.7em;"><b>Sub Total</b></td>
-                                                }
-                                            </tr>
-                                            <tr>
-                                                @foreach (var et in Model.EvaluationTypes)
-                                                {
-                                                    foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID))
-                                                    {
-                                                        var exams = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+                                        }
 
-                                                        <td style="vertical-align: middle;border:1px solid #808080" colspan="@exams">@set.EvaluationName</td>
-                                                    }
-                                                }
-                                            </tr>
-                                            <tr>
-                                                @foreach (var et in Model.EvaluationTypes)
+                                    </tr>
+
+                                }
+
+
+                                @foreach (var sub in Model.Subjects.Where(c => c.MainSubID == 0))
+                                {
+                                    decimal totalscored = 0;
+                                    decimal totalmax = 0;
+                                    decimal totalmarksresult = 0;
+
+
+                                    <tr>
+                                        <td style="vertical-align: middle;border:1px solid #808080">@sub.SubjectName</td>
+                                        @foreach (var me in Model.MainEvaluations)
+                                        {
+                                            foreach (var et in Model.EvaluationTypes)
+                                            {
+                                                foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID))
                                                 {
-                                                    foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID))
+                                                    foreach (var stype in Model.SubjectType)
                                                     {
-                                                        foreach (var stype in Model.SubjectTypes)
+                                                        var isappl = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID && c.SubjectType == stype.TypeID).Count();
+                                                        if (isappl > 0)
                                                         {
-                                                            var isappl = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID && c.SubjectType == stype.TypeID).Count();
-                                                            if (isappl > 0)
+                                                            var ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == stype.TypeID && c.EvaluationID == set.EvaluationID).SingleOrDefault();
+                                                            if (ex != null)
                                                             {
-                                                                <td style="vertical-align: middle;border:1px solid #808080">@stype.TypeName</td>
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var sub in Model.Subjects.Where(c => c.MainSubID == 0))
-                                                {
-                                                    decimal totalscored = 0;
-                                                    decimal totalmax = 0;
-                                                    <tr>
-                                                        <td style="vertical-align: middle;border:1px solid #808080">@sub.SubjectName</td>
-                                                        @foreach (var et in Model.EvaluationTypes)
-                                                        {
-                                                            foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID))
-                                                            {
-                                                                foreach (var stype in Model.SubjectTypes)
+                                                                totalmax = totalmax + ex.MaxMarks;
+                                                                var result = Model.Result.Where(c => c.ExamID == ex.ExamID).SingleOrDefault();
+                                                                if (result != null)
                                                                 {
-                                                                    var isappl = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID && c.SubjectType == stype.TypeID).Count();
-                                                                    if (isappl > 0)
+                                                                    totalscored = totalscored + result.MarksScored;
+                                                                    <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("N2")</td>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td style="vertical-align: middle;border:1px solid #808080">-</td>
+                                                                }
+                                                            }
+                                                            else
+                                                            {
+                                                                ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == 0 && stype.IsDefault == 1 && c.EvaluationID == set.EvaluationID).SingleOrDefault();
+                                                                if (ex != null)
+                                                                {
+                                                                    totalmax = totalmax + ex.MaxMarks;
+                                                                    var result = Model.Result.Where(c => c.ExamID == ex.ExamID).SingleOrDefault();
+                                                                    if (result != null)
                                                                     {
-                                                                        var ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == stype.TypeID && c.EvaluationID == set.EvaluationID).SingleOrDefault();
-                                                                        if (ex != null)
-                                                                        {
-                                                                            totalmax = totalmax + ex.MaxMarks;
-                                                                            var result = Model.Result.Where(c => c.ExamID == ex.ExamID).SingleOrDefault();
-                                                                            if (result != null)
-                                                                            {
-                                                                                totalscored = totalscored + result.MarksScored;
-                                                                                <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("0.00")</td>
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                <td style="vertical-align: middle;border:1px solid #808080">-</td>
-                                                                            }
-                                                                        }
-                                                                        else
-                                                                        {
-                                                                            ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == 0 && stype.IsDefault == 1 && c.EvaluationID == set.EvaluationID).SingleOrDefault();
-                                                                            if (ex != null)
-                                                                            {
-                                                                                totalmax = totalmax + ex.MaxMarks;
-                                                                                var result = Model.Result.Where(c => c.ExamID == ex.ExamID).SingleOrDefault();
-                                                                                if (result != null)
-                                                                                {
-                                                                                    totalscored = totalscored + result.MarksScored;
-                                                                                    <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("0.00")</td>
-                                                                                }
-                                                                                else
-                                                                                {
-                                                                                    <td style="vertical-align: middle;border:1px solid #808080">--</td>
-                                                                                }
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                <td style="vertical-align: middle;border:1px solid #808080">---</td>
-                                                                            }
-                                                                        }
+                                                                        totalscored = totalscored + result.MarksScored;
+
+                                                                        <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("0.00")</td>
                                                                     }
+                                                                    else
+                                                                    {
+                                                                        <td style="vertical-align: middle;border:1px solid #808080">--</td>
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td style="vertical-align: middle;border:1px solid #808080">---</td>
                                                                 }
                                                             }
                                                         }
-                                                        <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00")</td>
-                                                        <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
-                                                    </tr>
-                                                    TotalMaxMarks = TotalMaxMarks + totalmax;
-                                                    TotalScoredMarks = TotalScoredMarks + totalscored;
+                                                    }
                                                 }
-                                            </tbody>
-                                            <tfoot>
-                                                <tr style="font-weight: bold;">
-                                                    <td style="vertical-align: middle;border:1px solid #808080;text-align:right;" colspan="@(cols + 1)"> Total </td>
-                                                    <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@TotalScoredMarks</td>
-                                                    <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>
-                                                </tr>
-                                            </tfoot>
                                             }
-                                            }
-                                        </table>
-                                    }
-                                </div>
-                                <div class="col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
-                                    <br /><br /><br />
-                                    <table style="width:100%">
-
-                                        <tr>
-                                            <td style="width:25%;text-align: left;">
-                                                Place : <br />
-                                                Date  :@Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
-                                            </td>
-                                            <td style="width:25%">
-                                                <br /><br />
-                                                Signature of Class Teacher
-                                            </td>
-
-
-                                            @if (Model.SBranchDetails.PrincipalSignature == null)
+                                            <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00")</td>
+                                            if (Model.EvaluationID == -1)
                                             {
-                                                <td style="width:25%">
-                                                    <br /><br />
-                                                    Signature of Principal
-                                                </td>
+                                                <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
                                             }
                                             else
                                             {
-                                                <td style="width:25%">
-                                                    <img onerror="return OnImageError(this,2);" class="reportSign" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
-                                                    <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Signature of Principal
-                                                </td>
+                                                <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
                                             }
+                                            totalscoredForAll = totalscoredForAll + totalscored;
+                                            TotalMaxMarksForAll = TotalMaxMarksForAll + totalmax;
+                                            totalmarksresult = +totalscored;
+                                            totalmax = +totalmax;
+                                            totalscored = 0;
+                                            totalmax = 0;
+                                        }
+                                    </tr>
+                                    TotalMaxMarks = TotalMaxMarks + totalmax;
+                                    TotalScoredMarks = TotalScoredMarks + totalscored;
+
+                                }
 
 
+                                <tfoot>
+                                    <tr style="font-weight: bold;">
+                                        @if (Model.EvaluationID == -1)
+                                        {
+                                            @*<td style="vertical-align: middle;border:1px solid #808080;text-align:right;" colspan="@(0+1)"> Total </td>
+                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@TotalScoredMarks.ToString("N2")</td>
+                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
 
-                                        </tr>
-                                    </table>
-                                    <input type="hidden" id="hdnCounterCount" value="@mainCounter" />
-                                    }
-                                </div>
+                                        }
+                                        else
+                                        {
 
-                            </div>
+                                            foreach (var me in Model.MainEvaluations)
+                                            {
 
-                            <div class="col-md-12">
-                                <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
-                            </div>
-                        </div>
+                                                foreach (var et in Model.EvaluationTypes)
+                                                {
+                                                    var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID);
+                                                    foreach (var e in eva)
+                                                    {
+                                                        colsT = colsT + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+                                                    }
+                                                }
+                                            }
+                                            <td style="vertical-align: middle;border:1px solid #808080;text-align:right;" colspan="@(colsT+1)"> Total </td>
+                                            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@totalscoredForAll.ToString("N2")</td>
+                                            @*<td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
+                                            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarksForAll == 0 ? "--" : (totalscoredForAll * 100 / TotalMaxMarksForAll).ToString("0.00") + "% ") (@(TotalMaxMarksForAll == 0 ? "--" :  AcadmicModel.CalculateGradeShine(totalscoredForAll, TotalMaxMarksForAll)))</td>
+
+                                        }
+                                    </tr>
+
+
+                                </tfoot>
+
+                            </table>
+                            <table style="width:100%;border: 1px solid #ddd;">
+                                @if (Model.EvaluationID == -1)
+                                {
+                                    totaltotal = Model.Result.Sum(x => x.etMaxMarks);
+                                    totalObtscored = Model.Result.Sum(x => x.etMarksScored);
+                                    divisionAll = @AcadmicModel.CalculateGradeDivisionShine(totalscoredForAll, TotalMaxMarksForAll);
+                                    GradeAll = @AcadmicModel.CalculateGradeShine(totalscoredForAll, TotalMaxMarksForAll);
+                                    <tr>
+                                        <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@totalscoredForAll.ToString("0.00")</b> / <b>@TotalMaxMarksForAll.ToString("0.00")</b></td>
+                                        <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(TotalMaxMarksForAll == 0 ? 0 : totalscoredForAll * 100 / TotalMaxMarksForAll, 2).ToString("0.00") %</b></td>
+                                        <td style="width:20%;text-align:center;"> Grade : <b>@GradeAll</b> </td>
+                                        <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@divisionAll</b> </td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    @*<tr>
+                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalObtMarksT.ToString("0.00")</b> / <b>@TotalMarksT.ToString("0.00")</b></td>
+                            <td style="width:25%;text-align:center;">Percentage :<b>@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2).ToString("0.00") %</b></td>
+                            <td style="width:20%;text-align:center;"> Grade : <b>@Grade</b> </td>
+                            <td style="width:25%;text-align:right;padding-right:20px"> Division :   <b>@division</b>  </td>
+                        </tr>*@
+                                }
+                            </table>
+                        }
                     </div>
-                </div>
-            </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12" style="text-align: center;">
+                        <br /><br /><br />
+                        <table style="width:100%">
 
-            @section scripts
+                            <tr>
+                                <td style="width:25%;text-align: left;">
+                                    Place : <br />
+                                    Date  :@Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
+                                </td>
+                                <td style="width:25%">
+                                    <br /><br />
+                                    Signature of Class Teacher
+                                </td>
+
+
+                                @if (Model.SBranchDetails.PrincipalSignature == null)
+                                {
+                                    <td style="width:25%">
+                                        <br /><br />
+                                        Signature of Principal
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td style="width:25%">
+                                        <img onerror="return OnImageError(this,2);" class="reportSign" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
+                                        <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Signature of Principal
+                                    </td>
+                                }
+
+
+
+                            </tr>
+                        </table>
+                    </div>
+                    <p></p>
+                    <table style="font-size: 10px;">
+                        
+                        <tr>
+                            <td style="width:50%;text-align:left;">
+                                <table class="table table-bordered" style="font-size: 12px;">
+                                    <tr><td> <b>Grading Scale for scholastic areas :</b> <br />Grades are awarded on a 5-point grading scale as follow - </td></tr>
+                                    <tr><td> <b>A</b> [80%-100%], <b>B</b> [65%-79%], <b>C</b> [ 50%-64%], <b>D</b> [35%-49%], <b>E</b> [1%-34%]</td></tr>
+
+
+                                </table>
+                            </td>
+                            <td style="width:10%"></td>
+                            <td style="width:40%;text-align:left;">
+                                <table class="table table-bordered" style="font-size: 12px;">
+                                    <tr>
+                                        <td>
+                                            <b>Grading Scale for co-scholastic areas :</b><br /> Grades are awarded on a 5-point grading scale
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <b>A</b> [Outstanding], <b>B</b> [ Very Good], <b>C</b> [Good], <b> D</b> [ Average], <b> D</b> [ Below Average]
+                                        </td>
+
+                                    </tr>
+
+
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+
+                <div class="col-md-12">
+                    <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
 {
-                <script type="text/javascript">
+    <script type="text/javascript">
         function DrawAttandanceChart(data) {
             new Chart(document.getElementById("canvas000"), {
                 type: 'line',
@@ -391,5 +524,5 @@
                 frame1.remove();
             }, 500);
         }
-                </script>
-            }
+    </script>
+}

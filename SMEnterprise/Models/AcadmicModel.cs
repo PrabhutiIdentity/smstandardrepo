@@ -120,7 +120,8 @@ namespace SMEnterprise.Models
     public class AcadmicModel
     {
         public static string CalculateGradeShine(decimal totalscored, decimal totalmax = 100)
-        {   string Grade ;
+        {
+            string Grade;
             if (totalscored != 0)
             {
                 // perform the division only if count is different than 0,
@@ -129,35 +130,35 @@ namespace SMEnterprise.Models
                 decimal Num;
                 Num = (totalscored * 100) / totalmax;
                 //numbers = numbers * 100 / maxMarks;
-             
+
                 if (Num >= 80 && Num <= 100)
                 {
                     Grade = "A";
                 }
-                else if (Num >= 65 && Num <= 79)
+                else if (Num >= 64)
                 {
                     Grade = "B";
                 }
-                else if (Num >= 49 && Num <= 64)
+                else if (Num >= 49)
                 {
                     Grade = "C";
                 }
-                else if (Num >= 35 && Num <= 48)
+                else if (Num >= 35)
                 {
                     Grade = "D";
                 }
 
                 else
                 {
-                    Grade = "E";
+                    Grade = "--";
                 }
-             
+
             }
             else
             {
                 Grade = "--";
             }
-              return Grade;
+            return Grade;
         }
         public static string CalculateGradePointsShine(decimal numbers, decimal maxMarks = 100)
         {
@@ -167,27 +168,27 @@ namespace SMEnterprise.Models
             {
                 Grade = "10";
             }
-            else if (numbers >= 65 && numbers <= 79)
+            else if (numbers >= 79)
             {
                 Grade = "9";
             }
-            else if (numbers >= 49 && numbers <= 64)
+            else if (numbers >= 64)
             {
                 Grade = "8";
             }
-            else if (numbers >= 35 && numbers <= 48)
+            else if (numbers >= 48)
             {
                 Grade = "7";
             }
-            else if (numbers >= 11 && numbers <= 34)
+            else if (numbers >= 34)
             {
                 Grade = "6";
             }
-            else if (numbers >= 10)
+            else if (numbers >= 11)
             {
                 Grade = "5";
             }
-           
+
             else
             {
                 Grade = "--";
@@ -201,7 +202,7 @@ namespace SMEnterprise.Models
                 // perform the division only if count is different than 0,
                 // otherwise we know that it will throw an exception 
                 // so why even attempting it?
-            numbers = numbers * 100 / maxMarks;
+                numbers = numbers * 100 / maxMarks;
             }
             else
             {
@@ -303,7 +304,7 @@ namespace SMEnterprise.Models
             {
 
             }
-           
+
             string Division = "First";
             if (numbers >= 75)
             {
@@ -321,14 +322,54 @@ namespace SMEnterprise.Models
             {
                 Division = "Third";
             }
-           
+
             else
             {
                 Division = "-";
             }
             return Division;
         }
+        public static string CalculateGradeDivisionShine(decimal numbers, decimal maxMarks = 100)
+        {
+            if (numbers != 0)
+            {
+                // perform the division only if count is different than 0,
+                // otherwise we know that it will throw an exception 
+                // so why even attempting it?
+                numbers = numbers * 100 / maxMarks;
+            }
+            else
+            {
+
+            }
+
+            string Division = "Outstanding";
+
+            if (numbers >= 80)
+            {
+                Division = "Outstanding";
+            }
+            else if (numbers >= 64)
+            {
+                Division = "Very Good";
+            }
+            else if (numbers >= 49)
+            {
+                Division = "Good";
+            }
+            else if (numbers >= 35)
+            {
+                Division = "Average";
+            }
+            else
+            {
+                Division = "Below Average";
+            }
+            return Division;
+        }
+
     }
+
     public class AssignmentPageModel
     {
         public int SType { get; set; }
@@ -707,6 +748,7 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Evaluations { get; set; }
         public List<ExamResultDetailModel> ExamResults { get; set; }
         public int IsLocked { get; set; }
+        public int MarkingScheme { get; set; }
         public DataTable GetResultDetailsDataTable()
         {
 
@@ -719,7 +761,9 @@ namespace SMEnterprise.Models
             dtAttandanceDetails.Columns.Add("Grade");
             dtAttandanceDetails.Columns.Add("Status");
             dtAttandanceDetails.Columns.Add("GradePoints");
-
+            // For Using Grading
+            dtAttandanceDetails.Columns.Add("MarksScored");
+            //
             foreach (ExamResultDetailModel e in ExamResults)
             {
                 DataRow dr = dtAttandanceDetails.NewRow();
@@ -730,6 +774,9 @@ namespace SMEnterprise.Models
                 dr["Grade"] = e.Grade;
                 dr["Status"] = e.Status;
                 dr["GradePoints"] = e.GradePoints;
+                // For Using Grading
+                dr["MarksScored"] = e.MarksScored;
+                //
 
                 dtAttandanceDetails.Rows.Add(dr);
             }
@@ -831,11 +878,11 @@ namespace SMEnterprise.Models
         public string SessionName { get; set; }
         public string EvaluationName { get; set; }
         public decimal CGPA { get; set; }
-        public int TotalParameter { get; set; }        
+        public int TotalParameter { get; set; }
         public List<EvaluationTypeModel> EvaluationTypes { get; set; }
 
     }
-  public class StudentResultCheckModel
+    public class StudentResultCheckModel
     {
         public int SubjectID { get; set; }
         public int EvaluationID { get; set; }
@@ -890,7 +937,7 @@ namespace SMEnterprise.Models
     public class TotalResultModel
     {
         public List<SubjectModel> Subjects { get; set; }
-        public  List<EvaluationModel> Evaluations { get; set; }
+        public List<EvaluationModel> Evaluations { get; set; }
         public List<ExamModel> Exams { get; set; }
         public List<ExamResultDetailModel> Result { get; set; }
 
@@ -909,7 +956,9 @@ namespace SMEnterprise.Models
         public string SessionName { get; set; }
         public SBranchModel SBranchDetails { get; set; }
         public StudentModel Student { get; set; }
-        public List<SubSubjectTypeModel> SubjectTypes { get; set; }
+        public List<NameIDModel> SubjectTypes { get; set; }
+        public List<SubSubjectTypeModel> SubjectType { get; set; }
+        // public List<SubSubjectTypeModel> SubjectTypes { get; set; }
         public List<ExamModel> Exams { get; set; }
         public List<SubjectModel> Subjects { get; set; }
         public List<EvaluationModel> MainEvaluations { get; set; }

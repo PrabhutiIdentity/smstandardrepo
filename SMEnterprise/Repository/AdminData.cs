@@ -2220,6 +2220,28 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+        public GroupModel InsertUpdateGroupSubjectMarkingGrade(SubjectModel objData)
+        {
+            GroupModel objModel = new GroupModel();
+            objModel.GroupID = objData.GroupID;
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SubjectID", objData.SubjectID);
+                paramater.Add("@GroupID", objData.GroupID);
+                paramater.Add("@SubjectName", objData.SubjectName);
+                paramater.Add("@IsOptionalSubject", objData.IsOptionalsubject);
+                paramater.Add("@Status", objData.Status);
+                paramater.Add("@OpType", objData.OpType);
+                paramater.Add("@SubjectCode", objData.SubjectCode);
+                paramater.Add("@MainSubID", objData.MainSubID);
+                paramater.Add("@SubjectType", objData.SubjectType);
+                paramater.Add("@MarkingScheme", objData.MarkingScheme);
+                objModel.SubjectList = con.Query<SubjectModel>("spn_InsertUpdateGroupSubject", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+            }
+            return objModel;
+        }
+        
         #endregion
         #region Fee Management
         public FeeCategoryEditModel GetFeeTypes(int SBranchID)
@@ -2755,7 +2777,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PrincipalSignature", objData.PrincipalSignature);
                 paramater.Add("@NotificationServerKey", objData.NotificationServerKey);
                 paramater.Add("@PlayStoreLink", objData.PlayStoreLink);
-
+                paramater.Add("@UDISECode", objData.UDISECode);
+                paramater.Add("@SchoolCode", objData.SchoolCode);
                 return con.Query<int>("spn_InsertUpdateSBranch", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }

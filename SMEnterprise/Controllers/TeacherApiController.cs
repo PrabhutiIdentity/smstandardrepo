@@ -1719,7 +1719,7 @@ namespace SMEnterprise.Controllers
                 DateTime enddatetime = DateTime.Parse("2021-02-01 " + cModel.EndTime);
                 int duration = (enddatetime - startdatetime).Minutes; 
                 
-                if (duration < 0)
+                if (duration <= 0)
                 {
                     duration = 30;
                 }
