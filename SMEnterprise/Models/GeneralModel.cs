@@ -489,6 +489,8 @@ namespace SMEnterprise.Models
         public decimal MaxMarks { get; set; }
         public decimal ScoredMarks { get; set; }
         public int TAssigned { get; set; }
+
+        public int MarkingScheme { get; set; }
     }
     public class HouseModel
     {

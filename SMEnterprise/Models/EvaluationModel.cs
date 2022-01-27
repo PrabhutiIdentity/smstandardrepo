@@ -195,7 +195,7 @@ namespace SMEnterprise.Models
         public int EvaluationSchemeID { get; set; }
         public List<SchoolSessionModel> Sessions { get; set; }
         //public List<EvaluationSchemeModel> EvaluationSchemes { get; set; }
-        public List<EvaluationSchemeModel> EvaluationSchemes { get; set; }
+        public List<NameIDModel> EvaluationSchemes { get; set; }
         public List<NameIDModel> Evaluations { get; set; }
         public List<NameIDModel> Classes { get; set; }
         public List<NameIDModel> Sections { get; set; }
