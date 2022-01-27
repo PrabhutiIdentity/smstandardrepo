@@ -2765,6 +2765,20 @@ namespace SMEnterprise.Repository
         }
 
         #region Exam Related
+
+        public IEnumerable<EvaluationSchemeModel> GetEvaluationSchemeExam(int SBranchID, int SessionID)
+        {
+            EvaluationSchemePageModel objModel = new EvaluationSchemePageModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                //objModel.SessionID = SessionID;
+                return con.Query<EvaluationSchemeModel>("sp_GetEvaluationSchemes", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+
+            }
+        }
         public void GetAdmitCards(AdmitCardListModel objModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
