@@ -2865,7 +2865,7 @@ namespace SMEnterprise.Repository
         }
         // Shishupal Work on Exam Date Sheet For School
         // Date : 17 Nov 2021
-        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID, int SessionID)
+        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID, int SessionID, int EvaluationSchemeID)
         {
             EvaluationTypePageModelExam objModel = new EvaluationTypePageModelExam();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -2873,6 +2873,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SBranchID", SBranchID);
                 paramater.Add("@SessionID", SessionID);
+                paramater.Add("@EvaluationSchemeID", EvaluationSchemeID);
                 return con.Query<NameIDModel>("sp_GetEvaluationTypesExam", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
 
             }
