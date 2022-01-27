@@ -2876,13 +2876,12 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_DateSheetTest", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    //objModel.EvaluationSchemes = multi.Read<EvaluationSchemeModel>().ToList();
+                    objModel.EvaluationSchemes = multi.Read<NameIDModel>().ToList();
                     objModel.Evaluations = multi.Read<NameIDModel>().ToList();
                     objModel.ExamList = multi.Read<ExamDateListModel>().ToList();
                     objModel.Classes = multi.Read<NameIDModel>().ToList();
                     objModel.Exams = multi.Read<ExamModel>().ToList();
                     //objModel.SubjectsE = multi.Read<SubjectModel>().ToList();
-
                     objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
                 }
             }
