@@ -361,7 +361,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@UUID", uuid);
 
-                return con.Query<ApiAuthenticationModel>("select UserID,UserType,FCMToken as deviceToken,SBranchID,Status,LastActive as LastLoginDate,UUID,DynamicSalt from [dbo].[AppUsers] where UUID = @UUID", paramater, null, true, 0, commandType: CommandType.Text).ToList();
+                return con.Query<ApiAuthenticationModel>("select UserID,UserType,FCMToken as deviceToken,SBranchID,Status,LastActive as LastLoginDate,UUID,DynamicSalt from [dbo].[AppUsers] where UUID =@UUID", paramater, null, true, 0, commandType: CommandType.Text).ToList();
 
             }
         }

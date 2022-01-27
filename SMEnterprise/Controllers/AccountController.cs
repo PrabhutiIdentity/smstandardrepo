@@ -2276,6 +2276,14 @@ namespace SMEnterprise.Controllers
             objModel = objTeacherData.GetStudentTotalResult(StudentID, SessionID);
             return View(objModel);
         }
+        
+            [PermissionFilter]
+        public ActionResult StudentPerformanceDetailsClassShine(StudentPerformanceListModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStudentsPerformanceShine(objModel);
+            return View(objModel);
+        }
         [PermissionFilter]
         public ActionResult StudentPerformanceDetailsClass(StudentPerformanceListModel objModel)
         {
@@ -2294,6 +2302,7 @@ namespace SMEnterprise.Controllers
             objModel = objTeacherData.GetStudentPerformanceDetails(objModel);
             return PartialView("_StudentPerformanceDetailsPartial", objModel);
         }
+
         [PermissionFilter]
         public ActionResult StudentPerformanceDetailsESS(string ID = null, string ID2 = null, string ID3 = null)
         {
@@ -2349,6 +2358,18 @@ namespace SMEnterprise.Controllers
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objTeacherData.GetStudentPerformanceResult(objModel);
             return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult StudentPerformanceReportPartialShine(string ID = null, string ID2 = null, string ID3 = null)
+        {
+            //  PerformanceParameterDetailModel objModel = new PerformanceParameterDetailModel();
+           StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
+            objModel.StudentSessionUID = CommonUsage.ConvertToInt(ID);
+            objModel.EvaluationID = CommonUsage.ConvertToInt(ID2);
+            objModel.SessionID = CommonUsage.ConvertToInt(ID3);
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objTeacherData.GetStudentPerformanceResult(objModel);
+            return PartialView("_StudentPerformanceDetailsPartialShine", objModel);
         }
         [PermissionFilter]
         public ActionResult UpdateStudentPerformance(PerformanceParameterDetailModel objModel)

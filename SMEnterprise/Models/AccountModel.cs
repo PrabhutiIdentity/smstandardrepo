@@ -82,7 +82,7 @@ namespace SMEnterprise.Models
         public List<ClassModel> Classes { get; set; }
         public List<SectionModel> Sections { get; set; }
         public List<NameIDModel> Sessions { get; set; }
-
+        public List<ActiveInactiveStudentModel> ActiveInactive { get; set; }
         public DataTable GetStudentsDataTable()
         {
 

@@ -1640,6 +1640,14 @@ namespace SMEnterprise.Controllers
             return PartialView("_GroupSubjectsPartial", objModel);
         }
         [PermissionFilter]
+        public ActionResult GetGroupSubjectsMarking(string id = null)
+        {
+            int ID = CommonUsage.ConvertToInt(id);
+
+            GroupModel objModel = objAdminData.GetGroupSubjects(ID);
+            return PartialView("_GroupSubjectsPartialMarking", objModel);
+        }
+        [PermissionFilter]
         public ActionResult GetGroupSubjectTypes(string id = null)
         {
             SubSubjectTypeEditModel oModel = new SubSubjectTypeEditModel();
@@ -1662,6 +1670,20 @@ namespace SMEnterprise.Controllers
             if (objData.MainSubID == 0)
             {
                 return PartialView("_GroupSubjectsPartial", objModel);
+            }
+            else
+            {
+                SubSubjectEditModel oModel = objAdminData.GetSubSubjectsPageModel(objData.MainSubID);
+                return PartialView("_SubSubjectsPartial", oModel);
+            }
+        }
+        [PermissionFilter]
+        public ActionResult UpdateGroupSubjectMarkingGrade(SubjectModel objData)
+        {
+            GroupModel objModel = objAdminData.InsertUpdateGroupSubjectMarkingGrade(objData);
+            if (objData.MainSubID == 0)
+            {
+                return PartialView("_GroupSubjectsPartialMarking", objModel);
             }
             else
             {
@@ -3288,6 +3310,91 @@ namespace SMEnterprise.Controllers
         //}
         #endregion
 
+        #region OnlineExam
+
+        [PermissionFilter]
+        public ActionResult QuestionBank(TeacherQuestionBankModel objModel)
+        {
+            if (TempData["QuestionBank"] != null)
+            {
+                objModel = (TeacherQuestionBankModel)TempData["QuestionBank"];
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAdminData.GetTeacherQuestionBank(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult UpdateQuestionBank(QuestionBankModel objModel)
+        {
+            //objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.CreatedDate = CommonUsage.GetCurrentDate();
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            TeacherData objTeacherData = new TeacherData();
+            int QuestionID = objTeacherData.UpdateQuestionBank(objModel);
+            TeacherQuestionBankModel objFD = new TeacherQuestionBankModel();
+            objFD.QuestionsBy = objModel.QuestionsBy;
+            objFD.ClassID = objModel.ClassID;
+            objFD.SubjectID = objModel.SubjectID;
+            TempData["QuestionBank"] = objFD;
+            return RedirectToAction("QuestionBank");
+        }
+
+        [PermissionFilter]
+        public ActionResult OnlineExams(OnlineExamPageModel objModel)
+        {
+            if (TempData["OnlineExams"] != null)
+            {
+                objModel = (OnlineExamPageModel)TempData["OnlineExams"];
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            //TeacherData objTeacherData = new TeacherData();
+            objAdminData.GetAdminOnlineExams(objModel);
+            return View(objModel);
+        }
+
+
+
+
+        [PermissionFilter]
+        public ActionResult OnlineExamDetails(OnlineExamModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            OnlineExamEditModel oData = objAdminData.GetAdminOnlineExamDetails(objModel);
+            oData.Exam.GroupID = objModel.GroupID;
+            return View(oData);
+        }
+
+
+        [PermissionFilter]
+        public ActionResult UpdateOnlineExam(OnlineExamModel objModel)
+        {
+            objModel.CreatedDate = CommonUsage.GetCurrentDate();
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            int QuestionID = objAdminData.UpdateOnlineExam(objModel);
+            OnlineExamPageModel objFD = new OnlineExamPageModel();
+            objFD.SectionID = objModel.SectionID;
+            objFD.ClassID = objModel.ClassID;
+            objFD.SessionID = objModel.SessionID;
+            objFD.SubjectID = objModel.SubjectID;
+            objFD.GroupID = objModel.GroupID;
+            TempData["OnlineExams"] = objFD;
+            return RedirectToAction("OnlineExams");
+        }
+
+
+
+        [PermissionFilter]
+        public ActionResult DeleteOnlineExam(OnlineExamModel objModel)
+        {
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            TeacherData objTeacherData = new TeacherData();
+            objTeacherData.DeleteOnlineExam(objModel.OExamID, SBranchID);
+            OnlineExamPageModel objFD = new OnlineExamPageModel();
+            TempData["OnlineExams"] = objFD;
+            return RedirectToAction("OnlineExams");
+        }
+
+        #endregion
 
         #region OnlineClasses
         [HttpPost]

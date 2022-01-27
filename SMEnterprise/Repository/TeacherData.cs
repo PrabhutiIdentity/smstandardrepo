@@ -404,7 +404,7 @@ namespace SMEnterprise.Repository
                     model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.Subjects = multi.Read<SubjectModel>().ToList();
-                    model.SubjectTypes = multi.Read<SubSubjectTypeModel>().ToList();
+                    model.SubjectType = multi.Read<SubSubjectTypeModel>().ToList();
                     model.Exams = multi.Read<ExamModel>().ToList();
                     model.Result = multi.Read<ExamResultDetailModel>().ToList();
                     model.Student = multi.Read<StudentModel>().SingleOrDefault();
