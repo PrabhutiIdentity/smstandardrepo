@@ -1930,18 +1930,20 @@ namespace SMEnterprise.Controllers
         // Shishupal Work on Exam Date Sheet For School
         // Date : 17 Nov 2021
         [PermissionFilter]
-        public ActionResult EvaluationTypeManagementExam(string ID = null)
+             public ActionResult EvaluationTypeManagementExam(string ID = null)
         {
-            int SessionID = CommonUsage.ConvertToInt(ID);
+
+            StudentExamDatesheetModel objSModel = new StudentExamDatesheetModel();
+            int EvaluationSchemeID = CommonUsage.ConvertToInt(ID);
+            EvaluationTypeModel objSs = new EvaluationTypeModel();
+            int SessionID = objSs.SessionID;
             if (Session["SBranchID"] == null)
             {
                 Session["SBranchID"] = 1;
             }
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID);
-            //EvaluationTypePageModelExam objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID);
+            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID, EvaluationSchemeID);
             return PartialView("_EvaluationsPartial", objModel);
-            //return Json(objModel);
         }
 
         [PermissionFilter]
