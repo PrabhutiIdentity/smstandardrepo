@@ -136,7 +136,6 @@
                 <div class="x_panel">
                     @using (Html.BeginForm("UpdateTeacherResults", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
                     {
-                       
                         <input type="hidden" name="ClassID" value="@Model.ClassID" />
                         <input type="hidden" name="SectionID" value="@Model.SectionID" />
                         <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
@@ -146,30 +145,28 @@
                             @if (Model.ExamResults.Count == 0)
                             {
                                 <div>No Exam Defined</div>
-                                }
-                                else
-                                {
-                                   
-                                    <table id="tblCategory" class="table table-bordered table-hover">
+                            }
+                            else
+                            {
+                                <table id="tblCategory" class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
                                             <th style="width: 10%">Photo</th>
                                             <th style="width: 15%">Student</th>
-
-                                            
-                                            @if (Model.MarkingScheme == 0)
-                                           
+                                            @if (Model.MarkingScheme == 1)
                                             {
+                                               
+                                                <th style="width: 10%">Grade</th>
+                                            }
+                                            else
+                                            {
+
                                                 <th style="width: 10%">Max. Marks</th>
                                                 <th style="width: 10%">Pass Marks</th>
                                                 <th style="width: 10%">Score</th>
                                                 <th style="width: 8%">Grade</th>
                                                 <th style="width: 7%">Points</th>
                                                 <th style="width: 30%">Status</th>
-                                            }
-                                            else
-                                            {
-                                                <th style="width: 10%">Grade</th>
                                             }
 
                                         </tr>
@@ -180,6 +177,7 @@
                                         foreach (ExamResultDetailModel c in Model.ExamResults)
                                         {
                                             <tr>
+
                                                 <td>
                                                     <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
                                                     <input type="hidden" name="ExamResults[@count].ResultID" value="@c.ResultID" />
@@ -193,7 +191,22 @@
                                                     <br />@c.RollNo
                                                 </td>
 
-                                                @if (Model.MarkingScheme == 0)
+                                                @if (Model.MarkingScheme == 1)
+                                                {
+                                                    <td>
+                                                        <input type="hidden" id="hdnMaxMarks" value="0" />
+                                                        <input type="hidden" id="hdnPassMarks" value="0" />
+                                                        @if (Model.IsLocked == 0)
+                                                        {
+                                                            <input type="text" id="txtGrade" class="form-control" tabindex="-1" name="ExamResults[@count].Grade" value="@c.Grade" />
+                                                        }
+                                                        else
+                                                        {
+                                                            @c.Grade
+                                                        }
+                                                    </td>
+                                                }
+                                                else
                                                 {
                                                     <td style="text-align:center">
                                                         @c.MaxMarks
@@ -247,21 +260,6 @@
                                                                     <input type="hidden" id="hdnStatus" name="ExamResults[@count].Status" value="@c.Status" />
                                                                 </div>
                                                             </div>
-                                                        }
-                                                    </td>
-                                                }
-                                                else
-                                                {
-                                                    <td>
-                                                        <input type="hidden" id="hdnMaxMarks" value="0" />
-                                                        <input type="hidden" id="hdnPassMarks" value="0" />
-                                                        @if (Model.IsLocked == 0)
-                                                        {
-                                                            <input type="text" id="txtGrade" class="form-control" tabindex="-1" name="ExamResults[@count].Grade" value="@c.Grade" />
-                                                        }
-                                                        else
-                                                        {
-                                                            @c.Grade
                                                         }
                                                     </td>
                                                 }

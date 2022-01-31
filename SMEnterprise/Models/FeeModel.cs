@@ -610,7 +610,12 @@ namespace SMEnterprise.Models
         public SBranchModel SBranchDetails { get; set; }
         public int FeeTypeID { get; set; }
         public decimal PaymentRecieved { get; set; }
-
+        public List<NameIDModel> Classes { get; set; }
+        public List<NameIDModel> Sections { get; set; }
+        public List<NameIDModel> Sessions { get; set; }
+        public List<FeeDetailsModel> FeeListDetail { get; set; }
+        public List<StudentModel> StudentList { get; set; }
+        public DateTime DemandMonth { get; set; }
         public string Class { get; set; }
         public string Section { get; set; }
         public string ClassName

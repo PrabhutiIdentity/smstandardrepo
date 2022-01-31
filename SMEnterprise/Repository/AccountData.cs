@@ -2670,6 +2670,36 @@ namespace SMEnterprise.Repository
                 }
             }
         }
+        public FeePaymentModel GetDuefeeReportMonthlyNew(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
+        {
+            FeePaymentModel objModel = new FeePaymentModel();
+            objModel.DemandMonth = QDate;
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ClassID", ClassID);
+                paramater.Add("@SectionID", SectionID);
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                paramater.Add("@QDate", QDate);
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                using (var multi = con.QueryMultiple("sp_GetStudentFeeDetailsNewTemp", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.Sections = multi.Read<NameIDModel>().ToList();
+                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.StudentList = multi.Read<StudentModel>().ToList();
+                    objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
+                    objModel.FeeListDetail = multi.Read<FeeDetailsModel>().ToList();
+
+                }
+            }
+            return objModel;
+        }
         public DemandReciptListModel GetDemandReciptDataNew(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
         {
 
@@ -3238,6 +3268,15 @@ namespace SMEnterprise.Repository
                     }
                     objModel.IsLocked = multi.Read<int>().SingleOrDefault();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
             return objModel;
