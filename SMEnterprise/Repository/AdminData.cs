@@ -2035,6 +2035,12 @@ namespace SMEnterprise.Repository
                     objModel.GroupID = multi.Read<int>().SingleOrDefault();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    try
+                    {
+                        objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
+                    }
+                    catch
+                    { }
                 }
             }
 
@@ -2241,7 +2247,7 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
-        
+
         #endregion
         #region Fee Management
         public FeeCategoryEditModel GetFeeTypes(int SBranchID)
@@ -3312,7 +3318,7 @@ namespace SMEnterprise.Repository
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@SBranchID", SBranchID);
-                return (await con.QueryAsync<ImportantContactModel>("spn_GetImportantContacts", paramater, null,  0, commandType: CommandType.StoredProcedure)).ToList();
+                return (await con.QueryAsync<ImportantContactModel>("spn_GetImportantContacts", paramater, null, 0, commandType: CommandType.StoredProcedure)).ToList();
 
             }
         }
@@ -3665,7 +3671,7 @@ namespace SMEnterprise.Repository
             }
             return oModel;
         }
-        
+
         public int UpdateYoutubeVideo(YoutubeAdminEditPageData oModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -4122,7 +4128,7 @@ namespace SMEnterprise.Repository
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
-               paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
                 //paramater.Add("@StartDate", oModel.StartDate);
 
