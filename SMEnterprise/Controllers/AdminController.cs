@@ -54,7 +54,7 @@ namespace SMEnterprise.Controllers
             //objModel.SessionID = CommonUsage.ConvertToInt(ID);
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             oModel.EncryptedPassword = CommonUsage.EncryptPassword(oModel.Password + CommonUsage.FixedPrimaryEncryptionSalt);
-          //  objModel = objAdminData.GetParentsForLoginSMS(objModel.SessionID, objModel.SBranchID);
+            //  objModel = objAdminData.GetParentsForLoginSMS(objModel.SessionID, objModel.SBranchID);
             string PlayLink = objAdminData.GetPlayStoreLink(SBranchID);
             string ContentID = "0";
             foreach (ParentModel r in oModel.Parents.Where(c => c.IsSelected == 1))
@@ -72,7 +72,7 @@ namespace SMEnterprise.Controllers
             return RedirectToAction("ParentAppInstalSMS", "Admin");
         }
 
-   
+
 
         [HttpPost]
         public ActionResult GetSMSBalance()
@@ -744,7 +744,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult EditMergedClasses(EditMergedClassModel objData)
         {
-            EditMergedClassModel objModel = objAdminData.GetEditMergeClasses(objData);
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            EditMergedClassModel objModel = objAdminData.GetEditMergeClasses(objData, SBranchID);
 
             return PartialView("_MergeSectionPopup", objModel);
         }
@@ -1947,7 +1948,7 @@ namespace SMEnterprise.Controllers
                 }
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             CommonData objCommonData = new CommonData();
-            EventCalendarModel model =await objCommonData.GetEventCalander(month, year, SBranchID, 1);
+            EventCalendarModel model = await objCommonData.GetEventCalander(month, year, SBranchID, 1);
             model.EventTypes = objAdminData.GetEventTypeList(SBranchID);
             model.Classes = objAdminData.GetClasses(1, SBranchID, 0).Classes;
             return View(model);
@@ -3412,7 +3413,7 @@ namespace SMEnterprise.Controllers
         public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
         {
 
-           
+
             if (oModel.ClassDate.Year == 1)
             {
                 oModel.ClassDate = CommonUsage.GetCurrentDate();
@@ -3438,9 +3439,9 @@ namespace SMEnterprise.Controllers
                 var joinDate = CommonUsage.GetCurrentDate();
                 //NameIDModel student = await onlienClassData.StudentJoinOnlineClass(StudentID, joinDate, OCID, ParentID, 0);
                 // StudentModel Student = objStudents.Where(x => x.StudentID == StudentID).FirstOrDefault();
-               // string avatar = basepath + student.Extra1;
+                // string avatar = basepath + student.Extra1;
                 var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
-                requestJoin.userID =SBranchID.ToString();
+                requestJoin.userID = SBranchID.ToString();
                 requestJoin.fullName = "Principle";
                 requestJoin.password = cModel.AttPassword;
                 var setConfigRequest = new SetConfigXMLRequest
@@ -3451,7 +3452,7 @@ namespace SMEnterprise.Controllers
                 var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
                 if (setConfigResult.returncode == Returncode.FAILED) return Json(0);
                 requestJoin.configToken = setConfigResult.configToken;
-              
+
                 var url = client.GetJoinMeetingUrl(requestJoin);
                 ViewBag.URL = url;
                 return View();
