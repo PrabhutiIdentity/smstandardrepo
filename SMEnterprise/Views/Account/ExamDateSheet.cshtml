@@ -3,6 +3,8 @@
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
     //List<NameIDModel> EvaluationSubjectTotals = new List<NameIDModel>();
+    var SelectedSession = Model.Sessions.Where(x => x.SessionID == Model.SessionID).FirstOrDefault();
+    //var SelectedEvaluationName = Model.Evaluations.Where(x =>x.ID == Model.EvaluationID).FirstOrDefault();
 }
 @model SMEnterprise.Models.StudentExamDatesheetModel
 @section IncludeCss
@@ -150,24 +152,47 @@
                 <div class="x_content">
                     <table id="tblCategory" class="table table-bordered table-hover">
                         <thead>
-                            <tr>
-                                <td style="width:20%">Examination Date Sheet</td>
-                                <td colspan="@Model.Classes.Count" style="width:80%"><strong> @Model.Branch.BranchSchoolName </strong></td>
+                            <tr style="width:100%">
+                                <td>
+                                    <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                                </td>
+
+                                <td colspan="@Model.Classes.Count" >
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td style="text-align: center;vertical-align: middle;">
+                                                <p style="margin-top: 2px;margin-bottom: 5px;font-size: 26px;">@Model.Branch.BranchSchoolName</p>
+
+                                                <p style="margin-bottom: 2px;margin-left:10px;font-size: 16px;">
+                                                    @Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))
+                                                    @*@Model.SBranchDetails.Address*@
+                                                </p>
+                                                <p style="margin-bottom: 2px;margin-left:80px;"> Ph. @Model.Branch.ContactNo, Email : @Model.Branch.EmailID</p>
+                                                <p style="margin-bottom: 2px;margin-left:50px;"><b>Session : @SelectedSession.SessionName</b>  </p>
+                                                @*|| <b>Evaluation :  @SelectedEvaluationName.Name</b>*@
+                                            </td>
+                                          
+                                        </tr>
+                                    </table>
+                                </td>
+
 
                             </tr>
+
+            
                             <tr>
-                                <td></td>
-                                <td colspan="@Model.Classes.Count" class="text-center">CLASSESS</td>
-                            </tr>
-                            <tr>
-                                <td class="tblTopRow text-center">
+                                <td class="tblTopRow text-center" rowspan="2">
                                     <span>EXAM DATE</span><br />
                                     <span>EXAM DAY</span>
                                 </td>
 
+                                <td colspan="@Model.Classes.Count" class="text-center" style="text-align:center">CLASSESS</td>
+                            </tr>
+                            <tr>
+
                                 @if (Model.ExamList.Count < 1)
                                 {
-                                    <td colspan="3" class="tblMainDateSheet">
+                                    <td colspan="3" class="tblMainDateSheet" style="border: solid 1px; text-align: center">
                                         <span>--No Exams Scheduled--</span>
                                     </td>
                                 }
@@ -176,7 +201,7 @@
                                     foreach (var cls in Model.Classes)
                                     {
 
-                                        <td class="tblTopRow text-center"> @(cls.Name)</td>
+                                        <td class="tblTopRow text-center" style="border:solid 1px;text-align:center"> @(cls.Name)</td>
                                     }
                                 }
 

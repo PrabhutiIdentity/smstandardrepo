@@ -21,7 +21,6 @@
 
     ul.day {
         margin: 0px;
-        top: 35px;
     }
 </style>
 @section IncludeCss
@@ -104,47 +103,51 @@
                 </div>
                 <div class="box-body" id="dvTimeTableContainer">
                     @{
-                        <div class="ClassSectionHeader" style="margin-top: -10px;">
+                        <div class="ClassSectionHeader">
                             <k2> <sk id="skClassName"></sk> / <sk id="skSectionName"></sk> </k2>
                         </div>
                         var width = 100 / (Model.TimeTable.Periods.Count + 1) - 0.5;
                         <div class="time-table-dates">
                             <div class="row" id="divTimeTableFrame" style="margin-left: 5px;">
-                                <table style="width: 100%; color: aliceblue; text-align: center; border:1px;">
-                                    <thead>
-                                        <tr style=" height: 90px; ">
-                                            <td style="padding: 1px; width: 10%; background-color: rgba(61, 83, 104, 0.9); border: 1px solid #c2d0af; padding-top: 10px; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">
-                                                <p>Period Name</p>
-                                            </td>
-                                            @for (var day = 0; day < Model.TimeTable.Days; day++)
-                                            {
-                                                <td style="background-color: rgba(61, 83, 104, 0.9); border: 1px solid #c2d0af; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png);">
-                                                    <span>@Model.TimeTable.DayNames[day]</span>
-                                                </td>
-                                            }
-                                        </tr>
-                                    </thead>
-
-                                    @foreach (PeriodModel period in Model.TimeTable.Periods)
+                                
+                                <ul class="days day" style="width:@width%;">
+                                    <li class="period" style="color: #fff;height: 60px;">
+                                        <p>Days</p>
+                                    </li>
+                                    @for (var day = 0; day < Model.TimeTable.Days; day++)
                                     {
-                                        var ulClass = "period-01 day";
-                                        var PeriodDone = 0;
-                                        if (period.PeriodType == 4)
+                                        <li>
+                                            <span>@Model.TimeTable.DayNames[day]</span>
+                                        </li>
+                                    }
+                                </ul>
+                                @foreach (PeriodModel period in Model.TimeTable.Periods)
+                                {
+                                    var ulClass = "period-01 day";
+                                    var PeriodDone = 0;
+                                    if (period.PeriodType == 4)
+                                    {
+                                        ulClass = "lunch-break day lunch";
+                                    }
+                                    <ul class="@ulClass" style="width:@width%">
+                                        <li class="period" style="height: 60px;">
+                                            <p> @period.Name </p>
+                                            <p class="period-time">
+                                                <span>@period.StartTime.Substring(0, 5)</span><span> - </span><span>@period.EndTime.Substring(0, 5)</span>
+                                            </p>
+                                        </li>
+                                        @if (period.PeriodType == 4)
                                         {
-                                            ulClass = "lunch-break day lunch";
+                                            for (var day = 0; day < Model.TimeTable.Days; day++)
+                                            {
+                                                <li>
+                                                    <p>Lunch Break</p>
+                                                </li>
+                                            }
                                         }
-                                        <tr>
-                                            <td style="height: 90px; border: 1px solid #c2d0af; ">
-
-                                                <div style="width: 100%; height:100%; background-color: rgba(0, 87, 162, 0.6); border: 1px solid white; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png);">
-                                                    <p> @period.EducationLevelName </p>
-                                                    <p> @period.Name </p>
-                                                    <p class="period-time">
-                                                        <span>@period.StartTime.Substring(0, 5)</span><span> - </span><span>@period.EndTime.Substring(0, 5)</span>
-                                                    </p>
-                                                </div>
-                                            </td>
-                                            @foreach (var lac in Model.TimeTable.Lactures)
+                                        else
+                                        {
+                                            foreach (var lac in Model.TimeTable.Lactures)
                                             {
                                                 if (lac.PeriodID == period.PeriodID)
                                                 {
@@ -162,8 +165,8 @@
                                                             }
 
                                                         }
-                                                        <td style="border: 1px solid #c2d0af; background-color: #ffffff; border-style: double; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">
 
+                                                        <li class="@subsClass" id="li-@period.PeriodID-@(day + 1)">
                                                             <p class="subject">
                                                                 @{
                                                                     var teachedName = "No Teacher";
@@ -248,64 +251,52 @@
                                                                 <input type="hidden" id="hdnEducationLevelID" value="@Model.TimeTable.EducationLevelID" />
                                                             }
                                                             <a href="javascript:void(0)" onclick="EditLacture(this);" class="link_1" title="Change Period"><i class="fa fa-edit"></i></a>
+
+                                                            @*@if (subID != 0)
+                                                                {
+                                                                    <a href="javascript:void(0)" title="View Syllabus" onclick="ViewSyllabusSchedule(this);" class="link_2"><i class="fa fa-calendar-o"></i></a>
+                                                                }*@
                                                             @if (isOptional == 1)
                                                             {
                                                                 <a href="javascript:void(0)" onclick="EditClassMerge(this);" class="link_3" title="Merge Classes"><i class="fa fa-sitemap"></i></a>
                                                             }
+
                                                             <a href="javascript:void(0)" onclick="ViewSubstitutions(this);" class="link_4" title="View Substitutions"><i class="fa fa-exclamation-triangle"></i></a>
-                                                        </td>
+
+                                                        </li>
                                                     }
                                                 }
                                             }
-                                            @if (PeriodDone == 0)
+                                            if (PeriodDone == 0)
                                             {
                                                 for (var day = 0; day < Model.TimeTable.Days; day++)
                                                 {
-                                                    if (period.PeriodType == 4)
-                                                    {
-                                                        <td style="border: 1px solid #c2d0af; background-color: #F1FDE1; border-style: double; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">
-                                                            <p class="subject">
-                                                                <span id="pSubject">Lunch Time</span>
-                                                            </p>
-                                                            @*<p class="teacher" id="pTeacher">No Teacher</p>
-                                                                <div class="liBG"></div>*@
-                                                            @*<input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
-                                                                <input type="hidden" id="hdnSubjectID" value="0" />
-                                                                <input type="hidden" id="hdnTeacherID" value="0" />
-                                                                <input type="hidden" id="hdnDayID" value="@(day+1)" />
-                                                                <input type="hidden" id="hdnSectionID" value="@Model.TimeTable.SectionID" />
-                                                                <input type="hidden" id="hdnClassID" value="@Model.TimeTable.ClassID" />
-                                                                <input type="hidden" id="hdnEducationLevelID" value="@Model.TimeTable.EducationLevelID" />
-                                                                <input type="hidden" id="hdnIsMergedSubject" value="0" />*@
-                                                            @*<a href="javascript:void(0)" onclick="EditLacture(this);" class="link_1" title="Change Period"><i class="fa fa-edit"></i></a>*@
-                                                        </td>
-                                                    }
-                                                    else
-                                                    {
-                                                        <td style="border: 1px solid #c2d0af; background-color: #ffffff; border-style: double; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">
-                                                            <p class="subject">
-                                                                <span id="pSubject">No Subject</span>
-                                                            </p>
-                                                            <p class="teacher" id="pTeacher">No Teacher</p>
-                                                            <div class="liBG"></div>
-                                                            <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
-                                                            <input type="hidden" id="hdnSubjectID" value="0" />
-                                                            <input type="hidden" id="hdnTeacherID" value="0" />
-                                                            <input type="hidden" id="hdnDayID" value="@(day+1)" />
-                                                            <input type="hidden" id="hdnSectionID" value="@Model.TimeTable.SectionID" />
-                                                            <input type="hidden" id="hdnClassID" value="@Model.TimeTable.ClassID" />
-                                                            <input type="hidden" id="hdnEducationLevelID" value="@Model.TimeTable.EducationLevelID" />
-                                                            <input type="hidden" id="hdnIsMergedSubject" value="0" />
-                                                            <a href="javascript:void(0)" onclick="EditLacture(this);" class="link_1" title="Change Period"><i class="fa fa-edit"></i></a>
+                                                    <li class="EmptyPeriod" id="li-@period.PeriodID-@(day + 1)">
+                                                        <p class="subject">
 
-                                                        </td>
+                                                            <span id="pSubject">No Subject</span>
 
-                                                    }
+                                                        </p>
+                                                        <p class="teacher" id="pTeacher">No Teacher</p>
+
+                                                        <div class="liBG"></div>
+                                                        <input type="hidden" id="hdnPeriodID" value="@period.PeriodID" />
+                                                        <input type="hidden" id="hdnSubjectID" value="0" />
+                                                        <input type="hidden" id="hdnTeacherID" value="0" />
+                                                        <input type="hidden" id="hdnDayID" value="@(day+1)" />
+                                                        <input type="hidden" id="hdnSectionID" value="@Model.TimeTable.SectionID" />
+                                                        <input type="hidden" id="hdnClassID" value="@Model.TimeTable.ClassID" />
+                                                        <input type="hidden" id="hdnEducationLevelID" value="@Model.TimeTable.EducationLevelID" />
+                                                        <input type="hidden" id="hdnIsMergedSubject" value="0" />
+                                                        <a href="javascript:void(0)" onclick="EditLacture(this);" class="link_1" title="Change Period"><i class="fa fa-edit"></i></a>
+
+
+                                                    </li>
                                                 }
                                             }
-                                        </tr>
-                                    }
-                                </table>
+                                        }
+                                    </ul>
+                                }
                             </div>
                         </div>
                     }
@@ -378,11 +369,12 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
             url: "@Url.Action("ViewTeacherSubstitution", "Admin")",
             type: 'POST',
             data: JSON.stringify({
+
                 ClassName: $('#ddlClass option:selected').text(),
                 SectionName: $('#ddlSection option:selected').text(),
-                PeriodID: $(sender).closest('tr').find('#hdnPeriodID').val(),
+                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
                 SectionID: $('#ddlSection').val(),
-                DayID: $(sender).closest('td').find('#hdnDayID').val(),
+                DayID: $(sender).closest('li').find('#hdnDayID').val(),
                 ClassID: $('#ddlClass').val()
             }),
             contentType: 'application/json; charset=utf-8',
@@ -412,6 +404,7 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
         });
     }
     function ViewSyllabusSchedule(sender) {
+
         $.ajax({
             url: "@Url.Action("ViewSyllabusSchedule", "Admin")",
             type: 'POST',
@@ -420,8 +413,8 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
                 ClassName: $('#ddlClass option:selected').text(),
                 SectionName: $('#ddlSection option:selected').text(),
                 SectionID: $('#ddlSection').val(),
-                SubjectID: $(sender).closest('td').find('#hdnSubjectID').val(),
-                SubjectName: $(sender).closest('td').find('#hdnSubjectName').val(),
+                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
+                SubjectName: $(sender).closest('li').find('#hdnSubjectName').val(),
                 ClassID: $('#ddlClass').val()
             }),
             contentType: 'application/json; charset=utf-8',
@@ -448,14 +441,14 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
             type: 'POST',
             data: JSON.stringify({
 
-                PeriodID: $(sender).closest('td').find('#hdnPeriodID').val(),
-                SectionID: $(sender).closest('td').find('#hdnSectionID').val(),
-                SubjectID: $(sender).closest('td').find('#hdnSubjectID').val(),
-                DayID: $(sender).closest('td').find('#hdnDayID').val(),
-                TeacherID: $(sender).closest('td').find('#hdnTeacherID').val(),
-                ClassID: $(sender).closest('td').find('#hdnClassID').val(),
-                EducationLevelID: $(sender).closest('td').find('#hdnEducationLevelID').val(),
-                IsMergedSubject: $(sender).closest('td').find('#hdnIsMergedSubject').val()
+                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
+                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
+                DayID: $(sender).closest('li').find('#hdnDayID').val(),
+                TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
+                ClassID: $(sender).closest('li').find('#hdnClassID').val(),
+                EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val(),
+                IsMergedSubject: $(sender).closest('li').find('#hdnIsMergedSubject').val()
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
@@ -551,19 +544,20 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
         EditLactureForm.remove();
     }
     function EditClassMerge(sender) {
-        var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
         $.ajax({
             url: "@Url.Action("EditMergedClasses", "Admin")",
             type: 'POST',
             data: JSON.stringify({
 
-                PeriodID: $(sender).closest('td').find('#hdnPeriodID').val(),
-                SectionID: $(sender).closest('td').find('#hdnSectionID').val(),
-                DayID: $(sender).closest('td').find('#hdnDayID').val(),
-                ClassID: $(sender).closest('td').find('#hdnClassID').val(),
-                SubjectID: $(sender).closest('td').find('#hdnSubjectID').val(),
-                TeacherID: $(sender).closest('td').find('#hdnTeacherID').val(),
-                EducationLevelID: $(sender).closest('td').find('#hdnEducationLevelID').val()
+                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
+                DayID: $(sender).closest('li').find('#hdnDayID').val(),
+                ClassID: $(sender).closest('li').find('#hdnClassID').val(),
+                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
+                TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
+                EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val()
+
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
@@ -592,6 +586,7 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
         });
     }
     function MergeClassChanged(sender) {
+
         $.ajax({
             url: "@Url.Action("EditMergedClassSections", "Admin")",
             type: 'POST',
@@ -675,6 +670,7 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
+
                 EditLactureForm.remove();
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -689,19 +685,19 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
     function DeleteMergedClass(sender) {
         if (confirm("Do you Really Want to Remove Merged Section????")) {
             $.ajax(
-            {
-                type: "POST",
-                url: "/Admin/DeleteMergedClassSection/" + $(sender).attr('id'),
-                cache: false,
-                processData: false,
-                contentType: false,
-                success: function (html) {
-                    EditLactureForm.remove();
-                },
-                error: function (e) {
-                    alert("errorn");
-                }
-            });
+{
+    type: "POST",
+    url: "/Admin/DeleteMergedClassSection/" + $(sender).attr('id'),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
             return true;
         }
         else {
@@ -709,43 +705,44 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
         }
     }
     function EducationLevelChanged(sender) {
+
         $.ajax(
-        {
-            type: "POST",
-            url: "/Admin/GetClassesOnEducationLevel/" + $(sender).val(),
-            cache: false,
-            processData: false,
-            contentType: false,
-            success: function (html) {
-                $('#ddlClass').html('');
-                $('#ddlClass').html('<option value="0">--Select--</option>');
-                $('#ddlClass').append(html);
-                $('#ddlSection').html('');
-                $('#ddlSection').html('<option value="0">--Select--</option>');
-            },
-            error: function (e) {
-                alert("errorn");
-            }
-        });
+{
+    type: "POST",
+    url: "/Admin/GetClassesOnEducationLevel/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        $('#ddlClass').html('');
+        $('#ddlClass').html('<option value="0">--Select--</option>');
+        $('#ddlClass').append(html);
+        $('#ddlSection').html('');
+        $('#ddlSection').html('<option value="0">--Select--</option>');
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
     }
     function ClassChanged(sender) {
 
         $.ajax(
-        {
-            type: "POST",
-            url: "/Admin/GetSectionOnClass/" + $(sender).val(),
-            cache: false,
-            processData: false,
-            contentType: false,
-            success: function (html) {
-                $('#ddlSection').html('');
-                $('#ddlSection').html('<option value="0">--Select--</option>');
-                $('#ddlSection').append(html);
-            },
-            error: function (e) {
-                alert("errorn");
-            }
-        });
+{
+    type: "POST",
+    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+        $('#ddlSection').html('');
+        $('#ddlSection').html('<option value="0">--Select--</option>');
+        $('#ddlSection').append(html);
+    },
+    error: function (e) {
+        alert("errorn");
+    }
+});
     }
     function MainSectionChanged(sender) {
         window.location.href = "/Admin/TimeTableManagement/" + $(sender).val();
