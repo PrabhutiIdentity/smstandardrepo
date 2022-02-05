@@ -888,7 +888,7 @@ namespace SMEnterprise.Repository
 
         public static string[] arrDays = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
-        public EditMergedClassModel GetEditMergeClasses(EditMergedClassModel objModel)
+        public EditMergedClassModel GetEditMergeClasses(EditMergedClassModel objModel,int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -897,6 +897,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PeriodID", objModel.PeriodID);
                 paramater.Add("@DayID", objModel.DayID);
                 paramater.Add("@DayName", arrDays[objModel.DayID - 1]);
+                paramater.Add("@SBranchID", SBranchID);
                 using (var multi = con.QueryMultiple("spn_GetEditMergeClasses", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.MergedClasses = multi.Read<TimeTableMergedClassModel>().ToList();
