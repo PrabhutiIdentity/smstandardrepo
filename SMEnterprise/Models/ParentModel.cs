@@ -185,6 +185,8 @@ namespace SMEnterprise.Models
         public int Cadd_DistrictCode { get; set; }
         public int Cadd_StateCode { get; set; }
         public int Cadd_CountryCode { get; set; }
+        public string SchoolUID { get; set; }
+        
     }
     public class AttandanceModel
     {
