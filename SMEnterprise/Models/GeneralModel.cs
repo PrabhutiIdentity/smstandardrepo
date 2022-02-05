@@ -444,6 +444,10 @@ namespace SMEnterprise.Models
         public int OpType { get; set; }
         public string UDISECode { get; set; }
         public string SchoolCode { get; set; }
+        // Using for ExamDatesheet
+        public string SessionName { get; set; }
+        public string EvaluationName { get; set; }
+        //
     }
     public class SubSubjectTypeEditModel
     {

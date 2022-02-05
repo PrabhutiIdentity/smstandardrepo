@@ -42,6 +42,9 @@ namespace SMEnterprise
                 CommonData objcd = new CommonData();
                 objcd.InsertError(0, "Startup", ex.ToString());
             }
+            //from accessing a cross - origin frame
+            System.Web.Helpers.AntiForgeryConfig.SuppressXFrameOptionsHeader = true;
+            //
         }
 
         protected void Application_Error(object sender, EventArgs e)

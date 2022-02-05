@@ -254,7 +254,7 @@
                                                 }
                                                 else
                                                 {
-                                                    <td style="border: 1px solid #c2d0af;; border-style: double; color: black; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">Leave Applicable</td>
+                                                    <td style="border: 1px solid #c2d0af; border-style: double; color: black; background-image: url(http://www.transparenttextures.com/patterns/egg-shell.png); ">Leave Applicable</td>
                                                 }
                                             }
                                         </tr>
@@ -312,7 +312,7 @@
         }, 500);
     }
     $(document).ready(function () {
-        $('#liTeacherTimeTable').closest('ul').closest('li').addClass('active');
+        $('#liTeacherTimeTable').closest('tr').closest('td').addClass('active');
         $('#liTeacherTimeTable').addClass('active');
         $('#skTeacherName').html($("#ddlTeachers option:selected").text());
     });
@@ -331,21 +331,22 @@
         }
     }
     function ViewSubstitutions(sender) {
+
         var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
         $.ajax({
             url: "@Url.Action("EditTeacherSubstitution", "Admin")",
             type: 'POST',
             data: JSON.stringify({
 
-                ClassName: $(sender).closest('li').find('#hdnClassName').val(),
-                SectionName: $(sender).closest('li').find('#hdnSectionName').val(),
-                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
-                SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
-                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
-                DayID: $(sender).closest('li').find('#hdnDayID').val(),
-                TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
-                ClassID: $(sender).closest('li').find('#hdnClassID').val(),
-                EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val()
+                ClassName: $(sender).closest('td').find('#hdnClassName').val(),
+                SectionName: $(sender).closest('td').find('#hdnSectionName').val(),
+                PeriodID: $(sender).closest('td').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('td').find('#hdnSectionID').val(),
+                SubjectID: $(sender).closest('td').find('#hdnSubjectID').val(),
+                DayID: $(sender).closest('td').find('#hdnDayID').val(),
+                TeacherID: $(sender).closest('td').find('#hdnTeacherID').val(),
+                ClassID: $(sender).closest('td').find('#hdnClassID').val(),
+                EducationLevelID: $(sender).closest('td').find('#hdnEducationLevelID').val()
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
@@ -381,18 +382,19 @@
             type: 'POST',
             data: JSON.stringify({
 
-                PeriodID: $(sender).closest('li').find('#hdnPeriodID').val(),
-                SectionID: $(sender).closest('li').find('#hdnSectionID').val(),
-                SubjectID: $(sender).closest('li').find('#hdnSubjectID').val(),
-                DayID: $(sender).closest('li').find('#hdnDayID').val(),
-                TeacherID: $(sender).closest('li').find('#hdnTeacherID').val(),
-                ClassID: $(sender).closest('li').find('#hdnClassID').val(),
-                EducationLevelID: $(sender).closest('li').find('#hdnEducationLevelID').val(),
-                IsMergedSubject: $(sender).closest('li').find('#hdnIsMergedSubject').val()
+                PeriodID: $(sender).closest('td').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('td').find('#hdnSectionID').val(),
+                SubjectID: $(sender).closest('td').find('#hdnSubjectID').val(),
+                DayID: $(sender).closest('td').find('#hdnDayID').val(),
+                TeacherID: $(sender).closest('td').find('#hdnTeacherID').val(),
+                ClassID: $(sender).closest('td').find('#hdnClassID').val(),
+                EducationLevelID: $(sender).closest('td').find('#hdnEducationLevelID').val(),
+                IsMergedSubject: $(sender).closest('td').find('#hdnIsMergedSubject').val()
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
                 notice.remove();
+                
                 EditLactureForm = new PNotify({
                     text: html,
                     icon: false,
@@ -509,6 +511,7 @@
     function InsertSubstitution(sender, OpType) {
         var IsContinue = true;
         var tReplacingTeacherID = 0;
+        
         if (OpType == -1) {
             IsContinue = confirm('Do you really want to remove the Substitution?');
             tReplacingTeacherID = $(sender).closest('tr').find('#hdnReplacingTeacherID').val();
@@ -518,7 +521,7 @@
             tReplacingTeacherID = $(sender).closest('tr').find('#ddlTeacher').val();
         }
         if (IsContinue) {
-            if ($(sender).closest('tr').find('#ddlTeacher').val() == "0") {
+            if ($(sender).closest('td').find('#ddlTeacher').val() == "0") {
                 alert("Please Select a Teacher....")
             }
             else {
@@ -548,6 +551,7 @@
                     success: function (html) {
                         $('#li-' + $(sender).closest('tr').find('#hdnPeriodID').val() + '-' + $(sender).closest('tr').find('#hdnDayID').val()).addClass('SubstitutedTeacherPeriod');
                         notice.remove();
+                        EditLactureForm.remove();
                         EditLactureForm = new PNotify({
                             text: html,
                             icon: false,
@@ -577,19 +581,19 @@
     function DeleteMergedClass(sender) {
         if (confirm("Do you Really Want to Remove Merged Section????")) {
             $.ajax(
-{
-    type: "POST",
-    url: "/Admin/DeleteMergedClassSection/" + $(sender).attr('id'),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
+            {
+                type: "POST",
+                url: "/Admin/DeleteMergedClassSection/" + $(sender).attr('id'),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
 
-    },
-    error: function (e) {
-        alert("errorn");
-    }
-});
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
             return true;
         }
         else {
@@ -599,23 +603,23 @@
     function EducationLevelChanged(sender) {
 
         $.ajax(
-{
-    type: "POST",
-    url: "/Admin/GetClassesOnEducationLevel/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-        $('#ddlClass').html('');
-        $('#ddlClass').html('<option value="0">--Select--</option>');
-        $('#ddlClass').append(html);
-        $('#ddlSection').html('');
-        $('#ddlSection').html('<option value="0">--Select--</option>');
-    },
-    error: function (e) {
-        alert("errorn");
-    }
-});
+        {
+            type: "POST",
+            url: "/Admin/GetClassesOnEducationLevel/" + $(sender).val(),
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (html) {
+                $('#ddlClass').html('');
+                $('#ddlClass').html('<option value="0">--Select--</option>');
+                $('#ddlClass').append(html);
+                $('#ddlSection').html('');
+                $('#ddlSection').html('<option value="0">--Select--</option>');
+            },
+            error: function (e) {
+                alert("errorn");
+            }
+        });
     }
     function ClassChanged(sender) {
         $('#ddlSections').html('<option value="-1">Loading....</option>');

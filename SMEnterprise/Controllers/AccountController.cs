@@ -1936,13 +1936,13 @@ namespace SMEnterprise.Controllers
             StudentExamDatesheetModel objSModel = new StudentExamDatesheetModel();
             int EvaluationSchemeID = CommonUsage.ConvertToInt(ID);
             EvaluationTypeModel objSs = new EvaluationTypeModel();
-            int SessionID = objSs.SessionID;
-            if (Session["SBranchID"] == null)
-            {
-                Session["SBranchID"] = 1;
-            }
+            //  int SessionID = objSs.SessionID;
+            //if (Session["SBranchID"] == null)
+            //{
+            //    Session["SBranchID"] = 1;
+            //}
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, SessionID, EvaluationSchemeID);
+            IEnumerable<NameIDModel> objModel = objAccountData.GetEvaluationTypesExam(SBranchID, EvaluationSchemeID);
             return PartialView("_EvaluationsPartial", objModel);
         }
 
@@ -2980,7 +2980,20 @@ namespace SMEnterprise.Controllers
             DemandReciptListModel objModel = objAccountData.GetDemandReciptDataNew(SBranchID, objData.DemandMonth, objData.ClassID, objData.SectionID, objData.SessionID);
             return View(objModel);
         }
+        [PermissionFilter]
+        public ActionResult MonthlyDueFeeReport(FeePaymentModel objData = null)
+        {
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
 
+            if (objData.DemandMonth.Year == 1)
+            {
+                objData.DemandMonth = CommonUsage.GetCurrentDate();
+            }
+            //   DemandReciptListModel objModel = objAccountData.GetDemandReciptData1(SBranchID, objData.DemandMonth.Month, objData.DemandMonth.Year, objData.ClassID, objData.SectionID);
+
+            FeePaymentModel objModel = objAccountData.GetDuefeeReportMonthlyNew(SBranchID, objData.DemandMonth, objData.ClassID, objData.SectionID, objData.SessionID);
+            return View(objModel);
+        }
         [PermissionFilter]
         public ActionResult ReportDailyFeeCollection(CollectionReportModel objModel)
         {
