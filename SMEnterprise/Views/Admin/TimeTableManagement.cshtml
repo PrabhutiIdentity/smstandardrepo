@@ -551,20 +551,19 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
         EditLactureForm.remove();
     }
     function EditClassMerge(sender) {
-var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
+        var notice = ShowNotification('Loading', 'Please wait while we load the required details....', 'info');
         $.ajax({
             url: "@Url.Action("EditMergedClasses", "Admin")",
             type: 'POST',
             data: JSON.stringify({
 
-                PeriodID: $(sender).closest('tr').find('#hdnPeriodID').val(),
-                SectionID: $(sender).closest('tr').find('#hdnSectionID').val(),
-                DayID: $(sender).closest('tr').find('#hdnDayID').val(),
-                ClassID: $(sender).closest('tr').find('#hdnClassID').val(),
-                SubjectID: $(sender).closest('tr').find('#hdnSubjectID').val(),
-                TeacherID: $(sender).closest('tr').find('#hdnTeacherID').val(),
-                EducationLevelID: $(sender).closest('tr').find('#hdnEducationLevelID').val()
-
+                PeriodID: $(sender).closest('td').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('td').find('#hdnSectionID').val(),
+                DayID: $(sender).closest('td').find('#hdnDayID').val(),
+                ClassID: $(sender).closest('td').find('#hdnClassID').val(),
+                SubjectID: $(sender).closest('td').find('#hdnSubjectID').val(),
+                TeacherID: $(sender).closest('td').find('#hdnTeacherID').val(),
+                EducationLevelID: $(sender).closest('td').find('#hdnEducationLevelID').val()
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
@@ -593,7 +592,6 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
         });
     }
     function MergeClassChanged(sender) {
-
         $.ajax({
             url: "@Url.Action("EditMergedClassSections", "Admin")",
             type: 'POST',
@@ -665,19 +663,18 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
             type: 'POST',
             data: JSON.stringify({
 
-                PeriodID: $(sender).closest('td').find('#hdnPeriodID').val(),
-                SectionID: $(sender).closest('td').find('#hdnSectionID').val(),
-                SecondSectionID: $(sender).closest('td').find('#m_ddlSection').val(),
-                DayID: $(sender).closest('td').find('#hdnDayID').val(),
-                ClassID: $(sender).closest('td').find('#hdnClassID').val(),
-                SubjectID: $(sender).closest('td').find('#hdnSubjectID').val(),
-                TeacherID: $(sender).closest('td').find('#hdnTeacherID').val(),
-                EducationLevelID: $(sender).closest('td').find('#hdnEducationLevelID').val()
+                PeriodID: $(sender).closest('tr').find('#hdnPeriodID').val(),
+                SectionID: $(sender).closest('tr').find('#hdnSectionID').val(),
+                SecondSectionID: $(sender).closest('tr').find('#m_ddlSection').val(),
+                DayID: $(sender).closest('tr').find('#hdnDayID').val(),
+                ClassID: $(sender).closest('tr').find('#hdnClassID').val(),
+                SubjectID: $(sender).closest('tr').find('#hdnSubjectID').val(),
+                TeacherID: $(sender).closest('tr').find('#hdnTeacherID').val(),
+                EducationLevelID: $(sender).closest('tr').find('#hdnEducationLevelID').val()
 
             }),
             contentType: 'application/json; charset=utf-8',
             success: function (html) {
-
                 EditLactureForm.remove();
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
@@ -692,19 +689,19 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
     function DeleteMergedClass(sender) {
         if (confirm("Do you Really Want to Remove Merged Section????")) {
             $.ajax(
-{
-    type: "POST",
-    url: "/Admin/DeleteMergedClassSection/" + $(sender).attr('id'),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-
-    },
-    error: function (e) {
-        alert("errorn");
-    }
-});
+            {
+                type: "POST",
+                url: "/Admin/DeleteMergedClassSection/" + $(sender).attr('id'),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    EditLactureForm.remove();
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
             return true;
         }
         else {
@@ -712,44 +709,43 @@ var notice = ShowNotification('Loading', 'Please wait while we load the required
         }
     }
     function EducationLevelChanged(sender) {
-
         $.ajax(
-{
-    type: "POST",
-    url: "/Admin/GetClassesOnEducationLevel/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-        $('#ddlClass').html('');
-        $('#ddlClass').html('<option value="0">--Select--</option>');
-        $('#ddlClass').append(html);
-        $('#ddlSection').html('');
-        $('#ddlSection').html('<option value="0">--Select--</option>');
-    },
-    error: function (e) {
-        alert("errorn");
-    }
-});
+        {
+            type: "POST",
+            url: "/Admin/GetClassesOnEducationLevel/" + $(sender).val(),
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (html) {
+                $('#ddlClass').html('');
+                $('#ddlClass').html('<option value="0">--Select--</option>');
+                $('#ddlClass').append(html);
+                $('#ddlSection').html('');
+                $('#ddlSection').html('<option value="0">--Select--</option>');
+            },
+            error: function (e) {
+                alert("errorn");
+            }
+        });
     }
     function ClassChanged(sender) {
 
         $.ajax(
-{
-    type: "POST",
-    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-        $('#ddlSection').html('');
-        $('#ddlSection').html('<option value="0">--Select--</option>');
-        $('#ddlSection').append(html);
-    },
-    error: function (e) {
-        alert("errorn");
-    }
-});
+        {
+            type: "POST",
+            url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+            cache: false,
+            processData: false,
+            contentType: false,
+            success: function (html) {
+                $('#ddlSection').html('');
+                $('#ddlSection').html('<option value="0">--Select--</option>');
+                $('#ddlSection').append(html);
+            },
+            error: function (e) {
+                alert("errorn");
+            }
+        });
     }
     function MainSectionChanged(sender) {
         window.location.href = "/Admin/TimeTableManagement/" + $(sender).val();
