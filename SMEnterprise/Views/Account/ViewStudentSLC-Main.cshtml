@@ -1,0 +1,610 @@
+﻿
+@{
+    ViewBag.Title = "DemandRecipt";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Student Certificates</title>
+    <style>
+
+
+        .reportSign {
+            max-width: 200px;
+            max-height: 90px;
+        }
+    </style>
+}
+@model SMEnterprise.Models.SLCCertificateDetails
+<div class="" style="background-color: white;">
+
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-10" style="text-align:right;">
+
+        </div>
+    </div>
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Scholar's Register & Transfer Certificate</h2>
+            <button type="button" class="btn btn-primary pull-right" onclick="PrintSLC(0);"><i class="fa fa-print"></i> Print</button>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content ScholarRegister">
+            <table style="width: 100%; border:0px;">
+                <thead>
+                    <tr>
+                        <td style="text-align:left;width:20%;">
+                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                        </td>
+                        <td style="text-align:center;width:60%;border-top: 1px solid;">
+                            <h3> @Model.Branch.BranchSchoolName</h3>
+                            <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
+                            <p>Scholar's Register & Transfer Certificate</p>
+                        </td>
+                        <td style="text-align:left;width:20%;border-right: 1px solid;border-top: 1px solid;">
+                            S.R.N. @Model.Student.SchoolUID
+                            @*Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <table style="width:100%">
+                                <tr style="font-weight: bold;text-align: center;">
+                                    <td style="padding: 10px; border: 1px solid;">
+                                        Name of Scholar
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Parents Name
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Last Institution attended
+                                    </td>
+
+
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Name:&nbsp; <b>@Model.Student.Name</b><br />
+                                        Student ID:&nbsp;<b>@Model.Student.StudentSID</b>
+                                        <br />
+                                        S.R.N.:&nbsp;<b>@Model.Student.SchoolUID</b>
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    Mother:&nbsp; <b>@Model.Parent.MotherName</b>
+
+                                                    <br />Occupation:&nbsp; <b>@Model.Parent.MotherOccupationID</b>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    Mother:&nbsp; <b>@Model.Parent.FatherName</b>
+
+                                                    <br />Occupation:&nbsp;<b>@Model.Parent.FatherOccupationID</b>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">@Model.Student.PSchoolName</td>
+                                </tr>
+                                <tr style="font-weight: bold;text-align: center;">
+                                    <td style="padding: 10px; border: 1px solid;">
+                                        Religions  & Cast
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Address
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Length of Residence in this Province
+                                    </td>
+
+
+                                </tr>
+                                <tr>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Religion:&nbsp; <b>@Model.Student.Religion</b> <br />
+                                        Cast:&nbsp; <b>@Model.Student.CategoryName</b>
+
+                                    </td>
+                                    <td style="white-space:break-spaces;padding: 10px;border: 1px solid;">@Model.Student.MiniAddress</td>
+
+                                    <td style="padding: 10px;border: 1px solid;"></td>
+
+                                </tr>
+                                <tr style="font-weight: bold;text-align: center;">
+                                    <td style="padding: 10px; border: 1px solid;">
+                                        Date of Birth Scholar
+                                    </td>
+                                    <td colspan="2" style="padding: 10px; border: 1px solid;">Date of Birth (In words)</td>
+                                </tr>
+
+                                <tr style="text-align: center;">
+                                    <td style="padding: 10px; border: 1px solid;">
+                                        @Model.Student.DOB.ToString("dd MMM, yyyy")
+
+                                    </td>
+                                    <td colspan="2" style="padding: 10px; border: 1px solid;">
+                                        @SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Day) @Model.Student.DOB.ToString("MMMM") @SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Year)
+                                    </td>
+                                </tr>
+                            </table>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <table style="width:100%">
+                            <tr style="font-weight: bold;text-align: center;">
+                                <td style="padding: 5px;border: 1px solid;">Class</td>
+                                <td style="padding: 5px;border: 1px solid;">Date of Admission</td>
+                                <td style="padding: 5px;border: 1px solid;">Date of Promotion</td>
+                                <td style="padding: 5px;border: 1px solid;">Date of Removal</td>
+                                <td style="padding: 5px;border: 1px solid;">Cause of Removal</td>
+                                <td style="padding: 5px;border: 1px solid;">Session</td>
+                                <td style="padding: 5px;border: 1px solid;">Conduct</td>
+                                <td style="padding: 5px;border: 1px solid;"> Work</td>
+                                <td style="padding: 5px;border: 1px solid;"> Signature</td>
+                            </tr>
+                            @{
+                                var sctr = 0;
+                                foreach (var s in Model.Sessions)
+                                {
+                                    <tr>
+                                        <td rowspan="3" style="padding: 10px;border: 1px solid;">@s.ClassName</td>
+                                        <td style="padding: 10px;border: 1px solid;">@s.FromDate.ToString("dd MMM, yyyy")</td>
+                                        <td style="padding: 10px;border: 1px solid;">@(s.DateOfPromotion.Year == 1 ? "" : s.DateOfPromotion.ToString("dd MMM, yyyy"))</td>
+                                        <td style="padding: 10px;border: 1px solid;">@(s.DateOfRemoval.Year == 1 ? "" : s.DateOfRemoval.ToString("dd MMM, yyyy"))</td>
+                                        <td style="padding: 10px;border: 1px solid;">@s.CauseOfRemoval</td>
+                                        <td style="padding: 10px;border: 1px solid;">@s.SessionName</td>
+                                        <td style="padding: 10px;border: 1px solid;">@s.ConductWork</td>
+                                        <td style="padding: 10px;border: 1px solid;">@s.Work</td>
+                                        <td style="padding: 10px;border: 1px solid;"> </td>
+                                    </tr>
+                                    <tr>
+                                        <td  style="padding: 10px;border: 1px solid;">&nbsp;</td>
+                                        <td  style="padding: 10px;border: 1px solid;"></td>
+                                        <td  style="padding: 10px;border: 1px solid;"></td>
+                                        <td  style="padding: 10px;border: 1px solid;"></td>
+                                        <td  style="padding: 10px;border: 1px solid;"></td>
+                                        <td  style="padding: 10px;border: 1px solid;"></td>
+                                        <td  style="padding: 10px;border: 1px solid;"></td>
+                                        <td  style="padding: 10px;border: 1px solid;"></td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 10px;border: 1px solid;">&nbsp;</td>
+                                        <td style="padding: 10px;border: 1px solid;"></td>
+                                        <td style="padding: 10px;border: 1px solid;"></td>
+                                        <td style="padding: 10px;border: 1px solid;"></td>
+                                        <td style="padding: 10px;border: 1px solid;"></td>
+                                        <td style="padding: 10px;border: 1px solid;"></td>
+                                        <td style="padding: 10px;border: 1px solid;"></td>
+                                        <td style="padding: 10px;border: 1px solid;"></td>
+                                    </tr>
+                                    sctr++;
+                                }
+                                while (sctr < 7)
+                                {
+                                    <tr>
+                                        <td style="padding: 5px;border: 1px solid;">-</td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                        <td style="padding: 5px;border: 1px solid;"></td>
+                                    </tr>
+                                    sctr++;
+                                }
+                            }
+                            <tr>
+                                <td style="border-left:1px solid;padding: 10px;">
+                                    Note :
+                                </td>
+                                <td style="border-right:1px solid;padding: 10px;" colspan="8">1- Certified that the Scholar's Register has been posted up to date of the scholar's leaving as required by the departmental rules.</td>
+                            </tr>
+                            <tr>
+                                <td style="border-left:1px solid;padding-left: 10px;"></td>
+                                <td style="border-right:1px solid;padding: 10px;" colspan="8">2- If the Scholar has been among the first five in the class this fact should be mentioned in the column of conduct & work.</td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" style="border-left:1px solid;border-right:1px solid">.</td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" style="border-left:1px solid;border-right:1px solid">.</td>
+                            </tr>
+                            <tr>
+                                <td colspan="9" style="border-left:1px solid;border-right:1px solid">.</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="border-left:1px solid;border-bottom:1px solid;padding: 10px;">
+                                    <br />
+                                    <br />
+                                    Date : @Model.CreatedDate.ToString("dd MMM, yyyy")
+                                </td>
+
+                                <td colspan="3" style="border-bottom:1px solid;padding: 10px;">
+                                    <br />
+                                    <br />
+                                    <br />
+
+                                    Clerk________________
+                                </td>
+
+                                @if (Model.Branch.PrincipalSignature == null)
+                                {
+
+
+                                    <td colspan="3" style="border-right:1px solid;border-bottom:1px solid;padding: 10px;">
+                                        <br />
+                                        <br />
+                                        <br />
+
+                                        Principal________________
+                                    </td>
+
+
+                                }
+                                else
+                                {
+                                    <td colspan="3" style="border-right:1px solid;border-bottom:1px solid;padding: 10px;">
+                                        <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                        <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal
+                                    </td>
+                                }
+
+                            </tr>
+                            <tr>
+                                <td colspan="9">
+                                    <small> Generated by Pschool Software by Prabhuti Systems Pvt. Ltd.</small>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+<div class="x_panel">
+    <div class="x_title">
+        <h2>TRANSFER CERTIFICATE</h2>
+        <button type="button" class="btn btn-primary pull-right" onclick="PrintSLC(1);"><i class="fa fa-print"></i> Print</button>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content tccontainer">
+        <table style="width: 100%;padding:10px;">
+            <thead>
+                <tr>
+                    <td style="text-align:center;width:20%;">
+                        <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                    </td>
+                    <td style="text-align:center;width:60%;">
+                        <h3> @Model.Branch.BranchSchoolName</h3>
+                        <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
+                    </td>
+                    <td style="text-align:center;width:20%;">
+                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:center">
+                        <label style="padding: 20px;border: 2px solid;box-shadow: 6px 5px #888282;margin-bottom: 10px;">
+                            TRANSFER CERTIFICATE
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <table style="width:100%;padding:10px;">
+                            <tr>
+                                <td>TC Serial No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)</td>
+                                <td style="text-align:right">Admission/Registration No. @Model.Student.SchoolUID</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    @{
+                        var finalSession = Model.Sessions.LastOrDefault();
+                        var firstSession = Model.Sessions.FirstOrDefault();
+                    }
+                    <td colspan="3">
+                        <br /><br />
+                        <p style="font-size: 15px;">
+                            This is to certify that <b>@Model.Student.Name</b> @(Model.Student.Gender == 0 ? "son" : "daughter") of @Model.Parent.FatherName
+                            was admitted into this school on the @Model.Student.DOJ.ToString("dd MMM, yyyy") on a transfer from @firstSession.FromDate.ToString("dd MMM, yyyy")
+
+                            @*and left on @firstSession.ToDate.ToString("dd MMM, yyyy") with a @Model.Character Character.*@
+                            and left on @Model.TCDate.ToString("dd MMM, yyyy") with a @Model.Character Character.
+                        </p><br />
+                        <p style="font-size: 15px;">
+                            @(Model.Student.Gender == 0 ? "He" : "She") was then studying in the@("@") @finalSession.ClassName class of the <b><u>@Model.Stream</u></b> stream  the school
+                            year being from(*) @finalSession.FromDate.ToString("dd MMM, yyyy")
+                            to(*) @finalSession.ToDate.ToString("dd MMM, yyyy")
+                        </p><br />
+                        <p style="font-size: 15px;">
+                            All sums due (#) to this school on @(Model.Student.Gender == 0 ? "his" : "her") account have <b>@(Model.DuesCleared == "0" ? "not" : "")</b>
+                            been remitted or satisfactorily arranged for.
+                        </p><br />
+                        <p style="font-size: 15px;">
+                            @(Model.Student.Gender == 0 ? "His" : "Her")  date of birth according to our Admission Register is (In figures) <b><u>@Model.Student.DOB.ToString("dd MMM, yyyy")</u></b>
+                            (in words) <b><u>@SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Day) @Model.Student.DOB.ToString("MMMM") @SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Year)</u></b>
+
+                        </p><br />
+                        <p style="font-size: 15px;">
+                            Promotion has been ($) <b><u>@Model.Promotion</u></b>
+                        </p>
+                        <label>Date : @Model.TCDate.ToString("dd MMM, yyyy")</label>
+                        @if (Model.Branch.PrincipalSignature == null)
+                        {
+
+                            <br /><br /><br /><br />
+                            <label style="float:right">   (Head of the school) </label>
+
+
+                        }
+                        else
+                        {
+                            <label style="float:right">
+                                <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  (Head of the school)
+                            </label>
+                        }
+                        @*<label style="float:right">
+                                Signature.....................<br />
+                                (Head of the school)
+                            </label>*@
+
+                        <div>
+                            <label>
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                <b>COUNTERSIGNED</b>
+                            </label>
+
+                        </div>
+                        <div style="float:right">
+                            <label>
+                                <br />
+                                <br />
+                                <br />
+                                <br />
+                                School Rubber Stamp
+                            </label>
+                        </div>
+                        <div style="border-bottom:2px solid"></div>
+                        <div>
+                            @("@") To be given in wods.<br />
+                            + Mention whether ISC/ICSE stream.<br />
+                            * Insert month and year.<br />
+                            # Sums due to the school include payments for which provision is made in the rules
+                            supplied to the parent/guardian when the scholar was admitted into the school.<br />
+                            $ Granted / refused / not applicables.<br />
+                        </div>
+                    </td>
+                </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+<div class="x_panel">
+    <div class="x_title">
+        <h2>Character Certificate</h2>
+        <button type="button" class="btn btn-primary pull-right" onclick="PrintSLC(2);"><i class="fa fa-print"></i> Print</button>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content charactercontainer">
+        <table style="width: 100%;padding:10px;">
+            <thead>
+                <tr>
+                    <td style="text-align:center;width:20%;">
+                        <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                    </td>
+                    <td style="text-align:center;width:60%;">
+                        <h3> @Model.Branch.BranchSchoolName</h3>
+                        <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
+                        <p>Affiliated To C.B.S.E.Board</p>
+                    </td>
+                    <td style="text-align:center;width:20%;">
+                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:center">
+                        <h1 style="padding: 20px;margin-bottom: 10px;">
+                            * Character Certificate *
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <table style="width:100%;padding:10px;">
+                            <tr>
+                                <td></td>
+                                <td style="text-align:right">Dated @Model.TCDate.ToString("dd MMM, yyyy")</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td colspan="3">
+                        <br />
+                        <p style="font-size: 15px;">
+                            This is to certify that <b>@Model.Student.Name</b> @(Model.Student.Gender == 0 ? "son" : "daughter") of @Model.Parent.FatherName
+                            has been / was a student of this school during the session from @firstSession.SessionName he has appeared in the class @finalSession.ClassName examination of the year
+                            @finalSession.SessionName .
+                        </p>
+                        <p style="font-size: 15px;">
+                            As far as I know @(Model.Student.Gender == 0 ? "he" : "she") bears a @Model.Character Character.
+                        </p>
+                        <p style="font-size: 15px;">
+                            I wish him all success in life
+                        </p><br />
+                        <br />
+                        <br />
+                        <br />
+
+                        <label>
+                            <br /><br /><br /><br />
+                            <b>HEAD CLERK</b>
+                        </label>
+
+
+                        @if (Model.Branch.PrincipalSignature == null)
+                        {
+
+                            <br /><br /><br />
+                            <label style="float:right">  Principal </label>
+
+
+                        }
+                        else
+                        {
+                            <label style="float:right">
+                                <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                <br />&nbsp; &nbsp; &nbsp; &nbsp;  Principal
+                            </label>
+                        }
+                        <div style="border-bottom:2px dotted"></div>
+                    </td>
+                </tr>
+            </thead>
+        </table>
+        <table style="width: 100%;padding:10px;">
+            <thead>
+                <tr>
+                    <td style="text-align:center;width:20%;">
+                        <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                    </td>
+                    <td style="text-align:center;width:60%;">
+                        <h3> @Model.Branch.BranchSchoolName</h3>
+                        <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
+                        <p>Affiliated To C.B.S.E.Board</p>
+                    </td>
+                    <td style="text-align:center;width:20%;">
+                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:center">
+                        <h1 style="padding: 20px;margin-bottom: 10px;">
+                            * Character Certificate *
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <table style="width:100%;padding:10px;">
+                            <tr>
+                                <td></td>
+                                <td style="text-align:right">Dated @Model.TCDate.ToString("dd MMM, yyyy")</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+
+                    <td colspan="3">
+                        <br />
+                        <p style="font-size: 15px;">
+                            This is to certify that <b>@Model.Student.Name</b> @(Model.Student.Gender == 0 ? "son" : "daughter") of @Model.Parent.FatherName
+                            has been / was a student of this school during the session from @firstSession.SessionName he has appeared in the class @finalSession.ClassName examination of the year
+                            @finalSession.SessionName .
+                        </p>
+                        <p style="font-size: 15px;">
+                            As far as I know @(Model.Student.Gender == 0 ? "he" : "she") bears a @Model.Character Character.
+                        </p>
+                        <p style="font-size: 15px;">
+                            I wish @(Model.Student.Gender == 0 ? "him" : "her") all success in life
+                        </p><br />
+                        <br />
+                        <br />
+                        <br />
+
+                        <label>
+                            <br /><br /><br /><br />
+                            <b>HEAD CLERK</b>
+                        </label>
+
+
+                        @if (Model.Branch.PrincipalSignature == null)
+                        {
+
+                            <br /><br /><br /><br />
+                            <label style="float:right">  Principal </label>
+
+
+                        }
+                        else
+                        {
+                            <label style="float:right">
+                                <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal
+                            </label>
+                        }
+
+                        @*<b>PRINCIPAL</b>*@
+
+                    </td>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+</div>
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+
+
+
+        });
+    </script>
+    <script>
+
+        function PrintSLC(type) {
+            var contents = '';
+            if (type == 0) {
+                contents = $(".ScholarRegister").html();
+            }
+            else if (type == 1) {
+                contents = $(".tccontainer").html();
+            }
+            else {
+                contents = $(".charactercontainer").html();
+            }
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" type="text/css" />');
+
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 1000);
+        }
+    </script>
+}

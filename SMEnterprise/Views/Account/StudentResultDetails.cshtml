@@ -21,6 +21,7 @@
         .print {
             display: none;
         }
+
         .reportSign {
             max-width: 200px;
             max-height: 90px;
@@ -123,7 +124,7 @@
                                             <div class="col-md-12" style="text-align:right;">
                                                 @if (Model.Student.Photo == null)
                                                 {
-                                                <p style="width:100px;height:100px;"></p>
+                                                    <p style="width:100px;height:100px;"></p>
                                                 }
                                                 else
                                                 {
@@ -205,50 +206,50 @@
                                     decimal subTotalScored = 0;
                                     var isML = false;
                                     var isAnyNML = false;
-                                    <tr>
-                                        <td><b>@sm.SubjectName</b></td>
-                                        @foreach (NameIDModel st in Model.SubjectTypes)
-                                        {
-                                            var isfound = false;
-                                            foreach (ExamResultDetailModel r in Model.Result)
-                                            {
-                                                if ((r.MainSubID == 0 && r.SubjectID == sm.SubjectID || r.MainSubID != 0 && r.MainSubID == sm.SubjectID) && r.SubjectType == st.ID)
-                                                {
-                                                    subTotalMarks = subTotalMarks + r.MaxMarks;
-                                                    subTotalScored = subTotalScored + r.MarksScored;
-                                                    isfound = true;
-                                                    isML = r.Status == -1 || isML ? true : false;
-                                                    isAnyNML = !isML && !isAnyNML ? true : isAnyNML;
-                                                    <td>@(r.MaxMarks == 0 ? "NA" : r.MaxMarks.ToString("00") )</td>
-                                                    <td>@(r.MarksScored == 0 ? "NA" : r.MarksScored.ToString("00") )</td>
-                                                    @*<td>@(r.PassMarks == 0 ? "NA" : r.Status == -1 ? "M/L" : r.PassMarks.ToString("00") )</td>*@
+                        <tr>
+                            <td><b>@sm.SubjectName</b></td>
+                            @foreach (NameIDModel st in Model.SubjectTypes)
+                            {
+                                var isfound = false;
+                                foreach (ExamResultDetailModel r in Model.Result)
+                                {
+                                    if ((r.MainSubID == 0 && r.SubjectID == sm.SubjectID || r.MainSubID != 0 && r.MainSubID == sm.SubjectID) && r.SubjectType == st.ID)
+                                    {
+                                        subTotalMarks = subTotalMarks + r.MaxMarks;
+                                        subTotalScored = subTotalScored + r.MarksScored;
+                                        isfound = true;
+                                        isML = r.Status == -1 || isML ? true : false;
+                                        isAnyNML = !isML && !isAnyNML ? true : isAnyNML;
+                                        <td>@(r.MaxMarks == 0 ? "NA" : r.MaxMarks.ToString("00") )</td>
+                                        @* <td>@(r.MarksScored == 0 ? "NA" : r.MarksScored.ToString("00") )</td>*@
+                                        <td>@(r.PassMarks == 0 ? "NA" : r.Status == -1 ? "M/L" : r.PassMarks.ToString("00") )</td>
 
-                                                    break;
-                                                }
-                                            }
-                                            if (!isfound)
-                                            {
-                                                <td>NA</td>
-                                                <td>NA</td>
-                                            }
-                                        }
-                                        @*<td>@(isML == true ? "M/L" : subTotalScored.ToString("00"))</td>*@
-                                        <td>@(isAnyNML == false ? "M/L" : subTotalScored.ToString("00"))</td>
-                                        <td>@(subTotalMarks == 0 || isML ? "--" : AcadmicModel.CalculateGrade(subTotalScored, subTotalMarks))</td>
+                                        break;
+                                    }
+                                }
+                                if (!isfound)
+                                {
+                                    <td>NA</td>
+                                    <td>NA</td>
+                                }
+                            }
+                            @*<td>@(isML == true ? "M/L" : subTotalScored.ToString("00"))</td>*@
+                            <td>@(isAnyNML == false ? "M/L" : subTotalScored.ToString("00"))</td>
+                            <td>@(subTotalMarks == 0 || isML ? "--" : AcadmicModel.CalculateGrade(subTotalScored, subTotalMarks))</td>
 
-                                    </tr>
+                        </tr>
 
                                     TotalMarks = TotalMarks + subTotalMarks;
                                     MarksObtained = MarksObtained + subTotalScored;
                                 }
-                                    <tr style="font-weight: bold;">
-                                        <td colspan="@(Model.SubjectTypes.Count*2+1)">
-                                            Total
-                                        </td>
-                                        <td>@MarksObtained</td>
-                                      
-                                        <td>@((MarksObtained / TotalMarks * 100).ToString("0.0"))% (@(TotalMarks == 0 ? "--" : AcadmicModel.CalculateGrade(MarksObtained, TotalMarks)))</td>
-                                    </tr>
+                                <tr style="font-weight: bold;">
+                                    <td colspan="@(Model.SubjectTypes.Count*2+1)">
+                                        Total
+                                    </td>
+                                    <td>@MarksObtained</td>
+
+                                    <td>@((MarksObtained / TotalMarks * 100).ToString("0.0"))% (@(TotalMarks == 0 ? "--" : AcadmicModel.CalculateGrade(MarksObtained, TotalMarks)))</td>
+                                </tr>
 
 
                             }

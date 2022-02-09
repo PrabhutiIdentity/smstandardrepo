@@ -245,30 +245,27 @@
                                                             </div>
                                                         </div>
                                                     }
-
-                                                    <button type="button" class="btn btn-info pull-right" onclick="SubmitAns('@q.OXQID');">Save & Next </button>
-
+                                                    <a class="btn btn-primary pull-right" id="Submitanswer" onclick="SubmitAns('@q.OXQID');">Save & next </a>
+                                                    <button type="button" class="btn btn-info pull-right" id="submitsheet" style="display:none;" onclick="SubmitExam('@q.OXQID');">Save & Submit</button>
                                                 </div>
 
                                             </li>
-
-
                                             ctr++;
                                         }
                                     }
                                 </ul>
                             </div>
                             <br /><br />
-                            <div class="buttons">
-                                <a class="btn btn-primary pull-right" id="next">Next</a>
-                                <a class="btn btn-primary pull-right" id="prev" style="display:none;">Previous</a>
+                                  <div class="buttons">
+                                       <a class="btn btn-primary pull-right" id="next">Skip</a>
+                                      <a class="btn btn-primary pull-right" id="prev" style="display:none;">Previous</a>
 
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button type="button" class="btn btn-info pull-right" id="submitsheet" style="display:none;" onclick="return SubmitExam();">Submit Answer Sheet</button>
-                                    </div>
-                                </div>
-                            </div>
+                                      @*<div class="row">
+                                          <div class="col-md-12">
+                                              <button type="button" class="btn btn-info pull-right" id="submitsheet" style="display:none;" onclick="return SubmitExam();">Submit Answer Sheet</button>
+                                          </div>
+                                      </div>*@
+                                  </div>
                         </div>
 
                     </div>
@@ -306,15 +303,16 @@
 
 
             $("#next").click(function () {
+                debugger;
                 if ($(".divs ul li:visible").next().length != 0) {
                     $(".divs ul li:visible").next().show().prev().hide();
 
                     var hasnextelement = $(".divs ul li:visible").next().length;
                     if (hasnextelement == 0) {
                         $("#next").hide();
-                        $("#submitsheet").show();
-                        $("#submitans").hide();
-                    }
+                        $(".divs ul li #Submitanswer").hide();
+                        $(".divs ul li #submitsheet").show();
+                     }
                     else {
                         $("#next").show();
                         $("#submitsheet").hide();
@@ -327,7 +325,7 @@
                     }
                     else {
                         $("#prev").show();
-                    }
+                     }
                 }
                 else {
                     $(".divs ul li:visible").hide();
@@ -337,7 +335,7 @@
             });
 
             $("#prev").click(function () {
-                 if ($(".divs ul li:visible").prev().length != 0) {
+                if ($(".divs ul li:visible").prev().length != 0) {
                     $(".divs ul li:visible").prev().show().next().hide();
 
                     var hasprevelement = $(".divs ul li:visible").prev().length;
@@ -352,11 +350,13 @@
                     if (hasnextelement == 0) {
                         $("#next").hide();
                         $("#submitsheet").show();
+                        $("#lastsubmit").show();
                         $("#submitans").hide();
                     }
                     else {
                         $("#next").show();
                         $("#submitsheet").hide();
+                        $("#lastsubmit").hide();
                         $("#submitans").show();
                     }
                 }
@@ -405,11 +405,12 @@
 
     <script>
 
-        function SubmitExam() {
+        function SubmitExam(questionid) {
             if (confirm('Are you sure want to submit the answers?')) {
 
+                SubmitAns(questionid);
                 $('#frmSubmitAnswerSheet').submit();
-             }
+            }
         }
 
 
