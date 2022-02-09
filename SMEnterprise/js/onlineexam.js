@@ -5,60 +5,68 @@
     Answersobj.Name = name;
     Answersobj.ID = questionid;
 
-    var questionbankobj = new Object();
-    questionbankobj.QuesAnswers = Answersobj;
-    questionbankobj.OExamID = $('#ExamID').val();
-    questionbankobj.SubAnsID = $('#hdnSubAnsID_' + questionid).val();
-    $.ajax(
-        {
-            url: "/Parent/SubmitAnswer",
-            type: "POST",
-            data: JSON.stringify(questionbankobj),
-            contentType: 'application/json; charset=utf-8',
-            success: function (res) {
-                debugger;
-                if (res != null) {
-                    $('#hdnSubAnsID_' + questionid).val(res);
+    if (Answersobj.Name == "") {
+        alert("Please select any option to save");
+    }
+    else
+    {
+        var questionbankobj = new Object();
+        questionbankobj.QuesAnswers = Answersobj;
+        questionbankobj.OExamID = $('#ExamID').val();
+        questionbankobj.SubAnsID = $('#hdnSubAnsID_' + questionid).val();
+        $.ajax(
+            {
+                url: "/Parent/SubmitAnswer",
+                type: "POST",
+                data: JSON.stringify(questionbankobj),
+                contentType: 'application/json; charset=utf-8',
+                success: function (res) {
+                    debugger;
+                    if (res != null) {
+                        $('#hdnSubAnsID_' + questionid).val(res);
+                    }
+                },
+                error: function (e) {
+                    alert("errorn");
                 }
-            },
-            error: function (e) {
-                alert("errorn");
-            }
-        });
-    SaveAndNext();
+            });
+        SaveAndNext();
+    }
 }
 
-function SaveAndNext() {
+function SaveAndNext()
+{
     debugger;
-    if ($(".divs ul li:visible").next().length != 0) {
-        $(".divs ul li:visible").next().show().prev().hide();
+         if ($(".divs ul li:visible").next().length != 0) {
+            $(".divs ul li:visible").next().show().prev().hide();
 
-        var hasnextelement = $(".divs ul li:visible").next().length;
-        if (hasnextelement == 0) {
-            $("#next").hide();
-            $("#submitsheet").show();
-            $("#submitans").hide();
+            var hasnextelement = $(".divs ul li:visible").next().length;
+            if (hasnextelement == 0) {
+                $("#next").hide();
+                $(".divs ul li #Submitanswer").hide();
+                $(".divs ul li #submitsheet").show();
+            }
+            else {
+                $("#next").show();
+                $(".divs ul li #submitsheet").hide();
+                $(".divs ul li #submitans").show();
+            }
+
+            var hasprevelement = $(".divs ul li").prev().length;
+            if (hasprevelement == 0) {
+                $("#prev").hide();
+            }
+            else {
+                $("#prev").show();
+            }
         }
         else {
-            $("#next").show();
-            $("#submitsheet").hide();
-            $("#submitans").show();
+             $(".divs ul li:visible").hide();
+             $(".divs ul li:last").show();
+             //$('#lastAnswer').html("You have completed your exam, Press Submit Button to submit the sheet or Press Previous button to go for prevoius questions.")
         }
-
-        var hasprevelement = $(".divs ul li").prev().length;
-        if (hasprevelement == 0) {
-            $("#prev").hide();
-        }
-        else {
-            $("#prev").show();
-        }
-    }
-    else {
-        $(".divs ul li:visible").hide();
-        $('#lastAnswer').append("You have completed your exam, Press Submit Button to submit the sheet or Press Previous button to go for prevoius questions.")
-    }
-    return false;
-}
+        return false;
+ }
 
 function GetAnswers(questionid) {
     debugger;
