@@ -248,6 +248,7 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase AddressCertificateUploader { get; set; }
         public HttpPostedFileBase CategoryCertificateUploader { get; set; }
         public HttpPostedFileBase TransferCertificateUploader { get; set; }
+        public string EducationLevel { get; set; }
     }
     public class StudentEditModel
     {
