@@ -37,25 +37,30 @@
         width: expression((this.width/this.height)>=1?125:'auto');
         height: expression((this.width/this.height)<1?125:'auto');
     }
-    #tblCategory>tbody>tr>td{
-        vertical-align:middle;
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
     }
+
     .tblResult {
         text-align: center;
         margin-bottom: 5px;
     }
-    .tblResult>tbody>tr>td{
-        padding:1px;
-    }
+
+        .tblResult > tbody > tr > td {
+            padding: 1px;
+        }
+
         .tblResult > thead > tr > td {
             padding: 1px;
         }
+
         .tblResult thead {
             font-weight: bold;
         }
-    .tblResultEvName
-    {
-        font-weight:bold;
+
+    .tblResultEvName {
+        font-weight: bold;
     }
 </style>
 <div class="">
@@ -76,7 +81,7 @@
                                 <div class="col-md-3 padding">
                                     <label class="col-md-4 text-right" style="padding-right: 0px;">Session :</label>
                                     <div class="col-md-8">
-                                        <select class="form-control" name="SessionID" id="ddlSessions"  onchange="$('#frmGetStudents').submit();">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
                                             <option value="0">--Select Session--</option>
                                             @foreach (SchoolSessionModel el in Model.Sessions)
                                             {
@@ -112,10 +117,10 @@
                                     <label class="col-md-4 text-right padding-R">Evaluation : </label>
                                     <div class="col-md-8 padding-L" style="padding-left: 10px;">
                                         <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetStudents').submit();">
-                                                @foreach (NameIDModel el in Model.Evaluations)
-                                                {
-                                                    <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
-                                                }
+                                            @foreach (NameIDModel el in Model.Evaluations)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
+                                            }
                                             }
                                         </select>
                                     </div>
@@ -123,7 +128,7 @@
                             </div>
                         </div>
                     </div>
-                                                }
+                }
                 <div class="x_panel">
 
                     <a class="btn btn-dark" onclick="PrintReport();">Print</a>
@@ -143,7 +148,7 @@
                                     <tr>
 
                                         <td class="NoPrint">
-                                            <img id="imgPhoto"  style="height:120px;width:120px" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                            <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
                                         </td>
                                         <td>
                                             <b> @c.Name</b><br />
@@ -155,8 +160,8 @@
 
                                         </td>
                                         <td>
-                                                @Html.Raw(c.ResultDetails)
-                                       </td>
+                                            @Html.Raw(c.ResultDetails)
+                                        </td>
                                     </tr>
 
                                     count++;
@@ -174,12 +179,118 @@
 
 @section scripts
 {
-<script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
-<script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>
+    @*<script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
+        <script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>*@
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
 
     <script>
+
         $(document).ready(function () {
-            $('#sClassName').html(' For : ' + $('#ddlClass option:selected').text() + '-' + $('#ddlSection option:selected').text() + ' (' + $('#ddlEvaluation option:selected').text() + ') - ' + $('#ddlSessions option:selected').text());
+            var BranchSchoolName;
+          //  $('#sClassName').html(' For : ' + $('#ddlClass option:selected').text() + '-' + $('#ddlSection option:selected').text() + ' (' + $('#ddlEvaluation option:selected').text() + ') - ' + $('#ddlSessions option:selected').text());
+              var handleDataTableButtons = function () {
+                 var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+                var rpname = 'Student Result Checking 1 For' + $('#ddlClass option:selected').text() + '-' + $('#ddlSection option:selected').text() + ' (' + $('#ddlEvaluation option:selected').text() + ') - ' + $('#ddlSessions option:selected').text();
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
+if ($("#tblCategory").length) {
+                      $("#tblCategory").DataTable({
+                          "pageLength": 20,
+                          bSort: false,
+                          dom: "Bfrtip",
+                          buttons: [
+                              {
+                              extend: "copy",
+                                  className: "btn-sm",
+                                  footer: true,
+                                  text: '<i class="fa fa- copy"></i> Copy',
+
+                                  message: printdate,
+                                  messageTop: '@Model.Branch.BranchSchoolName',
+
+                            messageBottom: repname,
+                            title: rpname
+                            },
+                            {
+                              extend: "csv",
+                                className: "btn-sm",
+                                text: '<i class="fas fa-file-csv"></i> CSV',
+                                 footer: true,
+                                message: printdate,
+                            messageBottom: repname,
+                            title: rpname
+                            },
+                            {
+                              extend: "excel",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-table fainfo" aria-hidden="true"></i> Excel',
+                                footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+                            },
+                            {
+                              extend: "pdfHtml5",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-file-pdf-o"></i> Pdf',
+                                footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                                  doc.defaultStyle.fontSize = 7;
+                                  doc.styles.tableHeader.fontSize = 10;
+
+                                  doc['header'] = (function () {
+                                      return {
+                                          columns: [
+                                              {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                      }
+                                  });
+                              },
+                          message: printdate,
+                          messageBottom: repname,
+                          title: rpname
+                            },
+                            {
+                              extend: "print",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-print"></i> Print',
+                                 footer: true,
+                          message: printdate,
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+                            },
+                        ],
+                        responsive: true
+                    });
+                  }
+            };
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+            TableManageButtons.init();
+
+        });
         });
 
         function ClassChanged(sender) {

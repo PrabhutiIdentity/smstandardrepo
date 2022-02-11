@@ -3069,6 +3069,13 @@ namespace SMEnterprise.Repository
                     objModel.SectionID = multi.Read<int>().SingleOrDefault();
                     objModel.Sessions = multi.Read<NameIDModel>().ToList();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+
+                        objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return objModel;
@@ -3342,6 +3349,15 @@ namespace SMEnterprise.Repository
                     objModel.SectionID = multi.Read<int>().SingleOrDefault();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
             return objModel;
@@ -3408,6 +3424,15 @@ namespace SMEnterprise.Repository
                     objModel.SectionID = multi.Read<int>().SingleOrDefault();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
             return objModel;
