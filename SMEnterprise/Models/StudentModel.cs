@@ -164,6 +164,7 @@ namespace SMEnterprise.Models
         public string StudentSID { get; set; }
         public string Name { get; set; }
         public DateTime DOB { get; set; }
+        public int Age { get; set; }
         public int Gender { get; set; }
         public int Nationality { get; set; }
         public string NationalityText { get; set; }
