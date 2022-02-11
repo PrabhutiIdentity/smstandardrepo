@@ -1,6 +1,7 @@
 ﻿using BigBlueButtonAPI.Common;
 using BigBlueButtonAPI.Core;
 using Microsoft.AspNet.SignalR;
+using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json;
 using SMEnterprise.Models;
 using SMEnterprise.Repository;
@@ -21,7 +22,15 @@ namespace SMEnterprise.Controllers
     public class HomeController : Controller
     {
         private readonly IHubContext<OnlineClassHub> _hubContext;
+        private IHostingEnvironment _hostingEnvironment;
         //private readonly BigBlueButtonAPIClient client;
+
+        AccountData oData = new AccountData();
+
+        public HomeController( IHostingEnvironment hostingEnvironment)
+        {
+              _hostingEnvironment = hostingEnvironment;
+        }
         public HomeController()
         {
             CommonData objcd = new CommonData();
@@ -49,6 +58,39 @@ namespace SMEnterprise.Controllers
         }
         public ActionResult ClassEnded()
         {
+
+            return View();
+        }
+        public async Task<ActionResult> AdmissionEnquiry(string ID = null)
+        {
+            int BranchID = CommonUsage.ConvertToInt(ID);
+            AdmissionEnquiryMasterModel model =await oData.GetBranchDetails(BranchID);
+            return View(model);
+        }
+        public async Task<ActionResult> UpdateAdmission(AdmissionEnquiryMasterModel obj)
+        {
+            string filePath = "";
+            
+            if (obj.ImageFile != null)
+            {
+                 obj.Image = obj.ImageFile.FileName.Replace(" ", "-");
+                System.IO.File.Delete(
+                        Server.MapPath(CommonUsage.StudentDocumentsBasePath + obj.StudentID + "_AdmissionEnquiry_"));
+
+                var path = Path.Combine(Server.MapPath(CommonUsage.StudentDocumentsBasePath),
+                 obj.StudentID + "_AdmissionEnquiry_" + obj.Image);
+                obj.ImageFile.SaveAs(path);
+            }
+            obj = oData.UpdateAdmissionEnquiry(obj);
+             
+             
+             
+            return Redirect("Home/Success/" + obj.EnquiryID);
+        }
+        public ActionResult Success(string id = null)
+        {
+            //int EnquiryID = CommonUsage.ConvertToInt(id);
+            //AdmissionEnquiryMasterModel model = oData.GetEnquiryDetails(EnquiryID);
 
             return View();
         }
@@ -334,7 +376,7 @@ namespace SMEnterprise.Controllers
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
     }
-
+    
     public class StudentResultGetModel
     {
         public DateTime DOB { get; set; }
