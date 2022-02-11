@@ -761,9 +761,9 @@ namespace SMEnterprise.Models
             dtAttandanceDetails.Columns.Add("Grade");
             dtAttandanceDetails.Columns.Add("Status");
             dtAttandanceDetails.Columns.Add("GradePoints");
-            // For Using Grading
-            dtAttandanceDetails.Columns.Add("MarksScored");
-            //
+            //// For Using Grading
+            //dtAttandanceDetails.Columns.Add("MarksScored");
+            ////
             foreach (ExamResultDetailModel e in ExamResults)
             {
                 DataRow dr = dtAttandanceDetails.NewRow();
@@ -775,7 +775,7 @@ namespace SMEnterprise.Models
                 dr["Status"] = e.Status;
                 dr["GradePoints"] = e.GradePoints;
                 // For Using Grading
-                dr["MarksScored"] = e.MarksScored;
+                //dr["MarksScored"] = e.MarksScored;
                 //
 
                 dtAttandanceDetails.Rows.Add(dr);
