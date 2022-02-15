@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Http;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
@@ -41,6 +42,7 @@ namespace SMEnterprise.Models
     public class AdmissionEnquiryMasterModel
     {
         public int SrNo { get; set; }
+        public string SerailNO { get; set; }
         public int AssignedTo { get; set; }
         public int Followups { get; set; }
         public string SessionName { get; set; }
@@ -80,6 +82,29 @@ namespace SMEnterprise.Models
         public int StudentID { get; set; }
         public int PaymentStatus { get; set; }
         public string PaymentDetails { get; set; }
+        public string Image { get; set; }
+        public HttpPostedFileBase ImageFile { get; set; }
+        public string StudentAadharNo { get; set; }
+        public string FatherAadhaarNo { get; set; }
+        public string MotherAadhaarNo { get; set; }
+        public string Caste { get; set; }
+        public DateTime DateOfBirth { get; set; }
+        public string TelephoneNoReg { get; set; }
+        public string TelephoneNoOff { get; set; }
+        public string Sibling { get; set; }
+        public string SiblingName { get; set; }
+        public string SiblingClass { get; set; }
+        public string MotherQuaAndOcc { get; set; }
+        public string PermanentAddress { get; set; }
+        public string TemporaryAddress { get; set; }
+        public string FatherQuaAndOcc { get; set; }
+        public int BranchID { get; set; }
+        public List<SBranchModel> BranchData { get; set; }
+        public int ReligionID { get; set; }
+        public List<NameIDModel> Religions { get; set; }
+        public List<ClassModel> Classes { get; set; }
+        public List<NameIDModel> Casts { get; set; }
+
     }
     public class ToDoItemModel {
         public int OpType { get; set; }
