@@ -42,6 +42,7 @@ namespace SMEnterprise.Models
     public class AdmissionEnquiryMasterModel
     {
         public int SrNo { get; set; }
+        public string SerailNO { get; set; }
         public int AssignedTo { get; set; }
         public int Followups { get; set; }
         public string SessionName { get; set; }
