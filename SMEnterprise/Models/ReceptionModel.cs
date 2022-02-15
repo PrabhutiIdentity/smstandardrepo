@@ -99,6 +99,10 @@ namespace SMEnterprise.Models
         public string FatherQuaAndOcc { get; set; }
         public int BranchID { get; set; }
         public List<SBranchModel> BranchData { get; set; }
+        public int ReligionID { get; set; }
+        public List<NameIDModel> Religions { get; set; }
+        public List<ClassModel> Classes { get; set; }
+        public List<NameIDModel> Casts { get; set; }
 
     }
     public class ToDoItemModel {

@@ -4527,7 +4527,9 @@ namespace SMEnterprise.Repository
                 {
                     objNew.BranchID = multi.Read<int>().SingleOrDefault();
                     objNew.BranchData = multi.Read<SBranchModel>().ToList();
-                     
+                    objNew.Religions = multi.Read<NameIDModel>().ToList();
+                    objNew.Casts = multi.Read<NameIDModel>().ToList();
+                    objNew.Classes = multi.Read<ClassModel>().ToList();
                 }
             }
 
@@ -4587,6 +4589,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@FatherQuaAndOcc", objData.FatherQuaAndOcc);
                 paramater.Add("@TemporaryAddress", objData.TemporaryAddress);
                 paramater.Add("@PermanentAddress", objData.PermanentAddress);
+                paramater.Add("@Religion", objData.ReligionID);
 
                 return con.Query<AdmissionEnquiryMasterModel>("spn_InsertUpdateAdmissionEnquiry", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
