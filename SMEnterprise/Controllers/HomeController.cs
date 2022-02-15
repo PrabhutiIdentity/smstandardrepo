@@ -70,21 +70,24 @@ namespace SMEnterprise.Controllers
         public async Task<ActionResult> UpdateAdmission(AdmissionEnquiryMasterModel obj)
         {
             string filePath = "";
-            
             if (obj.ImageFile != null)
             {
-                 obj.Image = obj.ImageFile.FileName.Replace(" ", "-");
+                obj.Image = obj.ImageFile.FileName.ToString();
+            }
+            obj.SerailNO = Guid.NewGuid().ToString();
+            if (obj.ImageFile != null)
+            {
+                 //obj.Image = obj.ImageFile.FileName.Replace(" ", "-");
                 System.IO.File.Delete(
-                        Server.MapPath(CommonUsage.StudentDocumentsBasePath + obj.StudentID + "_AdmissionEnquiry_"));
+                        Server.MapPath(CommonUsage.StudentDocumentsBasePath + obj.SerailNO.ToString() + "_AdmissionEnquiry_"));
 
                 var path = Path.Combine(Server.MapPath(CommonUsage.StudentDocumentsBasePath),
-                 obj.StudentID + "_AdmissionEnquiry_" + obj.Image);
+                 obj.SerailNO + "_AdmissionEnquiry_" + obj.Image);
                 obj.ImageFile.SaveAs(path);
             }
+
             obj = oData.UpdateAdmissionEnquiry(obj);
-             
-             
-             
+
             return Redirect("Home/Success/" + obj.EnquiryID);
         }
         public ActionResult Success(string id = null)
