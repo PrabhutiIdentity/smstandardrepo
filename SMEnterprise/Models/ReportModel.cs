@@ -135,6 +135,7 @@ public class ClassGenderCategoryCountModel
         public int SchemeID { get; set; }
         public int EducationLevelID { get; set; }
         public int SBranchID { get; set; }
+        public List<NameIDModel> Categories { get; set; }
     }
     public class DailyAttandanceReportModel
     {
