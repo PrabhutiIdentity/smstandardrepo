@@ -62,33 +62,31 @@ namespace SMEnterprise.Controllers
             return View();
         }
         public async Task<ActionResult> AdmissionEnquiry(string ID = null)
+        
         {
             int BranchID = CommonUsage.ConvertToInt(ID);
             AdmissionEnquiryMasterModel model =await oData.GetBranchDetails(BranchID);
             return View(model);
         }
-        public async Task<ActionResult> UpdateAdmission(AdmissionEnquiryMasterModel obj)
+        public async Task<ActionResult> UpdateAdmission(AdmissionEnquiryMasterModel objData)
         {
             string filePath = "";
-            if (obj.ImageFile != null)
+            if (objData.ImageFile != null)
             {
-                obj.Image = obj.ImageFile.FileName.ToString();
+                objData.Image = objData.ImageFile.FileName.Replace(" ", "-");
             }
-            obj.SerailNO = Guid.NewGuid().ToString();
-            if (obj.ImageFile != null)
+            //obj.SerailNO = Guid.NewGuid().ToString();
+           
+
+            objData = oData.UpdateAdmissionEnquiry(objData);
+            if (objData.ImageFile != null)
             {
-                 //obj.Image = obj.ImageFile.FileName.Replace(" ", "-");
-                System.IO.File.Delete(
-                        Server.MapPath(CommonUsage.StudentDocumentsBasePath + obj.SerailNO.ToString() + "_AdmissionEnquiry_"));
 
-                var path = Path.Combine(Server.MapPath(CommonUsage.StudentDocumentsBasePath),
-                 obj.SerailNO + "_AdmissionEnquiry_" + obj.Image);
-                obj.ImageFile.SaveAs(path);
+                var path = Path.Combine(Server.MapPath(CommonUsage.StudentDocumentsBasePath), objData.EnquiryID + "_AdmissionEnquiry_" + objData.Image);
+                objData.ImageFile.SaveAs(path);
             }
 
-            obj = oData.UpdateAdmissionEnquiry(obj);
-
-            return Redirect("Home/Success/" + obj.EnquiryID);
+            return Redirect("~/Success/" + objData.EnquiryID);
         }
         public ActionResult Success(string id = null)
         {
