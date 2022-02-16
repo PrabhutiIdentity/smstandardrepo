@@ -2981,6 +2981,12 @@ namespace SMEnterprise.Repository
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.Houses = multi.Read<NameIDModel>().ToList();
                     objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    try
+                    {
+                        objModel.Categories = multi.Read<NameIDModel>().ToList();
+                    }
+                    catch
+                    { }
                 }
             }
             return objModel;
