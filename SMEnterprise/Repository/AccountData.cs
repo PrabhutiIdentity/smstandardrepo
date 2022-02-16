@@ -4532,7 +4532,7 @@ namespace SMEnterprise.Repository
                 using (var multi = await con.QueryMultipleAsync("sp_GetBranchDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objNew.BranchID = multi.Read<int>().SingleOrDefault();
-                    objNew.BranchData = multi.Read<SBranchModel>().ToList();
+                   objNew.BranchData = multi.Read<SBranchModel>().SingleOrDefault();                    
                     objNew.Religions = multi.Read<NameIDModel>().ToList();
                     objNew.Casts = multi.Read<NameIDModel>().ToList();
                     objNew.Classes = multi.Read<ClassModel>().ToList();
