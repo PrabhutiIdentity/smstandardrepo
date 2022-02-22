@@ -86,7 +86,7 @@ namespace SMEnterprise.Controllers
                 objData.ImageFile.SaveAs(path);
             }
 
-            return Redirect("~/Success/" + objData.EnquiryID);
+            return Redirect("~/Home/Success/" + objData.EnquiryID);
         }
         public ActionResult Success(string id = null)
         {

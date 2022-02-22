@@ -1,0 +1,45 @@
+alter table ExamMaster
+Add MarkingScheme int
+go
+drop proc [sp_UpdateExamDetails]
+go 
+drop type ExamDetails
+go
+CREATE TYPE [dbo].[ExamDetails] AS TABLE(
+	[ExamID] [int] NULL,
+	[EvaluationID] [int] NULL,
+	[ClassID] [int] NULL,
+	[GroupID] [int] NULL,
+	[SubjectID] [int] NULL,
+	[ExamDate] [date] NULL,
+	[StartTime] [time](7) NULL,
+	[EndTime] [time](7) NULL,
+	[SBranchID] [int] NULL,
+	[UserID] [int] NULL,
+	[CreatedDate] [datetime] NULL,
+	[ModifiedDate] [datetime] NULL,
+	[IsApplicable] [bit] NULL,
+	[MaxMarks] [numeric](10, 2) NULL,
+	[PassMarks] [numeric](10, 2) NULL,
+	[IsLocked] [int] NULL,
+	[MarkingScheme] [int] NULL
+)
+GO
+
+create proc [dbo].[sp_UpdateExamDetails]      
+(      
+@ExamDetails ExamDetails READONLY      
+)      
+AS      
+BEGIN       
+   UPDATE e SET e.EvaluationID=d.EvaluationID, e.ClassID=d.ClassID, e.GroupID=d.GroupID, e.SubjectID=d.SubjectID,e.IsLocked=d.IsLocked      
+   , e.ExamDate=d.ExamDate, e.StartTime=d.StartTime, e.EndTime=d.EndTime, e.IsApplicable=d.IsApplicable,      
+   e.ModifiedDate=d.ModifiedDate,e.UserID=d.UserID,e.MaxMarks=d.MaxMarks,e.PassMarks=d.PassMarks,e.MarkingScheme=d.MarkingScheme    
+    FROM  ExamMaster e, @ExamDetails d       
+    WHERE d.ExamID=e.ExamID and d.ExamID<>0      
+      
+   INSERT INTO ExamMaster(EvaluationID, ClassID, GroupID,SubjectID,ExamDate,StartTime,EndTime,SBranchID      
+   ,UserID,CreatedDate ,IsApplicable,MaxMarks,PassMarks,IsLocked,MarkingScheme)      
+    SELECT EvaluationID, ClassID, GroupID,SubjectID,ExamDate,StartTime,EndTime,SBranchID      
+   ,UserID,CreatedDate ,IsApplicable,MaxMarks,PassMarks,IsLocked,MarkingScheme FROM @ExamDetails PD where PD.ExamID=0      
+END 

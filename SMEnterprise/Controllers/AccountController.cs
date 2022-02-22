@@ -3182,6 +3182,16 @@ namespace SMEnterprise.Controllers
             return View(oModel);
         }
         #endregion
+        #region SessionAdmissionReport
+        [PermissionFilter]
+        public ActionResult SessionAdmissionReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+            objAccountData.GetSessionAdmissionReport(oModel);
+            return View(oModel);
+        }
+        #endregion
 
 
         #region TransportFee
