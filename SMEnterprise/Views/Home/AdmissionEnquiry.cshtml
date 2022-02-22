@@ -21,401 +21,408 @@
 </style>
 
 
-    <div class="container">
-        <div class="row">
+<div class="container">
+    <div class="row">
 
-            <div class="row SelectedDivForPDF">
+        <div class="row SelectedDivForPDF">
 
-                <div class="x_content">
+            <div class="x_content">
+                <div class="row">
+                    <div class="col-md-1"></div>
 
-                    @*<div class="form-inline">*@
-                    @using (Html.BeginForm("UpdateAdmission", "Home", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "contact-form", @class = "form-inline" }))
-                    {
+                    <div class="col-md-10">
+                       
+                        @using (Html.BeginForm("UpdateAdmission", "Home", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "contact-form", @class = "form-inline" }))
+                        {
 
 
 
 
-                        <div class="row">
-                            <div class="col-md-3"></div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
 
-                            <div class="col-md-7">
-                                <table style="width:100%">
-                                    <tr>
-                                        <td style="width:20%;text-align:left;">
+                                <div class="col-md-8">
+                                    <table style="width:100%">
+                                        <tr>
+                                            <td style="width:20%;text-align:left;">
 
-                                            <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchData.SBranchID)_@(Model.BranchData.Logo)" />
-                                        </td>
-                                        <td style="text-align: left;vertical-align: middle; ">
-                                            <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.BranchData.BranchSchoolName</p>
+                                                <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchData.SBranchID)_@(Model.BranchData.Logo)" />
+                                            </td>
+                                            <td style="text-align: left;vertical-align: middle; ">
+                                                <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.BranchData.BranchSchoolName</p>
 
-                                            <p style="margin-bottom: 2px;font-size: 16px;text-align: center;">
-                                                @Html.Raw(Html.Encode(Model.BranchData.Address).Replace("\n", "<br />"))
+                                                <p style="margin-bottom: 2px;font-size: 16px;text-align: center;">
+                                                    @Html.Raw(Html.Encode(Model.BranchData.Address).Replace("\n", "<br />"))
 
-                                            </p>
-                                            <p style="margin-bottom: 2px;text-align: center;"> <b>Ph.</b> @Model.BranchData.ContactNo,  <b> Email :</b> @Model.BranchData.EmailID</p>
+                                                </p>
+                                                <p style="margin-bottom: 2px;text-align: center;"> <b>Ph.</b> @Model.BranchData.ContactNo,  <b> Email :</b> @Model.BranchData.EmailID</p>
 
-                                        </td>
-                                        <td style="width:20%;text-align:right;">
-                                            <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchData.SBranchID)_@(Model.BranchData.Logo)" />
-                                        </td>
-                                    </tr>
-                                </table>
+                                            </td>
+                                            <td style="width:20%;text-align:right;">
+                                                <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchData.SBranchID)_@(Model.BranchData.Logo)" />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-2"></div>
                             </div>
-                            <div class="col-md-2"></div>
-                        </div>
 
-                        <div class="row">
-                            <br />
-                            <hr />
-                        </div>
+                            <div class="row">
+                                <br />
+                                <hr />
+                            </div>
 
 
-                        <input type="hidden" name="SBranchID" value="@Model.BranchID" id="@Model.BranchID" />
+                            <input type="hidden" name="SBranchID" value="@Model.BranchID" id="@Model.BranchID" />
 
-                        <div class="row">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
-                                <div style="margin:15px 0 0 0;">
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <div style="margin:15px 0 0 0;">
+                                        <div class="col-md-4 col-sm-12 form-group">
+                                            <label for="StudentName">Name Of The Child</label>
+                                            <input type="text" class="form-control chm-input01 myreq" name="StudentName" id="StudentName" @*required onkeypress="return onlyAlphabets(event,this);"*@>
+                                        </div>
+                                        <div class="col-md-3 col-sm-12 form-group">
+                                            <label for="DateOfBirth">Date of Birth <small>(dd/mm/yyyy)</small> </label>
+                                            <input type="date" class="form-control" name="DateOfBirth" id="DateOfBirth" onchange="ageCalculator();" required value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy/MM/dd")">
+                                        </div>
+
+                                        <div class="col-md-3 col-sm-12 form-group">
+                                            <label for="pstcode">Age at the time of admission</label>
+                                            <input type="text" class="form-control" name="StudentAgeOnAdd" disabled id="StudentAgeOnAdd">
+                                        </div>
+
+                                        <div class="col-md-2 col-sm-12 form-group">
+                                            <label for="pstcode">Gender</label>
+                                            <select class="form-control chm-input06" name="ReligionID" id="ID">
+                                                <option value="-1" selected>--Select--</option>
+                                                <option value="0">Male</option>
+                                                <option value="1">Female</option>
+                                                <option value="2">Others</option>
+                                            </select>
+                                        </div>
+
+                                        @*<div class="col-md-6 col-sm-6 form-group" style="margin:14px 0 14px 0px">
+                                <label class="chm-mr">Male</label>
+                                <label class="checkbg">
+                                    <input type="checkbox" id="chkMale" name="radioGender">
+                                    <input type="hidden" name="Gender" id="hdnGender" />
+                                    <span class="checkmark" style="top: -18px;"></span>
+                                </label>
+                            </div>
+                            <div class="col-md-6 col-sm-6 form-group femaleabc" style="margin:14px 0 0 -76px">
+                                <label class="chm-mr">Female</label>
+                                <label class="checkbg">
+                                    <input type="checkbox" id="chkFemale" name="radioGender">
+                                    <span class="checkmark" style="top: -18px;"></span>
+                                </label>
+                            </div>*@
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
                                     <div class="col-md-4 col-sm-12 form-group">
-                                        <label for="StudentName">Name Of The Child</label>
-                                        <input type="text" class="form-control chm-input01 myreq" name="StudentName" id="StudentName" @*required onkeypress="return onlyAlphabets(event,this);"*@>
-                                    </div>
-                                    <div class="col-md-3 col-sm-12 form-group">
-                                        <label for="DateOfBirth">Date of Birth <small>(dd/mm/yyyy)</small> </label>
-                                        <input type="date" class="form-control" name="DateOfBirth" id="DateOfBirth" onchange="ageCalculator();" required value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy/MM/dd")">
-                                    </div>
-
-                                    <div class="col-md-3 col-sm-12 form-group">
-                                        <label for="pstcode">Age at the time of admission</label>
-                                        <input type="text" class="form-control" name="StudentAgeOnAdd" disabled id="StudentAgeOnAdd">
-                                    </div>
-
-                                    <div class="col-md-2 col-sm-12 form-group">
-                                        <label for="pstcode">Gender</label>
+                                        <label for="pstcode">Religion</label>
                                         <select class="form-control chm-input06" name="ReligionID" id="ID">
-                                            <option value="-1" selected>--Select--</option>
-                                            <option value="0">Male</option>
-                                            <option value="1">Female</option>
-                                            <option value="2">Others</option>
+                                            <option value="0" selected> Select Religion </option>
+                                            @foreach (NameIDModel el in Model.Religions)
+                                            {
+                                                <option value="@el.ID">@el.Name</option>
+                                            }
+
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 col-sm-12 form-group">
+                                        <label for="pstcode">Caste</label>
+                                        <select class="form-control" name="Caste" id="ID" @*onchange="ClassChanged()"*@>
+                                            <option value="0" selected> Select Caste </option>
+                                            @foreach (var C in Model.Casts)
+                                            {
+                                                <option value="@C.ID">@C.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4 col-sm-12 form-group">
+                                        <label for="ClassForAdmission">Class to which admission sought</label>
+                                        <select class="form-control" name="AppliedForClass" id="AppliedForClass" @*onchange="ClassChanged()"*@>
+                                            <option value="0" selected> Select Class </option>
+                                            @foreach (var C in Model.Classes)
+                                            {
+                                                <option value="@C.ClassID">@C.ClassName</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-2"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="FatherName">Father's Name</label>
+                                        <input type="text" class="form-control" name="FatherName" id="FatherName">
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="FatherQuaAndOcc">Father's Qualification and Occupation</label>
+                                        <input type="text" class="form-control" name="FatherQuaAndOcc" id="FatherQuaAndOcc">
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="pstcode">Father's Aadhaar No</label>
+                                        <input type="text" class="form-control" name="FatherAadhaarNo" id="MotherQuaAndOcc">
+                                    </div>
+
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="MotherName">Mother's Name</label>
+                                        <input type="text" class="form-control" name="MotherName" id="MotherName">
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="pstcode">Mother's Qualification and Occupation</label>
+                                        <input type="text" class="form-control" name="MotherQuaAndOcc" id="MotherQuaAndOcc">
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="pstcode">Mother's Aadhaar No</label>
+                                        <input type="text" class="form-control" name="MotherAadhaarNo" id="MotherQuaAndOcc">
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+
+                                    <div class="col-md-12 col-sm-12 form-group">
+                                        <label for="pstcode">Student Aadhaar card No.</label>
+                                        <input type="text" class="form-control" name="StudentAadharNo" id="StudentAadharNo">
+                                    </div>
+
+                                    <div class="col-md-12 col-sm-12 form-group">
+                                        <label for="PermanentAddress">Permanent Address</label>
+                                        <input type="text" class="form-control" name="PermanentAddress" id="PermanentAddress" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <div class="col-md-12 col-sm-12 form-group">
+                                        <label for="TemporaryAddress">Temporary Address</label>
+                                        <input type="text" class="form-control" name="TemporaryAddress" id="TemporaryAddress">
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="pstcode" id="mob_frm">Mobile No. 1</label>
+                                        <input type="text" class="form-control" minlength="10" maxlength="10" placeholder="10-digit Mobile Number" name="TelephoneNoReg" @*pattern="\d{3}[\-]\d{3}[\-]\d{4}"*@ id="TelephoneNoReg" @*onkeyup="checkMobile(); return false;"*@ required>
+                                    </div>
+                                    <div class="col-md-6 col-sm-12 form-group">
+                                        <label for="pstcode">Mobile No. 2</label>
+                                        <input type="text" class="form-control" name="TelephoneNoOff" id="TelephoneNoOff">
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <div class="col-md-12 col-sm-12 form-group">
+                                        <label for="pstcode">Brother/Sister if already studying in this school</label>
+                                        <select class="form-control chm-input06" name="Sibling" id="SiblingNameList" onchange="SelectSiblingName()">
+                                            <option value="0" selected>Select</option>
+                                            <option value="Yes" class="form-control">Yes</option>
+                                            <option value="No" class="form-control">No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <div class="col-md-6 col-sm-12 form-group" id="SiblingNameID">
+                                        <label for="pstcode">Name of Sibling</label>
+                                        <input type="text" class="form-control" name="SiblingName" id="StudentAadharNo">
+                                    </div>
+
+                                    <div class="col-md-6 col-sm-12 form-group" name="SiblingClass" id="SiblingClassID">
+                                        <select class="form-control" style="margin-top: 23px;">
+                                            <option value="0" selected>Select Class</option>
+                                            @foreach (var C in Model.Classes)
+                                            {
+                                                <option value="@C.ClassID">@C.ClassName</option>
+                                            }
                                         </select>
                                     </div>
 
-                                    @*<div class="col-md-6 col-sm-6 form-group" style="margin:14px 0 14px 0px">
-                            <label class="chm-mr">Male</label>
-                            <label class="checkbg">
-                                <input type="checkbox" id="chkMale" name="radioGender">
-                                <input type="hidden" name="Gender" id="hdnGender" />
-                                <span class="checkmark" style="top: -18px;"></span>
-                            </label>
-                        </div>
-                        <div class="col-md-6 col-sm-6 form-group femaleabc" style="margin:14px 0 0 -76px">
-                            <label class="chm-mr">Female</label>
-                            <label class="checkbg">
-                                <input type="checkbox" id="chkFemale" name="radioGender">
-                                <span class="checkmark" style="top: -18px;"></span>
-                            </label>
-                        </div>*@
-
-                                </div>
-                            </div>
-                            <div class="col-md-2"></div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
-                                <div class="col-md-4 col-sm-12 form-group">
-                                    <label for="pstcode">Religion</label>
-                                    <select class="form-control chm-input06" name="ReligionID" id="ID">
-                                        <option value="0" selected>--Select--</option>
-                                        @foreach (NameIDModel el in Model.Religions)
-                                        {
-                                            <option value="@el.ID" selected>@el.Name</option>
-                                        }
-
-                                    </select>
-                                </div>
-                                <div class="col-md-4 col-sm-12 form-group">
-                                    <label for="pstcode">Caste</label>
-                                    <select class="form-control" name="Caste" id="ID" @*onchange="ClassChanged()"*@>
-                                        <option value="0" selected>Select Caste</option>
-                                        @foreach (var C in Model.Casts)
-                                        {
-                                            <option value="@C.ID">@C.Name</option>
-                                        }
-                                    </select>
-                                </div>
-                                <div class="col-md-4 col-sm-12 form-group">
-                                    <label for="ClassForAdmission">Class to which admission sought</label>
-                                    <select class="form-control" name="AppliedForClass" id="AppliedForClass" @*onchange="ClassChanged()"*@>
-                                        <option value="0" selected>Select Class</option>
-                                        @foreach (var C in Model.Classes)
-                                        {
-                                            <option value="@C.ClassID">@C.ClassName</option>
-                                        }
-                                    </select>
-                                </div>
+                                </div><br /><br /><br />
+                                <div class="col-md-2"></div>
                             </div>
 
-                            <div class="col-md-2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
 
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="FatherName">Father's Name</label>
-                                    <input type="text" class="form-control" name="FatherName" id="FatherName">
-                                </div>
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="FatherQuaAndOcc">Father's Qualification and Occupation</label>
-                                    <input type="text" class="form-control" name="FatherQuaAndOcc" id="FatherQuaAndOcc">
-                                </div>
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="pstcode">Father's Aadhaar No</label>
-                                    <input type="text" class="form-control" name="FatherAadhaarNo" id="MotherQuaAndOcc">
-                                </div>
-
-                            </div>
-                            <div class="col-md-2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="MotherName">Mother's Name</label>
-                                    <input type="text" class="form-control" name="MotherName" id="MotherName">
-                                </div>
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="pstcode">Mother's Qualification and Occupation</label>
-                                    <input type="text" class="form-control" name="MotherQuaAndOcc" id="MotherQuaAndOcc">
-                                </div>
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="pstcode">Mother's Aadhaar No</label>
-                                    <input type="text" class="form-control" name="MotherAadhaarNo" id="MotherQuaAndOcc">
-                                </div>
-                            </div>
-                            <div class="col-md-2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
-
-                                <div class="col-md-12 col-sm-12 form-group">
-                                    <label for="pstcode">Student Aadhaar card No.</label>
-                                    <input type="text" class="form-control" name="StudentAadharNo" id="StudentAadharNo">
-                                </div>
-
-                                <div class="col-md-12 col-sm-12 form-group">
-                                    <label for="PermanentAddress">Permanent Address</label>
-                                    <input type="text" class="form-control" name="PermanentAddress" id="PermanentAddress" required>
-                                </div>
-                            </div>
-                            <div class="col-md-2"></div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-2"></div>
-                            <div class="col-md-8">
-                                <div class="col-md-12 col-sm-12 form-group">
-                                    <label for="TemporaryAddress">Temporary Address</label>
-                                    <input type="text" class="form-control" name="TemporaryAddress" id="TemporaryAddress">
-                                </div>
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="pstcode" id="mob_frm">Mobile No. 1</label>
-                                    <input type="text" class="form-control" minlength="10" maxlength="10" placeholder="10-digit Mobile Number" name="TelephoneNoReg" @*pattern="\d{3}[\-]\d{3}[\-]\d{4}"*@ id="TelephoneNoReg" @*onkeyup="checkMobile(); return false;"*@ required>
-                                </div>
-                                <div class="col-md-6 col-sm-12 form-group">
-                                    <label for="pstcode">Mobile No. 2</label>
-                                    <input type="text" class="form-control" name="TelephoneNoOff" id="TelephoneNoOff">
-                                </div>
-                            </div>
-                            <div class="col-md-2"></div>
-                        </div>
-                        <div class="row">
-                           
-                            <div class="col-md-12">
-                                <div class="col-md-12 col-sm-12 form-group">
-                                    <label for="pstcode">Brother/Sister if already studying in this school</label>
-                                    <select class="form-control chm-input06" name="Sibling" id="SiblingNameList" onchange="SelectSiblingName()">
-                                        <option value="0" selected>Select</option>
-                                        <option value="Yes" class="form-control">Yes</option>
-                                        <option value="No" class="form-control">No</option>
-                                    </select>
-                                </div>
-                            </div>
-                          
-                        </div>
-                        <div class="row">
-                            
-                            <div class="col-md-12">
-                                <div class="col-md-6 col-sm-12 form-group" id="SiblingNameID">
-                                    <label for="pstcode">Name of Sibling</label>
-                                    <input type="text" class="form-control" name="SiblingName" id="StudentAadharNo">
-                                </div>
-                              
-                                <div class="col-md-6 col-sm-12 form-group" name="SiblingClass" id="SiblingClassID">
-                                    <select class="form-control" style="margin-top: 23px;">
-                                        <option value="0" selected>Select Class</option>
-                                        @foreach (var C in Model.Classes)
-                                        {
-                                            <option value="@C.ClassID">@C.ClassName</option>
-                                        }
-                                    </select>
-                                </div>
-
-                            </div><br /><br /><br />
-                          
-                        </div>
-                       
-                      
-                        @*<div class="row">
-                <div class="col-md-2"></div>
-                <div class="col-md-8" style="border:5px">
-                    <div style="margin:15px 0 0 0;">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div>
-                                    <div class="col-md-6 col-sm-6 form-group" id="ClassDoc">
-                                        <label style="margin-top: 30px;">Documents Required For Class LKG-UKG and Ist</label><br />
-                                        <label for="birthCert">1.Birth Certificate</label>
-                                        <input type="file" class="form-control" name="BirthCertificateFile" id="BirthFile">
-                                    </div>
-                                    <div class="col-md-6 col-sm-6 form-group" id="ClassDoc2">
-                                        <label style="margin-top: 30px;">Documents Required For Class II-IX</label><br />
-                                        <label for="birthCert">1.Birth Certificate issued from Previous School</label>
-                                        <input type="file" class="form-control" name="BirthCertificateFile" id="BirthFile">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div>
-                                    <div class="col-md-6 col-sm-6 form-group">
-                                        <label style="margin-top: 30px;">Residential Proof Of Parents</label><br />
-                                        <label for="birthCert">2.AADHAR/VoterID/RationCard/NiwasParmanPatra</label>
-                                        <input type="file" class="form-control" name="AddressProofFile" id="BirthFile" required>
-                                    </div>
-                                    <div class="col-md-2 col-sm-12 form-group">
-                                        <label style="margin-top: 30px;">Parent's Signature</label><br />
-                                        <div class="chm-box">
-                                            <figure class="figure profile-box">
-                                                <img id="ParentSign" src="" title="" class="img-responsive">
-                                            </figure>
-                                            <input type="file" id="Image" name="ParentSignature" onchange="ParentSignatureFunc(this, 'SudentImage');" required />
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="col-md-6 col-sm-6 form-group" style="display:none">
-                            <label style="margin-top: 30px;">Residential Proof Of Parents</label><br />
-                            <label for="birthCert">2.AADHAR/VoterID/RationCard/NiwasParmanPatra</label>
-                            <input type="file" class="form-control" name="AddressProofFile" id="BirthFile">
-                        </div>
-
-                    </div>
-                </div>
-                <div class="col-md-2"></div>
-            </div><br /><br />*@
-
-                <div class="row">
-                    <div class="col-md-4">
-                        <input type="checkbox" id="checkme" />
-                    </div>
-
-                    <div class="col-md-8">
-                        I hereby declare that all the information given by me in this application is true and correct to the
-                        best of my knowledge and belief.
-                    </div>
-                                       
-               
-                </div>
-                      
-
+                            @*<div class="row">
+                    <div class="col-md-2"></div>
+                    <div class="col-md-8" style="border:5px">
+                        <div style="margin:15px 0 0 0;">
                             <div class="row">
                                 <div class="col-md-12">
-                                    <div class="full-width">
-                                        <button type="submit" style="margin:50px;min-height:50px;" name="sendNewSms" class="btn btn-primary" id="create_pdf" @*onclick="return generatePdf()"*@>Submit</button>
+                                    <div>
+                                        <div class="col-md-6 col-sm-6 form-group" id="ClassDoc">
+                                            <label style="margin-top: 30px;">Documents Required For Class LKG-UKG and Ist</label><br />
+                                            <label for="birthCert">1.Birth Certificate</label>
+                                            <input type="file" class="form-control" name="BirthCertificateFile" id="BirthFile">
+                                        </div>
+                                        <div class="col-md-6 col-sm-6 form-group" id="ClassDoc2">
+                                            <label style="margin-top: 30px;">Documents Required For Class II-IX</label><br />
+                                            <label for="birthCert">1.Birth Certificate issued from Previous School</label>
+                                            <input type="file" class="form-control" name="BirthCertificateFile" id="BirthFile">
+                                        </div>
                                     </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div>
+                                        <div class="col-md-6 col-sm-6 form-group">
+                                            <label style="margin-top: 30px;">Residential Proof Of Parents</label><br />
+                                            <label for="birthCert">2.AADHAR/VoterID/RationCard/NiwasParmanPatra</label>
+                                            <input type="file" class="form-control" name="AddressProofFile" id="BirthFile" required>
+                                        </div>
+                                        <div class="col-md-2 col-sm-12 form-group">
+                                            <label style="margin-top: 30px;">Parent's Signature</label><br />
+                                            <div class="chm-box">
+                                                <figure class="figure profile-box">
+                                                    <img id="ParentSign" src="" title="" class="img-responsive">
+                                                </figure>
+                                                <input type="file" id="Image" name="ParentSignature" onchange="ParentSignatureFunc(this, 'SudentImage');" required />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-sm-6 form-group" style="display:none">
+                                <label style="margin-top: 30px;">Residential Proof Of Parents</label><br />
+                                <label for="birthCert">2.AADHAR/VoterID/RationCard/NiwasParmanPatra</label>
+                                <input type="file" class="form-control" name="AddressProofFile" id="BirthFile">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-md-2"></div>
+                </div><br /><br />*@
+
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+
+                                    <input type="checkbox" id="checkme" />  I hereby declare that all the information given by me in this application is true and correct to the
+                                    best of my knowledge and belief.
 
                                 </div>
 
+
+
+                                <div class="col-md-2"></div>
+                                <br />
                             </div>
-                       
-                    }
-                    @*</div>*@
-                </div>
-                        </div>
-                      
-                    </div>
-                </div>
-          
-  
 
 
-        <script>
-            document.getElementById('ImgStudent').src = "/images/MaleNoImage.png";
+                            <div class="row">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-8">
+                                    <div class="full-width">
+                                        <button type="submit" style="margin-left:200px; min-height:50px; min-width:200px;" name="sendNewSms" class="btn btn-primary" id="create_pdf" @*onclick="return generatePdf()"*@>Submit</button>
+                                    </div>
 
+                                </div>
+                                <div class="col-md-2"></div>
+                            </div>
 
-            function SelectSudentImage(fileBox, Type) {
-                if (fileBox.files && fileBox.files[0]) {
-                    MainImageName = fileBox.files[0].name;
-                    if (fileBox.files[0].size / 1024 < 5000) {
-                        var reader = new FileReader();
-                        reader.onload = function (e) {
-                            $('#ImgStudent').attr('src', e.target.result);
                         }
-                        reader.readAsDataURL(fileBox.files[0]);
-                    }
-                    else {
-                        ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
-                        clearFileInput(fileBox);
-                    }
+                       
+                    </div>
+                    <div class="col-md-1"></div>
+                </div>
+</div>
+    </div>
+</div>
+
+
+
+
+<script>
+    document.getElementById('ImgStudent').src = "/images/MaleNoImage.png";
+
+
+    function SelectSudentImage(fileBox, Type) {
+        if (fileBox.files && fileBox.files[0]) {
+            MainImageName = fileBox.files[0].name;
+            if (fileBox.files[0].size / 1024 < 5000) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#ImgStudent').attr('src', e.target.result);
                 }
+                reader.readAsDataURL(fileBox.files[0]);
             }
-
-            function ageCalculator() {
-                var userinput = document.getElementById("DateOfBirth").value;
-
-                var dob = new Date(userinput);
-                if (userinput == null || userinput == '') {
-                    document.getElementById("message").innerHTML = "**Choose a date please!";
-                    return false;
-                } else {
-                    //calculate month difference from current date in time
-                    var month_diff = Date.now() - dob.getTime();
-                    //convert the calculated difference in date format
-                    var age_dt = new Date(month_diff);
-                    //extract year from date
-
-                    var year = age_dt.getUTCFullYear();
-                    //now calculate the age of the user
-
-                    var age = Math.abs(year - 1970);
-                    //display the calculated age
-                    if (age > 0) {
-                        $('#StudentAgeOnAdd').val(age);
-                    }
-                    else {
-
-                        $('#StudentAgeOnAdd').val("--");
-                    }
-                }
+            else {
+                ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+                clearFileInput(fileBox);
             }
+        }
+    }
 
-            function SelectSiblingName() {
-                var SelectNameVal = $("#SiblingNameList").val();
-                debugger;
-                if (SelectNameVal == 'Yes') {
-                    $('#SiblingNameID').css('display', '');
-                    $('#SiblingClassID').css('display', '');
-                }
-                else {
-                    $('#SiblingClassID').css('display', 'none');
-                    $('#SiblingNameID').css('display', 'none');
-                }
+    function ageCalculator() {
+        var userinput = document.getElementById("DateOfBirth").value;
+
+        var dob = new Date(userinput);
+        if (userinput == null || userinput == '') {
+            document.getElementById("message").innerHTML = "**Choose a date please!";
+            return false;
+        } else {
+            //calculate month difference from current date in time
+            var month_diff = Date.now() - dob.getTime();
+            //convert the calculated difference in date format
+            var age_dt = new Date(month_diff);
+            //extract year from date
+
+            var year = age_dt.getUTCFullYear();
+            //now calculate the age of the user
+
+            var age = Math.abs(year - 1970);
+            //display the calculated age
+            if (age > 0) {
+                $('#StudentAgeOnAdd').val(age);
             }
-        </script>
+            else {
+
+                $('#StudentAgeOnAdd').val("--");
+            }
+        }
+    }
+
+    function SelectSiblingName() {
+        var SelectNameVal = $("#SiblingNameList").val();
+        debugger;
+        if (SelectNameVal == 'Yes') {
+            $('#SiblingNameID').css('display', '');
+            $('#SiblingClassID').css('display', '');
+        }
+        else {
+            $('#SiblingClassID').css('display', 'none');
+            $('#SiblingNameID').css('display', 'none');
+        }
+    }
+</script>

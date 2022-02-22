@@ -161,16 +161,17 @@
                 <div class="x_panel">
                     @using (Html.BeginForm("UpdatePromotedStudents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmPromoteStudents" }))
                     {
-                        <div class="x_content">
-                            <input type="hidden" id="hdnPSessionID" name="SessionID" />
-                            <input type="hidden" id="hdnPClassID" name="ClassID" />
-                            <input type="hidden" id="hdnPSectionID" name="SectionID" />
-                            <input type="hidden" id="hdnPSBranchID" name="SBranchID" />
-                            <div class="col-md-12">
-                                <input type="hidden" id="hdnRecieverCount" value="@Model.Students.Count" />
-                                <b> Total Students: <lable id="lblSMSCount">@Model.Students.Count</lable></b>
-                            </div>
-
+                    <div class="x_content">
+                        <input type="hidden" id="hdnPSessionID" name="SessionID" />
+                        <input type="hidden" id="hdnPClassID" name="ClassID" />
+                        <input type="hidden" id="hdnPSectionID" name="SectionID" />
+                        <input type="hidden" id="hdnPSBranchID" name="SBranchID" />
+                        <div class="col-md-12">
+                            <input type="hidden" id="hdnRecieverCount" value="@Model.Students.Count" />
+                            <b> Total Students: <lable id="lblSMSCount">@Model.Students.Count</lable></b>
+                        </div>
+                        @if (Model.Students.Count > 0)
+                        {
                             <div class="row">
 
                                 <div class="icheckbox_flat-blue checked " aria-checked="false" aria-disabled="false" style="position: relative;">
@@ -182,42 +183,49 @@
 
                                 <div class="clearfix"></div>
                             </div>
-                            <ul class="dd-options dd-click-off-close row" style="display: block;" id="ulSchoolList">
-                                @{
-                                    int count = 0;
+                        }
+                        else
+                        { }
+                        <ul class="dd-options dd-click-off-close row" style="display: block;" id="ulSchoolList">
+                            @{
+                                int count = 0;
 
-                                    foreach (var c in Model.Students)
-                                    {
-                                        <li class="col-md-3">
-                                            <div class="smsList">
-                                                <div class="dd-option">
-                                                    <input type="hidden" name="Students[@count].IsSelected" id="hdnSelected" value="1" />
-                                                    <input type="hidden" name="Students[@count].QuotaID" value="@c.QuotaID" />
-                                                    <input type="hidden" name="Students[@count].FeePaymentMode" value="@c.FeePaymentMode" />
-                                                    <input name="Students[@count].StudentID" type="hidden" value="@c.StudentID">
-                                                    <img onerror="return OnImageError(this,@c.Gender);" class="dd-option-image" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo">
-                                                    <label class="dd-option-text">@c.Name</label>
-                                                    <small class="dd-option-description dd-desc">@c.StudentSID</small>
-                                                    <small class="dd-option-description dd-desc">@c.FatherName</small>
-                                                </div>
-                                                <div class="icheckbox_flat-blue checked" aria-checked="false" aria-disabled="false" style="position: relative;">
-
-                                                    <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
-                                                </div>
+                                foreach (var c in Model.Students)
+                                {
+                                    <li class="col-md-3">
+                                        <div class="smsList">
+                                            <div class="dd-option">
+                                                <input type="hidden" name="Students[@count].IsSelected" id="hdnSelected" value="1" />
+                                                <input type="hidden" name="Students[@count].QuotaID" value="@c.QuotaID" />
+                                                <input type="hidden" name="Students[@count].FeePaymentMode" value="@c.FeePaymentMode" />
+                                                <input name="Students[@count].StudentID" type="hidden" value="@c.StudentID">
+                                                <img onerror="return OnImageError(this,@c.Gender);" class="dd-option-image" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo">
+                                                <label class="dd-option-text">@c.Name</label>
+                                                <small class="dd-option-description dd-desc">@c.StudentSID</small>
+                                                <small class="dd-option-description dd-desc">@c.FatherName</small>
                                             </div>
-                                        </li>
+                                            <div class="icheckbox_flat-blue checked" aria-checked="false" aria-disabled="false" style="position: relative;">
 
-                                        count++;
-                                    }
+                                                <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                            </div>
+                                        </div>
+                                    </li>
+
+                                    count++;
                                 }
+                            }
 
-                            </ul>
-
+                        </ul>
+                        @if (Model.Students.Count > 0)
+                        {
                             <div>
                                 <a href="javascript:void(0);" id="btnSaveResult" data-toggle="modal" data-target="#modelPromoteStudents" @*onclick="return PromoteStudents();"*@ class="btn btn-block btn-info pull-right">Confirm Promote</a>
                             </div>
+                        }
+                        else
+                        { }
                         </div>
-                    }
+                                }
                 </div>
             </div>
         </div>

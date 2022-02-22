@@ -14,6 +14,7 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public int Month { get; set; }
         public List<NameIDModel> Sessions { get; set; }
+        public SBranchModel Branches { get; set; }
         public List<StudentAdmissionDetail> StudentDetail { get; set; }
 
 
@@ -124,6 +125,7 @@ namespace SMEnterprise.Models
         public string AccountNumber { get; set; }
         public string IFSCCode { get; set; }
         public string BranchName { get; set; }
+        public string StudentSessions { get; set; }
 
     }
 }
