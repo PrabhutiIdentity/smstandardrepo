@@ -4610,5 +4610,22 @@ namespace SMEnterprise.Repository
                 return con.Query<AdmissionEnquiryMasterModel>("sp_GetEnquiryDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+        public StudentAdmissionReportModel GetSessionAdmissionReport(StudentAdmissionReportModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                //paramater.Add("@StartDate", oModel.StartDate);
+                using (var multi = con.QueryMultiple("sp_GetSessionAdmissionsDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
+                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    oModel.Branches = multi.Read<SBranchModel>().SingleOrDefault();
+                }
+            }
+            return oModel;
+        }
     }
 }
