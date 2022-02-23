@@ -7,6 +7,25 @@ using System.Web;
 
 namespace SMEnterprise.Models
 {
+    public class SOCertificateDetails
+    {
+        public int CertID { get; set; }
+        public DateTime CertDate { get; set; }
+        public string SchoolUID { get; set; }
+        public string PSchoolMedium { get; set; }
+        public int CertType { get; set; }
+        public int StudentID { get; set; }
+        public int SessionID { get; set; }
+        public int FirstSessionID { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public int CreatedBy { get; set; }
+        public int SBranchID { get; set; }
+        public ParentModel Parent { get; set; }
+        public SBranchModel Branch { get; set; }
+        public StudentModel Student { get; set; }
+        public string Character { get; set; }
+        public List<SessionModel> Sessions { get; set; }
+    }
     public class SLCCertificateDetails
     {
         public DateTime DOB { get; set; }

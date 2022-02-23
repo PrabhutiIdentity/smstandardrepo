@@ -111,6 +111,10 @@ namespace SMEnterprise.Models
     {
         public string FatherName { get; set; }
         public int SLCGenerated { get; set; }
+        public int CSGenerated { get; set; }
+        public int DOBCGenerated { get; set; }
+        public int NDCGenerated { get; set; }
+        public int TFCGenerated { get; set; }
         public string SchoolUID { get; set; }
         public int StudentID { get; set; }
         public string StudentSID { get; set; }
