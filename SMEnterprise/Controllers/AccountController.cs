@@ -702,10 +702,10 @@ namespace SMEnterprise.Controllers
             {
                 objModel = objAccountData.GetNewFeePayments(objModel);
             }
-          
+
             return View(objModel);
         }
-               [PermissionFilter]
+        [PermissionFilter]
         public ActionResult ParentsFeeDetailsNew(StudentFeeModel objModel)
         {
             if (objModel == null)
@@ -798,9 +798,9 @@ namespace SMEnterprise.Controllers
         {
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             //  objModel.QDate = CommonUsage.GetCurrentDate();
-         //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+            //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
 
-           
+
             //string FeeDate= objModel.FeeDate.ToShortDateString();
             //if (FeeDate.Length>0)
             //{
@@ -826,7 +826,7 @@ namespace SMEnterprise.Controllers
                 int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
                 string ContentID = "0";
                 NotificationSMSModel objModel = objAccountData.GetFeePaymentSMSDetails(PaymentID);
-              
+
                 if (objModel.Number != null && objModel.Number != "" && !String.IsNullOrEmpty(objModel.SMSText) && String.IsNullOrEmpty(objModel.FCMToken))
                 {
                     SMSSender objSender = new SMSSender();
@@ -1239,7 +1239,7 @@ namespace SMEnterprise.Controllers
         #region Employee Attandance
         [PermissionFilter]
         public ActionResult EmployeeAttandance(EmployeeAttandancePageModel objModel)
-    {
+        {
             if (objModel.SelectedDate.Year == 1)
             {
                 objModel.SelectedDate = CommonUsage.GetCurrentDate();
@@ -1677,6 +1677,43 @@ namespace SMEnterprise.Controllers
         }
         #endregion
 
+        #region OtherCerificates
+        [PermissionFilter]
+        public ActionResult GetStudentOCDetails(string ID = null, string ID2 = null, string ID3 = null)
+        {
+            int StudentID = CommonUsage.ConvertToInt(ID);
+            int SessionID = CommonUsage.ConvertToInt(ID2);
+            int Ctype = CommonUsage.ConvertToInt(ID3);
+            //int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            var data = objAccountData.GetStudentSOCDetails(StudentID, SessionID, Ctype);
+
+            return PartialView("_EditSOCDetailsPartial", data);
+            //return Json(data, JsonRequestBehavior.AllowGet);
+        }
+
+        [PermissionFilter]
+        public ActionResult UpdateSOCDetails(SOCertificateDetails objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.CreatedBy = PermissionManager.GetLoggedInUser().UserID;
+            objModel.CreatedDate = CommonUsage.GetCurrentDate();
+            
+            int Res = objAccountData.InsertUpdateOCertificates(objModel);
+            return Redirect("ConductCertificates/" + objModel.StudentID + "/" + objModel.SessionID +"/" +objModel.CertType);
+        }
+        [PermissionFilter]
+        public ActionResult ConductCertificate(string ID = null, string ID2 = null, string ID3 = null)
+        {
+            int StudentID = CommonUsage.ConvertToInt(ID);
+            int SessionID = CommonUsage.ConvertToInt(ID2);
+            int CertType= CommonUsage.ConvertToInt(ID3);
+            var data = objAccountData.GetStudentSOCPrintDetails(StudentID, SessionID, CertType);
+
+            return View(data);
+            //return Json(data, JsonRequestBehavior.AllowGet);
+        }
+        #endregion
+
         #region TC
         [PermissionFilter]
         public ActionResult StudentList(StudentsPageModel objModel)
@@ -1700,7 +1737,7 @@ namespace SMEnterprise.Controllers
 
             return PartialView("_EditSLCDetailsPartial", data);
             //return Json(data, JsonRequestBehavior.AllowGet);
-        }
+        }        
         [PermissionFilter]
         public ActionResult ViewStudentSLC(string ID = null, string ID2 = null)
         {
@@ -1853,7 +1890,7 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
 
-       
+
         [PermissionFilter]
         public ActionResult DemandRecipt1(DemandReciptListModel objData = null)
         {
@@ -1898,7 +1935,7 @@ namespace SMEnterprise.Controllers
             return PartialView("_EvaluationsSchemePartial", objModel);
         }
         [PermissionFilter]
-            
+
         public ActionResult AdmitCard(AdmitCardListModel objData = null)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -1930,7 +1967,7 @@ namespace SMEnterprise.Controllers
         // Shishupal Work on Exam Date Sheet For School
         // Date : 17 Nov 2021
         [PermissionFilter]
-             public ActionResult EvaluationTypeManagementExam(string ID = null)
+        public ActionResult EvaluationTypeManagementExam(string ID = null)
         {
 
             StudentExamDatesheetModel objSModel = new StudentExamDatesheetModel();
@@ -2290,8 +2327,8 @@ namespace SMEnterprise.Controllers
             objModel = objTeacherData.GetStudentTotalResult(StudentID, SessionID);
             return View(objModel);
         }
-        
-            [PermissionFilter]
+
+        [PermissionFilter]
         public ActionResult StudentPerformanceDetailsClassShine(StudentPerformanceListModel objModel)
         {
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -2377,7 +2414,7 @@ namespace SMEnterprise.Controllers
         public ActionResult StudentPerformanceReportPartialShine(string ID = null, string ID2 = null, string ID3 = null)
         {
             //  PerformanceParameterDetailModel objModel = new PerformanceParameterDetailModel();
-           StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
+            StudentPerformanceResultModel objModel = new StudentPerformanceResultModel();
             objModel.StudentSessionUID = CommonUsage.ConvertToInt(ID);
             objModel.EvaluationID = CommonUsage.ConvertToInt(ID2);
             objModel.SessionID = CommonUsage.ConvertToInt(ID3);
@@ -2902,12 +2939,12 @@ namespace SMEnterprise.Controllers
             int UserID = CommonUsage.ConvertToInt(parentid);
             int UserType =4;
             CommonData objCommonData = new CommonData();
-          int i=  objAccountData.UpdatePassword(UserID, UserType, Password);
-           // objAccountData.UpdatePassword(UserID, UserType, Password);
+            int i=  objAccountData.UpdatePassword(UserID, UserType, Password);
+            // objAccountData.UpdatePassword(UserID, UserType, Password);
             return Json(i, JsonRequestBehavior.AllowGet);
-         
+
             //  return View(objModel);
-           // return RedirectToAction("Students", "Account");
+            // return RedirectToAction("Students", "Account");
         }
         public ActionResult UpdateEmployeePassword(string ID = null, string employeeid = null)
         {
@@ -2922,7 +2959,7 @@ namespace SMEnterprise.Controllers
         #endregion
 
         #region Student Block
-      
+
         public ActionResult UpdateIsBlock(string ID = null, string ID2 = null)
         {
             int isBlock = CommonUsage.ConvertToInt(ID);
@@ -3164,7 +3201,7 @@ namespace SMEnterprise.Controllers
             objAccountData.GetClassWiseDueFeeDetailsNew(objModel);
             return View(objModel);
         }
-       
+
         #endregion
 
         #region studentadmissionreport

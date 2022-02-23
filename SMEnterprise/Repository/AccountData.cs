@@ -3999,6 +3999,80 @@ namespace SMEnterprise.Repository
         }
         #endregion
 
+        #region Other Certificate Related
+        public SOCertificateDetails GetStudentSOCDetails(int StudentID, int SessionID,int CType)
+        {
+            SOCertificateDetails objModel = new SOCertificateDetails();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SessionID", SessionID);
+                paramater.Add("@CType", CType);
+                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
+                    if (objModel == null)
+                    {
+                        objModel = new SOCertificateDetails();
+                        objModel.StudentID = StudentID;
+                        objModel.SessionID = SessionID;
+                        objModel.CertDate = CommonUsage.GetCurrentDate();
+                    }
+                    objModel.Sessions = multi.Read<SessionModel>().ToList();
+                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                }
+                return objModel;
+            }
+        }
+        public int InsertUpdateOCertificates(SOCertificateDetails oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@CertID", oModel.CertID);
+                paramater.Add("@CertType", oModel.CertType);
+                paramater.Add("@StudentID", oModel.StudentID);
+                paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@FirstSessionID", oModel.FirstSessionID);
+                paramater.Add("@Character", oModel.Character);
+                paramater.Add("@CreatedDate", oModel.CreatedDate);
+                paramater.Add("@CreatedBy", oModel.CreatedBy);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                paramater.Add("@OpType", 0);
+
+                return con.Query<int>("sp_UpdateStudentSOCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public SOCertificateDetails GetStudentSOCPrintDetails(int StudentID, int SessionID, int CertType)
+        {
+            SOCertificateDetails objModel = new SOCertificateDetails();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SessionID", SessionID);
+                paramater.Add("@CertType", CertType);
+                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
+                    if (objModel == null)
+                    {
+                        objModel = new SOCertificateDetails();
+                        objModel.StudentID = StudentID;
+                        objModel.SessionID = SessionID;
+                        objModel.CertDate = CommonUsage.GetCurrentDate();
+                    }
+                    objModel.Sessions = multi.Read<SessionModel>().ToList();
+                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                    //objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
+                    //objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                }
+                return objModel;
+            }
+        }
+        #endregion
+
         #region TC Related
 
         public int InsertUpdateTC(TCModel oModel)
@@ -4032,7 +4106,6 @@ namespace SMEnterprise.Repository
         }
         public SLCCertificateDetails GetStudentSLCDetails(int StudentID, int SessionID)
         {
-
             SLCCertificateDetails objModel = new SLCCertificateDetails();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -4084,6 +4157,7 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
+        
         public int InsertUpdateSLC(SLCCertificateDetails oModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))

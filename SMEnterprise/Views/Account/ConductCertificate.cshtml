@@ -1,0 +1,202 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    //ViewBag.Title = "DemandRecipt";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>Conduct Certificates</title>
+    <style>
+        .reportSign {
+            max-width: 200px;
+            max-height: 90px;
+        }
+    </style>
+}
+@model SMEnterprise.Models.SOCertificateDetails
+<div class="" style="background-color: white;">
+
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-10" style="text-align:right;">
+        </div>
+    </div>
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Conduct Certificate</h2>
+            <button type="button" class="btn btn-primary pull-right" onclick="PrintCert(0);"><i class="fa fa-print"></i> Print</button>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content ConductCert">
+            <table style="width: 100%; border:0px;">
+                <thead>
+                    <tr>
+                        <td style="text-align:left;width:20%;">
+                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                        </td>
+                        <td style="text-align:center;width:60%;border-top: 1px solid;">
+                            <h3> @Model.Branch.BranchSchoolName</h3>
+                            <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
+                            <h2>@Model.Branch.ContactNo</h2>
+                            <h2>@Model.Branch.EmailID</h2>
+                            <p>TO WHOM IT MAY CONCERN</p>
+                        </td>
+                        <td style="text-align:right;width:20%;border-right: 1px solid;border-top: 1px solid;">
+                            S.R.N. @Model.Student.SchoolUID
+                            @*Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <table style="width:100%">
+                                <tr style="font-weight: bold;text-align: center;">
+                                    <td style="padding: 10px; border: 1px solid;">
+                                        Name of Scholar
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Parents Name
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Last Institution attended
+                                    </td>
+                                </tr>
+
+                                <tr style="font-weight: bold;text-align: center;">
+                                    <td style="padding: 10px; border: 1px solid;">
+                                        Religions  & Cast
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Address
+                                    </td>
+                                    <td style="padding: 10px;border: 1px solid;">
+                                        Length of Residence in this Province
+                                    </td>
+
+
+                                </tr>
+
+                                <tr style="font-weight: bold;text-align: center;">
+                                    <td style="padding: 10px; border: 1px solid;">
+                                        Date of Birth Scholar
+                                    </td>
+                                    <td colspan="2" style="padding: 10px; border: 1px solid;">Date of Birth (In words)</td>
+                                </tr>
+
+
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <table style="width:100%">
+
+                                <tr>
+                                    <td colspan="9" style="border-left:1px solid;border-right:1px solid">.</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="9" style="border-left:1px solid;border-right:1px solid">.</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="9" style="border-left:1px solid;border-right:1px solid">.</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3" style="border-left:1px solid;border-bottom:1px solid;padding: 10px;">
+                                        <br />
+                                        <br />
+                                        Date : @Model.CreatedDate.ToString("dd MMM, yyyy")
+                                    </td>
+
+                                    <td colspan="3" style="border-bottom:1px solid;padding: 10px;">
+                                        <br />
+                                        <br />
+                                        <br />
+
+                                        Clerk________________
+                                    </td>
+
+                                    @if (Model.Branch.PrincipalSignature == null)
+                                    {
+
+
+                                        <td colspan="3" style="border-right:1px solid;border-bottom:1px solid;padding: 10px;">
+                                            <br />
+                                            <br />
+                                            <br />
+
+                                            Principal________________
+                                        </td>
+
+
+                                    }
+                                    else
+                                    {
+                                        <td colspan="3" style="border-right:1px solid;border-bottom:1px solid;padding: 10px;">
+                                            <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                            <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal
+                                        </td>
+                                    }
+
+                                </tr>
+                                @*<tr>
+                                        <td colspan="9">
+                                            <small> Generated by Pschool Software by Prabhuti Systems Pvt. Ltd.</small>
+                                        </td>
+                                    </tr>*@
+                            </table>
+                        </td>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+
+
+
+        });
+    </script>
+    <script>
+        function PrintCert(type) {
+            var contents = '';
+            if (type == 0) {
+                contents = $(".ConductCert").html();
+            }
+            //else if (type == 1) {
+            //    contents = $(".tccontainer").html();
+            //}
+            //else {
+            //    contents = $(".charactercontainer").html();
+            //}
+
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" type="text/css" />');
+
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 1000);
+        }
+    </script>
+}
