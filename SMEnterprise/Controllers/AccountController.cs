@@ -1699,7 +1699,7 @@ namespace SMEnterprise.Controllers
             objModel.CreatedDate = CommonUsage.GetCurrentDate();
             
             int Res = objAccountData.InsertUpdateOCertificates(objModel);
-            return Redirect("ConductCertificates/" + objModel.StudentID + "/" + objModel.SessionID +"/" +objModel.CertType);
+            return Redirect("ConductCertificate/" + objModel.StudentID + "/" + objModel.SessionID +"/0" +objModel.CertType);
         }
         [PermissionFilter]
         public ActionResult ConductCertificate(string ID = null, string ID2 = null, string ID3 = null)

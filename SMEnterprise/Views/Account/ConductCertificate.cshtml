@@ -29,63 +29,55 @@
             <div class="clearfix"></div>
         </div>
         <div class="x_content ConductCert">
-            <table style="width: 100%; border:0px;">
-                <thead>
+            <table style="width: 80%; border: 0px; border: 1px solid;">
+                <thead style="border: 1px solid;">
                     <tr>
                         <td style="text-align:left;width:20%;">
                             <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
                         </td>
-                        <td style="text-align:center;width:60%;border-top: 1px solid;">
+                        <td style="text-align:center;width:60%;">
                             <h3> @Model.Branch.BranchSchoolName</h3>
                             <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
                             <h2>@Model.Branch.ContactNo</h2>
                             <h2>@Model.Branch.EmailID</h2>
-                            <p>TO WHOM IT MAY CONCERN</p>
+                            <br />
+                            <H3><strong><u>TO WHOM IT MAY CONCERN</u></strong></H3>
                         </td>
-                        <td style="text-align:right;width:20%;border-right: 1px solid;border-top: 1px solid;">
-                            S.R.N. @Model.Student.SchoolUID
-                            @*Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
+                        <td style="text-align:right;width:20%;">
+                            @*S.R.N. @Model.Student.SchoolUID
+                            Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
                         </td>
                     </tr>
                     <tr>
+                        @{
+                            var relation = "";
+                            var H = "";
+                            var H1 = "";
+                            if (Model.Student.Gender == 0)
+                            {
+                                relation = "Son";
+                                H = "His";
+                                H1 = "He";
+                            }
+                            else
+                            {
+                                relation = "Daughter";
+                                H = "Her";
+                                H1 = "She";
+                            }
                         <td colspan="3">
                             <table style="width:100%">
-                                <tr style="font-weight: bold;text-align: center;">
+                                <tr style="font-weight: bold;text-align: justify;">
                                     <td style="padding: 10px; border: 1px solid;">
-                                        Name of Scholar
-                                    </td>
-                                    <td style="padding: 10px;border: 1px solid;">
-                                        Parents Name
-                                    </td>
-                                    <td style="padding: 10px;border: 1px solid;">
-                                        Last Institution attended
+                                        <p>This is to certify that @Model.Student.Name (@Model.Student.SchoolUID)  @relation of @Model.Parent.MotherName and @Model.Parent.FatherName is/was a student of @Model.Session.ClassName/@Model.Session.SectionName in this school, for the Academic Session @Model.Session.SessionName admitted in 
+                                        @Model.FirstClassSectionName preparatory on (admission date) @Model.Student.DOJ.ToString("dd-MMM-yyyy") in the Academic Session @Model.FirstSessionName.</p>
+                                        <p>@H date of birth according to our school record is @Model.Student.DOB.ToString("dd-MMM-yyyy") (in words)  @SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Day) @Model.Student.DOB.ToString("MMMM") @SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Year).</p>
+                                        <p>@H1 is/was of @Model.Character. The Academic Session of this school is @Model.Session.FromDate.ToString("MMMM") to @Model.Session.ToDate.ToString("MMMM") . All the instructions are given in English medium only.</p>
                                     </td>
                                 </tr>
-
-                                <tr style="font-weight: bold;text-align: center;">
-                                    <td style="padding: 10px; border: 1px solid;">
-                                        Religions  & Cast
-                                    </td>
-                                    <td style="padding: 10px;border: 1px solid;">
-                                        Address
-                                    </td>
-                                    <td style="padding: 10px;border: 1px solid;">
-                                        Length of Residence in this Province
-                                    </td>
-
-
-                                </tr>
-
-                                <tr style="font-weight: bold;text-align: center;">
-                                    <td style="padding: 10px; border: 1px solid;">
-                                        Date of Birth Scholar
-                                    </td>
-                                    <td colspan="2" style="padding: 10px; border: 1px solid;">Date of Birth (In words)</td>
-                                </tr>
-
-
                             </table>
                         </td>
+                        }
                     </tr>
                     <tr>
                         <td colspan="3">
