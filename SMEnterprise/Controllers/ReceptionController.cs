@@ -90,7 +90,8 @@ namespace SMEnterprise.Controllers
         {
             objData.CreatedDate = CommonUsage.GetCurrentDate();
             int FollowupID = receptionData.InsertAdmissionEnquiryFollowup(objData);
-            return Json(FollowupID, JsonRequestBehavior.AllowGet);
+            //return Json(FollowupID, JsonRequestBehavior.AllowGet);
+            return RedirectToAction("Enquiries", "Reception");
         }
         #region Calendar
         [PermissionFilter]

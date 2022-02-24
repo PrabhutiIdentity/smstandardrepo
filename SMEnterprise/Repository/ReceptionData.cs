@@ -77,7 +77,7 @@ namespace SMEnterprise.Repository
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@EnquiryID", objData.EnquiryID);
-                paramater.Add("@EDate", objData.EDate);
+                paramater.Add("@EDate", CommonUsage.GetCurrentDate());
                 paramater.Add("@FatherName", objData.FatherName);
                 paramater.Add("@MotherName", objData.MotherName);
                 paramater.Add("@FatherMobileNo", objData.FatherMobileNo);
@@ -102,14 +102,30 @@ namespace SMEnterprise.Repository
                 paramater.Add("@StudentDOB", objData.StudentDOB);
                 paramater.Add("@EStatus", objData.EStatus);
                 paramater.Add("@EPossibility", objData.EPossibility);
-                paramater.Add("@NextFollowUpDate", objData.NextFollowUpDate);
+                paramater.Add("@NextFollowUpDate", CommonUsage.GetCurrentDate());
                 paramater.Add("@SBranchID", objData.SBranchID);
                 paramater.Add("@UserID", objData.UserID);
-                paramater.Add("@CreatedDate", objData.CreatedDate);
+                paramater.Add("@CreatedDate", CommonUsage.GetCurrentDate());
                 paramater.Add("@StudentID", objData.StudentID);
                 paramater.Add("@PaymentStatus", objData.PaymentStatus);
                 paramater.Add("@PaymentDetails", objData.PaymentDetails);
                 paramater.Add("@AssignedTo", objData.AssignedTo);
+                paramater.Add("@Image", objData.Image);
+                paramater.Add("@StudentAadharNo", objData.StudentAadharNo);
+                paramater.Add("@FatherAadhaarNo", objData.FatherAadhaarNo);
+                paramater.Add("@MotherAadhaarNo", objData.MotherAadhaarNo);
+                paramater.Add("@Caste", objData.Caste);
+                paramater.Add("@DateOfBirth", objData.StudentDOB);
+                paramater.Add("@TelephoneNoOff", objData.TelephoneNoOff);
+                paramater.Add("@TelephoneNoReg", objData.TelephoneNoReg);
+                paramater.Add("@Sibling", objData.Sibling);
+                paramater.Add("@SiblingName", objData.SiblingName);
+                paramater.Add("@SiblingClass", objData.SiblingClass);
+                paramater.Add("@MotherQuaAndOcc", objData.MotherQuaAndOcc);
+                paramater.Add("@FatherQuaAndOcc", objData.FatherQuaAndOcc);
+                paramater.Add("@TemporaryAddress", objData.TemporaryAddress);
+                paramater.Add("@PermanentAddress", objData.PermanentAddress);
+                paramater.Add("@Religion", objData.ReligionID);
 
                 return con.Query<AdmissionEnquiryMasterModel>("spn_InsertUpdateAdmissionEnquiry", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
