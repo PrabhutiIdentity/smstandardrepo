@@ -1,0 +1,257 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Promoted Students Report";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentAdmissionReportModel
+@section IncludeCss
+{
+    <title>Promoted Students Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+
+}
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+
+    #tblAdmission > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    table.dataTable tbody td {
+        word-break: break-word;
+        vertical-align: top;
+    }
+</style>
+
+<section class="content-header">
+    <h1>
+        Promoted Students Report
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href=""><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Promoted Students Report</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("PromotedStudentsReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            {
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-1 padding">
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Session :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="SessionID" id="ddlSessions">
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (NameIDModel el in Model.Sessions)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1=="1"?"(Active)":"")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            @*<div class="col-md-3 form-group">
+                                    <label>Select Month:<small>(mm/yyyy)</small><span class="tx-danger">*</span></label>
+                                    <input type="month" name="StartDate" class="form-control" id="txtStartDate" placeholder="Enter Name" value="@Model.StartDate.ToString("yyyy-MM")" required>
+                                </div>*@
+
+
+                            <div class="col-md-3 form-group">
+                                <button type="submit" class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            }
+            <div class="x_panel">
+                <div class="x_content">
+
+                    <table id="tblCategory" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
+                        <thead>
+                            <tr>
+                                <th colspan="12"></th>
+                                <th colspan="2" style="text-align:center">Classes</th>
+                            </tr>
+                            <tr>                                
+                                <th>Seq</th>
+                                <th>Student Name  </th>
+                                <th>Student ID  </th>
+                                <th>SR.No.</th>
+                                <th>Gender</th>
+                                <th>Admission Date</th>
+                                <th>Date of Birth</th>
+                                <th><b>User Name</b></th>
+                                <th>Father Name </th>
+                                <th>Father Contact No</th>
+                                <th>Mother Name </th>
+                                <th>Mother Contact No</th>
+                                <th>Current Class</th>
+                                <th>Previous Class</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (var c in Model.StudentDetail)
+
+                            {
+                                <tr>
+                                    <td>@(count + 1)</td>
+                                    <td>@c.Name </td>
+                                    <td>@c.StudentSID</td>
+                                    <td>@c.SchoolUID</td>
+                                    <td>
+                                        @if (@c.Gender != 0)
+                                        {
+                                            <label>Female</label>
+                                        }
+                                        else
+                                        {
+                                            <label>Male</label>
+                                        }
+                                    </td>
+                                    <td>@c.DOJ.ToString("dd/MM/yyyy")</td>
+                                    <td>@c.DOB.ToString("dd/MM/yyyy")</td>
+                                    <td style="color:dodgerblue;"><b>@c.SParentID</b></td>
+                                    <td> @c.FatherName</td>
+                                    <td> @c.FatherMobileNo</td>
+                                    <td>@c.MotherName</td>
+                                    <td>@c.MotherMobileNo</td>
+                                    <td>@c.ClassName</td>
+                                    <td>@c.PrevClassName</td>
+
+                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts
+{
+
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script>
+        $(document).ready(function () {           
+
+            var printdate = 'Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+            var SsnName = document.getElementById("ddlSessions");            
+            var rpname = 'Promoted Students Report for Session ' + SsnName.options[SsnName.selectedIndex].text;
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
+            $("#tblCategory").DataTable({
+
+                        dom: "Bfrtip",
+                    "paging": true,
+                    "pageLength": 20,
+                    buttons: [
+                      {
+                          extend: "copy",
+                            className: "btn-sm",
+                            footer: true,
+                            message: printdate,
+                             messageTop: '@Model.Branches.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+
+
+                      },
+                      {
+                          extend: "csv",
+                          className: "btn-sm",
+                          footer: true,
+                          message: printdate,
+                            messageTop: '@Model.Branches.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+
+                      },
+                      {
+                          extend: "excel",
+                          className: "btn-sm",
+                          footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branches.BranchSchoolName'
+
+                      },
+                      {
+                          extend: "pdfHtml5",
+                          className: "btn-sm",
+                          footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branches.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                          },
+                          message: printdate,
+                          messageBottom: repname,
+                          title: rpname
+                      },
+                      {
+                          extend: "print",
+                          className: "btn-sm",
+                          footer: true,
+                          orientation: 'landscape',
+                          message: rpname,
+                          messageTop: printdate,
+                          messageBottom: repname,
+                          title: '@Model.Branches.BranchSchoolName'
+                      },
+                    ],
+                        responsive: true
+                    });
+
+
+        });
+    </script>
+}
