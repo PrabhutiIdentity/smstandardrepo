@@ -22,6 +22,12 @@ namespace SMEnterprise.Controllers
             return View(objData);
         }
         [PermissionFilter]
+        public ActionResult AddAssignee(AdmissionEnquiryMasterModel oModel)
+        {
+            oModel = receptionData.AddEnquiryAssignee(oModel);
+            return RedirectToAction("Enquiries", "Reception");
+        }
+        [PermissionFilter]
         public ActionResult Dashboard()
         {
             int UserID = PermissionManager.GetLoggedInUser().UserID;

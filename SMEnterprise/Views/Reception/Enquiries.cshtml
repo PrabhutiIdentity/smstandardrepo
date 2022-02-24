@@ -179,7 +179,8 @@
                                     <th style="width: 10%">Dates</th>
                                     <th style="width: 10%">Eq. Status</th>
                                     <th style="width: 10%">Prospect</th>
-                                    <th style="width: 10%">#Followups</th>
+                                    <th style="width: 15%">Assign To</th>
+                                    <th style="width: 5%">Followups</th>
                                     <th style="width: 10%"><a href="javascript:void(0);" onclick="AddEnquiry(this);" class="Closed">Add New</a></th>
                                 </tr>
                             </thead>
@@ -266,6 +267,10 @@
                                             }
                                         </td>
                                         <td>
+                                            <p>Assignee Name : <b>@c.ReciptionistName</b></p>
+                                            <a href="javascript:void(0);" class="btn btn-link" onclick="AddAssignee(this,@c.EnquiryID);">Assign To</a>
+                                        </td>
+                                        <td>
                                             @c.Followups
                                         </td>
                                         <td>
@@ -291,6 +296,37 @@
 <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
 <input type="hidden" id="hdnNext2DaysDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(2).ToString("yyyy-MM-dd")" />
 @section PageBottom{
+    <div class="modal fade bs-example-modal-sm" id="AssigneeTo" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                @using (Html.BeginForm("AddAssignee", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmAddFollowup" }))
+                {
+                    <div class="modal-body">
+                        <input type="hidden" name="EnquiryID" id="hdnNewEnquiryID" value="" />
+                        <div class="row">
+                            <div class="col-md-12">
+                                Assigned To : <b id="vReceptionist"></b>
+                                <select class="form-control" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
+
+                                    <option value="0">--Select--</option>
+                                    @foreach (var Emp in Model.Receptionists)
+                                    {
+                                        <option value="@Emp.ID">@Emp.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade bs-example-modal-lg" id="addfollowupdetails" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -731,6 +767,14 @@
         var ClassName = '';
         var EnquiryUID = '';
         var AssignTO = '';
+
+
+        EnquiryUID = $('#hdnEnquiryUID').val();
+        $('#hdnNewEnquiryID').val(EnquiryUID);
+        function AddAssignee(sender, ID)
+        {
+            $('#AssigneeTo').modal('show');
+        }
                         function AddNewFollowup(sender)
                         {
                             debugger;

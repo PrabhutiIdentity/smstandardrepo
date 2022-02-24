@@ -71,6 +71,17 @@ namespace SMEnterprise.Repository
                 return con.Query<AdmissionEnquiryFollowupModel>("sp_GetAdmissionEnquiryFollowups", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
             }
         }
+        public AdmissionEnquiryMasterModel AddEnquiryAssignee(AdmissionEnquiryMasterModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@EnquiryID", oModel.EnquiryID);
+                paramater.Add("@AssignedTo", oModel.AssignedTo);
+
+                return con.Query<AdmissionEnquiryMasterModel>("sp_AddEnquiryAssignee", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
         public AdmissionEnquiryMasterModel UpdateEnquiry(AdmissionEnquiryMasterModel objData)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
