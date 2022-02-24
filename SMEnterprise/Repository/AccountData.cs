@@ -4008,7 +4008,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@StudentID", StudentID);
                 paramater.Add("@SessionID", SessionID);
-                paramater.Add("@CType", CType);
+                paramater.Add("@CertType", CType);
                 using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
@@ -4019,7 +4019,7 @@ namespace SMEnterprise.Repository
                         objModel.SessionID = SessionID;
                         objModel.CertDate = CommonUsage.GetCurrentDate();
                     }
-                    objModel.Sessions = multi.Read<SessionModel>().ToList();
+                    objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
                     objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
                 }
                 return objModel;
@@ -4063,10 +4063,10 @@ namespace SMEnterprise.Repository
                         objModel.SessionID = SessionID;
                         objModel.CertDate = CommonUsage.GetCurrentDate();
                     }
-                    objModel.Sessions = multi.Read<SessionModel>().ToList();
+                    objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
                     objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
-                    //objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
-                    //objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
+                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
                 }
                 return objModel;
             }
