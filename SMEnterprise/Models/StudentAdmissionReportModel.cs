@@ -126,6 +126,7 @@ namespace SMEnterprise.Models
         public string IFSCCode { get; set; }
         public string BranchName { get; set; }
         public string StudentSessions { get; set; }
+        public string PrevClassName { get; set; }
 
     }
 }

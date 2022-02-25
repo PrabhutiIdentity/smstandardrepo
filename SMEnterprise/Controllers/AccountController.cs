@@ -3182,6 +3182,17 @@ namespace SMEnterprise.Controllers
             return View(oModel);
         }
         #endregion
+
+        #region promotedstudentsreport
+        [PermissionFilter]
+        public ActionResult PromotedStudentsReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+            objAdminData.GetPromotedStudentsDetail(oModel);
+            return View(oModel);
+        }
+        #endregion
         #region SessionAdmissionReport
         [PermissionFilter]
         public ActionResult SessionAdmissionReport(StudentAdmissionReportModel oModel)
