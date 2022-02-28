@@ -175,13 +175,14 @@
                                 <tr id="trHeader">
                                     <th style="width: 5%">#</th>
                                     <th style="width: 35%">Details</th>
-                                    <th style="width: 10%">Source</th>
+                                    @*<th style="width: 10%">Source</th>*@
                                     <th style="width: 10%">Dates</th>
                                     <th style="width: 10%">Eq. Status</th>
                                     <th style="width: 10%">Prospect</th>
                                     <th style="width: 15%">Assign To</th>
                                     <th style="width: 5%">Followups</th>
                                     <th style="width: 10%"><a href="javascript:void(0);" onclick="AddEnquiry(this);" class="Closed">Add New</a></th>
+                                    <th style="width: 15%">Convert</th>
                                 </tr>
                             </thead>
                             @{
@@ -189,24 +190,27 @@
                                 foreach (AdmissionEnquiryMasterModel c in Model.Enquiries)
                                 {
                                     <tr>
+                                        <td>
+                                            <input type="hidden" id="hdnEnquiryUID" value="@c.EnquiryID" />
+                                            <input type="hidden" id="hdnStudentName" value="@c.StudentName" />
+                                            <input type="hidden" id="hdnAssigneName" value="@c.ReciptionistName" />
+                                            <input type="hidden" id="hdnFatherName" value="@c.FatherName" />
+                                            <input type="hidden" id="hdnFatherOcc" value="@c.FatherQuaAndOcc" />
+                                            <input type="hidden" id="hdnMotherName" value="@c.MotherName" />
+                                            <input type="hidden" id="hdnMotherOcc" value="@c.MotherQuaAndOcc" />
+                                            <input type="hidden" id="hdnDOB" value="@c.StudentDOB.ToString("dd MMM, yyyy")" />
+                                            <input type="hidden" id="hdnMobileNo" value="@c.TelephoneNoReg" />
+                                            <input type="hidden" id="hdnSessionName" value="@c.SessionName" />
+                                            <input type="hidden" id="hdnClassName" value="@c.ClassName" />
+                                            <input type="hidden" id="hdnEnquiry" value="@c.Gender" />
+                                            <input type="hidden" id="hdnAddress" value="@c.PermanentAddress" />
+                                            <input type="hidden" id="hdnEnquiryDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
+                                            <input type="hidden" id="hdnNxtFollowupDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
+                                            <input type="hidden" id="hdnReligionID" value="@c.ReligionID" />
+                                            <input type="hidden" id="hdnClassID" value="@c.AppliedForClass" />
 
-                                        <input type="hidden" id="hdnEnquiryUID" value="@c.EnquiryID" />
-                                        <input type="hidden" id="hdnStudentName" value="@c.StudentName" />
-                                        <input type="hidden" id="hdnAssigneName" value="@c.ReciptionistName" />
-                                        <input type="hidden" id="hdnFatherName" value="@c.FatherName" />
-                                        <input type="hidden" id="hdnFatherOcc" value="@c.FatherQuaAndOcc" />
-                                        <input type="hidden" id="hdnMotherName" value="@c.MotherName" />
-                                        <input type="hidden" id="hdnMotherOcc" value="@c.MotherQuaAndOcc" />
-                                        <input type="hidden" id="hdnDOB" value="@c.StudentDOB.ToString("dd MMM, yyyy")" />
-                                        <input type="hidden" id="hdnMobileNo" value="@c.TelephoneNoReg" />
-                                        <input type="hidden" id="hdnSessionName" value="@c.SessionName" />
-                                        <input type="hidden" id="hdnClassName" value="@c.ClassName" />
-                                        <input type="hidden" id="hdnEnquiry" value="@c.Gender" />
-                                        <input type="hidden" id="hdnAddress" value="@c.PermanentAddress" />
-                                        <input type="hidden" id="hdnEnquiryDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
-                                        <input type="hidden" id="hdnNxtFollowupDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
-
-                                        <td>@(count + 1)</td>
+                                            @(count + 1)
+                                        </td>
                                         <td>
                                             <input type="hidden" id="hdnSrNo" value="@(count+1)" />
                                             <label class='badge bg-green'>Name: @c.StudentName</label>
@@ -218,20 +222,20 @@
                                             <label class='badge bg-red'>Income: @c.FamilyIncome.ToString("00") Lakh</label>
                                             <input type="hidden" id="hdnData" value="@(Json.Encode(c))" />
                                         </td>
-                                        <td>
-                                            @if (c.ESource == 0)
-                                            {
-                                                <label class='badge bg-blue'>Search</label>
-                                            }
-                                            else if (c.ESource == 1)
-                                            {
-                                                <label class='badge bg-green'>Referance</label>
-                                            }
-                                            else
-                                            {
-                                                <label class='badge bg-red'>Ads</label>
-                                            }
-                                        </td>
+                                        @*<td>
+                                                @if (c.ESource == 0)
+                                                {
+                                                    <label class='badge bg-blue'>Search</label>
+                                                }
+                                                else if (c.ESource == 1)
+                                                {
+                                                    <label class='badge bg-green'>Referance</label>
+                                                }
+                                                else
+                                                {
+                                                    <label class='badge bg-red'>Ads</label>
+                                                }
+                                            </td>*@
                                         <td>
                                             Next Followup<br /> <label id="lblNextFollowDate" class='badge bg-red'>
                                                 @c.NextFollowUpDate.ToString("dd MMM, yyyy")
@@ -275,6 +279,31 @@
                                         </td>
                                         <td>
                                             <a href="javascript:void(0);" class="btn btn-link Closed" onclick="ViewEnquiry(this,@c.EnquiryID);">View</a>
+                                        </td>
+                                        <td>
+                                            @using (Html.BeginForm("ConvertEnquiry", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal" }))
+                                            {
+
+                                                <input type="hidden" id="hdnEnquiryUID" value="@c.EnquiryID" />
+                                                <input type="hidden" id="hdnStudentName" value="@c.StudentName" />
+                                                <input type="hidden" id="hdnAssigneName" value="@c.ReciptionistName" />
+                                                <input type="hidden" id="hdnFatherName" value="@c.FatherName" />
+                                                <input type="hidden" id="hdnFatherOcc" value="@c.FatherQuaAndOcc" />
+                                                <input type="hidden" id="hdnMotherName" value="@c.MotherName" />
+                                                <input type="hidden" id="hdnMotherOcc" value="@c.MotherQuaAndOcc" />
+                                                <input type="hidden" id="hdnDOB" value="@c.StudentDOB.ToString("dd MMM, yyyy")" />
+                                                <input type="hidden" id="hdnMobileNo" value="@c.TelephoneNoReg" />
+                                                <input type="hidden" id="hdnSessionName" value="@c.SessionName" />
+                                                <input type="hidden" id="hdnClassName" value="@c.ClassName" />
+                                                <input type="hidden" id="hdnEnquiry" value="@c.Gender" />
+                                                <input type="hidden" id="hdnAddress" value="@c.PermanentAddress" />
+                                                <input type="hidden" id="hdnEnquiryDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
+                                                <input type="hidden" id="hdnNxtFollowupDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
+                                                <input type="hidden" id="hdnReligionID" value="@c.ReligionID" />
+                                                <input type="hidden" id="hdnClassID" value="@c.AppliedForClass" />
+
+                                                <button type="submit" onclick="return Convertenquiry(this);" class="btn btn-link">Convert</button>
+                                            }
                                         </td>
                                     </tr>
 
@@ -381,23 +410,23 @@
                         <h4 class="modal-title" id="myModalLabel">Device Details</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-5">
-                                Assigned To : <b id="vReceptionist"></b>
-                                <select class="form-control editReceptionEnquiry hidden" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
-
-                                    <option value="0">--Select--</option>
-                                    @foreach (var Emp in Model.Receptionists)
-                                    {
-                                        <option value="@Emp.ID">@Emp.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            @*<div class="col-md-5"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint hidden" onclick="PrintEnquiry(this);"> Print</a></div>
-                                <div class="col-md-2"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint" id="btnEditEnquiry" onclick="EditEnquiryDetails(this);"> Edit Details</a></div>*@
-                        </div>
 
                         <div class="viewe">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    Assigned To : <b id="vReceptionistname"></b>
+                                    @*<select class="form-control editReceptionEnquiry hidden" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
+
+                                            <option value="0">--Select--</option>
+                                            @foreach (var Emp in Model.Receptionists)
+                                            {
+                                                <option value="@Emp.ID">@Emp.Name</option>
+                                            }
+                                        </select>*@
+                                </div>
+                                @*<div class="col-md-5"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint hidden" onclick="PrintEnquiry(this);"> Print</a></div>
+                                    <div class="col-md-2"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint" id="btnEditEnquiry" onclick="EditEnquiryDetails(this);"> Edit Details</a></div>*@
+                            </div>
                             <div class="row">
                                 <div class="col-md-3">Enquery Date : <b id="vEnqDate"></b></div>
                                 <div class="col-md-2">Status : <b id="vEStatus">Open</b></div>
@@ -769,10 +798,17 @@
         var AssignTO = '';
 
 
+        function Convertenquiry(sender, proID) {
+
+            return confirm('Do you really want to Convert this Enquiry!!!!');
+            //alert('Product is deleted Sucessfully..!');
+        }
+
         EnquiryUID = $('#hdnEnquiryUID').val();
         $('#hdnNewEnquiryID').val(EnquiryUID);
         function AddAssignee(sender, ID)
         {
+            $('#hdnNewEnquiryID').val(ID);
             $('#AssigneeTo').modal('show');
         }
                         function AddNewFollowup(sender)
@@ -825,18 +861,12 @@
                         });
 
                         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        function ViewEnquiry(sender,ID) {
-                            if ($(sender).hasClass('Closed')) {
+        function ViewEnquiry(sender, ID) {
+            debugger;
+                            //if ($(sender).hasClass('Closed')) {
                                 var Data = $.parseJSON($(sender).closest('tr').find('#hdnData').val());
 
-                                var ele = document.getElementsByClassName("Open");
-                                if (ele.length > 0) {
-                                    $(ele[0]).click();
-                                }
 
-                                $(sender).removeClass('Closed');
-                                $(sender).addClass('Open');
-                                //$(sender).html('Close');
                                 var dtEnqDate=new Date(Data.EDate.match(/\d+/).map(Number)[0]);
                                 var sEnqDate= dtEnqDate.getDate() + ' ' + months[dtEnqDate.getMonth()] + ' ,' + dtEnqDate.getFullYear();
 
@@ -859,65 +889,7 @@
                                 ClassName = $('#hdnClassName').val();
                                 EnquiryUID = $('#hdnEnquiryUID').val();
                                 AssignTO = $('#hdnAssigneName').val();
-                                //$(sender)
-                                //      .closest("tr")
-                                //      .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: #fcfcfd;'>"+$('.tblEqDetailswrapper').html()+" </td></tr>");
 
-                                $('#tdDetails').find('.enqDetails').find('#txtStudentName').val(Data.StudentName);
-                                $('#tdDetails').find('.enqDetails').find('#txtEnqDate').val(dtEnqDate.getFullYear()+'-'+pad(dtEnqDate.getMonth()+1,2)+'-'+dtEnqDate.getDate());
-                                $('#tdDetails').find('.enqDetails').find('#ddlEStatus').val(Data.EStatus);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEProspect').val(Data.EPossibility);
-                                $('#tdDetails').find('.enqDetails').find('#txtFollowDate').val(dtFollow.getFullYear()+'-'+pad(dtFollow.getMonth()+1,2)+'-'+dtFollow.getDate());
-                                $('#tdDetails').find('.enqDetails').find('#ddlSource').val(Data.ESource);
-                                $('#tdDetails').find('.enqDetails').find('#txtDOB').val(dtDOB.getFullYear()+'-'+pad(dtDOB.getMonth()+1,2)+'-'+dtDOB.getDate());
-                                $('#tdDetails').find('.enqDetails').find('#ddlGender').val(Data.Gender);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEnqSessions').val(Data.AppliedForSession);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEnqClassApplied').val(Data.AppliedForClass);
-                                $('#tdDetails').find('.enqDetails').find('#txtSchoolName').val(Data.CurrentSchool);
-                                $('#tdDetails').find('.enqDetails').find('#txtBoardName').val(Data.CurrentEducationSystem);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEnqClassCurrent').val(Data.CurrentClass);
-                                $('#tdDetails').find('.enqDetails').find('#txtFatherName').val(Data.FatherName);
-                                $('#tdDetails').find('.enqDetails').find('#txtFOccupation').val(Data.FOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#txtFMobile').val(Data.FatherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#txtEmail').val(Data.FatherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#txtMotherName').val(Data.MotherName);
-                                $('#tdDetails').find('.enqDetails').find('#txtMOccupation').val(Data.MOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#txtMMobile').val(Data.MotherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#txtMEmail').val(Data.MotherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#txtAnnualIncome').val(Data.FamilyIncome);
-                                $('#tdDetails').find('.enqDetails').find('#txtNationality').val(Data.Nationality);
-                                $('#tdDetails').find('.enqDetails').find('#txtAddress').val(Data.Address);
-                                $('#tdDetails').find('.enqDetails').find('#txtReason').html(Data.ReasonForChange);
-                                $('#tdDetails').find('.enqDetails').find('#ddlReceptionist').val(Data.AssignedTo);
-                                $('#tdDetails').find('.enqDetails').find('#hdnFollowupBy').val(Data.AssignedTo);
-                                $('#tdDetails').find('.enqDetails').find('#vReceptionist').html(Data.ReciptionistName);
-                                $('#tdDetails').find('.enqDetails').find('#vEnqDate').html(sEnqDate);
-                                $('#tdDetails').find('.enqDetails').find('#vEStatus').html(Data.EStatus==0?'Open':Data.EStatus==1?'Converted':'Lost');
-                                $('#tdDetails').find('.enqDetails').find('#vProspect').html(Data.EPossibility==0?'Neutral':Data.EPossibility==1?'Positive':'Negative');
-                                $('#tdDetails').find('.enqDetails').find('#vFollowupdate').html(sFollow);
-                                $('#tdDetails').find('.enqDetails').find('#vSource').html(Data.ESource==0?'Search':Data.ESource==1?'Referance':'Ads');
-                                //$('#tdDetails').find('.enqDetails').find('#vStudentName').html(Data.StudentName);
-                                $('#tdDetails').find('.enqDetails').find('#vStudentDOB').html(sDOB);
-                                $('#tdDetails').find('.enqDetails').find('#vStudentGender').html(Data.Gender==0?'Male':'Female');
-                                $('#tdDetails').find('.enqDetails').find('#vSessionApplied').html(Data.SessionName);
-                                $('#tdDetails').find('.enqDetails').find('#vClassApplied').html(Data.ClassName);
-                                $('#tdDetails').find('.enqDetails').find('#vCurSchoolName').html(Data.CurrentSchool);
-                                $('#tdDetails').find('.enqDetails').find('#vCurrentBoard').html(Data.CurrentEducationSystem);
-                                $('#tdDetails').find('.enqDetails').find('#vCurrentClass').html(Data.CurrentClassName);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherName').html(Data.FatherName);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherOccupation').html(Data.FOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherMobile').html(Data.FatherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherEmail').html(Data.FatherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherName').html(Data.MotherName);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherOccupation').html(Data.MOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherMobile').html(Data.MotherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherEmail').html(Data.MotherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#vIncome').html(Data.FamilyIncome);
-                                $('#tdDetails').find('.enqDetails').find('#vNationality').html(Data.Nationality);
-                                $('#tdDetails').find('.enqDetails').find('#vAddress').html(Data.Address);
-                                $('#tdDetails').find('.enqDetails').find('#vReason').html(Data.ReasonForChange);
-                                $('#tdDetails').find('.enqDetails').find('#hdnEnquiryID').val(ID);
-                                //$('#tdDetails').find('#hdnFEnquiryID').val(ID);
 
                                 $('#vStudentName').html(studentName);
                                 $('#vFatherName').html(FatherName);
@@ -931,7 +903,7 @@
                                 $('#vAddress').html(Address);
                                 $('#vClassApplied').html(ClassName);
                                 $('#hdnFEnquiryID').val(EnquiryUID);
-                                $('#vReceptionist').html(AssignTO);
+                                $('#vReceptionistname').html(AssignTO);
                                 var SlNo=0;
                                 if(ID==0)
                                 {
@@ -983,13 +955,81 @@
                                         }
                                     });
 
-                            }
-                            else {
-                                $(sender).text('View');
-                                $(sender).removeClass('Open');
-                                $(sender).addClass('Closed');
-                                $(sender).closest("tr").next().remove();
-                            }
+            //var ele = document.getElementsByClassName("Open");
+            //if (ele.length >= 0) {
+            //    $(ele[0]).click();
+            //}
+
+            //$(sender).removeClass('Closed');
+            //$(sender).addClass('Open');
+                                //$(sender).html('Close');
+            //$(sender)
+
+            //      .closest("tr")
+            //      .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: #fcfcfd;'>"+$('.tblEqDetailswrapper').html()+" </td></tr>");
+
+            $('#tdDetails').find('.enqDetails').find('#txtStudentName').val(Data.StudentName);
+            $('#tdDetails').find('.enqDetails').find('#txtEnqDate').val(dtEnqDate.getFullYear() + '-' + pad(dtEnqDate.getMonth() + 1, 2) + '-' + dtEnqDate.getDate());
+            $('#tdDetails').find('.enqDetails').find('#ddlEStatus').val(Data.EStatus);
+            $('#tdDetails').find('.enqDetails').find('#ddlEProspect').val(Data.EPossibility);
+            $('#tdDetails').find('.enqDetails').find('#txtFollowDate').val(dtFollow.getFullYear() + '-' + pad(dtFollow.getMonth() + 1, 2) + '-' + dtFollow.getDate());
+            $('#tdDetails').find('.enqDetails').find('#ddlSource').val(Data.ESource);
+            $('#tdDetails').find('.enqDetails').find('#txtDOB').val(dtDOB.getFullYear() + '-' + pad(dtDOB.getMonth() + 1, 2) + '-' + dtDOB.getDate());
+            $('#tdDetails').find('.enqDetails').find('#ddlGender').val(Data.Gender);
+            $('#tdDetails').find('.enqDetails').find('#ddlEnqSessions').val(Data.AppliedForSession);
+            $('#tdDetails').find('.enqDetails').find('#ddlEnqClassApplied').val(Data.AppliedForClass);
+            $('#tdDetails').find('.enqDetails').find('#txtSchoolName').val(Data.CurrentSchool);
+            $('#tdDetails').find('.enqDetails').find('#txtBoardName').val(Data.CurrentEducationSystem);
+            $('#tdDetails').find('.enqDetails').find('#ddlEnqClassCurrent').val(Data.CurrentClass);
+            $('#tdDetails').find('.enqDetails').find('#txtFatherName').val(Data.FatherName);
+            $('#tdDetails').find('.enqDetails').find('#txtFOccupation').val(Data.FOccupation);
+            $('#tdDetails').find('.enqDetails').find('#txtFMobile').val(Data.FatherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#txtEmail').val(Data.FatherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#txtMotherName').val(Data.MotherName);
+            $('#tdDetails').find('.enqDetails').find('#txtMOccupation').val(Data.MOccupation);
+            $('#tdDetails').find('.enqDetails').find('#txtMMobile').val(Data.MotherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#txtMEmail').val(Data.MotherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#txtAnnualIncome').val(Data.FamilyIncome);
+            $('#tdDetails').find('.enqDetails').find('#txtNationality').val(Data.Nationality);
+            $('#tdDetails').find('.enqDetails').find('#txtAddress').val(Data.Address);
+            $('#tdDetails').find('.enqDetails').find('#txtReason').html(Data.ReasonForChange);
+            $('#tdDetails').find('.enqDetails').find('#ddlReceptionist').val(Data.AssignedTo);
+            $('#tdDetails').find('.enqDetails').find('#hdnFollowupBy').val(Data.AssignedTo);
+            //$('#tdDetails').find('.enqDetails').find('#vReceptionist').html(Data.ReciptionistName);
+            $('#tdDetails').find('.enqDetails').find('#vEnqDate').html(sEnqDate);
+            $('#tdDetails').find('.enqDetails').find('#vEStatus').html(Data.EStatus == 0 ? 'Open' : Data.EStatus == 1 ? 'Converted' : 'Lost');
+            $('#tdDetails').find('.enqDetails').find('#vProspect').html(Data.EPossibility == 0 ? 'Neutral' : Data.EPossibility == 1 ? 'Positive' : 'Negative');
+            $('#tdDetails').find('.enqDetails').find('#vFollowupdate').html(sFollow);
+            $('#tdDetails').find('.enqDetails').find('#vSource').html(Data.ESource == 0 ? 'Search' : Data.ESource == 1 ? 'Referance' : 'Ads');
+            //$('#tdDetails').find('.enqDetails').find('#vStudentName').html(Data.StudentName);
+            $('#tdDetails').find('.enqDetails').find('#vStudentDOB').html(sDOB);
+            $('#tdDetails').find('.enqDetails').find('#vStudentGender').html(Data.Gender == 0 ? 'Male' : 'Female');
+            $('#tdDetails').find('.enqDetails').find('#vSessionApplied').html(Data.SessionName);
+            $('#tdDetails').find('.enqDetails').find('#vClassApplied').html(Data.ClassName);
+            $('#tdDetails').find('.enqDetails').find('#vCurSchoolName').html(Data.CurrentSchool);
+            $('#tdDetails').find('.enqDetails').find('#vCurrentBoard').html(Data.CurrentEducationSystem);
+            $('#tdDetails').find('.enqDetails').find('#vCurrentClass').html(Data.CurrentClassName);
+            $('#tdDetails').find('.enqDetails').find('#vFatherName').html(Data.FatherName);
+            $('#tdDetails').find('.enqDetails').find('#vFatherOccupation').html(Data.FOccupation);
+            $('#tdDetails').find('.enqDetails').find('#vFatherMobile').html(Data.FatherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#vFatherEmail').html(Data.FatherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#vMotherName').html(Data.MotherName);
+            $('#tdDetails').find('.enqDetails').find('#vMotherOccupation').html(Data.MOccupation);
+            $('#tdDetails').find('.enqDetails').find('#vMotherMobile').html(Data.MotherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#vMotherEmail').html(Data.MotherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#vIncome').html(Data.FamilyIncome);
+            $('#tdDetails').find('.enqDetails').find('#vNationality').html(Data.Nationality);
+            $('#tdDetails').find('.enqDetails').find('#vAddress').html(Data.Address);
+            $('#tdDetails').find('.enqDetails').find('#vReason').html(Data.ReasonForChange);
+            $('#tdDetails').find('.enqDetails').find('#hdnEnquiryID').val(ID);
+                                //$('#tdDetails').find('#hdnFEnquiryID').val(ID);
+                            //}
+                            //else {
+                            //    $(sender).text('View');
+                                //$(sender).removeClass('Open');
+                                //$(sender).addClass('Closed');
+                                //$(sender).closest("tr").next().remove();
+                            //}
                         }
                         function SaveAdmissionEnquiry(sender)
                         {

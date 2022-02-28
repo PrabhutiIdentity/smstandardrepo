@@ -82,6 +82,51 @@ namespace SMEnterprise.Repository
                 return con.Query<AdmissionEnquiryMasterModel>("sp_AddEnquiryAssignee", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+        public AdmissionEnquiryMasterModel UpdateEnquiryToAdmission(AdmissionEnquiryMasterModel objData)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@EnquiryID", objData.EnquiryID);
+                paramater.Add("@StudentName", objData.StudentName);
+                paramater.Add("@FatherName", objData.FatherName);
+                paramater.Add("@MotherName", objData.MotherName);
+                paramater.Add("@FatherEmailID", objData.FatherEmailID);
+                paramater.Add("@MotherEmailID", objData.MotherEmailID);
+                paramater.Add("@AppliedForSession", objData.AppliedForSession);
+                paramater.Add("@AppliedForClass", objData.AppliedForClass);
+                paramater.Add("@CurrentClass", objData.CurrentClass);
+                paramater.Add("@ReasonForChange", objData.ReasonForChange);
+                paramater.Add("@Gender", objData.Gender);
+                paramater.Add("@Nationality", objData.Nationality);
+                paramater.Add("@StudentDOB", objData.StudentDOB);
+                paramater.Add("@EStatus", objData.EStatus);
+                paramater.Add("@EPossibility", objData.EPossibility);
+                paramater.Add("@SBranchID", objData.SBranchID);
+                paramater.Add("@UserID", objData.UserID);
+                paramater.Add("@CreatedDate", CommonUsage.GetCurrentDate());
+                paramater.Add("@Image", objData.Image);
+                paramater.Add("@StudentAadharNo", objData.StudentAadharNo);
+                paramater.Add("@FatherAadhaarNo", objData.FatherAadhaarNo);
+                paramater.Add("@MotherAadhaarNo", objData.MotherAadhaarNo);
+                paramater.Add("@Caste", objData.Caste);
+                paramater.Add("@DateOfBirth", objData.StudentDOB);
+                paramater.Add("@TelephoneNoOff", objData.TelephoneNoOff);
+                paramater.Add("@TelephoneNoReg", objData.TelephoneNoReg);
+                paramater.Add("@Sibling", objData.Sibling);
+                paramater.Add("@SiblingName", objData.SiblingName);
+                paramater.Add("@SiblingClass", objData.SiblingClass);
+                paramater.Add("@MotherQuaAndOcc", objData.MotherQuaAndOcc);
+                paramater.Add("@FatherQuaAndOcc", objData.FatherQuaAndOcc);
+                paramater.Add("@TemporaryAddress", objData.TemporaryAddress);
+                paramater.Add("@PermanentAddress", objData.PermanentAddress);
+                paramater.Add("@Religion", objData.ReligionID);
+                paramater.Add("@StudentID", objData.StudentID);
+                paramater.Add("@ParentID", objData.ParentID);
+
+                return con.Query<AdmissionEnquiryMasterModel>("spn_UpdateEnquiryToAdmission", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
         public AdmissionEnquiryMasterModel UpdateEnquiry(AdmissionEnquiryMasterModel objData)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -212,7 +257,7 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetReceptionSearchStudentData", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.StudentDetail = multi.Read<StudentModel>().SingleOrDefault();
-                    objModel.TodayAttandanceStatus= multi.Read<int>().SingleOrDefault();
+                    objModel.TodayAttandanceStatus = multi.Read<int>().SingleOrDefault();
                     objModel.MonthAttandance = multi.Read<AttandanceCalenderModel>().ToList();
                 }
             }
