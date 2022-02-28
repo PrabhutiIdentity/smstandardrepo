@@ -80,6 +80,7 @@ namespace SMEnterprise.Models
         public int UserID { get; set; }
         public DateTime CreatedDate { get; set; }
         public int StudentID { get; set; }
+        public int ParentID { get; set; }
         public int PaymentStatus { get; set; }
         public string PaymentDetails { get; set; }
         public string Image { get; set; }
