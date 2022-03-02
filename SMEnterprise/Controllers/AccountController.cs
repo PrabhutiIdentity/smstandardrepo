@@ -694,7 +694,7 @@ namespace SMEnterprise.Controllers
             objModel.Day = objModel.SelectedDate.Day;
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel.SchoolID = PermissionManager.GetLoggedInUser().SchoolID;
-            if(objModel.SBranchID == 2 && objModel.SchoolID==1068)
+            if (objModel.SBranchID == 2 && objModel.SchoolID == 1068)
             {
 
             }
@@ -767,7 +767,7 @@ namespace SMEnterprise.Controllers
                 objModel.Year = objModel.QDate.Year;
             }
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel =await objAccountData.GetFeePaymentDetailsNew2(objModel);
+            objModel = await objAccountData.GetFeePaymentDetailsNew2(objModel);
             objModel.FeeDate = CommonUsage.GetCurrentDate();
             return PartialView("_FeePaymentDetailsPartialNew2", objModel);
         }
@@ -1493,11 +1493,11 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
-        public ActionResult ExpanceDetails(string ID = null,string ID2=null)
+        public ActionResult ExpanceDetails(string ID = null, string ID2 = null)
         {
             int ExpenceID = CommonUsage.ConvertToInt(ID);
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            ExpenceModel objModel = objAccountData.GetExpenceDetails(ExpenceID,SBranchID);
+            ExpenceModel objModel = objAccountData.GetExpenceDetails(ExpenceID, SBranchID);
             return View(objModel);
         }
         [PermissionFilter]
@@ -1679,13 +1679,12 @@ namespace SMEnterprise.Controllers
 
         #region OtherCerificates
         [PermissionFilter]
-        public ActionResult GetStudentOCDetails(string ID = null, string ID2 = null, string ID3 = null)
+        public ActionResult GetStudentOCDetails(string ID = null, string ID2 = null)
         {
             int StudentID = CommonUsage.ConvertToInt(ID);
             int SessionID = CommonUsage.ConvertToInt(ID2);
-            int Ctype = CommonUsage.ConvertToInt(ID3);
             //int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            var data = objAccountData.GetStudentSOCDetails(StudentID, SessionID, Ctype);
+            var data = objAccountData.GetStudentSOCDetails(StudentID, SessionID);
 
             return PartialView("_EditSOCDetailsPartial", data);
             //return Json(data, JsonRequestBehavior.AllowGet);
@@ -1695,19 +1694,24 @@ namespace SMEnterprise.Controllers
         public ActionResult UpdateSOCDetails(SOCertificateDetails objModel)
         {
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel.CreatedBy = PermissionManager.GetLoggedInUser().UserID;
-            objModel.CreatedDate = CommonUsage.GetCurrentDate();
-            
+            if (objModel.CertID < 1)
+            {
+                objModel.CreatedBy = PermissionManager.GetLoggedInUser().UserID;
+            }
+            else
+            {
+
+                objModel.ModifiedBy = PermissionManager.GetLoggedInUser().UserID;
+            }
             int Res = objAccountData.InsertUpdateOCertificates(objModel);
-            return Redirect("ConductCertificate/" + objModel.StudentID + "/" + objModel.SessionID +"/0" +objModel.CertType);
+            return Redirect("Certificates/" + objModel.StudentID + "/" + objModel.SessionID);
         }
         [PermissionFilter]
-        public ActionResult ConductCertificate(string ID = null, string ID2 = null, string ID3 = null)
+        public ActionResult Certificates(string ID = null, string ID2 = null)
         {
             int StudentID = CommonUsage.ConvertToInt(ID);
             int SessionID = CommonUsage.ConvertToInt(ID2);
-            int CertType= CommonUsage.ConvertToInt(ID3);
-            var data = objAccountData.GetStudentSOCPrintDetails(StudentID, SessionID, CertType);
+            var data = objAccountData.GetStudentSOCPrintDetails(StudentID, SessionID);
 
             return View(data);
             //return Json(data, JsonRequestBehavior.AllowGet);
@@ -1737,7 +1741,7 @@ namespace SMEnterprise.Controllers
 
             return PartialView("_EditSLCDetailsPartial", data);
             //return Json(data, JsonRequestBehavior.AllowGet);
-        }        
+        }
         [PermissionFilter]
         public ActionResult ViewStudentSLC(string ID = null, string ID2 = null)
         {
@@ -2937,7 +2941,7 @@ namespace SMEnterprise.Controllers
         {
             string Password = ID;
             int UserID = CommonUsage.ConvertToInt(parentid);
-            int UserType =4;
+            int UserType = 4;
             CommonData objCommonData = new CommonData();
             int i=  objAccountData.UpdatePassword(UserID, UserType, Password);
             // objAccountData.UpdatePassword(UserID, UserType, Password);
