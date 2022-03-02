@@ -55,7 +55,7 @@ namespace SMEnterprise.Controllers
         {
             oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             oModel = receptionData.UpdateEnquiryToAdmission(oModel);
-            return RedirectToAction("Enquiries","oModel");
+            return RedirectToAction("Enquiries","Reception");
         }
         [PermissionFilter]
         public ActionResult EnquiryFollowups(string id = null)
