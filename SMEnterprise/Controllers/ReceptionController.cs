@@ -22,6 +22,12 @@ namespace SMEnterprise.Controllers
             return View(objData);
         }
         [PermissionFilter]
+        public ActionResult AddAssignee(AdmissionEnquiryMasterModel oModel)
+        {
+            oModel = receptionData.AddEnquiryAssignee(oModel);
+            return RedirectToAction("Enquiries", "Reception");
+        }
+        [PermissionFilter]
         public ActionResult Dashboard()
         {
             int UserID = PermissionManager.GetLoggedInUser().UserID;
@@ -43,6 +49,13 @@ namespace SMEnterprise.Controllers
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objData = receptionData.GetEnquiries(objData);
             return View(objData);
+        }
+        [PermissionFilter]
+        public ActionResult ConvertEnquiry(AdmissionEnquiryMasterModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            oModel = receptionData.UpdateEnquiryToAdmission(oModel);
+            return RedirectToAction("Enquiries","Reception");
         }
         [PermissionFilter]
         public ActionResult EnquiryFollowups(string id = null)
@@ -90,7 +103,8 @@ namespace SMEnterprise.Controllers
         {
             objData.CreatedDate = CommonUsage.GetCurrentDate();
             int FollowupID = receptionData.InsertAdmissionEnquiryFollowup(objData);
-            return Json(FollowupID, JsonRequestBehavior.AllowGet);
+            //return Json(FollowupID, JsonRequestBehavior.AllowGet);
+            return RedirectToAction("Enquiries", "Reception");
         }
         #region Calendar
         [PermissionFilter]

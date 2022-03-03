@@ -4609,6 +4609,7 @@ namespace SMEnterprise.Repository
                     objNew.Religions = multi.Read<NameIDModel>().ToList();
                     objNew.Casts = multi.Read<NameIDModel>().ToList();
                     objNew.Classes = multi.Read<ClassModel>().ToList();
+                    objNew.SessionNames = multi.Read<NameIDModel>().ToList();
                 }
             }
 

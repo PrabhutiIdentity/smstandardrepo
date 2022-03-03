@@ -1,4 +1,6 @@
-﻿@using SMEnterprise.Models;
+﻿
+
+@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_ReceptionLayout.cshtml";
@@ -173,21 +175,42 @@
                                 <tr id="trHeader">
                                     <th style="width: 5%">#</th>
                                     <th style="width: 35%">Details</th>
-                                    <th style="width: 10%">Source</th>
+                                    @*<th style="width: 10%">Source</th>*@
                                     <th style="width: 10%">Dates</th>
                                     <th style="width: 10%">Eq. Status</th>
                                     <th style="width: 10%">Prospect</th>
-                                    <th style="width: 10%">#Followups</th>
+                                    <th style="width: 15%">Assign To</th>
+                                    <th style="width: 5%">Followups</th>
                                     <th style="width: 10%"><a href="javascript:void(0);" onclick="AddEnquiry(this);" class="Closed">Add New</a></th>
+                                    <th style="width: 15%">Convert</th>
                                 </tr>
                             </thead>
                             @{
                                 int count = 0;
                                 foreach (AdmissionEnquiryMasterModel c in Model.Enquiries)
                                 {
-
                                     <tr>
-                                        <td>@(count + 1)</td>
+                                        <td>
+                                            <input type="hidden" id="hdnEnquiryUID" value="@c.EnquiryID" />
+                                            <input type="hidden" id="hdnStudentName" value="@c.StudentName" />
+                                            <input type="hidden" id="hdnAssigneName" value="@c.ReciptionistName" />
+                                            <input type="hidden" id="hdnFatherName" value="@c.FatherName" />
+                                            <input type="hidden" id="hdnFatherOcc" value="@c.FatherQuaAndOcc" />
+                                            <input type="hidden" id="hdnMotherName" value="@c.MotherName" />
+                                            <input type="hidden" id="hdnMotherOcc" value="@c.MotherQuaAndOcc" />
+                                            <input type="hidden" id="hdnDOB" value="@c.StudentDOB.ToString("dd MMM, yyyy")" />
+                                            <input type="hidden" id="hdnMobileNo" value="@c.TelephoneNoReg" />
+                                            <input type="hidden" id="hdnSessionName" value="@c.SessionName" />
+                                            <input type="hidden" id="hdnClassName" value="@c.ClassName" />
+                                            <input type="hidden" id="hdnEnquiry" value="@c.Gender" />
+                                            <input type="hidden" id="hdnAddress" value="@c.PermanentAddress" />
+                                            <input type="hidden" id="hdnEnquiryDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
+                                            <input type="hidden" id="hdnNxtFollowupDate" value="@c.EDate.ToString("dd MMM, yyyy")" />
+                                            <input type="hidden" id="hdnReligionID" value="@c.ReligionID" />
+                                            <input type="hidden" id="hdnClassID" value="@c.AppliedForClass" />
+
+                                            @(count + 1)
+                                        </td>
                                         <td>
                                             <input type="hidden" id="hdnSrNo" value="@(count+1)" />
                                             <label class='badge bg-green'>Name: @c.StudentName</label>
@@ -199,20 +222,20 @@
                                             <label class='badge bg-red'>Income: @c.FamilyIncome.ToString("00") Lakh</label>
                                             <input type="hidden" id="hdnData" value="@(Json.Encode(c))" />
                                         </td>
-                                        <td>
-                                            @if (c.ESource == 0)
-                                            {
-                                                <label class='badge bg-blue'>Search</label>
-                                            }
-                                            else if (c.ESource == 1)
-                                            {
-                                                <label class='badge bg-green'>Referance</label>
-                                            }
-                                            else
-                                            {
-                                                <label class='badge bg-red'>Ads</label>
-                                            }
-                                        </td>
+                                        @*<td>
+                                                @if (c.ESource == 0)
+                                                {
+                                                    <label class='badge bg-blue'>Search</label>
+                                                }
+                                                else if (c.ESource == 1)
+                                                {
+                                                    <label class='badge bg-green'>Referance</label>
+                                                }
+                                                else
+                                                {
+                                                    <label class='badge bg-red'>Ads</label>
+                                                }
+                                            </td>*@
                                         <td>
                                             Next Followup<br /> <label id="lblNextFollowDate" class='badge bg-red'>
                                                 @c.NextFollowUpDate.ToString("dd MMM, yyyy")
@@ -248,10 +271,50 @@
                                             }
                                         </td>
                                         <td>
+                                            <p>Assignee Name : <b>@c.ReciptionistName</b></p>
+                                            <a href="javascript:void(0);" class="btn btn-link" onclick="AddAssignee(this,@c.EnquiryID);">Assign To</a>
+                                        </td>
+                                        <td>
                                             @c.Followups
                                         </td>
                                         <td>
                                             <a href="javascript:void(0);" class="btn btn-link Closed" onclick="ViewEnquiry(this,@c.EnquiryID);">View</a>
+                                        </td>
+                                        <td>
+                                            @if (c.EStatus == 1)
+                                            {
+                                                <a href="javascript:void(0);" class="btn btn-link" onclick="">Converted</a>
+
+                                            }
+                                            else
+                                            {
+                                                using (Html.BeginForm("ConvertEnquiry", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal" }))
+                                                {
+
+                                                    <input type="hidden" id="hdnEnquiryUID" name="EnquiryID" value="@c.EnquiryID" />
+                                                    <input type="hidden" id="hdnStudentName" name="StudentName" value="@c.StudentName" />
+                                                    <input type="hidden" id="hdnAssigneName" name="AssigneeName" value="@c.ReciptionistName" />
+                                                    <input type="hidden" id="hdnFatherName" name="FatherName" value="@c.FatherName" />
+                                                    <input type="hidden" id="hdnFatherOcc" name="FatherQuaAndOcc" value="@c.FatherQuaAndOcc" />
+                                                    <input type="hidden" id="hdnMotherName" name="MotherName" value="@c.MotherName" />
+                                                    <input type="hidden" id="hdnMotherOcc" name="MotherQuaAndOcc" value="@c.MotherQuaAndOcc" />
+                                                    <input type="hidden" id="hdnDOB" name="StudentDOB" value="@c.StudentDOB" />
+                                                    <input type="hidden" id="hdnMobileNo" name="TelephoneNoReg" value="@c.TelephoneNoReg" />
+                                                    <input type="hidden" id="hdnSessionName" name="SessionName" value="@c.AppliedForSession" />
+                                                    <input type="hidden" id="hdnClassName" name="ClassName" value="@c.ClassName" />
+                                                    <input type="hidden" id="hdnEnquiry" name="Gender" value="@c.Gender" />
+                                                    <input type="hidden" id="hdnAddress" name="PermanentAddress" value="@c.PermanentAddress" />
+                                                    <input type="hidden" id="hdnEnquiryDate" name="EDate" value="@c.EDate" />
+                                                    <input type="hidden" id="hdnNxtFollowupDate" name="NextFollowUpDate" value="@c.NextFollowUpDate" />
+                                                    <input type="hidden" id="hdnReligionID" name="ReligionID" value="@c.ReligionID" />
+                                                    <input type="hidden" id="hdnClassID" name="AppliedForClass" value="@c.AppliedForClass" />
+                                                    <input type="hidden" id="hdnClassID" name="FatherEmailID" value="@c.FatherEmailID" />
+                                                    <input type="hidden" id="hdnClassID" name="MotherEmailID" value="@c.MotherEmailID" />
+
+                                                    <button type="submit" onclick="return Convertenquiry(this);" class="btn btn-link">Convert</button>
+                                                }
+                                            }
+
                                         </td>
                                     </tr>
 
@@ -273,6 +336,79 @@
 <input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
 <input type="hidden" id="hdnNext2DaysDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(2).ToString("yyyy-MM-dd")" />
 @section PageBottom{
+    <div class="modal fade bs-example-modal-sm" id="AssigneeTo" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                @using (Html.BeginForm("AddAssignee", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmAddFollowup" }))
+                {
+                    <div class="modal-body">
+                        <input type="hidden" name="EnquiryID" id="hdnNewEnquiryID" value="" />
+                        <div class="row">
+                            <div class="col-md-12">
+                                Assigned To : <b id="vReceptionist"></b>
+                                <select class="form-control" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
+
+                                    <option value="0">--Select--</option>
+                                    @foreach (var Emp in Model.Receptionists)
+                                    {
+                                        <option value="@Emp.ID">@Emp.Name</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade bs-example-modal-lg" id="addfollowupdetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                @using (Html.BeginForm("AddFollowup", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmAddFollowup" }))
+                {
+                    <div class="Followup" style="border-color: #d9dbdf;">
+                        <input type="hidden" name="FollowupBy" id="hdnFollowupBy" />
+                        <input type="hidden" name="EnquiryID" id="hdnFEnquiryID" />
+                        <div class="row">
+                            <div class="col-md-2 pull-left">
+                                Prospect :
+                                <select class="form-control" name="Possibility" id="ddlEProspect">
+                                    <option value="0">Neutral</option>
+                                    <option value="1" selected>Positive</option>
+                                    <option value="2">Negative</option>
+                                </select>
+                            </div><div class="col-md-5 pull-left" style="border:0px;">
+                                Followup On  (mm/dd/yyyy): <input type="datetime-local" id="txtFollowupDate" name="FDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                            </div><div class="col-md-5 pull-right">
+                                <div class="pull-right">
+                                    Next Scheduled (mm/dd/yyyy): <input type="datetime-local" id="txtNextFollowupDate" name="NextFollowupDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(2).ToString("yyyy-MM-dd")" />
+
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                Remarks :
+                                <textarea rows="4" class="form-control" id="txtDetails" name="Remark" style="width:100%;height:auto;"></textarea>
+                            </div>
+                            @*<div class="col-md-12">
+                                    <button type="submit" onclick="return SaveAdmissionEnquiryFeedback(this)" class="btn btn-success pull-right">Update</button>
+                                </div>*@
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade bs-example-modal-lg" id="mdlEnquiryDetails" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
@@ -285,121 +421,127 @@
                         <h4 class="modal-title" id="myModalLabel">Device Details</h4>
                     </div>
                     <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-5">
-                                Assigned To : <b id="vReceptionist"></b>
-                                <select class="form-control editReceptionEnquiry hidden" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
 
-                                    <option value="0">--Select--</option>
-                                    @foreach (var Emp in Model.Receptionists)
-                                    {
-                                        <option value="@Emp.ID">@Emp.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <div class="col-md-5"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint hidden" onclick="PrintEnquiry(this);"> Print</a></div>
-                            <div class="col-md-2"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint" id="btnEditEnquiry" onclick="EditEnquiryDetails(this);"> Edit Details</a></div>
-                        </div>
                         <div class="viewe">
                             <div class="row">
+                                <div class="col-md-5">
+                                    Assigned To : <b id="vReceptionistname"></b>
+                                    @*<select class="form-control editReceptionEnquiry hidden" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
+
+                                            <option value="0">--Select--</option>
+                                            @foreach (var Emp in Model.Receptionists)
+                                            {
+                                                <option value="@Emp.ID">@Emp.Name</option>
+                                            }
+                                        </select>*@
+                                </div>
+                                @*<div class="col-md-5"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint hidden" onclick="PrintEnquiry(this);"> Print</a></div>
+                                    <div class="col-md-2"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint" id="btnEditEnquiry" onclick="EditEnquiryDetails(this);"> Edit Details</a></div>*@
+                            </div>
+                            <div class="row">
                                 <div class="col-md-3">Enquery Date : <b id="vEnqDate"></b></div>
-                                <div class="col-md-2">Status : <b id="vEStatus"></b></div>
-                                <div class="col-md-2">Prospect : <b id="vProspect"></b></div>
+                                <div class="col-md-2">Status : <b id="vEStatus">Open</b></div>
+                                <div class="col-md-2">Prospect : <b id="vProspect">Neutral</b></div>
                                 <div class="col-md-3">Followup Due : <b id="vFollowupdate"></b></div>
-                                <div class="col-md-2">Source : <b id="vSource"></b></div>
+                                <div class="col-md-2">Source : <b id="vSource">Search</b></div>
                             </div>
                             <div class="row">
                                 <div class="col-md-3">Student : <b id="vStudentName"></b></div>
                                 <div class="col-md-2">DOB : <b id="vStudentDOB"></b></div>
-                                <div class="col-md-2">Gender : <b id="vStudentGender"></b></div>
-                                <div class="col-md-3">Session : <b id="vSessionApplied"></b></div>
-                                <div class="col-md-2">Class Applied : <b id="vClassApplied"></b></div>
+                                @*<div class="col-md-2">Gender : <b id="vStudentGender"></b></div>
+                                    <div class="col-md-3">Session : <b id="vSessionApplied"></b></div>*@
+                                <div class="col-md-4">Class Applied : <b id="vClassApplied"></b></div>
                             </div>
-                            <div class="row">
-                                <div class="col-md-5">Current School : <b id="vCurSchoolName"></b></div>
-                                <div class="col-md-5">Current Board: <b id="vCurrentBoard"></b></div>
-                                <div class="col-md-2">Current Class : <b id="vCurrentClass"></b></div>
-                            </div>
+                            @*<div class="row">
+                                    <div class="col-md-5">Current School : <b id="vCurSchoolName"></b></div>
+                                    <div class="col-md-5">Current Board: <b id="vCurrentBoard"></b></div>
+                                    <div class="col-md-2">Current Class : <b id="vCurrentClass"></b></div>
+                                </div>*@
 
                             <div class="row">
                                 <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
-                                    <div class="col-md-12" style="text-align:center"><b>Father</b></div>
+                                    <div class="col-md-12" style="text-align:center"><b>Father Details</b></div>
                                     <div class="row">
                                         <div class="col-md-3">
                                             Name :
-                                        </div>
-                                        <div class="col-md-9" id="vFatherName">
+                                        </div><b>
+                                            <div class="col-md-9" id="vFatherName">
 
-                                        </div>
-                                        <div class="col-md-3">
+                                            </div>
+                                        </b>
+                                        <div class="col-md-4">
                                             Occupation :
                                         </div>
-                                        <div class="col-md-9" id="vFatherOccupation">
+                                        <b>
+                                            <div class="col-md-8" id="vFatherOccupation">
 
-                                        </div>
-                                        <div class="col-md-3">
-                                            Mobile :
-                                        </div>
-                                        <div class="col-md-9" id="vFatherMobile">
+                                            </div>
+                                        </b>
+                                        @*<div class="col-md-3">
+                                                Mobile :
+                                            </div>
+                                            <div class="col-md-9" id="vFatherMobile">
 
-                                        </div>
-                                        <div class="col-md-3">
-                                            Email ID :
-                                        </div>
-                                        <div class="col-md-9" id="vFatherEmail">
+                                            </div>
+                                            <div class="col-md-3">
+                                                Email ID :
+                                            </div>
+                                            <div class="col-md-9" id="vFatherEmail">
 
-                                        </div>
+                                            </div>*@
                                     </div>
                                 </div>
 
                                 <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
-                                    <div class="col-md-12" style="text-align:center"><b>Mother</b></div>
+                                    <div class="col-md-12" style="text-align:center"><b>Mother Details</b></div>
                                     <div class="row">
                                         <div class="col-md-3">
                                             Name :
-                                        </div>
-                                        <div class="col-md-9" id="vMotherName">
+                                        </div><b>
+                                            <div class="col-md-9" id="vMotherName">
 
-                                        </div>
-                                        <div class="col-md-3">
+                                            </div>
+                                        </b>
+                                        <div class="col-md-4">
                                             Occupation :
-                                        </div>
-                                        <div class="col-md-9" id="vMotherOccupation">
+                                        </div><b>
+                                            <div class="col-md-8" id="vMotherOccupation">
 
-                                        </div>
-                                        <div class="col-md-3">
-                                            Mobile :
-                                        </div>
-                                        <div class="col-md-9" id="vMotherMobile">
+                                            </div>
+                                        </b>
+                                        @*<div class="col-md-3">
+                                                Mobile :
+                                            </div>
+                                            <div class="col-md-9" id="vMotherMobile">
 
-                                        </div>
-                                        <div class="col-md-3">
-                                            Email ID :
-                                        </div>
-                                        <div class="col-md-9" id="vMotherEmail">
+                                            </div>
+                                            <div class="col-md-3">
+                                                Email ID :
+                                            </div>
+                                            <div class="col-md-9" id="vMotherEmail">
 
-                                        </div>
+                                            </div>*@
                                     </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <div class="row">
-                                        <div class="col-md-12">
-                                            Income :
+                                @*<div class="col-md-2">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                Income :
+                                            </div>
+                                            <div class="col-md-12" id="vIncome">
+                                                Lakh
+                                            </div>
+                                            <div class="col-md-12">
+                                                Nationality :
+                                            </div>
+                                            <div class="col-md-12" id="vNationality">
+                                                Indian
+                                            </div>
                                         </div>
-                                        <div class="col-md-12" id="vIncome">
-                                            Lakh
-                                        </div>
-                                        <div class="col-md-12">
-                                            Nationality :
-                                        </div>
-                                        <div class="col-md-12" id="vNationality">
-                                            Indian
-                                        </div>
-                                    </div>
-                                </div>
+                                    </div>*@
                             </div>
                             <div class="row">
-                                <div class="col-md-12">Address : <b id="vAddress">A-11, Sangam Nagar Near Sanmati Hospital Indore(MP) 452006</b></div>
+                                <div class="col-md-12">Address : <b id="vAddress"></b></div>
                             </div>
                             <div class="row">
                                 <div class="col-md-12">
@@ -506,6 +648,7 @@
                                     <div class="row">
                                         <div class="col-md-3">
                                             Name :
+
                                         </div>
                                         <div class="col-md-9">
                                             <input type="text" id="txtFatherName" name="FatherName" class="form-control" style="width: 100%;" />
@@ -595,7 +738,7 @@
                                 <button onclick="return SaveAdmissionEnquiry(this);" class="btn btn-primary pull-right">Save</button>
                             </div>
                         </div>
-                        }
+
                         <div class="row" style="text-align:center;">
                             <h4><b>Followups</b></h4>
                         </div>
@@ -609,7 +752,7 @@
                             {
                                 <div class="Followup" style="border-color: #d9dbdf;">
                                     <input type="hidden" name="FollowupBy" id="hdnFollowupBy" />
-                                    <input type="hidden" name="EnquiryID" value="0" id="hdnFEnquiryID" />
+                                    <input type="hidden" name="EnquiryID" id="hdnFEnquiryID" />
                                     <div class="row">
                                         <div class="col-md-2 pull-left">
                                             Prospect :
@@ -651,11 +794,43 @@
     <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
     <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
     <script>
+        var studentName = '';
+        var FatherName = '';
+        var MotherName = '';
+        var DOB = '';
+        var MobileNO = '';
+        var SessionName = '';
+        var NxtFollowupDate = '';
+        var FatherOcc = '';
+        var MotherOcc = '';
+        var Address = '';
+        var ClassName = '';
+        var EnquiryUID = '';
+        var AssignTO = '';
+
+
+        function Convertenquiry(sender, proID) {
+
+            return confirm('Do you really want to Convert this Enquiry!!!!');
+            //alert('Product is deleted Sucessfully..!');
+        }
+
+        EnquiryUID = $('#hdnEnquiryUID').val();
+        $('#hdnNewEnquiryID').val(EnquiryUID);
+        function AddAssignee(sender, ID)
+        {
+            $('#hdnNewEnquiryID').val(ID);
+            $('#AssigneeTo').modal('show');
+        }
                         function AddNewFollowup(sender)
                         {
+                            debugger;
                             if($(sender).hasClass('add'))
                             {
-                                $(sender).closest('.enqDetails').find('#divNewFollowup').css('display','');
+                                $("#mdlEnquiryDetails").modal('hide');
+                                $("#addfollowupdetails").modal('show');
+                                //$(sender).closest('.enqDetails').find('#divNewFollowup').css('display','');
+                                //$(sender).closest('#mdlEnquiryDetails').find('#divNewFollowup').css('display','');
                                 $(sender).removeClass('add').addClass('cancel').html('Cancel');
                             }
                             else
@@ -697,18 +872,12 @@
                         });
 
                         var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                        function ViewEnquiry(sender,ID) {
-                            if ($(sender).hasClass('Closed')) {
+        function ViewEnquiry(sender, ID) {
+            debugger;
+                            //if ($(sender).hasClass('Closed')) {
                                 var Data = $.parseJSON($(sender).closest('tr').find('#hdnData').val());
 
-                                var ele = document.getElementsByClassName("Open");
-                                if (ele.length > 0) {
-                                    $(ele[0]).click();
-                                }
 
-                                $(sender).removeClass('Closed');
-                                $(sender).addClass('Open');
-                                $(sender).html('Close');
                                 var dtEnqDate=new Date(Data.EDate.match(/\d+/).map(Number)[0]);
                                 var sEnqDate= dtEnqDate.getDate() + ' ' + months[dtEnqDate.getMonth()] + ' ,' + dtEnqDate.getFullYear();
 
@@ -718,67 +887,34 @@
                                 var dtFollow=new Date(Data.NextFollowUpDate.match(/\d+/).map(Number)[0]);
                                 var sFollow= dtFollow.getDate() + ' ' + months[dtFollow.getMonth()] + ' ,' + dtFollow.getFullYear();
 
+                                studentName = $('#hdnStudentName').val();
+                                FatherName = $('#hdnFatherName').val();
+                                MotherName = $('#hdnMotherName').val();
+                                DOB = $('#hdnDOB').val();
+                                MobileNO = $('#hdnMobileNo').val();
+                                EnquiryDate = $('#hdnEnquiryDate').val();
+                                NxtFollowupDate = $('#hdnNxtFollowupDate').val();
+                                FatherOcc = $('#hdnFatherOcc').val();
+                                MotherOcc = $('#hdnMotherOcc').val();
+                                Address = $('#hdnAddress').val();
+                                ClassName = $('#hdnClassName').val();
+                                EnquiryUID = $('#hdnEnquiryUID').val();
+                                AssignTO = $('#hdnAssigneName').val();
 
 
-                                $(sender)
-                                      .closest("tr")
-                                      .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: #fcfcfd;'>"+$('.tblEqDetailswrapper').html()+" </td></tr>");
-
-                                $('#tdDetails').find('.enqDetails').find('#txtStudentName').val(Data.StudentName);
-                                $('#tdDetails').find('.enqDetails').find('#txtEnqDate').val(dtEnqDate.getFullYear()+'-'+pad(dtEnqDate.getMonth()+1,2)+'-'+dtEnqDate.getDate());
-                                $('#tdDetails').find('.enqDetails').find('#ddlEStatus').val(Data.EStatus);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEProspect').val(Data.EPossibility);
-                                $('#tdDetails').find('.enqDetails').find('#txtFollowDate').val(dtFollow.getFullYear()+'-'+pad(dtFollow.getMonth()+1,2)+'-'+dtFollow.getDate());
-                                $('#tdDetails').find('.enqDetails').find('#ddlSource').val(Data.ESource);
-                                $('#tdDetails').find('.enqDetails').find('#txtDOB').val(dtDOB.getFullYear()+'-'+pad(dtDOB.getMonth()+1,2)+'-'+dtDOB.getDate());
-                                $('#tdDetails').find('.enqDetails').find('#ddlGender').val(Data.Gender);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEnqSessions').val(Data.AppliedForSession);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEnqClassApplied').val(Data.AppliedForClass);
-                                $('#tdDetails').find('.enqDetails').find('#txtSchoolName').val(Data.CurrentSchool);
-                                $('#tdDetails').find('.enqDetails').find('#txtBoardName').val(Data.CurrentEducationSystem);
-                                $('#tdDetails').find('.enqDetails').find('#ddlEnqClassCurrent').val(Data.CurrentClass);
-                                $('#tdDetails').find('.enqDetails').find('#txtFatherName').val(Data.FatherName);
-                                $('#tdDetails').find('.enqDetails').find('#txtFOccupation').val(Data.FOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#txtFMobile').val(Data.FatherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#txtEmail').val(Data.FatherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#txtMotherName').val(Data.MotherName);
-                                $('#tdDetails').find('.enqDetails').find('#txtMOccupation').val(Data.MOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#txtMMobile').val(Data.MotherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#txtMEmail').val(Data.MotherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#txtAnnualIncome').val(Data.FamilyIncome);
-                                $('#tdDetails').find('.enqDetails').find('#txtNationality').val(Data.Nationality);
-                                $('#tdDetails').find('.enqDetails').find('#txtAddress').val(Data.Address);
-                                $('#tdDetails').find('.enqDetails').find('#txtReason').html(Data.ReasonForChange);
-                                $('#tdDetails').find('.enqDetails').find('#ddlReceptionist').val(Data.AssignedTo);
-                                $('#tdDetails').find('.enqDetails').find('#hdnFollowupBy').val(Data.AssignedTo);
-                                $('#tdDetails').find('.enqDetails').find('#vReceptionist').html(Data.ReciptionistName);
-                                $('#tdDetails').find('.enqDetails').find('#vEnqDate').html(sEnqDate);
-                                $('#tdDetails').find('.enqDetails').find('#vEStatus').html(Data.EStatus==0?'Open':Data.EStatus==1?'Converted':'Lost');
-                                $('#tdDetails').find('.enqDetails').find('#vProspect').html(Data.EPossibility==0?'Neutral':Data.EPossibility==1?'Positive':'Negative');
-                                $('#tdDetails').find('.enqDetails').find('#vFollowupdate').html(sFollow);
-                                $('#tdDetails').find('.enqDetails').find('#vSource').html(Data.ESource==0?'Search':Data.ESource==1?'Referance':'Ads');
-                                $('#tdDetails').find('.enqDetails').find('#vStudentName').html(Data.StudentName);
-                                $('#tdDetails').find('.enqDetails').find('#vStudentDOB').html(sDOB);
-                                $('#tdDetails').find('.enqDetails').find('#vStudentGender').html(Data.Gender==0?'Male':'Female');
-                                $('#tdDetails').find('.enqDetails').find('#vSessionApplied').html(Data.SessionName);
-                                $('#tdDetails').find('.enqDetails').find('#vClassApplied').html(Data.ClassName);
-                                $('#tdDetails').find('.enqDetails').find('#vCurSchoolName').html(Data.CurrentSchool);
-                                $('#tdDetails').find('.enqDetails').find('#vCurrentBoard').html(Data.CurrentEducationSystem);
-                                $('#tdDetails').find('.enqDetails').find('#vCurrentClass').html(Data.CurrentClassName);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherName').html(Data.FatherName);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherOccupation').html(Data.FOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherMobile').html(Data.FatherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#vFatherEmail').html(Data.FatherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherName').html(Data.MotherName);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherOccupation').html(Data.MOccupation);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherMobile').html(Data.MotherMobileNo);
-                                $('#tdDetails').find('.enqDetails').find('#vMotherEmail').html(Data.MotherEmailID);
-                                $('#tdDetails').find('.enqDetails').find('#vIncome').html(Data.FamilyIncome);
-                                $('#tdDetails').find('.enqDetails').find('#vNationality').html(Data.Nationality);
-                                $('#tdDetails').find('.enqDetails').find('#vAddress').html(Data.Address);
-                                $('#tdDetails').find('.enqDetails').find('#vReason').html(Data.ReasonForChange);
-                                $('#tdDetails').find('.enqDetails').find('#hdnEnquiryID').val(ID);
-                                $('#tdDetails').find('#hdnFEnquiryID').val(ID);
+                                $('#vStudentName').html(studentName);
+                                $('#vFatherName').html(FatherName);
+                                $('#vMotherName').html(MotherName);
+                                $('#vStudentDOB').html(DOB);
+                                $('#vSessionApplied').html(SessionName);
+                                $('#vEnqDate').html(EnquiryDate);
+                                $('#vFollowupdate').html(NxtFollowupDate);
+                                $('#vFatherOccupation').html(FatherOcc);
+                                $('#vMotherOccupation').html(MotherOcc);
+                                $('#vAddress').html(Address);
+                                $('#vClassApplied').html(ClassName);
+                                $('#hdnFEnquiryID').val(EnquiryUID);
+                                $('#vReceptionistname').html(AssignTO);
                                 var SlNo=0;
                                 if(ID==0)
                                 {
@@ -793,7 +929,7 @@
                                 {
                                     $('#tdDetails').find('.enqDetails').find('#btnAddFollowup').css('display','none');
                                 }
-
+                                $('#divFollowups').html('');
                                 $.ajax(
                                     {
                                         type: "POST",
@@ -803,6 +939,7 @@
                                         contentType: false,
                                         success: function (data) {
                                             console.log(data);
+                                            debugger;
                                             for(var i=0;i<data.length;i++)
                                             {
                                                 var dtFollowup=new Date(data[i].FDate.match(/\d+/).map(Number)[0]);
@@ -816,10 +953,12 @@
                                                   '  Followup On : <b>'+sFollowup+'</b>'+
                                               '  </div><div class="col-md-4 pull-right">'+
                                                '     Next Scheduled : <b>'+snFollowup+'</b>'+
-                                               ' </div><div class="col-md-12">'+
-                                               data[i].Remark+
+                                               //' </div><div class="col-md-12">'+
+                                               //data[i].Remark+
                                                ' </div></div></div>';
-                                                $('#tdDetails').find('#divFollowups').append(followup);
+                                                //$('#tdDetails').find('#divFollowups').append(followup);
+                                                $('#divFollowups').append(followup);
+                                                $("#mdlEnquiryDetails").modal('show');
                                             }
                                         },
                                         error: function (e) {
@@ -827,13 +966,81 @@
                                         }
                                     });
 
-                            }
-                            else {
-                                $(sender).text('View');
-                                $(sender).removeClass('Open');
-                                $(sender).addClass('Closed');
-                                $(sender).closest("tr").next().remove();
-                            }
+            //var ele = document.getElementsByClassName("Open");
+            //if (ele.length >= 0) {
+            //    $(ele[0]).click();
+            //}
+
+            //$(sender).removeClass('Closed');
+            //$(sender).addClass('Open');
+                                //$(sender).html('Close');
+            //$(sender)
+
+            //      .closest("tr")
+            //      .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: #fcfcfd;'>"+$('.tblEqDetailswrapper').html()+" </td></tr>");
+
+            $('#tdDetails').find('.enqDetails').find('#txtStudentName').val(Data.StudentName);
+            $('#tdDetails').find('.enqDetails').find('#txtEnqDate').val(dtEnqDate.getFullYear() + '-' + pad(dtEnqDate.getMonth() + 1, 2) + '-' + dtEnqDate.getDate());
+            $('#tdDetails').find('.enqDetails').find('#ddlEStatus').val(Data.EStatus);
+            $('#tdDetails').find('.enqDetails').find('#ddlEProspect').val(Data.EPossibility);
+            $('#tdDetails').find('.enqDetails').find('#txtFollowDate').val(dtFollow.getFullYear() + '-' + pad(dtFollow.getMonth() + 1, 2) + '-' + dtFollow.getDate());
+            $('#tdDetails').find('.enqDetails').find('#ddlSource').val(Data.ESource);
+            $('#tdDetails').find('.enqDetails').find('#txtDOB').val(dtDOB.getFullYear() + '-' + pad(dtDOB.getMonth() + 1, 2) + '-' + dtDOB.getDate());
+            $('#tdDetails').find('.enqDetails').find('#ddlGender').val(Data.Gender);
+            $('#tdDetails').find('.enqDetails').find('#ddlEnqSessions').val(Data.AppliedForSession);
+            $('#tdDetails').find('.enqDetails').find('#ddlEnqClassApplied').val(Data.AppliedForClass);
+            $('#tdDetails').find('.enqDetails').find('#txtSchoolName').val(Data.CurrentSchool);
+            $('#tdDetails').find('.enqDetails').find('#txtBoardName').val(Data.CurrentEducationSystem);
+            $('#tdDetails').find('.enqDetails').find('#ddlEnqClassCurrent').val(Data.CurrentClass);
+            $('#tdDetails').find('.enqDetails').find('#txtFatherName').val(Data.FatherName);
+            $('#tdDetails').find('.enqDetails').find('#txtFOccupation').val(Data.FOccupation);
+            $('#tdDetails').find('.enqDetails').find('#txtFMobile').val(Data.FatherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#txtEmail').val(Data.FatherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#txtMotherName').val(Data.MotherName);
+            $('#tdDetails').find('.enqDetails').find('#txtMOccupation').val(Data.MOccupation);
+            $('#tdDetails').find('.enqDetails').find('#txtMMobile').val(Data.MotherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#txtMEmail').val(Data.MotherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#txtAnnualIncome').val(Data.FamilyIncome);
+            $('#tdDetails').find('.enqDetails').find('#txtNationality').val(Data.Nationality);
+            $('#tdDetails').find('.enqDetails').find('#txtAddress').val(Data.Address);
+            $('#tdDetails').find('.enqDetails').find('#txtReason').html(Data.ReasonForChange);
+            $('#tdDetails').find('.enqDetails').find('#ddlReceptionist').val(Data.AssignedTo);
+            $('#tdDetails').find('.enqDetails').find('#hdnFollowupBy').val(Data.AssignedTo);
+            //$('#tdDetails').find('.enqDetails').find('#vReceptionist').html(Data.ReciptionistName);
+            $('#tdDetails').find('.enqDetails').find('#vEnqDate').html(sEnqDate);
+            $('#tdDetails').find('.enqDetails').find('#vEStatus').html(Data.EStatus == 0 ? 'Open' : Data.EStatus == 1 ? 'Converted' : 'Lost');
+            $('#tdDetails').find('.enqDetails').find('#vProspect').html(Data.EPossibility == 0 ? 'Neutral' : Data.EPossibility == 1 ? 'Positive' : 'Negative');
+            $('#tdDetails').find('.enqDetails').find('#vFollowupdate').html(sFollow);
+            $('#tdDetails').find('.enqDetails').find('#vSource').html(Data.ESource == 0 ? 'Search' : Data.ESource == 1 ? 'Referance' : 'Ads');
+            //$('#tdDetails').find('.enqDetails').find('#vStudentName').html(Data.StudentName);
+            $('#tdDetails').find('.enqDetails').find('#vStudentDOB').html(sDOB);
+            $('#tdDetails').find('.enqDetails').find('#vStudentGender').html(Data.Gender == 0 ? 'Male' : 'Female');
+            $('#tdDetails').find('.enqDetails').find('#vSessionApplied').html(Data.SessionName);
+            $('#tdDetails').find('.enqDetails').find('#vClassApplied').html(Data.ClassName);
+            $('#tdDetails').find('.enqDetails').find('#vCurSchoolName').html(Data.CurrentSchool);
+            $('#tdDetails').find('.enqDetails').find('#vCurrentBoard').html(Data.CurrentEducationSystem);
+            $('#tdDetails').find('.enqDetails').find('#vCurrentClass').html(Data.CurrentClassName);
+            $('#tdDetails').find('.enqDetails').find('#vFatherName').html(Data.FatherName);
+            $('#tdDetails').find('.enqDetails').find('#vFatherOccupation').html(Data.FOccupation);
+            $('#tdDetails').find('.enqDetails').find('#vFatherMobile').html(Data.FatherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#vFatherEmail').html(Data.FatherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#vMotherName').html(Data.MotherName);
+            $('#tdDetails').find('.enqDetails').find('#vMotherOccupation').html(Data.MOccupation);
+            $('#tdDetails').find('.enqDetails').find('#vMotherMobile').html(Data.MotherMobileNo);
+            $('#tdDetails').find('.enqDetails').find('#vMotherEmail').html(Data.MotherEmailID);
+            $('#tdDetails').find('.enqDetails').find('#vIncome').html(Data.FamilyIncome);
+            $('#tdDetails').find('.enqDetails').find('#vNationality').html(Data.Nationality);
+            $('#tdDetails').find('.enqDetails').find('#vAddress').html(Data.Address);
+            $('#tdDetails').find('.enqDetails').find('#vReason').html(Data.ReasonForChange);
+            $('#tdDetails').find('.enqDetails').find('#hdnEnquiryID').val(ID);
+                                //$('#tdDetails').find('#hdnFEnquiryID').val(ID);
+                            //}
+                            //else {
+                            //    $(sender).text('View');
+                                //$(sender).removeClass('Open');
+                                //$(sender).addClass('Closed');
+                                //$(sender).closest("tr").next().remove();
+                            //}
                         }
                         function SaveAdmissionEnquiry(sender)
                         {
@@ -878,7 +1085,7 @@
                         }
                         function SaveAdmissionEnquiryFeedback(sender)
                         {
-
+                            debugger;
                             var $this = $(sender).closest('#tdDetails').find('#frmAddFollowup');
                             var form = $(sender).closest('#tdDetails').find('#frmAddFollowup');
                             var formdata = true;
