@@ -51,6 +51,13 @@ namespace SMEnterprise.Controllers
             return View(objData);
         }
         [PermissionFilter]
+        public ActionResult ConvertEnquiry(AdmissionEnquiryMasterModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            oModel = receptionData.UpdateEnquiryToAdmission(oModel);
+            return RedirectToAction("Enquiries","Reception");
+        }
+        [PermissionFilter]
         public ActionResult EnquiryFollowups(string id = null)
         {
             int EnquiryID = CommonUsage.ConvertToInt(id);
