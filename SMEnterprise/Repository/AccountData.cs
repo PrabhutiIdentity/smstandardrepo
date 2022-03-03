@@ -125,7 +125,7 @@ namespace SMEnterprise.Repository
                     {
 
                     }
-                   
+
                 }
             }
             return objModel;
@@ -1549,7 +1549,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
                 paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
                 // use ORion Public school (Prabh
-                if(objData.SBranchID==4005)
+                if (objData.SBranchID == 4005)
                 {
                     paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
                 }
@@ -1557,7 +1557,7 @@ namespace SMEnterprise.Repository
                 {
                     paramater.Add("@PaymentDate", objData.PaymentDate);
                 }
-              //  paramater.Add("@PaymentDate", objData.PaymentDate);
+                //  paramater.Add("@PaymentDate", objData.PaymentDate);
                 paramater.Add("@PaymentAmount", objData.PaymentAmount);
                 paramater.Add("@WaiverMonths", objData.WaiverMonths);
                 paramater.Add("@Remark", objData.Remark);
@@ -2895,14 +2895,14 @@ namespace SMEnterprise.Repository
         }
         // Shishupal Work on Exam Date Sheet For School
         // Date : 17 Nov 2021
-        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID,  int EvaluationSchemeID)
+        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID,int EvaluationSchemeID)
         {
             EvaluationTypePageModelExam objModel = new EvaluationTypePageModelExam();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@SBranchID", SBranchID);
-               
+
                 paramater.Add("@EvaluationSchemeID", EvaluationSchemeID);
                 return con.Query<NameIDModel>("sp_GetEvaluationTypesExam", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
 
@@ -2917,7 +2917,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SessionID", objModel.SessionID);
                 paramater.Add("@EvaluationSchemeID", objModel.EvaluationSchemeID);
                 paramater.Add("@EvaluationID", objModel.EvaluationID);
-            
+
                 using (var multi = con.QueryMultiple("sp_DateSheetTest", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
@@ -3489,7 +3489,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SBranchID", objModel.SBranchID);
                 paramater.Add("@EvaluationMode", 0);
                 paramater.Add("@SessionID", objModel.SessionID);
-                
+
                 using (var multi = con.QueryMultiple("sp_GetClassSectionWiseStudentPerformancesMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
 
@@ -3999,6 +3999,79 @@ namespace SMEnterprise.Repository
         }
         #endregion
 
+        #region Other Certificate Related
+        public SOCertificateDetails GetStudentSOCDetails(int StudentID, int SessionID)
+        {
+            SOCertificateDetails objModel = new SOCertificateDetails();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
+                    if (objModel == null)
+                    {
+                        objModel = new SOCertificateDetails();
+                        objModel.StudentID = StudentID;
+                        objModel.SessionID = SessionID;
+                        objModel.CertDate = CommonUsage.GetCurrentDate();
+                    }
+                    objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
+                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                }
+                return objModel;
+            }
+        }
+        public int InsertUpdateOCertificates(SOCertificateDetails oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ID", oModel.ID);
+                paramater.Add("@CertID", oModel.CertID);
+                paramater.Add("@StudentID", oModel.StudentID);
+                paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@DueStatus", oModel.DueStatus);
+                paramater.Add("@Character", oModel.Character);
+                paramater.Add("@CreatedBy", oModel.CreatedBy);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                paramater.Add("@CertDate", oModel.CertDate);
+                paramater.Add("@ModifiedBy", oModel.ModifiedBy);
+                paramater.Add("@OpType", 0);
+
+                return con.Query<int>("sp_UpdateStudentSOCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public SOCertificateDetails GetStudentSOCPrintDetails(int StudentID, int SessionID)
+        {
+            SOCertificateDetails objModel = new SOCertificateDetails();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
+                    if (objModel == null)
+                    {
+                        objModel = new SOCertificateDetails();
+                        objModel.StudentID = StudentID;
+                        objModel.SessionID = SessionID;
+                        objModel.CertDate = CommonUsage.GetCurrentDate();
+                    }
+                    objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
+                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                    objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
+                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                }
+                return objModel;
+            }
+        }
+        #endregion
+
         #region TC Related
 
         public int InsertUpdateTC(TCModel oModel)
@@ -4032,7 +4105,6 @@ namespace SMEnterprise.Repository
         }
         public SLCCertificateDetails GetStudentSLCDetails(int StudentID, int SessionID)
         {
-
             SLCCertificateDetails objModel = new SLCCertificateDetails();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -4084,6 +4156,7 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
+
         public int InsertUpdateSLC(SLCCertificateDetails oModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -4532,7 +4605,7 @@ namespace SMEnterprise.Repository
                 using (var multi = await con.QueryMultipleAsync("sp_GetBranchDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objNew.BranchID = multi.Read<int>().SingleOrDefault();
-                   objNew.BranchData = multi.Read<SBranchModel>().SingleOrDefault();                    
+                    objNew.BranchData = multi.Read<SBranchModel>().SingleOrDefault();
                     objNew.Religions = multi.Read<NameIDModel>().ToList();
                     objNew.Casts = multi.Read<NameIDModel>().ToList();
                     objNew.Classes = multi.Read<ClassModel>().ToList();

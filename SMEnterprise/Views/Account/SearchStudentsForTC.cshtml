@@ -15,6 +15,7 @@
     .modal-lg {
         width: 95%!important;
     }
+
     .btn {
         padding: 3px 6px;
     }
@@ -78,10 +79,10 @@
                                     <label class="col-md-4 text-right">TC Type :</label>
                                     <div class="col-md-8">
                                         <select class="form-control" name="TCType" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
-                                             
-                                                <option value="0">New TC Format </option>
-                                                <option value="1">Old TC Format </option>
-                                            
+
+                                            <option value="0">New TC Format </option>
+                                            <option value="1">Old TC Format </option>
+
                                         </select>
                                     </div>
                                 </div>
@@ -103,14 +104,15 @@
                             <thead>
                                 <tr>
                                     <th style="width: 9%">Photo</th>
-                                    <th style="width: 19%">Student Details</th>
-                                    <th style="width: 19%">Parent's </th>
-                                    <th style="width: 12%">DOB</th>
+                                    <th style="width: 18%">Student Details</th>
+                                    <th style="width: 18%">Parent's </th>
+                                    <th style="width: 11%">DOB</th>
                                     @*<th style="width: 10%">Aadhar Number</th>*@
-                                    <th style="width: 11%">Contact</th>
-                                    <th style="width: 10%">Class/Section</th>
-                                    <th style="width: 15%">Address</th>
+                                    <th style="width: 10%">Contact</th>
+                                    <th style="width: 8%">Class/Section</th>
+                                    <th style="width: 13%">Address</th>
                                     <th style="width: 5%">Option</th>
+                                    <th style="width: 8%">Certificates</th>
                                 </tr>
                             </thead>
                             @{
@@ -162,6 +164,18 @@
                                                 <a href="/Account/ViewStudentSLC/@c.StudentID/@Model.SessionID" target="_blank" class="btn btn-link">View</a>
                                             }
                                         </td>
+
+                                        <td>
+                                            @if (c.CSGenerated == 0)
+                                            {
+                                                <a href="javascript:void(0);" onclick="OpenConductDetails(this,@c.StudentID,@Model.SessionID)" class="btn btn-link">Generate</a>
+                                            }
+                                            else
+                                            {
+                                                <a href="javascript:void(0);" onclick="OpenConductDetails(this,@c.StudentID,@Model.SessionID)" class="btn btn-link">Edit</a>
+                                                <a href="/Account/Certificates/@c.StudentID/@Model.SessionID" target="_blank" class="btn btn-link">View</a>
+                                            }
+                                        </td>
                                     </tr>
 
                                     count++;
@@ -201,6 +215,26 @@
                 {
                     type: "POST",
                     url: "/Account/GetStudentSLCDetails/" + StudentID + "/"+SessionID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#mdlEditSLCDetails').find('.modal-body').html(html);
+                        $('#mdlEditSLCDetails').modal('toggle');
+
+                        $('.se-pre-con').css('display', 'none');
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+        function OpenConductDetails(sender, StudentID, SessionID) {
+            $('.se-pre-con').css('display', '');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetStudentOCDetails/" + StudentID + "/" + SessionID,
                     cache: false,
                     processData: false,
                     contentType: false,
