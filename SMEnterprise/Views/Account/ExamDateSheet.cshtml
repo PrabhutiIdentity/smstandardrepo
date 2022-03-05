@@ -4,7 +4,15 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
     //List<NameIDModel> EvaluationSubjectTotals = new List<NameIDModel>();
     var SelectedSession = Model.Sessions.Where(x => x.SessionID == Model.SessionID).FirstOrDefault();
-    //var SelectedEvaluationName = Model.Evaluations.Where(x =>x.ID == Model.EvaluationID).FirstOrDefault();
+    var SelectedEvaluationName = "";
+    if (Model.Evaluations.Count > 0)
+    {
+        var evaluation = Model.Evaluations.Where(x =>x.ID == Model.EvaluationID).FirstOrDefault();
+        if(evaluation!=null)
+        {
+            SelectedEvaluationName = evaluation.Name;
+        }
+    }
 }
 @model SMEnterprise.Models.StudentExamDatesheetModel
 @section IncludeCss
@@ -136,8 +144,7 @@
                                         @foreach (NameIDModel el in Model.Evaluations)
                                         {
                                             <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
-                                        }
-                                        
+                                        }                                        
                                     </select>
                                 </div>
                             </div>
@@ -169,6 +176,9 @@
                                                 </p>
                                                 <p style="margin-bottom: 2px;margin-left:80px;"> Ph. @Model.Branch.ContactNo, Email : @Model.Branch.EmailID</p>
                                                 <p style="margin-bottom: 2px;margin-left:50px;"><b>Session : @SelectedSession.SessionName</b>  </p>
+                                                
+                                                    <p style="margin-bottom: 2px;margin-left:50px;"><b>Evaluation :  @SelectedEvaluationName</b>  </p>
+                                                
                                                 @*|| <b>Evaluation :  @SelectedEvaluationName.Name</b>*@
                                             </td>
                                           
