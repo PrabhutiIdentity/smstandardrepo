@@ -114,6 +114,7 @@ namespace SMEnterprise.Models
         public DateTime ModifiedDate { get; set; }
         public string EvaluationName { get; set; }
         public int MarkingScheme { get; set; }
+        public int Sstatus { get; set; }
     }
     public class ExamPageModel
     {
