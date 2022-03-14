@@ -2036,12 +2036,12 @@ namespace SMEnterprise.Repository
                     objModel.GroupID = multi.Read<int>().SingleOrDefault();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    try
-                    {
-                        objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
-                    }
-                    catch
-                    { }
+                    //try
+                    //{
+                    //    objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
+                    //}
+                    //catch
+                    //{ }
                 }
             }
 
@@ -2243,7 +2243,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SubjectCode", objData.SubjectCode);
                 paramater.Add("@MainSubID", objData.MainSubID);
                 paramater.Add("@SubjectType", objData.SubjectType);
-                paramater.Add("@MarkingScheme", objData.MarkingScheme);
+                //paramater.Add("@MarkingScheme", objData.MarkingScheme);
                 objModel.SubjectList = con.Query<SubjectModel>("spn_InsertUpdateGroupSubject", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
             }
             return objModel;
