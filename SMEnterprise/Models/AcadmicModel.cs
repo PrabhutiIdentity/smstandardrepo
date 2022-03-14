@@ -28,6 +28,7 @@ namespace SMEnterprise.Models
         public SBranchModel Branch { get; set; }
         public StudentModel Student { get; set; }
         public string Character { get; set; }
+        public string BirthPlace { get; set; }
         public SessionModel Session { get; set; }
         public DateTime ModifiedDate { get; set; }
         public int ModifiedBy { get; set; }

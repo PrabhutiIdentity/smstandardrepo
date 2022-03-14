@@ -56,7 +56,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-left" style="padding:20px;" colspan="2"> 
+                        <td class="text-left" style="padding:20px;" colspan="2">
                             Certificate No. CS/@Model.Student.SchoolUID/@Model.CertDate.ToString("yyyyMMdd")/@Model.CertID<br />
                             Admission No. @Model.Student.SchoolUID
                         </td>
@@ -396,6 +396,145 @@
 
         </div>
     </div>
+    <div class="x_panel">
+        <div class="x_title">
+            <div class="clearfix"></div>
+            <h2>CERTIFICATE</h2>
+            <button type="button" class="btn btn-primary pull-right" onclick="PrintCert(3);"><i class="fa fa-print"></i> Print</button>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content ClearanceCert">
+            <table style="width: 100%; border: 0px; border: 1px solid;">
+                <thead style="border: 1px solid;">
+                    <tr>
+                        <td style="text-align:left;width:20%;">
+                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                        </td>
+                        <td style="text-align:center;width:60%;">
+                            <h3 style="text-transform: uppercase;"> @Model.Branch.BranchSchoolName</h3>
+                            <h4 style="white-space: break-spaces;">@Model.Branch.Address </h4>
+                            <h5>@Model.Branch.ContactNo</h5>
+                            <h5>@Model.Branch.EmailID</h5>
+                            <br />
+                            <H3><strong><u>CERTIFICATE</u></strong></H3>
+                        </td>
+
+                        <td style="text-align:right;width:20%;">
+                            @*S.R.N. @Model.Student.SchoolUID
+                                Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <table style="width:100%">
+                                <tr style="text-align: justify; font-size:medium; width:75%;">
+                                    <td class="text-left" style="padding: 10px;">
+                                        Certificate No. CS/@Model.Student.SchoolUID/@Model.CertDate.ToString("yyyyMMdd")/@Model.CertID<br />
+                                        Admission No. @Model.Student.SchoolUID
+                                    </td>
+                                    <td class="text-right" style="padding: 10px; width: 25%;">
+                                        <br />
+                                        Date: @Model.CertDate.ToString("dd/MM/yyyy")
+                                    </td>
+                                </tr>
+                            </table>                            
+                        </td>
+                        
+                    </tr>
+                    @{
+                        if (Model.Student.Gender == 0)
+                        {
+                            relation = "Son";
+                            H = "His";
+                            H1 = "He";
+                            G = "Mr.";
+                        }
+                        else
+                        {
+                            relation = "Daughter";
+                            H = "Her";
+                            H1 = "She";
+                            G = "Miss./Ms.";
+                        }
+                        <tr>
+                            <td colspan="3" style="padding: 10px; border-top: 1px solid; border-bottom: 1px solid;">
+                                <table style="width:100%">
+                                    <tr style="text-align: justify; font-size:medium;">
+                                        <td style="padding: 10px;">
+                                            <p>
+                                                This is to certify that <b>@Model.Student.Name (@Model.Student.SchoolUID)</b> @relation of @Model.Parent.FatherName residing at @Model.Student.MiniAddress is Bonafide student of our school.
+                                            </p>
+                                            <p>
+                                                @H1 is very obedient, sincere and hardworking.
+                                            </p>
+                                            <p>
+                                                @H1 is belogn to <b>@Model.Student.CategoryName Cast</b> Category.
+                                            </p>
+                                            <p>
+                                                @H1 bears @Model.Character. @H Date of Birth is @Model.Student.DOB.ToString("dd-MMM-yyyy") and place of birth is @Model.BirthPlace.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td colspan="3">
+                            <table style="width:100%; height:200px;">
+
+
+                                <tr>
+                                    <td colspan="3" style="padding: 20px; text-align:">
+                                        <br />
+                                        <br />
+                                        Date : @Model.CreatedDate.ToString("dd MMM, yyyy")
+                                    </td>
+
+                                    <td colspan="3" style="padding: 20px;">
+                                        <br />
+                                        <br />
+                                        <br />
+
+                                        Clerk________________
+                                    </td>
+
+                                    @if (Model.Branch.PrincipalSignature == null)
+                                    {
+
+
+                                        <td colspan="3" style="padding: 20px;text-align: right">
+                                            <br />
+                                            <br />
+                                            <br />
+
+                                            Principal________________
+                                        </td>
+
+
+                                    }
+                                    else
+                                    {
+                                        <td colspan="3" style="padding: 20px; text-align: right;">
+                                            <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                            <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal
+                                        </td>
+                                    }
+
+                                </tr>
+                                @*<tr>
+                                        <td colspan="9">
+                                            <small> Generated by Pschool Software by Prabhuti Systems Pvt. Ltd.</small>
+                                        </td>
+                                    </tr>*@
+                            </table>
+                        </td>
+                    </tr>
+                </thead>
+            </table>
+
+        </div>
+    </div>
 </div>
 @section scripts
 {
@@ -415,8 +554,11 @@
             else if (type == 1) {
                 contents = $(".DOBCert").html();
             }
-            else {
+            else if (type == 2){
                 contents = $(".DueClearanceCert").html();
+            }
+            else {
+                contents = $(".ClearanceCert").html();
             }
 
             var frame1 = $('<iframe />');
