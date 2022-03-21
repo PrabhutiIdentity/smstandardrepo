@@ -1,0 +1,185 @@
+--update procedure to get CSGenerated status
+CREATE procedure [dbo].[spn_GetSearchedStudents]  --'',1,0            
+(              
+@SearchText nvarchar(20),              
+@SBranchID int,              
+@SessionID int=0              
+)              
+as               
+begin               
+ if(@SessionID=0)              
+ begin              
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID              
+ end              
+ set @SearchText=upper(@SearchText)              
+ if(@SearchText<>'')              
+ begin              
+  Select SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,SS.RollNo,SM.AccessCardNo,              
+  SM.GuardianMobileNo ,PM.FatherMobileNo,PM.MotherMobileNo,SM.Gender,SS.ClassID,SS.SectionID ,SM.AadharCardNo,PM.FatherName,PM.MotherName,SM.SchoolUID,SM.SSSID,SM.FamilyID,              
+   SM.MiniAddress, SM.MiniAddress2,              
+   (select count(*) from [dbo].[StudentLeavingCertificateMaster] SLC where SLC.StudentID=SM.StudentID) as SLCGenerated,          
+   (select count(*) from [dbo].[StudentOtherCertificateMaster] SOC where SOC.StudentID=SM.StudentID) as CSGenerated,          
+  isnull((Select ClassName from ClassMaster CM where CM.ClassID=SS.ClassID),'NA') as ClassName,              
+  isnull((Select Name from Class_Sections CS where CS.ID=SS.SectionID),'NA') as SectionName              
+  from StudentMaster SM left outer join Student_Session SS on SS.StudentID=SM.StudentID            
+  left outer join Parentmaster PM on PM.ParentID=SM.ParentID   
+  and SS.Status=1 and SS.SessionID=@SessionID               
+  where SM.SBranchID=@SBranchID and SS.SessionID=@SessionID and      
+  (upper(SM.Name) like '%'+@SearchText+'%' or 'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6)       
+  like  '%'+@SearchText+'%' or upper(SM.Name) like '%'+@SearchText+'%' or upper(SS.RollNo) like '%'+@SearchText+'%' or       
+  upper(PM.FatherName) like '%'+@SearchText+'%' or upper(PM.MotherName) like '%'+@SearchText+'%' or upper(SM.SSSID) like '%'+@SearchText+'%' or upper(SM.FamilyID) like '%'+@SearchText+'%' or upper(SM.AadharCardNo) like '%'+@SearchText+'%' or upper(SM.Scho
+olUID)       
+like '%'+@SearchText+'%')              
+  order by Name              
+ end              
+ else              
+ begin                
+ Select top 50 SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,SS.RollNo,SM.AccessCardNo,              
+  SM.GuardianMobileNo ,PM.FatherMobileNo,PM.MotherMobileNo,SM.Gender,SS.ClassID,SS.SectionID ,SM.AadharCardNo,PM.FatherName,PM.MotherName,SM.SchoolUID,SM.SSSID,SM.FamilyID,              
+  SM.MiniAddress, SM.MiniAddress2,              
+   (select count(*) from [dbo].[StudentLeavingCertificateMaster] SLC where SLC.StudentID=SM.StudentID) as SLCGenerated,              
+  (select count(*) from [dbo].[StudentOtherCertificateMaster] SOC where SOC.StudentID=SM.StudentID) as CSGenerated,          
+  isnull((Select ClassName from ClassMaster CM where CM.ClassID=SS.ClassID),'NA') as ClassName,              
+  isnull((Select Name from Class_Sections CS where CS.ID=SS.SectionID),'NA') as SectionName              
+  from StudentMaster SM left outer join Student_Session SS on SS.StudentID=SM.StudentID and SS.Status=1  and SS.SessionID=@SessionID              
+  left outer join Parentmaster PM on PM.ParentID=SM.ParentID              
+  where SM.SBranchID=@SBranchID  and SS.SessionID=@SessionID              
+  order by Name              
+ end              
+              
+ Select SessionName as Name,SessionID as ID,SessionStatus as Extra1 from SessionMaster where SBranchID=@SBranchID              
+               
+ select @SessionID              
+              
+end 
+
+--Procedure to get Certificate Details
+  
+CREATE Procedure [dbo].[sp_GetStudentSOCDetails] --3395,23          
+(                          
+@StudentID int,                  
+@SessionID int          
+)                          
+AS                          
+BEGIN            
+          
+DECLARE @Temp_ID INT, @FirstSessionID int, @CrrentSessionID int, @ParentID int,@SBranchID int           
+          
+Select @Temp_ID=ID from [dbo].[StudentOtherCertificateMaster] where StudentID=@StudentID          
+          
+ select *,(Select SessionName from SessionMaster where SessionID=(Select top 1 SessionID from Student_Session where StudentID=SOC.StudentID order by FromDate asc))            
+as FirstSessionName            
+,(select ClassName from ClassMaster where ClassID=(Select top 1 ClassID from Student_Session where StudentID=SOC.StudentID order by FromDate asc))+'/'+            
+(Select [Name] from Class_Sections where ID=(Select top 1 SectionID from Student_Session where StudentID=SOC.StudentID order by FromDate asc))            
+as FirstClassSectionName from [dbo].[StudentOtherCertificateMaster] SOC where StudentID=@StudentID and ID=@Temp_ID                         
+             
+   Set @FirstSessionID = (Select Top 1 SessionID from Student_Session where StudentID=@StudentID order by SessionID asc)          
+   Set @CrrentSessionID =(Select Top 1 SessionID from Student_Session where StudentID=@StudentID order by SessionID Desc)          
+          
+ select Top 1  SS.SBranchID, SS.StudentSessionUID,SS.StudentID,(select MiniAddress from StudentMaster where StudentID=SS.StudentID) as MiniAddress,      
+ (select gender from StudentMaster where StudentID=ss.StudentID) as gender,      
+ SS.FromDate,SS.ToDate,SS.RollNo,SS.IsLeft,SS.DateOfPromotion                         
+ ,CM.ClassName,CS.Name as SectionName,SM.SessionName,SS.SessionID,@FirstSessionID,@CrrentSessionID          
+ from Student_Session SS left outer join ClassMaster CM on CM.ClassID=SS.ClassID                          
+ left outer join Class_Sections CS on CS.ID=SS.SectionID                          
+ left outer join SessionMaster SM on SM.SessionID=SS.SessionID                          
+ where StudentID=@StudentID                          
+ order by FromDate  desc         
+                     
+ select @ParentID=ParentID,@SBranchID=SBranchID from StudentMaster where StudentID=@StudentID                        
+            
+ select SM.StudentID,SM.[Name],SM.DOB,SM.DOJ,SM.SchoolUID,SM.Gender,    
+ (select [Name] from SocialCategory where ID=SM.Category) as CategoryName           
+ from StudentMaster SM                       
+ where StudentID=@StudentID                  
+        
+END 
+
+--Procedure to insert/update Certificate
+CREATE Procedure [dbo].[sp_UpdateStudentSOCDetails]           
+(            
+@ID int,        
+@CertID int,          
+@StudentID int,          
+@SessionID int,      
+@Character nvarchar(50),          
+@BirthPlace nvarchar(500),      
+@CreatedBy int,          
+@SBranchID int,        
+@CertDate Date,        
+@ModifiedBy int,        
+@OpType int              
+)              
+AS              
+BEGIN         
+ if(@OpType=-1)              
+ begin              
+  Delete from [dbo].[StudentOtherCertificateMaster] where ID=@ID          
+ end              
+ else              
+ Begin              
+  if(@ID=0)              
+  begin             
+  insert into [dbo].[StudentOtherCertificateMaster](CertID,StudentID,CurrentSessionID,          
+  [Character],CreatedDate,CreatedBy,SBranchID,CertDate,BirthPlace)          
+  values (@CertID,@StudentID,@SessionID,@Character,(Select GETDATE()),@CreatedBy,@SBranchID,@CertDate,@BirthPlace)          
+  select @ID=Cast(Scope_Identity() as int)          
+           
+  --Update Student_Session set IsCertIssued=1            
+  end              
+  else              
+  begin              
+   Update [dbo].[StudentOtherCertificateMaster] set CertID=@CertID,StudentID=@StudentID,CurrentSessionID=@SessionID,         
+   [Character]=@Character,SBranchID=@SBranchID,CertDate=@CertDate,ModifiedDate=(Select GETDATE()),      
+   ModifiedBy=@ModifiedBy, BirthPlace=@BirthPlace      
+   where ID=@ID        
+   Select @ID        
+  end             
+ END          
+END  
+
+--Procedure to Print Certificate
+
+CREATE Procedure [dbo].[sp_GetStudentSOCDetailsForPrint] --3391,23      
+(                      
+@StudentID int,              
+@SessionID int      
+)                      
+AS                      
+BEGIN        
+      
+DECLARE @Temp_ID INT, @FirstSessionID int, @CrrentSessionID int, @ParentID int,@SBranchID int       
+      
+Select @Temp_ID=ID from [dbo].[StudentOtherCertificateMaster] where StudentID=@StudentID      
+      
+ select *,(Select SessionName from SessionMaster where SessionID=(Select top 1 SessionID from Student_Session where StudentID=SOC.StudentID order by FromDate asc))        
+as FirstSessionName        
+,(select ClassName from ClassMaster where ClassID=(Select top 1 ClassID from Student_Session where StudentID=SOC.StudentID order by FromDate asc))+'/'+        
+(Select [Name] from Class_Sections where ID=(Select top 1 SectionID from Student_Session where StudentID=SOC.StudentID order by FromDate asc))        
+as FirstClassSectionName from [dbo].[StudentOtherCertificateMaster] SOC where StudentID=@StudentID and ID=@Temp_ID                     
+         
+   Set @FirstSessionID = (Select Top 1 SessionID from Student_Session where StudentID=@StudentID order by SessionID asc)      
+   Set @CrrentSessionID =(Select Top 1 SessionID from Student_Session where StudentID=@StudentID order by SessionID Desc)      
+      
+ select Top 1  SS.SBranchID, SS.StudentSessionUID,SS.StudentID,(select MiniAddress from StudentMaster where StudentID=SS.StudentID) as MiniAddress,    
+ (select gender from StudentMaster where StudentID=ss.StudentID) as gender,    
+ SS.FromDate,SS.ToDate,SS.RollNo,SS.IsLeft,SS.DateOfPromotion                     
+ ,CM.ClassName,CS.Name as SectionName,SM.SessionName,SS.SessionID,@FirstSessionID,@CrrentSessionID      
+from Student_Session SS left outer join ClassMaster CM on CM.ClassID=SS.ClassID                      
+ left outer join Class_Sections CS on CS.ID=SS.SectionID                      
+ left outer join SessionMaster SM on SM.SessionID=SS.SessionID                      
+ where StudentID=@StudentID                      
+ order by FromDate  desc     
+                 
+ select @ParentID=ParentID,@SBranchID=SBranchID from StudentMaster where StudentID=@StudentID                    
+        
+ select SM.StudentID,SM.[Name],SM.DOB,SM.DOJ,SM.SchoolUID,SM.Gender,  
+ (select [Name] from SocialCategory where ID=SM.Category) as CategoryName         
+ from StudentMaster SM    
+ where StudentID=@StudentID              
+        
+ Select * from ParentMaster where ParentID=@ParentID        
+        
+ select * from SBranchMaster where SBranchID=@SBranchID        
+      
+END 
