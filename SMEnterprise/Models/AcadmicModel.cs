@@ -14,7 +14,6 @@ namespace SMEnterprise.Models
         public DateTime CertDate { get; set; }
         public string SchoolUID { get; set; }
         public string PSchoolMedium { get; set; }
-        public string DueStatus { get; set; }
         public DateTime DOB { get; set; }
         public int StudentID { get; set; }
         public int SessionID { get; set; }
