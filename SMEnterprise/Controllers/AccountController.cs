@@ -3214,11 +3214,13 @@ namespace SMEnterprise.Controllers
         {
             oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
 
-            //if (oModel.StartDate.Year == 1)
-            //{
-            //    oModel.StartDate = CommonUsage.GetCurrentDate();
-            //    oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
-            //}
+            if (oModel.StartDate.Year == 1)
+            {
+                oModel.StartDate = CommonUsage.GetCurrentDate();
+                oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
+                oModel.EndDate = CommonUsage.GetCurrentDate();
+                oModel.EndDate = oModel.EndDate.AddDays(-oModel.EndDate.Day + 1);
+            }
             objAdminData.GetStudentAdmssionDetail(oModel);
             return View(oModel);
         }
