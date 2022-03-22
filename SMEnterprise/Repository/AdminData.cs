@@ -4123,7 +4123,6 @@ namespace SMEnterprise.Repository
         }
 
         #endregion
-
         public StudentAdmissionReportModel GetStudentAdmssionDetail(StudentAdmissionReportModel oModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -4131,13 +4130,14 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
-                //paramater.Add("@StartDate", oModel.StartDate);
+                paramater.Add("@StartDate", oModel.StartDate);
+                paramater.Add("@EndDate", oModel.EndDate);
 
                 using (var multi = con.QueryMultiple("sp_GetSessionStudentAdmissionDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    //oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
                 }
             }
             return oModel;
