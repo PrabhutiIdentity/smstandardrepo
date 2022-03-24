@@ -28,13 +28,15 @@
         var H1 = "";
         var G = "";
     }
+
     <div class="x_panel">
         <div class="x_title">
-            <h2>Conduct Certificate</h2>
-            <button type="button" class="btn btn-primary pull-right" onclick="PrintCert(0);"><i class="fa fa-print"></i> Print</button>
+            <div class="clearfix"></div>
+            <h2>CERTIFICATE</h2>
+            <button type="button" class="btn btn-primary pull-right" onclick="PrintCert(3);"><i class="fa fa-print"></i> Print</button>
             <div class="clearfix"></div>
         </div>
-        <div class="x_content ConductCert">
+        <div class="x_content ClearanceCert">
             <table style="width: 100%; border: 0px; border: 1px solid;">
                 <thead style="border: 1px solid;">
                     <tr>
@@ -46,300 +48,84 @@
                             <h4 style="white-space: break-spaces;">@Model.Branch.Address </h4>
                             <h5>@Model.Branch.ContactNo</h5>
                             <h5>@Model.Branch.EmailID</h5>
-                            <br />
-                            <H3><strong><u>TO WHOM IT MAY CONCERN</u></strong></H3>
+                            
                         </td>
 
                         <td style="text-align:right;width:20%;">
-                            @*S.R.N. @Model.Student.SchoolUID
-                                Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
                         </td>
                     </tr>
                     <tr>
-                        <td class="text-left" style="padding:20px;" colspan="2"> 
-                            Certificate No. CS/@Model.Student.SchoolUID/@Model.CertDate.ToString("yyyyMMdd")/@Model.CertID<br />
-                            Admission No. @Model.Student.SchoolUID
-                        </td>
+                        <td style="width: 20%">
 
-                        <td class="text-right" style="padding:20px;">
+                        </td>
+                        <td style="text-align: center; width: 60%">
                             <br />
-                            Date: @Model.CertDate.ToString("dd/MM/yyyy")
-
+                            <H3><strong><u>CERTIFICATE</u></strong></H3>
                         </td>
-                    </tr>
-                    <tr>
-                        @{
-                            if (Model.Student.Gender == 0)
-                            {
-                                relation = "Son";
-                                H = "His";
-                                H1 = "He";
-                            }
-                            else
-                            {
-                                relation = "Daughter";
-                                H = "Her";
-                                H1 = "She";
-                            }
-
-                            <td colspan="3" style="padding: 10px; border-top: 1px solid; border-bottom: 1px solid;">
-                                <table style="width:100%">
-                                    <tr style="text-align: justify; font-size:medium;">
-                                        <td style="padding: 10px;">
-                                            <p>
-                                                This is to certify that <b>@Model.Student.Name (@Model.Student.SchoolUID)</b> @relation of <b>@Model.Parent.MotherName</b> and <b>@Model.Parent.FatherName</b> is/ was a student of Class <b>@Model.Session.ClassName / @Model.Session.SectionName </b> in this school, for the Academic Session <b>@Model.Session.SessionName </b> admitted in <b>@Model.FirstClassSectionName</b> preparatory on(admission date) <b>@Model.Student.DOJ.ToString("dd-MMM-yyyy")</b> in the Academic Session <b>@Model.FirstSessionName</b>.
-                                            </p>
-                                            <p>@H date of birth according to our school record is <b>@Model.Student.DOB.ToString("dd-MMM-yyyy")</b> (in words)  <b>@SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Day) @Model.Student.DOB.ToString("MMMM") @SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Year)</b>.</p>
-                                            <p>@H1 is/was of <b>@Model.Character</b>. The Academic Session of this school is <b>@Model.Session.FromDate.ToString("MMMM")</b> to <b>@Model.Session.ToDate.ToString("MMMM")</b>. All the instructions are given in English medium only.</p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        }
+                        <td style="width: 20%; text-align:end;">
+                            <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+                        </td>
                     </tr>
                     <tr>
                         <td colspan="3">
-                            <table style="width:100%; height:200px;">
-
-
-                                <tr>
-                                    <td colspan="3" style="padding: 20px; text-align:">
-                                        <br />
-                                        <br />
-                                        Date : @Model.CreatedDate.ToString("dd MMM, yyyy")
-                                    </td>
-
-                                    <td colspan="3" style="padding: 20px;">
-                                        <br />
-                                        <br />
-                                        <br />
-
-                                        Clerk________________
-                                    </td>
-
-                                    @if (Model.Branch.PrincipalSignature == null)
-                                    {
-
-
-                                        <td colspan="3" style="padding: 20px;text-align: right">
-                                            <br />
-                                            <br />
-                                            <br />
-
-                                            Principal________________
-                                        </td>
-
-
-                                    }
-                                    else
-                                    {
-                                        <td colspan="3" style="padding: 20px; text-align: right;">
-                                            <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
-                                            <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal
-                                        </td>
-                                    }
-
-                                </tr>
-                                @*<tr>
-                                        <td colspan="9">
-                                            <small> Generated by Pschool Software by Prabhuti Systems Pvt. Ltd.</small>
-                                        </td>
-                                    </tr>*@
-                            </table>
-                        </td>
-                    </tr>
-                </thead>
-            </table>
-
-        </div>
-
-    </div>
-    <div class="x_panel">
-        <div class="x_title">
-            <div class="clearfix"></div>
-            <h2>Date of Birth Certificate</h2>
-            <button type="button" class="btn btn-primary pull-right" onclick="PrintCert(1);"><i class="fa fa-print"></i> Print</button>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content DOBCert">
-            <table style="width: 100%; border: 0px; border: 1px solid;">
-                <thead style="border: 1px solid;">
-                    <tr>
-                        <td style="text-align:left;width:20%;">
-                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
-                        </td>
-                        <td style="text-align:center;width:60%;">
-                            <h3 style="text-transform: uppercase;"> @Model.Branch.BranchSchoolName</h3>
-                            <h4 style="white-space: break-spaces;">@Model.Branch.Address </h4>
-                            <h5>@Model.Branch.ContactNo</h5>
-                            <h5>@Model.Branch.EmailID</h5>
-                            <br />
-                            <H3><strong><u>BIRTH CERTIFICATE</u></strong></H3>
-                        </td>
-
-                        <td style="text-align:right;width:20%;">
-                            @*S.R.N. @Model.Student.SchoolUID
-                                Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-left" style="padding:20px;" colspan="2">
-                            Certificate No. BS/@Model.Student.SchoolUID/@Model.CertDate.ToString("yyyyMMdd")/@Model.CertID<br />
-                            Admission No. @Model.Student.SchoolUID
-                        </td>
-                        <td class="text-right" style="padding:20px;">
-                            <br />
-                            Date: @Model.CertDate.ToString("dd/MM/yyyy")
-                        </td>
-                    </tr>
-                    <tr>
-                        @{
-                            if (Model.Student.Gender == 0)
-                            {
-                                relation = "Son";
-                                H = "His";
-                                H1 = "He";
-                                G = "Mr.";
-                            }
-                            else
-                            {
-                                relation = "Daughter";
-                                H = "Her";
-                                H1 = "She";
-                                G = "Miss./Ms.";
-                            }
-
-                            <td colspan="3" style="padding: 10px; border-top: 1px solid; border-bottom: 1px solid;">
-                                <table style="width:100%">
-                                    <tr style="text-align: justify; font-size:medium;">
-                                        <td style="padding: 10px;">
-                                            <p>
-                                                This is to ceritfy that @G <b>@Model.Student.Name</b> Admission No <b>@Model.Student.SchoolUID</b> @relation of <b>@Model.Parent.MotherName</b> is studing in class <b>@Model.Session.ClassName / @Model.Session.SectionName.</b>
-                                                <br />
-                                            </p>
-                                            <p>
-                                                As per our school record @H date of birth is :<br />
-
-                                            </p>
-                                            <p>
-                                                (In Figures): <b>@Model.Student.DOB.ToString("dd-MMM-yyyy")</b>
-                                            </p>
-                                            <p>
-                                                (In Words): <b>@SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Day) @Model.Student.DOB.ToString("MMMM") @SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords(Model.Student.DOB.Year)</b>
-                                                @*@H1 is/was of <b>@Model.Character</b>. The Academic Session of this school is <b>@Model.Session.FromDate.ToString("MMMM")</b> to <b>@Model.Session.ToDate.ToString("MMMM")</b>. All the instructions are given in English medium only.*@
-                                            </p>
-                                        </td>
-                                    </tr>
-                                </table>
-                            </td>
-                        }
-                    </tr>
-                    <tr>
-                        <td colspan="3">
-                            <table style="width:100%; height:200px;">
-
-
-                                <tr>
-                                    <td colspan="3" style="padding: 20px; text-align:">
-                                        <br />
-                                        <br />
-                                        Date : @Model.CreatedDate.ToString("dd MMM, yyyy")
-                                    </td>
-
-                                    <td colspan="3" style="padding: 20px;">
-                                        <br />
-                                        <br />
-                                        <br />
-
-                                        Clerk________________
-                                    </td>
-
-                                    @if (Model.Branch.PrincipalSignature == null)
-                                    {
-                                        <td colspan="3" style="padding: 20px;text-align: right">
-                                            <br />
-                                            <br />
-                                            <br />
-
-                                            Principal________________
-                                        </td>
-                                    }
-                                    else
-                                    {
-                                        <td colspan="3" style="padding: 20px; text-align: right;">
-                                            <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
-                                            <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal
-                                        </td>
-                                    }
-
-                                </tr>
-                                @*<tr>
-                                        <td colspan="9">
-                                            <small> Generated by Pschool Software by Prabhuti Systems Pvt. Ltd.</small>
-                                        </td>
-                                    </tr>*@
-                            </table>
-                        </td>
-                    </tr>
-                </thead>
-            </table>
-
-        </div>
-    </div>
-
-    <div class="x_panel">
-        <div class="x_title">
-            <div class="clearfix"></div>
-            <h2>DUES CLEARANCE CERTIFICATE</h2>
-            <button type="button" class="btn btn-primary pull-right" onclick="PrintCert(2);"><i class="fa fa-print"></i> Print</button>
-            <div class="clearfix"></div>
-        </div>
-        <div class="x_content DueClearanceCert">
-            <table style="width: 100%; border: 0px; border: 1px solid;">
-                <thead style="border: 1px solid;">
-                    <tr>
-                        <td style="text-align:left;width:20%;">
-                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
-                        </td>
-                        <td style="text-align:center;width:60%;">
-                            <h3 style="text-transform: uppercase;"> @Model.Branch.BranchSchoolName</h3>
-                            <h4 style="white-space: break-spaces;">@Model.Branch.Address </h4>
-                            <h5>@Model.Branch.ContactNo</h5>
-                            <h5>@Model.Branch.EmailID</h5>
-                            <br />
-                            <H3><strong><u>DUES CLEARANCE CERTIFICATE</u></strong></H3>
-                        </td>
-
-                        <td style="text-align:right;width:20%;">
-                            @*S.R.N. @Model.Student.SchoolUID
-                                Sl. No. @(Model.TCSLNo == "" ? Model.CertID.ToString().PadLeft(6, '0') : Model.TCSLNo)*@
-                        </td>
-                    </tr>
-                    <tr>
-                        <td class="text-left" style="padding:20px;" colspan="2">
-                            Certificate No. DCS/@Model.Student.SchoolUID/@Model.CertDate.ToString("yyyyMMdd")/@Model.CertID<br />
-                            Admission No. @Model.Student.SchoolUID
-                        </td>
-                        <td class="text-right" style="padding:20px;">
-                            <br />
-                            Date: @Model.CertDate.ToString("dd/MM/yyyy")
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3" style="padding: 10px; border-top: 1px solid; border-bottom: 1px solid;">
                             <table style="width:100%">
-                                <tr style="text-align: justify; font-size:medium;">
-                                    <td style="padding: 10px;">
-                                        <p>
-                                            This is to certify that <b>@Model.Student.Name (@Model.Student.SchoolUID)</b> of Standard Std -<b> @Model.Session.ClassName </b> Section Std -<b>
-                                                @Model.Session.SectionName
-                                            </b> has <b>@Model.DueStatus</b> the dues for the session <b>@Model.Session.SessionName</b>.
-                                        </p>
+                                <tr style="text-align: justify; font-size:medium; width:75%;">
+                                    <td class="text-left" style="padding: 10px;">
+                                        Certificate No. CS/@Model.Student.SchoolUID/@Model.CertDate.ToString("yyyyMMdd")/@Model.CertID<br />
+                                        Admission No. @Model.Student.SchoolUID
+                                    </td>
+                                    <td class="text-right" style="padding: 10px; width: 25%;">
+                                        <br />
+                                        Date: @Model.CertDate.ToString("dd/MM/yyyy")
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
+                    @{
+                        if (Model.Student.Gender == 0)
+                        {
+                            relation = "Son";
+                            H = "His";
+                            H1 = "He";
+                            G = "Mr.";
+                        }
+                        else
+                        {
+                            relation = "Daughter";
+                            H = "Her";
+                            H1 = "She";
+                            G = "Miss./Ms.";
+                        }
+                        <tr>
+                            <td colspan="3" style="padding: 10px; border-top: 1px solid; border-bottom: 1px solid;">
+                                <table style="width:100%">
+
+                                    <tr>
+                                        <td class="text-left" style="padding: 10px; text-align: end">
+                                            
+                                        </td>
+                                    </tr>
+                                    <tr style="text-align: justify; font-size:medium;">
+                                        <td style="padding: 10px;">
+                                            <p>
+                                                This is to certify that <b>@Model.Student.Name (@Model.Student.SchoolUID)</b> @relation of <b>@Model.Parent.FatherName</b> residing at <b>@Model.Student.MiniAddress</b> is Bonafide student of our school.
+                                            </p>
+                                            <p>
+                                                @H1 is very obedient, sincere and hardworking.
+                                            </p>
+                                            <p>
+                                                @H1 is belong to <b>@Model.Student.CategoryName Cast</b> Category.
+                                            </p>
+                                            <p>
+                                                @H1 bears <b>@Model.Character</b>. @H Date of Birth is <b>@Model.Student.DOB.ToString("dd-MMM-yyyy")</b> and place of birth is <b>@Model.BirthPlace</b>.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    }
                     <tr>
                         <td colspan="3">
                             <table style="width:100%; height:200px;">
@@ -415,8 +201,11 @@
             else if (type == 1) {
                 contents = $(".DOBCert").html();
             }
-            else {
+            else if (type == 2){
                 contents = $(".DueClearanceCert").html();
+            }
+            else {
+                contents = $(".ClearanceCert").html();
             }
 
             var frame1 = $('<iframe />');

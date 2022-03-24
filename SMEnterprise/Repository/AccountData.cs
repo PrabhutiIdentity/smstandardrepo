@@ -4033,11 +4033,12 @@ namespace SMEnterprise.Repository
                 paramater.Add("@CertID", oModel.CertID);
                 paramater.Add("@StudentID", oModel.StudentID);
                 paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@DueStatus", oModel.DueStatus);
+                //paramater.Add("@DueStatus", oModel.DueStatus);
                 paramater.Add("@Character", oModel.Character);
                 paramater.Add("@CreatedBy", oModel.CreatedBy);
                 paramater.Add("@SBranchID", oModel.SBranchID);
                 paramater.Add("@CertDate", oModel.CertDate);
+                paramater.Add("@BirthPlace", oModel.BirthPlace);
                 paramater.Add("@ModifiedBy", oModel.ModifiedBy);
                 paramater.Add("@OpType", 0);
 
@@ -4052,7 +4053,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@StudentID", StudentID);
                 paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetailsForPrint", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
                     if (objModel == null)
