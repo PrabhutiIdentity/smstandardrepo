@@ -2036,12 +2036,12 @@ namespace SMEnterprise.Repository
                     objModel.GroupID = multi.Read<int>().SingleOrDefault();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    try
-                    {
-                        objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
-                    }
-                    catch
-                    { }
+                    //try
+                    //{
+                    //    objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
+                    //}
+                    //catch
+                    //{ }
                 }
             }
 
@@ -2243,7 +2243,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SubjectCode", objData.SubjectCode);
                 paramater.Add("@MainSubID", objData.MainSubID);
                 paramater.Add("@SubjectType", objData.SubjectType);
-                paramater.Add("@MarkingScheme", objData.MarkingScheme);
+                //paramater.Add("@MarkingScheme", objData.MarkingScheme);
                 objModel.SubjectList = con.Query<SubjectModel>("spn_InsertUpdateGroupSubject", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
             }
             return objModel;
@@ -4123,7 +4123,6 @@ namespace SMEnterprise.Repository
         }
 
         #endregion
-
         public StudentAdmissionReportModel GetStudentAdmssionDetail(StudentAdmissionReportModel oModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -4131,13 +4130,14 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
-                //paramater.Add("@StartDate", oModel.StartDate);
+                paramater.Add("@StartDate", oModel.StartDate);
+                paramater.Add("@EndDate", oModel.EndDate);
 
                 using (var multi = con.QueryMultiple("sp_GetSessionStudentAdmissionDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    //oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
                 }
             }
             return oModel;
