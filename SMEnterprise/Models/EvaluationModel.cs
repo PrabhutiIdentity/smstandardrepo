@@ -152,7 +152,7 @@ namespace SMEnterprise.Models
             dtExamDetails.Columns.Add("PassMarks");
             dtExamDetails.Columns.Add("IsLocked");
             // For using Grading Subject
-            //dtExamDetails.Columns.Add("MarkingScheme");
+            dtExamDetails.Columns.Add("MarkingScheme");
             //
             foreach (ExamModel e in Exams)
             {
@@ -174,14 +174,14 @@ namespace SMEnterprise.Models
                 dr["PassMarks"] = e.PassMarks;
                 dr["IsLocked"] = e.IsLocked;
                 // Use for Grading Subject 
-                ///dr["MarkingScheme"] = e.MarkingScheme;
+                dr["MarkingScheme"] = e.MarkingScheme;
                 //
                 dtExamDetails.Rows.Add(dr);
             }
 
             return dtExamDetails;
         }
-        //public int MarkingScheme { get; set; }
+        public int MarkingScheme { get; set; }
     }
 
     // shishupal ExamDate sheet

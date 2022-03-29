@@ -32,33 +32,33 @@
             <div class="col-md-12">
                 @using (Html.BeginForm("StopWiseCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetReport" }))
                 {
-                <div class="row std-mng-head">
+                    <div class="row std-mng-head">
 
-                    <div class="col-md-12 class-section">
-                        <div class="row">
+                        <div class="col-md-12 class-section">
+                            <div class="row">
 
-                            <div class="col-md-6 padding">
-                                <label class="col-md-4 text-right"></label>
-                                <div class="col-md-8">
+                                <div class="col-md-6 padding">
+                                    <label class="col-md-4 text-right"></label>
+                                    <div class="col-md-8">
 
-                                </div>
-                            </div>
-                            <div class="col-md-5 padding">
-                                <div class="row">
-                                    <label class="col-md-3 text-right padding-R">Month : </label>
-                                    <div class="col-md-7 padding-L" style="padding-left: 10px;">
-                                        <input type="month" value="@Model.SelectedDate.ToString("yyyy-MM")" name="SelectedDate" id="dtMonth" class="form-control" onchange="ExpenceMonthChanged();" />
                                     </div>
-                                    <div class="col-md-2">
-                                        <a href="javascript:void(0);" onclick="$('#frmGetReport').submit();"><i class="fa fa-search"></i></a>
+                                </div>
+                                <div class="col-md-5 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R">Month : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="month" value="@Model.SelectedDate.ToString("yyyy-MM")" name="SelectedDate" id="dtMonth" class="form-control" onchange="ExpenceMonthChanged();" />
+                                        </div>
+                                        <div class="col-md-2">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetReport').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+
                     </div>
-                   
-                   
-                </div>
                 }
                 <div class="x_panel">
 
@@ -68,10 +68,10 @@
                             <thead>
                                 <tr>
                                     <th>Sr.No</th>
-                                    
+
                                     <th>Stopage Name </th>
                                     <th>Amount</th>
-                                  
+
                                     <th>No. Of Student</th>
                                 </tr>
                             </thead>
@@ -90,8 +90,8 @@
                                         <td>
                                             @c.Amount.ToString("0.00")
                                         </td>
-                                      
-                                      
+
+
                                         <td>
                                             @c.Students
                                         </td>
@@ -113,14 +113,26 @@
 
 @section scripts
 {
-    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+
+    @*<script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+        <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>*@
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+
+    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+        <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+        <script src="@Url.Content("~/js/jszip.min.js")"></script>
+        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
-    <script src="@Url.Content("~/js/jszip.min.js")"></script>
-    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
-    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
     <script>
         function ExpenceMonthChanged() {
             var monthyear = $('#dtMonth').val().split('-');
@@ -141,30 +153,85 @@
         }
         $(document).ready(function () {
             var handleDataTableButtons = function () {
-                if ($("#PaymentsTable").length) {
-                    $("#PaymentsTable").DataTable({
+                 var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+                var rpname = 'Student Stop Collection : ' + $('#ddlHouses option:selected').text();
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+                        "pageLength": 100,
+                        bSort: true,
                         dom: "Bfrtip",
                         buttons: [
                             {
-                                extend: "copy", footer: 'true',
-                                className: "btn-sm", footer: true
+                                extend: "copy",
+                                className: "btn-sm",
+                                footer: true,
+                                text: '<i class="fa fa- copy"></i> Copy',
+
+                            message: printdate,
+                             messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
                             },
                             {
-                                extend: "csv", footer: 'true',
-                                className: "btn-sm", footer: true
+                                extend: "csv",
+                                className: "btn-sm",
+                                text: '<i class="fas fa-file-csv"></i> CSV',
+                                 footer: true,
+                          message: printdate,
+                            messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
                             },
                             {
-                                extend: "excel", footer: 'true',
-                                className: "btn-sm", footer: true
+                                extend: "excel",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-table fainfo" aria-hidden="true"></i> Excel',
+                                footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                             {
-                                extend: "pdfHtml5", footer: 'true',
-                                className: "btn-sm", footer: true
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-file-pdf-o"></i> Pdf',
+                                footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                          },
+                          message: printdate,
+                          messageBottom: repname,
+                          title: rpname
                             },
                             {
                                 extend: "print",
-                                footer: 'true',
-                                className: "btn-sm", footer: true
+                                className: "btn-sm",
+                                text: '<i class="fa fa-print"></i> Print',
+                                 footer: true,
+                          message: printdate,
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                         ],
                         responsive: true

@@ -259,6 +259,15 @@ namespace SMEnterprise.Repository
                     objModel.Students = multi.Read<StudentModel>().ToList();
                     objModel.Houses = multi.Read<HouseModel>().ToList();
                     objModel.ID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
+                    }
                 }
                 return objModel;
             }
@@ -318,6 +327,15 @@ namespace SMEnterprise.Repository
                     objModel.Students = multi.Read<StudentModel>().ToList();
                     objModel.ClassSections = multi.Read<ClassSectionModel>().ToList();
                     objModel.ID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
+                    }
                 }
                 return objModel;
             }
@@ -1079,6 +1097,13 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetStopWiseCollectionStudents", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.StopWiseReport = multi.Read<StopWiseStudentAmountModel>().ToList();
+                    try
+                    {
+
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
                 objModel.SelectedDate = MStartDate;
                 return objModel;
@@ -1099,6 +1124,13 @@ namespace SMEnterprise.Repository
                     objModel.Students = multi.Read<StudentModel>().ToList();
                     objModel.Busses = multi.Read<NameIDModel>().ToList();
                     objModel.ID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
                 return objModel;
             }
@@ -1118,6 +1150,13 @@ namespace SMEnterprise.Repository
                     objModel.Students = multi.Read<StudentModel>().ToList();
                     objModel.Busses = multi.Read<NameIDModel>().ToList();
                     objModel.ID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
                 return objModel;
             }
@@ -3252,7 +3291,15 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("spr_GetDailyAttandanceReportMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Report = multi.Read<DailyAttandanceModel>().ToList();
+                    try
+                    {
+
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
+                
             }
             return objModel;
         }
