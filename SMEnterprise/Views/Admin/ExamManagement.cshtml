@@ -133,11 +133,11 @@
                                         <th style="width: 20%">Exam Date <sa style="color: cadetblue;">(MM/DD/YYYY)</sa></th>
                                         <th style="width: 10%">Start Time</th>
                                         <th style="width: 10%">End Time</th>
-                                        <th style="width: 7%">Marking Scheme</th>
+                                        @*<th style="width: 7%">Marking Scheme</th>*@
                                         <th style="width: 11%">Max Marks</th>
                                         <th style="width: 12%">Pass Marks</th>
-                                        <th style="width: 6%">Applicable</th>
-                                        <th style="width: 6%">Lock Result</th>
+                                        <th style="width: 10%">Applicable</th>
+                                        <th style="width: 9%">Lock Result</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -145,7 +145,7 @@
                                         var Counter = 0;
                                         decimal MxMarks = 0;
                                         decimal MnMarks = 0;
-                                        foreach (ExamModel e in Model.Exams)
+                                        foreach (ExamModel e in Model.Exams.Where(x=>x.Sstatus>0))
                                         {
                                             <tr @(e.ExamID == 0 ? "style=color:red" : "")>
                                                 <td>
@@ -182,8 +182,8 @@
                                                 </td>
 
 
-                                                <td style="vertical-align:middle;">
-                                                    <span class="ViewCopy visible"><label class='MScheme badge bg-@(e.MarkingScheme == 0 ? "green" : "red")'>@(e.MarkingScheme == 0 ? "Marks" : "Grade")</label></span>
+                                                <!--<td style="vertical-align:middle;">
+                                                    <span class="ViewCopy visible"><label class='MScheme badge bg-@(e.MarkingScheme == 0 ? "green" : "red")'>@(e.MarkingScheme == 0 ? "Marks" : "Grade")</label></span>-->
                                                     @*<label class="switch switch-green" style="padding-top: 3px;">
                                                             <input type="checkbox" id="chkMarkingScheme" @(e.MarkingScheme == 0 ? "checked" : "") class="switch-input MScheme">
 
@@ -192,13 +192,13 @@
 
                                                         </label>*@
                                                     @*<input type="hidden" id="hdnMarkingScheme" name="Exams[@Counter].MarkingScheme" value="@e.MarkingScheme" />*@
-                                                </td>
+                                                <!--</td>-->
 
-                                                @if (@e.MarkingScheme == 0)
+                                                @*@if (@e.MarkingScheme == 0)
                                                 {
                                                     MxMarks = @e.MaxMarks;
 
-                                                    MnMarks = @e.PassMarks;
+                                                    MnMarks = @e.PassMarks;*@
                                                     <td>
                                                         <input type="number" id="inMxMarks" step="0.01" class="form-control maxMarks" name="Exams[@Counter].MaxMarks" value="@e.MaxMarks" />
                                                     </td>
@@ -207,7 +207,7 @@
                                                         <input type="hidden" id="hdnMarkingScheme" name="Exams[@Counter].MarkingScheme" value="0" />
                                                     </td>
 
-                                                }
+                                                @*}
                                                 else
                                                 {
                                                     <td>
@@ -217,7 +217,7 @@
                                                         <input type="number" id="inMxMarks" step="0.01" class="form-control passMarks" name="Exams[@Counter].PassMarks" disabled value="0" />
                                                         <input type="hidden" id="hdnMarkingScheme" name="Exams[@Counter].MarkingScheme" value="1" />
                                                     </td>
-                                                }
+                                                }*@
 
                                                 <td style="vertical-align:middle;">
                                                     <label class="switch switch-green" style="padding-top: 3px;">
@@ -289,16 +289,16 @@
 
 </section>
 <script>
-    $(document).ready(function () {
-        if ($(sender).closest('tr').find('#hdnMarkingScheme').val() == 1) {
-            $(this).parents("tr:eq(0)").find(".maxMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".maxMarks").val(0);
+    //$(document).ready(function () {
+    //    if ($(sender).closest('tr').find('#hdnMarkingScheme').val() == 1) {
+    //        $(this).parents("tr:eq(0)").find(".maxMarks").prop("disabled", true);
+    //        $(this).parents("tr:eq(0)").find(".maxMarks").val(0);
 
-            $(this).parents("tr:eq(0)").find(".passMarks").prop("disabled", true);
-            $(this).parents("tr:eq(0)").find(".passMarks").val(0);
-        }
-        //alert('Value = ' + $(sender).closest('tr').find('#hdnMarkingScheme').val());
-    })
+    //        $(this).parents("tr:eq(0)").find(".passMarks").prop("disabled", true);
+    //        $(this).parents("tr:eq(0)").find(".passMarks").val(0);
+    //    }
+    //    //alert('Value = ' + $(sender).closest('tr').find('#hdnMarkingScheme').val());
+    //})
 
     //$('.MScheme').change(function () {
     //    var isChecked = this.checked;

@@ -80,6 +80,7 @@ namespace SMEnterprise.Models
         public int UserID { get; set; }
         public DateTime CreatedDate { get; set; }
         public int StudentID { get; set; }
+        public int ParentID { get; set; }
         public int PaymentStatus { get; set; }
         public string PaymentDetails { get; set; }
         public string Image { get; set; }
@@ -103,6 +104,7 @@ namespace SMEnterprise.Models
         //public List<SBranchModel> BranchData { get; set; }
         public int ReligionID { get; set; }
         public List<NameIDModel> Religions { get; set; }
+        public List<NameIDModel> SessionNames { get; set; }
         public List<ClassModel> Classes { get; set; }
         public List<NameIDModel> Casts { get; set; }
 
