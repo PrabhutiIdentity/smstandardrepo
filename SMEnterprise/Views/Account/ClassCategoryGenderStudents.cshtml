@@ -116,7 +116,7 @@
                             </table>
                             <h5 style="text-align:center">Class wise Student List based on Category and Gender</h5>
 
-                            <table id="tblCategory" class="table table-bordered" style="padding-bottom: 1px ;">
+                            <table id="tblCategory" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
                                 <thead>
 
                                     <tr style="width:100%;padding-bottom: 1px;">
@@ -222,31 +222,112 @@
 
 @section scripts
 {
-    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
-    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
 
-    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+        <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+        <script src="@Url.Content("~/js/jszip.min.js")"></script>
+        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
-
-    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
-
-    <script src="@Url.Content("~/js/jszip.min.js")"></script>
-    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
-    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
     <script>
-
-        $(function () {
+        $(document).ready(function () {
+           // var repname = '@PermissionManager.GetLoggedInUser().Description' +'<br /> Student Records ' + $('#ddlSessions option:selected').text();
             var handleDataTableButtons = function () {
+                  var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+                var rpname = 'All Student Records based on Category and Gender' + 'Session ' + $('#ddlSessions option:selected').text() ;
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
 
                 if ($("#tblCategory").length) {
-        // jQuery update a column title from the demo table to contain a long description
-    // You would not need to do this in your own code.
-    $('#tblCategory thead tr:eq(0) th:eq(2)').html("This is a really long column title!");
+                    $("#tblCategory").DataTable({
 
-    // Wrap the colspan'ing header cells with a span so they can be positioned
-    // absolutely - filling the available space, and no more.
+                        "pageLength": 50,
+                        bSort: false,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                footer: true,
+                                text: '<i class="fa fa- copy"></i> Copy',
 
+                            message: printdate,
+                             messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                text: '<i class="fas fa-file-csv"></i> CSV',
+                                 footer: true,
+                          message: printdate,
+                            messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-table fainfo" aria-hidden="true"></i> Excel',
+                                footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: 'Model.Branch.BranchSchoolName'
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-file-pdf-o"></i> Pdf',
+                                footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                          },
+                          message: printdate,
+                          messageBottom: repname,
+                          title: rpname
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                text: '<i class="fa fa-print"></i> Print',
+                                footer: true,
+                                orientation: 'landscape',
+                          message: printdate,
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+                            },
+                        ],
+                        responsive: true
+                    });
                 }
             };
             TableManageButtons = function () {
@@ -258,46 +339,46 @@
                 };
             }();
             TableManageButtons.init();
+
         });
-        function DeleteStudent(sender) {
-            return confirm('Do you really want to delete Student!!!!');
-        }
-        function ClassChanged(sender) {
-            $('#ddlSection').html('<option value="0">Loading....</option>');
-            $.ajax(
-                {
-                    type: "POST",
-                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
-                    cache: false,
-                    processData: false,
-                    contentType: false,
-                    success: function (html) {
-                        $('#ddlSection').html('');
-                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
-                        $('#ddlSection').append(html);
-                    },
-                    error: function (e) {
-                        alert("errorn");
-                    }
-                });
-        }
+    </script>
+    <script>
+    function ClassChanged(sender) {
+    $('#ddlSection').html('<option value="0">Loading....</option>');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    $('#ddlSection').html('');
+    $('#ddlSection').html('<option value="0">--Select Section--</option>');
+    $('#ddlSection').append(html);
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
 
-          function PrintDemantRecipt() {
-            var contents = $("#PrintDiv").html();
-            var frame1 = $('<iframe />');
-            frame1[0].name = "frame1";
-            frame1.css({ "position": "absolute", "top": "-1000000px" });
-            $("body").append(frame1);
-            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
-            frameDoc.document.open();
+    function PrintDemantRecipt() {
+    var contents = $("#PrintDiv").html();
+    var frame1 = $('<iframe />');
+    frame1[0].name = "frame1";
+    frame1.css({ "position": "absolute", "top": "-1000000px" });
+    $("body").append(frame1);
+    var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+    frameDoc.document.open();
 
-            frameDoc.document.write('<html><head><title>Class wise Social Category Report</title>');
-            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
+    frameDoc.document.write('<html><head><title>Class wise Social Category Report</title>');
+        frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
 
-            //Append the external CSS file.
-            //Append the DIV contents.
-            frameDoc.document.write(contents);
-            frameDoc.document.write('</body></html>');
+        //Append the external CSS file.
+        //Append the DIV contents.
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
             frameDoc.document.close();
             setTimeout(function () {
                 window.frames["frame1"].focus();
@@ -306,20 +387,10 @@
             }, 1000);
         }
 
-       @* function PrintDemantRecipt()
-        {
 
-        var divToPrint = document.getElementById('PrintDiv');
-        var newWin = window.open('','Print-Window');
-        newWin.document.open();
-        newWin.document.write('<html><body onload="window.print()">'  + divToPrint.innerHTML + '</body></html>');
-         newWin.document.close();
-        setTimeout(function () { newWin.Close(); },10);
-
-        }*@
 
 
     </script>
-    </script>
+
 }
 <!-- /.content -->

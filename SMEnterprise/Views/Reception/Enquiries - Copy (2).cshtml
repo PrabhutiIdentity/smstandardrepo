@@ -1,0 +1,1103 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_ReceptionLayout.cshtml";
+}
+@model SMEnterprise.Models.AdmissionEnquiryPageModel
+@section IncludeCss
+{
+    <title>Admission Enquiries Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+
+    .tblEqDetails > tbody > tr > td {
+        padding: 0px;
+    }
+
+    .noPadRight {
+        padding-right: 0px;
+    }
+
+    .noPadLeft {
+        padding-left: 0px;
+    }
+
+    .enqDetails .row {
+        border-bottom: 1px solid #d9dbdf;
+        padding: 2px 0px 2px 0px;
+    }
+
+    .enqDetails .form-control {
+        display: inline;
+        width: auto;
+        border-radius: 3px;
+        padding: 2px 5px;
+        font-size: 12px;
+        height: 20px;
+    }
+
+    .enqDetails .btn {
+        padding: 0px 2px;
+        font-size: 13px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .Followup {
+        border: 2px solid #5cb8a0;
+        padding: 2px 2px 2px 8px;
+        border-radius: 3px;
+        margin-top: 2px;
+    }
+
+        .Followup .row {
+            border-bottom: 0px;
+        }
+
+        .Followup .col-md-4 {
+            border-bottom: 1px solid red;
+            text-align: center;
+        }
+
+        .Followup .col-md-12 {
+            margin-top: 2px;
+        }
+
+    .square {
+        background-color: rgba(255, 0, 0, 0.59);
+        transition: opacity 1s ease-in-out;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("Enquiries", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetEnquiries" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions">
+                                            <option value="0">--Any Session--</option>
+                                            @foreach (NameIDModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Class :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="ClassID" id="ddlClass">
+                                            <option value="0">--Any Class--</option>
+                                            @foreach (NameIDModel el in Model.Classes)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <div class="row">
+                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">From : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 padding">
+                                    <div class="row">
+                                        <label class="col-md-2 text-right padding-R" style="padding-left: 10px;">To : </label>
+                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                            <input type="date" name="EndDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" />
+                                        </div>
+                                        <div class="col-md-1 padding-L" style="padding-left: 10px;">
+                                            <a href="javascript:void(0);" onclick="$('#frmGetEnquiries').submit();"><i class="fa fa-search"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered">
+                            <thead>
+                                <tr id="trHeader">
+                                    <th style="width: 5%">#</th>
+                                    <th style="width: 35%">Details</th>
+                                    <th style="width: 10%">Source</th>
+                                    <th style="width: 10%">Dates</th>
+                                    <th style="width: 10%">Eq. Status</th>
+                                    <th style="width: 10%">Prospect</th>
+                                    <th style="width: 10%">#Followups</th>
+                                    <th style="width: 10%"><a href="javascript:void(0);" onclick="AddEnquiry(this);" class="Closed">Add New</a></th>
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (AdmissionEnquiryMasterModel c in Model.Enquiries)
+                                {
+
+                                    <tr>
+                                        <td>@(count + 1)</td>
+                                        <td>
+                                            <input type="hidden" id="hdnSrNo" value="@(count+1)" />
+                                            <label class='badge bg-green'>Name: @c.StudentName</label>
+                                            <label class='badge bg-green'>DOB: @c.StudentDOB.ToString("dd MMM, yyyy")</label>
+                                            <label class='badge bg-green'>Class: @c.ClassName</label>
+                                            <label class='badge bg-purple'>Father: @c.FatherName</label>
+                                            <label class='badge bg-purple'>Mobile: @c.FatherMobileNo</label>
+                                            <label class='badge bg-blue'>Session: @c.SessionName</label>
+                                            <label class='badge bg-red'>Income: @c.FamilyIncome.ToString("00") Lakh</label>
+                                            <input type="hidden" id="hdnData" value="@(Json.Encode(c))" />
+                                        </td>
+                                        <td>
+                                            @if (c.ESource == 0)
+                                            {
+                                                <label class='badge bg-blue'>Search</label>
+                                            }
+                                            else if (c.ESource == 1)
+                                            {
+                                                <label class='badge bg-green'>Referance</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-red'>Ads</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            Next Followup<br /> <label id="lblNextFollowDate" class='badge bg-red'>
+                                                @c.NextFollowUpDate.ToString("dd MMM, yyyy")
+                                            </label><br />
+                                            Enq. Date<br /> <label class='badge bg-gray'>@c.EDate.ToString("dd MMM, yyyy")</label>
+                                        </td>
+                                        <td>
+                                            @if (c.EStatus == 0)
+                                            {
+                                                <label class='badge bg-blue'>Open</label>
+                                            }
+                                            else if (c.EStatus == 1)
+                                            {
+                                                <label class='badge bg-green'>Converted</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-red'>Lost</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (c.EPossibility == 0)
+                                            {
+                                                <label class='badge bg-blue'>Neutral</label>
+                                            }
+                                            else if (c.EPossibility == 1)
+                                            {
+                                                <label class='badge bg-green'>Positive</label>
+                                            }
+                                            else
+                                            {
+                                                <label class='badge bg-red'>Negative</label>
+                                            }
+                                        </td>
+                                        <td>
+                                            @c.Followups
+                                        </td>
+                                        <td>
+                                            <a href="javascript:void(0);" class="btn btn-link Closed" onclick="ViewEnquiry(this,@c.EnquiryID);">View</a>
+                                        </td>
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="x_panel tblEqDetailswrapper" style="display:none;">
+
+</div>
+<input type="hidden" id="hdnCurrentDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+<input type="hidden" id="hdnNext2DaysDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(2).ToString("yyyy-MM-dd")" />
+@section PageBottom{
+    <div class="modal fade bs-example-modal-lg" id="mdlEnquiryDetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                @using (Html.BeginForm("UpdateAdmissionEnquiry", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSaveAdmissionEnquiry" }))
+                {
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <h4 class="modal-title" id="myModalLabel">Device Details</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-5">
+                                Assigned To : <b id="vReceptionist"></b>
+                                <select class="form-control editReceptionEnquiry hidden" id="ddlReceptionist" name="AssignedTo" onchange="$(this).closest('.enqDetails').find('#hdnFollowupBy').val($(this).val())">
+
+                                    <option value="0">--Select--</option>
+                                    @foreach (var Emp in Model.Receptionists)
+                                    {
+                                        <option value="@Emp.ID">@Emp.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-5"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint hidden" onclick="PrintEnquiry(this);"> Print</a></div>
+                            <div class="col-md-2"><a href="javascript:void(0);" class="btn btn-dark edit pull-right NoPrint" id="btnEditEnquiry" onclick="EditEnquiryDetails(this);"> Edit Details</a></div>
+                        </div>
+                        <div class="viewe">
+                            <div class="row">
+                                <div class="col-md-3">Enquery Date : <b id="vEnqDate"></b></div>
+                                <div class="col-md-2">Status : <b id="vEStatus"></b></div>
+                                <div class="col-md-2">Prospect : <b id="vProspect"></b></div>
+                                <div class="col-md-3">Followup Due : <b id="vFollowupdate"></b></div>
+                                <div class="col-md-2">Source : <b id="vSource"></b></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">Student : <b id="vStudentName"></b></div>
+                                <div class="col-md-2">DOB : <b id="vStudentDOB"></b></div>
+                                <div class="col-md-2">Gender : <b id="vStudentGender"></b></div>
+                                <div class="col-md-3">Session : <b id="vSessionApplied"></b></div>
+                                <div class="col-md-2">Class Applied : <b id="vClassApplied"></b></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">Current School : <b id="vCurSchoolName"></b></div>
+                                <div class="col-md-5">Current Board: <b id="vCurrentBoard"></b></div>
+                                <div class="col-md-2">Current Class : <b id="vCurrentClass"></b></div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                                    <div class="col-md-12" style="text-align:center"><b>Father</b></div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            Name :
+                                        </div>
+                                        <div class="col-md-9" id="vFatherName">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            Occupation :
+                                        </div>
+                                        <div class="col-md-9" id="vFatherOccupation">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            Mobile :
+                                        </div>
+                                        <div class="col-md-9" id="vFatherMobile">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            Email ID :
+                                        </div>
+                                        <div class="col-md-9" id="vFatherEmail">
+
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                                    <div class="col-md-12" style="text-align:center"><b>Mother</b></div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            Name :
+                                        </div>
+                                        <div class="col-md-9" id="vMotherName">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            Occupation :
+                                        </div>
+                                        <div class="col-md-9" id="vMotherOccupation">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            Mobile :
+                                        </div>
+                                        <div class="col-md-9" id="vMotherMobile">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            Email ID :
+                                        </div>
+                                        <div class="col-md-9" id="vMotherEmail">
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            Income :
+                                        </div>
+                                        <div class="col-md-12" id="vIncome">
+                                            Lakh
+                                        </div>
+                                        <div class="col-md-12">
+                                            Nationality :
+                                        </div>
+                                        <div class="col-md-12" id="vNationality">
+                                            Indian
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">Address : <b id="vAddress">A-11, Sangam Nagar Near Sanmati Hospital Indore(MP) 452006</b></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    Reason For Change :
+                                    <b id="vReason"></b>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="editEnquiry hidden">
+                            <div class="row">
+
+                                <input type="hidden" name="EnquiryID" value="" id="hdnEnquiryID" />
+                                <input type="hidden" name="SrNo" value="" id="hdnSrNo" />
+                                <div class="col-md-3">Enquery Date : <input type="date" name="EDate" class="form-control" id="txtEnqDate" /></div>
+                                <div class="col-md-2">
+                                    Status :
+                                    <select class="form-control editEnquiry hidden" name="EStatus" id="ddlEStatus">
+                                        <option value="0">Open</option>
+                                        <option value="1">Converted</option>
+                                        <option value="2">Lost</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    Prospect :
+                                    <select class="form-control editEnquiry hidden" name="EPossibility" id="ddlEProspect">
+                                        <option value="0">Neutral</option>
+                                        <option value="1">Positive</option>
+                                        <option value="2">Negative</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">Followup Due : <input type="date" name="NextFollowUpDate" class="form-control" id="txtFollowDate" /></div>
+                                <div class="col-md-2 noPadLeft noPadRight">
+                                    Source :
+                                    <select class="form-control" name="ESource" id="ddlSource">
+                                        <option value="0">Search</option>
+                                        <option value="1">Referance</option>
+                                        <option value="2">Advertisement</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="col-md-3 noPadLeft noPadRight">Student :</div>
+                                    <div class="col-md-9">
+                                        <input type="text" id="txtStudentName" name="StudentName" class="form-control" style="width: 100%;" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3 noPadLeft noPadRight" style="width: 18%;">
+                                    DOB :<input type="date" class="form-control" name="StudentDOB" id="txtDOB">
+                                </div>
+                                <div class="col-md-1" style="width: 16%;">
+                                    Gender :
+                                    <select class="form-control" id="ddlGender" name="Gender">
+                                        <option value="0">Male</option>
+                                        <option value="1">Female</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 noPadLeft noPadRight" style="width: 16%;">
+                                    Session :
+                                    <select class="form-control" id="ddlEnqSessions" name="AppliedForSession">
+                                        @foreach (var s in Model.Sessions)
+                                        {
+                                            <option value="@s.ID">@s.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    Class Applied :
+                                    <select class="form-control" id="ddlEnqClassApplied" name="AppliedForClass">
+                                        @foreach (var c in Model.Classes)
+                                        {
+                                            <option value="@c.ID">@c.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="col-md-3 noPadLeft noPadRight">Current School :</div>
+                                    <div class="col-md-9">
+                                        <input type="text" id="txtSchoolName" name="CurrentSchool" class="form-control" style="width: 100%;" />
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="col-md-3 noPadLeft noPadRight">Current Board:</div>
+                                    <div class="col-md-9">
+                                        <input type="text" id="txtBoardName" name="CurrentEducationSystem" class="form-control" style="width: 100%;" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    Current Class :
+                                    <select class="form-control" id="ddlEnqClassCurrent" name="CurrentClass">
+                                        @foreach (var c in Model.Classes)
+                                        {
+                                            <option value="@c.ID">@c.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                                    <div class="col-md-12" style="text-align:center"><b>Father</b></div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            Name :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtFatherName" name="FatherName" class="form-control" style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            Occupation :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtFOccupation" name="FOccupation" class="form-control" style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            Mobile :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtFMobile" name="FatherMobileNo" class="form-control" style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            Email ID :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtEmail" name="FatherEmailID" class="form-control" style="width: 100%;" />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5" style="border: 1px solid #ecedef;border-radius: 3px;">
+                                    <div class="col-md-12" style="text-align:center"><b>Mother</b></div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            Name :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtMotherName" name="MotherName" class="form-control" style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            Occupation :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtMOccupation" name="MOccupation" class="form-control" style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            Mobile :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtMMobile" name="MotherMobileNo" class="form-control" style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            Email ID :
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" id="txtMEmail" name="MotherEmailID" class="form-control" style="width: 100%;" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            Income (Lakhs):
+                                        </div>
+                                        <div class="col-md-12">
+                                            <input type="number" id="txtAnnualIncome" name="FamilyIncome" class="form-control" style="width: 100%;" />
+                                        </div>
+                                        <div class="col-md-12">
+                                            Nationality :
+                                        </div>
+                                        <div class="col-md-12">
+                                            <input type="text" id="txtNationality" name="Nationality" class="form-control" style="width: 100%;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">Address :</div>
+                                <div class="col-md-12">
+                                    <input type="text" id="txtAddress" name="Address" class="form-control" style="width: 100%;" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12">Reason For Change :</div>
+                                <div class="col-md-12">
+                                    <textarea type="text" id="txtReason" rows="2" name="ReasonForChange" class="form-control" style="width: 100%;height:auto;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row editEnquiry hidden">
+                            <div class="col-md-12">
+                                <button onclick="return SaveAdmissionEnquiry(this);" class="btn btn-primary pull-right">Save</button>
+                            </div>
+                        </div>
+                        }
+                        <div class="row" style="text-align:center;">
+                            <h4><b>Followups</b></h4>
+                        </div>
+                        <div id="divFollowups">
+                        </div>
+                        <div class="row NoPrint">
+                            <a href="javascript:void(0);" id="btnAddFollowup" onclick="AddNewFollowup(this);" class="btn btn-link pull-right add">Add New followup</a>
+                        </div>
+                        <div id="divNewFollowup" style="display:none;">
+                            @using (Html.BeginForm("AddFollowup", "Reception", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmAddFollowup" }))
+                            {
+                                <div class="Followup" style="border-color: #d9dbdf;">
+                                    <input type="hidden" name="FollowupBy" id="hdnFollowupBy" />
+                                    <input type="hidden" name="EnquiryID" value="0" id="hdnFEnquiryID" />
+                                    <div class="row">
+                                        <div class="col-md-2 pull-left">
+                                            Prospect :
+                                            <select class="form-control" name="Possibility" id="ddlEProspect">
+                                                <option value="0">Neutral</option>
+                                                <option value="1" selected>Positive</option>
+                                                <option value="2">Negative</option>
+                                            </select>
+                                        </div><div class="col-md-5 pull-left" style="border:0px;">
+                                            Followup On  (mm/dd/yyyy): <input type="datetime-local" id="txtFollowupDate" name="FDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                                        </div><div class="col-md-5 pull-right">
+                                            <div class="pull-right">
+                                                Next Scheduled (mm/dd/yyyy): <input type="datetime-local" id="txtNextFollowupDate" name="NextFollowupDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddDays(2).ToString("yyyy-MM-dd")" />
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <textarea rows="4" class="form-control" id="txtDetails" name="Remark" style="width:100%;height:auto;"></textarea>
+                                        </div>
+                                        <div class="col-md-12">
+                                            <button type="submit" onclick="return SaveAdmissionEnquiryFeedback(this)" class="btn btn-success pull-right">Update</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    @*<script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+        <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>*@
+    <script>
+                        function AddNewFollowup(sender)
+                        {
+                            if($(sender).hasClass('add'))
+                            {
+                                $(sender).closest('.enqDetails').find('#divNewFollowup').css('display','');
+                                $(sender).removeClass('add').addClass('cancel').html('Cancel');
+                            }
+                            else
+                            {
+
+                                $(sender).closest('.enqDetails').find('#divNewFollowup').css('display','none');
+                                $(sender).removeClass('cancel').addClass('add').html('Add New Followup');
+                            }
+                        }
+                        var ut=@PermissionManager.GetLoggedInUser().RoleID;
+                        function EditEnquiryDetails(sender) {
+                            if ($(sender).hasClass('edit')) {
+                                $(sender).html('Cancel');
+                                $(sender).removeClass('edit').addClass('cancel');
+                                $(sender).closest('.enqDetails').find('.viewe').addClass('hidden');
+                                $(sender).closest('.enqDetails').find('.editEnquiry').removeClass('hidden');
+                                if(ut==10)
+                                {
+                                    $(sender).closest('.enqDetails').find('#vReceptionist').addClass('hidden');
+                                    $(sender).closest('.enqDetails').find('#ddlReceptionist').removeClass('hidden');
+
+                                }
+                            }
+                            else {
+                                $(sender).html('Edit Details');
+                                $(sender).removeClass('cancel').addClass('edit');
+                                $(sender).closest('.enqDetails').find('.viewe').removeClass('hidden');
+                                $(sender).closest('.enqDetails').find('.editEnquiry').addClass('hidden');
+                                if(ut==10)
+                                {
+                                    $(sender).closest('.enqDetails').find('#vReceptionist').removeClass('hidden');
+                                    $(sender).closest('.enqDetails').find('#ddlReceptionist').addClass('hidden');
+
+                                }
+                            }
+                        }
+                        $(function () {
+                            $("#tblCategory").DataTable({"ordering": false});//{"ordering": false}
+                        });
+
+                        var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        function ViewEnquiry(sender, ID) {
+            debugger;
+                            if ($(sender).hasClass('Closed')) {
+                                var Data = $.parseJSON($(sender).closest('tr').find('#hdnData').val());
+
+                                var ele = document.getElementsByClassName("Open");
+                                if (ele.length > 0) {
+                                    $(ele[0]).click();
+                                }
+
+                                $(sender).removeClass('Closed');
+                                $(sender).addClass('Open');
+                                $(sender).html('Close');
+                                var dtEnqDate=new Date(Data.EDate.match(/\d+/).map(Number)[0]);
+                                var sEnqDate= dtEnqDate.getDate() + ' ' + months[dtEnqDate.getMonth()] + ' ,' + dtEnqDate.getFullYear();
+
+                                var dtDOB=new Date(Data.StudentDOB.match(/\d+/).map(Number)[0]);
+                                var sDOB= dtDOB.getDate() + ' ' + months[dtDOB.getMonth()] + ' ,' + dtDOB.getFullYear();
+
+                                var dtFollow=new Date(Data.NextFollowUpDate.match(/\d+/).map(Number)[0]);
+                                var sFollow= dtFollow.getDate() + ' ' + months[dtFollow.getMonth()] + ' ,' + dtFollow.getFullYear();
+
+
+
+                                $(sender)
+                                      .closest("tr")
+                                      .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: #fcfcfd;'>"+$('.tblEqDetailswrapper').html()+" </td></tr>");
+
+                                $('#tdDetails').find('.enqDetails').find('#txtStudentName').val(Data.StudentName);
+                                $('#tdDetails').find('.enqDetails').find('#txtEnqDate').val(dtEnqDate.getFullYear()+'-'+pad(dtEnqDate.getMonth()+1,2)+'-'+dtEnqDate.getDate());
+                                $('#tdDetails').find('.enqDetails').find('#ddlEStatus').val(Data.EStatus);
+                                $('#tdDetails').find('.enqDetails').find('#ddlEProspect').val(Data.EPossibility);
+                                $('#tdDetails').find('.enqDetails').find('#txtFollowDate').val(dtFollow.getFullYear()+'-'+pad(dtFollow.getMonth()+1,2)+'-'+dtFollow.getDate());
+                                $('#tdDetails').find('.enqDetails').find('#ddlSource').val(Data.ESource);
+                                $('#tdDetails').find('.enqDetails').find('#txtDOB').val(dtDOB.getFullYear()+'-'+pad(dtDOB.getMonth()+1,2)+'-'+dtDOB.getDate());
+                                $('#tdDetails').find('.enqDetails').find('#ddlGender').val(Data.Gender);
+                                $('#tdDetails').find('.enqDetails').find('#ddlEnqSessions').val(Data.AppliedForSession);
+                                $('#tdDetails').find('.enqDetails').find('#ddlEnqClassApplied').val(Data.AppliedForClass);
+                                $('#tdDetails').find('.enqDetails').find('#txtSchoolName').val(Data.CurrentSchool);
+                                $('#tdDetails').find('.enqDetails').find('#txtBoardName').val(Data.CurrentEducationSystem);
+                                $('#tdDetails').find('.enqDetails').find('#ddlEnqClassCurrent').val(Data.CurrentClass);
+                                $('#tdDetails').find('.enqDetails').find('#txtFatherName').val(Data.FatherName);
+                                $('#tdDetails').find('.enqDetails').find('#txtFOccupation').val(Data.FOccupation);
+                                $('#tdDetails').find('.enqDetails').find('#txtFMobile').val(Data.FatherMobileNo);
+                                $('#tdDetails').find('.enqDetails').find('#txtEmail').val(Data.FatherEmailID);
+                                $('#tdDetails').find('.enqDetails').find('#txtMotherName').val(Data.MotherName);
+                                $('#tdDetails').find('.enqDetails').find('#txtMOccupation').val(Data.MOccupation);
+                                $('#tdDetails').find('.enqDetails').find('#txtMMobile').val(Data.MotherMobileNo);
+                                $('#tdDetails').find('.enqDetails').find('#txtMEmail').val(Data.MotherEmailID);
+                                $('#tdDetails').find('.enqDetails').find('#txtAnnualIncome').val(Data.FamilyIncome);
+                                $('#tdDetails').find('.enqDetails').find('#txtNationality').val(Data.Nationality);
+                                $('#tdDetails').find('.enqDetails').find('#txtAddress').val(Data.Address);
+                                $('#tdDetails').find('.enqDetails').find('#txtReason').html(Data.ReasonForChange);
+                                $('#tdDetails').find('.enqDetails').find('#ddlReceptionist').val(Data.AssignedTo);
+                                $('#tdDetails').find('.enqDetails').find('#hdnFollowupBy').val(Data.AssignedTo);
+                                $('#tdDetails').find('.enqDetails').find('#vReceptionist').html(Data.ReciptionistName);
+                                $('#tdDetails').find('.enqDetails').find('#vEnqDate').html(sEnqDate);
+                                $('#tdDetails').find('.enqDetails').find('#vEStatus').html(Data.EStatus==0?'Open':Data.EStatus==1?'Converted':'Lost');
+                                $('#tdDetails').find('.enqDetails').find('#vProspect').html(Data.EPossibility==0?'Neutral':Data.EPossibility==1?'Positive':'Negative');
+                                $('#tdDetails').find('.enqDetails').find('#vFollowupdate').html(sFollow);
+                                $('#tdDetails').find('.enqDetails').find('#vSource').html(Data.ESource==0?'Search':Data.ESource==1?'Referance':'Ads');
+                                $('#tdDetails').find('.enqDetails').find('#vStudentName').html(Data.StudentName);
+                                $('#tdDetails').find('.enqDetails').find('#vStudentDOB').html(sDOB);
+                                $('#tdDetails').find('.enqDetails').find('#vStudentGender').html(Data.Gender==0?'Male':'Female');
+                                $('#tdDetails').find('.enqDetails').find('#vSessionApplied').html(Data.SessionName);
+                                $('#tdDetails').find('.enqDetails').find('#vClassApplied').html(Data.ClassName);
+                                $('#tdDetails').find('.enqDetails').find('#vCurSchoolName').html(Data.CurrentSchool);
+                                $('#tdDetails').find('.enqDetails').find('#vCurrentBoard').html(Data.CurrentEducationSystem);
+                                $('#tdDetails').find('.enqDetails').find('#vCurrentClass').html(Data.CurrentClassName);
+                                $('#tdDetails').find('.enqDetails').find('#vFatherName').html(Data.FatherName);
+                                $('#tdDetails').find('.enqDetails').find('#vFatherOccupation').html(Data.FOccupation);
+                                $('#tdDetails').find('.enqDetails').find('#vFatherMobile').html(Data.FatherMobileNo);
+                                $('#tdDetails').find('.enqDetails').find('#vFatherEmail').html(Data.FatherEmailID);
+                                $('#tdDetails').find('.enqDetails').find('#vMotherName').html(Data.MotherName);
+                                $('#tdDetails').find('.enqDetails').find('#vMotherOccupation').html(Data.MOccupation);
+                                $('#tdDetails').find('.enqDetails').find('#vMotherMobile').html(Data.MotherMobileNo);
+                                $('#tdDetails').find('.enqDetails').find('#vMotherEmail').html(Data.MotherEmailID);
+                                $('#tdDetails').find('.enqDetails').find('#vIncome').html(Data.FamilyIncome);
+                                $('#tdDetails').find('.enqDetails').find('#vNationality').html(Data.Nationality);
+                                $('#tdDetails').find('.enqDetails').find('#vAddress').html(Data.Address);
+                                $('#tdDetails').find('.enqDetails').find('#vReason').html(Data.ReasonForChange);
+                                $('#tdDetails').find('.enqDetails').find('#hdnEnquiryID').val(ID);
+                                $('#tdDetails').find('#hdnFEnquiryID').val(ID);
+                                var SlNo=0;
+                                if(ID==0)
+                                {
+                                    SlNo= $("#tblCategory").find('tr').length;
+                                }
+                                else{
+                                    SlNo=$(sender).closest('tr').find('#hdnSrNo').val();
+                                }
+                                $('#tdDetails').find('.enqDetails').find('#hdnSrNo').val(SlNo);
+
+                                if(ID==0)
+                                {
+                                    $('#tdDetails').find('.enqDetails').find('#btnAddFollowup').css('display','none');
+                                }
+
+                                $.ajax(
+                                    {
+                                        type: "POST",
+                                        url: "/Reception/EnquiryFollowups/" + ID,
+                                        cache: false,
+                                        processData: false,
+                                        contentType: false,
+                                        success: function (data) {
+                                            console.log(data);
+                                            for(var i=0;i<data.length;i++)
+                                            {
+                                                var dtFollowup=new Date(data[i].FDate.match(/\d+/).map(Number)[0]);
+                                                var sFollowup= dtFollowup.getDate() + ' ' + months[dtFollowup.getMonth()] + ', ' + dtFollowup.getFullYear()+' ' + (pad(dtFollowup.getHours()>12?dtFollowup.getHours()-12:dtFollowup.getHours(),2))+':'+pad(dtFollowup.getMinutes(),2)+' '+(dtFollowup.getHours()>12?'PM':'AM');
+                                                var dtnFollowup=new Date(data[i].NextFollowupDate.match(/\d+/).map(Number)[0]);
+                                                var snFollowup= dtnFollowup.getDate() + ' ' + months[dtnFollowup.getMonth()] + ', ' + dtnFollowup.getFullYear()+' ' + (pad(dtnFollowup.getHours()>12?dtnFollowup.getHours()-12:dtnFollowup.getHours(),2))+':'+pad(dtnFollowup.getMinutes(),2)+' '+(dtnFollowup.getHours()>12?'PM':'AM');
+
+                                                var followup='<div class="Followup"><div class="row"><div class="col-md-4 pull-left" style=text-align:left>'+
+                                                    'Prospect : <b>'+(data[i].Possibility==0?'Neutral':data[i].Possibility==1?'Positive':'Negative')+'</b>'+
+                                                '</div><div class="col-md-4 pull-left">'+
+                                                  '  Followup On : <b>'+sFollowup+'</b>'+
+                                              '  </div><div class="col-md-4 pull-right">'+
+                                               '     Next Scheduled : <b>'+snFollowup+'</b>'+
+                                               ' </div><div class="col-md-12">'+
+                                               data[i].Remark+
+                                               ' </div></div></div>';
+                                                $('#tdDetails').find('#divFollowups').append(followup);
+                                            }
+                                        },
+                                        error: function (e) {
+                                            alert("errorn");
+                                        }
+                                    });
+
+                            }
+                            else {
+                                $(sender).text('View');
+                                $(sender).removeClass('Open');
+                                $(sender).addClass('Closed');
+                                $(sender).closest("tr").next().remove();
+                            }
+                        }
+                        function SaveAdmissionEnquiry(sender)
+                        {
+
+                            var $this = $(sender).closest('#tdDetails').find('#frmSaveAdmissionEnquiry');
+                            var form = $(sender).closest('#tdDetails').find('#frmSaveAdmissionEnquiry');
+                            var formdata = true;
+                            if (window.FormData) {
+                                formdata = new FormData(form[0]);
+                            }
+
+                            event.preventDefault();
+                            $.ajax({
+                                type: $this.attr('method'),
+                                url: $this.attr('action'),
+                                data: formdata ? formdata : form.serialize(),
+                                contentType: false,
+                                processData: false,
+                                method: 'POST'
+                            })
+                            .done(function (html) {
+                                ShowNotification('Updated', 'Admission Enquiry Successfully Updated', 'success');
+                                var $row = $(sender).closest('tr');
+                                $row.prev().replaceWith(html);
+                                $row.remove();
+                                var $square = $('.square');
+
+                                $square.css('opacity', '0');
+
+                                $square.one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", function() {
+                                    $square.removeClass('square');
+
+                                    $square.css('opacity', '1');
+                                });
+                            })
+                            .fail(function () {
+                                ShowNotification('Error', 'Admission Enquiry Not Updated', 'error');
+                            });
+
+
+                            return false;
+                        }
+                        function SaveAdmissionEnquiryFeedback(sender)
+                        {
+
+                            var $this = $(sender).closest('#tdDetails').find('#frmAddFollowup');
+                            var form = $(sender).closest('#tdDetails').find('#frmAddFollowup');
+                            var formdata = true;
+                            if (window.FormData) {
+                                formdata = new FormData(form[0]);
+                            }
+
+                            event.preventDefault();
+                            $.ajax({
+                                type: $this.attr('method'),
+                                url: $this.attr('action'),
+                                data: formdata ? formdata : form.serialize(),
+                                contentType: false,
+                                processData: false,
+                                method: 'POST'
+                            })
+                            .done(function (html) {
+                                ShowNotification('Updated', 'Enquiry Followup Successfully Updated', 'success');
+                                var fdatearr = $(sender).closest('#divNewFollowup').find('#txtFollowupDate').val().split('-');
+                                var fndatearr = $(sender).closest('#divNewFollowup').find('#txtNextFollowupDate').val().split('-');
+
+                                var tDatetime = $(sender).closest('#divNewFollowup').find('#txtFollowupDate').val().split('T');
+                                var tDate = tDatetime[0].split('-');
+                                var tTime = tDatetime[1];
+                                var tHour = tTime.split(':')[0];
+                                var tMin = tTime.split(':')[1];
+                                var mer = 'AM';
+                                if (tHour > 12) {
+                                    mer = 'PM';
+                                    tHour = tHour - 12;
+                                }
+                                var sfdate=tDate[2] + ' ' + months[tDate[1] - 1] + ', ' + tDate[0] + ' ' + pad(tHour,2) + ':' + pad(tMin,2) + ' ' + mer;
+
+                                tDatetime = $(sender).closest('#divNewFollowup').find('#txtNextFollowupDate').val().split('T');
+                                tDate = tDatetime[0].split('-');
+                                tTime = tDatetime[1];
+                                tHour = tTime.split(':')[0];
+                                tMin = tTime.split(':')[1];
+                                mer = 'AM';
+                                if (tHour > 12) {
+                                    mer = 'PM';
+                                    tHour = tHour - 12;
+                                }
+                                var snfdate=tDate[2] + ' ' + months[tDate[1] - 1] + ', ' + tDate[0] + ' ' + pad(tHour,2) + ':' + pad(tMin,2) + ' ' + mer;
+
+                                var followup='<div class="Followup"><div class="row"><div class="col-md-4 pull-left" style=text-align:left>'+
+                                                           'Prospect : <b>'+($(sender).closest('#divNewFollowup').find('#ddlEProspect').val()==0?'Neutral':$(sender).closest('#divNewFollowup').find('#ddlEProspect').val()==1?'Positive':'Negative')+'</b>'+
+                                                       '</div><div class="col-md-4 pull-left">'+
+                                                         '  Followup On : <b>'+sfdate+'</b>'+
+                                                     '  </div><div class="col-md-4 pull-right">'+
+                                                      '     Next Scheduled : <b>'+snfdate+'</b>'+
+                                                      ' </div><div class="col-md-12">'+
+                                                     $(sender).closest('#divNewFollowup').find('#txtDetails').val()+
+                                                      ' </div></div></div>';
+                                $('#tdDetails').find('#divFollowups').append(followup);
+
+                                $('#tdDetails').find('#vFollowupdate').html(sfdate);
+                                $('#tdDetails').closest('tr').prev().find('#lblNextFollowDate').html(snfdate);
+                                $('#tdDetails').find('#txtFollowDate').html($(sender).closest('#divNewFollowup').find('#txtFollowupDate').val());
+                                $(sender).closest('#divNewFollowup').find('#ddlEProspect').val(0);
+                                $(sender).closest('#divNewFollowup').find('#txtFollowupDate').val($('#hdnCurrentDate').val())
+                                $(sender).closest('#divNewFollowup').find('#txtNextFollowupDate').val($('#hdnNext2DaysDate').val())
+                                $(sender).closest('#divNewFollowup').find('#txtDetails').val('');
+                                $('#tdDetails').find('#btnAddFollowup').click();
+                                //var $square = $('.square');
+
+                                //$square.css('opacity', '0');
+
+                                //$square.one("webkitTransitionEnd otransitionend oTransitionEnd msTransitionEnd transitionend", function() {
+                                //    $square.removeClass('square');
+
+                                //    $square.css('opacity', '1');
+                                //});
+                            })
+                            .fail(function () {
+                                ShowNotification('Error', 'Enquiry Feedback Not Updated', 'error');
+                            });
+
+
+                            return false;
+                        }
+                        function pad(str, max) {
+                            str = str.toString();
+                            return str.length < max ? pad("0" + str, max) : str;
+                        }
+                        var isAddStarted=false;
+                        function AddEnquiry(sender) {
+                            if ($(sender).hasClass("Closed")) {
+                                if (!isAddStarted) {
+                                    isAddStarted = true;
+                                    $('#tblCategory').find('thead')
+                                               .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: #fcfcfd;'> "+$('.tblEqDetailswrapper').html()+" </td></tr>");
+                                    var ele = document.getElementsByClassName("Open");
+                                    if (ele.length > 0) {
+                                        $(ele[0]).click();
+                                    }
+
+                                    $('#btnEditEnquiry').click();
+                                    $(sender).removeClass("Closed");
+                                    $(sender).text('Cancel');
+                                    $(sender).addClass("Open");
+                                    var ID=0;
+                                    var cdatearr = $("#hdnCurrentDate").val().split('-');
+                                    var cndatearr = $("#hdnNext2DaysDate").val().split('-');
+                                    $('#tdDetails').find('.enqDetails').find('#txtStudentName').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtEnqDate').val($('#hdnCurrentDate').val());
+                                    $('#tdDetails').find('.enqDetails').find('#ddlEStatus').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#ddlEProspect').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#txtFollowDate').val($('#hdnNext2DaysDate').val());
+                                    $('#tdDetails').find('.enqDetails').find('#ddlSource').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#txtDOB').val();
+                                    $('#tdDetails').find('.enqDetails').find('#ddlGender').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#ddlEnqSessions').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#ddlEnqClassApplied').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#txtSchoolName').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtBoardName').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#ddlEnqClassCurrent').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#txtFatherName').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtFOccupation').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtFMobile').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtEmail').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtMotherName').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtMOccupation').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtMMobile').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtMEmail').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtAnnualIncome').val(0);
+                                    $('#tdDetails').find('.enqDetails').find('#txtNationality').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtAddress').val('');
+                                    $('#tdDetails').find('.enqDetails').find('#txtReason').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#ddlReceptionist').val(0);
+
+                                    $('#tdDetails').find('.enqDetails').find('#vReceptionist').html('Need Implementation');
+                                    $('#tdDetails').find('.enqDetails').find('#vEnqDate').html(cdatearr[2] + ' ' + months[cdatearr[1]] + ' ,' + cdatearr[0]);
+                                    $('#tdDetails').find('.enqDetails').find('#vEStatus').html('Open');
+                                    $('#tdDetails').find('.enqDetails').find('#vProspect').html('Neutral');
+                                    $('#tdDetails').find('.enqDetails').find('#vFollowupdate').html(cndatearr[2] + ' ' + months[cndatearr[1]] + ' ,' + cndatearr[0]);
+                                    $('#tdDetails').find('.enqDetails').find('#vSource').html('Search');
+                                    $('#tdDetails').find('.enqDetails').find('#vStudentName').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vStudentDOB').html('xx/xx/xxxx');
+                                    $('#tdDetails').find('.enqDetails').find('#vStudentGender').html('Male');
+                                    $('#tdDetails').find('.enqDetails').find('#vSessionApplied').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vClassApplied').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vCurSchoolName').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vCurrentBoard').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vCurrentClass').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vFatherName').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vFatherOccupation').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vFatherMobile').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vFatherEmail').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vMotherName').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vMotherOccupation').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vMotherMobile').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vMotherEmail').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vIncome').html(0);
+                                    $('#tdDetails').find('.enqDetails').find('#vNationality').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vAddress').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#vReason').html('');
+                                    $('#tdDetails').find('.enqDetails').find('#hdnEnquiryID').val(0);
+                                    var SlNo=0;
+                                    if(ID==0)
+                                    {
+                                        SlNo= $("#tblCategory").find('tr').length;
+                                    }
+                                    else{
+                                        SlNo=$(sender).closest('tr').find('#hdnSrNo').val();
+                                    }
+                                    $('#tdDetails').find('.enqDetails').find('#hdnSrNo').val(SlNo);
+
+                                    if(ID==0)
+                                    {
+                                        $('#tdDetails').find('.enqDetails').find('#btnAddFollowup').css('display','none');
+                                    }
+                                }
+                            }
+                            else {
+                                isAddStarted=false;
+                                if($('#tdDetails').find('.enqDetails').find('#btnEditEnquiry').hasClass('cancel'))
+                                {
+                                    $('#tdDetails').find('.enqDetails').find('#btnEditEnquiry').click();
+                                }
+                                $(sender).removeClass("Open");
+                                $(sender).addClass("Closed");
+                                $('#tdDetails').closest("tr").remove();
+                                $(sender).text('Add New')
+                            }
+                        }
+                        function PrintEnquiry(sender) {
+                            var contents =$(sender).closest(".enqDetails").html();
+                            var frame1 = $('<iframe />');
+                            frame1[0].name = "frame1";
+                            frame1.css({ "position": "absolute", "top": "-1000000px" });
+                            $("body").append(frame1);
+                            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                            frameDoc.document.open();
+                            //Create a new HTML document.
+                            frameDoc.document.write('<html><head><title></title>');
+                            frameDoc.document.write('</head><body>');
+                            //Append the external CSS file.
+                            frameDoc.document.write('<link href="@Url.Content("~/css/AdmissionEnquiry.css")" rel="stylesheet" type="text/css" />');
+                            //Append the DIV contents.
+                            frameDoc.document.write(contents);
+                            frameDoc.document.write('</body></html>');
+                            frameDoc.document.close();
+                            setTimeout(function () {
+                                window.frames["frame1"].focus();
+                                window.frames["frame1"].print();
+                                frame1.remove();
+                            }, 500);
+                        }
+
+    </script>
+}
+<!-- /.content -->

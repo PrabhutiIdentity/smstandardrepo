@@ -29,6 +29,7 @@ namespace SMEnterprise.Models
         public List<HouseModel> Houses { get; set; }
         public List<ClassSectionModel> ClassSections { get; set; }
         public List<StudentModel> Students { get; set; }
+        public SBranchModel Branch { get; set; }
     }
     public class StopWiseStudentAmountModel
     {
@@ -56,6 +57,7 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Busses { get; set; }
         public List<ClassSectionModel> ClassSections { get; set; }
         public List<StudentModel> Students { get; set; }
+        public SBranchModel Branch { get; set; }
     }
 
 
@@ -145,6 +147,7 @@ public class ClassGenderCategoryCountModel
         public int SBranchID { get; set; }
         public DateTime ReportDate { get; set; }
         public List<DailyAttandanceModel> Report { get; set; }
+        public SBranchModel Branch { get; set; }
     }
     public class DailyAttandanceModel
     {
