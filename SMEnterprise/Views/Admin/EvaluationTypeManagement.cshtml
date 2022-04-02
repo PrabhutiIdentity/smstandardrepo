@@ -71,85 +71,110 @@
                         </div>
                     }
                 </div>
-                @if (Model.Schemes.Count == 0)
-                {
-                    <div class="box-body">
-                        <div class="row">
-                            <div class="col-md-12" style="text-align:center">
-                                <a href="/Admin/EvaluationSchemeManagement">No Evaluation Scheme Added, Please Add one.</a>
+                @{
+                    var sDate = DateTime.Today;
+                    var ssnId = 0;
+                    //if (Model.Sessions.)//.Where(x=>x.SessionStartDate <= sDate))// && x.SessionEndDate >= sDate))
+                    //{
+                    //}
+                    foreach (var csn in Model.Sessions)
+                    {
+                        if (csn.SessionStartDate <= sDate && csn.SessionEndDate >= sDate)
+                        {
+                            ssnId = csn.SessionID;
+                        }
+                    }
+
+                    if (ssnId == 0)
+                    {
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-12" style="text-align:center">
+                                    <a href="/Admin/SessionManagement" class="btn btn-link">Current Session Not Added, Please Add.</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                }
-                else 
-                {
-                    <div class="box-body">
-                        <table id="tblCategory" class="table table-bordered table-hover">
-                            <thead>
-                                <tr>
-                                    <th style="width: 10%">Sl. No.</th>
-                                    <th style="width: 30%">Name</th>
-                                    <th style="width: 10%">Edit/Delete</th>
-                                </tr>
-                            </thead>
-                            @{
-                                int count = 0;
-                                foreach (var c in Model.Evaluations)
-                                {
+                    }
+                    else if (Model.Schemes.Count == 0)
+                    {
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-12" style="text-align:center">
+                                    <a href="/Admin/EvaluationSchemeManagement">No Evaluation Scheme Added, Please Add one.</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="box-body">
+                            <table id="tblCategory" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 10%">Sl. No.</th>
+                                        <th style="width: 30%">Name</th>
+                                        <th style="width: 10%">Edit/Delete</th>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int count = 0;
+                                    foreach (var c in Model.Evaluations)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @(count + 1)
+                                                <input type="hidden" name="ID" id="hdnEvaluationTypeID" value="@c.EvaluationTypeID" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationTypeName").val($(this).val())' id="txtEvaluationTypeName" name="Name" value="@c.EvaluationTypeName" />
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    @using (Html.BeginForm("UpdateEvaluationType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="EvaluationTypeID" id="hdnEvaluationTypeID" value="@c.EvaluationTypeID" />
+                                                        <input type="hidden" id="hdnEvaluationTypeName" name="EvaluationTypeName" value="@c.EvaluationTypeName" />
+                                                        <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                                        <input type="submit" onclick="return BeforeEvaluationTypeUpdate(this);" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Save" />
+                                                    }
+                                                    @using (Html.BeginForm("UpdateEvaluationType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="OpType" value="-1" />
+                                                        <input type="hidden" name="EvaluationTypeID" value="@c.EvaluationTypeID" />
+                                                        <input type="hidden" id="hdnCountUsed" value="@c.etCountUsed" />
+                                                        <button onclick="return EvaluationTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        count++;
+                                    }
                                     <tr>
                                         <td>
                                             @(count + 1)
-                                            <input type="hidden" name="ID" id="hdnEvaluationTypeID" value="@c.EvaluationTypeID" />
+                                            <input type="hidden" name="EvaluationTypeID" id="hdnEvaluationTypeID" value="0" />
                                         </td>
                                         <td>
-                                            <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationTypeName").val($(this).val())' id="txtEvaluationTypeName" name="Name" value="@c.EvaluationTypeName" />
+                                            <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationTypeName").val($(this).val())' id="txtEvaluationTypeName" name="Name" value="" />
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                @using (Html.BeginForm("UpdateEvaluationType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                @using (Html.BeginForm("UpdateEvaluationType", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
                                                 {
-                                                    <input type="hidden" name="EvaluationTypeID" id="hdnEvaluationTypeID" value="@c.EvaluationTypeID" />
-                                                    <input type="hidden" id="hdnEvaluationTypeName" name="EvaluationTypeName" value="@c.EvaluationTypeName" />
-                                                    <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
-                                                    <input type="submit" onclick="return BeforeEvaluationTypeUpdate(this);" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Save" />
-                                                }
-                                                @using (Html.BeginForm("UpdateEvaluationType", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                                                {
-                                                    <input type="hidden" name="OpType" value="-1" />
-                                                    <input type="hidden" name="EvaluationTypeID" value="@c.EvaluationTypeID" />
-                                                    <input type="hidden" id="hdnCountUsed" value="@c.CountUsed" />
-                                                    <button onclick="return EvaluationTypeDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                                    <input type="hidden" name="EvaluationTypeID" id="hdnEvaluationTypeID" value="0" />
+                                                    <input type="hidden" id="hdnEvaluationTypeName" name="EvaluationTypeName" value="" />
+                                                    <input type="hidden" id="hdnSessionID" name="SessionID" value="@Model.SessionID" />
+                                                    <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@Model.EvaluationSchemeID" />
+                                                    <input type="hidden" id="hdnEvaluationTypeColor" name="EvaluationTypeColor" value="" />
+                                                    <input type="submit" onclick="return BeforeEvaluationTypeUpdate(this);" class="btn btn-default" style="background-color: #605ca8;color: white;" value="Add New" />
                                                 }
                                             </div>
                                         </td>
                                     </tr>
-                                    count++;
                                 }
-                                <tr>
-                                    <td>
-                                        @(count + 1)
-                                        <input type="hidden" name="EvaluationTypeID" id="hdnEvaluationTypeID" value="0" />
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationTypeName").val($(this).val())' id="txtEvaluationTypeName" name="Name" value="" />
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            @using (Html.BeginForm("UpdateEvaluationType", "Admin", FormMethod.Post, new { @class = "form-horizontal", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                                            {
-                                                <input type="hidden" name="EvaluationTypeID" id="hdnEvaluationTypeID" value="0" />
-                                                <input type="hidden" id="hdnEvaluationTypeName" name="EvaluationTypeName" value="" />
-                                                <input type="hidden" id="hdnSessionID" name="SessionID" value="@Model.SessionID" />
-                                                <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@Model.EvaluationSchemeID" />
-                                                <input type="hidden" id="hdnEvaluationTypeColor" name="EvaluationTypeColor" value="" />
-                                                <input type="submit" onclick="return BeforeEvaluationTypeUpdate(this);" class="btn btn-default" style="background-color: #605ca8;color: white;" value="Add New" />
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                        </table>
-                    </div>
+                            </table>
+                        </div>
+                    }
                 }
             </div>
         </div>

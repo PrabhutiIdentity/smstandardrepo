@@ -18,7 +18,7 @@ namespace SMEnterprise.Models
         public int Status { get; set; }
         public int SBranchID { get; set; }
         public int OpType { get; set; }
-        public int CountUsed { get; set; }
+        public int esCountUsed { get; set; }
     }
     public class EvaluationSchemePageModel
     {
@@ -43,6 +43,7 @@ namespace SMEnterprise.Models
         public int OpType { get; set; }
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
+        public int etCountUsed { get; set; }
     }
     public class SubEvaluationListModel
     {

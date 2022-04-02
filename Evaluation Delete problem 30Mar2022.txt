@@ -1,0 +1,182 @@
+--EvaluationSchemeDelete Problem--
+--sp_GetEvaluationSchemes
+GO
+
+CREATE proc [dbo].[sp_GetEvaluationSchemes]    
+(        
+@SBranchID int,        
+@SessionID int=0        
+)        
+AS        
+BEGIN        
+ if(@SessionID=0)        
+ begin        
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID        
+ end        
+ Select EvaluationSchemeID,EvaluationSchemeName,[dbo].[GetEvaluationSchemeClassList](EvaluationSchemeID,@SessionID) as Classes,      
+ [dbo].[GetSchemeClassListIDs](EvaluationSchemeID,@SessionID) as ClassIDs , (Select Count(*) from  EvaluationTypes where EvaluationSchemeID=ESM.EvaluationSchemeID) as CountUsed      
+ from EvaluationSchemeMaster ESM where SBranchID=@SBranchID and SessionID=@SessionID        
+ select @SessionID        
+ Select SessionID,SessionName,SessionStatus,SessionStartDate,SessionEndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate        
+         
+ select CM.ClassID,CM.ClassName,ESM.EvaluationSchemeName as EducationLevelName, ESM.EvaluationSchemeID        
+ from ClassMaster CM left outer join [ClassSessionDetails] CSD on CSD.SessionID=@SessionID and CSD.ClassID=CM.ClassID        
+ left outer join EvaluationSchemeMaster ESM on ESM.EvaluationSchemeID=CSD.SchemeID  and ESM.SessionID=@SessionID      
+ where CM.SBranchID=@SBranchID and CM.Status=1        
+END 
+GO
+--EvaluationSchemeModel
+public int CountUsed { get; set; }
+
+--EvaluationSchemeManagement.cshtml
+
+<input type="hidden" id="hdnCountUsed" value="@c.CountUsed">
+<button onclick="return EvaluationSchemeDelete(this,' @c.EvaluationSchemeName');" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+
+function EvaluationSchemeDelete(sender, EvaluationName) {
+	var CountUsed = $(sender).closest('tr').find('#hdnCountUsed').val();        
+	if (CountUsed > 0) {
+		alert('Test');
+		ShowClosingNotification('Error', 'Evaluation Type are added in this Evaluation Scheme, so It can\'t be deleted!!!!', 'error');
+		return false;
+	}
+	else {
+		if (confirm('Are you sure you wish to delete ' + EvaluationName + ' Evaluation Scheme?')) {
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+}
+
+
+
+--EvaluationType Delete Problem--
+
+--[sp_GetEvaluationTypes]
+
+CREATE proc [dbo].[sp_GetEvaluationTypes]    
+(    
+@SBranchID int,    
+@SessionID int,    
+@EvaluationSchemeID int    
+)    
+AS    
+BEGIN    
+ if(@SessionID=0)    
+ begin    
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID    
+ end    
+ if(@EvaluationSchemeID=0)    
+ begin    
+  select @EvaluationSchemeID=EvaluationSchemeID from EvaluationSchemeMaster where SessionID=@SessionID    
+ end    
+ Select *,(select Count(*) from EvaluationMaster where EvaluationType=ET.EvaluationTypeID) as CountUsed  
+ from  EvaluationTypes ET   
+ where SBranchID=@SBranchID and SessionID=@SessionID and EvaluationSchemeID=@EvaluationSchemeID    
+ select @SessionID    
+ Select SessionID,SessionName,SessionStatus,SessionStartDate,SessionEndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate    
+ select EvaluationSchemeName,EvaluationSchemeID from EvaluationSchemeMaster where SBranchID=@SBranchID and SessionID=@SessionID    
+ select @EvaluationSchemeID    
+END 
+GO
+--EvaluationTypeManagement.cshtml
+
+<input type="hidden" id="hdnCountUsed" value="@c.CountUsed" />
+
+function EvaluationTypeDelete(sender) {
+	if ($(sender).closest('tr').find('#hdnCountUsed').val() > 0) {
+		ShowClosingNotification('Error', 'Evaluation Type Already used, so It can\'t be deleted!!!!', 'error');
+		return false;
+	}
+	else {
+		if (confirm('Are you sure you wish to delete this Evaluation Type?')) {
+
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+}
+
+--EvaluationTypeModel
+public int CountUsed { get; set; }
+
+
+--_EvaluationDetailsPartial Delete Problem--
+
+ALTER proc [dbo].[sp_GetSubEvaluations]    
+(    
+@EvaluationID int    
+)    
+AS    
+BEGIN    
+ declare @SessionID int    
+  select @SessionID=SessionID from EvaluationMaster where EvaluationID=@EvaluationID    
+ Select EvaluationID,[EvaluationName],[Weightage],EvaluationMonth,    
+ DateName( month , DateAdd( month , EvaluationMonth , -1 ) ) as EvaluationMonthName,EvaluationType
+ ,(Select count(*) from ExamMaster Exm where Exm.EvaluationID=EM.EvaluationID) evCountUsed
+ from  [dbo].[EvaluationMaster] EM    
+ where MasterID=@EvaluationID    
+    
+ declare @SchemeID int    
+ select @SchemeID =EvaluationSchemeID from [dbo].[EvaluationMaster] EM where EvaluationID=@EvaluationID    
+ Select * from EvaluationTypes Where SessionID=@SessionID and EvaluationSchemeID=@SchemeID    
+END
+ 
+GO
+--public class EvaluationModel
+
+        public int evCountUsed { get; set; }
+
+function SaveSubEvaluation(sender, OpType) {
+        
+        var isProcess = true;
+        if (OpType == -1)
+        {
+            if ($(sender).closest('tr').find('#hdnEvCountUsed').val() == 0) {
+
+                if (confirm('Are you sure you wish to delete this Sub Evaluation?')) {
+
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                ShowClosingNotification('Error', 'Sub-Evaluations are used in Exam Management, so It can\'t be deleted!!!!', 'error');
+                return false;
+            }
+
+            //hdnEvCountUsed
+            //isProcess = confirm('Do you really want to delete this Evaluation????');
+        }
+        if (isProcess) {
+            $.ajax({
+                url: "@Url.Action("UpdateSubEvaluations", "Admin")",
+                type: 'POST',
+                data: JSON.stringify({
+                    OpType: OpType,
+                    MasterID: $(sender).closest('tr').find('#hdnMasterID').val(),
+                    EvaluationID: $(sender).closest('tr').find('#hdnEvaluationID').val(),
+                    EvaluationType: $(sender).closest('tr').find('#ddlTypes').val(),
+                    EvaluationName: $(sender).closest('tr').find('#txtEvaluationName').val(),
+                    Weightage: $(sender).closest('tr').find('#txtWeightage').val(),
+                    EvaluationMonth: $(sender).closest('tr').find('#ddlMonth').val()
+                }),
+                contentType: 'application/json; charset=utf-8',
+                success: function (html) {
+                    ShowClosingNotification('Success', 'Changes updated successfully', 'info');
+                    $(sender).closest('table').closest('td').html(html);
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+                async: true,
+                processData: false
+            });
+        }
+    }
