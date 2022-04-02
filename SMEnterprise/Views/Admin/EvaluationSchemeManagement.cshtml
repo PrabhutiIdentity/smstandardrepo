@@ -39,7 +39,7 @@
                                     <div class="col-md-4 padding">
                                         <label class="col-md-5 text-right" style="padding-right: 0px;">Session :</label>
                                         <div class="col-md-7">
-                                            <select class="form-control" name="ID" ID="ddlEvaluations">
+                                            <select class="form-control" name="ID" ID="ddlSession">
                                                 @foreach (SchoolSessionModel e in Model.Sessions)
                                                 {
                                                     <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
@@ -76,7 +76,30 @@
                             </tr>
                         </thead>
                         @{
-                            if (Model.Schemes.Count() == 0)
+                            var sDate = DateTime.Today;
+                            var ssnId = 0;
+                            //if (Model.Sessions.)//.Where(x=>x.SessionStartDate <= sDate))// && x.SessionEndDate >= sDate))
+                            //{
+                            //}
+                            foreach (var csn in Model.Sessions)
+                            {
+                                if (csn.SessionStartDate <= sDate && csn.SessionEndDate >= sDate)
+                                {
+                                    ssnId = csn.SessionID;
+                                }
+                            }
+
+                            if (ssnId == 0)
+                            {
+                                <tr>
+                                    <td colspan="4" style="text-align:center">
+
+                                        <a href="/Admin/SessionManagement" class="btn btn-link" >Current Session Not Added, Please Add.</a>
+
+                                    </td>
+                                </tr>
+                            }
+                            else if (Model.Schemes.Count() == 0)
                             {
                                 <tr>
                                     <td colspan="4" style="text-align:center">
@@ -85,38 +108,41 @@
                                     </td>
                                 </tr>
                             }
-                            int count = 0;
-                            foreach (var c in Model.Schemes)
+                            else
                             {
-                                <tr>
+                                int count = 0;
+                                foreach (var c in Model.Schemes)
+                                {
+                                    <tr>
 
-                                    <td>
-                                        @(count + 1)
-                                        <input type="hidden" name="ID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
-                                        <input type="hidden" name="ClassIDs" id="hdnEvaluationSchemeClasses" value="@c.ClassIDs" />
-                                    </td>
-                                    <td>
-                                        @c.EvaluationSchemeName
-                                    </td>
+                                        <td>
+                                            @(count + 1)
+                                            <input type="hidden" name="ID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                            <input type="hidden" name="ClassIDs" id="hdnEvaluationSchemeClasses" value="@c.ClassIDs" />
+                                        </td>
+                                        <td>
+                                            @c.EvaluationSchemeName
+                                        </td>
 
-                                    <td>
-                                        @c.Classes
-                                    </td>
-                                    <td>
-                                        <div class="btn-group">
-                                            <a href="javascript:void(0)" data-toggle="modal" data-target="#mdlEditScheme" class="btn btn-link" onclick="EditScheme(@c.EvaluationSchemeID,'@c.ClassIDs',' @c.EvaluationSchemeName');">Edit</a>
-                                            @using (Html.BeginForm("UpdateEvaluationScheme", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                                            {
-                                                <input type="hidden" name="OpType" value="-1" />
-                                                <input type="hidden" name="EvaluationSchemeID" value="@c.EvaluationSchemeID" />
-                                                <input type="hidden" id="hdnCountUsed" value="@c.CountUsed">
-                                                <button onclick="return EvaluationSchemeDelete(this,' @c.EvaluationSchemeName');" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
-                                            }
-                                        </div>
-                                    </td>
-                                </tr>
+                                        <td>
+                                            @c.Classes
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#mdlEditScheme" class="btn btn-link" onclick="EditScheme(@c.EvaluationSchemeID,'@c.ClassIDs',' @c.EvaluationSchemeName');">Edit</a>
+                                                @using (Html.BeginForm("UpdateEvaluationScheme", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                {
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <input type="hidden" name="EvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                                    <input type="hidden" id="hdnCountUsed" value="@c.esCountUsed">
+                                                    <button onclick="return EvaluationSchemeDelete(this,' @c.EvaluationSchemeName');" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
 
-                                count++;
+                                    count++;
+                                }
                             }
                         }
                     </table>
@@ -205,13 +231,13 @@
             }
         });
     }
-    $(function () {
-        $("#tblCategory").DataTable({
-            "ordering": false
-        });
-        $('#liEvaluationSchemeManagement').closest('ul').closest('li').addClass('active');
-        $('#liEvaluationSchemeManagement').addClass('active');
-    });
+    //$(function () {
+    //    $("#tblCategory").DataTable({
+    //        "ordering": false
+    //    });
+    //    $('#liEvaluationSchemeManagement').closest('ul').closest('li').addClass('active');
+    //    $('#liEvaluationSchemeManagement').addClass('active');
+    //});
     function EvaluationSchemeDelete(sender, EvaluationName) {
         var CountUsed = $(sender).closest('tr').find('#hdnCountUsed').val();
         if (CountUsed > 0) {
