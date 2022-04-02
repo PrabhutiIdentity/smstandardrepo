@@ -180,7 +180,7 @@
                                                         Status
                                                     </label>
                                                     <div class="form-group col-md-4">
-                                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                                        <div class="col-md-9 col-sm-9 col-xs-12" id="Estatus">
                                                             <label class="switch switch-green col-md-6">
                                                                 <input type="checkbox" class="switch-input" @(Model.EmployeeDetails.Status == 1 ? "checked" : "" )>
                                                                 <span class="switch-label" onclick="$(this).closest('label').find('#hdnEmployeeStatus').val($(this).closest('label').find('#hdnEmployeeStatus').val() == '0' ? '1' : '0');" data-on="Active" data-off="Inactive"></span>
@@ -1353,7 +1353,7 @@
                                                 <div class="col-md-12">
                                                     <div class="form-group col-md-6">
                                                         <label class="control-label col-md-3 col-sm-3 col-xs-12">
-                                                           Date of Joining
+                                                            Date of Joining
                                                         </label>
                                                         <div class="col-md-9 col-sm-9 col-xs-12">
                                                             <input type="text" class="form-control" name="DOJ" value="@Model.EmployeeDetails.DOJ.ToShortDateString()" placeholder="PAN Number" aria-describedby="inputSuccess2Status" readonly>
@@ -1381,6 +1381,11 @@
                                                                 <input type="hidden" name="IsLeft" id="hdnEmployeeIsLeft" value="@Model.EmployeeDetails.IsLeft">
                                                             </label>
                                                         </div>
+                                                        <div class="col-md-9 col-sm-9 col-xs-12">
+                                                            <label class="red col-md-12">
+                                                                Time table for the employee is also delete when Employee goes left.
+                                                            </label>
+                                                        </div>
                                                     </div>
                                                     <div class="form-group col-md-6">
                                                         <label class="control-label col-md-3 col-sm-3 col-xs-12">
@@ -1400,7 +1405,7 @@
                                     </div>
                                 }
                             }
-                                                            
+
                         </div>
                     </div>
                 </div>
@@ -1461,6 +1466,16 @@
                 $(sender).closest('form').submit();
             }
         }
+        $(document).ready(function () {
+            $("#Estatus").change(function () {
+                if ($("#hdnEmployeeStatus").val() == 0) {
+                    confirm("Time table of the Teacher also removed after save .... Are you agree!!!");
+                }
+                else {
+                    return true;
+                }
+            });
+        });
         function OpenTransportEdit(EmployeeID, THChangeID) {
 
             $('.se-pre-con').css('display', '');

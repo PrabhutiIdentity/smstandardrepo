@@ -75,140 +75,158 @@
                         </div>
                     }
                 </div>
-                <div class="box-body">
-                    <table id="tblCategory" class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th style="width: 10%">Sl. No.</th>
-                                <th style="width: 35%">Title</th>
-                                <th style="width: 10%">Weightage</th>
-                                <th style="width: 15%">Sub Evaluations</th>
-                                <th style="width: 15%">Result Date</th>
-                                <th style="width: 15%">Edit/Delete</th>
-                            </tr>
-                        </thead>
-                        @{
-                            int count = 0;
-                            decimal TotalWeightage = 0;
-                            <tbody>
-                                @foreach (EvaluationModel c in Model.Evaluations)
-                                {
-                                    TotalWeightage = TotalWeightage + c.Weightage;
-                                    <tr>
-
-                                        <td>
-                                            @(count + 1)
-                                            <input type="hidden" name="EvaluationID" id="hdnEvaluationID" value="@c.EvaluationID" />
-                                        </td>
-                                        <td>
-
-                                            <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationName").val($(this).val())' id="txtEvaluationName" name="EvaluationName" value="@c.EvaluationName" />
-
-                                        </td>
-                                        <td>
-
-                                            <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationWeightage").val($(this).val())' id="txtWeightage" name="Weightage" value="@c.Weightage" />
-
-                                        </td>
-                                        <td>
-                                            <input type="hidden" id="hdnSubEvalCount" value="@c.SubEvals" />
-                                            @c.SubEvals
-                                            <ss>(<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.EvaluationID" class="SubEvalClosed Poll-Options">Manage</a>)</ss>
-
-                                        </td>
-
-                                        <td>
-
-                                            <input type="date" class="form-control" onchange='$(this).closest("tr").find("#hdnResultDate").val($(this).val())' id="txtResultDate" name="ResultDate" value="@c.ResultDate.ToString("yyyy-MM-dd")" />
-
-                                        </td>
-                                        <td>
-                                            <div class="btn-group">
-                                                @using (Html.BeginForm("UpdateEvaluation", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                                                {
-                                                    <input type="hidden" name="EvaluationID" id="hdnEvaluationID" value="@c.EvaluationID" />
-                                                    <input type="hidden" id="hdnEvaluationName" name="EvaluationName" value="@c.EvaluationName" />
-                                                    <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
-                                                    <input type="hidden" name="ResultDate" id="hdnResultDate" value="@c.ResultDate" />
-                                                    <input type="hidden" id="hdnEvaluationMonth" name="EvaluationMonth" value="@c.EvaluationMonth" />
-                                                    <input type="hidden" id="hdnEvaluationWeightage" name="Weightage" value="@c.Weightage" />
-                                                    <input type="submit" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Save" />
-                                                }
-                                                @using (Html.BeginForm("UpdateEvaluation", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                                                {
-                                                    <input type="hidden" name="OpType" value="-1" />
-                                                    <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
-                                                    <input type="hidden" name="EvaluationID" value="@c.EvaluationID" />
-                                                    <button onclick="return EvaluationDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
-                                                }
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    count++;
-                                }
-                                <tr>
-
-                                    <td>
-                                        @(count + 1)
-                                        <input type="hidden" name="EvaluationID" id="hdnEvaluationID" value="0" />
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationName").val($(this).val())' id="txtEvaluationName" name="EvaluationName" value="" />
-                                    </td>
-                                    <td>
-
-                                        <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationWeightage").val($(this).val())' id="txtWeightage" name="Weightage" value="0" />
-
-                                    </td>
-                                    <td>
-                                        0
-                                    </td>
-                                    <td>
-
-                                        <input type="date" class="form-control" onchange='$(this).closest("tr").find("#hdnResultDate").val($(this).val())' id="txtResultDate" name="ResultDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
-
-                                    </td>
-
-                                    <td>
-                                        <div class="btn-group">
-                                            @using (Html.BeginForm("UpdateEvaluation", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                                            {
-                                                <input type="hidden" name="ID" id="hdnEvaluationID" value="0" />
-                                                <input type="hidden" id="hdnEvaluationName" name="EvaluationName" value="" />
-                                                <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@Model.EvaluationSchemeID" />
-                                                <input type="hidden" name="ResultDate" id="hdnResultDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate()" />
-                                                <input type="hidden" id="hdnSessionID" name="SessionID" value="@Model.SessionID" />
-                                                <input type="hidden" id="hdnEvaluationMonth" name="EvaluationMonth" value="1" />
-                                                <input type="hidden" id="hdnEvaluationWeightage" name="Weightage" value="0" />
-                                                                        <input type="submit" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Add New" />
-                                            }
-
-                                        </div>
-                                    </td>
-                                </tr>
-
-
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td>#</td>
-                                    <td>Final</td>
-                                    <td>@TotalWeightage</td>
-                                    <td></td>
-                                    <td></td>
-                                </tr>
-                            </tfoot>
+                @{
+                    var sDate = DateTime.Today;
+                    var ssnId = 0;
+                    //if (Model.Sessions.)//.Where(x=>x.SessionStartDate <= sDate))// && x.SessionEndDate >= sDate))
+                    //{
+                    //}
+                    foreach (var csn in Model.Sessions)
+                    {
+                        if (csn.SessionStartDate <= sDate && csn.SessionEndDate >= sDate)
+                        {
+                            ssnId = csn.SessionID;
                         }
-                    </table>
+                    }
+                    if (ssnId == 0)
+                    {
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-12" style="text-align:center">
+                                                    <a href="/Admin/SessionManagement" class="btn btn-link">Current Session Not Added, Please Add.</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else if (Model.Schemes.Count == 0)
+                    {
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-12" style="text-align:center">
+                                    <a href="/Admin/EvaluationSchemeManagement">No Evaluation Scheme Added, Please Add one.</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="box-body">
+                            <table id="tblCategory" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 10%">Sl. No.</th>
+                                        <th style="width: 35%">Title</th>
+                                        <th style="width: 10%">Weightage</th>
+                                        <th style="width: 15%">Sub Evaluations</th>
+                                        <th style="width: 15%">Result Date</th>
+                                        <th style="width: 15%">Edit/Delete</th>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int count = 0;
+                                    decimal TotalWeightage = 0;
+                                    <tbody>
+                                        @foreach (EvaluationModel c in Model.Evaluations)
+                                        {
+                                            TotalWeightage = TotalWeightage + c.Weightage;
+                                            <tr>
 
+                                                <td>
+                                                    @(count + 1)
+                                                    <input type="hidden" name="EvaluationID" id="hdnEvaluationID" value="@c.EvaluationID" />
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationName").val($(this).val())' id="txtEvaluationName" name="EvaluationName" value="@c.EvaluationName" />
 
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationWeightage").val($(this).val())' id="txtWeightage" name="Weightage" value="@c.Weightage" />
+                                                </td>
+                                                <td>
+                                                    <input type="hidden" id="hdnSubEvalCount" value="@c.SubEvals" />
+                                                    @c.SubEvals
+                                                    <ss>(<a href="javascript:void(0);" onclick="ToggleDetails(this);" id="@c.EvaluationID" class="SubEvalClosed Poll-Options">Manage</a>)</ss>
+                                                </td>
+                                                <td>
+                                                    <input type="date" class="form-control" onchange='$(this).closest("tr").find("#hdnResultDate").val($(this).val())' id="txtResultDate" name="ResultDate" value="@c.ResultDate.ToString("yyyy-MM-dd")" />
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        @using (Html.BeginForm("UpdateEvaluation", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                        {
+                                                            <input type="hidden" name="EvaluationID" id="hdnEvaluationID" value="@c.EvaluationID" />
+                                                            <input type="hidden" id="hdnEvaluationName" name="EvaluationName" value="@c.EvaluationName" />
+                                                            <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                                            <input type="hidden" name="ResultDate" id="hdnResultDate" value="@c.ResultDate" />
+                                                            <input type="hidden" id="hdnEvaluationMonth" name="EvaluationMonth" value="@c.EvaluationMonth" />
+                                                            <input type="hidden" id="hdnEvaluationWeightage" name="Weightage" value="@c.Weightage" />
+                                                            <input type="submit" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Save" />
+                                                        }
+                                                        @using (Html.BeginForm("UpdateEvaluation", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                        {
+                                                            <input type="hidden" name="OpType" value="-1" />
+                                                            <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
+                                                            <input type="hidden" name="EvaluationID" value="@c.EvaluationID" />
+                                                            <button onclick="return EvaluationDelete(this);" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            count++;
+                                        }
+                                        <tr>
 
-                </div>
+                                            <td>
+                                                @(count + 1)
+                                                <input type="hidden" name="EvaluationID" id="hdnEvaluationID" value="0" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationName").val($(this).val())' id="txtEvaluationName" name="EvaluationName" value="" />
+                                            </td>
+                                            <td>
+                                                <input type="text" class="form-control" onchange='$(this).closest("tr").find("#hdnEvaluationWeightage").val($(this).val())' id="txtWeightage" name="Weightage" value="0" />
+                                            </td>
+                                            <td>
+                                                0
+                                            </td>
+                                            <td>
+
+                                                <input type="date" class="form-control" onchange='$(this).closest("tr").find("#hdnResultDate").val($(this).val())' id="txtResultDate" name="ResultDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    @using (Html.BeginForm("UpdateEvaluation", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                                                    {
+                                                        <input type="hidden" name="ID" id="hdnEvaluationID" value="0" />
+                                                        <input type="hidden" id="hdnEvaluationName" name="EvaluationName" value="" />
+                                                        <input type="hidden" name="EvaluationSchemeID" id="hdnEvaluationSchemeID" value="@Model.EvaluationSchemeID" />
+                                                        <input type="hidden" name="ResultDate" id="hdnResultDate" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate()" />
+                                                        <input type="hidden" id="hdnSessionID" name="SessionID" value="@Model.SessionID" />
+                                                        <input type="hidden" id="hdnEvaluationMonth" name="EvaluationMonth" value="1" />
+                                                        <input type="hidden" id="hdnEvaluationWeightage" name="Weightage" value="0" />
+                                                        <input type="submit" class="btn btn-default" style="background-color: #1abb9c;color: white;" value="Add New" />
+                                                    }
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td>#</td>
+                                            <td>Final</td>
+                                            <td>@TotalWeightage</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tfoot>
+                                }
+                            </table>
+                        </div>
+                    }
+                }
             </div>
         </div>
     </div>
-
 </section>
 <script>
     function SessionChanged(sender) {
@@ -245,32 +263,32 @@
           .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>Loading....</td></tr>");
 
             $.ajax(
-{
-    type: "POST",
-    url: "/Admin/GetSubEvaluations/" + $(sender).attr('id'),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-        notice.remove();
-        // fill the div with the html returned by action
-        $(sender).closest("tr").next().remove();
-        $(sender)
-            .closest("tr")
-            .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
-        var ele = document.getElementsByClassName("SubEvalOpen");
-        if (ele.length > 0) {
-            $(ele[0]).click();
-        }
+            {
+                type: "POST",
+                url: "/Admin/GetSubEvaluations/" + $(sender).attr('id'),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    notice.remove();
+                    // fill the div with the html returned by action
+                    $(sender).closest("tr").next().remove();
+                    $(sender)
+                        .closest("tr")
+                        .after("<tr><td style='background-color: rgba(123, 100, 165, 0.48);'></td><td colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + html + "</td></tr>");
+                    var ele = document.getElementsByClassName("SubEvalOpen");
+                    if (ele.length > 0) {
+                        $(ele[0]).click();
+                    }
 
-        $(sender).removeClass("SubEvalClosed");
-        $(sender).addClass("SubEvalOpen");
-        $(sender).text("Close");
-    },
-    error: function (e) {
-        alert("errorn");
-    }
-});
+                    $(sender).removeClass("SubEvalClosed");
+                    $(sender).addClass("SubEvalOpen");
+                    $(sender).text("Close");
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
         }
         else {
             $(sender).removeClass("SubEvalOpen");
@@ -288,7 +306,6 @@
         $('#liEvaluationManagement').addClass('active');
     });
     function EvaluationDelete(sender) {
-
         if ($(sender).closest('tr').find('#hdnSubEvalCount').val() == 0) {
             if (confirm('Are you sure you wish to delete this Evaluation?')) {
 
@@ -305,10 +322,27 @@
         }
     }
     function SaveSubEvaluation(sender, OpType) {
+
         var isProcess = true;
         if (OpType == -1)
         {
-            isProcess = confirm('Do you really want to delete this Evaluation????');
+            if ($(sender).closest('tr').find('#hdnEvCountUsed').val() == 0) {
+
+                if (confirm('Are you sure you wish to delete this Sub Evaluation?')) {
+
+                    return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                ShowClosingNotification('Error', 'Sub-Evaluations are used in Exam Management, so It can\'t be deleted!!!!', 'error');
+                return false;
+            }
+
+            //hdnEvCountUsed
+            //isProcess = confirm('Do you really want to delete this Evaluation????');
         }
         if (isProcess) {
             $.ajax({
