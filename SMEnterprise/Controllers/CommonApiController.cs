@@ -443,6 +443,7 @@ namespace SMEnterprise.Controllers
                         //objapiModel[0].deviceType = login.deviceType == null ? "" : login.deviceType;
                         //objapiModel[0].deviceToken = login.deviceToken == null ? "" : login.deviceToken;
                         //LuceneData.AddUpdateLuceneIndex(objapiModel[0]);
+
                         AttemptedUser.Password = "";
                         objApiWrapper.Data = AttemptedUser;
                         objApiWrapper.Code = 200;
