@@ -2,6 +2,10 @@
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
+
+    @*  New Changes 31March2022  Start *@
+    List<NameIDModel> SubjectEvaluationFinalStatus = new List<NameIDModel>();
+     @*  New Changes 31March2022  Start *@
 }
 @model SMEnterprise.Models.PerformanceParameterDetailModel
 @section IncludeCss
@@ -187,15 +191,19 @@
                                                             }
 
                                                             var privSubID = 0;
-                                                            foreach (ExamResultDetailModel r in Model.Result)
-                                                            {
-                                                                //r.wMaxMarks = 0;
-                                                                //r.wMarksScored = 0;
-                                                                decimal subjectTotal = 0;
-                                                                decimal subjectScored = 0;
+                                                            @*  New Changes 31March2022  Start *@
+                                                          decimal totalmarksresult = 0;
+                                                            @*  New Changes 31March2022  Start *@
 
-                                                                if (privSubID != r.SubjectID)
-                                                                {
+                                                        foreach (ExamResultDetailModel r in Model.Result)
+                                                        {
+                                                            //r.wMaxMarks = 0;
+                                                            //r.wMarksScored = 0;
+                                                            decimal subjectTotal = 0;
+                                                            decimal subjectScored = 0;
+
+                                                            if (privSubID != r.SubjectID)
+                                                            {
                                                                     <tr>
                                                                         <td style="min-width: 110px;"><b>@r.SubjectName</b></td>
                                                                         @foreach (EvaluationModel er in Model.MainEvaluations)
@@ -234,6 +242,9 @@
                                                                                             er.MarksObtained = er.MarksObtained + err.wMarksScored;
                                                                                             r.etMarksScored = r.etMarksScored + err.wMarksScored;
                                                                                             r.etMaxMarks = r.etMaxMarks + err.wMaxMarks;
+
+
+
                                                                                         }
                                                                                     }
                                                                                     if (!isFound)
@@ -243,6 +254,53 @@
                                                                                 }
 
                                                                             }
+                                                                            @* New Changes: 31March2022  Start*@
+                                                                            //var subEve = SubjectEvaluationFinalStatus.Where(se => se.ID == r.SubjectID && se.Name == er.EvaluationID.ToString()).SingleOrDefault();
+                                                                            //if (subEve == null)
+                                                                            //{
+                                                                            //    subEve = new NameIDModel();
+                                                                            //    subEve.ID = r.SubjectID;
+                                                                            //    subEve.Name = er.EvaluationID.ToString();
+
+
+                                                                            //    if (EvalTotalMarks != 0)
+                                                                            //    {
+                                                                            //        if (EvalMaxMarks == 0)
+                                                                            //        {
+                                                                            //            subEve.Extra1 = "-";
+                                                                            //        }
+                                                                            //        else
+                                                                            //        {
+                                                                            //            subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                            //        }
+
+                                                                            //    }
+                                                                            //    else
+                                                                            //    {
+                                                                            //        subEve.Extra1 = "Invalid";
+                                                                            //    }
+
+                                                                            //    SubjectEvaluationFinalStatus.Add(subEve);
+                                                                            //}
+                                                                            //else
+                                                                            //{
+
+                                                                            //    if (EvalMaxMarks == 0)
+                                                                            //    {
+                                                                            //        subEve.Extra1 = "-";
+                                                                            //    }
+                                                                            //    else
+                                                                            //    {
+                                                                            //        subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                            //    }
+
+
+                                                                            //}
+
+                                                                            //totalmarksresult = totalmarksresult + EvalMaxMarks;
+
+                                                                            @* New Changes: 31March2022 End*@
+
                                                                             <td>@Math.Round(EvalTotalMarks, 2)</td>
                                                                             @*<td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>*@
                                                                         }
@@ -254,7 +312,7 @@
                                                                             <td>@r.etMarksScored.ToString("0.00")</td>
                                                                             <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>
                                                                             @*<td>@(r.rMarksScored.ToString("0"))</td>
-                                                                                <td>@AcadmicModel.CalculateGrade(r.MarksScored, r.wMaxMarks)</td>*@
+                            <td>@AcadmicModel.CalculateGrade(r.MarksScored, r.wMaxMarks)</td>*@
 
                                                                             @*  For Grade*@
                                                                         }
@@ -299,7 +357,8 @@
                                                                     }
                                                                     <td><b>@(Model.Result.Sum(x => x.rMaxMarks).ToString("0"))</b></td>
                                                                     <td><b>@(Model.Result.Sum(x => x.rMarksScored).ToString("0"))</b></td>
-                                                                    <td>@AcadmicModel.CalculateGrade(Model.Result.Sum(x => x.rMarksScored), Model.Result.Sum(x => x.rMaxMarks))</td> @* For Grade*@
+                                                                    <td>@AcadmicModel.CalculateGrade(Model.Result.Sum(x => x.rMarksScored), Model.Result.Sum(x => x.rMaxMarks))</td>
+                                                                    @* For Grade*@
                                                                 }
 
                                                             </tr>
@@ -506,7 +565,7 @@
                                                 <tr>
                                                     <td style="width:25%">
                                                         Place : <br />
-                                                        Date  :@Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
+                                                        Date  : @Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
                                                     </td>
                                                     <td style="width:25%">
                                                         Signature of <br />

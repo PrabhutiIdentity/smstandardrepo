@@ -4078,6 +4078,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@ID", oModel.ID);
                 paramater.Add("@CertID", oModel.CertID);
+
                 paramater.Add("@StudentID", oModel.StudentID);
                 paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@DueStatus", oModel.DueStatus);
