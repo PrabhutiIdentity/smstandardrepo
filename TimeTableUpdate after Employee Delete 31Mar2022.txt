@@ -1,3 +1,123 @@
+--Update Employee Details
+--When Status is Disabled then
+
+ALTER procedure [dbo].[spn_InsertUpdateEmployeeBasicDetails]      
+(      
+@EmployeeID int,      
+@EmployeeName nvarchar(50),      
+@DOB date,      
+@Gender int,      
+@Nationality int,      
+@ReligionID int,      
+@DOJ date,      
+@EmailID nvarchar(100),      
+@CategoryID int,      
+@MaritalStatus int,      
+@BloodGroup nvarchar(5),      
+@MotherTongueID int,      
+@PassportNo nvarchar(20),      
+@MobileNo nvarchar(12),      
+@PhoneNo nvarchar(20),      
+@AccessCardNo nvarchar(20),      
+@FatherHubName nvarchar(20),      
+@SBranchID int,      
+@OperationDate datetime,      
+@ImageName nvarchar(100),      
+@Status int,      
+@EmployeeType int,      
+@Password nvarchar(200),      
+@AadharNumber nvarchar(50),      
+@LicenceNumber nvarchar(50)      
+)      
+as       
+begin       
+      
+ declare @EmployeeSID nvarchar(20)       
+ if(@EmployeeID=0)      
+ begin      
+  insert into [dbo].[EmployeeMaster](EmployeeName,DOB,Gender,Nationality,ReligionID,DOJ,EmailID,CategoryID,MaritalStatus,BloodGroup,      
+   MotherTongueID,PassportNo,MobileNumber,LandLineNumber,AccessCardNo,FatherHubName,SBranchID,CreatedDate,      
+   Photo,[Status],EmployeeType,DesignationID,LicenceNumber,AadharNumber)      
+   values(@EmployeeName,@DOB,@Gender,@Nationality,@ReligionID,@DOJ,@EmailID,@CategoryID,@MaritalStatus,@BloodGroup,      
+   @MotherTongueID,@PassportNo,@MobileNo,@PhoneNo,@AccessCardNo,@FatherHubName,@SBranchID,@OperationDate,@ImageName,@Status,      
+   @EmployeeType,@EmployeeType,@LicenceNumber,@AadharNumber)      
+      
+   SELECT @EmployeeID= CAST(SCOPE_IDENTITY() as int)      
+        
+         
+   --if(@EmployeeType=1)      
+   -- Change for Reception Login Credential      
+   if(@EmployeeType in (3,10,5,8,12))      
+   begin      
+       
+    select @EmployeeSID='EMP'+RIGHT(REPLICATE('0',6)+CAST(@EmployeeID AS VARCHAR(6)),6)       
+          
+    insert into LoginDetails (UserName,Password,EmailID,UserID,Usertype,SBranchID)      
+    values(@EmployeeSID,'9cf5bbb6267e906a8f8ad2047ff8f984',@EmailID,@EmployeeID,@EmployeeType,@SBranchID)      
+  end      
+      
+   declare @EmployeeAID nvarchar(20)      
+      
+   select @EmployeeAID='EMP'+RIGHT(REPLICATE('0',6)+CAST(@EmployeeID AS VARCHAR(6)),6)       
+  set @AccessCardNo =isnull(@AccessCardNo,'0000')      
+   exec sp_AddUserToEsslDevice @EmployeeName,@EmployeeAID,@SBranchID,@AccessCardNo,@OperationDate      
+      
+        
+ end      
+ else      
+ begin      
+      
+ declare @OldAccessCardNumber nvarchar(50)      
+       
+  declare @OldEmployeeType int      
+  select @OldEmployeeType=EmployeeType,@OldAccessCardNumber= AccessCardNo from EmployeeMaster where EmployeeID=@EmployeeID      
+  Update [dbo].[EmployeeMaster] set EmployeeName=@EmployeeName,DOB=@DOB,Gender=@Gender,Nationality=@Nationality      
+  ,ReligionID=@ReligionID,DOJ=@DOJ,EmailID=@EmailID,CategoryID=@CategoryID,MaritalStatus=@MaritalStatus,BloodGroup=@BloodGroup,      
+   MotherTongueID=@MotherTongueID,PassportNo=@PassportNo,MobileNumber=@MobileNo,LandLineNumber=@PhoneNo,AccessCardNo=@AccessCardNo      
+   ,FatherHubName=@FatherHubName,ModifiedDate=@OperationDate,      
+   Photo=@ImageName,[Status]=@Status,EmployeeType=@EmployeeType,DesignationID=@EmployeeType      
+   ,LicenceNumber=@LicenceNumber,AadharNumber=@AadharNumber      
+    where EmployeeID=@EmployeeID    
+--DeleteTimeTable when EmployeeStatus Disabled
+  --02Apr2022
+      if(@Status=0)
+	  begin 
+	   exec sp_RemoveTimeTableEntryByEmployee @EmployeeID
+	   end
+
+--
+   if(@OldEmployeeType<>@EmployeeType)      
+   begin      
+   if(@OldEmployeeType  in (3,10,5,8,12) and @EmployeeType not in (3,10,5,8,12))      
+   begin      
+    delete from LoginDetails where UserID=@EmployeeID and UserType=@EmployeeType      
+   end      
+   else if(@EmployeeType in (3,10,5,8,12) and @OldEmployeeType not in (3,10,5,8,12))      
+   begin      
+       
+     select @EmployeeSID='EMP'+RIGHT(REPLICATE('0',6)+CAST(@EmployeeID AS VARCHAR(6)),6)       
+          
+     insert into LoginDetails (UserName,Password,EmailID,UserID,Usertype,SBranchID)      
+     values(@EmployeeSID,@Password,@EmailID,@EmployeeID,@EmployeeType,@SBranchID)      
+   end      
+   else if(@OldEmployeeType  in (3,10,5,8,12) and @EmployeeType in (3,10,5,8,12))      
+   begin      
+    Update LoginDetails set UserType=@EmployeeType where UserType=@OldEmployeeType and UserID=@EmployeeID      
+   end      
+   end      
+   if(isnull(@OldAccessCardNumber,'0000')<>@AccessCardNo)      
+  begin      
+    declare @EmployeeAUID nvarchar(20)      
+    select @EmployeeAUID='EMP'+RIGHT(REPLICATE('0',6)+CAST(@EmployeeID AS VARCHAR(6)),6)       
+    exec sp_DeleteUserToEsslDevice @EmployeeAUID,@SBranchID,@OperationDate      
+    set @OperationDate=DATEADD (minute , 5 , @OperationDate )       
+    exec sp_AddUserToEsslDevice @EmployeeName,@EmployeeAUID,@SBranchID,@AccessCardNo,@OperationDate      
+   end      
+ end      
+ SELECT @EmployeeID      
+end 
+
+
 --Employee Left Procedure--
 ALTER procedure [dbo].[spn_UpdateEmployeeLeftDetails]    
 (    
