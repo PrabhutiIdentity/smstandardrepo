@@ -525,5 +525,41 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Sections { get; set; }
         public List<NameIDModel> Students { get; set; }
     }
+    #region for bulk upload
+    public class StudentBulkUploadModel
+    {
+        public string MiniAddress { get; set; }
+        public decimal AnnualIncome { get; set; }
+        public string SchoolUID { get; set; }
+        public string AadharCardNo { get; set; }
+        public int StudentID { get; set; }
+        public string Name { get; set; }
+        public DateTime DOB { get; set; }
+        public int Gender { get; set; }
+        public DateTime DOJ { get; set; }
+        public string GuardianName { get; set; }
+        public string GuardianMobileNo { get; set; }
+        public string GuardianEmail { get; set; }
+        public string FatherName { get; set; }
+        public string FatherMobileNo { get; set; }
+        public string FatherEmailID { get; set; }
+        public string MotherName { get; set; }
+        public string MotherMobileNo { get; set; }
+        public string MotherEmailID { get; set; }
+        public int SBranchID { get; set; }
+        public int QuotaID { get; set; }
 
-   }
+        public int ReligionID { get; set; }
+        public int Category { get; set; }
+        public string RollNo { get; set; }
+        public string ClassName { get; set; }
+        public string SectionName { get; set; }
+        public string BloodGroup { get; set; }
+        public int ClassID { get; set; }
+        public int SectionID { get; set; }
+        public int FamilyID { get; set; }
+    }
+
+    #endregion
+
+}
