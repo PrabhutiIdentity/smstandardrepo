@@ -41,14 +41,14 @@ namespace SMEnterprise.Models
                 objCM.labels = new List<string>();
                 DataSetsModel dsTotal = new DataSetsModel();
                 dsTotal.label = "Fee Collection";
-                dsTotal.data = new List<decimal>(); 
+                dsTotal.data = new List<decimal>();
                 dsTotal.backgroundColor = "rgba(26, 187, 156, 0.21)";
                 dsTotal.borderColor = "rgba(26, 187, 156, 0.7)";
                 dsTotal.pointBorderColor = "rgba(26, 187, 156, 0.7)";
                 dsTotal.pointBackgroundColor = "rgba(26, 187, 156, 0.7)";
                 dsTotal.pointHoverBackgroundColor = "#fff";
                 dsTotal.pointHoverBorderColor = "rgba(220,220,220,1)";
-                
+
                 foreach (ClassFeeCollectionChartModel att in Collection)
                 {
                     objCM.labels.Add(att.ClassName);
@@ -59,7 +59,7 @@ namespace SMEnterprise.Models
                 return objCM;
             }
         }
-        
+
     }
     public class AccountModel
     {
@@ -67,10 +67,10 @@ namespace SMEnterprise.Models
     public class StudentsPageModel
     {
         public int ParentID { get; set; }
-        
+
         public List<StudentModel> Students { get; set; }
         public int ClassID { get; set; }
-        
+
         public string ClassName { get; set; }
         public int SectionID { get; set; }
         public string SectionName { get; set; }
@@ -90,7 +90,7 @@ namespace SMEnterprise.Models
             dtStudentDetails.SetTypeName("ut_QuickStudentEdit");
             dtStudentDetails.Columns.Add("StudentID");
             dtStudentDetails.Columns.Add("StudentSessionUID");
-            dtStudentDetails.Columns.Add("ParentID");            
+            dtStudentDetails.Columns.Add("ParentID");
             dtStudentDetails.Columns.Add("SchoolUID");
             dtStudentDetails.Columns.Add("RollNo");
             dtStudentDetails.Columns.Add("DOB");
@@ -149,5 +149,123 @@ namespace SMEnterprise.Models
         public List<SectionModel> Sections { get; set; }
         public List<NameIDModel> Sessions { get; set; }
         public List<SMEnterpriseDB.Models.StudentAttendanceMasterT> Attendances { get; set; }
+
+       
+
     }
+    #region Bulk Student Data Upload
+    public class BulkStudentUploadModel
+    {
+        public HttpPostedFileBase ExcelFile { get; set; }
+        public List<StudentBulkUploadModel> Students { get; set; }
+        public List<ClassModel> Classes { get; set; }
+        public List<SectionModel> Sections { get; set; }
+        public List<NameIDModel> Sessions { get; set; }
+        public int ClassID { get; set; }
+        public int SectionID { get; set; }
+        public int SessionID { get; set; }
+        public int SBranchID { get; set; }
+        public DataTable GetStudentsDataTable()
+        {
+
+            DataTable dtStudentDetails = new DataTable();
+            dtStudentDetails.SetTypeName("ut_BulkStudentUpload");
+            dtStudentDetails.Columns.Add("Name");
+            dtStudentDetails.Columns.Add("RollNo");
+            dtStudentDetails.Columns.Add("SchoolUID");
+            dtStudentDetails.Columns.Add("BloodGroup");
+            dtStudentDetails.Columns.Add("DOB");
+            dtStudentDetails.Columns.Add("DOJ");
+            dtStudentDetails.Columns.Add("AadharCardNo");
+            dtStudentDetails.Columns.Add("FatherName");
+            dtStudentDetails.Columns.Add("MotherName");
+            dtStudentDetails.Columns.Add("GuardianMobileNo");
+            dtStudentDetails.Columns.Add("MiniAddress");
+            dtStudentDetails.Columns.Add("FamilyID");
+
+            foreach (StudentBulkUploadModel e in Students)
+            {
+                DataRow dr = dtStudentDetails.NewRow();
+                dr["Name"] = e.Name;
+                dr["RollNo"] = e.RollNo;
+                dr["SchoolUID"] = e.SchoolUID;
+                dr["BloodGroup"] = e.BloodGroup;
+                dr["DOB"] = e.DOB;
+                dr["DOJ"] = e.DOJ.Year == 1 ? DateTime.Now : e.DOJ;
+                dr["AadharCardNo"] = e.AadharCardNo;
+                dr["FatherName"] = e.FatherName;
+                dr["MotherName"] = e.MotherName;
+                dr["GuardianMobileNo"] = e.GuardianMobileNo;
+                dr["MiniAddress"] = e.MiniAddress;
+                dr["FamilyID"] = e.FamilyID;
+
+                dtStudentDetails.Rows.Add(dr);
+            }
+
+            return dtStudentDetails;
+        }
+        public DataTable GetStudentsDataTableEnt()
+        {
+
+            DataTable dtStudentDetailsEnt = new DataTable();
+            dtStudentDetailsEnt.SetTypeName("ut_BulkStudentUploadEnt");
+            dtStudentDetailsEnt.Columns.Add("Name");
+            dtStudentDetailsEnt.Columns.Add("RollNo");
+            dtStudentDetailsEnt.Columns.Add("SchoolUID");
+            dtStudentDetailsEnt.Columns.Add("BloodGroup");
+            dtStudentDetailsEnt.Columns.Add("Gender");
+            dtStudentDetailsEnt.Columns.Add("DOB");
+            dtStudentDetailsEnt.Columns.Add("DOJ");
+            dtStudentDetailsEnt.Columns.Add("AadharCardNo");
+            dtStudentDetailsEnt.Columns.Add("FatherName");
+            dtStudentDetailsEnt.Columns.Add("FatherMobileNo");
+            dtStudentDetailsEnt.Columns.Add("FatherEmailID");
+            dtStudentDetailsEnt.Columns.Add("MotherName");
+            dtStudentDetailsEnt.Columns.Add("MotherMobileNo");
+            dtStudentDetailsEnt.Columns.Add("MotherEmailID");
+            dtStudentDetailsEnt.Columns.Add("GuardianName");
+            dtStudentDetailsEnt.Columns.Add("GuardianMobileNo");
+            dtStudentDetailsEnt.Columns.Add("GuardianEmail");
+            dtStudentDetailsEnt.Columns.Add("MiniAddress");
+            dtStudentDetailsEnt.Columns.Add("ReligionID");
+            dtStudentDetailsEnt.Columns.Add("Category");
+            dtStudentDetailsEnt.Columns.Add("QuotaID");
+         //   dtStudentDetailsEnt.Columns.Add("FamilyID");
+
+            foreach (StudentBulkUploadModel e in Students)
+            {
+                DataRow dr = dtStudentDetailsEnt.NewRow();
+                dr["Name"] = e.Name;
+                dr["RollNo"] = e.RollNo;
+                dr["SchoolUID"] = e.SchoolUID;
+                dr["BloodGroup"] = e.BloodGroup;
+                dr["Gender"] = e.Gender;
+                dr["DOB"] = e.DOB;
+                dr["DOJ"] = e.DOJ.Year == 1 ? DateTime.Now : e.DOJ;
+                dr["AadharCardNo"] = e.AadharCardNo;
+                dr["FatherName"] = e.FatherName;
+                dr["FatherMobileNo"] = e.FatherMobileNo;
+                dr["FatherEmailID"] = e.FatherEmailID;
+                dr["MotherName"] = e.MotherName;
+                dr["MotherMobileNo"] = e.MotherMobileNo;
+                dr["MotherEmailID"] = e.MotherEmailID;
+                dr["GuardianName"] = e.GuardianName;
+                dr["GuardianMobileNo"] = e.GuardianMobileNo;
+                dr["GuardianEmail"] = e.GuardianEmail;
+                dr["MiniAddress"] = e.MiniAddress;
+                dr["ReligionID"] = e.ReligionID;
+                dr["Category"] = e.Category;
+                dr["QuotaID"] = e.QuotaID;
+              //  dr["FamilyID"] = e.FamilyID;
+
+                dtStudentDetailsEnt.Rows.Add(dr);
+            }
+
+            return dtStudentDetailsEnt;
+        }
+    }
+
+    #endregion Bulk Student Data Upload
+
+
 }
