@@ -1929,6 +1929,24 @@ namespace SMEnterprise.Repository
 
             }
         }
+        public ExamPageModel GetAllClasses(int Status, int SBranchID, int SessionID)
+        {
+            ExamPageModel objModel = new ExamPageModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@Status", Status);
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("sp_GetAllClasses", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Classes = multi.Read<ClassModel>().ToList();
+                    objModel.Evaluations = multi.Read<EvaluationModel>().ToList();
+                    objModel.Groups = multi.Read<GroupModel>().ToList();
+                }
+            }
+            return objModel;
+        }
         public EvaluationPageModel GetEvaluations(int SBranchID, int SessionID, int SchemeID)
         {
             EvaluationPageModel objModel = new EvaluationPageModel();
