@@ -526,4 +526,12 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Students { get; set; }
     }
 
+    public class BulkUploadInfoModel
+    {
+        public int ID { get; set; }
+        public List<NameIDModel> Religion { get; set; }
+        public List<NameIDModel> Categroy { get; set; }
+        public List<NameIDModel> Quota { get; set; }
+        public int SBranchID { get; set; }
+    }
    }
