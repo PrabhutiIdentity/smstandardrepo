@@ -3310,5 +3310,16 @@ namespace SMEnterprise.Controllers
 
         #endregion
 
+        #region bulkinfo
+        [PermissionFilter]
+        public ActionResult BulkUploadInfo(BulkUploadInfoModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            oModel = objAccountData.GetBulkUploadInfo(oModel);
+            return View(oModel);
+        }
+
+        #endregion
+
     }
 }
