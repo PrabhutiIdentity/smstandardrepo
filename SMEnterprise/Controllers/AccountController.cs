@@ -2971,8 +2971,8 @@ namespace SMEnterprise.Controllers
         {
             int isBlock = CommonUsage.ConvertToInt(ID);
             int studentID = CommonUsage.ConvertToInt(ID2);
-            objAccountData.UpdateIsBlock(isBlock, studentID);
-            return Json(JsonRequestBehavior.AllowGet);
+           int res = objAccountData.UpdateIsBlock(isBlock, studentID);
+            return Json(res,JsonRequestBehavior.AllowGet);
         }
 
         #endregion

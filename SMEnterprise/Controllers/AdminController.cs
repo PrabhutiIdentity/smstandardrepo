@@ -1497,6 +1497,17 @@ namespace SMEnterprise.Controllers
             return RedirectToAction("EvaluationTypeManagement", "Admin", new { id = objData.SessionID, id2 = objData.EvaluationSchemeID });
         }
         [PermissionFilter]
+        public ActionResult GetAllClasses(string ID = null)
+        {
+            int SessionID = CommonUsage.ConvertToInt(ID);
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+
+            ExamPageModel objModel = objAdminData.GetAllClasses(1, SBranchID, SessionID);
+            return Json(objModel, JsonRequestBehavior.AllowGet);
+        }
+
+
+        [PermissionFilter]
         public ActionResult EvaluationManagement(string ID = null, string ID2 = null)
         {
             int SessionID = CommonUsage.ConvertToInt(ID);
