@@ -4768,11 +4768,18 @@ namespace SMEnterprise.Repository
         }
         public BulkStudentUploadModel GetBulkUploadData(int ClassID, int SectionID, int SBranchID, int SessionID)
         {
+
+            BulkStudentUploadModel objModel = new BulkStudentUploadModel();
+            objModel.SectionID = SectionID;
+            objModel.ClassID = ClassID;
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetBulkUploadInfo", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                paramater.Add("@ClassID", ClassID);
+                paramater.Add("@SectionID", SectionID);
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("spn_GetBulkUploadPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Classes = multi.Read<ClassModel>().ToList();
                     objModel.Sections = multi.Read<SectionModel>().ToList();
@@ -4798,7 +4805,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Students", objModel.GetStudentsDataTableEnt());
                 return con.Query<int>("sp_BulkUploadStudentsEnt", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
-            return oModel;
         }
+        #endregion
     }
 }
