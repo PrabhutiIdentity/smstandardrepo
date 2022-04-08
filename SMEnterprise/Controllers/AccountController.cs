@@ -3385,6 +3385,12 @@ namespace SMEnterprise.Controllers
             return RedirectToAction("Students", "Account", objNewModel);
         }
 
+        public ActionResult BulkUploadInfo(BulkUploadInfoModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            oModel = objAccountData.GetBulkUploadInfo(oModel);
+            return View(oModel);
+        }
         #endregion Bulk Student Data Upload
 
     }
