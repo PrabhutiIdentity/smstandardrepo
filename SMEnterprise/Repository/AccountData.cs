@@ -4751,6 +4751,21 @@ namespace SMEnterprise.Repository
             return oModel;
         }
         #region Bulk Student Data Upload
+        public BulkUploadInfoModel GetBulkUploadInfo(BulkUploadInfoModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                using (var multi = con.QueryMultiple("sp_GetBulkUploadInfo", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    oModel.Religion = multi.Read<NameIDModel>().ToList();
+                    oModel.Categroy = multi.Read<NameIDModel>().ToList();
+                    oModel.Quota = multi.Read<NameIDModel>().ToList();
+                }
+            }
+            return oModel;
+        }
         public BulkStudentUploadModel GetBulkUploadData(int ClassID, int SectionID, int SBranchID, int SessionID)
         {
 
