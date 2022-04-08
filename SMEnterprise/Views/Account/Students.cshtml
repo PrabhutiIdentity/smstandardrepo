@@ -279,6 +279,7 @@
                                             <input type="hidden" name="StudentID" id="hdnStudentID" value="@c.StudentID" />
                                             <input type="hidden" name="IsBlock" id="hdnIsBlock" value="@c.IsBlock">
                                         </label>
+
                                     </td>
                                 </tr>
 
@@ -376,6 +377,7 @@
         });
 
         $('.IsBlock').click(function () {
+            return confirm('Do you really want to Change student Status!!!!');
             debugger;
             var isblock = $(this).closest('label').find('#hdnIsBlock').val();
             var studentID = $(this).closest('label').find('#hdnStudentID').val();
@@ -385,8 +387,11 @@
                     url: '/Account/UpdateIsBlock/' + isblock + "/" + studentID,
                     success: function (result) {
                         //  alert("Do you really want to Change student Status");
-                        return confirm('Do you really want to Change student Status!!!!');
-                        window.location.reload();
+                        if (result != null) {
+                            debugger;
+                            window.location.reload();
+                        }
+                        
                     }
                 });
         })

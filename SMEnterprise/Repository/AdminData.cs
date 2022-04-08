@@ -1929,6 +1929,24 @@ namespace SMEnterprise.Repository
 
             }
         }
+        public ExamPageModel GetAllClasses(int Status, int SBranchID, int SessionID)
+        {
+            ExamPageModel objModel = new ExamPageModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@Status", Status);
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("sp_GetAllClasses", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Classes = multi.Read<ClassModel>().ToList();
+                    objModel.Evaluations = multi.Read<EvaluationModel>().ToList();
+                    objModel.Groups = multi.Read<GroupModel>().ToList();
+                }
+            }
+            return objModel;
+        }
         public EvaluationPageModel GetEvaluations(int SBranchID, int SessionID, int SchemeID)
         {
             EvaluationPageModel objModel = new EvaluationPageModel();
@@ -4130,14 +4148,14 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@StartDate", oModel.StartDate);
-                paramater.Add("@EndDate", oModel.EndDate);
+                //paramater.Add("@StartDate", oModel.StartDate);
+                //paramater.Add("@EndDate", oModel.EndDate);
 
                 using (var multi = con.QueryMultiple("sp_GetSessionStudentAdmissionDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                   // oModel.SessionID = multi.Read<int>().SingleOrDefault();
                 }
             }
             return oModel;

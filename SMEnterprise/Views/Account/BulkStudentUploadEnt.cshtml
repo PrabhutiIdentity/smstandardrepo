@@ -1,0 +1,489 @@
+﻿@using System.Data;
+@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.BulkStudentUploadModel
+@section IncludeCss
+{
+    <title>Students Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    #myTabContent .form-control {
+        width: 100% !important;
+    }
+
+    .col-sm-6 .dataTables_filter input.form-control {
+        width: auto !important;
+    }
+
+    #myTabContent .form-horizontal .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-inline .form-control {
+        width: 100% !important;
+    }
+
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+        text-wrap: normal;
+    }
+
+    #tdDetails .row {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("BulkStudentUploadEnt", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                        @foreach (NameIDModel el in Model.Sessions)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+
+                                        <option value="0">--Select Class--</option>
+                                        @foreach (ClassModel el in Model.Classes)
+                                        {
+                                            <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="row">
+
+                                        <select name="SectionID" class="form-control" id="ddlSection">
+                                            <option value="0">--Select Section--</option>
+                                            @foreach (SectionModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="file" name="ExcelFile" />
+                                </div>
+                                <div class="col-md-1">
+                                    <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                                    <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();" class="btn btn-success pull-right" style="color:white;">Get</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+                        @using (Html.BeginForm("BulkUploadStudentsEnt", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                        {
+                            <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                            <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                            <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                            <table id="tblCategory" class="table table-bordered table-hover">
+                                <thead>
+                                    <tr id="trHeader">
+                                        <th style="width: 20%">Name</th>
+                                        <th style="width: 15%">Details</th>
+                                        <th style="width: 20%">Parents</th>
+                                        <th style="width: 30%">Contact</th>
+                                        <th style="width: 10%">Edit</th>
+                                    </tr>
+                                </thead>
+                                @{
+                                    int count = 0;
+                                    if (Model.Students != null)
+                                    {
+                                        foreach (StudentBulkUploadModel c in Model.Students)
+                                        {
+                                            if (String.IsNullOrEmpty(c.Name))
+                                            { }
+                                            else
+                                            {
+                                                if (c.DOJ.Year == 1)
+                                                {
+                                                    c.DOJ = SMEnterprise.Repository.CommonUsage.GetCurrentDate().AddYears(-1);
+                                                }
+                                                <tr>
+
+
+
+                                                    <td>
+                                                        <input type="hidden" id="hdnName" name="Students[@count].Name" value="@c.Name" />
+                                                        <input type="hidden" id="hdnRollNo" name="Students[@count].RollNo" value="@c.RollNo" />
+                                                        <input type="hidden" id="hdnSchoolUID" name="Students[@count].SchoolUID" value="@c.SchoolUID" />
+                                                        <input type="hidden" id="hdnBloodGroup" name="Students[@count].BloodGroup" value="@c.BloodGroup" />
+                                                        <input type="hidden" id="hdnReligionID" name="Students[@count].ReligionID" value="@c.ReligionID" />
+                                                        <input type="hidden" id="hdnCategory" name="Students[@count].Category" value="@c.Category" />
+                                                        <input type="hidden" id="hdnGender" name="Students[@count].Gender" value="@c.Gender" />
+                                                        <input type="hidden" id="hdnDOB" name="Students[@count].DOB" value="@c.DOB.ToString("yyyy-MM-dd")" />
+                                                        <input type="hidden" id="hdnDOJ" name="Students[@count].DOJ" value="@c.DOJ.ToString("yyyy-MM-dd")" />
+                                                        <input type="hidden" id="hdnAadharCardNo" name="Students[@count].AadharCardNo" value="@c.AadharCardNo" />
+                                                        <input type="hidden" id="hdnFatherName" name="Students[@count].FatherName" value="@c.FatherName" />
+                                                        <input type="hidden" id="hdnFatherMobileNo" name="Students[@count].FatherMobileNo" value="@c.FatherMobileNo" />
+                                                        <input type="hidden" id="hdnFatherEmailID" name="Students[@count].FatherEmailID" value="@c.FatherEmailID" />
+                                                        <input type="hidden" id="hdnMotherName" name="Students[@count].MotherName" value="@c.MotherName" />
+                                                        <input type="hidden" id="hdnMotherMobileNo" name="Students[@count].MotherMobileNo" value="@c.MotherMobileNo" />
+                                                        <input type="hidden" id="hdnMotherEmailID" name="Students[@count].MotherEmailID" value="@c.MotherEmailID" />
+                                                        <input type="hidden" id="hdnGuardianName" name="Students[@count].GuardianName" value="@c.GuardianName" />
+                                                        <input type="hidden" id="hdnGuardianMobileNo" name="Students[@count].GuardianMobileNo" value="@c.GuardianMobileNo" />
+                                                        <input type="hidden" id="hdnGuardianEmail" name="Students[@count].GuardianEmail" value="@c.GuardianEmail" />
+                                                        <input type="hidden" id="hdnQuotaID" name="Students[@count].QuotaID" value="@c.QuotaID" />
+                                                        <input type="hidden" id="hdnMiniAddress" name="Students[@count].MiniAddress" value="@c.MiniAddress" />
+                                                        <input type="hidden" id="hdnFamilyID" name="Students[@count].FamilyID" value="@c.FamilyID" />
+                                                        Name : <ss id="ssName">@c.Name</ss><br />
+                                                        Roll No : <ss id="ssRollNo">@c.RollNo</ss><br />
+                                                        School UID : <ss id="ssSchoolUID">@c.SchoolUID</ss><br />
+                                                        BG : <ss id="ssBloodGroup">@c.BloodGroup</ss>
+                                                        Gender : <ss id="ssGender">@c.Gender</ss>
+                                                    </td>
+                                                    <td>
+                                                        Aadhaar : <ss id="ssAadharCardNo">@c.AadharCardNo</ss><br />
+                                                        DOB : <ss id="ssDOB">@c.DOB.ToString("dd MMM, yyyy")</ss><br />
+                                                        DOJ : <ss id="ssDOJ">@c.DOJ.ToString("dd MMM, yyyy")</ss>
+                                                        Religion : <ss id="ssReligionID">@c.ReligionID</ss>
+                                                        Category : <ss id="ssCategory">@c.Category</ss>
+                                                    </td>
+                                                    <td>
+                                                        F  : <ss id="ssFatherName">@c.FatherName</ss>
+                                                        FM : <ss id="ssFatherMobileNo">@c.FatherMobileNo</ss>
+                                                        FE :<ss id="ssFatherEmailID">@c.FatherEmailID</ss>
+                                                        <br />
+                                                        M  : <ss id="ssMotherName">@c.MotherName</ss>
+                                                        MM : <ss id="ssMotherMobileNo">@c.MotherMobileNo</ss>
+                                                        ME : <ss id="ssMotherEmailID">@c.MotherEmailID</ss>
+                                                        FamilyID : <ss id="ssFamilyID">@c.FamilyID</ss>
+                                                    </td>
+                                                    <td>
+                                                        G : <ss id="ssGuardianName">@c.GuardianName</ss><br />
+                                                        GM : <ss id="ssGuardianMobileNo">@c.GuardianMobileNo</ss><br />
+                                                        GE : <ss id="ssGuardianEmail">@c.GuardianEmail</ss><br />
+                                                        Quota : <ss id="ssQuotaID">@c.QuotaID</ss><br />
+                                                        Address : <ss id="ssMiniAddress">@c.MiniAddress</ss>
+                                                    </td>
+                                                    <td>
+                                                        <div class="row" style="margin-right: 10px;">
+                                                            <div class="col-md-6">
+                                                                <a href="javascript:void(0);" onclick="ViewStudentDetails(this);" class="btn btn-link Closed">View</a>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                count++;
+                                            }
+                                        }
+                                    }
+                                }
+                            </table>
+                            <div>
+                                <button href="javascript:void(0);" id="btnSaveAttandance" type="submit" class="btn btn-block btn-info pull-right">Upload</button>
+                            </div>
+                                    }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="divEditStudent" style="display:none;">
+    <div class="x_panel">
+        <div class="x_content">
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtSchoolUID">
+                        School UID
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" id="txtSchoolUID" class="form-control" value="">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtName">
+                        Student Name <span class="required">*</span>
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" id="txtName" value="" required="required" class="form-control">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="txtDOB">
+                        Birth Date <span class="required">*</span> <small>(mm/dd/yyyy)</small>
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="date" required="" class="form-control" id="txtDOB" placeholder="Date Of Birth" value="">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3" for="txtDOJ">
+                        Joining Date <span class="required">*</span> <small>(mm/dd/yyyy)</small>
+                    </label>
+                    <div class="col-md-9">
+                        <input type="date" required="" class="form-control" id="txtDOJ" placeholder="Date Of Joining" value="">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                        Roll No
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" id="txtRollNo" value="" class="form-control" placeholder="Roll No" aria-describedby="inputSuccess2Status">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12" for="ddlSBloodGroup">
+                        Blood Group
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <select id="ddlSBloodGroup" required="required" class="form-control">
+                            <option value="A+">A+</option>
+                            <option value="A-">A-</option>
+                            <option value="B+">B+</option>
+                            <option value="B-">B-</option>
+                            <option value="O-">O-</option>
+                            <option value="O+">O+</option>
+                            <option value="AB+">AB-</option>
+                            <option value="AB+">AB+</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                        Father Name
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" value="" class="form-control" id="txtPFatherName" placeholder="Father's Name" aria-describedby="inputSuccess2Status">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                        Mother Name
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" value="" class="form-control" id="txtPMotherName" placeholder="Mother's Name" aria-describedby="inputSuccess2Status">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                        Mobile Number
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" id="txtGuardianMobileNo" value="" class="form-control" placeholder="Mobile Number" aria-describedby="inputSuccess2Status">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                        Aadhar Card No
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" id="txtAadharCardNumber" value="" class="form-control" placeholder="Aadhar Card No" aria-describedby="inputSuccess2Status">
+                    </div>
+                </div>
+                <div class="form-group col-md-6">
+                    <label class="control-label col-md-3 col-sm-3 col-xs-12">
+                        FamilyID
+                    </label>
+                    <div class="col-md-9 col-sm-9 col-xs-12">
+                        <input type="text" id="txtFamilyID" value="" class="form-control" placeholder="FamilyID" aria-describedby="inputSuccess2Status">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="form-group col-md-12">
+                    <label class="control-label col-md-1 col-sm-3 col-xs-12" style="width: 12.3%;">
+                        Address
+                    </label>
+                    <div class="col-md-11 col-sm-9 col-xs-12" style="width: 87.7%;">
+                        <textarea class="form-control" id="txtMiniAddress" style="resize:none" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="form-group col-md-12">
+                    <a href="javascript:void(0);" onclick="return SaveStudentDetails(this);" class="btn btn-success pull-right">Save</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>
+
+    <script src="@Url.Content("~/Parent/js/moment/moment.min.js")"></script>
+    <script src="@Url.Content("~/Parent/js/datepicker/daterangepicker.js")"></script>
+    <script>
+
+        function SessionChanged() {
+            $('#ddlClass').val(0);
+            document.getElementById("ddlClass").onchange();
+            document.getElementById("ddlSection").onchange();
+        }
+
+        $(function () {
+            var table = $('#tblCategory').DataTable({
+                "bPaginate": false,
+                "retrieve": true
+            });
+            $('#btnSaveAttandance').click(function () {
+                $('.bs-filters').val('');
+                $('input[type=search]').val('');
+
+                table.search('').columns().search('').draw();
+                return true;
+            });
+        });
+
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Account/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        var EditSender;
+        function ViewStudentDetails(sender) {
+            if ($(sender).hasClass('Closed')) {
+                $(sender)
+                       .closest("tr")
+                       .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("Open");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+
+                    //$(ele[0]).text('Edit');
+                }
+                //Code to Populate form goes here
+                EditSender = sender;
+                $(sender).closest("tr").next().remove();
+                $(sender)
+               .closest("tr")
+               .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #7b64a5;background-color: rgba(192, 181, 212, 0.47);'>" + $('#divEditStudent').html() + "</td></tr>");
+
+                $('#tdDetails').find('#txtSchoolUID').val($(sender).closest('tr').find('#hdnSchoolUID').val());
+                $('#tdDetails').find('#txtName').val($(sender).closest('tr').find('#hdnName').val());
+                $('#tdDetails').find('#txtDOB').val($(sender).closest('tr').find('#hdnDOB').val());
+                $('#tdDetails').find('#txtDOJ').val($(sender).closest('tr').find('#hdnDOJ').val());
+                $('#tdDetails').find('#txtRollNo').val($(sender).closest('tr').find('#hdnRollNo').val());
+                $('#tdDetails').find('#ddlSBloodGroup').val($(sender).closest('tr').find('#hdnBloodGroup').val());
+                $('#tdDetails').find('#txtPFatherName').val($(sender).closest('tr').find('#hdnFatherName').val());
+                $('#tdDetails').find('#txtPMotherName').val($(sender).closest('tr').find('#hdnMotherName').val());
+                $('#tdDetails').find('#txtGuardianMobileNo').val($(sender).closest('tr').find('#hdnGuardianMobileNo').val());
+                $('#tdDetails').find('#txtAadharCardNumber').val($(sender).closest('tr').find('#hdnAadharCardNo').val());
+                $('#tdDetails').find('#txtMiniAddress').text($(sender).closest('tr').find('#hdnMiniAddress').val());
+                $('#tdDetails').find('#txtMiniAddress').text($(sender).closest('tr').find('#hdnMiniAddress').val());
+                $('#tdDetails').find('#txtFamilyID').text($(sender).closest('tr').find('#hdnFamilyID').val());
+
+                $(sender).text('Close');
+                $(sender).removeClass('Closed');
+                $(sender).addClass('Open');
+            }
+            else {
+                $(sender).text('View');
+                $(sender).removeClass('Open');
+                $(sender).addClass('Closed');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        var monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        function SaveStudentDetails() {
+            $(EditSender).closest('tr').find('#hdnSchoolUID').val($('#tdDetails').find('#txtSchoolUID').val());
+            $(EditSender).closest('tr').find('#hdnName').val($('#tdDetails').find('#txtName').val());
+            $(EditSender).closest('tr').find('#hdnDOB').val($('#tdDetails').find('#txtDOB').val());
+            $(EditSender).closest('tr').find('#hdnDOJ').val($('#tdDetails').find('#txtDOJ').val());
+            $(EditSender).closest('tr').find('#hdnRollNo').val($('#tdDetails').find('#txtRollNo').val());
+            $(EditSender).closest('tr').find('#hdnBloodGroup').val($('#tdDetails').find('#ddlSBloodGroup').val());
+            $(EditSender).closest('tr').find('#hdnFatherName').val($('#tdDetails').find('#txtPFatherName').val());
+            $(EditSender).closest('tr').find('#hdnMotherName').val($('#tdDetails').find('#txtPMotherName').val());
+            $(EditSender).closest('tr').find('#hdnGuardianMobileNo').val($('#tdDetails').find('#txtGuardianMobileNo').val());
+            $(EditSender).closest('tr').find('#hdnAadharCardNo').val($('#tdDetails').find('#txtAadharCardNumber').val());
+            $(EditSender).closest('tr').find('#hdnMiniAddress').val($('#tdDetails').find('#txtMiniAddress').text());
+            $(EditSender).closest('tr').find('#hdnFamilyID').val($('#tdDetails').find('#txtFamilyID').text());
+
+            var dtDOB = new Date($('#tdDetails').find('#txtDOB').val());
+            var dtDOJ = new Date($('#tdDetails').find('#txtDOJ').val());
+            $(EditSender).closest('tr').find('#ssSchoolUID').html($('#tdDetails').find('#txtSchoolUID').val());
+            $(EditSender).closest('tr').find('#ssName').html($('#tdDetails').find('#txtName').val());
+            $(EditSender).closest('tr').find('#ssDOB').html(dtDOB.getDate() + " " + monthNames[dtDOB.getMonth()] + ", " + dtDOB.getFullYear());
+            $(EditSender).closest('tr').find('#ssDOJ').html(dtDOJ.getDate() + " " + monthNames[dtDOJ.getMonth()] + ", " + dtDOJ.getFullYear());
+            $(EditSender).closest('tr').find('#ssRollNo').html($('#tdDetails').find('#txtRollNo').val());
+            $(EditSender).closest('tr').find('#ssBloodGroup').html($('#tdDetails').find('#ddlSBloodGroup').val());
+            $(EditSender).closest('tr').find('#ssFatherName').html($('#tdDetails').find('#txtPFatherName').val());
+            $(EditSender).closest('tr').find('#ssMotherName').html($('#tdDetails').find('#txtPMotherName').val());
+            $(EditSender).closest('tr').find('#ssGuardianMobileNo').html($('#tdDetails').find('#txtGuardianMobileNo').val());
+            $(EditSender).closest('tr').find('#ssAadharCardNo').html($('#tdDetails').find('#txtAadharCardNumber').val());
+            $(EditSender).closest('tr').find('#ssMiniAddress').html($('#tdDetails').find('#txtMiniAddress').text());
+            $(EditSender).closest('tr').find('#ssFamilyID').html($('#tdDetails').find('#txtFamilyID').text());
+            $(EditSender).click();
+        }
+    </script>
+}
+<!-- /.content -->
