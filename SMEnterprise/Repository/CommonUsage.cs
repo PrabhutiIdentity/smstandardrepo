@@ -12,9 +12,15 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Data;
+using System.Data.OleDb;
+using System.Reflection;
+
+
 
 namespace SMEnterprise.Repository
 {
+ 
     public static class DateToWords
     {
         private static CultureInfo ci = new CultureInfo("en-US");
@@ -81,6 +87,259 @@ namespace SMEnterprise.Repository
     }
     public class CommonUsage
     {
+        public static List<T> ConvertDataTable<T>(DataTable dt)
+        {
+            List<T> data = new List<T>();
+            foreach (DataRow row in dt.Rows)
+            {
+                T item = GetItem<T>(row);
+                data.Add(item);
+            }
+            return data;
+        }
+        public static T GetItem<T>(DataRow dr)
+        {
+            Type temp = typeof(T);
+            T obj = Activator.CreateInstance<T>();
+
+            foreach (DataColumn column in dr.Table.Columns)
+            {
+                foreach (PropertyInfo pro in temp.GetProperties())
+                {
+                    if (pro.Name == column.ColumnName)
+                    {
+                        if (pro.PropertyType == typeof(DateTime))
+                        {
+                            DateTime val = GetCurrentDate();
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "M/d/yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "M/d/yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "M/d/yyyy hh:mm:ss tt", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "MM/dd/yyyy HH:mm:ss tt", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "MM/dd/yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd.MM.yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd-MMM-yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd.MM.yy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd-MMM-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd-MMM-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd-MM-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd/MM/yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd/MM/yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "dd/MMM/yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "ddMMyyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+
+
+
+
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d.MM.yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d-MMM-yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d.MM.yy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d-MMM-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d-MMM-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d-MM-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d/MM/yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d/MM/yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d/MMM/yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+
+
+
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d.M.yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d-M-yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d.M.yy", CultureInfo.InvariantCulture);
+                            }
+                            catch { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d-M-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+
+
+
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d-M-yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d/M/yy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            { }
+                            try
+                            {
+                                val = DateTime.ParseExact(dr[column.ColumnName].ToString(), "d/M/yyyy", CultureInfo.InvariantCulture);
+                            }
+                            catch
+                            {
+                                try
+                                {
+                                    val = DateTime.Parse(dr[column.ColumnName].ToString());
+                                }
+                                catch { }
+                            }
+
+                            pro.SetValue(obj, val, null);
+                        }
+                        else if (pro.PropertyType == typeof(string))
+                        {
+                            pro.SetValue(obj, dr[column.ColumnName].ToString(), null);
+
+                        }
+                        else if (pro.PropertyType == typeof(int))
+                        {
+
+                            pro.SetValue(obj, ConvertToInt(dr[column.ColumnName].ToString()), null);
+                        }
+                    }
+
+                    else
+                        continue;
+                }
+            }
+            return obj;
+        }
         private static List<ApiAuthenticationModel> _appUsersDynamicSalt;
         public static List<ApiAuthenticationModel> AppUsersDynamicSalt
         {
@@ -856,6 +1115,83 @@ namespace SMEnterprise.Repository
             }
             return sb.ToString().TrimEnd();
         }
+
+
+        #region for bulk upload
+        public static class Utility
+        {
+            public static DataTable ConvertCSVtoDataTable(string strFilePath)
+            {
+                DataTable dt = new DataTable();
+                using (StreamReader sr = new StreamReader(strFilePath))
+                {
+                    string[] headers = sr.ReadLine().Split(',');
+                    foreach (string header in headers)
+                    {
+                        dt.Columns.Add(header);
+                    }
+
+                    while (!sr.EndOfStream)
+                    {
+                        string[] rows = sr.ReadLine().Split(',');
+                        if (rows.Length > 1)
+                        {
+                            DataRow dr = dt.NewRow();
+                            for (int i = 0; i < headers.Length; i++)
+                            {
+                                dr[i] = rows[i].Trim();
+                            }
+                            dt.Rows.Add(dr);
+                        }
+                    }
+
+                }
+
+
+                return dt;
+            }
+
+            public static DataTable ConvertXSLXtoDataTable(string strFilePath, string connString)
+            {
+                OleDbConnection oledbConn = new OleDbConnection(connString);
+                DataTable dt = new DataTable();
+                DataSet ds = new DataSet();
+                //try
+                //{
+
+                oledbConn.Open();
+                using (DataTable Sheets = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null))
+                {
+
+                    for (int i = 0; i < Sheets.Rows.Count; i++)
+                    {
+                        string worksheets = Sheets.Rows[i]["TABLE_NAME"].ToString();
+                        OleDbCommand cmd = new OleDbCommand(String.Format("SELECT * FROM [{0}]", worksheets), oledbConn);
+                        OleDbDataAdapter oleda = new OleDbDataAdapter();
+                        oleda.SelectCommand = cmd;
+
+                        oleda.Fill(ds);
+                    }
+
+                    dt = ds.Tables[0];
+                }
+
+                //}
+                //catch (Exception ex)
+                //{
+                //}
+                //finally
+                //{
+
+                oledbConn.Close();
+                //}
+
+                return dt;
+
+            }
+
+        }
+        #endregion 
 
     }
 

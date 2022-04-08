@@ -8,6 +8,9 @@ using SMEnterprise.Repository;
 using SMEnterprise.Filters;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNet.SignalR;
+using System.Data;
+using static SMEnterprise.Repository.CommonUsage;
 
 namespace SMEnterprise.Controllers
 {
@@ -586,7 +589,7 @@ namespace SMEnterprise.Controllers
         public async Task<ActionResult> GetFeeReciept(string ID = null)
         {
             int iID = CommonUsage.ConvertToInt(ID);
-            FeePaymentModel model =await objAccountData.GetFeePaymentReciptDetails(iID);
+            FeePaymentModel model = await objAccountData.GetFeePaymentReciptDetails(iID);
             return PartialView("_PrintFeeRecipt", model);
         }
         [PermissionFilter]
@@ -2478,7 +2481,7 @@ namespace SMEnterprise.Controllers
             int month = CommonUsage.GetCurrentDate().Month;
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             CommonData objCommonData = new CommonData();
-            EventCalendarModel model =await objCommonData.GetEventCalander(month, year, SBranchID, 0);
+            EventCalendarModel model = await objCommonData.GetEventCalander(month, year, SBranchID, 0);
             return View(model);
         }
         [PermissionFilter]
@@ -2489,7 +2492,7 @@ namespace SMEnterprise.Controllers
 
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             CommonData objCommonData = new CommonData();
-            EventCalendarModel model =await objCommonData.GetEventCalander(month, year, SBranchID, 1);
+            EventCalendarModel model = await objCommonData.GetEventCalander(month, year, SBranchID, 1);
 
             return Json(model, JsonRequestBehavior.AllowGet);
         }
@@ -2943,7 +2946,7 @@ namespace SMEnterprise.Controllers
             int UserID = CommonUsage.ConvertToInt(parentid);
             int UserType = 4;
             CommonData objCommonData = new CommonData();
-            int i=  objAccountData.UpdatePassword(UserID, UserType, Password);
+            int i = objAccountData.UpdatePassword(UserID, UserType, Password);
             // objAccountData.UpdatePassword(UserID, UserType, Password);
             return Json(i, JsonRequestBehavior.AllowGet);
 
@@ -2968,8 +2971,8 @@ namespace SMEnterprise.Controllers
         {
             int isBlock = CommonUsage.ConvertToInt(ID);
             int studentID = CommonUsage.ConvertToInt(ID2);
-            objAccountData.UpdateIsBlock(isBlock, studentID);
-            return Json(JsonRequestBehavior.AllowGet);
+           int res = objAccountData.UpdateIsBlock(isBlock, studentID);
+            return Json(res,JsonRequestBehavior.AllowGet);
         }
 
         #endregion
@@ -3224,6 +3227,15 @@ namespace SMEnterprise.Controllers
             objAdminData.GetStudentAdmssionDetail(oModel);
             return View(oModel);
         }
+
+        [PermissionFilter]
+        public ActionResult SessionAdmissionReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+            objAccountData.GetSessionAdmissionReport(oModel);
+            return View(oModel);
+        }
         #endregion
 
         #region promotedstudentsreport
@@ -3236,16 +3248,7 @@ namespace SMEnterprise.Controllers
             return View(oModel);
         }
         #endregion
-        #region SessionAdmissionReport
-        [PermissionFilter]
-        public ActionResult SessionAdmissionReport(StudentAdmissionReportModel oModel)
-        {
-            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
 
-            objAccountData.GetSessionAdmissionReport(oModel);
-            return View(oModel);
-        }
-        #endregion
 
 
         #region TransportFee
@@ -3310,16 +3313,79 @@ namespace SMEnterprise.Controllers
 
         #endregion
 
-        #region bulkinfo
+        #region Bulk Student Data Upload
         [PermissionFilter]
-        public ActionResult BulkUploadInfo(BulkUploadInfoModel oModel)
+        public ActionResult BulkStudentUploadEnt(BulkStudentUploadModel objModel)
         {
-            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            oModel = objAccountData.GetBulkUploadInfo(oModel);
-            return View(oModel);
+            HttpPostedFileBase fileupload = objModel.ExcelFile;
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            objModel = objAccountData.GetBulkUploadData(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
+            objModel.ExcelFile = fileupload;
+            if (objModel.ExcelFile != null)
+            {
+                string extension = System.IO.Path.GetExtension(objModel.ExcelFile.FileName).ToLower();
+                string query = null;
+                string connString = "";
+
+                string[] validFileTypes = { ".xls", ".xlsx", ".csv" };
+
+                string path1 = string.Format("{0}/{1}", Server.MapPath("~/Content/Uploads/"), objModel.ExcelFile.FileName.Replace(" ", "_"));
+                if (!Directory.Exists(path1))
+                {
+                    Directory.CreateDirectory(Server.MapPath("~/Content/Uploads"));
+                }
+                if (validFileTypes.Contains(extension))
+                {
+                    DataTable dt = new DataTable();
+                    if (System.IO.File.Exists(path1))
+                    {
+                        System.IO.File.Delete(path1);
+                    }
+                    objModel.ExcelFile.SaveAs(path1);
+                    if (extension == ".csv")
+                    {
+                        dt = Utility.ConvertCSVtoDataTable(path1);
+                        ViewBag.Data = dt;
+                    }
+                    //Connection String to Excel Workbook  
+                    else if (extension.Trim() == ".xls")
+                    {
+                        connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + path1 + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
+                        dt = Utility.ConvertXSLXtoDataTable(path1, connString);
+                        ViewBag.Data = dt;
+                    }
+                    else if (extension.Trim() == ".xlsx")
+                    {
+
+                        connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path1 + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
+                        dt = Utility.ConvertXSLXtoDataTable(path1, connString);
+                        ViewBag.Data = dt;
+                    }
+                    objModel.Students = CommonUsage.ConvertDataTable<StudentBulkUploadModel>(dt);
+                }
+                else
+                {
+                    ViewBag.Error = "Please Upload Files in .xls, .xlsx or .csv format";
+
+                }
+
+            }
+
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult BulkUploadStudentsEnt(BulkStudentUploadModel objModel)
+        {
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAccountData.UpdateBulkStudentsEnt(objModel);
+            StudentsPageModel objNewModel = new StudentsPageModel();
+            objNewModel.ClassID = objModel.ClassID;
+            objNewModel.SectionID = objModel.SectionID;
+            objNewModel.SessionID = objModel.SessionID;
+            return RedirectToAction("Students", "Account", objNewModel);
         }
 
-        #endregion
+        #endregion Bulk Student Data Upload
 
     }
 }

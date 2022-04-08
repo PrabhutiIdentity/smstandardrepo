@@ -1,0 +1,83 @@
+--EvaluationSchemeDelete Problem--
+--sp_GetEvaluationSchemes
+GO
+
+alter proc [dbo].[sp_GetEvaluationSchemes]    
+(        
+@SBranchID int,        
+@SessionID int=0        
+)        
+AS        
+BEGIN        
+ if(@SessionID=0)        
+ begin        
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID        
+ end        
+ Select EvaluationSchemeID,EvaluationSchemeName,[dbo].[GetEvaluationSchemeClassList](EvaluationSchemeID,@SessionID) as Classes,      
+ [dbo].[GetSchemeClassListIDs](EvaluationSchemeID,@SessionID) as ClassIDs , (Select Count(*) from  EvaluationTypes where EvaluationSchemeID=ESM.EvaluationSchemeID) as CountUsed      
+ from EvaluationSchemeMaster ESM where SBranchID=@SBranchID and SessionID=@SessionID        
+ select @SessionID        
+ Select SessionID,SessionName,SessionStatus,SessionStartDate,SessionEndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate        
+         
+ select CM.ClassID,CM.ClassName,ESM.EvaluationSchemeName as EducationLevelName, ESM.EvaluationSchemeID        
+ from ClassMaster CM left outer join [ClassSessionDetails] CSD on CSD.SessionID=@SessionID and CSD.ClassID=CM.ClassID        
+ left outer join EvaluationSchemeMaster ESM on ESM.EvaluationSchemeID=CSD.SchemeID  and ESM.SessionID=@SessionID      
+ where CM.SBranchID=@SBranchID and CM.Status=1        
+END 
+GO
+
+--EvaluationType Delete Problem--
+
+--[sp_GetEvaluationTypes]
+
+alter proc [dbo].[sp_GetEvaluationTypes]    
+(    
+@SBranchID int,    
+@SessionID int,    
+@EvaluationSchemeID int    
+)    
+AS    
+BEGIN    
+ if(@SessionID=0)    
+ begin    
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID    
+ end    
+ if(@EvaluationSchemeID=0)    
+ begin    
+  select @EvaluationSchemeID=EvaluationSchemeID from EvaluationSchemeMaster where SessionID=@SessionID    
+ end    
+ Select *,(select Count(*) from EvaluationMaster where EvaluationType=ET.EvaluationTypeID) as CountUsed  
+ from  EvaluationTypes ET   
+ where SBranchID=@SBranchID and SessionID=@SessionID and EvaluationSchemeID=@EvaluationSchemeID    
+ select @SessionID    
+ Select SessionID,SessionName,SessionStatus,SessionStartDate,SessionEndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate    
+ select EvaluationSchemeName,EvaluationSchemeID from EvaluationSchemeMaster where SBranchID=@SBranchID and SessionID=@SessionID    
+ select @EvaluationSchemeID    
+END 
+GO
+
+
+--_EvaluationDetailsPartial Delete Problem--
+
+ALTER proc [dbo].[sp_GetSubEvaluations]    
+(    
+@EvaluationID int    
+)    
+AS    
+BEGIN    
+ declare @SessionID int    
+  select @SessionID=SessionID from EvaluationMaster where EvaluationID=@EvaluationID    
+ Select EvaluationID,[EvaluationName],[Weightage],EvaluationMonth,    
+ DateName( month , DateAdd( month , EvaluationMonth , -1 ) ) as EvaluationMonthName,EvaluationType
+ ,(Select count(*) from ExamMaster Exm where Exm.EvaluationID=EM.EvaluationID) evCountUsed
+ from  [dbo].[EvaluationMaster] EM    
+ where MasterID=@EvaluationID    
+    
+ declare @SchemeID int    
+ select @SchemeID =EvaluationSchemeID from [dbo].[EvaluationMaster] EM where EvaluationID=@EvaluationID    
+ Select * from EvaluationTypes Where SessionID=@SessionID and EvaluationSchemeID=@SchemeID    
+END
+ 
+GO
+
+      

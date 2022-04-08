@@ -1,16 +1,14 @@
 ﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_AccountLayout.cshtml";
-
-    @*  New Changes 31March2022  Start *@
+    Layout = null;
+@*  New Changes 31March2022  Start *@
     List<NameIDModel> SubjectEvaluationFinalStatus = new List<NameIDModel>();
      @*  New Changes 31March2022  Start *@
 }
 @model SMEnterprise.Models.PerformanceParameterDetailModel
 @section IncludeCss
 {
-    <title>Performance Card | @Model.Student.Name</title>
     <style>
         #tblResult > tbody > tr > td {
             text-align: center !important;
@@ -25,11 +23,6 @@
         .print {
             display: none;
         }
-
-        .reportSign {
-            max-width: 200px;
-            max-height: 90px;
-        }
     </style>
 }
 <div class="">
@@ -37,10 +30,10 @@
     <div class="clearfix"></div>
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-                @using (Html.BeginForm("UpdateStudentPerformance", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                {
-                    <div class="x_content">
+              
+                    <div class="x_panel">
+                @{
+                  <div class="x_content">
                         <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
 
                             <tr style="width:100%">
@@ -78,40 +71,83 @@
                                 </td>
                             </tr>
                             <tr style="padding-top:10px;padding-bottom:10px;">
+                                @if (Model.SBranchDetails.SBranchID == 1)
+                                {
+                                    <td style="padding-left:10px;text-align:left; width:45%">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                अनुक्रमांक :<b> @Model.Student.RollNo</b>
+                                            </div>
+                                            <div class="row">
+                                                नाम : <b id="bStudentNate">@Model.Student.Name</b>
+                                            </div>
+                                            <div class="row">
+                                                माता का नाम : <b>@Model.Student.MotherName</b>
+                                            </div>
+                                            <div class="row">
+                                                पिता का नाम : <b>@Model.Student.FatherName</b>
+                                            </div>
+                                            <div class="row">
+                                                Parent's ID : <b>@Model.Student.SParentID</b>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding-left:10px;width:45%">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                जन्मतिथि :<b> @Model.Student.DOB.ToString("dd MMM, yyyy")</b>
+                                            </div>
+                                            <div class="row">
+                                                कक्षा-अनुभाग :<b id="bClassSection"> @Model.Student.ClassName </b>
+                                            </div>
+                                            <div class="row">
+                                                छात्र आईडी :<b> @Model.Student.StudentSID</b>
+                                            </div>
+                                            <div class="row">
+                                                छात्र पंजीयन सं :<b> @Model.Student.SchoolUID</b>
+                                            </div>
 
-                                <td style="padding-left:10px;text-align:left; width:45%">
-                                    <div class="col-md-12">
-                                        <div class="row">
-                                            अनुक्रमांक :<b> @Model.Student.RollNo</b>
                                         </div>
-                                        <div class="row">
-                                            नाम : <b id="bStudentNate">@Model.Student.Name</b>
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td style="padding-left:10px;text-align:left; width:45%">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                Roll No. :<b> @Model.Student.RollNo</b>
+                                            </div>
+                                            <div class="row">
+                                                Student : <b id="bStudentNate">@Model.Student.Name</b>
+                                            </div>
+                                            <div class="row">
+                                                Mother's Name : <b>@Model.Student.MotherName</b>
+                                            </div>
+                                            <div class="row">
+                                                Father's Name : <b>@Model.Student.FatherName</b>
+                                            </div>
+                                            <div class="row">
+                                                Parent's ID : <b>@Model.Student.SParentID</b>
+                                            </div>
                                         </div>
-                                        <div class="row">
-                                            माता का नाम : <b>@Model.Student.MotherName</b>
+                                    </td>
+                                    <td style="padding-left:10px;width:45%;text-align:left;">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                Date of Birth :<b> @Model.Student.DOB.ToString("dd MMM, yyyy")</b>
+                                            </div>
+                                            <div class="row">
+                                                Class-Section :<b id="bClassSection"> @Model.Student.ClassName </b>
+                                            </div>
+                                            <div class="row">
+                                                Student ID :<b> @Model.Student.StudentSID</b>
+                                            </div>
+                                            <div class="row">
+                                                SR No.  :<b> @Model.Student.SchoolUID</b>
+                                            </div>
                                         </div>
-                                        <div class="row">
-                                            पिता का नाम : <b>@Model.Student.FatherName</b>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style="padding-left:10px;width:45%">
-                                    <div class="col-md-12">
-                                        <div class="row">
-                                            जन्मतिथि :<b> @Model.Student.DOB.ToString("dd MMM, yyyy")</b>
-                                        </div>
-                                        <div class="row">
-                                            कक्षा-अनुभाग :<b id="bClassSection"> @Model.Student.ClassName </b>
-                                        </div>
-                                        <div class="row">
-                                            छात्र आईडी :<b> @Model.Student.StudentSID</b>
-                                        </div>
-                                        <div class="row">
-                                            छात्र पंजीयन सं :<b> @Model.Student.SchoolUID</b>
-                                        </div>
-
-                                    </div>
-                                </td>
+                                    </td>
+                                }
                                 <td style="text-align:left;width:10%">
                                     <div class="col-md-12" style="text-align:left;">
                                         <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
@@ -120,9 +156,6 @@
                                 </td>
                             </tr>
                         </table>
-
-
-
                         <input type="hidden" name="StudentSessionUID" value="@Model.StudentSessionUID" />
                         <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
                         <div class="col-md-12 col-sm-12 col-xs-12">
@@ -130,7 +163,7 @@
 
                                 //Model.Result.ForEach(cc => cc.wMaxMarks = 0);
                                 //Model.Result.ForEach(cc => cc.wMarksScored = 0);
-                                <table class="table">
+                                <table class="table" style="width:100%">
                                     @foreach (PerformanceParameterModel c in Model.PerformanceParameters)
                                     {
                                         if (c.ParamType == 0)
@@ -142,7 +175,7 @@
                                                 </td>
                                             </tr>
                                             <tr>
-                                                <td colspan="3">
+                                                <td  style="width:100%">
                                                     <table id="tblResult" class="table table-bordered table-hover" style="width:100%">
                                                         @{
                                                             var sublevels = 1;
@@ -175,7 +208,8 @@
                                                                         {
                                                                             if (se.MasterID == tme.EvaluationID)
                                                                             {
-                                                                                <td style="font-size: 0.7em;"><b>@se.EvaluationName</b> @*(@se.Weightage)*@</td>
+                                                                                @* <td style="font-size: 0.7em;"><b>@se.EvaluationName</b>(@se.Weightage)</td>*@
+<td style="font-size: 0.7em;"><b>प्राप्तांक</b> @*(@se.Weightage)*@</td>
                                                                             }
                                                                         }
                                                                         <td style="font-size: 0.7em;"><b>योग</b>  @*(@tme.Weightage)*@</td>
@@ -185,25 +219,24 @@
                                                                     {
                                                                         <td style="font-size: 0.7em;"><b>पूर्णाक</b></td>
                                                                         <td style="font-size: 0.7em;"><b>प्राप्तांक</b></td>
-                                                                        <td style="font-size: 0.7em;"><b>ग्रेड</b></td>
+                                                                          @*<td style="font-size: 0.7em;"><b>ग्रेड</b></td> check*@
                                                                     }
                                                                 </tr>
                                                             }
 
                                                             var privSubID = 0;
+ @*  New Changes 31March2022  Start *@
+                                                        decimal totalmarksresult = 0;
                                                             @*  New Changes 31March2022  Start *@
-                                                          decimal totalmarksresult = 0;
-                                                            @*  New Changes 31March2022  Start *@
-
-                                                        foreach (ExamResultDetailModel r in Model.Result)
-                                                        {
-                                                            //r.wMaxMarks = 0;
-                                                            //r.wMarksScored = 0;
-                                                            decimal subjectTotal = 0;
-                                                            decimal subjectScored = 0;
-
-                                                            if (privSubID != r.SubjectID)
+                                                            foreach (ExamResultDetailModel r in Model.Result)
                                                             {
+                                                                //r.wMaxMarks = 0;
+                                                                //r.wMarksScored = 0;
+                                                                decimal subjectTotal = 0;
+                                                                decimal subjectScored = 0;
+
+                                                                if (privSubID != r.SubjectID)
+                                                                {
                                                                     <tr>
                                                                         <td style="min-width: 110px;"><b>@r.SubjectName</b></td>
                                                                         @foreach (EvaluationModel er in Model.MainEvaluations)
@@ -225,7 +258,7 @@
                                                                                             @*<td>@(err.Grade == null ? "NA" : err.Grade)</td>*@
 
                                                                                             @*<td>@err.wMarksScored.ToString("N2")</td>*@
-                                                                                            <td>@err.wMarksScored.ToString("N2")</td>
+                                                                                            <td>@err.wMarksScored.ToString("0")</td>
                                                                                             EvalTotalMarks = EvalTotalMarks + err.wMarksScored;
                                                                                             isFound = true;
 
@@ -242,9 +275,6 @@
                                                                                             er.MarksObtained = er.MarksObtained + err.wMarksScored;
                                                                                             r.etMarksScored = r.etMarksScored + err.wMarksScored;
                                                                                             r.etMaxMarks = r.etMaxMarks + err.wMaxMarks;
-
-
-
                                                                                         }
                                                                                     }
                                                                                     if (!isFound)
@@ -254,54 +284,56 @@
                                                                                 }
 
                                                                             }
-                                                                            @* New Changes: 31March2022  Start*@
-                                                                            //var subEve = SubjectEvaluationFinalStatus.Where(se => se.ID == r.SubjectID && se.Name == er.EvaluationID.ToString()).SingleOrDefault();
-                                                                            //if (subEve == null)
-                                                                            //{
-                                                                            //    subEve = new NameIDModel();
-                                                                            //    subEve.ID = r.SubjectID;
-                                                                            //    subEve.Name = er.EvaluationID.ToString();
 
+  @* New Changes: 31March2022  Start*@
+                                                                            var subEve = SubjectEvaluationFinalStatus.Where(se => se.ID == r.SubjectID && se.Name == er.EvaluationID.ToString()).SingleOrDefault();
+                                                                            if (subEve == null)
+                                                                            {
+                                                                                subEve = new NameIDModel();
+                                                                                subEve.ID = r.SubjectID;
+                                                                                subEve.Name = er.EvaluationID.ToString();
 
-                                                                            //    if (EvalTotalMarks != 0)
-                                                                            //    {
-                                                                            //        if (EvalMaxMarks == 0)
-                                                                            //        {
-                                                                            //            subEve.Extra1 = "-";
-                                                                            //        }
-                                                                            //        else
-                                                                            //        {
-                                                                            //            subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
-                                                                            //        }
+                                                                                // subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                                if (EvalTotalMarks != 0)
+                                                                                {
+                                                                                    if (EvalMaxMarks == 0)
+                                                                                    {
+                                                                                        subEve.Extra1 = "-";
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                                    }
+                                                                                    //subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    subEve.Extra1 = "Invalid";
+                                                                                }
 
-                                                                            //    }
-                                                                            //    else
-                                                                            //    {
-                                                                            //        subEve.Extra1 = "Invalid";
-                                                                            //    }
+                                                                                SubjectEvaluationFinalStatus.Add(subEve);
+                                                                            }
+                                                                            else
+                                                                            {
 
-                                                                            //    SubjectEvaluationFinalStatus.Add(subEve);
-                                                                            //}
-                                                                            //else
-                                                                            //{
+                                                                                if (EvalMaxMarks == 0)
+                                                                                {
+                                                                                    subEve.Extra1 = "-";
+                                                                                }
+                                                                                else
+                                                                                {
+                                                                                    subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                                                }
+                                                                                //subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
 
-                                                                            //    if (EvalMaxMarks == 0)
-                                                                            //    {
-                                                                            //        subEve.Extra1 = "-";
-                                                                            //    }
-                                                                            //    else
-                                                                            //    {
-                                                                            //        subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
-                                                                            //    }
+                                                                            }
 
-
-                                                                            //}
-
-                                                                            //totalmarksresult = totalmarksresult + EvalMaxMarks;
+                                                                            totalmarksresult = totalmarksresult + EvalMaxMarks;
 
                                                                             @* New Changes: 31March2022 End*@
 
-                                                                            <td>@Math.Round(EvalTotalMarks, 2)</td>
+
+                                                                            <td>@Math.Round(EvalTotalMarks, 0)</td>
                                                                             @*<td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>*@
                                                                         }
                                                                         @if (Model.EvaluationID == -1)
@@ -309,10 +341,10 @@
 
 
                                                                             <td>@(r.rMaxMarks.ToString("0"))</td>
-                                                                            <td>@r.etMarksScored.ToString("0.00")</td>
-                                                                            <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>
+                                                                            <td>@r.etMarksScored.ToString("0")</td>
+                                                                            @*<td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td> check*@
                                                                             @*<td>@(r.rMarksScored.ToString("0"))</td>
-                            <td>@AcadmicModel.CalculateGrade(r.MarksScored, r.wMaxMarks)</td>*@
+                                                                                <td>@AcadmicModel.CalculateGrade(r.MarksScored, r.wMaxMarks)</td>*@
 
                                                                             @*  For Grade*@
                                                                         }
@@ -330,7 +362,7 @@
                                                                         @*<td><b>@Math.Round(sube.MarksObtained, 2)</b></td>*@
                                                                         <td></td>
                                                                     }
-                                                                    <td><b>@Math.Round(me.MarksObtained, 2)</b></td>
+                                                                    <td><b>@Math.Round(me.MarksObtained, 0)</b></td>
 
                                                                     @*<td>@Math.Round(me.TotalMarks == 0 ? 0 : me.MarksObtained * 100 / me.TotalMarks, 2)%</td>*@
                                                                     @*<td>@Math.Round(me.TotalMarks == 0 ? 0 : me.MarksObtained * 100 / me.TotalMarks, 2)% (@AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks))</td>*@
@@ -357,8 +389,7 @@
                                                                     }
                                                                     <td><b>@(Model.Result.Sum(x => x.rMaxMarks).ToString("0"))</b></td>
                                                                     <td><b>@(Model.Result.Sum(x => x.rMarksScored).ToString("0"))</b></td>
-                                                                    <td>@AcadmicModel.CalculateGrade(Model.Result.Sum(x => x.rMarksScored), Model.Result.Sum(x => x.rMaxMarks))</td>
-                                                                    @* For Grade*@
+                                                                    @*<td>@AcadmicModel.CalculateGrade(Model.Result.Sum(x => x.rMarksScored), Model.Result.Sum(x => x.rMaxMarks))</td>*@ @* For Grade*@
                                                                 }
 
                                                             </tr>
@@ -564,8 +595,8 @@
 
                                                 <tr>
                                                     <td style="width:25%">
-                                                        Place : <br />
-                                                        Date  : @Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
+                                                        Place : BARAYEPUR<br />
+                                                        Date  :@Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
                                                     </td>
                                                     <td style="width:25%">
                                                         Signature of <br />
@@ -747,52 +778,8 @@
                             }
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
-                        @if (Model.EvaluationID != -1)
-                        {
-                            <button class="btn btn-success pull-right" type="submit" onclick="$(this).css('display', 'none');" value="Save">Save</button>
-                        }
-                    </div>
+              
                 }
             </div>
         </div>
     </div>
-</div>
-
-@section scripts
-{
-    <script type="text/javascript">
-        function DrawAttandanceChart(data) {
-            new Chart(document.getElementById("canvas000"), {
-                type: 'line',
-                data: data
-            });
-        }
-        function PrintReport() {
-            var StudentName = $('#bStudentNate').html();
-            var ClassSection = $('#bClassSection').html();
-            var contents = $(".x_content").html();
-            var frame1 = $('<iframe />');
-            frame1[0].name = "frame1";
-            frame1.css({ "position": "absolute", "top": "-1000000px" });
-            $("body").append(frame1);
-            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
-            frameDoc.document.open();
-            //Create a new HTML document.
-            frameDoc.document.write('<html><head><title>Performance Report For ' + StudentName + ' Class ' + ClassSection + '</title>');
-            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
-            frameDoc.document.write('</head><body>');
-            //Append the external CSS file.
-            //Append the DIV contents.
-            frameDoc.document.write(contents);
-            frameDoc.document.write('</body></html>');
-            frameDoc.document.close();
-            setTimeout(function () {
-                window.frames["frame1"].focus();
-                window.frames["frame1"].print();
-                frame1.remove();
-            }, 500);
-        }
-    </script>
-}
