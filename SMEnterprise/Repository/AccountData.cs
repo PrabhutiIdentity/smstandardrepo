@@ -4779,7 +4779,7 @@ namespace SMEnterprise.Repository
 
         public int UpdateBulkStudentsEnt(BulkStudentUploadModel objModel)
         {
-
+            //Added for bulk upload
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
