@@ -4750,6 +4750,7 @@ namespace SMEnterprise.Repository
             }
             return oModel;
         }
+        #region Bulk Student Data Upload
         public BulkUploadInfoModel GetBulkUploadInfo(BulkUploadInfoModel oModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -4765,5 +4766,46 @@ namespace SMEnterprise.Repository
             }
             return oModel;
         }
+        public BulkStudentUploadModel GetBulkUploadData(int ClassID, int SectionID, int SBranchID, int SessionID)
+        {
+
+            BulkStudentUploadModel objModel = new BulkStudentUploadModel();
+            objModel.SectionID = SectionID;
+            objModel.ClassID = ClassID;
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ClassID", ClassID);
+                paramater.Add("@SectionID", SectionID);
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("spn_GetBulkUploadPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Classes = multi.Read<ClassModel>().ToList();
+                    objModel.Sections = multi.Read<SectionModel>().ToList();
+                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
+
+        public int UpdateBulkStudentsEnt(BulkStudentUploadModel objModel)
+        {
+            //Added for bulk upload
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ClassID", objModel.ClassID);
+                paramater.Add("@SectionID", objModel.SectionID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@Students", objModel.GetStudentsDataTableEnt());
+                return con.Query<int>("sp_BulkUploadStudentsEnt", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        #endregion
     }
 }
