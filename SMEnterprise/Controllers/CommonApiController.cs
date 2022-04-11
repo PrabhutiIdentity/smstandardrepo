@@ -72,6 +72,26 @@ namespace SMEnterprise.Controllers
             return objWraper;
         }
         [HttpGet]
+        public async Task<CommonApiWraperModel> GetTransportLocationMode(string UUID = null)
+        {
+            var user = VerifyUser(UUID);
+
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+            if (user != null)
+            {
+                objWraper.Code = 200;
+                objWraper.Data = await (new CommonData()).GetTransportLocationMode(user.SBranchID);
+                objWraper.Message = "Success";
+            }
+            else
+            {
+                objWraper.Code = 404;
+                objWraper.Message = "User Not Found";
+                objWraper.Data = -1;
+            }
+            return objWraper;
+        }
+        [HttpGet]
         public string GetLoginDynamicSalt(string UUID = null)
         {
             var commonData = new CommonData();
