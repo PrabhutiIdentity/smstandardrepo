@@ -66,6 +66,16 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+        public async Task<int> GetTransportLocationMode(int SBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                DateTime curDate = CommonUsage.GetCurrentDate();
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                return (await con.QueryAsync<int>("tsp_GetTransportLocationMode", paramater, null, 0, CommandType.StoredProcedure)).FirstOrDefault();
+            }
+        }
         //public static void InitializeSMSConfiguration(string Path)
         //{
         //    try
