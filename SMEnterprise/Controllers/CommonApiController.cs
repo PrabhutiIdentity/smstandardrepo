@@ -182,8 +182,19 @@ namespace SMEnterprise.Controllers
                 if (entry == null)
                 {
                     entry = new ApiAuthenticationModel();
+                    entry.SchoolID = SchoolID;
+                    entry.UUID = UUID;
+                    entry.SBranchID = loginData.GetBranchIDOnSchoolID(SchoolID);
+                    entry.LastLoginDate = CommonUsage.GetCurrentDate();
+                    entry.DynamicSalt = CommonUsage.RandomString(6, false);
+                    commonData.InsertUpdateAppUser(entry);
                 }
-
+                else
+                {
+                    entry.LastLoginDate = CommonUsage.GetCurrentDate();
+                    entry.DynamicSalt = CommonUsage.RandomString(6, false);
+                    commonData.InsertUpdateAppUser(entry);
+                }
                 entry.SchoolID = SchoolID;
                 entry.UUID = UUID;
                 entry.SBranchID = loginData.GetBranchIDOnSchoolID(SchoolID);
