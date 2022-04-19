@@ -470,6 +470,7 @@ namespace SMEnterprise.Controllers
             objModel.CurrentTab = 1;
             return PartialView("_StudentViewPartial", objModel);
         }
+    
         [PermissionFilter]
         public ActionResult GetSectionOptionalSubjects(string id = null)
         {

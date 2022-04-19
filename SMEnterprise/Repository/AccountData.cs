@@ -965,6 +965,7 @@ namespace SMEnterprise.Repository
                     objModel.Sessions = multi.Read<SessionModel>().ToList();
                     objModel.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
                     objModel.SessionName = multi.Read<string>().SingleOrDefault();
+                  
                 }
                 if (objModel.Student == null)
                 {
