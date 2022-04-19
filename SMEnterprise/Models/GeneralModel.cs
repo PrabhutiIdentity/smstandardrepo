@@ -29,6 +29,7 @@ namespace SMEnterprise.Models
         public int ClassID { get; set; }
         public List<NameIDModel> Sessions { get; set; }
         public List<ParentModel> Parents { get; set; }
+        public List<NameIDModel> Classes { get; set; }
     }
     public class YoutubeAdminEditPageData
     {
