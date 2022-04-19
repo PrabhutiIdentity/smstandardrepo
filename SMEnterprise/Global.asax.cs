@@ -107,7 +107,7 @@ namespace SMEnterprise
         {
           //  Session is Available here
             HttpContext context = HttpContext.Current;
-            context.Session["UserID"] = "100";
+          //  context.Session["UserID"] = "100";
 
         }
         protected void Application_PreRequestHandlerExecute(object sender, EventArgs e)

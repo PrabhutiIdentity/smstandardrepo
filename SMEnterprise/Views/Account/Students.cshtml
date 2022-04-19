@@ -1,4 +1,4 @@
-﻿﻿@using SMEnterprise.Models;
+﻿﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
@@ -102,7 +102,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
 
                 </div>
@@ -244,7 +243,6 @@
 
                                             <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
                                             <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
-                                          
                                             <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
 
 
@@ -280,7 +278,6 @@
                                             <input type="hidden" name="StudentID" id="hdnStudentID" value="@c.StudentID" />
                                             <input type="hidden" name="IsBlock" id="hdnIsBlock" value="@c.IsBlock">
                                         </label>
-
                                     </td>
                                 </tr>
 
@@ -304,7 +301,7 @@
             </div>
         </div>
     </div>
- 
+
 </div>
 
 
@@ -378,7 +375,6 @@
         });
 
         $('.IsBlock').click(function () {
-            return confirm('Do you really want to Change student Status!!!!');
             debugger;
             var isblock = $(this).closest('label').find('#hdnIsBlock').val();
             var studentID = $(this).closest('label').find('#hdnStudentID').val();
@@ -388,11 +384,8 @@
                     url: '/Account/UpdateIsBlock/' + isblock + "/" + studentID,
                     success: function (result) {
                         //  alert("Do you really want to Change student Status");
-                        if (result != null) {
-                            debugger;
-                            window.location.reload();
-                        }
-                        
+                        return confirm('Do you really want to Change student Status!!!!');
+                        window.location.reload();
                     }
                 });
         })
@@ -494,8 +487,7 @@
                     }
                 });
         }
-        
-  
+
         function EditPassword(parentid) {
             $('#hdnparentid').val(parentid);
 
