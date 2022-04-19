@@ -1,376 +1,716 @@
 ﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 
-<div style="text-align:right">
+<div class="" style="background-color: white;">
 
-    <button style="width:100px; height:30px" class="btn btn-info" data-dismiss="modal">Cancel</button>
-    <button onclick="Printpage();" style="width:100px; height:30px" class="btn btn-info">Print</button>
-</div>
-<div id="divprint">
-    <table class="table" style="border-bottom: 0px solid #000;padding-bottom: 1px;" cellspacing="2">
-        <tr><td colspan="3">
-            <table class="table"><tr style="width:100%">
-    <td style="width:15%;text-align:left;">
-        <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
-    </td>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-10" style="text-align:right;">
 
-    <td style="width:70%">
+        </div>
+    </div>
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Student Information</h2>
+            <button type="button" class="btn btn-primary pull-right" onclick="Printpage(0);"><i class="fa fa-print"></i> Student Information</button>
+            <button type="button" class="btn btn-primary pull-right" onclick="Printpage(1);"><i class="fa fa-print"></i> Health Card</button>
+            <button style="width:100px; height:30px" class="btn btn-info" data-dismiss="modal">Close</button>
+            <div class="clearfix"></div>
+        </div>
+        @*<div style="text-align:right">
 
-        <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.SBranchDetails.BranchSchoolName</p>
+                <button style="width:100px; height:30px" class="btn btn-info" data-dismiss="modal">Cancel</button>
+                <button onclick="Printpage();" style="width:100px; height:30px" class="btn btn-info">Print</button>
+            </div>*@
+        @*<div id="divprint">*@
+        <div class="x_content StudentInformation">
+            <table class="table" style="border-bottom: 0px solid #000;padding-bottom: 1px;" cellspacing="2">
+                <tr>
+                    <td colspan="3">
+                        <table class="table">
+                            <tr style="width:100%">
+                                <td style="width:15%;text-align:left;">
+                                    <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                                </td>
 
+                                <td style="width:70%">
 
-        <p style="margin-bottom: 2px;text-align: center;font-size: 16px;">
-            @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
-
-        </p>
-
-        <p style="margin-bottom: 2px;text-align: center;"> Ph. @Model.SBranchDetails.ContactNo, Email : @Model.SBranchDetails.EmailID</p>
-        @*<p style="margin-bottom: 2px;margin-left:50px;"><b>Session : @Model.SessionName</b></p>*@
-
-
-    </td>
-    <td style="width:15%">
-        &nbsp;
-    </td>
-
-</tr></table>
-            </td></tr>
-        
-        <tr>
-            <td colspan="3" style="text-align: center;font-size:16px;">
-                <b>Student Details</b>
-            </td>
-        </tr>
-        <tr style="padding-top:10px;padding-bottom:10px;">
-
-            <td style="padding-left:10px;text-align:left; width:45%">
-                <div class="col-md-12">
-                    <div class="row">
-                        SR No.  :<b> @Model.Student.SchoolUID</b>
-                    </div>
-                    <div class="row">
-                        Student : <b id="bStudentNate">@Model.Student.Name</b>
-                    </div>
-                    <div class="row">
-                        Student ID :<b> @Model.Student.StudentSID</b>
-                    </div>
-                    @*<div class="row">
-                            Class-Section :<b id="bClassSection"> @Model.Student.ClassName - @Model.Student.SectionName </b>
-                        </div>*@
-                    <div class="row">
-                        Gender :<b>@(Model.Student.Gender == 0 ? "Male" : Model.Student.Gender == 1 ? "Female" : "NA")</b>
-                    </div>
-                    <div class="row">
-                        Blood Group:<b>@Model.Student.BloodGroup</b>
-                    </div>
-
-                    <div class="row">
-                        Date of Birth :<b> @Model.Student.DOB.ToString("dd MMM, yyyy")</b>
-                    </div>
+                                    <p style="margin-top: 2px;margin-bottom: 5px;text-align: left;font-size: 26px;">@Model.SBranchDetails.BranchSchoolName</p>
 
 
+                                    <p style="margin-bottom: 2px;text-align: center;font-size: 16px;">
+                                        @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
 
-                </div>
-            </td>
+                                    </p>
 
-            <td style="padding-left:10px;width:45%">
-                <div class="col-md-12">
-                    <div class="row">
-                        Admission Date :<b> @Model.Student.DOJ.ToString("dd MMM, yyyy")</b>
-                        @*Admission Date:@Model.Student.DOJ.ToShortDateString()*@
-                    </div>
-
-                    <div class="row">
-                        Adhaar Number :<b> @Model.Student.AadharCardNo</b>
-                    </div>
-                    <div class="row">
-                        Nationality : <b>@Model.Student.NationalityText</b>
-                    </div>
-                    <div class="row">
-                        Religion : <b>@Model.Student.Religion</b>
-                    </div>
-                    <div class="row">
-                        Category : <b>@Model.Student.CategoryName</b>
-                    </div>
-                    <div class="row">
-                        Transport:@if (Model.Student.StopID != 0)
-                        {
-                            <label><b>Yes</b></label>
-                        }
-                        else
-                        {
-                            <label><b>No</b></label>
-                        }
-                    </div>
-                </div>
-            </td>
-            <td style="text-align:left;width:10%">
-                <div class="col-md-12" style="text-align:left;">
-                    @if (Model.Student.Photo == null)
-                    {
-
-                    }
-                    else
-                    {
-                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
-                    }
-                </div>
-
-            </td>
-        </tr>
-        <tr>
-            <td colspan="3" style="text-align: center;font-size:16px;">
-                <b>Parent's Details</b>  (Parent's ID : <b>@Model.ParantDetails.ParentSID</b>)
-            </td>
-
-        </tr>
-        <tr>
-            <td style="padding-left:10px;width:45%">
-                <p><b>Father</b></p>
-                <div class="col-md-12">
-
-                    <div class="row">
-                        Name : <b>@Model.ParantDetails.FatherName</b>
-                    </div>
-                    <div class="row">
-                        Adhaar No.  :<b> @Model.ParantDetails.FatherAadhaar</b>
-                    </div>
-                    <div class="row">
-                        Contact : <b>@Model.ParantDetails.FatherMobileNo</b>
-                    </div>
-
-                </div>
-            </td>
-            <td style="padding-left:10px;width:45%">
-                <p>&nbsp;</p>
-                <div class="col-md-12">
-                    <div class="row">
-                        Email Id :<b>@Model.ParantDetails.FatherEmailID</b>
-                    </div>
-                    <div class="row">
-                         Qualification : <b>@Model.ParantDetails.FatherEducationID</b>
-                    </div>
-                    <div class="row">
-
-                        Occupation : <b>@Model.ParantDetails.FatherOccupationID</b>
-
-                    </div>
-
-                </div>
-            </td>
-            <td style="text-align:left;width:10%">
-                <div class="col-md-12" style="text-align:left;">
-                    @if (Model.ParantDetails.FatherImage == null)
-                    {
-
-                    }
-                    else
-                    {
-
-                        <img id="imgFPhoto" onerror="return OnImageError(this,0);" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(Model.ParantDetails.ParentID)_1_@Model.ParantDetails.FatherImage" />
-                    }
-                </div>
+                                    <p style="margin-bottom: 2px;text-align: center;"> Ph. @Model.SBranchDetails.ContactNo, Email : @Model.SBranchDetails.EmailID</p>
+                                    @*<p style="margin-bottom: 2px;margin-left:50px;"><b>Session : @Model.SessionName</b></p>*@
 
 
-            </td>
-        </tr>
-        <tr>
-            <td style="padding-left:10px;width:45%">
-                <p><b>Mother</b></p>
-                <div class="col-md-12">
+                                </td>
+                                <td style="width:15%">
+                                    &nbsp;
+                                </td>
 
-                    <div class="row">
-                        Name : <b>@Model.ParantDetails.MotherName</b>
-                    </div>
-                    <div class="row">
-                        Contact : <b>@Model.ParantDetails.MotherMobileNo</b>
-                    </div>
-                    <div class="row">
-                        Adhaar No. : <b>@Model.ParantDetails.MotherAadhaar</b>
-                    </div>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
 
-                </div>
-            </td>
-            <td style="padding-left:10px;width:45%">
-                <p>&nbsp;</p>
-                <div class="col-md-12">
+                <tr>
+                    <td colspan="3" style="text-align: center;font-size:16px;">
+                        <b>Student Details</b>
+                    </td>
+                </tr>
+                <tr style="padding-top:10px;padding-bottom:10px;">
 
-                    <div class="row">
-                        Email Id :<b>@Model.ParantDetails.MotherEmailID</b>
-                    </div>
-                    <div class="row">
-                        Qualification : <b>@Model.ParantDetails.MotherEducationID</b>
-                    </div>
-                    <div class="row">
+                    <td style="padding-left:10px;text-align:left; width:45%">
+                        <div class="col-md-12">
+                            <div class="row">
+                                SR No.  :<b> @Model.Student.SchoolUID</b>
+                            </div>
+                            <div class="row">
+                                Student : <b id="bStudentNate">@Model.Student.Name</b>
+                            </div>
+                            <div class="row">
+                                Student ID :<b> @Model.Student.StudentSID</b>
+                            </div>
+                            @*<div class="row">
+                                    Class-Section :<b id="bClassSection"> @Model.Student.ClassName - @Model.Student.SectionName </b>
+                                </div>*@
+                            <div class="row">
+                                Gender :<b>@(Model.Student.Gender == 0 ? "Male" : Model.Student.Gender == 1 ? "Female" : "NA")</b>
+                            </div>
+                            <div class="row">
+                                Blood Group:<b>@Model.Student.BloodGroup</b>
+                            </div>
 
-                        Occupation : <b>@Model.ParantDetails.MotherOccupationID</b>
-
-                    </div>
+                            <div class="row">
+                                Date of Birth :<b> @Model.Student.DOB.ToString("dd MMM, yyyy")</b>
+                            </div>
 
 
 
-                </div>
-            </td>
-            <td style="text-align:left;width:10%">
+                        </div>
+                    </td>
 
-                <div class="col-md-12" style="text-align:left;">
-                    @if (Model.ParantDetails.MotherImage == null)
-                    {
+                    <td style="padding-left:10px;width:45%">
+                        <div class="col-md-12">
+                            <div class="row">
+                                Admission Date :<b> @Model.Student.DOJ.ToString("dd MMM, yyyy")</b>
+                                @*Admission Date:@Model.Student.DOJ.ToShortDateString()*@
+                            </div>
 
-                    }
-                    else
-                    {
-                    <img id="imgMPhoto" onerror="return OnImageError(this,1);" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage" />
-                    }
-                </div>
-
-            </td>
-        </tr>
-        <tr>
-            <td style="padding-left:10px;width:50%">
-                <div class="col-md-12">
-                    <b>Current Address :</b>@Model.Student.MiniAddress
-                </div>
-            </td>
-            <td style="padding-left:10px;width:50%">
-                <div class="col-md-12">
-                    <b>Permanent Address :</b>@Model.Student.MiniAddress2
-                </div>
-            </td>
-        </tr>
-
-    </table>
-
-
-
-    <table class="table" style="border-bottom: 0px solid #000;" cellspacing="2">
-        <p style="text-align:center"> <b>Class- Section Details</b></p>
-
-
-        <thead style="border-bottom: 1px solid #000;text-align:center">
-            <tr>
-                <th width="15%">Class/Section</th>
-                <th width="10%">Session</th>
-                <th width="15%">From</th>
-                <th width="14%">To</th>
-                <th width="13%">Roll No.</th>
-                <th width="10%">Quota</th>
-                <th width="15%">Fee Mode</th>
-                <th width="8%">Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @{
-                foreach (SessionModel c in Model.Sessions)
-                {
-                    <tr style="box-decoration-break: 1px  #000;text-align:center">
-
-                        <td>
-                            <input type="hidden" id="StudentSessionUID" name="ID" value="@c.StudentSessionUID" />
-                            @c.ClassName - @c.SectionName
-                        </td>
-                        <td>
-                            @c.SessionName
-                        </td>
-                        <td>@c.FromDate.ToString("dd MMM, yyyy")</td>
-                        <td>@c.ToDate.ToString("dd MMM, yyyy")</td>
-
-                        <td>@c.RollNo</td>
-                        <td>@c.QuotaName</td>
-                        <td>@(c.FeePaymentMode == 1 ? "Monthly" : c.FeePaymentMode == 3 ? "Quarterly" : "Half Yearly")</td>
-                        <td>
-                            @if (c.Status == 1)
+                            <div class="row">
+                                Adhaar Number :<b> @Model.Student.AadharCardNo</b>
+                            </div>
+                            <div class="row">
+                                Nationality : <b>@Model.Student.NationalityText</b>
+                            </div>
+                            <div class="row">
+                                Religion : <b>@Model.Student.Religion</b>
+                            </div>
+                            <div class="row">
+                                Category : <b>@Model.Student.CategoryName</b>
+                            </div>
+                            <div class="row">
+                                Transport:@if (Model.Student.StopID != 0)
+                                {
+                                    <label><b>Yes</b></label>
+                                }
+                                else
+                                {
+                                    <label><b>No</b></label>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td style="text-align:left;width:10%">
+                        <div class="col-md-12" style="text-align:left;">
+                            @if (Model.Student.Photo == null)
                             {
-                                <label class='badge bg-green'>Active</label>
+
                             }
                             else
                             {
-                                <label class='badge bg-red'></label>
+                                <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
                             }
+                        </div>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align: center;font-size:16px;">
+                        <b>Parent's Details</b>  (Parent's ID : <b>@Model.ParantDetails.ParentSID</b>)
+                    </td>
+
+                </tr>
+                <tr>
+                    <td style="padding-left:10px;width:45%">
+                        <p><b>Father</b></p>
+                        <div class="col-md-12">
+
+                            <div class="row">
+                                Name : <b>@Model.ParantDetails.FatherName</b>
+                            </div>
+                            <div class="row">
+                                Adhaar No.  :<b> @Model.ParantDetails.FatherAadhaar</b>
+                            </div>
+                            <div class="row">
+                                Contact : <b>@Model.ParantDetails.FatherMobileNo</b>
+                            </div>
+
+                        </div>
+                    </td>
+                    <td style="padding-left:10px;width:45%">
+                        <p>&nbsp;</p>
+                        <div class="col-md-12">
+                            <div class="row">
+                                Email Id :<b>@Model.ParantDetails.FatherEmailID</b>
+                            </div>
+                            <div class="row">
+                                Qualification : <b>@Model.ParantDetails.FatherEducationID</b>
+                            </div>
+                            <div class="row">
+
+                                Occupation : <b>@Model.ParantDetails.FatherOccupationID</b>
+
+                            </div>
+
+                        </div>
+                    </td>
+                    <td style="text-align:left;width:10%">
+                        <div class="col-md-12" style="text-align:left;">
+                            @if (Model.ParantDetails.FatherImage == null)
+                            {
+
+                            }
+                            else
+                            {
+
+                                <img id="imgFPhoto" onerror="return OnImageError(this,0);" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(Model.ParantDetails.ParentID)_1_@Model.ParantDetails.FatherImage" />
+                            }
+                        </div>
+
+
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-left:10px;width:45%">
+                        <p><b>Mother</b></p>
+                        <div class="col-md-12">
+
+                            <div class="row">
+                                Name : <b>@Model.ParantDetails.MotherName</b>
+                            </div>
+                            <div class="row">
+                                Contact : <b>@Model.ParantDetails.MotherMobileNo</b>
+                            </div>
+                            <div class="row">
+                                Adhaar No. : <b>@Model.ParantDetails.MotherAadhaar</b>
+                            </div>
+
+                        </div>
+                    </td>
+                    <td style="padding-left:10px;width:45%">
+                        <p>&nbsp;</p>
+                        <div class="col-md-12">
+
+                            <div class="row">
+                                Email Id :<b>@Model.ParantDetails.MotherEmailID</b>
+                            </div>
+                            <div class="row">
+                                Qualification : <b>@Model.ParantDetails.MotherEducationID</b>
+                            </div>
+                            <div class="row">
+
+                                Occupation : <b>@Model.ParantDetails.MotherOccupationID</b>
+
+                            </div>
+
+
+
+                        </div>
+                    </td>
+                    <td style="text-align:left;width:10%">
+
+                        <div class="col-md-12" style="text-align:left;">
+                            @if (Model.ParantDetails.MotherImage == null)
+                            {
+
+                            }
+                            else
+                            {
+                                <img id="imgMPhoto" onerror="return OnImageError(this,1);" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage" />
+                            }
+                        </div>
+
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding-left:10px;width:50%">
+                        <div class="col-md-12">
+                            <b>Current Address :</b>@Model.Student.MiniAddress
+                        </div>
+                    </td>
+                    <td style="padding-left:10px;width:50%">
+                        <div class="col-md-12">
+                            <b>Permanent Address :</b>@Model.Student.MiniAddress2
+                        </div>
+                    </td>
+                </tr>
+
+            </table>
+
+
+
+            <table class="table" style="border-bottom: 0px solid #000;" cellspacing="2">
+                <p style="text-align:center"> <b>Class- Section Details</b></p>
+
+
+                <thead style="border-bottom: 1px solid #000;text-align:center">
+                    <tr>
+                        <th width="15%">Class/Section</th>
+                        <th width="10%">Session</th>
+                        <th width="15%">From</th>
+                        <th width="14%">To</th>
+                        <th width="13%">Roll No.</th>
+                        <th width="10%">Quota</th>
+                        <th width="15%">Fee Mode</th>
+                        <th width="8%">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        foreach (SessionModel c in Model.Sessions)
+                        {
+                            <tr style="box-decoration-break: 1px  #000;text-align:center">
+
+                                <td>
+                                    <input type="hidden" id="StudentSessionUID" name="ID" value="@c.StudentSessionUID" />
+                                    @c.ClassName - @c.SectionName
+                                </td>
+                                <td>
+                                    @c.SessionName
+                                </td>
+                                <td>@c.FromDate.ToString("dd MMM, yyyy")</td>
+                                <td>@c.ToDate.ToString("dd MMM, yyyy")</td>
+
+                                <td>@c.RollNo</td>
+                                <td>@c.QuotaName</td>
+                                <td>@(c.FeePaymentMode == 1 ? "Monthly" : c.FeePaymentMode == 3 ? "Quarterly" : "Half Yearly")</td>
+                                <td>
+                                    @if (c.Status == 1)
+                                    {
+                                        <label class='badge bg-green'>Active</label>
+                                    }
+                                    else
+                                    {
+                                        <label class='badge bg-red'></label>
+                                    }
+
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+
+            </table>
+
+            <table class="table" style="border-bottom: 0px solid #000;padding-bottom: 1px;" cellspacing="2">
+                <tr>
+                    <td colspan="2" style="text-align: center;font-size:16px;">
+                        <b>Student Previous School Details</b>
+                    </td>
+                </tr>
+                <tr style="padding-top:10px;padding-bottom:10px;">
+
+                    <td style="padding-left:10px;text-align:left; width:50%">
+                        <div class="col-md-12">
+                            <div class="row">
+                                School Name  :<b> @Model.Student.PSchoolName</b>
+                            </div>
+                            <div class="row">
+                                School Medium : <b id="bStudentNate">@Model.Student.PSchoolMedium</b>
+                            </div>
+                            <div class="row">
+                                Class Name :<b> @Model.Student.PClassName</b>
+                            </div>
+
+
+
+
+                        </div>
+                    </td>
+
+                    <td style="padding-left:10px;width:50%">
+                        <div class="col-md-12">
+
+
+                            <div class="row">
+                                Result :<b> @Model.Student.PSResult</b>
+                            </div>
+                            <div class="row">
+                                School City : <b>@Model.Student.PSchoolCity</b>
+                            </div>
+                            <div class="row">
+                                State : <b>@Model.Student.PSchoolState</b>
+                            </div>
+
+                        </div>
+                        <br />
+                        <br />
+                    </td>
+
+                </tr>
+                <tr>
+
+                    <td style="padding-left:10px;text-align:left; width:50%"></td>
+                    <td style="padding-left:10px;text-align:left; width:50%">
+                        @if (Model.SBranchDetails.PrincipalSignature == null)
+                        {
+
+                            <br /><br />
+                            <label>Signature of Principal</label>
+
+                        }
+                        else
+                        {
+
+                            <img onerror="return OnImageError(this,2);" style="margin-left: 40px;" class="reportSign" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
+                            <br /> <label>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Signature of Principal</label>
+
+                        }
+                    </td>
+
+                </tr>
+            </table>
+        </div>
+
+    </div>
+    <br />
+   
+    <div class="x_panel">
+        <div class="x_title">
+            <h2>Health Card</h2>
+            <button type="button" class="btn btn-primary pull-right" onclick="Printpage(1);"><i class="fa fa-print"></i> Health Card</button>
+            <div class="clearfix"></div>
+        </div>
+        <div class="x_content Healthcontainer">
+            <table style="width: 100%;padding:2px;">
+                <thead>
+                    <tr>
+                        <td style="text-align:center;width:20%;">
+                            <img onerror="return OnImageError(this,2);" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                        </td>
+                        <td style="text-align:center;width:60%;">
+                            <table style="width: 100%; padding: 0px;">
+                                <tr>
+                                    <td style="text-align: left;vertical-align: middle;">
+                                        <p style="margin-top: 2px;margin-bottom: 2px;text-align: left;font-size: 20px;">@Model.SBranchDetails.BranchSchoolName</p>
+
+                                        <p style="margin-bottom: 2px;margin-left:10px;font-size: 14px;">
+                                            @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
+                                            @*@Model.SBranchDetails.Address*@
+                                        </p>
+                                      
+                                    </td>
+                                </tr>
+                            </table>
+                           
+                        </td>
+                        <td style="text-align:center;width:20%;">
+                            @if (Model.Student.Photo == null)
+                            {
+
+                            }
+                            else
+                            {
+                                <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align:center">
+                         
+                            <b> HEALTH CARD</b>
+                           
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align: center;font-size:16px;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3">
+                            <br /><br />
+                            <p style="font-size: 15px;">
+                                1.    Name of the student : @Model.Student.Name
+                            </p>
+                            <p style="font-size: 15px;">
+                                2.    Class/Section :  @Model.Student.ClassName / @Model.Student.SectionName    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Date of Birth :  @Model.Student.DOB.ToString("dd MMM, yyyy")
+                            </p>
+                            <p style="font-size: 15px;">
+                                3.    Father's Name : @Model.ParantDetails.FatherName
+                            </p>
+                            <p style="font-size: 15px;">
+                                4.    Mother's Name : @Model.ParantDetails.MotherName
+                            </p>
+                            <p style="font-size: 15px;">
+                                5.    Address: @Model.Student.MiniAddress
+                            </p>
+                            <p style="font-size: 15px;">
+                                6.    Telephone No: @Model.ParantDetails.FatherMobileNo
+                            </p>
+                            <p>
+                                <table style="width: 100%;padding:0px;">
+                                    <tr>
+                                        <td style="text-align:left;width:40%;">
+                                            7.  Immunization Histroy
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            Yes
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            No
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            a).   B C G
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            b).   D P T
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            c).   Oral Polio
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            d).   D T
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            e).   Measles/MMR
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            f).   Tetanus Booster<br /> (7 -16 years)
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            g).   Typhoid
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            h).   Cholera
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            i).   Meaningitis
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td style="text-align: left; padding-left: 50px; width: 40%;">
+                                            j).   Any Other
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+                                        <td style="text-align:center;width:30%;">
+                                            <input type="checkbox" style=" width: 15px; height: 15px;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3">
+                                            <p> <b>Note :</b></p>
+                                            <p> 1.  Vaccines (a) to (f) are compulsory</p>
+                                            <p> 2.  Vaccines (g) to (h) are optional but recommended to be given once a year.</p>
+                                            <p> 3.  Vaccines (i) to (j) are optional but recommended.</p>
+                                           
+                                        </td>
+
+                                    </tr>
+                                </table>
+                            </p>
+                            <p style="font-size: 15px;">
+                                8.    Blood Group :
+                            </p>
+                            <p style="font-size: 15px;">
+                                9.    History of Past illiness :
+                                <ul>
+                                    <li>
+                                        <p style="font-size: 15px;">
+                                            a).    Specific diseases suffered in the past :................................................................
+                                        </p>
+                                        <p style="font-size: 15px;">
+                                            b).   Operation undergone in the past, if any, specify :................................................................
+                                        </p>
+                                        <p style="font-size: 15px;">
+                                            c).    Allergies if any :................................................................
+                                        </p>
+                                        <p style="font-size: 15px;">
+                                            d).    Any other diseases for which the child is on regular medication :................................................................
+                                        </p>
+                                        <p style="font-size: 15px;">
+                                            e).    Any bronchial problem :................................................................
+                                        </p>
+
+                                    </li>
+                                </ul>
+                            </p>
+                            <p style="font-size: 15px;">
+                                10.   Is the child fit for swimming & horse riding :
+                            </p>
+                            <p style="font-size: 15px;">
+                              
+                                I shall have no bojection to the School Medical Officer giving inoculation against Typhoid, A B & Cholera to my child from year to year.
+                            </p>
+                            <p>
+                                <br />
+                                <br />
+                             
+                               
+                            </p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:left;width:40%;">
+                            Signature of Parent
+                        </td>
+                        <td style="text-align:center;width:30%;">
+                        </td>
+                        <td style="text-align:center;width:30%;">
+                            Date:
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align:center">
+                           <hr/>
+                            <label style="padding: 20px;margin-bottom: 10px;">
+                                MEDICAL CERTIFICATE OF FITNESS
+                                (from Registered Doctor)
+                            </label>
+                            <br />
+                            <br />
+
 
                         </td>
                     </tr>
-                }
+                    <tr>
+                        <td colspan="3" style="text-align:left">
+
+                            <p>
+                                This is to certify that I, Dr. ............................................ have examined .......................................<br />
+                                aged .............. years, S/O or D/O ......................................................... on date ........................<br />
+                                His/Her visual equity is normal / corrected with glasses. There is no other illiness which would render the child unfit to join school.<br />
+                                He/She is fit/unfit to join school. The child is fit for swimming & horse riding
+                            </p>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="text-align:right;">
+                            <b>SIGNATURE & SEAL OF DOCTOR </b>
+                        </td>
+
+                    </tr>
+                  
+                </thead>
+            </table>
+
+        </div>
+    </div>
+    </div>
+    <script>
+            /* function Printpage() {*/
+            function Printpage(type) {
+            var contents = '';
+            if (type == 0) {
+                contents = $(".StudentInformation").html();
             }
-        </tbody>
-
-    </table>
-
-    <table class="table" style="border-bottom: 0px solid #000;padding-bottom: 1px;" cellspacing="2">
-        <tr>
-            <td colspan="2" style="text-align: center;font-size:16px;">
-                <b>Student Previous School Details</b>
-            </td>
-        </tr>
-        <tr style="padding-top:10px;padding-bottom:10px;">
-
-            <td style="padding-left:10px;text-align:left; width:50%">
-                <div class="col-md-12">
-                    <div class="row">
-                        School Name  :<b> @Model.Student.PSchoolName</b>
-                    </div>
-                    <div class="row">
-                        School Medium : <b id="bStudentNate">@Model.Student.PSchoolMedium</b>
-                    </div>
-                    <div class="row">
-                        Class Name :<b> @Model.Student.PClassName</b>
-                    </div>
-                   
-
-
-
-                </div>
-            </td>
-
-            <td style="padding-left:10px;width:50%">
-                <div class="col-md-12">
-
-
-                    <div class="row">
-                        Result :<b> @Model.Student.PSResult</b>
-                    </div>
-                    <div class="row">
-                        School City : <b>@Model.Student.PSchoolCity</b>
-                    </div>
-                    <div class="row">
-                        State : <b>@Model.Student.PSchoolState</b>
-                    </div>
-
-                </div>
-                <br />
-                <br />
-            </td>
-           
-        </tr>
-        <tr>
-           
-            <td style="padding-left:10px;text-align:left; width:50%"></td>
-            <td style="padding-left:10px;text-align:left; width:50%">
-                @if (Model.SBranchDetails.PrincipalSignature == null)
-                {
-
-                    <br /><br />
-                    <label>Signature of Principal</label>
-
-                }
-                else
-                {
-
-                    <img onerror="return OnImageError(this,2);" style="margin-left: 40px;" class="reportSign" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
-                    <br /> <label>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Signature of Principal</label>
-
-                }
-            </td>
-
-            </tr>
-    </table>
-</div>
-<br />
-<br />
-
-
-<script>
-    function Printpage() {
+            else if (type == 1) {
+                contents = $(".Healthcontainer").html();
+            }
+            else {
+               // contents = $(".StudentHealth").html();
+            }
         // $("#divprint").html();"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
         var frame1 = $('<iframe />');
         frame1[0].name = "frame1";
@@ -383,7 +723,8 @@
       frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
         frameDoc.document.write('</head><body>');
         //Append the DIV contents.
-        frameDoc.document.write($('#divprint').html());
+                /* frameDoc.document.write($('#divprint').html());*/
+        frameDoc.document.write(contents);
         frameDoc.document.write('</body></html>');
         frameDoc.document.close();
         setTimeout(function () {
@@ -393,4 +734,4 @@
         }, 500);
     }
 
-</script>
+    </script>
