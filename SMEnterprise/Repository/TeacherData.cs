@@ -780,6 +780,7 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+
         #endregion
         #region API Attandance
         public IEnumerable<AppAttandanceModel> GetAttandanceStatus(int EmployeeID)
@@ -1185,7 +1186,25 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_UpdateRemarkOnStudentOnlineExamSubmission", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }
-       
+
         #endregion
+        public async Task<StudentStopsScreenModel> GetEmployeeRouteDetails(int EmployeeID, DateTime CurDate)
+        {
+            StudentStopsScreenModel objModel = new StudentStopsScreenModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@EmployeeID", EmployeeID);
+                paramater.Add("@CurDate", CurDate);
+                using (var multi = await con.QueryMultipleAsync("spn_GetEmployeeRouteStoppages", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Stops = multi.Read<RouteStoppageModel>().ToList();
+                    objModel.Conductor = multi.Read<object>().SingleOrDefault();
+                    objModel.VehicleRouteID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
+
     }
 }
