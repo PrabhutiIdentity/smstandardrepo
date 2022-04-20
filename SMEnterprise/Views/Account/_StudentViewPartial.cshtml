@@ -13,6 +13,7 @@
         <div class="x_title">
             <h2>Student Information</h2>
             <button type="button" class="btn btn-primary pull-right" onclick="Printpage(0);"><i class="fa fa-print"></i> Student Information</button>
+            <button type="button" class="btn btn-primary pull-right" onclick="Printpage(2);"><i class="fa fa-print"></i> Character Certificate</button>
             <button type="button" class="btn btn-primary pull-right" onclick="Printpage(1);"><i class="fa fa-print"></i> Health Card</button>
             <button style="width:100px; height:30px" class="btn btn-info" data-dismiss="modal">Close</button>
             <div class="clearfix"></div>
@@ -400,12 +401,15 @@
                 <thead>
                     <tr>
                         <td style="text-align:center;width:20%;">
-                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
                         </td>
                         <td style="text-align:center;width:60%;">
-                            <h3> @Model.Branch.BranchSchoolName</h3>
-                            <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
-                            <p>Affiliated To C.B.S.E.Board</p>
+                            <h3> @Model.SBranchDetails.BranchSchoolName</h3>
+                            <p style="margin-bottom: 2px;text-align: center;font-size: 16px;">
+                                @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
+
+                            </p>
+                            @*<p>Affiliated To C.B.S.E.Board</p>*@
                         </td>
                         <td style="text-align:center;width:20%;">
                             <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
@@ -423,7 +427,7 @@
                             <table style="width:100%;padding:10px;">
                                 <tr>
                                     <td></td>
-                                    <td style="text-align:right">Dated @Model.TCDate.ToString("dd MMM, yyyy")</td>
+                                    <td style="text-align:right">Dated @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy")</td>
                                 </tr>
                             </table>
                         </td>
@@ -433,12 +437,12 @@
                         <td colspan="3">
                             <br />
                             <p style="font-size: 15px;">
-                                This is to certify that <b>@Model.Student.Name</b> @(Model.Student.Gender == 0 ? "son" : "daughter") of @Model.Parent.FatherName
-                                has been / was a student of this school during the session from @firstSession.SessionName he has appeared in the class @finalSession.ClassName examination of the year
-                                @finalSession.SessionName .
+                                This is to certify that <b>@Model.Student.Name</b> @(Model.Student.Gender == 0 ? "son" : "daughter") of @Model.ParantDetails.FatherName
+                                has been / was a student of this school during the session from .............. @*@firstSession.SessionName*@ he has appeared in the class ...........@*@finalSession.ClassName*@ examination of the year .............
+                                @*@finalSession.SessionName*@ .
                             </p>
                             <p style="font-size: 15px;">
-                                As far as I know @(Model.Student.Gender == 0 ? "he" : "she") bears a @Model.Character Character.
+                                As far as I know @(Model.Student.Gender == 0 ? "he" : "she") ..........................@*bears a @Model.Character*@ Character.
                             </p>
                             <p style="font-size: 15px;">
                                 I wish him all success in life
@@ -453,7 +457,7 @@
                             </label>
 
 
-                            @if (Model.Branch.PrincipalSignature == null)
+                            @if (Model.SBranchDetails.PrincipalSignature == null)
                             {
 
                                 <br /><br /><br />
@@ -464,7 +468,7 @@
                             else
                             {
                                 <label style="float:right">
-                                    <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                    <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
                                     <br />&nbsp; &nbsp; &nbsp; &nbsp;  Principal
                                 </label>
                             }
@@ -477,12 +481,16 @@
                 <thead>
                     <tr>
                         <td style="text-align:center;width:20%;">
-                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                            <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
                         </td>
                         <td style="text-align:center;width:60%;">
-                            <h3> @Model.Branch.BranchSchoolName</h3>
-                            <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
-                            <p>Affiliated To C.B.S.E.Board</p>
+                            <h3> @Model.SBranchDetails.BranchSchoolName</h3>
+                            <p style="margin-bottom: 2px;text-align: center;font-size: 16px;">
+                                @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
+
+                            </p>
+                            @*<h2 style="white-space: break-spaces;">@Model.SBranchDetails.Address </h2>*@
+                            @*<p>Affiliated To C.B.S.E.Board</p>*@
                         </td>
                         <td style="text-align:center;width:20%;">
                             <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
@@ -500,7 +508,7 @@
                             <table style="width:100%;padding:10px;">
                                 <tr>
                                     <td></td>
-                                    <td style="text-align:right">Dated @Model.TCDate.ToString("dd MMM, yyyy")</td>
+                                    <td style="text-align:right">Dated @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy")</td>
                                 </tr>
                             </table>
                         </td>
@@ -510,15 +518,14 @@
                         <td colspan="3">
                             <br />
                             <p style="font-size: 15px;">
-                                This is to certify that <b>@Model.Student.Name</b> @(Model.Student.Gender == 0 ? "son" : "daughter") of @Model.Parent.FatherName
-                                has been / was a student of this school during the session from @firstSession.SessionName he has appeared in the class @finalSession.ClassName examination of the year
-                                @finalSession.SessionName .
+                                This is to certify that <b>@Model.Student.Name</b> @(Model.Student.Gender == 0 ? "son" : "daughter") of @Model.ParantDetails.FatherName
+                                has been / was a student of this school during the session from .............. @*@firstSession.SessionName*@ he has appeared in the class ...........@*@finalSession.ClassName*@ examination of the year .............
+                                @*@finalSession.SessionName*@ .
+
                             </p>
+                            
                             <p style="font-size: 15px;">
-                                As far as I know @(Model.Student.Gender == 0 ? "he" : "she") bears a @Model.Character Character.
-                            </p>
-                            <p style="font-size: 15px;">
-                                I wish @(Model.Student.Gender == 0 ? "him" : "her") all success in life
+                                As far as I know @(Model.Student.Gender == 0 ? "he" : "she") ..........................@*bears a @Model.Character*@ Character.
                             </p><br />
                             <br />
                             <br />
@@ -530,7 +537,7 @@
                             </label>
 
 
-                            @if (Model.Branch.PrincipalSignature == null)
+                            @if (Model.SBranchDetails.PrincipalSignature == null)
                             {
 
                                 <br /><br /><br /><br />
@@ -541,7 +548,7 @@
                             else
                             {
                                 <label style="float:right">
-                                    <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                    <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
                                     <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal
                                 </label>
                             }
@@ -872,6 +879,9 @@
             }
             else if (type == 1) {
                 contents = $(".Healthcontainer").html();
+            }
+            else if (type == 2) {
+                contents = $(".charactercontainer").html();
             }
             else {
                // contents = $(".StudentHealth").html();
