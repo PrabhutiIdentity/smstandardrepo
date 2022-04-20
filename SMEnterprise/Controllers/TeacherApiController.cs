@@ -2230,6 +2230,50 @@ namespace SMEnterprise.Controllers
         //            .GetAccessTokenForRequestAsync(); // Gets the Access Token  
         //    }
         //}
+
+        [HttpPost]
+        public async Task<CommonApiWraperModel> GetRouteStoppages(ParentApiParamModel data)
+        {
+            CommonApiWraperModel objWraper = new CommonApiWraperModel();
+
+            try
+            {
+
+                var oModel = await (new TeacherData()).GetEmployeeRouteDetails(data.ID, CommonUsage.GetCurrentDate());
+                var stopsdone = VehicleStopData.SearchDefault("", CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd"), oModel.VehicleRouteID.ToString()).ToList();
+                var isFirst = 0;
+                foreach (var s in oModel.Stops)
+                {
+                    if (stopsdone.Where(x => x.StopID == s.StopID).Count() > 0)
+                    {
+                        s.IsDone = 2;
+                    }
+                    else
+                    {
+                        if (isFirst == 0)
+                        {
+                            s.IsDone = 1;
+                            isFirst = 1;
+                        }
+                        else
+                        {
+                            s.IsDone = 0;
+                        }
+                    }
+                }
+                objWraper.List = oModel.Stops.ToList<object>();
+                objWraper.Data = oModel.Conductor;
+                objWraper.Code = 200;
+                objWraper.Message = "Success";
+            }
+            catch (Exception ex)
+            {
+                objWraper.Code = 404;
+                objWraper.Message = ex.ToString();
+            }
+
+            return objWraper;
+        }
     }
 
 }
