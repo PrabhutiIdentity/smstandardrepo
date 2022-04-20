@@ -164,6 +164,7 @@ namespace SMEnterprise.Models
         public DateTime StartDate { get; set; }
         public List<NameIDModel> ExpenceTypes { get; set; }
         public List<ExpenceModel> Expences { get; set; }
+        public SBranchModel Branch { get; set; }
     }
     public class ExpenceModel
     {
