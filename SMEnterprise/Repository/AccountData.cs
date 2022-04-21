@@ -965,6 +965,7 @@ namespace SMEnterprise.Repository
                     objModel.Sessions = multi.Read<SessionModel>().ToList();
                     objModel.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
                     objModel.SessionName = multi.Read<string>().SingleOrDefault();
+                  
                 }
                 if (objModel.Student == null)
                 {
@@ -3263,6 +3264,13 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetExpenceReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Expences = multi.Read<ExpenceModel>().ToList();
+                    try
+                    {
+
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return objModel;
