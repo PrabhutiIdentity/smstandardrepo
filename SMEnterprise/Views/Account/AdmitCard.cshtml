@@ -29,7 +29,7 @@
                             <div class="col-md-3 padding">
                                 <label class="col-md-4 text-right">Sessions :</label>
                                 <div class="col-md-8">
-                                    <select name="SessionID" class="form-control" id="ddlSessions">
+                                    <select name="SessionID" class="form-control" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
                                         <option value="0">--Select Session--</option>
                                         @foreach (var el in Model.Sessions)
                                         {
@@ -55,7 +55,7 @@
                             <div class="col-md-3 padding">
                                 <label class="col-md-4 text-right">Section :</label>
                                 <div class="col-md-8">
-                                    <select name="SectionID" class="form-control" id="ddlSection">
+                                    <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
                                         <option value="0">--Select Section--</option>
                                         @foreach (var el in Model.Sections)
                                         {
@@ -67,12 +67,12 @@
                             <div class="col-md-3 padding">
                                 <label class="col-md-4 text-right padding-R">Evaluation : </label>
                                 <div class="col-md-8 padding-L" style="padding-left: 10px;">
-                                    <select name="EvaluationID" class="form-control" id="ddlEvaluation">
+                                    <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetStudents').submit();">
                                         @foreach (var el in Model.Evaluations)
                                         {
                                             <option value="@el.EvaluationID" @(el.EvaluationID == Model.EvaluationID ? "selected" : "")>@el.EvaluationName</option>
                                         }
-                                        }
+
                                     </select>
                                 </div>
                             </div>
@@ -102,136 +102,135 @@
         <table style="width:100%;">
             @foreach (var d in Model.AdmitCards)
             {
-                <tr class="listitem" style="page-break-before: avoid;page-break-inside:avoid">
-                    <td>
-                        <table style="width:100%;text-align:center;">
-                            <tr>
-                                <td> <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(d.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(d.StudentID)_@d.Photo" /></td>
-                                <td colspan="2">
-                                    <h2>@Model.Branch.BranchSchoolName</h2>
-                                    <p>@Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))</p>
-                                    @*<h4>@Model.Branch.Address</h4>*@
-                                    <p style="margin-top: 2px;text-align: center;"> <b>Ph.</b> @Model.Branch.ContactNo,  <b> Email :</b> @Model.Branch.EmailID</p>
-                                    <br />
-                                </td>
-                                <td> <img id="imgPhoto" class="thumbImageGrid" style="height:120px;width:120px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@Model.Branch.Logo" /></td>
-                            </tr>
-                            @*<tr style="border-bottom:1px solid black;">
-                                    <td colspan="2" style="white-space:pre-line"><h4>@Model.Branch.Address</h4>
+            <tr class="listitem" style="page-break-before: avoid;page-break-inside:avoid">
+                <td>
+                    <table style="width:100%;text-align:center;">
+                        <tr>
+                            <td> <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(d.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(d.StudentID)_@d.Photo" /></td>
+                            <td colspan="2">
+                                <h2>@Model.Branch.BranchSchoolName</h2>
+                                <p>@Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))</p>
+                                @*<h4>@Model.Branch.Address</h4>*@
+                                <p style="margin-top: 2px;text-align: center;"> <b>Ph.</b> @Model.Branch.ContactNo,  <b> Email :</b> @Model.Branch.EmailID</p>
+                                <br />
+                            </td>
+                            <td> <img id="imgPhoto" class="thumbImageGrid" style="height:120px;width:120px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@Model.Branch.Logo" /></td>
+                        </tr>
+                        @*<tr style="border-bottom:1px solid black;">
+                    <td colspan="2" style="white-space:pre-line"><h4>@Model.Branch.Address</h4>
 
-                                    </td>
-                                </tr>*@
-                            <tr style="border-bottom:1px solid black;">
-                                <td colspan="2" style="white-space:pre-line"><b>Admit Card</b></td>
+                    </td>
+                </tr>*@
+                        <tr style="border-bottom:1px solid black;">
+                            <td colspan="2" style="white-space:pre-line"><b>Admit Card</b></td>
+                        </tr>
+                    </table>
+                    <table style="width:100%;">
+                        <tr style="border-bottom:1px solid black;">
+                            <td>Session</td>
+                            <td>@d.SessionName</td>
+                            <td>Evaluation</td>
+                            <td>@d.EvaluationName</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid black;">
+                            <td>Student Name</td>
+                            <td class="searchable">@d.Name</td>
+                            <td>Sr. No.</td>
+                            <td>@d.SchoolUID</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid black;">
+                            <td>Class /Section</td>
+                            <td>@d.ClassName / @d.SectionName</td>
+                            <td>Roll No.</td>
+                            <td>@d.RollNo</td>
+                        </tr>
+                        <tr style="border-bottom:1px solid black;">
+                            <td>Father's Name</td>
+                            <td class="searchable">@d.FatherName</td>
+                            <td>Mother's Name</td>
+                            <td class="searchable">@d.MotherName</td>
+                        </tr>
+                        @*<tr style="border-bottom:1px solid black;">
+                    <td>Mother's Name</td>
+                    <td>@d.MotherName</td>
+                </tr>*@
+                        <tr style="border-bottom:1px solid black;">
+                            <td colspan="4">
+                            </td>
+                        </tr>
+                    </table>
+                    <table style="width:100%;">
+                        <thead>
+                            <tr style="border-bottom:1px solid black;  text-align:left;">
+                                <th>#</th>
+                                <th>Subject</th>
+                                <th>Date</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
                             </tr>
-                        </table>
-                        <table style="width:100%;">
-                            <tr style="border-bottom:1px solid black;">
-                                <td>Session</td>
-                                <td>@d.SessionName</td>
-                                <td>Evaluation</td>
-                                <td>@d.EvaluationName</td>
-                            </tr>
-                            <tr style="border-bottom:1px solid black;">
-                                <td>Student Name</td>
-                                <td class="searchable">@d.Name</td>
-                                <td>Sr. No.</td>
-                                <td>@d.SchoolUID</td>
-                            </tr>
-                            <tr style="border-bottom:1px solid black;">
-                                <td>Class</td>
-                                <td>@d.ClassName</td>
-                                <td>Section</td>
-                                <td>@d.SectionName</td>
-                            </tr>
-                            <tr style="border-bottom:1px solid black;">
-                                <td>Roll No</td>
-                                <td>@d.RollNo</td>
-                                <td>Gender</td>
-                                <td>
-                                    @if (d.Gender!= 0)
-                                    {
-                                        <label>Female</label>
-                                    }
-                                    else
-                                    {
-                                        <label>Male</label>
-                                    }
-                                </td>
-                            </tr>
-                            <tr style="border-bottom:1px solid black;">
-                                <td>Father's Name</td>
-                                <td class="searchable">@d.FatherName</td>
-                                <td>Mother's Name</td>
-                                <td class="searchable">@d.MotherName</td>
-                            </tr>
-                            @*<tr style="border-bottom:1px solid black;">
-            <td>Mother's Name</td>
-            <td>@d.MotherName</td>
-        </tr>*@
-                            <tr style="border-bottom:1px solid black;">
-                                <td colspan="4">
-                                </td>
-                            </tr>
-                        </table>
-                        <table style="width:100%;">
-                            <thead>
-                                <tr style="border-bottom:1px solid black;  text-align:left;">
-                                    <th>#</th>
-                                    <th>Subject</th>
-                                    <th>Date</th>
-                                    <th>Start Time</th>
-                                    <th>End Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @{
-                                    var ctr = 1;
-                                    foreach (var e in Model.Exams)
-                                    {
-                                        <tr style="border-bottom:1px solid black;">
-                                            <td>@ctr</td>
-                                            <td>@e.SubjectName</td>
-                                            <td>@e.ExamDate.ToString("dd/MM/yyyy")</td>
-                                            <td>@e.StartTime</td>
-                                            <td>@e.EndTime</td>
-                                            <td><p></p></td>
-                                        </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                var ctr = 1;
+                                foreach (var e in Model.Exams)
+                                {
+                                    <tr style="border-bottom:1px solid black;">
+                                        <td>@ctr</td>
+                                        <td>@e.SubjectName</td>
+                                        <td>@e.ExamDate.ToString("dd/MM/yyyy")</td>
+                                        <td>@e.StartTime</td>
+                                        <td>@e.EndTime</td>
+                                        <td><p></p></td>
+                                    </tr>
 
-                                        ctr++;
-
-                                    }
+                                    ctr++;
 
                                 }
 
-
-                            </tbody>
-
+                            }
 
 
-                        </table>
-                        <div class="row">
-                            <table style="width:100%">
+                        </tbody>
 
-                                <tr>
-                                    <td></td>
 
-                                    @if (Model.Branch.PrincipalSignature == null)
-                                    {
-                                        <td style="width:30%;text-align:right;padding-right: 153px;">
-                                            <br /><br />
-                                            Signature of Principal
-                                        </td>
-                                    }
-                                    else
-                                    {
-                                        <td style="width:30%;text-align:right;padding-right: 153px;">
-                                            <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
-                                            <br />&nbsp; &nbsp; &nbsp; &nbsp;  Signature of Principal
-                                        </td>
-                                    }
 
-                                </tr>
+                    </table>
+                    <div class="row">
+                        <table style="width:100%">
+
+                            <tr>
+                                @if (Model.Branch.SBranchID == 13)
+                                {
+                                    <td style="width:75%">
+                                        Note: -<br />1 - सभी छात्र / छात्राओं को इस सत्र की पूरी फीस जमा करवाना अनिवार्य है अन्यथा की स्थिति में आप परीक्षा से वंचित रहेंगे l<br />
+                                        2 - सभी छात्र / छात्राएं अपनी परीक्षा सामग्री स्वयं लायें न लाने की स्थिति में आप स्वयं जिम्मेदार होंगे l <br />
+                                        3 - सभी छात्र / छात्राओं को समय से व यूनिफॉर्म में आना अनिवार्य है l<br />
+
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td style="width:75%">
+                                    </td>
+                                }
+
+
+                                @if (Model.Branch.PrincipalSignature == null)
+                                {
+                                    <td style="width:25%;">
+                                        <br /><br />
+                                        Signature of Principal
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td style="width:25%;">
+                                        <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                        <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Signature of Principal
+                                    </td>
+                                }
+
+                            </tr>
                             </table>
                         </div>
                     </td>
@@ -289,7 +288,28 @@
         error: function (e) {
             alert("errorn");
         }
-    });
+                });
+
+        }
+        function SectionChanged(sender) {
+            $('#ddlEvaluation').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/GetEvaluationClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+
         }
         function PrintDemantRecipt() {
             var contents = $("#admitcards").html();
