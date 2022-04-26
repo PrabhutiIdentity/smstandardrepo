@@ -3221,7 +3221,13 @@ namespace SMEnterprise.Repository
                     objModel.FeeType = multi.Read<NameIDModel>().ToList();
                     objModel.Report = multi.Read<FeePaymentModel>().ToList();
                     objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
+                    try
+                    {
 
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return objModel;

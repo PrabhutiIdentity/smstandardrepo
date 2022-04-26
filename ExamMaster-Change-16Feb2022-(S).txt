@@ -1,3 +1,9 @@
+
+alter table [SubjectMasterT]
+add SeqNo int, IsAdditionalSubject	int,IsGradeType bit,IsGradeMarking bit,	EVSectionID int,GSubjectID int,MarkingScheme int
+go
+
+
 alter table ExamMaster
 Add MarkingScheme int
 go
@@ -294,5 +300,53 @@ select isnull(@SessionID,0)
           
 Select SessionID,SessionName,SessionStatus from SessionMaster where SBranchID=@SBranchID          
           
+END 
+go
+
+
+
+
+ alter proc [dbo].[sp_GetEvaluationList]  --1,-1,8,5               
+(                
+@SBranchID int,                
+@EvaluationMode int=null,                
+@ClassID int=0,                
+@SessionID int=0                
+)                
+AS                
+BEGIN                 
+declare @SchemeID int     
+ declare @SchemeID1 int       
+select @SchemeID1=isnull(EvaluationSchemeID,0) from [dbo].[EvaluationSchemeMaster] where sessionid=@SessionID          
+ if(@SchemeID1>0)          
+ begin               
+select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@SessionID           
+end     
+    
+--select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@SessionID                
+--if(@SchemeID is null)                
+--begin                
+--declare @TSessionID int                
+--Select top 1 @TSessionID=SessionID from SessionMaster where SessionID<>@SessionID and SBranchID=@SBranchID order by SessionStartDate desc                
+--select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@TSessionID                
+--insert into [dbo].[ClassSessionDetails] (ClassID,SessionID,SchemeID) values(@ClassID,@SessionID,@SchemeID)                
+--end                
+if(@EvaluationMode<>-1)                
+begin                
+Select EvaluationID,                
+(case when isnull(MasterID,0)=0 then EvaluationName else                 
+(Select EvaluationName from EvaluationMaster ED where ED.EvaluationID=EM.MasterID)+'->'+EvaluationName end) as EvaluationName                
+from EvaluationMaster EM where SBranchID=@SBranchID and EvaluationSchemeID=@SchemeID and EvaluationID not in (Select isnull(MasterID,0) from EvaluationMaster)                
+end                
+else if(@EvaluationMode=-1)                
+begin                
+print @EvaluationMode       
+Select EvaluationID, EvaluationName        
+from EvaluationMaster EM where SBranchID=@SBranchID and EvaluationSchemeID=@SchemeID and isnull(MasterID,0)=0               
+--Select EvaluationID,             
+--(case when isnull(MasterID,0)=0 then EvaluationName else                 
+--(Select EvaluationName from EvaluationMaster ED where ED.EvaluationID=EM.MasterID)+'->'+EvaluationName end) as EvaluationName      
+--from EvaluationMaster EM where SBranchID=@SBranchID and EvaluationSchemeID=@SchemeID and EvaluationID not in (Select isnull(MasterID,0) from EvaluationMaster)                     
+end                
 END 
 go
