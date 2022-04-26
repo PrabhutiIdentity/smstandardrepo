@@ -154,6 +154,7 @@ namespace SMEnterprise.Models
         public int StudentSessionUID { get; set; }
         public string SchoolUID { get; set; }
         public string SubReligion { get; set; }
+        public string SessionName { get; set; }
         public DateTime SessionStartDate { get; set; }
         public DateTime SessionEndDate { get; set; }
         public DateTime FatherDOB { get; set; }
