@@ -1915,6 +1915,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@RelievingCertificate", objData.RelievingCertificate);
                 paramater.Add("@AppointmentLetter", objData.AppointmentLetter);
                 paramater.Add("@BankAccountProof", objData.BankAccountProof);
+                paramater.Add("@EmpSignature", objData.EmpSignature);
 
                 return con.Query<int>("sp_UpdateEmployeeCertificates", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
