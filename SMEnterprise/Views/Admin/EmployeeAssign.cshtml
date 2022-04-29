@@ -1,0 +1,276 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Blog Categories";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeAssignPageModel
+<link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("EmployeeAssign", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-5 text-right" style="padding-right: 0px;">Session :</label>
+                                        <div class="col-md-7">
+                                            <select class="form-control" name="ID" ID="ddlSession">
+                                                @foreach (SchoolSessionModel e in Model.Sessions)
+                                                {
+                                                    <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+
+                                            <div class="col-md-2">
+                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6"></div>
+        <div class="col-md-6">
+            <div class="btn-group">
+                <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditScheme" onclick="EditScheme(0,'0','');">Add New</a>
+            </div>
+        </div>
+    </div>
+    <div class="box-body">
+        <table id="tblCategory" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th style="width: 10%">Sl. No.</th>
+                    <th style="width: 20%">Employee Type Name</th>
+                    <th style="width: 20%">Employee Name</th>
+                    <th style="width: 45%">Class</th>
+                    <th style="width: 15%">
+                        <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditScheme" onclick="EditScheme(0,'0','');">Add New</a>
+                    </th>
+                </tr>
+            </thead>
+            @{
+                int count = 0;
+                foreach (var c in Model.AssignedEmployee)
+                {
+                    <tr>
+
+                        <td>
+                            @(count + 1)
+                        </td>
+                        <td>
+                            @c.EmployeeTypeName
+                        </td>
+
+                        <td>
+                            @c.EmployeeName
+                        </td>
+                        <td>
+                            @c.ClassName
+                        </td>
+                        <td>
+                            @using (Html.BeginForm("UpdateEmployeeAssign", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+                            {
+                                <input type="hidden" name="OpType" value="-1" />
+                                <input type="hidden" name="EvaluationSchemeID" value="@c.EmployeeAssignID" />
+                                 <button onclick="return EvaluationSchemeDelete(this,' @c.EmployeeAssignID');" style="background-color: red;color: white;" class="btn btn-default" value="Edit">Delete</button>
+                            }
+                        </td>
+                    </tr>
+
+                    count++;
+                }
+            }
+        </table>
+    </div>
+
+</section>
+@section pageBottom{
+    <div id="mdlEditScheme" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Evaluation Scheme</h4>
+                </div>
+                <div class="modal-body">
+                    @using (Html.BeginForm("UpdateEmployeeAssign", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetEmployee" }))
+                    {
+                        <div class="box-body">
+                            <div class="form-group">
+                                <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
+                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <div class="col-md-6">
+                                        <label class="EmployeeType">Employee Type</label>
+                                        <select class="form-control" name="EmployeeTypeID" ID="ddlEmployeeTypeID" onchange="EmployeeChanged(this);">
+                                            <option value="0">--Select EmployeeType--</option>
+                                            @foreach (var e in Model.EmployeeType)
+                                            {
+                                                <option value="@e.ID" @(e.ID == Model.SessionID ? "Selected" : "")>@e.Name </option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="Employee">Select Employee</label>
+                                        <select class="form-control" name="EmployeeID" ID="ddlEmployeeID">
+                                            @foreach (var e in Model.Employeelist)
+                                            {
+                                                <option value="@e.ID" @(e.ID == Model.SessionID ? "Selected" : "")>@e.Name </option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <br /><br />
+                            <div class="form-group">
+
+                                <label class="select">
+                                    Select Classes
+                                    <select id="ddlcategory" style="max-height: 280px;" name="ClassesAry" multiple>
+                                        @if (Model.Classes != null && Model.Classes.Count > 0)
+                                        {
+                                            foreach (var item in Model.Classes)
+                                            {
+                                                <option value="@item.ClassID">@item.ClassName</option>
+                                            }
+                                        }
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
+
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary pull-right" onclick="return SaveEvaluationScheme();">Submit</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+        </div>
+    </div>
+}
+<script>
+    function SaveEvaluationScheme() {
+        var classes = '';
+        $(".EClassList").find('.class-checkbox').each(function () {
+            if ($(this).is(':checked') == true) {
+                if (classes != '') {
+                    classes = classes + ',';
+                }
+                classes = classes + $(this).attr('clsid');
+            }
+        });
+        $('#hdnClassIDs').val(classes);
+        return true;
+    }
+    function EditScheme(SchemeID, classes, title) {
+        $('#txtSchemeTitle').val(title);
+        var cls = classes.split(",");
+        var clsdone = [];
+        $('#hdnEditEvaluationSchemeID').val(SchemeID);
+        $(".EClassList").find('.class-checkbox').each(function () {
+            if ($.inArray($(this).attr('clsid'), clsdone) == -1) {
+                if ($(this).attr('esid') == SchemeID) {
+                    clsdone.push(cls);
+                    if ($.inArray($(this).attr('clsid'), cls) != -1) {
+                        $(this).attr('checked', 'checked');
+                    }
+                    else {
+                        $(this).removeAttr('checked');
+                        if ($(this).attr('esid') != '0') {
+                            $(this).attr('disabled', 'disabled');
+                        }
+                    }
+                }
+            }
+        });
+    }
+    //$(function () {
+    //    $("#tblCategory").DataTable({
+    //        "ordering": false
+    //    });
+    //    $('#liEvaluationSchemeManagement').closest('ul').closest('li').addClass('active');
+    //    $('#liEvaluationSchemeManagement').addClass('active');
+    //});
+    function EvaluationSchemeDelete(sender, EvaluationName) {
+        var CountUsed = $(sender).closest('tr').find('#hdnCountUsed').val();
+        if (CountUsed > 0) {
+            alert('Test');
+            ShowClosingNotification('Error', 'Evaluation Type are added in this Evaluation Scheme, so It can\'t be deleted!!!!', 'error');
+            return false;
+        }
+        else {
+            if (confirm('Are you sure you wish to delete ' + EvaluationName + ' Evaluation Scheme?')) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+  
+    function BeforeEvaluationSchemeUpdate(sender) {
+        if ($(sender).closest('tr').find('#txtEvaluationSchemeName').val() == "") {
+            alert("Plese Fill Required Details!!!!");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+    function EmployeeChanged(sender) {
+        $('#ddlPromoteSection').html('<option value="0">Loading....</option>');
+        var sessionID = $('#hdnSessionID').val();
+        debugger;
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetEmployeelist/" + $(sender).val() + "/" + sessionID,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlEmployeeID').html('');
+                    $('#ddlEmployeeID').html('<option value="0">--Select Employee--</option>');
+                    $('#ddlEmployeeID').append(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+</script>
+<!-- /.content -->
