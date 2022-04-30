@@ -181,6 +181,11 @@ namespace SMEnterprise.Repository
         }
         public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID, string ContentID, SMSConfigirationModel SMSConfiguration)
         {
+            if(SBranchID==0)
+            {
+                SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            }
+             
             string msg = "";
             if (SMSConfiguration == null)
             {

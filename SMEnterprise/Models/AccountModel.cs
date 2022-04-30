@@ -92,10 +92,13 @@ namespace SMEnterprise.Models
             dtStudentDetails.Columns.Add("StudentSessionUID");
             dtStudentDetails.Columns.Add("ParentID");
             dtStudentDetails.Columns.Add("SchoolUID");
+            dtStudentDetails.Columns.Add("Name");
             dtStudentDetails.Columns.Add("RollNo");
             dtStudentDetails.Columns.Add("DOB");
             dtStudentDetails.Columns.Add("DOJ");
+            dtStudentDetails.Columns.Add("FatherName");
             dtStudentDetails.Columns.Add("FatherMobileNo");
+            dtStudentDetails.Columns.Add("MotherName");
             dtStudentDetails.Columns.Add("MotherMobileNo");
             dtStudentDetails.Columns.Add("AadharCardNo");
 
@@ -106,10 +109,13 @@ namespace SMEnterprise.Models
                 dr["StudentSessionUID"] = e.StudentSessionUID;
                 dr["ParentID"] = e.ParentID;
                 dr["SchoolUID"] = e.SchoolUID;
+                dr["Name"] = e.Name;
                 dr["RollNo"] = e.RollNo;
                 dr["DOB"] = e.DOB;
                 dr["DOJ"] = e.DOJ;
+                dr["FatherName"] = e.FatherName;
                 dr["FatherMobileNo"] = e.FatherMobileNo;
+                dr["MotherName"] = e.MotherName;
                 dr["MotherMobileNo"] = e.MotherMobileNo;
                 dr["AadharCardNo"] = e.AadharCardNo;
                 dtStudentDetails.Rows.Add(dr);
