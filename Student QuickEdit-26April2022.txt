@@ -1,0 +1,44 @@
+
+drop proc sp_QuickUpdateStudents
+go
+drop type [ut_QuickStudentEdit]
+go
+  create TYPE [dbo].[ut_QuickStudentEdit] AS TABLE(
+	[StudentID] [int] NULL,
+	[StudentSessionUID] [int] NULL,
+	[ParentID] [int] NULL,
+	[SchoolUID] [nvarchar](100) NULL,
+	[Name] [nvarchar](100) NULL,
+	[RollNo] [nvarchar](50) NULL,
+	[DOB] [date] NULL,
+	[DOJ] [date] NULL,
+	[FatherName] [nvarchar](100) NULL,
+	[FatherMobileNo] [nvarchar](15) NULL,
+	[MotherName] [nvarchar](100) NULL,
+	[MotherMobileNo] [nvarchar](15) NULL,
+	[AadharCardNo] [nvarchar](50) NULL
+)
+GO
+  
+create proc [dbo].[sp_QuickUpdateStudents]  
+(  
+@SBranchID int,  
+@Students ut_QuickStudentEdit READONLY  
+)  
+AS  
+BEGIN  
+  
+  
+   UPDATE e SET e.Name=d.Name,e.DOB=d.DOB,e.DOJ=d.DOJ,e.SchoolUID=d.SchoolUID,e.AadharCardNo=d.AadharCardNo  
+   FROM  StudentMaster e, @Students d   
+   WHERE d.StudentID=e.StudentID  
+  
+   UPDATE e SET e.RollNo=d.RollNo  
+   FROM  Student_Session e, @Students d   
+   WHERE d.StudentSessionUID=e.StudentSessionUID  
+  
+   UPDATE e SET e.FatherName=d.FatherName,e.FatherMobileNo=d.FatherMobileNo,e.MotherName=d.MotherName,e.MotherMobileNo=d.MotherMobileNo  
+   FROM  ParentMaster e, @Students d   
+   WHERE d.ParentID=e.ParentID  
+END  
+ go 

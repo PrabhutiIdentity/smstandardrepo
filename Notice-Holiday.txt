@@ -1,0 +1,71 @@
+
+    
+alter PROCEDURE [dbo].[spn_GetHolidays]    
+(    
+@SBranchID int    
+)    
+AS    
+begin    
+ declare @StartDate date  
+   declare @EndDate date  
+   select @StartDate=SessionStartDate, @EndDate=SessionEndDate from sessionmaster where Sessionstatus=1 and SBranchID=@SBranchID  
+  
+ select HolidayID,HolidayType,(Case when HolidayType=1 then 'Local' else 'National' end) 'HolidayTypeName',    
+ [dbo].[GetClassNames](Classes) 'ClassesIncluded',[dbo].[GetEmployeeTypeNames](AssociatedIDs) as EmployeeTypes,    
+ (Case When DayDuration=1 then 'Full Day' else (Case when DayDuration=2 then 'First Half' else 'Second Half' end)end) 'DayDurationName',    
+ StartDate,EndDate,DATEDIFF(day,StartDate,EndDate)+1 as [Days],DayDuration, [HolidayDescription],Title,[Status],    
+ ISSMSSent,SMSSentTo,AssociatedIDs,IsEmployee,IsStudents,    
+ Classes from HolidayMaster where  SBranchID=@SBranchID and ( StartDate>=@StartDate and EndDate<=@EndDate) order by StartDate desc    
+end 
+go
+alter proc [dbo].[sp_GetPrincipleNotices]  
+(  
+@SBranchID int  
+)  
+AS  
+BEGIN  
+declare @NoticeStartDate date  
+   declare @NoticeEndDate date  
+   select @NoticeStartDate=SessionStartDate, @NoticeEndDate=SessionEndDate from sessionmaster where Sessionstatus=1 and SBranchID=@SBranchID  
+
+
+  Select [NoticeID] ,[NoticeTitle] ,[NoticeDescription],[NoticeStartDate] ,[NoticeEndDate],[ApplicableFor],[NoticeLevel]  
+      ,[ClassesIncludedIDs] ,  
+   (Case when ClassesIncludedIDs='0' then 'All Classes' else dbo.GetClassNames(ClassesIncludedIDs) end) 'ClassNames'  
+   ,[Status] ,[UserID],'Administrator' as PostedBy ,[CreatedDate] ,[ModifiedDate]  
+    from NoticeBoard NB where SBranchID=@SBranchID  and ( NoticeStartDate>=@NoticeStartDate and NoticeEndDate<=@NoticeEndDate) 
+    order by NoticeLevel, NoticeStartDate desc  
+END  
+
+
+go
+
+
+alter proc [dbo].[spn_GetAllNotices]    
+(    
+@SBranchID int    
+)    
+AS    
+BEGIN    
+ declare @NoticeStartDate date  
+   declare @NoticeEndDate date  
+   select @NoticeStartDate=SessionStartDate, @NoticeEndDate=SessionEndDate from sessionmaster where Sessionstatus=1 and SBranchID=@SBranchID  
+  
+  Select [NoticeID]    
+      ,[NoticeTitle]    
+      ,[NoticeDescription]    
+      ,[NoticeStartDate]    
+      ,[NoticeEndDate]    
+      ,[ApplicableFor]    
+      ,[NoticeLevel]    
+      ,[ClassesIncludedIDs]    
+      ,[Status]    
+    ,[UserID]    
+      ,[CreatedDate]    
+      ,[ModifiedDate],    
+   [IsSMSSent],    
+   [SMSSentTo]    
+    from NoticeBoard NB where SBranchID=@SBranchID and ( NoticeStartDate>=@NoticeStartDate and NoticeEndDate<=@NoticeEndDate)  order by NoticeStartDate desc    
+    
+    Select ClassID as ID, ClassName as Name from ClassMaster where Status=1 and SBranchID=@SBranchID    
+END    
