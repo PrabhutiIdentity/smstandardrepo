@@ -111,3 +111,76 @@ BEGIN
 END    
   go
   
+
+-- For DueAmount
+
+
+alter procedure [dbo].[spn_GetDueFeeStudentsForSMS]          
+(          
+@QDate date,          
+@CurDate date,          
+@SBranchID int=0,          
+@SessionID int          
+)          
+AS          
+BEGIN          
+ if(@SessionID=0)          
+ begin          
+  Select top 1 @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID order by SessionStatus desc          
+ end          
+          
+ Declare @Students table(StudentID int,Name nvarchar(100),RollNo nvarchar(100),Gender int,Photo nvarchar(100),ClassID int,FeePaymentMode int,          
+ StudentSID nvarchar(15),FromDate date,ToDate Date,QuotaID int,          
+ SessionID int,VehicleRouteID int,HostelRoomID int,SectionID int,          
+ SessionStartDate date,SessionEndDate date,IsAdmissionFee int,SchoolUID nvarchar(50),FeeAmount numeric(10,2),PreviousDue numeric(10,2)          
+ ,LateFee numeric(10,2),Discounts numeric(10,2),Paid numeric(10,2))          
+          
+ Declare @ClassDueFeeTable table(ClassID int,SectionID int, ClassName nvarchar(50),PreviousDues numeric(10,2),LateFee numeric(10,2),          
+ FeeAmount numeric(10,2),Paid numeric(10,2),Discounts numeric(10,2))          
+          
+ insert into @ClassDueFeeTable          
+ select CM.ClassID,ID,'',0,0,0,0,0 from Class_Sections CS          
+ left outer join ClassMaster CM on CS.ClassID=CM.ClassID          
+ where CS.Status=1 and CM.SBranchID=@SBranchID and CM.Status=1           
+ order by CM.SequenceNo          
+          
+ declare @ClassID int,@SectionID int, @PreviousDues numeric(10,2),@LateFee numeric(10,2),@FeeAmount numeric(10,2),@Paid numeric(10,2),@Discounts numeric(10,2)          
+          
+ DECLARE class_cursor CURSOR FOR          
+  SELECT ClassID,SectionID,PreviousDues,LateFee,FeeAmount,Paid,Discounts          
+  FROM @ClassDueFeeTable --FOR UPDATE OF PreviousDues,LateFee,FeeAmount,Paid,Discounts          
+  OPEN class_cursor          
+  FETCH NEXT FROM class_cursor          
+  INTO  @ClassID,@SectionID,@PreviousDues,@LateFee,@FeeAmount,@Paid,@Discounts          
+          
+  WHILE (@@FETCH_STATUS = 0)          
+  BEGIN          
+   --Delete from @Students          
+          
+   insert into @Students          
+   exec sp_GetClassGroupFeeListOnly @ClassID,@SectionID,@SBranchID,@SessionID,@QDate,@CurDate          
+             
+   --select @PreviousDues=sum(PreviousDue),@LateFee=sum(LateFee),@FeeAmount=sum(FeeAmount),@Paid=sum(Paid),@Discounts=sum(Discounts) from @Students          
+          
+   --UPDATE @ClassDueFeeTable SET FeeAmount=@FeeAmount,PreviousDues=@PreviousDues,Discounts=@Discounts,Paid=@Paid,LateFee=@LateFee WHERE CURRENT OF class_cursor          
+   FETCH NEXT FROM class_cursor          
+   INTO   @ClassID,@SectionID,@PreviousDues,@LateFee,@FeeAmount,@Paid,@Discounts          
+  END          
+          
+  CLOSE class_cursor          
+  DEALLOCATE class_cursor          
+          
+  delete from @Students where round(isnull(FeeAmount,0)+isnull(LateFee,0)+isnull(PreviousDue,0)-isnull(Discounts,0)-isnull(Paid,0),0)=0          
+          
+  select S.StudentID as RecieverID,1 as RecieverType,S.StudentSID,S.RollNo,S.Photo,S.Name,S.Gender,S.QuotaID,S.FeePaymentMode,DatePart(month,@QDate) as Month,DatePart(Year,@QDate) as Year          
+  ,S.LateFee,S.Discounts as DiscAmt,S.FeeAmount as ApplicableFee,S.PreviousDue as PreviousDues,S.Paid as PaymentAmount           
+  ,isnull(SM.NotificationSMSTo,0) as NotificationSMSTo,          
+  (case when isnull(SM.NotificationSMSTo,0)=0 then PM.FatherMobileNo when isnull(SM.NotificationSMSTo,0)=1 then PM.MotherMobileNo  else SM.GuardianMobileNo end) as Mobile,          
+  (Select ClassName from ClassMaster CM where CM.ClassID=S.ClassID)+'/'+(Select Name from Class_Sections cs where CS.ID=S.SectionID)+' ('+          
+  (cast(isnull(S.FeeAmount,0)+isnull(S.PreviousDue,0)+isnull(S.LateFee,0)-isnull(S.Paid,0)-isnull(S.Discounts,0) as nvarchar(50)))+')' as Details,(cast(isnull(S.FeeAmount,0)+isnull(S.PreviousDue,0)+isnull(S.LateFee,0)-isnull(S.Paid,0)-isnull(S.Discounts,0) as nvarchar(50))) as Amount   
+  from @Students S left outer join StudentMAster SM on S.StudentID=SM.StudentID           
+  left outer join ParentMaster PM on PM.ParentID=SM.ParentID          
+  --where round(isnull(S.FeeAmount,0)+isnull(S.LateFee,0)+isnull(S.PreviousDue,0)-isnull(S.Discounts,0)-isnull(S.Paid,0),0)>0          
+          
+end 
+go
