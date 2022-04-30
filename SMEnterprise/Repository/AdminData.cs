@@ -1108,7 +1108,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@EmployeeTypeID", EmployeeTypeID);
                 paramater.Add("@SessionID", SessionID);
-                return con.Query<NameIDModel>("sp_GetEmployeeList", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+                return con.Query<NameIDModel>("Sp_GetemployeelistOld", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
 
             }
         }

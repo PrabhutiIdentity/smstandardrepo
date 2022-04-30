@@ -24,7 +24,7 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public string ClassID { get; set; }
         public string EmployeeName { get; set; }
-        public string ClassName { get; set; }
+        public string ClassNames { get; set; }
         public int EmployeeTypeID { get; set; }
         public int EmployeeID { get; set; }
          public string EmployeeTypeName { get; set; }
