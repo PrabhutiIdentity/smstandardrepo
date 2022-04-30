@@ -80,6 +80,25 @@ go
      go
 
 
+alter view [dbo].[SubjectMaster]    
+  as     
+  Select SubjectID,SubjectName,IsOptionalSubject,Status,GroupID,SubjectCode,MainSubID,SubjectType,IsAdditionalSubject,IsGradeType,IsGradeMarking,EVSectionID,GSubjectID,isnull(MarkingScheme,0) as MarkingScheme,    
+  (Select Count(*) from SubjectMasterT SS where SS.MainSubID=SM.SubjectID) as SubSubjectCount    
+   from SubjectMasterT SM where isnull(MainSubID,0)=0    
+
+go
+ alter proc [dbo].[spn_GetGroupSubjectDetails]    
+(    
+@GroupID int    
+)    
+AS    
+BEGIN    
+ Select SubjectID,SubjectName,IsOptionalsubject,Status,GroupID,SubjectCode,          
+ MainSubID,SubSubjectCount,(select Count(*) from Teacher_Subject ST where ST.SubjectID=SM.SubjectID) as TAssigned, isnull(MarkingScheme  ,0) as MarkingScheme  
+ from SubjectMaster SM  where  GroupID=@GroupID    
+END   
+
+go
 	alter procedure [dbo].[spn_InsertUpdateGroupSubject]    
 (    
 @SubjectID int,    
