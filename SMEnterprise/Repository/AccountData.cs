@@ -3222,7 +3222,13 @@ namespace SMEnterprise.Repository
                     objModel.FeeType = multi.Read<NameIDModel>().ToList();
                     objModel.Report = multi.Read<FeePaymentModel>().ToList();
                     objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
+                    try
+                    {
 
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return objModel;
@@ -3953,7 +3959,7 @@ namespace SMEnterprise.Repository
         }
         public int InsertSMSSending(SMSSendTaskModel objModel)
         {
-            // int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
@@ -3964,7 +3970,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@RecieverCatIDs", objModel.RecieverCats);
                 paramater.Add("@Title", objModel.Title);
                 paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
-                paramater.Add("@SBranchID", objModel.SBranchID);
+                //paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SBranchID", SBranchID);
                 paramater.Add("@content_id", objModel.Content_id);
                 return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }

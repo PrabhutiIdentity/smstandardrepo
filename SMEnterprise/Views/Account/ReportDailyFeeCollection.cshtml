@@ -27,223 +27,293 @@
 </section>
 
 <!-- Main content -->
-<section class="content">
-    <!-- Small boxes (Stat box) -->
+<div class="" style="background-color: white;">
     <div class="row">
-        <div class="col-xs-12">
-            <div class="">
-                <div class="box-header">
-                    @using (Html.BeginForm("ReportDailyFeeCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
-                    {
-                        <div class="row std-mng-head">
+        <div class="col-md-12">
+            @using (Html.BeginForm("ReportDailyFeeCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+            {
+                <div class="row std-mng-head">
 
-                            <div class="col-md-12 class-section">
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-3 padding">
+
+                            </div>
+                            <div class="col-md-5 padding">
+                                <label class="col-md-4 text-right">Payment Mode :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" ID="ddlMainSessions" name="PaymentMode">
+                                        <option value="-1">--All Modes--</option>
+                                        @foreach (PaymentModeModel e in Model.PaymentModes)
+                                        {
+                                            <option value="@e.PaymentModeID" @(e.PaymentModeID == Model.PaymentMode ? "Selected" : "")>@e.PaymentModeName </option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 padding">
                                 <div class="row">
+                                    <label class="col-md-3 text-right padding-R">Date : </label>
+                                    <div class="col-md-7 padding-L" style="padding-left: 10px;">
 
-                                    <div class="col-md-3 padding">
+                                        <input type="date" class="form-control" name="FromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
+                                        <input type="hidden" name="ReportType" value="1" />
+                                        <input type="hidden" name="PaymentMode" value="-1" />
 
                                     </div>
-                                    <div class="col-md-5 padding">
-                                        <label class="col-md-4 text-right">Payment Mode :</label>
-                                        <div class="col-md-8">
-                                            <select class="form-control" ID="ddlMainSessions" name="PaymentMode">
-                                                <option value="-1">--All Modes--</option>
-                                                @foreach (PaymentModeModel e in Model.PaymentModes)
-                                                {
-                                                    <option value="@e.PaymentModeID" @(e.PaymentModeID == Model.PaymentMode ? "Selected" : "")>@e.PaymentModeName </option>
-                                                }
-                                            </select>
-                                        </div>
+                                    <div class="col-md-2">
+                                        <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
                                     </div>
-                                    <div class="col-md-4 padding">
-                                        <div class="row">
-                                            <label class="col-md-3 text-right padding-R">Date : </label>
-                                            <div class="col-md-7 padding-L" style="padding-left: 10px;">
-
-                                                <input type="date" class="form-control" name="FromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
-                                                <input type="hidden" name="ReportType" value="1" />
-                                                <input type="hidden" name="PaymentMode" value="-1" />
-
-                                            </div>
-                                            <div class="col-md-2">
-                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                 </div>
                             </div>
 
                         </div>
-                    }
+                    </div>
+
                 </div>
-                <div class="box-body">
-                    <table id="PaymentsTable" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
-                        <thead>
-                            <tr>
+            }
+        </div>
+        <div class="x_panel">
 
-                                <th>S.No</th>
-                                <th>Reciept No</th>
-                                <th>Student ID</th>
-                                <th>SR No</th>
-                                <th>Payee</th>
+            <div class="x_content">
+                <table id="PaymentsTable" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;">
+                    <thead>
+                        <tr>
 
-                                <th>Class</th>
-                                <th>Session</th>
-                                <th>Details</th>
-                                <th>Date</th>
-                                <th>collection</th>
-                                @foreach (var com in Model.FeeType)
-                                {
-                                    <th>@com.Name</th>
-                                }
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        @{
-                            int count = 1;
-                            decimal TotalPayment = 0;
+                            <th>S.No</th>
+                            <th>Reciept No</th>
+                            <th>Student ID</th>
+                            <th>SR No</th>
+                            <th>Payee</th>
 
-                            foreach (FeePaymentModel c in Model.Report)
+                            <th>Class</th>
+                            <th>Session</th>
+                            <th>Details</th>
+                            <th>Date</th>
+                            <th>collection</th>
+                            @foreach (var com in Model.FeeType)
                             {
-                                var PayMode = "";
-                                TotalPayment = TotalPayment + c.PaymentAmount;
-
-
-                                <tr>
-                                    <td>@count</td>
-                                    <td> @c.PaymentRecieptNo</td>
-                                    <td>
-
-                                        <b>Name:</b> @c.Name
-                                        @if (!string.IsNullOrEmpty(c.SchoolUID))
-                                        {
-                                            <b>SR No:</b> @c.SchoolUID
-                                        }
-
-                                    </td>
-                                    <td>
-                                        @c.ClassName / @c.SectionName
-                                    </td>
-                                    <td>
-                                        @c.SessionName
-                                    </td>
-
-                                    <td>
-                                        @if (c.PaymentMode == 0)
-                                        {
-                                            PayMode = "Cash Payment";
-                                        }
-                                        else if (c.PaymentMode == 1)
-                                        {
-                                            PayMode = "Cheque Payment";
-                                        }
-                                        else if (c.PaymentMode == 2)
-                                        {
-                                            PayMode = "NEFT Payment";
-                                        }
-                                        else if (c.PaymentMode == 2)
-                                        {
-                                            PayMode = "Other Payment";
-                                        }
-                                        @PayMode<br />
-                                        @c.PayMonths
-                                    </td>
-                                    <td>
-                                        @c.PaymentDate.ToString("dd MMM, yyyy")
-                                    </td>
-                                    <td>
-                                        @c.CollectedBy
-                                    </td>
-                                    @foreach (var FeeT in Model.FeeType)
-                                    {
-                                        var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentID == c.PaymentID).Sum(x => x.PaymentRecieved);
-
-                                        FeeT.Sum = FeeT.Sum + rep;
-
-                                        <td>@rep</td>
-
-                                    }
-                                    <td>
-                                        <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
-                                    </td>
-                                </tr>
-
-                                count++;
+                                <th>@com.Name</th>
                             }
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    @{
+                        int count = 1;
+                        decimal TotalPayment = 0;
 
-                        }
-                        <tfoot>
-                            <tr style="background-color: #606d73;color: white;">
-                                <td colspan="7">
-                                    @*<td colspan="@(4+Model.FeeType.Count())">*@
-                                    <b> Total Collection</b>
+                        foreach (FeePaymentModel c in Model.Report)
+                        {
+                            var PayMode = "";
+                            TotalPayment = TotalPayment + c.PaymentAmount;
+
+
+                            <tr>
+                                <td>@count</td>
+                                <td> @c.PaymentRecieptNo</td>
+                                <td> @c.StudentSID</td>
+
+                                <td>
+                                    @if (!string.IsNullOrEmpty(c.SchoolUID))
+                                    {
+                                        @c.StudentSID
+                                    }
                                 </td>
-                                @foreach (var com in Model.FeeType)
+                                <td>
+
+                                    @c.Name
+
+
+                                </td>
+                                <td>
+                                    @c.ClassName / @c.SectionName
+                                </td>
+                                <td>
+                                    @c.SessionName
+                                </td>
+
+                                <td>
+                                    @if (c.PaymentMode == 0)
+                                    {
+                                        PayMode = "Cash Payment";
+                                    }
+                                    else if (c.PaymentMode == 1)
+                                    {
+                                        PayMode = "Cheque Payment";
+                                    }
+                                    else if (c.PaymentMode == 2)
+                                    {
+                                        PayMode = "NEFT Payment";
+                                    }
+                                    else if (c.PaymentMode == 2)
+                                    {
+                                        PayMode = "Other Payment";
+                                    }
+                                    @PayMode<br />
+                                    @c.PayMonths
+                                </td>
+                                <td>
+                                    @c.PaymentDate.ToString("dd MMM, yyyy")
+                                </td>
+                                <td>
+                                    @c.CollectedBy
+                                </td>
+                                @foreach (var FeeT in Model.FeeType)
                                 {
-                                    <td>@com.Sum</td>
+                                    var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentID == c.PaymentID).Sum(x => x.PaymentRecieved);
+
+                                    FeeT.Sum = FeeT.Sum + rep;
+
+                                    <td>@rep</td>
+
                                 }
-
-                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
+                                <td>
+                                    <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
+                                </td>
                             </tr>
-                        </tfoot>
-                    </table>
 
-                </div>
+                            count++;
+                        }
+
+                    }
+                <tfoot>
+                   
+
+                    <tr style="background-color: #606d73;color: white;">
+
+                     
+                        <td>
+                            <b> Total</b>
+                        </td>
+                        <td>
+                            <b>  Collection</b>
+                        </td>
+
+                        <td colspan="@(7+Model.FeeType.Count())">
+
+                        </td>
+                        @foreach (var com in Model.FeeType)
+                        {
+                            <td>@com.Sum</td>
+                        }
+
+                        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
+                    </tr>
+                </tfoot>
+                </table>
+
             </div>
         </div>
     </div>
+</div>
 
-</section>
 @section scripts
 {
-    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+        <script src="@Url.Content("~/js/jszip.min.js")"></script>
+        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
-    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
-    <script src="@Url.Content("~/js/jszip.min.js")"></script>
-    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
-    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
     <script>
         $(document).ready(function () {
+              var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+            var rpname ='Daily Fee Wise Collection Report'
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
             var handleDataTableButtons = function () {
                 if ($("#PaymentsTable").length) {
                     $("#PaymentsTable").DataTable({
                         dom: "Bfrtip",
                         "paging": true,
-                        "pageLength": 30,
-                        buttons: [
-                            {
-                                extend: "copy",
-                                className: "btn-sm",
-                                footer: true
-                            },
-                            {
-                                extend: "csv",
-                                className: "btn-sm",
-                                footer: true
-                            },
-                            {
-                                extend: "excel",
-                                className: "btn-sm",
-                                footer: true
-                            },
-                            {
-                                extend: "pdfHtml5",
-                                className: "btn-sm",
-                                footer: true
-                            },
-                            {
-                                extend: "print",
-                                className: "btn-sm",
-                                footer: true
-                            },
-                        ],
-                        responsive: true
-                    });
-                }
-            };
+                       "pageLength": 31,
+                    buttons: [
+                      {
+                          extend: "copy",
+                            className: "btn-sm",
+                            footer: true,
+                            message: printdate,
+                             messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+
+
+                      },
+                      {
+                          extend: "csv",
+                          className: "btn-sm",
+                          footer: true,
+                          message: printdate,
+                            messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+
+                      },
+                      {
+                          extend: "excel",
+                          className: "btn-sm",
+                          footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+
+                      },
+                      {
+                          extend: "pdfHtml5",
+                          className: "btn-sm",
+                          footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                          },
+                          message: printdate,
+                          messageBottom: repname,
+                          title: rpname
+
+                      },
+                      {
+                          extend: "print",
+                          className: "btn-sm",
+                          footer: true,
+                          message: printdate,
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+
+
+                      },
+                    ],
+                    responsive: true
+                });
+            }
+        };
 
             TableManageButtons = function () {
                 "use strict";

@@ -106,7 +106,7 @@ namespace SMEnterprise
         void Application_AcquireRequestState(object sender, EventArgs e)
         {
           //  Session is Available here
-            HttpContext context = HttpContext.Current;
+         //   HttpContext context = HttpContext.Current;
           //  context.Session["UserID"] = "100";
 
         }
