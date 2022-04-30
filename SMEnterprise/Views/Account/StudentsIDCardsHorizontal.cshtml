@@ -1,7 +1,10 @@
-﻿@using SMEnterprise.Models;
+﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var SelectedSession = Model.Sessions.Where(x => x.ID == Model.SessionID).FirstOrDefault();
+
+}
 }
 @model SMEnterprise.Models.StudentsPageModel
 @section IncludeCss
@@ -10,279 +13,279 @@
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
     <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
     <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
-}
-<style>
-
-    .btn {
-        padding: 3px 6px;
     }
+    <style>
 
-    .thumbImageGrid {
-        max-width: 75px;
-        max-height: 75px;
-    }
+        .btn {
+            padding: 3px 6px;
+        }
 
-
-    *html1 .thumbImageGrid {
-        width: expression((this.width/this.height)>=1?75:'auto');
-        height: expression((this.width/this.height)<1?100:'auto');
-    }
-
-    .thumbImageMain {
-        max-width: 125px;
-        max-height: 125px;
-    }
+        .thumbImageGrid {
+            max-width: 75px;
+            max-height: 75px;
+        }
 
 
-    *html .thumbImageMain {
-        width: expression((this.width/this.height)>=1?125:'auto');
-        height: expression((this.width/this.height)<1?125:'auto');
-    }
+        *html1 .thumbImageGrid {
+            width: expression((this.width/this.height)>=1?75:'auto');
+            height: expression((this.width/this.height)<1?100:'auto');
+        }
 
-    #tblCategory > tbody > tr > td {
-        vertical-align: middle;
-    }
-</style>
-<div class="">
+        .thumbImageMain {
+            max-width: 125px;
+            max-height: 125px;
+        }
 
-    <div class="clearfix"></div>
+
+        *html .thumbImageMain {
+            width: expression((this.width/this.height)>=1?125:'auto');
+            height: expression((this.width/this.height)<1?125:'auto');
+        }
+
+        #tblCategory > tbody > tr > td {
+            vertical-align: middle;
+        }
+    </style>
     <div class="">
 
         <div class="clearfix"></div>
-        <div class="row">
-            <div class="col-md-12">
-                @using (Html.BeginForm("StudentsIDCardsHorizontal", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
-                {
-                    <div class="row std-mng-head">
+        <div class="">
 
-                        <div class="col-md-12 class-section">
-                            <div class="row">
+            <div class="clearfix"></div>
+            <div class="row">
+                <div class="col-md-12">
+                    @using (Html.BeginForm("StudentsIDCardsHorizontal", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                    {
+                        <div class="row std-mng-head">
 
-                                <div class="col-md-2">
-                                    <a href="javascript:void(0);" onclick="printList();"><i class="fa fa-print"></i></a>
-                                </div>
-                                <div class="col-md-3 padding">
-                                    <label class="col-md-4 text-right">Session :</label>
-                                    <div class="col-md-8">
-                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
-                                            @foreach (NameIDModel el in Model.Sessions)
-                                            {
-                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
-                                            }
-                                        </select>
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+
+                                    <div class="col-md-2">
+                                        <a href="javascript:void(0);" onclick="printList();"><i class="fa fa-print"></i></a>
                                     </div>
-                                </div>
-                                <div class="col-md-3 padding">
-                                    <label class="col-md-4 text-right">Class :</label>
-                                    <div class="col-md-8">
-                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
-                                            <option value="0">--Select Class--</option>
-                                            @foreach (ClassModel el in Model.Classes)
-                                            {
-                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 padding">
-                                    <div class="row">
-                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
-                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
-
-                                            <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
-                                                <option value="0">--Select Section--</option>
-                                                @foreach (SectionModel el in Model.Sections)
+                                    <div class="col-md-3 padding">
+                                        <label class="col-md-4 text-right">Session :</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                                @foreach (NameIDModel el in Model.Sessions)
                                                 {
-                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                    <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
                                                 }
                                             </select>
                                         </div>
-
                                     </div>
-                                </div>
-                                <div class="col-md-4 padding">
-                                    <div class="row">
-                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Search List : </label>
-                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
-                                            <input type="text" class="form-control" id="txtsearch" placeholder="comma separated text for multiple" onkeyup="Search(this);" />
+                                    <div class="col-md-3 padding">
+                                        <label class="col-md-4 text-right">Class :</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                                <option value="0">--Select Class--</option>
+                                                @foreach (ClassModel el in Model.Classes)
+                                                {
+                                                    <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                                }
+                                            </select>
                                         </div>
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+                                            <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                            <div class="col-md-7 padding-L" style="padding-left: 10px;">
 
+                                                <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                                    <option value="0">--Select Section--</option>
+                                                    @foreach (SectionModel el in Model.Sections)
+                                                    {
+                                                        <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                    }
+                                                </select>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+                                            <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Search List : </label>
+                                            <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                                <input type="text" class="form-control" id="txtsearch" placeholder="Search Text" onkeyup="Search(this);" />
+                                            </div>
+
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
+                    }
+                    <div class="x_panel">
 
-                    </div>
-                }
-                <div class="x_panel">
-
-                    <div class="x_content">
-                        <div style="width:100%" id="">
-                            @foreach (var stu in Model.Students)
-                            {
-                                <div class="listitem" style="width:100%;line-height: 1.471;">
-                                    <div class="frontdiv" style="width: 85.60mm;height:53.98mm;float:left;border: 1px solid black;border-radius: 5px;margin: 5px;">
-                                        <table style="width:100%;border-collapse: collapse;border-spacing: 0;">
-                                            <tr>
-                                                <td rowspan="2" style="width:20%;background-color: #4c88b9;text-align:center;color: white;border-radius: 0 0 2mm 0;">
-                                                    <img style="max-height:15mm;max-width:15mm" alt="Photo" onerror="return OnImageError(this,0);" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_@(Model.BranchDetails.Logo)" />
-                                                </td>
-                                                <td style="background-color: #4c88b9;text-align:center;color: white;">
-                                                    <h2 style="font-size: 4mm;margin: 0mm;">@Model.BranchDetails.BranchSchoolName</h2>
-                                                    <span style="font-size: 2.4mm;">
-                                                        Contact Number : @Model.BranchDetails.ContactNo
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td style="text-align:center;height: 5mm;font-size: 2.5mm;padding: 0 2mm;">
-                                                    <div style="float:left">IDENTITY CARD</div>
-                                                    <div style="float:right">HOUSE : @stu.HouseName</div>
-                                                </td>
-                                            </tr>
-                                        </table>
-                                        <table style="width:100%;height:100%;border-collapse: collapse;border-spacing: 0;">
-                                            <thead class="redbk">
+                        <div class="x_content">
+                            <div style="width:100%" id="">
+                                @foreach (var stu in Model.Students)
+                                {
+                                    <div class="listitem" style="width:100%;line-height: 1.471;">
+                                        <div class="frontdiv" style="width: 85.60mm;height:53.98mm;float:left;border: 1px solid black;border-radius: 5px;margin: 5px;">
+                                            <table style="width:100%;border-collapse: collapse;border-spacing: 0;">
                                                 <tr>
-                                                    <td style="text-align:center;width:20%;height:33mm;">
-                                                        <img id="imgPhoto" onerror="return OnImageError(this,0);" style="max-height:25mm;max-width:25mm" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(stu.StudentID)_@stu.Photo" />
+                                                    <td rowspan="2" style="width:20%;background-color: #4c88b9;text-align:center;color: white;border-radius: 0 0 2mm 0;">
+                                                        <img style="max-height:15mm;max-width:15mm;padding-top:0;" alt="Photo" onerror="return OnImageError(this,0);" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_@(Model.BranchDetails.Logo)" />
+                                                    </td>
+                                                    <td style="background-color: #4c88b9;text-align:center;color: white;">
 
+                                                        <h2 style="font-size: 3mm;margin: 0mm;">@Model.BranchDetails.BranchSchoolName</h2>
+                                                        <span style="font-size: 2.4mm;">
+                                                            Contact Number : @Model.BranchDetails.ContactNo
+                                                        </span>
                                                     </td>
-                                                    <td style="padding-left: 3mm;text-align: left;padding-top: 3mm;">
-                                                        <table style="border-collapse: collapse;border-spacing: 0;font-size: 2.4mm;width:95%">
-                                                            <tr>
-                                                                <td></td>
-                                                                <td></td>
-                                                                <td></td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Reg No :</td>
-                                                                <td colspan="2">@stu.StudentSID</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Enrol ID:</td>
-                                                                <td colspan="2"  class="searchable">@stu.SchoolUID</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Name :</td>
-                                                                <td class="searchable" colspan="2">@stu.Name</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Class :</td>
-                                                                <td colspan="2">@Model.ClassName @Model.SectionName DOB : @stu.DOB.ToString("dd/MM/yyyy")</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Father :</td>
-                                                                <td class="searchable" colspan="2">@stu.FatherName</td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td>Mother :</td>
-                                                                <td>@stu.MotherName</td>
-                                                                <td rowspan="2" style="text-align: right;">
-                                                                    <img onerror="return OnImageError(this,2);" style="max-height:45px;max-width:100px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_P_@Model.BranchDetails.PrincipalSignature" />
-                                                                    <br /> PRINCIPAL
-                                                                </td>
-                                                            </tr>
-                                                            <tr>
-                                                                <td colspan="3">
-                                                                    <span style="color:red"> Blood Group : @stu.BloodGroup</span>
-                                                                </td>
-                                                            </tr>
-                                                        </table>
-                                                    </td>
-                                                    
                                                 </tr>
-                                            </thead>
-                                        </table>
-                                        <table style="width:100%;height:100%;border-collapse: collapse;border-spacing: 0;">
-                                            <thead class="redbk">
-                                                
-                                            </thead>
-                                        </table>
+                                                <tr>
+                                                    <td style="text-align:center;height: 5mm;font-size: 2.5mm;padding: 0 2mm;">
+                                                        <div style="float:left">IDENTITY CARD : <b>@SelectedSession.Name</b></div>
+                                                        <div style="float:right">HOUSE : <b>@stu.HouseName</b></div>
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                            <table style="width:100%;height:74%;border-collapse: collapse;border-spacing: 0;">
+                                                <thead class="redbk">
+                                                    <tr>
+                                                        <td style="text-align:center;width:20%;height:33mm;">
+
+                                                            <img id="imgPhoto" onerror="return OnImageError(this,@(stu.Gender));" style="max-height:23mm;max-width:24mm" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(stu.StudentID)_@stu.Photo" />
+
+                                                        </td>
+                                                        <td style="padding-left: 3mm;text-align: left;padding-top: 1mm;">
+                                                            <p></p>
+                                                            <table style="border-collapse: collapse;border-spacing: 0;font-size: 2.6mm;width:95%">
+
+                                                                <tr>
+                                                                    <td>Reg No :</td>
+                                                                    <td colspan="2">@stu.StudentSID</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Enrol ID:</td>
+                                                                    <td colspan="2">@stu.SchoolUID</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Name :</td>
+                                                                    <td class="searchable" colspan="2">@stu.Name</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>DOB :</td>
+                                                                    <td class="searchable" colspan="2"> @stu.DOB.ToString("dd/MM/yyyy")</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Class :</td>
+                                                                    <td colspan="2">@Model.ClassName / @Model.SectionName </td>
+                                                                </tr>
+
+                                                                <tr>
+                                                                    <td>Father :</td>
+                                                                    <td class="searchable" colspan="2">@stu.FatherName</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td>Mother :</td>
+                                                                    <td>@stu.MotherName</td>
+                                                                    <td rowspan="2" style="text-align: right;">
+                                                                        <img onerror="return OnImageError(this,2);" style="max-height:28px;max-width:100px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_P_@Model.BranchDetails.PrincipalSignature" />
+                                                                        <br /> PRINCIPAL
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td colspan="3">
+                                                                        @*<span style="color:red"> Blood Group : @stu.BloodGroup</span>*@
+                                                                        <span style="color:dodgerblue"> Phone No  : <b>@stu.FatherMobileNo</b></span>
+                                                                    </td>
+                                                                </tr>
+                                                            </table>
+                                                        </td>
+
+                                                    </tr>
+                                                </thead>
+                                            </table>
+                                            <table style="width:100%;height:100%;border-collapse: collapse;border-spacing: 0;">
+                                                <thead class="redbk">
+
+                                                </thead>
+                                            </table>
+                                        </div>
+                                        <div class="frontdiv" style="width: 85.60mm;height:53.98mm;float:left;border: 1px solid black;border-radius: 5px;margin: 5px;">
+                                            <table style="width:100%;height:53.98mm;border-collapse: collapse;border-spacing: 0;">
+                                                <tbody>
+                                                    <tr>
+                                                        <td colspan="2" style="text-align:center;padding:0;height: 5mm;background-color: #4c88b9;color:white;font-size: 2.5mm;padding: 0 2mm;">
+                                                            <div style="float:left">ISSUED ON : @stu.SessionStartDate.ToString("dd/MM/yyyy")</div>
+                                                            <div style="float:right">VALID UPTO : @stu.SessionEndDate.ToString("dd/MM/yyyy")</div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="height: 13mm;font-size: 2.5mm;padding: 0 2mm;">
+                                                            <div style="float:left">
+                                                                Phone No : @stu.FatherMobileNo<br />
+                                                                @stu.MiniAddress
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="text-align:justify;height: 15mm;font-size: 2.5mm;padding: 0 1mm;">
+                                                            <div style="float:left">
+                                                                <b style="color:red">RULES & REGULATIONS : </b> @*(@stu.SchoolUID)*@<br />
+                                                                1) This card must be worn daily in school. 2) No student will be allowed to enter the school campus without this card.
+                                                                3) If this card is lost or found, please inform/deposit to school.
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr style="background-color: #d4eae1;height:100%;">
+                                                        <td style="width:20%;">
+                                                            <img style="max-height:15mm;max-width:15mm" alt="Photo" onerror="return OnImageError(this,0);" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_@(Model.BranchDetails.Logo)" />
+                                                        </td>
+                                                        <td style="">
+                                                            <h2 style="font-size:3mm;margin: 0;">@Model.BranchDetails.BranchSchoolName</h2>
+                                                            @*  <span>@Model.BranchDetails.TagLine</span>*@
+                                                            @if (Model.BranchDetails.Address != null)
+                                                            {
+                                                                <p style="margin:0px;font-size: 2mm;">
+                                                                    @Html.Raw(Model.BranchDetails.Address)
+                                                                </p>
+                                                            }
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="2" style="text-align:center;height: 4mm;background-color: #4c88b9;color:white;font-size: 2.5mm;">
+                                                            <div style="float:left">Phone : @Model.BranchDetails.ContactNo</div>
+                                                            <div style="float:right">EmailID : @Model.BranchDetails.EmailID</div>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
-                                    <div class="frontdiv" style="width: 85.60mm;height:53.98mm;float:left;border: 1px solid black;border-radius: 5px;margin: 5px;">
-                                        <table style="width:100%;height:53.98mm;border-collapse: collapse;border-spacing: 0;">
-                                            <tbody>
-                                                <tr>
-                                                    <td colspan="2" style="text-align:center;padding:0;height: 5mm;background-color: #4c88b9;color:white;font-size: 2.5mm;padding: 0 2mm;">
-                                                        <div style="float:left">ISSUED ON : @stu.SessionStartDate.ToString("dd/MM/yyyy")</div>
-                                                        <div style="float:right">VALID UPTO : @stu.SessionEndDate.ToString("dd/MM/yyyy")</div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2" style="height: 13mm;font-size: 2.5mm;padding: 0 2mm;">
-                                                        <div style="float:left">
-                                                            Phone No : @stu.FatherMobileNo<br />
-                                                            @stu.MiniAddress
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2" style="text-align:justify;height: 15mm;font-size: 2.5mm;padding: 0 2mm;">
-                                                        <div style="float:left">
-                                                            <b style="color:red">RULES & REGULATIONS : </b> (@stu.SchoolUID)<br />
-                                                            1) This card must be worn daily in school. 2) No student will be allowed to enter the school campus without this card.
-                                                            3) If this card is lost or found, please inform/deposit to school.
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                <tr style="background-color: #d4eae1;">
-                                                    <td style="width:20%">
-                                                        <img style="max-height:15mm;max-width:15mm" alt="Photo" onerror="return OnImageError(this,0);" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_@(Model.BranchDetails.Logo)" />
-                                                    </td>
-                                                    <td style="">
-                                                        <h2 style="font-size:4mm;margin: 0;">@Model.BranchDetails.BranchSchoolName</h2>
-                                                        <span>@Model.BranchDetails.TagLine</span>
-                                                        @if (Model.BranchDetails.Address != null)
-                                                        {
-                                                            <p style="margin:0px;font-size: 2mm;white-space:pre-line">
-                                                                @Html.Raw(Model.BranchDetails.Address)
-                                                            </p>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="2" style="text-align:center;height: 5mm;background-color: #4c88b9;color:white;font-size: 2.5mm;padding: 0 2mm;">
-                                                        <div style="float:left">Phone : @Model.BranchDetails.ContactNo</div>
-                                                        <div style="float:right">EmailID : @Model.BranchDetails.EmailID</div>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            }
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-@section scripts
+    @section scripts
 {
-    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
-    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
-    <script>
-       function Search(sender) {
-            var sText = $(sender).val().split(',');
+        <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+        <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+        <script>
+        function Search(sender) {
+            var sText = $(sender).val();
             console.log(sText);
-            if (sText[0] == "") {
+            if (sText == "") {
                 $('.listitem').css('display', '');
             }
             else {
                 $(".listitem").each(function () {
                     var isExist = false;
-
                     $(this).find(".searchable").each(function () {
-                        $srch = $(this);
-                        $.each(sText, function(index, value) {
-                             if ($srch.html().toLowerCase().includes(value.toLowerCase()) == true) {
-                                 isExist = true;
-                             }
-                        });
-
+                        if ($(this).html().toLowerCase().includes(sText.toLowerCase()) == true) {
+                            isExist = true;
+                                }
                     });
                     if (isExist == true) {
                         $(this).css('display', '');
@@ -341,6 +344,6 @@
                 frame1.remove();
             }, 500);
         }
-    </script>
-}
-<!-- /.content -->
+        </script>
+    }
+    <!-- /.content -->
