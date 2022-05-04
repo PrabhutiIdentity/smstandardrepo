@@ -169,6 +169,7 @@ namespace SMEnterprise.Models
         public string PANCardCopy { get; set; }
         public string BankAccountProof { get; set; }
         public string MedicalCertificate { get; set; }
+        public string EmpSignature { get; set; }
         public string AppointmentLetter { get; set; }
         public string PANnumber { get; set; }
         public string PFNumber { get; set; }
@@ -197,6 +198,7 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase AppointmentCertificateUploader { get; set; }
         public HttpPostedFileBase PANCardUploader { get; set; }
         public HttpPostedFileBase BankAccountProofUploader { get; set; }
+        public HttpPostedFileBase EmpSignatureUploader { get; set; }
     }
     public class EmployeeTypeModel
     {
