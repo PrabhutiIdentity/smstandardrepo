@@ -2,6 +2,16 @@
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var SelectedStockType = Model.Sessions.Where(x => x.SessionID == Model.SessionID).FirstOrDefault();
+    var SelectedEvaluationName = "";
+    if (Model.Evaluations.Count > 0)
+    {
+        var evaluation = Model.Evaluations.Where(x => x.ID == Model.EvaluationID).FirstOrDefault();
+        if (evaluation != null)
+        {
+            SelectedEvaluationName = evaluation.Name;
+        }
+    }
 }
 @model SMEnterprise.Models.StockManagementModel
 @section IncludeCss
@@ -145,13 +155,13 @@
                                                 <div class="col-md-6">
                                                     <a href="/Account/StockDetails/@c.STID" class="btn btn-link">View</a>
                                                 </div>
-                                                <div class="col-md-6">
-                                                    @using (Html.BeginForm("DeleteStock", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
-                                                    {
-                                                        <input type="hidden" name="ID" value="@c.STID" />
-                                                        <button type="submit" onclick="return BeforeDeleteStock(this);" class="btn btn-link">Delete</button>
-                                                    }
-                                                </div>
+                                                @*<div class="col-md-6">
+                                                        @using (Html.BeginForm("DeleteStock", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                        {
+                                                            <input type="hidden" name="ID" value="@c.STID" />
+                                                            <button type="submit" onclick="return BeforeDeleteStock(this);" class="btn btn-link">Delete</button>
+                                                        }
+                                                    </div>*@
                                             </div>
                                         </td>
                                         <td> <a href="javascript:void(0);" onclick="PrintTransactionReciept(this,@c.STID);" class="btn btn-link Closed">Print</a></td>
@@ -170,13 +180,133 @@
 
 @section scripts
 {
-    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
-    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+        <script src="@Url.Content("~/js/jszip.min.js")"></script>
+        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
     <script>
 
-        $(function () {
-            $("#tblCategory").DataTable({ "aaSorting": [] });
-        });
+        //$(function () {
+        //    $("#tblCategory").DataTable({ "aaSorting": [] });
+        //});
+           $(document).ready(function () {
+               var printdate = 'Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+             
+               var rpname = 'Daily  ' + $('#ddlStocks option:selected').text(); + 'Report '
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
+            var handleDataTableButtons = function () {
+                if ($("#tblCategory").length) {
+                    $("#tblCategory").DataTable({
+
+
+                    dom: "Bfrtip",
+                    "paging": true,
+                    "pageLength": 31,
+                    buttons: [
+                      {
+                          extend: "copy",
+                            className: "btn-sm",
+                            footer: true,
+                            message: printdate,
+                             messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+
+
+                      },
+                      {
+                          extend: "csv",
+                          className: "btn-sm",
+                          footer: true,
+                          message: printdate,
+                            messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+
+                      },
+                      {
+                          extend: "excel",
+                          className: "btn-sm",
+                          footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+
+                      },
+                      {
+                          extend: "pdfHtml5",
+                          className: "btn-sm",
+                          footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                          },
+                          message: printdate,
+                          messageBottom: repname,
+                          title: rpname
+
+                      },
+                      {
+                          extend: "print",
+                          className: "btn-sm",
+                          footer: true,
+                          message: printdate,
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+
+
+                      },
+                    ],
+                    responsive: true
+                });
+            }
+        };
+
+        TableManageButtons = function () {
+            "use strict";
+            return {
+                init: function () {
+                    handleDataTableButtons();
+                }
+            };
+        }();
+
+        TableManageButtons.init();
+           }); $(function () {
+               $('#liStockManagement').closest('ul').closest('li').addClass('active');
+               $('#liStockManagement').addClass('active');
+
+           });
         function BeforeDeleteStock(sender) {
             return confirm('Do you really want to delete Stock!!!!');
         }

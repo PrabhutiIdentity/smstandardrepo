@@ -563,6 +563,7 @@ namespace SMEnterprise.Models
         public int LastPayDay { get; set; }
         public int Day { get; set; }
         public int FeePaymentMode { get; set; }
+        public string FeePayMode { get; set; }
         public int SessionID { get; set; }
         public int Month { get; set; }
         public int Year { get; set; }

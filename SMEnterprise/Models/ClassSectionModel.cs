@@ -16,9 +16,12 @@ namespace SMEnterprise.Models
         public List<NameIDModel> NoFeeMonths { get; set; }
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
-   
+        public List<FeeCategoryModel> FeeCategories { get; set; }
+        public List<NameIDModel> Months { get; set; }
+        public List<NameIDModel> MonthTypeFeeType { get; set; }
 
-    public DataTable GetNoFeeMonthDataTable()
+
+        public DataTable GetNoFeeMonthDataTable()
     {
 
         DataTable dtNoFeeMonths = new DataTable();

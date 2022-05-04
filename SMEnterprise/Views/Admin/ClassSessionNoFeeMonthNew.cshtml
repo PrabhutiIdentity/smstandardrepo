@@ -1,0 +1,146 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Class/Section Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model ClassPageModel
+@section IncludeCss
+{
+    <title>Class Session No Fee Month</title>
+
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <script>
+        function SelectAllClasses(month,sender)
+        {
+            if($(sender).is(":checked"))
+            {
+                $('.month_' + month).prop('checked', true);
+            }
+            else {
+                $('.month_' + month).prop('checked',false);
+            }
+        }
+    </script>
+    <script>
+
+    </script>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Class Session No Fee Month
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Class Session No Fee Month</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("ClassSessionNoFeeMonth", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-5 text-right" style="padding-right: 0px;">Session :</label>
+                                        <div class="col-md-7">
+                                            <select class="form-control" name="SessionID" ID="ddlSessions">
+                                                @foreach (SchoolSessionModel e in Model.Sessions)
+                                                {
+                                                    <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+
+                                            <div class="col-md-2">
+                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    @using (Html.BeginForm("ClassSessionNoFeeMonth", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                        <table id="tblCategory" class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%">#</th>
+                                    <th>Class</th>
+                                    @for (int i = 1; i <= 12; i++)
+                                    {
+                                        <th>
+                                            <input type="checkbox" onchange="SelectAllClasses(@i,this);" class="minimal">
+                                            @SMEnterprise.Repository.CommonUsage.MonthNames[i - 1]
+                                        </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    var cCounter = 1;
+                                    foreach (var c in Model.Classes)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @cCounter
+                                            </td>
+                                            <td>
+                                                <span class="ViewCopy visible">@c.ClassName</span>
+                                                <input id="txtClassName" class="form-control editCopy hidden" type="text" onchange='$(this).closest("tr").find("#hdnClassName").val($(this).val())' name="ClassName" value="@c.ClassName" />
+                                            </td>
+                                            @for (int i = 1; i <= 12; i++)
+                                            {
+
+                                                var isPresent = Model.NoFeeMonths.Where(n => n.ID == c.ClassID && n.Name == i.ToString()).SingleOrDefault();
+                                            <td style="text-align:center">
+                                                <input type="hidden" name="NoFeeMonths[@((cCounter - 1) * 12 + (i-1))].ID" value="@c.ClassID" />
+                                                <input type="hidden" name="NoFeeMonths[@((cCounter - 1) * 12 + (i-1))].Name" value="@i" />
+                                                <input name="NoFeeMonths[@((cCounter - 1) * 12 + (i-1))].Extra1" type="checkbox" @(isPresent != null ? "checked" : "") class="minimal month_@i">
+                                            </td>
+                                            }
+
+                                        </tr>
+                                        cCounter++;
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                        <button class="btn btn-success" type="submit" value="Submit">Submit</button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+        $('#liClassSessionNoFeeMonth').closest('ul').closest('li').addClass('active');
+        $('#liClassSessionNoFeeMonth').addClass('active');
+    });
+
+</script>
+
+<!-- /.content -->
