@@ -888,7 +888,7 @@ namespace SMEnterprise.Repository
 
         public static string[] arrDays = { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
 
-        public EditMergedClassModel GetEditMergeClasses(EditMergedClassModel objModel,int SBranchID)
+        public EditMergedClassModel GetEditMergeClasses(EditMergedClassModel objModel, int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -1101,7 +1101,7 @@ namespace SMEnterprise.Repository
 
             }
         }
-        public IEnumerable<NameIDModel> GetEmployeeList(int EmployeeTypeID,int SessionID)
+        public IEnumerable<NameIDModel> GetEmployeeList(int EmployeeTypeID, int SessionID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -1895,7 +1895,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SBranchID", SBranchID);
                 paramater.Add("@SessionID", SessionID);
-                 using (var multi = con.QueryMultiple("sp_AssignedEmployee", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using (var multi = con.QueryMultiple("sp_AssignedEmployee", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
@@ -1908,9 +1908,9 @@ namespace SMEnterprise.Repository
 
             }
         }
-        public EmployeeAssignModel InsertAssignEmployee(EmployeeAssignModel objModel)
+        public int InsertAssignEmployee(EmployeeAssignModel objModel)
         {
-             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 int res = 0;
                 var paramater = new DynamicParameters();
@@ -1918,7 +1918,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@EmployeeTypeID", objModel.EmployeeTypeID);
                 paramater.Add("@EmployeeID", objModel.EmployeeID);
                 paramater.Add("@SessionID", objModel.SessionID);
-                 paramater.Add("@Status", objModel.Status);
+                paramater.Add("@Status", objModel.Status);
                 paramater.Add("@OpType", objModel.OpType);
                 if (objModel.OpType == -1)
                 {
@@ -1933,7 +1933,7 @@ namespace SMEnterprise.Repository
                         res = con.Query<int>("Sp_InsertUpdateEMployeeAssign", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
                     }
                 }
-                return objModel;
+                return res;
 
             }
         }
@@ -2322,7 +2322,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SubjectCode", objData.SubjectCode);
                 paramater.Add("@MainSubID", objData.MainSubID);
                 paramater.Add("@SubjectType", objData.SubjectType);
-                
+
                 paramater.Add("@MarkingScheme", objData.MarkingScheme);
                 objModel.SubjectList = con.Query<SubjectModel>("spn_InsertUpdateGroupSubject", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
             }
@@ -4217,7 +4217,7 @@ namespace SMEnterprise.Repository
                 {
                     oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                   // oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    // oModel.SessionID = multi.Read<int>().SingleOrDefault();
                 }
             }
             return oModel;

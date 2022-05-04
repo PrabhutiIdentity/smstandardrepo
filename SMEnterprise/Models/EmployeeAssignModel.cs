@@ -17,6 +17,7 @@ namespace SMEnterprise.Models
         public List<ClassModel> Classes { get; set; }
         public int EmployeeTypeID { get; set; }
         public int ClassID { get; set; }
+        
     }
     public class EmployeeAssignModel
     {
