@@ -797,6 +797,14 @@ namespace SMEnterprise.Controllers
 
             return PartialView("_SectionOptionsPartial", objModel);
         }
+        public ActionResult GetEmployeelist(string id = null,string id2 =  null)
+        {
+            int ID = CommonUsage.ConvertToInt(id);
+            int ID2 = CommonUsage.ConvertToInt(id2);
+            IEnumerable<NameIDModel> objModel = objAdminData.GetEmployeeList(ID,ID2);
+
+            return PartialView("_EmployeeListPartial", objModel);
+        }
         [PermissionFilter]
         public ActionResult GetSectionsOnClassTeacher(string id = null, string id2 = null)
         {
@@ -1466,6 +1474,31 @@ namespace SMEnterprise.Controllers
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             EvaluationSchemePageModel objModel = objAdminData.GetEvaluationSchemes(SBranchID, SessionID);
             return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult EmployeeAssign(string ID = null)
+        {
+            int SessionID = CommonUsage.ConvertToInt(ID);
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            EmployeeAssignPageModel objModel = objAdminData.GetAssignedEmployee(SBranchID, SessionID);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult UpdateEmployeeAssign(EmployeeAssignModel oModel)
+        {
+          int res =  objAdminData.InsertAssignEmployee(oModel);
+            return RedirectToAction("EmployeeAssign","Admin",res);
+
+        }
+        public ActionResult DeleteEmployeeAssign(EmployeeAssignModel obj)
+        {
+             
+            objAdminData.DeleteEmployeeAssing(obj.EmployeeID);
+            return RedirectToAction("EmployeeAssign","Admin");
         }
         [PermissionFilter]
         public ActionResult UpdateEvaluationScheme(EvaluationSchemeModel objData)
