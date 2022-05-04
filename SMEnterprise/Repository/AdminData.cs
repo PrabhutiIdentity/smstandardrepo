@@ -337,7 +337,30 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
+        public ClassPageModel GetClassesNoFeeMonthsNew(int SBranchID, int SessionID)
+        {
+            ClassPageModel objModel = new ClassPageModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("sp_GetClassSessionNoFeeMonths", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    objModel.Classes = multi.Read<ClassModel>().ToList();
+                    objModel.NoFeeMonths = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
 
+                    objModel.FeeCategories = multi.Read<FeeCategoryModel>().ToList();
+                    objModel.Months = multi.Read<NameIDModel>().ToList();
+                    objModel.MonthTypeFeeType = multi.Read<NameIDModel>().ToList();
+
+
+                }
+                return objModel;
+            }
+        }
         public ClassPageModel GetClassesNoFeeMonths(int SBranchID, int SessionID)
         {
             ClassPageModel objModel = new ClassPageModel();
@@ -352,6 +375,10 @@ namespace SMEnterprise.Repository
                     objModel.Classes = multi.Read<ClassModel>().ToList();
                     objModel.NoFeeMonths = multi.Read<NameIDModel>().ToList();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
+
+                   
+
+
                 }
                 return objModel;
             }

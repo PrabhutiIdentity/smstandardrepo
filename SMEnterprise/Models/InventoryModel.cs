@@ -181,6 +181,7 @@ namespace SMEnterprise.Models
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public List<StockTransaferMasterModel> Transactions { get; set; }
+        public SBranchModel Branch { get; set; }
     }
     public class StockTransaferMasterModel
     {
@@ -279,6 +280,10 @@ namespace SMEnterprise.Models
         public string ContactNo { get; set; }
         public int StateID { get; set; }
         public string ExtraData { get; set; }
+
+        public string ClassName { get; set; }
+        public string FatherName { get; set; }
+
     }
     public class PrintSaleReceiptModel
     {

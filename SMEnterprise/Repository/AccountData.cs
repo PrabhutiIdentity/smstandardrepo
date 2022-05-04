@@ -3725,6 +3725,15 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetStockTransactions", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Transactions = multi.Read<StockTransaferMasterModel>().ToList();
+                    try
+                    {
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                      
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
             return objModel;
