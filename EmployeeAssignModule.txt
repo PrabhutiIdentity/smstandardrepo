@@ -1,0 +1,133 @@
+Alter procedure Sp_InsertUpdateEMployeeAssign    
+(    
+@EmployeeAssignID int,    
+@EmployeeTypeID int,    
+@EmployeeID int,    
+@SessionID int,    
+@Status int,    
+@OpType int,    
+@ClassID int    
+)    
+AS    
+BEGIN    
+  
+declare @UpdateclassID int  
+ Select @UpdateclassID= count(classid) from Employeeassignmaster where classid=@CLassID   
+ 
+  
+ if(@OpType=-1)    
+ BEGIN    
+  Delete from [EmployeeAssignMaster] where EmployeeAssignID=@EmployeeAssignID    
+ END    
+ else    
+ BEGIN    
+
+ if(@UpdateclassID < 1)  
+BEGIN 
+  if(@EmployeeAssignID = 0 )    
+  BEGIN    
+    Insert into [EmployeeAssignMaster] (EmployeeTypeID,EmployeeID,ClassID,Status,SessionID)    
+ values( @EmployeeTypeID,@EmployeeID,@ClassID,@Status,@SessionID )    
+  
+   END    
+  else    
+  BEGIN    
+   Update [EmployeeAssignMaster] set EmployeeTypeID=@EmployeeTypeID,EmployeeID=@EmployeeID,ClassID=@ClassID,Status=@Status    
+   where EmployeeAssignID=@EmployeeAssignID    
+    
+  END 
+   END 
+ END    
+    
+  
+ 
+ Select @EmployeeAssignID      
+    
+    
+END
+
+
+
+
+  
+  
+    
+CREATE Procedure sp_AssignedEmployee    --10,1037         
+(        
+@SBranchID int,        
+@SessionID int=0        
+)        
+AS        
+BEGIN        
+ declare @ClassID int         
+        
+ if(@SessionID=0)                  
+ begin                  
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID                  
+ end          
+ select @SessionID                  
+ Select SessionID,SessionName,SessionStatus,SessionStartDate,SessionEndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate                  
+         
+ Select EmployeeTypeID as ID,EmployeeTypeName as Name,SbranchID as Extra1 from EmployeeTypeMaster        
+        
+ Select EmployeeID as ID , EMployeeName as Name from Employeemaster where SbranchID=@SbranchID           
+        
+ Select CM.ClassID,CM.ClassName,EducationLevelID,SBranchID,EAM.EmployeeID from ClassMaster CM  
+ Left outer join EmployeeAssignMaster EAM on EAM.CLassID=CM.CLassID  
+ where CM.status=1 and SBranchID=@SbranchID        
+        
+ Select  distinct EAM.EmployeeID, EAM.EmployeeTypeID,EM.EmployeeName ,ETM.EmployeeTypeName ,dbo.[GetEmployeeAssignClassList](EAM.EmployeeID,@SessionID) as ClassNames,      
+ dbo.[GetAssignEmployeeClassListIDs](EAM.EmployeeID,@SessionID) as ClassID from EmployeeAssignMaster EAM        
+ left outer join EmployeeMaster EM on EM.EmployeeID=EAM.EMployeeID        
+ left outer join EmployeeTypeMaster ETM on ETM.EmployeeTypeID=EAM.EMployeeTypeID        
+  where EAM.Sessionid=@SessionID      
+ END    
+    
+  
+
+Create procedure  Sp_DeleteEmployeeAssign
+(
+@ID int
+)
+AS
+BEGIN
+
+if(@ID!=0)
+BEGIN
+
+Delete from EmployeeAssignMaster where EmployeeID=@ID
+
+END
+
+
+END
+
+
+
+
+
+CREATE TABLE [dbo].[EmployeeAssignMaster](
+	[EmployeeAssignID] [int] IDENTITY(1,1) NOT NULL,
+	[EmployeeTypeID] [int] NULL,
+	[EmployeeID] [int] NULL,
+	[ClassID] [int] NULL,
+	[Status] [int] NULL,
+	[OpType] [int] NULL,
+	[SessionID] [int] NULL
+) ON [PRIMARY]
+GO
+
+
+Create Procedure   Sp_GetemployeelistOld  
+(    
+@EmployeeTypeID int,    
+@SessionID int    
+)    
+AS    
+BEGIN    
+declare @SBranchID int    
+Select @SBranchID=SBranchID from SessionMaster where SessionID=@SessionID    
+ Select EmployeeID as ID, EmployeeName as Name from EmployeeMaster where EmployeeType=@EmployeeTypeID  and SbranchID=@SbranchID    
+    
+    
+END
