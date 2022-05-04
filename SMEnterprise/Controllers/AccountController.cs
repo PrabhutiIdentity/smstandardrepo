@@ -1040,6 +1040,7 @@ namespace SMEnterprise.Controllers
             string OldAddressProof = "";
             string OldBirthCertificate = "";
             string OldCategoryCertificate = "";
+            string OldEmployeeSignature = "";
 
             //Birth
             if (objData.BirthCertificateUploader != null)
@@ -1160,6 +1161,17 @@ namespace SMEnterprise.Controllers
                 var path = Path.Combine(Server.MapPath(CommonUsage.EmployeeDocumentsBasePath),
                  objData.EmployeeID + "_Bank_" + objData.BankAccountProof);
                 objData.BankAccountProofUploader.SaveAs(path);
+            }
+            if (objData.EmpSignatureUploader != null)
+            {
+                OldBankAccountProof = objData.EmpSignature;
+                objData.EmpSignature = objData.EmpSignatureUploader.FileName.Replace(" ", "-");
+                System.IO.File.Delete(
+                        Server.MapPath(CommonUsage.EmployeeDocumentsBasePath + objData.EmployeeID + "_Sign_" + OldEmployeeSignature));
+
+                var path = Path.Combine(Server.MapPath(CommonUsage.EmployeeDocumentsBasePath),
+                 objData.EmployeeID + "_Sign_" + objData.EmpSignature);
+                objData.EmpSignatureUploader.SaveAs(path);
             }
             objAccountData.UpdateEmployeeDocuments(objData);
 
