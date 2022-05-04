@@ -1908,6 +1908,16 @@ namespace SMEnterprise.Repository
 
             }
         }
+        public int DeleteEmployeeAssing(int ID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ID", ID);
+
+                return  con.Query<int>("Sp_DeleteEmployeeAssign", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
         public int InsertAssignEmployee(EmployeeAssignModel objModel)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
