@@ -1769,6 +1769,22 @@ namespace SMEnterprise.Controllers
             objModel = objAdminData.GetClassesNoFeeMonths(SBranchID, objModel.SessionID);
             return View(objModel);
         }
+        [PermissionFilter]
+        public ActionResult ClassSessionNoFeeMonthNew(ClassPageModel objModel)
+        {
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            if (objModel.NoFeeMonths != null)
+            {
+                objModel.SBranchID = SBranchID;
+                objAdminData.UpdateSessionNoFeeMonths(objModel);
+            }
+            objModel = objAdminData.GetNoFeeMonthNewDataTable(SBranchID, objModel.SessionID);
+            return View(objModel);
+        }
 
         [PermissionFilter]
         public ActionResult FeeCategoryManagement()
