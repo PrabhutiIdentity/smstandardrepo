@@ -383,7 +383,28 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
+        public ClassPageModel GetNoFeeMonthNewDataTable(int SBranchID, int SessionID)
+        {
+            ClassPageModel objModel = new ClassPageModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("sp_GetClassSessionNoFeeMonths", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    objModel.Classes = multi.Read<ClassModel>().ToList();
+                    objModel.NoFeeMonths = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
 
+
+
+
+                }
+                return objModel;
+            }
+        }
         public int UpdateSessionNoFeeMonths(ClassPageModel objData)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))

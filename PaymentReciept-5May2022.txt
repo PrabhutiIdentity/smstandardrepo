@@ -53,3 +53,33 @@ begin
    Select * from SBranchMaster where SBranchID=@SBranchID    
 end    
 go    
+
+ 
+alter Procedure [dbo].[sp_GetStockTransactions]        
+(        
+@StartDate date,        
+@EndDate date,        
+@TrType int,        
+@SBranchID int        
+)        
+AS        
+BEGIN        
+ Select STID,TrDate,TrType,RefID,RefType,Remark,Status,    
+ 'STUD'+RIGHT(REPLICATE('0',6)+CAST(RefID AS VARCHAR(6)),6) as StudentSID,          
+ CAST(STM.STID AS VARCHAR(10))+'/'+CAST(STM.SbranchID AS VARCHAR(10))+'/'+CAST(STM.SessionID AS VARCHAR(10))+'/'+ CAST(STM.RefID AS VARCHAR(10)) as RecieptNo,    
+ (Select ClassName from classmaster CM where CM.ClassID=STM.Classid) as ClassName,         
+ (Select Name from class_sections CS where CS.ID=STM.SectionID and CS.ClassID=STM.ClassID ) as SectionName,          
+ (Case when TrType=0 then (Select CompanyName from VendorMaster VM where VM.VendorID=STM.VendorID) else        
+ (Case when RefType=0 then (Select Name from StudentMaster where StudentID=RefID) else         
+ (Select EmployeeName from EmployeeMaster where EmployeeID=RefID) end) end) as RefName,        
+ (Select sum(Quantity) from StockTransactionDetails STD where STD.STID=STM.STID) as Quantity,        
+ (select sum((Quantity*Cost) +Quantity*Cost*SGST/100+Quantity*Cost*CGST/100+Quantity*Cost*IGST/100)        
+ from StockTransactionDetails STD  where STD.STID=STM.STID) as Amount        
+  from StockTransactionMaster STM        
+ where cast(TrDate as date) between @StartDate and @EndDate and TrType=@TrType and SBranchID=@SBranchID        
+ order by TrDate desc      
+
+  select * from sbranchmaster where SBranchID=@SBranchID  
+END     
+    
+go
