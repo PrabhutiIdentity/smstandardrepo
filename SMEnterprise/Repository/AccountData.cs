@@ -2986,21 +2986,21 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SessionID", objModel.SessionID);
                 paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@EvaluationSchemeID", objModel.SchemeID);
+             
                 using (var multi = con.QueryMultiple("sp_ClassStudentCategoryGenderCount", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
 
                     objModel.Data = multi.Read<ClassGenderCategoryCountModel>().ToList();
                     objModel.Classes = multi.Read<ClassModel>().ToList();
                     objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Schemes = multi.Read<NameIDModel>().ToList();
-                    objModel.SchemeID = multi.Read<int>().SingleOrDefault();
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    objModel.RGroupSubjects = multi.Read<NameIDModel>().ToList();
-                    objModel.SubjectData = multi.Read<ClassGenderCategoryCountModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();                    
+                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    try
+                    {
+                        objModel.Categories = multi.Read<NameIDModel>().ToList();
+                    }
+                    catch
+                    { }
                 }
             }
             return objModel;
