@@ -139,16 +139,16 @@
                                             <option value="0">--Select EmployeeType--</option>
                                             @foreach (var e in Model.EmployeeType)
                                             {
-                                                <option value="@e.ID" @(e.ID == Model.SessionID ? "Selected" : "")>@e.Name </option>
+                                                <option value="@e.ID">@e.Name </option>
                                             }
                                         </select>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="Employee">Select Employee</label>
-                                        <select class="form-control" name="EmployeeID" ID="ddlEmployeeID">
+                                        <select class="form-control" name="EmployeeID" ID="ddlEmployeeID" onchange="GetEmployeeClass(this);">
                                             @foreach (var e in Model.Employeelist)
                                             {
-                                                <option value="@e.ID" @(e.ID == Model.SessionID ? "Selected" : "")>@e.Name </option>
+                                                <option value="@e.ID">@e.Name </option>
                                             }
                                         </select>
                                     </div>
@@ -157,20 +157,18 @@
                             <br /><br />
                             <div class="form-group">
 
-                                <label class="select">
-                                    <div class="row EClassList">
-                                        Select Classes
-                                        <select id="ddlcategory" style="max-height: 280px;" name="ClassesAry" multiple>
+                                <div class="row EClassList">
+                                    <label class="select">
+                                        Select Classes</label>
+                                        <select id="ddlClassName" style="max-height: 280px;" name="ClassesAry" multiple>
                                             @if (Model.Classes != null && Model.Classes.Count > 0)
                                             {
-                                                foreach (var item in Model.Classes)
-                                                {
-                                                    <option clsid="@item.ClassID" class="class-checkbox" value="@item.ClassID">@item.ClassName</option>
-                                                }
+                                                @Html.Partial("_EmployeeListPartial", Model.Classes)
                                             }
+
+
                                         </select>
-                                    </div>
-                                </label>
+                                </div>
                             </div>
                         </div>
                         <!-- /.box-body -->
@@ -203,25 +201,22 @@
         debugger;
         if (EmployeeID != 0) {
             $('#ddlEmployeeTypeID').val(EmployeeTypeID);
-            var cls = classes.split(",");
-            var clsdone = [];
+            console.log(EmployeeID);
             $('#ddlEmployeeID').val(EmployeeID);
-            $(".EClassList").find('.class-checkbox').each(function () {
-                if ($.inArray($(this).attr('clsid'), clsdone) == -1) {
-                    if ($(this).attr('clsid') == classes) {
-                        clsdone.push(cls);
-                        if ($.inArray($(this).attr('clsid'), cls) != -1) {
-                            $(".EClassList").find('.class-checkbox').addclass('selected', cls);
-                        }
-                        else {
-                            $(this).removeAttr('checked');
-                             
-                        }
-                    }
-                }
-            });
+            //$(".EClassList").find('.class-checkbox').each(function () {
+            //    if ($.inArray($(this).attr('clsid'), clsdone) == -1) {
+            //        if ($(this).attr('clsid') == classes) {
+            //            clsdone.push(cls);
+                        
+            //                $(".EClassList").find('.class-checkbox').addclass('selected', cls);
+                        
+            //        }
+            //    }
+            //});
         }
-
+        var sessionID = $('#hdnSessionID').val();
+        var teacherId = $('#ddlEmployeeID').val();
+        GetClassList(sessionID, teacherId);
     }
     //$(function () {
     //    $("#tblCategory").DataTable({
@@ -249,18 +244,44 @@
     function EmployeeChanged(sender) {
         $('#ddlPromoteSection').html('<option value="0">Loading....</option>');
         var sessionID = $('#hdnSessionID').val();
+        var teacherId = $('#ddlEmployeeID').val();
         debugger;
+        GetClassList(sessionID, teacherId);
+    }
+    function GetClassList(sessionID, teacherId) {
         $.ajax(
             {
                 type: "POST",
-                url: "/Admin/GetEmployeelist/" + $(sender).val() + "/" + sessionID,
+                url: "/Admin/GetEmployeeClass/" + teacherId + "/" + sessionID,
                 cache: false,
                 processData: false,
                 contentType: false,
                 success: function (html) {
-                    $('#ddlEmployeeID').html('');
-                    $('#ddlEmployeeID').html('<option value="0">--Select Employee--</option>');
-                    $('#ddlEmployeeID').append(html);
+                    debugger;
+                    $('#ddlClassName').html('');
+                    $('#ddlClassName').html('<option value="0">--Select Class--</option>');
+                    $('#ddlClassName').append(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
+    function GetEmployeeClass(sender) {
+        var sessionID = $('#hdnSessionID').val();
+        debugger;
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetEmployeeClass/" + $(sender).val() + "/" + sessionID,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    debugger;
+                    $('#ddlClassName').html('');
+                    $('#ddlClassName').html('<option value="0">--Select Class--</option>');
+                    $('#ddlClassName').append(html);
                 },
                 error: function (e) {
                     alert("errorn");
