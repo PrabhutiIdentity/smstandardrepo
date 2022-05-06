@@ -521,7 +521,8 @@ namespace SMEnterprise.Models
         public string Extra2 { get; set; }
         public string Extra3 { get; set; }
         public decimal Sum { get; set; }
-        
+        public int IsSelected { get; set; }
+
     }
     public class EventModel
     {
