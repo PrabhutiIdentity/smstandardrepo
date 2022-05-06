@@ -1499,7 +1499,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateEmployeeAssign(EmployeeAssignModel oModel)
         {
-          int res =  objAdminData.InsertAssignEmployee(oModel);
+            objAdminData.DeleteEmployeeAssing(oModel.EmployeeID);
+            int res =  objAdminData.InsertAssignEmployee(oModel);
             return RedirectToAction("EmployeeAssign","Admin",res);
 
         }
