@@ -203,79 +203,79 @@ END
 go
 --TeacherTimeTable
 
-ALTER proc [dbo].[spn_GetTeacherTimeTable]  
-(  
-@TeacherID int,  
-@CurrDate datetime=null,  
-@SBranchID int  
-)  
-AS  
-BEGIN  
-  
-if(@TeacherID=0)  
-begin  
- Select @TeacherID=Min(EmployeeID) from Teacher_Subject where EmployeeID in (select EmployeeID from EmployeeMaster where SBranchID=@SBranchID and ((isnull(IsLeft,1) !=1) or (Status != 0)))  
-end  
-set @TeacherID=isnull(@TeacherID,0)  
-Select max([Days]) as [Days],@TeacherID as TeacherID from EducationLevelMaster where ID in (Select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID)  
-  
-Select PeriodID,PeriodType,Name,EducationLevelID,  
-  
- (select Days from EducationLevelMaster ELM where ELM.ID=PM.EducationLevelID) as DaysCount,  
- (Select Name from EducationLevelMaster CM where CM.ID=EducationLevelID) as EducationLevelName,  
- cast(StartTime as nvarchar(10)) as StartTime,cast(EndTime as nvarchar(10)) as EndTime,  
-(Select PeriodTypeName from  PeriodTypeMaster PTM where PTM.PeriodTypeID=PM.PeriodType) as PeriodTypeName  
-from  PeriodMaster PM where EducationLevelID in (Select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID) and PeriodType!=4  
-order by StartTime  
-  
-Select TS.SubjectID,SubjectName,IsOptionalsubject ,TS.EducationLevelID  
-from SubjectMasterAll SM right outer join Teacher_Subject TS on TS.SubjectID=SM.SubjectID  
-where TS.EmployeeID=@TeacherID  
-  
-Select EducationLevelID,DaysCount,ClassID,ClassName,SectionID,SectionName,PeriodID,SubjectID1,SubjectID2,SubjectID3,SubjectID4,SubjectID5,SubjectID6 from  
- (SELECT  
- TTM.EducationLevelID,  
- (select Days from EducationLevelMaster ELM where ELM.ID=TTM.EducationLevelID) as DaysCount,  
- TTM.ClassID,  
- (Select ClassName from ClassMaster CM where CM.ClassID=TTM.ClassID) as ClassName,  
- TTM.SectionID,  
- (Select Name from Class_Sections CM where CM.ID=TTM.SectionID) as SectionName,  
-      TTM.PeriodID    
-      ,(case when TTM.MondayTeacherID=@TeacherID then TTM.MondaySubjectID else 0 end) as 'SubjectID1'  
+
+alter proc [dbo].[spn_GetTeacherTimeTable]    
+(    
+@TeacherID int,    
+@CurrDate datetime=null,    
+@SBranchID int    
+)    
+AS    
+BEGIN    
     
-      ,(case when TTM.TuesdayTeacherID=@TeacherID then TTM.TuesdaySubjectID else 0 end) as 'SubjectID2'  
-     
-      ,(case when TTM.WednesdayTeacherID=@TeacherID then TTM.WednesdaySubjectID else 0 end) as 'SubjectID3'  
+if(@TeacherID=0)    
+begin    
+ Select @TeacherID=Min(EmployeeID) from Teacher_Subject where EmployeeID in (select EmployeeID from EmployeeMaster where SBranchID=@SBranchID and ((isnull(IsLeft,1) !=0) or (Status != 0)))    
+end    
+set @TeacherID=isnull(@TeacherID,0)    
+Select max([Days]) as [Days],@TeacherID as TeacherID from EducationLevelMaster where ID in (Select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID)    
     
-      ,(case when TTM.ThursdayTeacherID=@TeacherID then TTM.ThursdaySubjectID else 0 end) as 'SubjectID4'  
+Select PeriodID,PeriodType,Name,EducationLevelID,    
+    
+ (select Days from EducationLevelMaster ELM where ELM.ID=PM.EducationLevelID) as DaysCount,    
+ (Select Name from EducationLevelMaster CM where CM.ID=EducationLevelID) as EducationLevelName,    
+ cast(StartTime as nvarchar(10)) as StartTime,cast(EndTime as nvarchar(10)) as EndTime,    
+(Select PeriodTypeName from  PeriodTypeMaster PTM where PTM.PeriodTypeID=PM.PeriodType) as PeriodTypeName    
+from  PeriodMaster PM where EducationLevelID in (Select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID) and PeriodType!=4    
+order by StartTime    
+    
+Select TS.SubjectID,SubjectName,IsOptionalsubject ,TS.EducationLevelID    
+from SubjectMasterAll SM right outer join Teacher_Subject TS on TS.SubjectID=SM.SubjectID    
+where TS.EmployeeID=@TeacherID    
+    
+Select EducationLevelID,DaysCount,ClassID,ClassName,SectionID,SectionName,PeriodID,SubjectID1,SubjectID2,SubjectID3,SubjectID4,SubjectID5,SubjectID6 from    
+ (SELECT    
+ TTM.EducationLevelID,    
+ (select Days from EducationLevelMaster ELM where ELM.ID=TTM.EducationLevelID) as DaysCount,    
+ TTM.ClassID,    
+ (Select ClassName from ClassMaster CM where CM.ClassID=TTM.ClassID) as ClassName,    
+ TTM.SectionID,    
+ (Select Name from Class_Sections CM where CM.ID=TTM.SectionID) as SectionName,    
+      TTM.PeriodID      
+      ,(case when TTM.MondayTeacherID=@TeacherID then TTM.MondaySubjectID else 0 end) as 'SubjectID1'    
+      
+      ,(case when TTM.TuesdayTeacherID=@TeacherID then TTM.TuesdaySubjectID else 0 end) as 'SubjectID2'    
+       
+      ,(case when TTM.WednesdayTeacherID=@TeacherID then TTM.WednesdaySubjectID else 0 end) as 'SubjectID3'    
+      
+      ,(case when TTM.ThursdayTeacherID=@TeacherID then TTM.ThursdaySubjectID else 0 end) as 'SubjectID4'    
+       
+      ,(case when TTM.FridayTeacherID=@TeacherID then TTM.FridaySubjectID else 0 end) as 'SubjectID5'    
+       
+      ,(case when TTM.SaturdayTeacherID=@TeacherID then  TTM.SaturdaySubjectID else 0 end) as 'SubjectID6'    
+       
+ FROM Time_Table_Master TTM where TTM.EducationLevelID in    
+ (Select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID))t    
+ where t.SubjectID1!=0 or t.SubjectID2!=0 or t.SubjectID3!=0or t.SubjectID4!=0 or t.SubjectID5!=0 or t.SubjectID6!=0    
      
-      ,(case when TTM.FridayTeacherID=@TeacherID then TTM.FridaySubjectID else 0 end) as 'SubjectID5'  
+ order by PeriodID,SubjectID1 desc    
+    
+ declare @ClassID int    
+ Select @ClassID=min(ClassID) from ClassMaster where EducationLevelID in (select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID)    
      
-      ,(case when TTM.SaturdayTeacherID=@TeacherID then  TTM.SaturdaySubjectID else 0 end) as 'SubjectID6'  
+ Select ClassID,ClassName from ClassMaster where EducationLevelID in (select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID)    
      
- FROM Time_Table_Master TTM where TTM.EducationLevelID in  
- (Select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID))t  
- where t.SubjectID1!=0 or t.SubjectID2!=0 or t.SubjectID3!=0or t.SubjectID4!=0 or t.SubjectID5!=0 or t.SubjectID6!=0  
-   
- order by PeriodID,SubjectID1 desc  
-  
- declare @ClassID int  
- Select @ClassID=min(ClassID) from ClassMaster where EducationLevelID in (select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID)  
-   
- Select ClassID,ClassName from ClassMaster where EducationLevelID in (select EducationLevelID from Teacher_Subject where EmployeeID=@TeacherID)  
-   
- Select ID,Name from Class_Sections where ClassID=@ClassID  
-  
- select EmployeeID,EmployeeName from EmployeeMaster where EmployeeID in 
- (select EmployeeID from Teacher_Subject) and ((isnull(IsLeft,1) !=1) or (Status != 0)) and SBranchID=@SBranchID  
-  
- Select PeriodID,DayID   
- from TeacherSubstitutionMaster TSM where ReplacedTeacherID=@TeacherID and SBranchID=@SBranchID  
- and (FromDate between  DATEADD(day,-2,@CurrDate) and DATEADD(day,7,@CurrDate) )  
-  
- select @TeacherID  
-END 
-go
+ Select ID,Name from Class_Sections where ClassID=@ClassID    
+    
+ select EmployeeID,EmployeeName from EmployeeMaster where EmployeeID in   
+ (select EmployeeID from Teacher_Subject) and ((isnull(IsLeft,1) !=0) or (Status != 0)) and SBranchID=@SBranchID    
+    
+ Select PeriodID,DayID     
+ from TeacherSubstitutionMaster TSM where ReplacedTeacherID=@TeacherID and SBranchID=@SBranchID    
+ and (FromDate between  DATEADD(day,-2,@CurrDate) and DATEADD(day,7,@CurrDate) )    
+    
+ select @TeacherID    
+END   
 --ClassTimeTable
 
 ALTER proc [dbo].[spn_GetSectionTimeTable]    
