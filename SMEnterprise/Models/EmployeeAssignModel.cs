@@ -15,10 +15,9 @@ namespace SMEnterprise.Models
         public List<NameIDModel> EmployeeType { get; set; }
         public List<NameIDModel> Employeelist { get; set; }
         public List<NameIDModel> Classes { get; set; }
-       
         public int EmployeeTypeID { get; set; }
         public int ClassID { get; set; }
-        
+
     }
     public class EmployeeAssignModel
     {
@@ -29,7 +28,7 @@ namespace SMEnterprise.Models
         public string ClassNames { get; set; }
         public int EmployeeTypeID { get; set; }
         public int EmployeeID { get; set; }
-         public string EmployeeTypeName { get; set; }
+        public string EmployeeTypeName { get; set; }
         public List<string> ClassesAry { get; set; }
         public int Status { get; set; }
         public int SBranchID { get; set; }
