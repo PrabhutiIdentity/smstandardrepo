@@ -1,0 +1,312 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@using SMEnterprise.Repository
+@{
+    ViewBag.Title = "Class/Section Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+@model ClassPageModel
+@section IncludeCss
+{
+    <title>Class Session No Fee Month</title>
+
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <script>
+        function SelectAllClasses(month, sender) {
+            if ($(sender).is(":checked")) {
+                $('.month_' + month).prop('checked', true);
+            }
+            else {
+                $('.month_' + month).prop('checked', false);
+            }
+        }
+    </script>
+    <script>
+
+    </script>
+}
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Class Session No Fee Month
+
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Class Session No Fee Month</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="box">
+                <div class="box-header">
+                    @using (Html.BeginForm("ClassSessionNoFeeMonth", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        <div class="row std-mng-head">
+
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-4 padding">
+                                        <label class="col-md-5 text-right" style="padding-right: 0px;">Session :</label>
+                                        <div class="col-md-7">
+
+                                            <select class="form-control" name="SessionID" ID="ddlSessions">
+                                                @foreach (SchoolSessionModel e in Model.Sessions)
+                                                {
+                                                    <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4 padding">
+                                        <div class="row">
+
+                                            <div class="col-md-2">
+                                                <a onclick="$('#frmGetExams').submit();" ID="lbGetList"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+
+                </div>
+                <div class="box-body">
+                    @using (Html.BeginForm("UpdateClassNoFeeMonths", "AccountConfig", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    {
+                        var monthfeecount = 0;
+                        var feecounter = 0;
+                        <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                        <table id="tblCategory" class="table table-bordered">
+                            <thead>
+                                <tr style="background-color: #5c6bc0;color:white;">
+                                    <th>Months</th>
+                                    <th>
+                                        <div class="btn-group justify-content-center class-open-FeeTypes">
+                                            <a href="javascript:void(0);" class="btn bg-indigo-400 dropdown-toggle">Fee Heads</a>
+
+                                            <div class="dropdown-menu">
+                                                @foreach (var ft in Model.FeeCategories)
+                                                {
+                                                    <div class="dropdown-item form-check form-check-switchery form-check-right">
+                                                        <label class="form-check-label">
+                                                            <input type="checkbox" feeid="@(ft.FeeTypeID)" class="form-check-input-switchery main-ft" checked data-fouc>
+                                                            @ft.FeeTypeName
+                                                        </label>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </th>
+                                    @foreach (var c in Model.Classes)
+                                    {
+                                        <th>
+                                            <div class="btn-group justify-content-center class-open-FeeTypes">
+                                                <a href="javascript:void(0);" class="btn bg-indigo-400 dropdown-toggle">@c.ClassName</a>
+
+                                                <div class="dropdown-menu">
+                                                    @foreach (var ft in Model.FeeCategories)
+                                                    {
+                                                        <div class="dropdown-item form-check form-check-switchery form-check-right">
+                                                            <label class="form-check-label">
+                                                                <input type="checkbox" classid="@c.ClassID" feeid="@(ft.FeeTypeID)" class="form-check-input-switchery main-class-ft" checked data-fouc>
+                                                                @ft.FeeTypeName
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var m in Model.Months)
+                                {
+                                    <tr>
+                                        <td class="configuration-option mth_@(m.ID)_@m.Name ">
+                                            <div class="form-check form-check-right form-check-switchery sw_@(m.ID)_@(m.Name)_0 ">
+                                                <label class="form-check-label">
+                                                    @Sm.Common.Utilities.CommonUtilities.MonthNames[m.ID - 1], @m.Name
+                                                    <input month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery whole-month" checked data-fouc>
+                                                </label>
+                                            </div>
+                                        </td>
+                                        @*<td></td>
+                                            @foreach (var c in Model.Classes)
+                                            {
+                                                <th>c</th>
+                                            }*@
+                                    </tr>
+                                    monthfeecount = 0;
+                                    foreach (var ft in Model.FeeCategories)
+                                    {
+                                        if (ft.FeeTypeApplicable == 9)
+                                        {
+                                            if (ft.Months != null)
+                                            {
+                                                var marray = ft.Months.Split(",".ToCharArray());
+                                                if (marray.Contains(m.ID.ToString()))
+                                                {
+                                                    monthfeecount++;
+                                                    <tr>
+                                                        <td class="configuration-option">
+                                                            <div class="form-check form-check-right form-check-switchery sw_@(ft.FeeTypeID)_@(m.ID)_@(m.Name)_0 main-month">
+                                                                <label class="form-check-label">
+                                                                    @ft.FeeTypeName
+                                                                    <input feeid="@(ft.FeeTypeID)" month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery main-month
+                                                                       my_@(m.ID)_@(m.Name) ft_@ft.FeeTypeID" checked data-fouc>
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                        @foreach (var c in Model.Classes)
+                                                        {
+                                                            var isexist = Model.NoFeeMonths.Where(x => x.ID == c.ClassID && x.Extra1 == ft.FeeTypeID.ToString() && x.Name == m.ID.ToString()).Count();
+                                                            if (isexist == 0 && Model.NoFeeMonths.Count() == 0)
+                                                            {
+                                                                isexist = 1;
+                                                            }
+                                                            <td>
+                                                                <div class="form-check form-check-switchery ">
+                                                                    <input type="hidden" name="NoFeeMonths[@feecounter].ID" value="@c.ClassID" />
+                                                                    <input type="hidden" name="NoFeeMonths[@feecounter].Name" value="@m.ID" />
+                                                                    <input type="hidden" name="NoFeeMonths[@feecounter].Extra2" value="@ft.FeeTypeID" />
+                                                                    <label class="form-check-label">
+                                                                        <input name="NoFeeMonths[@feecounter].Extra1" value="1" data-render="switchery" type="checkbox"
+                                                                               class="form-check-input-switchery
+                                                                           sw_@(ft.FeeTypeID)_@(m.ID)_@(m.Name)
+                                                                            fc_@(ft.FeeTypeID)_@c.ClassID
+                                                                                    class-month" @(isexist > 0 ? "checked" : "") data-fouc>
+                                                                    </label>
+                                                                </div>
+                                                            </td>
+                                                            feecounter++;
+                                                        }
+                                                    </tr>
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            var mft = Model.MonthTypeFeeType.Where(c => c.ID.ToString() == m.Extra1 && c.Name == ft.FeeTypeApplicable.ToString()).Count();
+                                            if (mft > 0)
+                                            {
+                                                monthfeecount++;
+                                                <tr>
+                                                    <td class="configuration-option">
+                                                        <div class="form-check form-check-right form-check-switchery sw_@(ft.FeeTypeID)_@(m.ID)_@(m.Name)_0 ">
+                                                            <label class="form-check-label">
+                                                                @ft.FeeTypeName
+                                                                <input feeid="@(ft.FeeTypeID)" month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery
+                                                                   main-month
+                                                                   my_@(m.ID)_@(m.Name) ft_@ft.FeeTypeID" checked data-fouc>
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                    @foreach (var c in Model.Classes)
+                                                    {
+                                                        var isexist = Model.NoFeeMonths.Where(x => x.ID == c.ClassID && x.Extra1 == ft.FeeTypeID.ToString() && x.Name == m.ID.ToString()).Count();
+                                                        if (isexist == 0 && Model.NoFeeMonths.Count() == 0)
+                                                        {
+                                                            isexist = 1;
+                                                        }
+                                                        <td>
+                                                            <div class="form-check form-check-switchery">
+                                                                <input type="hidden" name="NoFeeMonths[@feecounter].ID" value="@c.ClassID" />
+                                                                <input type="hidden" name="NoFeeMonths[@feecounter].Name" value="@m.ID" />
+                                                                <input type="hidden" name="NoFeeMonths[@feecounter].Extra2" value="@ft.FeeTypeID" />
+                                                                <label class="form-check-label">
+                                                                    <input name="NoFeeMonths[@feecounter].Extra1" value="1" data-render="switchery" type="checkbox"
+                                                                           class="form-check-input-switchery
+                                                                           sw_@(ft.FeeTypeID)_@(m.ID)_@(m.Name)
+                                                                            fc_@(ft.FeeTypeID)_@c.ClassID
+                                                                                    class-month" @(isexist > 0 ? "checked" : "") data-fouc>
+                                                                </label>
+                                                            </div>
+                                                        </td>
+                                                        feecounter++;
+                                                    }
+                                                </tr>
+                                            }
+                                        }
+                                    }
+                                    <script>
+                                    $('.mth_@(m.ID)_@m.Name').prop('rowspan', @(monthfeecount+1));
+                                    </script>
+                                }
+                            </tbody>
+                        </table>
+                        <button class="btn btn-success" type="submit" value="Submit">Submit</button>
+                    }
+                    @*@using (Html.BeginForm("ClassSessionNoFeeMonth", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                        {
+                            <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                            <table id="tblCategory" class="table table-bordered table-striped">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 5%">#</th>
+                                        <th>Class</th>
+                                        @for (int i = 1; i <= 12; i++)
+                                        {
+                                            <th>
+                                                <input type="checkbox" onchange="SelectAllClasses(@i,this);" class="minimal">
+                                                @SMEnterprise.Repository.CommonUsage.MonthNames[i - 1]
+                                            </th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{
+                                        var cCounter = 1;
+                                        foreach (var c in Model.Classes)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    @cCounter
+                                                </td>
+                                                <td>
+                                                    <span class="ViewCopy visible">@c.ClassName</span>
+                                                    <input id="txtClassName" class="form-control editCopy hidden" type="text" onchange='$(this).closest("tr").find("#hdnClassName").val($(this).val())' name="ClassName" value="@c.ClassName" />
+                                                </td>
+                                                @for (int i = 1; i <= 12; i++)
+                                                {
+
+                                                    var isPresent = Model.NoFeeMonths.Where(n => n.ID == c.ClassID && n.Name == i.ToString()).SingleOrDefault();
+                                                    <td style="text-align:center">
+                                                        <input type="hidden" name="NoFeeMonths[@((cCounter - 1) * 12 + (i-1))].ID" value="@c.ClassID" />
+                                                        <input type="hidden" name="NoFeeMonths[@((cCounter - 1) * 12 + (i-1))].Name" value="@i" />
+                                                        <input name="NoFeeMonths[@((cCounter - 1) * 12 + (i-1))].Extra1" type="checkbox" @(isPresent != null ? "checked" : "") class="minimal month_@i">
+                                                    </td>
+                                                }
+
+                                            </tr>
+                                            cCounter++;
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                            <button class="btn btn-success" type="submit" value="Submit">Submit</button>
+                        }*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+<script>
+    $(function () {
+        $('#liClassSessionNoFeeMonth').closest('ul').closest('li').addClass('active');
+        $('#liClassSessionNoFeeMonth').addClass('active');
+    });
+
+</script>
+
+<!-- /.content -->

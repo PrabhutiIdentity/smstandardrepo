@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Web;
+using System.Data.SqlClient;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace SMEnterprise.Models
 {
@@ -16,40 +19,73 @@ namespace SMEnterprise.Models
         public List<NameIDModel> NoFeeMonths { get; set; }
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
-   
+        public List<FeeCategoryModel> FeeCategories { get; set; }
+        public List<NameIDModel> Months { get; set; }
+        public List<NameIDModel> MonthTypeFeeType { get; set; }
 
-    public DataTable GetNoFeeMonthDataTable()
-    {
 
-        DataTable dtNoFeeMonths = new DataTable();
-        dtNoFeeMonths.SetTypeName("ut_Name_ID_Utility");
-        dtNoFeeMonths.Columns.Add("ID");
-        dtNoFeeMonths.Columns.Add("Name");
-        dtNoFeeMonths.Columns.Add("Extra1");
-        dtNoFeeMonths.Columns.Add("Extra2");
-        dtNoFeeMonths.Columns.Add("Extra3");
-        if (NoFeeMonths == null)
+        public DataTable GetNoFeeMonthDataTable()
         {
-            NoFeeMonths = new List<NameIDModel>();
-        }
-        foreach (NameIDModel e in NoFeeMonths)
-        {
-            if (e.Extra1 == "on")
+
+            DataTable dtNoFeeMonths = new DataTable();
+            dtNoFeeMonths.SetTypeName("ut_Name_ID_Utility");
+            dtNoFeeMonths.Columns.Add("ID");
+            dtNoFeeMonths.Columns.Add("Name");
+            dtNoFeeMonths.Columns.Add("Extra1");
+            dtNoFeeMonths.Columns.Add("Extra2");
+            dtNoFeeMonths.Columns.Add("Extra3");
+            if (NoFeeMonths == null)
             {
-                DataRow dr = dtNoFeeMonths.NewRow();
-                dr["ID"] = e.ID;
-                dr["Name"] = e.Name;
-                dr["Extra1"] = e.Extra1;
-                dr["Extra2"] = e.Extra2;
-                dr["Extra3"] = e.Extra3;
-
-                dtNoFeeMonths.Rows.Add(dr);
+                NoFeeMonths = new List<NameIDModel>();
             }
+            foreach (NameIDModel e in NoFeeMonths)
+            {
+                if (e.Extra1 == "on")
+                {
+                    DataRow dr = dtNoFeeMonths.NewRow();
+                    dr["ID"] = e.ID;
+                    dr["Name"] = e.Name;
+                    dr["Extra1"] = e.Extra1;
+                    dr["Extra2"] = e.Extra2;
+                    dr["Extra3"] = e.Extra3;
+
+                    dtNoFeeMonths.Rows.Add(dr);
+                }
+            }
+
+            return dtNoFeeMonths;
         }
 
-        return dtNoFeeMonths;
+        public DataTable GetNoFeeMonthNewDataTable()
+        {
+            DataTable dtNoFeeMonths = new DataTable();
+            dtNoFeeMonths.SetTypeName("ut_Name_ID_Utility");
+            dtNoFeeMonths.Columns.Add("ID");
+            dtNoFeeMonths.Columns.Add("Name");
+            dtNoFeeMonths.Columns.Add("Extra1");
+            dtNoFeeMonths.Columns.Add("Extra2");
+            dtNoFeeMonths.Columns.Add("Extra3");
+            if (NoFeeMonths == null)
+            {
+                NoFeeMonths = new List<NameIDModel>();
+            }
+            foreach (NameIDModel e in NoFeeMonths)
+            {
+                if (e.Extra1 == "1")
+                {
+                    DataRow dr = dtNoFeeMonths.NewRow();
+                    dr["ID"] = e.ID;
+                    dr["Name"] = e.Name;
+                    dr["Extra1"] = e.Extra1;
+                    dr["Extra2"] = e.Extra2;
+                    dr["Extra3"] = e.Extra3;
+
+                    dtNoFeeMonths.Rows.Add(dr);
+                }
+            }
+            return dtNoFeeMonths;
+        }
     }
-}
 public class ClassModel
     {
         public int ClassID { get; set; }
@@ -88,7 +124,7 @@ public class ClassModel
         public int UserID { get; set; }
         public DateTime OperationDate { get; set; }
         public string TeacherName { get; set; }
-       
+
 
 
     }
