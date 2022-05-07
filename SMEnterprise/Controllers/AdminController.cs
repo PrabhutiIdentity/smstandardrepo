@@ -1493,18 +1493,29 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult GetEmployeeClass(string id = null, string id2 = null)
+        {
+            int ID = CommonUsage.ConvertToInt(id);
+            int ID2 = CommonUsage.ConvertToInt(id2);
+            IEnumerable<NameIDModel> objModel = objAdminData.GetEmployeeClass(ID, ID2);
+
+            return PartialView("_EmployeeListPartial", objModel);
+        }
+        [PermissionFilter]
         public ActionResult UpdateEmployeeAssign(EmployeeAssignModel oModel)
         {
-          int res =  objAdminData.InsertAssignEmployee(oModel);
-            return RedirectToAction("EmployeeAssign","Admin",res);
+            objAdminData.DeleteEmployeeAssing(oModel.EmployeeID);
+            int res = objAdminData.InsertAssignEmployee(oModel);
+            return RedirectToAction("EmployeeAssign", "Admin", res);
 
         }
         public ActionResult DeleteEmployeeAssign(EmployeeAssignModel obj)
         {
-             
+
             objAdminData.DeleteEmployeeAssing(obj.EmployeeID);
-            return RedirectToAction("EmployeeAssign","Admin");
+            return RedirectToAction("EmployeeAssign", "Admin");
         }
+
         [PermissionFilter]
         public ActionResult UpdateEvaluationScheme(EvaluationSchemeModel objData)
         {

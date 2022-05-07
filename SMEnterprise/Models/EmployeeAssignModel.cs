@@ -15,6 +15,7 @@ namespace SMEnterprise.Models
         public List<NameIDModel> EmployeeType { get; set; }
         public List<NameIDModel> Employeelist { get; set; }
         public List<ClassModel> Classes { get; set; }
+       
         public int EmployeeTypeID { get; set; }
         public int ClassID { get; set; }
         
