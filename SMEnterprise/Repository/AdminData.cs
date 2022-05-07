@@ -1936,6 +1936,17 @@ namespace SMEnterprise.Repository
 
             }
         }
+        public IEnumerable<NameIDModel> GetEmployeeClass(int EmployeeID, int SessionID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@EmployeeID", EmployeeID);
+                paramater.Add("@SessionID", SessionID);
+                return con.Query<NameIDModel>("Sp_GetemployeeClasslist", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+
+            }
+        }
         public EmployeeAssignPageModel GetAssignedEmployee(int SBranchID, int SessionID)
         {
             EmployeeAssignPageModel objModel = new EmployeeAssignPageModel();
@@ -1950,7 +1961,7 @@ namespace SMEnterprise.Repository
                     objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
                     objModel.EmployeeType = multi.Read<NameIDModel>().ToList();
                     objModel.Employeelist = multi.Read<NameIDModel>().ToList();
-                    objModel.Classes = multi.Read<ClassModel>().ToList();
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
                     objModel.AssignedEmployee = multi.Read<EmployeeAssignModel>().ToList();
                 }
                 return objModel;
@@ -1964,7 +1975,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@ID", ID);
 
-                return  con.Query<int>("Sp_DeleteEmployeeAssign", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                return con.Query<int>("Sp_DeleteEmployeeAssign", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
         public int InsertAssignEmployee(EmployeeAssignModel objModel)
