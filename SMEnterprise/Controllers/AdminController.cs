@@ -10,6 +10,8 @@ using System.Text;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using BigBlueButtonAPI.Core;
+using System.Web.Security;
+
 
 namespace SMEnterprise.Controllers
 {
@@ -90,6 +92,7 @@ namespace SMEnterprise.Controllers
         public ActionResult SBranches()
         {
             int UserID = -1;
+            int SBranchID = 0;
             if (PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Admin || PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Director)
             {
                 UserID = -1;
@@ -97,11 +100,11 @@ namespace SMEnterprise.Controllers
             else
             {
                 UserID = PermissionManager.GetLoggedInUser().UserID;
-
+                SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             }
             if (Session["SBrancheList"] == null)
             {
-                Session["SBrancheList"] = objAdminData.GetBranches(UserID).ToList();
+                Session["SBrancheList"] = objAdminData.GetBranches(UserID, SBranchID).ToList();
             }
             List<SBranchModel> objModel = (List<SBranchModel>)Session["SBrancheList"];
             if (Session["SBranchID"] == null)
@@ -218,12 +221,14 @@ namespace SMEnterprise.Controllers
         public ActionResult Dashboard()
         {
             int UserID = -1;
+            int SBranchID = 0;
 
             if (PermissionManager.GetLoggedInUser().RoleID != 0)
             {
                 UserID = PermissionManager.GetLoggedInUser().UserID;
+                SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             }
-            IEnumerable<SBranchModel> objBranches = objAdminData.GetBranches(UserID);
+            IEnumerable<SBranchModel> objBranches = objAdminData.GetBranches(UserID, SBranchID);
             if (objBranches.Count() == 0)
             {
                 return RedirectToAction("FirstBranch");
@@ -232,7 +237,7 @@ namespace SMEnterprise.Controllers
             {
                 Session["SBranchID"] = objBranches.ElementAt(0).SBranchID;
             }
-            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+             SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             DateTime CurrentDate = CommonUsage.GetCurrentDate();
             AdminDashboardModel objModel = objAdminData.GetDashBoardData(SBranchID, CurrentDate);
             return View(objModel);

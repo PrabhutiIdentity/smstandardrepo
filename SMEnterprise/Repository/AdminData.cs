@@ -106,12 +106,13 @@ namespace SMEnterprise.Repository
                 CommonUsage.SMSConfigurations.Clear();
             }
         }
-        public IEnumerable<SBranchModel> GetBranches(int UserID)
+        public IEnumerable<SBranchModel> GetBranches(int UserID, int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@UserID", UserID);
+                paramater.Add("@SBranchID", SBranchID);
                 return con.Query<SBranchModel>("sp_GetSBranches", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
             }
         }
