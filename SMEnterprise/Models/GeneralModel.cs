@@ -449,6 +449,14 @@ namespace SMEnterprise.Models
         public string SessionName { get; set; }
         public string EvaluationName { get; set; }
         //
+        public string TeacherIncharge { get; set; }
+        public string TeacherInchargeSign { get; set; }
+        public int CTeacherID { get; set; }
+        public int InchargeTeacherID { get; set; }
+        
+            
+        public string ClassTeacher { get; set; }
+        public string ClassTeacherSign { get; set; }
     }
     public class SubSubjectTypeEditModel
     {
@@ -522,7 +530,6 @@ namespace SMEnterprise.Models
         public string Extra3 { get; set; }
         public decimal Sum { get; set; }
         public int IsSelected { get; set; }
-
     }
     public class EventModel
     {

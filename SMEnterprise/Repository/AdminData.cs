@@ -1975,7 +1975,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@ID", ID);
 
-                return  con.Query<int>("Sp_DeleteEmployeeAssign", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                return con.Query<int>("Sp_DeleteEmployeeAssign", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
         public int InsertAssignEmployee(EmployeeAssignModel objModel)
