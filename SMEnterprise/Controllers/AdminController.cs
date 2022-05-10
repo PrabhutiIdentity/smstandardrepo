@@ -1515,16 +1515,17 @@ namespace SMEnterprise.Controllers
         public ActionResult UpdateEmployeeAssign(EmployeeAssignModel oModel)
         {
             objAdminData.DeleteEmployeeAssing(oModel.EmployeeID);
-            int res =  objAdminData.InsertAssignEmployee(oModel);
-            return RedirectToAction("EmployeeAssign","Admin",res);
+            int res = objAdminData.InsertAssignEmployee(oModel);
+            return RedirectToAction("EmployeeAssign", "Admin", res);
 
         }
         public ActionResult DeleteEmployeeAssign(EmployeeAssignModel obj)
         {
-             
+
             objAdminData.DeleteEmployeeAssing(obj.EmployeeID);
-            return RedirectToAction("EmployeeAssign","Admin");
+            return RedirectToAction("EmployeeAssign", "Admin");
         }
+
         [PermissionFilter]
         public ActionResult UpdateEvaluationScheme(EvaluationSchemeModel objData)
         {
