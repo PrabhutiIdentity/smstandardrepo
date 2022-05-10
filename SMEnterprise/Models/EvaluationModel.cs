@@ -8,6 +8,14 @@ using SMEnterprise.Repository;
 
 namespace SMEnterprise.Models
 {
+    public class EditEvaluationModel
+    {
+        public int ID { get; set; }
+        public List<ClassModel> Classes { get; set; }
+        public int SessionID { get; set; }
+        public int EvaluationSchemeID { get; set; }
+        public string EvaluationSchemeName { get; set; }
+    }
     public class EvaluationSchemeModel
     {
         public int EvaluationSchemeID { get; set; }
