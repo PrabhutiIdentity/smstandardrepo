@@ -44,7 +44,7 @@ namespace SMEnterprise.Repository
                 return _CanceledTasks;
             }
         }
-        public string StartSending(SMSSendTaskModel data,SMSConfigirationModel SMSConfiguration)
+        public string StartSending(SMSSendTaskModel data, SMSConfigirationModel SMSConfiguration)
         {
             List<SMSRecieverDetailModel> finalSendingList = new List<SMSRecieverDetailModel>();
             foreach (SMSRecieverDetailModel r in data.Recievers)
@@ -80,7 +80,7 @@ namespace SMEnterprise.Repository
 
             return "1";
         }
-        public void SendSMSMini(SMSSendTaskModel data, int StartIndex, int EndIndex, int DeligateID,SMSConfigirationModel SMSConfiguration)
+        public void SendSMSMini(SMSSendTaskModel data, int StartIndex, int EndIndex, int DeligateID, SMSConfigirationModel SMSConfiguration)
         {
             foreach (SMSRecieverDetailModel r in data.Recievers)
             {
@@ -111,9 +111,9 @@ namespace SMEnterprise.Repository
                 CurrentTasks[data.SMSSendingID + "-" + DeligateID].ProcessCount = _CurrentTasks[data.SMSSendingID + "-" + DeligateID].ProcessCount + 1;
 
 
-                data.TemplateText= data.TemplateText.Replace("[Reciever]", "Parent");
+                data.TemplateText = data.TemplateText.Replace("[Reciever]", "Parent");
 
-              //  data.TemplateText = data.TemplateText.Replace("[DueAmount]", r.Amount.ToString("N2"));
+                //  data.TemplateText = data.TemplateText.Replace("[DueAmount]", r.Amount.ToString("N2"));
                 string SMSText = "";
                 //if (data.SMSTypeID == 1)
                 //{
@@ -125,7 +125,7 @@ namespace SMEnterprise.Repository
                 }
                 else if (data.SMSTypeID == 2)
                 {
-                    SMSText = data.TemplateText.Replace("[StudentName]", r.Name).Replace("[StartDate]", data.Date.ToString("dd MMM,yyyy")).Replace("[EndDate]", data.EDate.ToString("dd MMM,yyyy")).Replace("[Reason]",data.Title);
+                    SMSText = data.TemplateText.Replace("[StudentName]", r.Name).Replace("[StartDate]", data.Date.ToString("dd MMM,yyyy")).Replace("[EndDate]", data.EDate.ToString("dd MMM,yyyy")).Replace("[Reason]", data.Title);
                 }
                 else if (data.SMSTypeID == 6)
                 {
@@ -181,11 +181,11 @@ namespace SMEnterprise.Repository
         }
         public void SubmitSMS(string text, string mobileNo, int SBranchID, int SMSType, int RecieverType, int RecieverID, int SMSID, string ContentID, SMSConfigirationModel SMSConfiguration)
         {
-            if(SBranchID==0)
+            if (SBranchID == 0)
             {
                 SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             }
-             
+
             string msg = "";
             if (SMSConfiguration == null)
             {
@@ -194,36 +194,36 @@ namespace SMEnterprise.Repository
 
             SMSConfiguration = (new AdminData()).GetDefaultSMSConfigurationDetails(SBranchID);
             string s = "";
-          
-            
-                WebClient httpclient = new WebClient();
-                httpclient.Headers.Add("user-agent", SMSConfiguration.header);
-                foreach (SMSConfigirationParamModel param in SMSConfiguration.Params)
+
+
+            WebClient httpclient = new WebClient();
+            httpclient.Headers.Add("user-agent", SMSConfiguration.header);
+            foreach (SMSConfigirationParamModel param in SMSConfiguration.Params)
+            {
+                if (param.ParamType == 0)
                 {
-                    if (param.ParamType == 0)
-                    {
-                        httpclient.QueryString.Add(param.ParamName, param.ParamValue);
-                    }
-                    else if (param.ParamType == 1)
-                    {
-                        httpclient.QueryString.Add(param.ParamName, mobileNo);
-                    }
-                    else if (param.ParamType == 2)
-                    {
-                        httpclient.QueryString.Add(param.ParamName, text);
-                    }
+                    httpclient.QueryString.Add(param.ParamName, param.ParamValue);
+                }
+                else if (param.ParamType == 1)
+                {
+                    httpclient.QueryString.Add(param.ParamName, mobileNo);
+                }
+                else if (param.ParamType == 2)
+                {
+                    httpclient.QueryString.Add(param.ParamName, text);
+                }
                 else if (param.ParamType == 3)
                 {
                     httpclient.QueryString.Add(param.ParamName, Convert.ToString(ContentID).ToString());
                 }
             }
-                string baseurl = SMSConfiguration.baseurl;
-                Stream data = httpclient.OpenRead(baseurl);
-                StreamReader reader = new StreamReader(data);
-                s = reader.ReadToEnd();
-                data.Close();
-                reader.Close();
-            
+            string baseurl = SMSConfiguration.baseurl;
+            Stream data = httpclient.OpenRead(baseurl);
+            StreamReader reader = new StreamReader(data);
+            s = reader.ReadToEnd();
+            data.Close();
+            reader.Close();
+
             AccountData objData = new AccountData();
 
             var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
