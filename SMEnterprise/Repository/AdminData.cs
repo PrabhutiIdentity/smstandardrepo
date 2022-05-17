@@ -1936,6 +1936,25 @@ namespace SMEnterprise.Repository
 
             }
         }
+        public EditEvaluationModel GetEditEvaluationSchemes(int EvaluationID,int SessionID)
+        {
+            EditEvaluationModel objModel = new EditEvaluationModel();   
+             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@EvaluationID", EvaluationID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("Sp_GetEvaluationClasses", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Classes = multi.Read<ClassModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.EvaluationSchemeID = multi.Read<int>().SingleOrDefault();
+                    objModel.EvaluationSchemeName = multi.Read<string>().SingleOrDefault();
+                }
+                return objModel;
+
+            }
+        }
         public IEnumerable<NameIDModel> GetEmployeeClass(int EmployeeID, int SessionID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))

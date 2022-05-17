@@ -91,6 +91,7 @@ public class ClassModel
         public int ClassID { get; set; }
         public int SessionID { get; set; }
         public int EvaluationSchemeID { get; set; }
+        public int IsSelected { get; set; }
         public int EmployeeID { get; set; }
         public string ClassName { get; set; }
         public int SectionCount { get; set; }

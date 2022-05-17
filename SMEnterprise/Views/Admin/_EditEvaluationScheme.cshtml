@@ -1,0 +1,30 @@
+﻿@model SMEnterprise.Models.EditEvaluationModel
+
+<form role="form" action="/admin/UpdateEvaluationScheme">
+    <div class="box-body">
+        <div class="form-group">
+            <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
+            <input type="hidden" name="ClassIDs" id="hdnClassIDs" />
+            <input type="hidden" name="EvaluationSchemeID" id="hdnEditEvaluationSchemeID" value="@Model.EvaluationSchemeID" />
+            <label for="txtSchemeTitle">Scheme Title</label>
+            <input type="text" required name="EvaluationSchemeName" class="form-control" id="txtSchemeTitle" value="@Model.EvaluationSchemeName" placeholder="Enter Evaluation Scheme Name">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputPassword1">Classes</label>
+            <div class="row EClassList">
+                @foreach (var cls in Model.Classes.Where(x => x.IsSelected != -1).ToList())
+                {
+                    <div class="col-md-6">
+                        <input type="checkbox" @(cls.IsSelected == 1 ? "checked" : "") @(cls.IsSelected == -1 ? "disabled" : "") clsid="@cls.ClassID" esid="@cls.EvaluationSchemeID" id="chkClass_@cls.ClassID" class="minimal class-checkbox">@cls.ClassName 
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <!-- /.box-body -->
+
+    <div class="box-footer">
+        <button type="submit" class="btn btn-primary pull-right" onclick="return SaveEvaluationScheme();">Submit</button>
+    </div>
+</form>
+
