@@ -1481,6 +1481,16 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult GetEvaluationClass(string id = null, string id2 = null)
+        {
+            int ID = CommonUsage.ConvertToInt(id);
+            int ID2 = CommonUsage.ConvertToInt(id2);
+            
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            EditEvaluationModel objModel = objAdminData.GetEditEvaluationSchemes(ID,ID2);
+            return PartialView("_EditEvaluationScheme",objModel);
+        }
+        [PermissionFilter]
         public ActionResult EmployeeAssign(string ID = null)
         {
             int SessionID = CommonUsage.ConvertToInt(ID);
