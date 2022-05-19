@@ -1,0 +1,202 @@
+CREATE Procedure Sp_GetEvaluationClasses   --66,1037  
+(    
+@EvaluationID int,    
+@SessionID int    
+)    
+AS    
+BEGIN    
+    
+      
+Declare @SbranchID int    
+Select @SbranchID=SbranchID from SessionMaster where SessionID=@SessionID   
+Select CM.ClassID,CM.CLassName,CSD.SchemeID as EvaluationschemeID ,ESM.EvaluationSchemeName,  
+(case when CSD.SchemeID is null then 0 when CSD.SchemeID=@EvaluationID then 1 else -1  end) as IsSelected    
+from ClassMaster  CM  
+left outer join Classsessiondetails CSD on CSD.ClassID=CM.CLassiD and CSD.SessionID=@SessionID  
+left outer join EvaluationSchemeMaster ESM on ESM.SessionID=1037 and ESM.EvaluationSchemeID=CSD.SchemeID  
+where CM.SBranchID=@SbranchID  
+  
+Select @SessionID  
+Select @EvaluationID as EvaluationSchemeID  
+Select EvaluationSchemeName from EvaluationSchemeMaster where EvaluationSchemeID=@EvaluationID  
+END
+go
+
+CREATE TABLE [dbo].[EmployeeAssignMaster](
+	[EmployeeAssignID] [int] IDENTITY(1,1) NOT NULL,
+	[EmployeeTypeID] [int] NULL,
+	[EmployeeID] [int] NULL,
+	[ClassID] [int] NULL,
+	[Status] [int] NULL,
+	[OpType] [int] NULL,
+	[SessionID] [int] NULL
+) ON [PRIMARY]
+GO
+
+
+
+CREATE FUNCTION [dbo].[GetEmployeeAssignClassList]      
+(  
+@EmployeeID int,  
+@SessionID int  
+)  
+RETURNS nvarchar(max)      
+as      
+begin      
+declare @Classes nvarchar(Max)      
+Set @Classes= ''      
+declare @ClassID int      
+declare @ClassName nvarchar(max)      
+declare FirstCursor cursor  for select HC.ClassID, CM.ClassName    
+from EmployeeAssignMaster HC left Outer Join ClassMaster CM on HC.ClassID=CM.ClassID    where HC.SessionID=@SessionID and HC.EmployeeID=@EmployeeID  
+OPEN FirstCursor      
+ FETCH NEXT FROM FirstCursor INTO @ClassID, @ClassName        
+ WHILE @@FETCH_STATUS = 0      
+ Begin      
+ if(@ClassName is not null)      
+ begin      
+   set @Classes=@Classes+','+@ClassName      
+   end      
+   FETCH NEXT FROM FirstCursor INTO @ClassID, @ClassName      
+ end      
+close FirstCursor      
+deallocate FirstCursor      
+if(@Classes!='')      
+begin      
+ set @Classes= substring(@Classes,2,len(@Classes)-1)      
+end      
+return @Classes      
+end      
+go
+
+Create FUNCTION [dbo].[GetAssignEmployeeClassListIDs]      
+(      
+@EmployeeID int    ,  
+@SessionID int  
+)      
+RETURNS nvarchar(max)      
+as      
+begin      
+declare @Classes nvarchar(Max)      
+Set @Classes= ''      
+declare @ClassID int      
+declare FirstCursor cursor  for select HC.ClassID from EmployeeAssignMaster HC where HC.EmployeeID=@EmployeeID    and HC.SessionID=@SessionID  
+OPEN FirstCursor      
+ FETCH NEXT FROM FirstCursor INTO @ClassID        
+ WHILE @@FETCH_STATUS = 0      
+ Begin      
+   set @Classes=@Classes+','+convert(nvarchar(10), @ClassID)      
+   FETCH NEXT FROM FirstCursor INTO @ClassID      
+ end      
+close FirstCursor      
+deallocate FirstCursor      
+     
+if(@Classes!='')      
+begin      
+ set @Classes= substring(@Classes,2,len(@Classes)-1)      
+end      
+return @Classes      
+end      
+
+go
+
+
+
+create Procedure sp_AssignedEmployee    --10,1037             
+(            
+@SBranchID int,            
+@SessionID int=0            
+)            
+AS            
+BEGIN            
+ declare @ClassID int             
+            
+ if(@SessionID=0)                      
+ begin                      
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID                      
+ end              
+ select @SessionID                      
+ Select SessionID,SessionName,SessionStatus,SessionStartDate,SessionEndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate                      
+             
+ Select EmployeeTypeID as ID,EmployeeTypeName as Name,SbranchID as Extra1 from EmployeeTypeMaster   where (SbranchID=0 or SbranchID=@SBranchID) and Employeetypeid not in (12,13,10)         
+            
+ Select EmployeeID as ID , EMployeeName as Name from Employeemaster where SbranchID=@SbranchID  and ((isnull(IsLeft,1) !=0) or (Status != 0))   
+            
+ Select CM.ClassID AS ID,CM.ClassName as Name,EducationLevelID,SBranchID,EAM.EmployeeID from ClassMaster CM      
+ Left outer join EmployeeAssignMaster EAM on EAM.CLassID=CM.CLassID      
+ where CM.status=1 and SBranchID=@SbranchID            
+            
+ Select  Distinct EAM.EmployeeID, EAM.EmployeeTypeID,EM.EmployeeName ,ETM.EmployeeTypeName ,dbo.[GetEmployeeAssignClassList](EAM.EmployeeID,@SessionID) as ClassNames,          
+ dbo.[GetAssignEmployeeClassListIDs](EAM.EmployeeID,@SessionID) as ClassID from EmployeeAssignMaster EAM            
+ left outer join EmployeeMaster EM on EM.EmployeeID=EAM.EMployeeID            
+ left outer join EmployeeTypeMaster ETM on ETM.EmployeeTypeID=EAM.EMployeeTypeID            
+  where EAM.Sessionid=@SessionID       
+      
+  END        
+  go
+  go
+  
+Create procedure  Sp_DeleteEmployeeAssign
+(
+@ID int
+)
+AS
+BEGIN
+
+if(@ID!=0)
+BEGIN
+
+Delete from EmployeeAssignMaster where EmployeeID=@ID
+
+END
+END
+
+go
+
+create procedure Sp_InsertUpdateEMployeeAssign    
+(    
+@EmployeeAssignID int,    
+@EmployeeTypeID int,    
+@EmployeeID int,    
+@SessionID int,    
+@Status int,    
+@OpType int,    
+@ClassID int    
+)    
+AS    
+BEGIN    
+  
+declare @UpdateclassID int  
+ Select @UpdateclassID= count(classid) from Employeeassignmaster where classid=@CLassID   
+ 
+  
+ if(@OpType=-1)    
+ BEGIN    
+  Delete from [EmployeeAssignMaster] where EmployeeAssignID=@EmployeeAssignID    
+ END    
+ else    
+ BEGIN    
+
+ if(@UpdateclassID < 1)  
+BEGIN 
+  if(@EmployeeAssignID = 0 )    
+  BEGIN    
+    Insert into [EmployeeAssignMaster] (EmployeeTypeID,EmployeeID,ClassID,Status,SessionID)    
+ values( @EmployeeTypeID,@EmployeeID,@ClassID,@Status,@SessionID )    
+  
+   END    
+  else    
+  BEGIN    
+   Update [EmployeeAssignMaster] set EmployeeTypeID=@EmployeeTypeID,EmployeeID=@EmployeeID,ClassID=@ClassID,Status=@Status    
+   where EmployeeAssignID=@EmployeeAssignID    
+    
+  END 
+   END 
+ END    
+    
+ Select @EmployeeAssignID      
+    
+END
+go
+
+  
