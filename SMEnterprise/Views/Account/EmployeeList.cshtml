@@ -80,6 +80,31 @@
 
                     </div>
                 }
+                <br />
+                @using (Html.BeginForm("DownloadAllEmployeesCerts", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmdwnldEmployees" }))
+                {
+                    <div class="col-md-4 padding"></div>
+                    <div class="col-md-4 padding">
+                        @*<select class="form-control" name="DocType">
+                                    <option value="0">All Documents</option>
+                                    <option value="1">Birth Certificate</option>
+                            <option value="2">Experience Certificate</option>
+                                            </select>*@
+                    </div>
+                    <div class="col-md-4 padding">
+                        @{
+                            var ctr = 0;
+                            foreach (EmployeeModel c in Model.Employees)
+                            {
+                                <input type="hidden" name="Employees[@ctr].ID" value="@c.EmployeeID" />
+                                <input type="hidden" name="Employees[@ctr].Name" value="@c.EmployeeName" />
+                                ctr++;
+                            }
+                        }
+                        <a href="javascript:void(0);" onclick="$('#frmdwnldEmployees').submit();" class="col-md-8 text-right"><i class="fa fa-download"></i>&nbsp;Download Documents For All Employees</a>
+                    </div>
+                }
+                <br />
                 <div class="x_panel">
 
                     <div class="x_content">
@@ -97,72 +122,82 @@
                                     <th>Regination Date</th>
                                     <th>Status</th>
                                     <th>Designation</th>
-
+                                    <th>Documents</th>
                                 </tr>
                             </thead>
                             @{
                                 int count = 1;
                                 foreach (EmployeeModel c in Model.Employees)
                                 {
-                            <tr>
-                                <td>@count</td>
-                                <td>
-                                    @c.EmployeeSID
-                                </td>
-                                <td>
-                                    @c.EmployeeName
-                                </td>
+                                    <tr>
+                                        <td>@count</td>
+                                        <td>
+                                            @c.EmployeeSID
+                                        </td>
+                                        <td>
+                                            @c.EmployeeName
+                                        </td>
 
-                                <td>
-                                    @c.DOJ.ToString("dd MMM, yyyy")
+                                        <td>
+                                            @c.DOJ.ToString("dd MMM, yyyy")
 
-                                </td>
-                                <td>
-                                    @c.DOB.ToString("dd MMM, yyyy")
+                                        </td>
+                                        <td>
+                                            @c.DOB.ToString("dd MMM, yyyy")
 
-                                </td>
-                                <td>@c.FatherHubName</td>
+                                        </td>
+                                        <td>@c.FatherHubName</td>
 
-                                <td>
-                                    @c.MobileNumber
-                                </td>
-                                <td>
-                                    @if (c.IsLeft != 1)
-                                    {
-                                        <label class='badge bg-red'> @c.DOR.ToString("dd MMM, yyyy")</label>
-                                    }
-                                    else
-                                    {
+                                        <td>
+                                            @c.MobileNumber
+                                        </td>
+                                        <td>
+                                            @if (c.IsLeft != 1)
+                                            {
+                                                <label class='badge bg-red'> @c.DOR.ToString("dd MMM, yyyy")</label>
+                                            }
+                                            else
+                                            {
 
-                                    }
+                                            }
 
 
-                                </td>
-                                <td>
-                                    @if (c.Status != 0)
-                                    {
-                                        <label class='badge bg-green'>Active</label>
-                                    }
-                                    else
-                                    {
-                                        if (c.IsLeft != 1)
-                                        {
-                                            <label class='badge bg-danger'>Left</label>
-                                        }
-                                        else
-                                        {
+                                        </td>
+                                        <td>
+                                            @if (c.Status != 0)
+                                            {
+                                                <label class='badge bg-green'>Active</label>
+                                            }
+                                            else
+                                            {
+                                                if (c.IsLeft != 1)
+                                                {
+                                                    <label class='badge bg-danger'>Left</label>
+                                                }
+                                                else
+                                                {
 
-                                            <label class='badge bg-red'>Not</label>
-                                        }
+                                                    <label class='badge bg-red'>Not</label>
+                                                }
 
-                                    }
-                                </td>
-                                <td>
-                                    @c.EmployeeTypeName
-                                </td>
-                                
+                                            }
+                                        </td>
+                                        <td>
+                                            @c.EmployeeTypeName
+                                        </td>
+                                        <td>
+                                            @using (Html.BeginForm("DownloadEmployeeFiles", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmdwnldEmployeesDoc" }))
+                                            {
+                                                <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
+                                                <input type="hidden" name="EmployeeName" value="@c.EmployeeName" />
+                                                @*<a href="javascript:void(0);" onclick="$('#frmdwnldEmployeesDoc').submit();">Download</a>*@
+                                                <button type="submit" class="btn btn-link">Download</button>
 
-                            </tr>
+                                            }
+                                        </td>
+
+
+                                    </tr>
 
                                     count++;
                                 }
@@ -197,7 +232,7 @@
                     $("#tblCategory").DataTable({
 
                         bSort: false,
-                         "paging": true,
+                        "paging": true,
                         "pageLength": 50,
                         dom: "Bfrtip",
                         buttons: [

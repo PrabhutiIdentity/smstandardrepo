@@ -1,0 +1,268 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeListPageModel
+@section IncludeCss
+{
+    <title>Employee Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-bs/css/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/Parent/vendors/datatables.net-buttons-bs/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                @using (Html.BeginForm("Employees", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetEmployees" }))
+                {
+                    <div class="row std-mng-head">
+
+                        <div class="col-md-12 class-section">
+                            <div class="row">
+
+                                <div class="col-md-2 padding">
+                                </div>
+                                <div class="col-md-3 padding">
+                                    @*<a href="/Account/EmployeeDetails/0/1" target="_blank" class="btn btn-link" style="color:white;">Add Employee</a>*@
+
+                                    @*<label class="col-md-8 text-right">Total Employee : @Model.TotalEmployees </label>*@
+
+                                </div>
+                                @*<div class="col-md-6 padding">
+
+                                        <a href="/account/DownloadFiles" class="col-md-8 text-right" style="color:white"><i class="fa fa-download"></i>&nbsp;Download all Employees Files</a>
+                                    </div>*@
+                                @*<div class="col-md-6 padding">
+                                        <label class="col-md-4 text-right">Employee Type :</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" name="EmployeeType" id="ddlClass" onchange="$('#frmGetEmployees').submit();">
+                                                @foreach (EmployeeTypeModel el in Model.EmployeeTypes)
+                                                {
+                                                    <option value="@el.EmployeeTypeID" @(el.EmployeeTypeID == Model.EmployeeType ? "selected" : "")>@el.EmployeeTypeName</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-4 padding">
+                                    <div class="row">
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+
+                @using (Html.BeginForm("DownloadAllEmployeesCerts", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmdwnldEmployees" }))
+                {
+                    <div class="col-md-4 padding">
+                        <select class="form-control" name="DocType">
+                            <option value="0">All Documents</option>
+                            @*<option value="1">Birth Certificate</option>
+                                <option value="2">Experience Certificate</option>*@
+                        </select>
+                    </div>
+                    <div class="col-md-4 padding">
+                        @{
+                            var ctr = 0;
+                            foreach (EmployeeModel c in Model.Employees)
+                            {
+                                <input type="hidden" name="Employees[@ctr].ID" value="@c.EmployeeID" />
+                                <input type="hidden" name="Employees[@ctr].Name" value="@c.EmployeeName" />
+                                ctr++;
+                            }
+                        }
+                        <a href="javascript:void(0);" onclick="$('#frmdwnldEmployees').submit();" class="col-md-8 text-right"><i class="fa fa-download"></i>&nbsp;Download For All Employees</a>
+                    </div>
+                    <div class="col-md-4 padding"></div>
+                }
+                <div class="x_panel">
+
+                    <div class="x_content">
+
+                        <table id="tblCategory" class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10%">Photo</th>
+                                    <th style="width: 15%">Name</th>
+                                    @*<th style="width: 13%">Experience Certificate</th>
+                                        <th style="width: 10%">Birth Certificate</th>
+                                        <th style="width: 10%">Aadhar Card</th>*@
+                                    <th style="width: 15%">Download All Documents</th>
+
+                                </tr>
+                            </thead>
+                            @{
+                                int count = 0;
+                                foreach (EmployeeModel c in Model.Employees)
+                                {
+                                    <tr>
+
+                                        <td>
+                                            <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/EmployeeImage/Thumb/")@(c.EmployeeID)_@c.Photo" />
+                                        </td>
+                                        <td>
+                                            @c.EmployeeName
+                                            <br />
+                                            @c.EmployeeSID
+                                        </td>
+
+                                        @*<td>
+                                                @using (Html.BeginForm("DownloadExp", "Account", FormMethod.Post, new { role = "form", @ID = "frmdownload" }))
+                                                {
+                                                    <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
+                                                    <input type="hidden" name="BirthCertificate" value="@c.ExperienceCertificate" />
+
+                                                    <a href="javascript:void(0)" onclick='$(this).closest("td").find("#frmdownload").submit()'> Download  </a>
+                                                }
+
+                                            </td>
+                                            <td>
+                                                @using (Html.BeginForm("DownloadDoc", "Account", FormMethod.Post, new { role = "form", @ID = "frmdownload" }))
+                                                {
+                                                    <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
+                                                    <input type="hidden" name="BirthCertificate" value="@c.BirthCertificate" />
+
+                                                    <a href="javascript:void(0)" onclick='$(this).closest("td").find("#frmdownload").submit()'> Download  </a>
+                                                }
+                                            </td>
+
+                                            <td>
+                                                <a href="#">Download</a>
+                                                @c.AddressCertificateUploader
+                                            </td>*@
+
+
+                                    <td>
+                                        @using (Html.BeginForm("DownloadEmployeeFiles", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmdwnldEmployeesDoc" }))
+                                        {
+                                            <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
+                                            <input type="hidden" name="EmployeeName" value="@c.EmployeeName" />
+                                            <a href="javascript:void(0);" onclick="$('#frmdwnldEmployeesDoc').submit();">Download</a>
+
+                                        }
+
+                                    </td>
+                                        @*<td>
+                                                @c.AccessCardNo
+                                            </td>
+                                            <td>
+                                                @c.MobileNumber
+                                            </td>
+
+                                            <td>
+                                                @if (c.StopID != 0)
+                                                {
+                                                    <label class='badge bg-green'>Yes</label>
+                                                }
+                                                else
+                                                {
+                                                    <label class='badge bg-blue'>No</label>
+                                                }
+                                            </td>
+
+                                            <td>
+                                                <div class="row" style="margin-right: 10px;">
+                                                    <div class="col-md-6">
+                                                        <a href="/Account/EmployeeDetails/@c.EmployeeID/1" target="_blank" class="btn btn-link">View</a>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        @using (Html.BeginForm("DeleteEmployee", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                        {
+                                                            <input type="hidden" name="EmployeeType" value="@Model.EmployeeType" />
+                                                            <input type="hidden" name="EmployeeID" value="@c.EmployeeID" />
+
+                                                            <button type="submit" onclick="return DeleteEmployee(this);" class="btn btn-link">Delete</button>
+                                                        }
+                                                    </div>
+                                                </div>
+
+                                            </td>*@
+                                    </tr>
+
+                                    count++;
+                                }
+
+                            }
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/Parent/vendors/datatables.net/js/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/Parent/vendors/datatables.net-bs/js/dataTables.bootstrap.min.js")"></script>
+    <script>
+
+        $(function () {
+            $("#tblCategory").DataTable();
+        });
+        function DeleteEmployee(sender) {
+            return confirm('Do you really want to delete Employee!!!!');
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+}
