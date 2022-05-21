@@ -7,6 +7,13 @@ using System.Web;
 
 namespace SMEnterprise.Models
 {
+    public class EmployeeDocumentDownloadModel
+    {
+        public int DocType { get; set; }
+        public int EmployeeID { get; set; }
+        public string EmployeeName { get; set; }
+        public List<NameIDModel> Employees { get; set; }
+    }
     public class EmployeeSalarySlipModel
     {
         public EmployeeModel Employee { get; set; }
