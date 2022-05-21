@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNet.SignalR;
 using System.Data;
 using static SMEnterprise.Repository.CommonUsage;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace SMEnterprise.Controllers
 {
@@ -470,7 +471,7 @@ namespace SMEnterprise.Controllers
             objModel.CurrentTab = 1;
             return PartialView("_StudentViewPartial", objModel);
         }
-    
+
         [PermissionFilter]
         public ActionResult GetSectionOptionalSubjects(string id = null)
         {
@@ -2984,8 +2985,8 @@ namespace SMEnterprise.Controllers
         {
             int isBlock = CommonUsage.ConvertToInt(ID);
             int studentID = CommonUsage.ConvertToInt(ID2);
-           int res = objAccountData.UpdateIsBlock(isBlock, studentID);
-            return Json(res,JsonRequestBehavior.AllowGet);
+            int res = objAccountData.UpdateIsBlock(isBlock, studentID);
+            return Json(res, JsonRequestBehavior.AllowGet);
         }
 
         #endregion
@@ -3405,6 +3406,130 @@ namespace SMEnterprise.Controllers
             return View(oModel);
         }
         #endregion Bulk Student Data Upload
+
+
+        #region downloademployeedocumentsdetails
+        [PermissionFilter]
+        public ActionResult DownloadEmployeeDetails(EmployeeListPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new EmployeeListPageModel();
+
+            }
+            //if (objModel.EmployeeType == 0)
+            //{
+            //    objModel.EmployeeType = 1;
+            //}
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
+            return View(objModel);
+        }
+        public FileResult DownloadAllEmployeesCerts(EmployeeDocumentDownloadModel oModel)
+        {
+            string suffix = "";
+            if (oModel.DocType == 1)
+            {
+                suffix = "Birth_";
+            }
+            if (oModel.DocType == 2)
+            {
+                suffix = "Experience_";
+            }
+            var context = System.Web.HttpContext.Current;
+            //var folderPath = context.Server.MapPath(string.Format("~/{0}", id));
+            var folderPath = context.Server.MapPath(CommonUsage.EmployeeDocumentsBasePath);
+
+            DirectoryInfo folder = new DirectoryInfo(folderPath);
+            var baseOutputStream = new MemoryStream();
+            ZipOutputStream zipOutput = new ZipOutputStream(baseOutputStream);
+            zipOutput.IsStreamOwner = false;
+            /* * Higher compression level will cause higher usage of reources
+            * If not necessary do not use highest level 9
+            */
+            zipOutput.SetLevel(8);
+            byte[] buffer = new byte[4096];
+            foreach (var emp in oModel.Employees)
+            {
+                foreach (var file in folder.GetFiles(emp.ID + "_" + suffix + "*"))
+                {
+                    ZipEntry entry = new ZipEntry(emp.Name + "_" + Path.GetFileName(file.FullName));
+                    entry.DateTime = DateTime.Now;
+                    //entry.Name = emp.Name(entry);
+                    zipOutput.PutNextEntry(entry);
+
+                    using (FileStream fs = System.IO.File.OpenRead(file.FullName))
+                    {
+                        int sourceBytes = 0;
+                        do
+                        {
+                            sourceBytes = fs.Read(buffer, 0, buffer.Length);
+                            zipOutput.Write(buffer, 0, sourceBytes);
+                        } while (sourceBytes > 0);
+                    }
+                } 
+            }
+            zipOutput.Finish();
+            zipOutput.Close();
+
+            /* Set position to 0 so that cient start reading of the stream from the begining */
+            baseOutputStream.Position = 0;
+
+            /* Set custom headers to force browser to download the file instad of trying to open it */
+            return new FileStreamResult(baseOutputStream, "application/x-zip-compressed")
+            {
+                FileDownloadName = "AllEmployeeDocuments.zip"
+            };
+
+        }
+
+
+        public FileResult DownloadEmployeeFiles(EmployeeDocumentDownloadModel oModel)
+        {
+            var context = System.Web.HttpContext.Current;
+            //var folderPath = context.Server.MapPath(string.Format("~/{0}", id));
+            var folderPath = context.Server.MapPath(CommonUsage.EmployeeDocumentsBasePath);
+
+            DirectoryInfo folder = new DirectoryInfo(folderPath);
+            var baseOutputStream = new MemoryStream();
+            ZipOutputStream zipOutput = new ZipOutputStream(baseOutputStream);
+            zipOutput.IsStreamOwner = false;
+            /* * Higher compression level will cause higher usage of reources
+            * If not necessary do not use highest level 9
+            */
+            zipOutput.SetLevel(8);
+            byte[] buffer = new byte[4096];
+            foreach (var file in folder.GetFiles(oModel.EmployeeID + "_*"))
+            {
+                ZipEntry entry = new ZipEntry(Path.GetFileName(file.FullName));
+                entry.DateTime = DateTime.Now;
+                zipOutput.PutNextEntry(entry);
+
+                using (FileStream fs = System.IO.File.OpenRead(file.FullName))
+                {
+                    int sourceBytes = 0;
+                    do
+                    {
+                        sourceBytes = fs.Read(buffer, 0, buffer.Length);
+                        zipOutput.Write(buffer, 0, sourceBytes);
+                    } while (sourceBytes > 0);
+                }
+            }
+
+            zipOutput.Finish();
+            zipOutput.Close();
+
+            /* Set position to 0 so that cient start reading of the stream from the begining */
+            baseOutputStream.Position = 0;
+
+            /* Set custom headers to force browser to download the file instad of trying to open it */
+            return new FileStreamResult(baseOutputStream, "application/x-zip-compressed")
+            {
+                FileDownloadName = oModel.EmployeeName + "_Document.Zip" 
+            };
+
+        }
+        #endregion
 
     }
 }
