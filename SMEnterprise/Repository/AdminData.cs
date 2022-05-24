@@ -338,30 +338,64 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
-        public ClassPageModel GetClassesNoFeeMonthsNew(int SBranchID, int SessionID)
+        public async Task<ClassPageModel> GetClassesNoFeeMonthNew(int sbranchID, int sessionID)
         {
-            ClassPageModel objModel = new ClassPageModel();
+            ClassPageModel classNoFeeMonths = new ClassPageModel();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("sp_GetClassSessionNoFeeMonths", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                paramater.Add("@SBranchID", sbranchID);
+                paramater.Add("@SessionID", sessionID);
+                using (var multi = await con.QueryMultipleAsync("sp_GetClassSessionNoFeeMonths", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    objModel.Classes = multi.Read<ClassModel>().ToList();
-                    objModel.NoFeeMonths = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-
-                    objModel.FeeCategories = multi.Read<FeeCategoryModel>().ToList();
-                    objModel.Months = multi.Read<NameIDModel>().ToList();
-                    objModel.MonthTypeFeeType = multi.Read<NameIDModel>().ToList();
-
-
+                    classNoFeeMonths.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    classNoFeeMonths.Classes = multi.Read<ClassModel>().ToList();
+                    classNoFeeMonths.NoFeeMonths = multi.Read<NameIDModel>().ToList();
+                    classNoFeeMonths.SessionID = multi.Read<int>().SingleOrDefault();
+                    classNoFeeMonths.FeeCategories = multi.Read<FeeCategoryModel>().ToList();
+                    classNoFeeMonths.Months = multi.Read<NameIDModel>().ToList();
+                    classNoFeeMonths.MonthTypeFeeType = multi.Read<NameIDModel>().ToList();
                 }
-                return objModel;
+            }
+            return classNoFeeMonths;
+        }
+        public async Task<int> UpdateSessionNoFeeMonthsNew(ClassPageModel noFeeMonth)
+        {
+            DataTable dtNoFeeMonths = new DataTable();
+            dtNoFeeMonths.SetTypeName("ut_Name_ID_Utility");
+            dtNoFeeMonths.Columns.Add("ID");
+            dtNoFeeMonths.Columns.Add("Name");
+            dtNoFeeMonths.Columns.Add("Extra1");
+            dtNoFeeMonths.Columns.Add("Extra2");
+            dtNoFeeMonths.Columns.Add("Extra3");
+
+            foreach (NameIDModel e in noFeeMonth.NoFeeMonths)
+            {
+                if (e.Extra1 == "1")
+                {
+                    DataRow dr = dtNoFeeMonths.NewRow();
+                    dr["ID"] = e.ID;
+                    dr["Name"] = e.Name;
+                    dr["Extra1"] = e.Extra1;
+                    dr["Extra2"] = e.Extra2;
+                    dr["Extra3"] = e.Extra3;
+
+                    dtNoFeeMonths.Rows.Add(dr);
+                }
+            }
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SessionID", noFeeMonth.SessionID);
+                paramater.Add("@SBranchID", noFeeMonth.SBranchID);
+                paramater.Add("@NoFeeMonths", dtNoFeeMonths);
+
+                return (await con.QueryAsync<int>("spn_UpdateSessionNoFeeMonths", paramater, null, 0, commandType: CommandType.StoredProcedure)).SingleOrDefault();
             }
         }
+       
+
+
         public ClassPageModel GetClassesNoFeeMonths(int SBranchID, int SessionID)
         {
             ClassPageModel objModel = new ClassPageModel();

@@ -189,6 +189,7 @@ namespace SMEnterprise.Models
         public int Status { get; set; }
         public int IsLeft { get; set; }
         public int EmployeeType { get; set; }
+        public int EmployeeTypeID { get; set; }
         public string Password { get; set; }
         public string AadharNumber { get; set; }
         public string LicenceNumber { get; set; }
