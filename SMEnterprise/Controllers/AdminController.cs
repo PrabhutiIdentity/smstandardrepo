@@ -11,6 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using BigBlueButtonAPI.Core;
 using System.Web.Security;
+using System.Threading.Tasks;
 
 
 namespace SMEnterprise.Controllers
@@ -1795,22 +1796,50 @@ namespace SMEnterprise.Controllers
             objModel = objAdminData.GetClassesNoFeeMonths(SBranchID, objModel.SessionID);
             return View(objModel);
         }
-        [PermissionFilter]
-        public ActionResult ClassSessionNoFeeMonthNew(ClassPageModel objModel)
+
+        public async Task<ActionResult> ClassSessionNoFeeMonthNew(ClassPageModel objModel)
         {
             if (Session["SBranchID"] == null)
             {
                 Session["SBranchID"] = 1;
             }
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            if (objModel.NoFeeMonths != null)
-            {
-                objModel.SBranchID = SBranchID;
-                objAdminData.UpdateSessionNoFeeMonths(objModel);
-            }
-            objModel = objAdminData.GetNoFeeMonthNewDataTable(SBranchID, objModel.SessionID);
-            return View(objModel);
+            var noFeeMonths = await objAdminData.GetClassesNoFeeMonthNew(SBranchID, objModel.SessionID);
+            return View(noFeeMonths);
         }
+      
+        [PermissionFilter]
+        public async Task<ActionResult> UpdateClassNoFeeMonths(ClassPageModel noFeeMonth)
+        {
+            int res = await objAdminData.UpdateSessionNoFeeMonthsNew(noFeeMonth);
+            if (res > 0)
+            {
+                TempData["Message"] = "Fee less months Updated Successfully";
+                TempData["status"] = "success";
+            }
+            else
+            {
+                TempData["Message"] = "There is some problem updating the fee less months, please try again";
+                TempData["status"] = "error";
+            }
+            return RedirectToAction("ClassSessionNoFeeMonth");
+        }
+
+        //public ActionResult ClassSessionNoFeeMonthNew(ClassPageModel objModel)
+        //{
+        //    if (Session["SBranchID"] == null)
+        //    {
+        //        Session["SBranchID"] = 1;
+        //    }
+        //    int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+        //    if (objModel.NoFeeMonths != null)
+        //    {
+        //        objModel.SBranchID = SBranchID;
+        //        objAdminData.UpdateSessionNoFeeMonths(objModel);
+        //    }
+        //    objModel = objAdminData.GetNoFeeMonthNewDataTable(SBranchID, objModel.SessionID);
+        //    return View(objModel);
+        //}
 
         [PermissionFilter]
         public ActionResult FeeCategoryManagement()
