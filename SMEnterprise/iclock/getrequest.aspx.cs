@@ -16,6 +16,8 @@ namespace ESSL.iclock
         protected void Page_Load(object sender, EventArgs e)
         {
             string SerialNumber = HttpContext.Current.Request.QueryString["SN"];
+
+            objEsslData.InsertTestData("Get Request by Device : " + SerialNumber );
             try
             {
                 HttpContext.Current.Response.ContentType = "text/plain";
