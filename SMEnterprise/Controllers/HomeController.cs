@@ -56,6 +56,20 @@ namespace SMEnterprise.Controllers
             //  SMSSender.SendSMS("Test Message", "8860573641", 1);
             return View();
         }
+        public ActionResult SendBirthdayWishes()
+        {
+            //For each Branch loop Start
+                //Get Branch SMS COnfiguration
+                //If SMS COnfiguration is valid start
+                    //Get List of Brnach Students with todays birthday
+                        //For each student start
+                            //Send SMS to student
+                        //For each student end    
+                //If SMS Configuration is Valid end
+            //For each Branch loop end
+            //  SMSSender.SendSMS("Test Message", "8860573641", 1);
+            return View();
+        }
         public ActionResult ClassEnded()
         {
 

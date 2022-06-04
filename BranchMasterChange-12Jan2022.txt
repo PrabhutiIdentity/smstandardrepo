@@ -69,31 +69,30 @@ END
 go
 
 
-alter CREATE proc [dbo].[sp_GetAdminSBranches]      
-(      
-@SBranchID int=0      
-)      
-AS      
-BEGIN      
- if(@SBranchID=0)      
- begin      
-  Select SBranchID,BranchName,[Logo],[ContactNo],[EmailID],[Address],[PrincipalName],[PrincipalMobile]      
-  ,[PrincipalEmail],[BranchSchoolName],StateID,PrincipalSignature,NotificationServerKey,PlayStoreLink, AffiliationNo,SchoolNo,RenewedUpto,BookNo,     
-  (Select count(*) from Student_Session SS where Status=1 and SS.SBranchID=SBM.SBranchID) as Students,      
-  (Select UserName from LoginDetails LD where LD.SBranchID= SBM.SBranchID and UserType=2) as AccountUserName      
-   from [dbo].[SBranchMaster] SBM      
-      
- end      
- else      
- begin      
-  Select SBranchID,BranchName,[Logo],[ContactNo],[EmailID],[Address],[PrincipalName],[PrincipalMobile]      
-  ,[PrincipalEmail],[BranchSchoolName],StateID,PrincipalSignature,NotificationServerKey,PlayStoreLink,AffiliationNo,SchoolNo,RenewedUpto,BookNo,      
-  (Select count(*) from Student_Session SS where Status=1 and SS.SBranchID=SBM.SBranchID) as Students,      
-  (Select UserName from LoginDetails LD where LD.SBranchID= SBM.SBranchID and UserType=2) as AccountUserName      
-   from [dbo].[SBranchMaster] SBM where SBranchID=@SBranchID      
-      
- end      
-END 
+
+alter proc [dbo].[sp_GetAdminSBranches]        
+(        
+@SBranchID int=0        
+)        
+AS        
+BEGIN        
+ if(@SBranchID=0)        
+ begin        
+  Select SBranchID,BranchName,[Logo],[ContactNo],[EmailID],[Address],[PrincipalName],[PrincipalMobile]        
+  ,[PrincipalEmail],[BranchSchoolName],StateID,PrincipalSignature,NotificationServerKey,PlayStoreLink,UDISECode,SchoolCode,AffiliationNo,SchoolNo,RenewedUpto,BookNo,       
+  (Select count(*) from Student_Session SS where Status=1 and SS.SBranchID=SBM.SBranchID) as Students,        
+  (Select UserName from LoginDetails LD where LD.SBranchID= SBM.SBranchID and UserType=2) as AccountUserName        
+   from [dbo].[SBranchMaster] SBM        
+        
+ end        
+ else        
+ begin        
+  Select SBranchID,BranchName,[Logo],[ContactNo],[EmailID],[Address],[PrincipalName],[PrincipalMobile]        
+  ,[PrincipalEmail],[BranchSchoolName],StateID,PrincipalSignature,NotificationServerKey,PlayStoreLink,UDISECode,SchoolCode,AffiliationNo,SchoolNo,RenewedUpto,BookNo,        
+  (Select count(*) from Student_Session SS where Status=1 and SS.SBranchID=SBM.SBranchID) as Students,        
+  (Select UserName from LoginDetails LD where LD.SBranchID= SBM.SBranchID and UserType=2) as AccountUserName        
+   from [dbo].[SBranchMaster] SBM where SBranchID=@SBranchID        
+        
+ end        
+END   
 go
-     
-  

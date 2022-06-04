@@ -163,12 +163,13 @@
                                                         <button type="submit" onclick="return DeleteEmployee(this);" class="btn btn-link">Delete</button>
                                                     }
                                                 </div>
-                                                <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.EmployeeID);">Change Password</a>
+                                                <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.EmployeeID,@c.EmployeeTypeID);">Change Password</a>
 
                                             </div>
 
                                         </td>
                                     </tr>
+
 
                                     count++;
                                 }
@@ -198,6 +199,7 @@
                     <div class="box-body">
                         <div class="form-group">
                             <input type="hidden" name="EmployeeID" id="hdnemployeeid" value="" />
+                            <input type="hidden" name="EmployeeType" id="hdnemployeetype" value="" />
 
 
                         </div>
@@ -248,8 +250,9 @@
     <script src="@Url.Content("~/js/MD5.js")" type="text/javascript"></script>
 
     <script>
-        function EditPassword(employeeid) {
+        function EditPassword(employeeid, EmployeeType) {
             $('#hdnemployeeid').val(employeeid);
+            $('#hdnemployeetype').val(EmployeeType);
 
         }
         function UpdateStudentPassword() {
@@ -280,13 +283,14 @@
 
                 var Password = $("#hdnPassword").val();
                 var pid = $("#hdnemployeeid").val();
+                var UType = $("#hdnemployeetype").val();
 
                 $.ajax(
                     {
                         type: "POST", //HTTP POST Method
                         url: '/Account/UpdateEmployeePassword/"', // Controller/View
                         contentType: 'application/json; charset=utf-8',
-                        data: JSON.stringify({ id: Password, employeeid: pid }),
+                        data: JSON.stringify({ id: Password, employeeid: pid, UType: UType }),
                         dataType: 'json',
 
                         // data: JSON.stringify(ai),
