@@ -2967,11 +2967,11 @@ namespace SMEnterprise.Controllers
             //  return View(objModel);
             // return RedirectToAction("Students", "Account");
         }
-        public ActionResult UpdateEmployeePassword(string ID = null, string employeeid = null)
+        public ActionResult UpdateEmployeePassword(string ID = null, string employeeid = null, string UType= null)
         {
             string Password = ID;
             int UserID = CommonUsage.ConvertToInt(employeeid);
-            int UserType = 3;
+            int UserType = CommonUsage.ConvertToInt(UType);
             CommonData objCommonData = new CommonData();
             int i = objAccountData.UpdatePassword(UserID, UserType, Password);
             return Json(i, JsonRequestBehavior.AllowGet);
