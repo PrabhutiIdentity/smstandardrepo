@@ -1804,13 +1804,20 @@ namespace SMEnterprise.Controllers
                 Session["SBranchID"] = 1;
             }
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            var noFeeMonths = await objAdminData.GetClassesNoFeeMonthNew(SBranchID, objModel.SessionID);
+            objModel.SBranchID = SBranchID;
+            var noFeeMonths = await objAdminData.GetClassesNoFeeMonthNew(objModel.SBranchID, objModel.SessionID);
             return View(noFeeMonths);
         }
       
         [PermissionFilter]
         public async Task<ActionResult> UpdateClassNoFeeMonths(ClassPageModel noFeeMonth)
         {
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            noFeeMonth.SBranchID = SBranchID;
             int res = await objAdminData.UpdateSessionNoFeeMonthsNew(noFeeMonth);
             if (res > 0)
             {
@@ -1822,7 +1829,7 @@ namespace SMEnterprise.Controllers
                 TempData["Message"] = "There is some problem updating the fee less months, please try again";
                 TempData["status"] = "error";
             }
-            return RedirectToAction("ClassSessionNoFeeMonth");
+            return RedirectToAction("ClassSessionNoFeeMonthNew");
         }
 
         //public ActionResult ClassSessionNoFeeMonthNew(ClassPageModel objModel)

@@ -42,19 +42,8 @@
 
       
     </style>
-    <script>
-        function SelectAllClasses(month, sender) {
-            if ($(sender).is(":checked")) {
-                $('.month_' + month).prop('checked', true);
-            }
-            else {
-                $('.month_' + month).prop('checked', false);
-            }
-        }
-    </script>
-    <script>
-
-    </script>
+   
+  
 }
 <!-- Content Header (Page header) -->
 <section class="content-header">
@@ -114,7 +103,8 @@
                         var monthfeecount = 0;
                         var feecounter = 0;
                         <input type="hidden" name="SessionID" value="@Model.SessionID" />
-                        <table id="tblCategory" class="table table-bordered">
+                        @*<table id="tblCategory" class="table table-bordered">*@
+                        <table id="tblCategory" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
                             <thead>
                                 <tr style="background-color: #5c6bc0;color:white;">
                                     <th>Months</th>
@@ -135,7 +125,7 @@
                                             </div>
                                         </div>
                                     </th>
-                                  
+
                                     @foreach (var c in Model.Classes)
                                     {
                                         <th>
@@ -158,7 +148,7 @@
                                     }
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="font-size:11px">
                                 @foreach (var m in Model.Months)
                                 {
                                     <tr>
@@ -167,17 +157,19 @@
                                                 <label class="form-check-label">
                                                     @SMEnterprise.Repository.CommonUsage.MonthNames[m.ID - 1], @m.Name
 
-                                                    <input month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery whole-month" checked data-fouc>
+                                                    <input month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery whole-month" data-fouc>
+                                                    @* <input month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery whole-month" checked data-fouc>*@
                                                 </label>
                                             </div>
                                         </td>
                                         @*<td></td>
-                                            @foreach (var c in Model.Classes)
-                                            {
-                                                <th>c</th>
-                                            }*@
+                            @foreach (var c in Model.Classes)
+                            {
+                                <th>c</th>
+                            }*@
                                     </tr>
                                     monthfeecount = 0;
+
                                     foreach (var ft in Model.FeeCategories)
                                     {
                                         if (ft.FeeTypeApplicable == 9)
@@ -188,13 +180,15 @@
                                                 if (marray.Contains(m.ID.ToString()))
                                                 {
                                                     monthfeecount++;
+
+
                                                     <tr>
                                                         <td class="configuration-option">
                                                             <div class="form-check form-check-right form-check-switchery sw_@(ft.FeeTypeID)_@(m.ID)_@(m.Name)_0 main-month">
                                                                 <label class="form-check-label">
                                                                     @ft.FeeTypeName
                                                                     <input feeid="@(ft.FeeTypeID)" month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery main-month
-                                                                       my_@(m.ID)_@(m.Name) ft_@ft.FeeTypeID" checked data-fouc>
+                                                                       my_@(m.ID)_@(m.Name) ft_@ft.FeeTypeID" data-fouc>
                                                                 </label>
                                                             </div>
                                                         </td>
@@ -203,8 +197,9 @@
                                                             var isexist = Model.NoFeeMonths.Where(x => x.ID == c.ClassID && x.Extra1 == ft.FeeTypeID.ToString() && x.Name == m.ID.ToString()).Count();
                                                             if (isexist == 0 && Model.NoFeeMonths.Count() == 0)
                                                             {
-                                                                isexist = 1;
+                                                                isexist = 0;
                                                             }
+
                                                             <td>
                                                                 <div class="form-check form-check-switchery ">
                                                                     <input type="hidden" name="NoFeeMonths[@feecounter].ID" value="@c.ClassID" />
@@ -238,7 +233,7 @@
                                                                 @ft.FeeTypeName
                                                                 <input feeid="@(ft.FeeTypeID)" month="@(m.ID)" year="@m.Name" type="checkbox" class="form-check-input-switchery
                                                                    main-month
-                                                                   my_@(m.ID)_@(m.Name) ft_@ft.FeeTypeID" checked data-fouc>
+                                                                   my_@(m.ID)_@(m.Name) ft_@ft.FeeTypeID" data-fouc>
                                                             </label>
                                                         </div>
                                                     </td>
@@ -247,7 +242,7 @@
                                                         var isexist = Model.NoFeeMonths.Where(x => x.ID == c.ClassID && x.Extra1 == ft.FeeTypeID.ToString() && x.Name == m.ID.ToString()).Count();
                                                         if (isexist == 0 && Model.NoFeeMonths.Count() == 0)
                                                         {
-                                                            isexist = 1;
+                                                            isexist = 0;
                                                         }
                                                         <td>
                                                             <div class="form-check form-check-switchery">
@@ -284,6 +279,7 @@
 
 </section>
 <script>
+
     $(function () {
         $('#liClassSessionNoFeeMonth').closest('ul').closest('li').addClass('active');
         $('#liClassSessionNoFeeMonth').addClass('active');

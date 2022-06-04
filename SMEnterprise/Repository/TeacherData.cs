@@ -53,6 +53,32 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+        #region Teacher Student Details
+        public StudentsPageModel GetStudentClassReport(StudentsPageModel objModel)
+        {
+            
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@TeacherID", objModel.TeacherID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                using (var multi = con.QueryMultiple("spn_GetTeacherStudentClassSectionDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+
+                    objModel.Students = multi.Read<StudentModel>().ToList();
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                    
+                }
+            }
+            return objModel;
+        }
+        
+
+        #endregion
         #region Fee Module
         public StudentAttandancePageModel GetStudentAttandance(StudentAttandancePageModel objModel)
         {
