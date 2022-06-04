@@ -66,6 +66,7 @@ namespace SMEnterprise.Models
     }
     public class StudentsPageModel
     {
+        public int TeacherID { get; set; }
         public int ParentID { get; set; }
 
         public List<StudentModel> Students { get; set; }

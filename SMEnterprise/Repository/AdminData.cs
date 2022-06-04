@@ -346,7 +346,7 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SBranchID", sbranchID);
                 paramater.Add("@SessionID", sessionID);
-                using (var multi = await con.QueryMultipleAsync("sp_GetClassSessionNoFeeMonths", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using (var multi = await con.QueryMultipleAsync("sp_GetClassSessionNoFeeMonthsNew", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     classNoFeeMonths.Sessions = multi.Read<SchoolSessionModel>().ToList();
                     classNoFeeMonths.Classes = multi.Read<ClassModel>().ToList();

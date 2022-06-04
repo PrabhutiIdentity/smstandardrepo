@@ -133,6 +133,26 @@ namespace SMEnterprise.Controllers
             return PartialView("_SelectOptionsPartial", model);
         }
         #endregion
+        #region student Details
+       
+        [PermissionFilter]
+        public ActionResult StudentDetails(StudentsPageModel objModel)
+        {
+
+            if (objModel == null)
+            {
+                objModel = new StudentsPageModel();
+            }
+           
+            objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+              objModel = objTeacherData.GetStudentClassReport(objModel);
+           // objModel = objAccountData.GetAllStudentReport(SBranchID, objModel.SessionID);
+        //    objModel = objTeacherData.GetStudentAttandance(objModel);
+            return View(objModel);
+        }
+
+        #endregion
         #region Student Attandance
         [PermissionFilter]
         public ActionResult StudentAttandance(StudentAttandancePageModel objModel)
