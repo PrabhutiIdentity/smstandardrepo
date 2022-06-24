@@ -17,6 +17,54 @@ begin
 end 
 go
 
+ CREATE proc [dbo].[sp_GetClassSessionNoFeeMonthsNew]--1,1    
+(    
+@SBranchID int,    
+@SessionID int    
+)    
+AS    
+BEGIN    
+ Declare @SessionStartDate date,@SessionEndDate date    
+ Select * from SessionMaster where SBranchID=@SBranchID    
+ if(@SessionID=0)    
+ begin    
+  select @SessionID=SessionID,@SessionStartDate=SessionStartDate,@SessionEndDate=SessionEndDate from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID    
+ end    
+ else     
+ begin    
+ select @SessionStartDate=SessionStartDate,@SessionEndDate=SessionEndDate from SessionMaster where SessionID=@SessionID    
+ end    
+ Select ClassID,ClassName from ClassMaster where SBranchID=@SBranchID    
+    
+ select ClassID as ID,[Month] as Name,FeeTypeID as Extra1 from  SessionClassNoFeeMonths where SessionID=@SessionID and SBranchID=@SBranchID    
+     
+ select isnull(@SessionID,0)    
+    
+ select FeeTypeID,FeeTypeName,FeeTypeApplicable,Months from FeeTypeMaster where SBranchID=@SBranchID    
+    
+ Declare @LMonth int=0,@LYear int=0,@MonthType int=0,@BaseDate date=@SessionStartDate,@LoopDate date=@SessionStartDate    
+ declare @MonthTbl  table (ID int,Name int,Extra1 int)    
+ while(@LoopDate<=@SessionEndDate)    
+ begin    
+  set @LMonth=datepart(month,@LoopDate)    
+  set @LYear=datepart(year,@LoopDate)    
+  set @MonthType=(Case when datepart(month,@BaseDate)=@LMonth and (datepart(month,dateadd(month,3,@SessionStartDate))=@LMonth  or     
+      datepart(month,dateadd(month,9,@SessionStartDate))=@LMonth) then 5 else    
+      (Case when datepart(month,@BaseDate)=@LMonth and (datepart(month,dateadd(month,6,@SessionStartDate))=@LMonth) then 6 else     
+      (case when datepart(month,@BaseDate)=@LMonth then 0    
+      else (Case when datepart(month,dateadd(month,3,@SessionStartDate))=@LMonth  or datepart(month,dateadd(month,9,@SessionStartDate))=@LMonth then 3    
+      else (case when  datepart(month,dateadd(month,6,@SessionStartDate))=@LMonth then 4 else 2 end) end) end)end)end)    
+      
+  insert into @MonthTbl(ID,Name,Extra1) values(@LMonth,@LYear,@MonthType)    
+  set @LoopDate=dateadd(month,1,@LoopDate)    
+ end    
+ select * from @MonthTbl    
+ select MonthTypeID as ID,FeeTypeID Name from [MonthTypeFeeType]    
+END    
+go
+
+
+
 -- Display for Studentfee Pay 
   
 

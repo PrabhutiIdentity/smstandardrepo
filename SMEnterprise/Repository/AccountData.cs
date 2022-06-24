@@ -4297,6 +4297,11 @@ namespace SMEnterprise.Repository
                         oModel.TCDetails.DateOfApplication = CommonUsage.GetCurrentDate();
                         oModel.TCDetails.DateOfIssue = CommonUsage.GetCurrentDate();
                     }
+                    oModel.Subjects = multi.Read<string>().ToList();
+                    oModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    oModel.Sessions =multi.Read<SessionModel>().ToList();
+                   
+
                 }
             }
         }
