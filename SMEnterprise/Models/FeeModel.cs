@@ -609,6 +609,7 @@ namespace SMEnterprise.Models
         public DateTime SessionEndDate { get; set; }
         public DateTime SchoolSessionStartDate { get; set; }
         public SBranchModel SBranchDetails { get; set; }
+        public StudentModel StudentDetails { get; set; }
         public int FeeTypeID { get; set; }
         public decimal PaymentRecieved { get; set; }
         public List<NameIDModel> Classes { get; set; }
