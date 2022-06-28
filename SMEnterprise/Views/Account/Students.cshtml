@@ -23,7 +23,7 @@
         max-height: 75px;
     }
 
-
+     
     *html1 .thumbImageGrid {
         width: expression((this.width/this.height)>=1?75:'auto');
         height: expression((this.width/this.height)<1?100:'auto');
@@ -33,7 +33,6 @@
         max-width: 125px;
         max-height: 125px;
     }
-
 
     *html .thumbImageMain {
         width: expression((this.width/this.height)>=1?125:'auto');
@@ -244,11 +243,11 @@
                                             <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
                                             <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
                                             <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
-
-
+                                            <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
+                                            <input type="hidden" name="SessionEndDate" id="hdnSessionEndDate" value="@c.SessionEndDate" />
+                                            <a href="javascript:void(0);" onclick="ShowFeeDetails(this,@c.StudentID);" class="btn btn-link">Prtin Fee Details </a>
                                         </div>
                                     </td>
-
 
                                     <td>
                                         <div class="row">
@@ -362,6 +361,19 @@
 
         </div>
     </div>
+
+    <div class="modal fade" id="quickViewModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="min-width: 1215px;">
+                <div class="modal-body">
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 @section scripts
 {
@@ -385,14 +397,14 @@
                     success: function (result) {
                         //  alert("Do you really want to Change student Status");
                         if (result != null) {
-                          
+
                             window.location.reload();
                         }
 
                     }
                 });
         })
-       
+
         $(document).ready(function () {
             $("input[type='search']").wrap("<form>");
             $("input[type='search']").closest("form").attr("autocomplete", "off");
@@ -495,6 +507,25 @@
         function EditPassword(parentid) {
             $('#hdnparentid').val(parentid);
 
+        }
+
+        function ShowFeeDetails(sender,ID) {
+            $.ajax({
+                url: "/Account/GetFeePaymentDetailsForPrint/",
+                type: "GET",
+                data: { StudentID: ID, SessionID: $('#hdnSessionID').val(), SessionEndDate : $('#hdnSessionEndDate').val() },
+
+                success: function (html) {
+                    if (html != null) {
+                        debugger;
+                        $('#quickViewModal').find('.modal-body').html(html);
+                        $('#quickViewModal').modal('show');
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+            });
         }
     </script>
 }

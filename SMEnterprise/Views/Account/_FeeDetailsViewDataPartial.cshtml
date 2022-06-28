@@ -1,0 +1,369 @@
+﻿@using SMEnterprise.Models;
+@model SMEnterprise.Models.FeePaymentModel
+<style>
+    .switch-input:checked ~ .switch-handle {
+        left: 37px;
+    }
+
+    .switch-label {
+        font-size: 7px;
+    }
+
+    .switch {
+        width: 60px;
+    }
+
+    sa {
+        font-size: 12px;
+    }
+   
+</style>
+ 
+<div class="x_panel">
+
+    <div class="x_content" id="divList">
+        @{
+            decimal TotalRemaining = 0;
+            <div class="row monthList" style="display:none;">
+                <input type="hidden" id="hdnMonth" value="@Model.Month" />
+                <input type="hidden" id="hdnYear" value="@Model.Year" />
+                <input type="hidden" id="hdnSaveSessionID" value="@Model.SessionID" />
+                <div class="block">
+                    <div id='radios' style='width: 100%!important;'>
+                        @{
+                            var Status = 0;
+                            var counter = 1;
+                            var MonthsName = "";
+                            var lastMonth = Model.Months.LastOrDefault();
+                            if (lastMonth == null)
+                            {
+                                lastMonth = new PayDetailMonthsModel();
+                            }
+                            while (Model.SessionStartDate < Model.SessionEndDate)
+                            {
+
+                                if (Status == 0 && Model.SessionStartDate.Month == Model.Months[0].FeeMonth)
+                                {
+                                    Status = 1;
+                                }
+                                if (counter <= Model.FeePaymentMode)
+                                {
+                                    if (MonthsName != "")
+                                    {
+                                        MonthsName = MonthsName + ", ";
+                                    }
+                                    MonthsName = MonthsName + Model.SessionStartDate.ToString("MMM");
+                                }
+                                if (counter == Model.FeePaymentMode)
+                                {
+                                    counter = 0;
+                                    <input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.AddMonths(-Model.FeePaymentMode + 1).Month == lastMonth.FeeMonth && Model.SessionStartDate.AddMonths(-Model.FeePaymentMode + 1).Year == lastMonth.FeeYear ? "checked" : "") @(Status == 0 ? "disabled" : "") type="radio">
+                                    <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>
+                                    MonthsName = "";
+                                }
+                                //MonthsName = Model.SessionStartDate.ToString("MMM");
+                                @*<input id='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year" name='options' @(Model.SessionStartDate.Month == Model.Month ? "checked" : "" ) @(Status == 0 ? "disabled" : "") type="radio">
+                                    <label for='rbMonth_@Model.SessionStartDate.Month' month="@Model.SessionStartDate.Month" year="@Model.SessionStartDate.Year">@MonthsName</label>*@
+
+
+                                counter++;
+                                Model.SessionStartDate = Model.SessionStartDate.AddMonths(1);
+                            }
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="students">
+                <table style="width:100%;text-align:center;">
+                    <tr>
+                        <td> <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(Model.StudentDetails.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetails.StudentID)_@Model.StudentDetails.Photo" /></td>
+                        <td colspan="2">
+                            <h2>@Model.SBranchDetails.BranchSchoolName</h2>
+                            <p>@Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))</p>
+                            @*<h4>@Model.Branch.Address</h4>*@
+                            <p style="margin-top: 2px;text-align: center;"> <b>Ph.</b> @Model.SBranchDetails.ContactNo,  <b> Email :</b> @Model.SBranchDetails.EmailID</p>
+                            <br />
+                        </td>
+                        <td> <img id="imgPhoto" class="thumbImageGrid" style="height:120px;width:120px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@Model.SBranchDetails.Logo" /></td>
+                    </tr>
+
+                    <tr style="border-bottom:1px solid black;">
+                        <td colspan="2" style="white-space:pre-line"><b>StudentSID : @Model.StudentDetails.StudentSID </b></td>
+                    </tr>
+                </table>
+            </div>
+            <div>
+                <table style="width:100%">
+                    <tr style="padding-top:10px;padding-bottom:10px;">
+
+                        <td style="padding-left:10px;text-align:left; width:45%">
+                            <div class="col-md-12">
+
+                                <div class="row">
+                                    SR No.  :<b> @Model.StudentDetails.SchoolUID</b>
+                                </div>
+                                <div class="row">
+                                    Student : <b id="bStudentNate">@Model.StudentDetails.Name</b>
+                                </div>
+                                <div class="row">
+                                    Date of Birth :<b> @Model.StudentDetails.DOB.ToString("dd MMM, yyyy")</b>
+                                </div>
+                                <div class="row">
+                                    Mother's Name : <b>@Model.StudentDetails.MotherName</b>
+                                </div>
+                                <div class="row">
+                                    Father's Name : <b>@Model.StudentDetails.FatherName</b>
+                                </div>
+                                <div class="row">
+                                    Parent's ID : <b>@Model.StudentDetails.SParentID</b>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="padding-left:10px;width:45%;text-align:left;">
+                            <div class="col-md-12">
+
+                                <div class="row">
+                                </div>
+                                <div class="row">
+                                    Class-Section :<b id="bClassSection"> @Model.StudentDetails.ClassName </b>
+                                </div>
+
+                                <div class="row">
+                                    Roll No. :<b> @Model.StudentDetails.RollNo</b>
+                                </div>
+                                <div class="row">
+                                    Student ID :<b> @Model.StudentDetails.StudentSID</b>
+                                </div>
+                                <div class="row">
+                                    Mother's MobileNo : <b>@Model.StudentDetails.MotherMobileNo</b>
+                                </div>
+                                <div class="row">
+                                    Father's MobielNo : <b>@Model.StudentDetails.FatherMobileNo</b>
+                                </div>
+                            </div>
+                        </td>
+
+
+                    </tr>
+                </table>
+
+            </div>
+            <div class="row" style="padding-top: 5px;">
+                <table id="tblCategory" class="table table-bordered table-hover">
+                    <thead>
+                        <tr style="background-color: #e0e0e057;">
+                            <th style="vertical-align: middle;">Fee Type</th>
+                            @{
+                                MonthsName = "";
+                                var adjuster = 0;
+                                foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                {
+                                    for (int i = 0; i < Model.FeePaymentMode; i++)
+                                    {
+                                        if (MonthsName != "")
+                                        {
+                                            MonthsName = MonthsName + ", ";
+                                        }
+                                        MonthsName = MonthsName + new DateTime(pm.FeeYear, pm.FeeMonth, 1).AddMonths(i).ToString("MMM");
+                                    }
+                                    // MonthsName = new DateTime(pm.Year, pm.Month, 1).ToString("MMM");
+                                    if (pm.PaymentRecieved == 0)
+                                    {
+                                        <th style="vertical-align: middle;">
+                                            <div class="icheckbox_flat-blue checked" onclick="ExcludeMonth(this,@pm.FeeMonth);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                            </div>
+                                            @MonthsName <label class='badge bg-red'>Due</label><br />
+                                         </th>
+
+                                    }
+                                    else if (pm.PaymentRecieved >= pm.ApplicableFee - pm.Waiver)
+                                    {
+                                        <th style="vertical-align: middle;">@MonthsName <label class='badge bg-green'>Paid</label></th>
+                                    }
+                                    else
+                                    {
+                                        <th style="vertical-align: middle;">
+                                            @MonthsName <label class='badge bg-blue'>Partial</label><br />
+                                         </th>
+                                    }
+
+                                    MonthsName = "";
+                                }
+                            }
+                            <th style="vertical-align: middle;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (SMEnterprise.Models.PayDetailFeeTypesModel ft in Model.FeeTypeSummery.Where(c => c.ApplicableFee >= 0))
+                        {
+                            decimal TotalAmount = 0;
+                            <tr>
+                                <td>
+                                    @ft.FeeTypeName
+                                </td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        var isFound = false;
+                                        FeeDetailsModel feedetail = Model.PaymentDetails.Where(c => c.FeeMonth == pm.FeeMonth && c.FeeTypeID == ft.FeeTypeID).SingleOrDefault();
+
+                                        if (feedetail != null)
+                                        {
+                                            var NetFee = (feedetail.IsPayment == 1 ? feedetail.PayApplicableAmount : feedetail.IsCustomFee == 1 ? feedetail.CustomFee : (feedetail.FeeAmount - feedetail.FeeAmount * feedetail.QDiscount / 100));
+                                            var PayableAmount = NetFee - feedetail.RDiscount;
+                                            //TotalAmount = TotalAmount +feedetail.IsPayment==1?feedetail.PayApplicableAmount - feedetail.DiscAmt;
+                                            isFound = true;
+                                            <td>
+                                                <input type="hidden" id="hdnFeeApplicable" value="@PayableAmount" />
+                                                @if (Math.Round(PayableAmount - feedetail.PaidAmount) == 0)
+                                                {
+                                                    <sa>
+                                                        Fee : @(NetFee.ToString("0"))
+                                                        @if (feedetail.RDiscount > 0)
+                                                        {
+                                                            <br /> <sp>Disc: @feedetail.RDiscount.ToString("0")</sp>
+                                                        }
+                                                        @if (feedetail.PaidAmount > 0)
+                                                        {
+                                                            <br /><sp>Paid: @feedetail.PaidAmount.ToString("0")</sp>
+                                                        }
+                                                    </sa>
+                                                }
+                                                else
+                                                {
+                                                    <sa>
+                                                        Fee : @(NetFee.ToString("0"))
+                                                        @if (feedetail.RDiscount > 0)
+                                                        {
+                                                            <br /> <sp>Disc: @feedetail.RDiscount.ToString("0")</sp>
+                                                        }
+                                                        @if (feedetail.PaidAmount > 0)
+                                                        {
+                                                            <br /><sp>Paid: @feedetail.PaidAmount.ToString("0")</sp>
+                                                        }
+                                                    </sa>
+                                                }
+                                                @if (feedetail.FeeTypeApplicable == 7)
+                                                {
+
+
+
+                                                    if (PayableAmount - feedetail.PaidAmount - feedetail.RDiscount > 0)
+                                                    {
+
+                                                        <label class="switch switch-green">
+                                                            <input type="checkbox" class="switch-input" @(pm.Waiver == 0 ? "checked" : "") />
+                                                            <span class="switch-label" onclick="FeeStatusChanged(this)" id="@pm.FeeMonth" data-on="Add" data-off="Waiver"></span>
+                                                            <span class="switch-handle" onclick="FeeStatusChanged(this)" id="shTranding"></span>
+                                                            <input type="hidden" id="hdnMonthID" value="@pm.FeeMonth">
+                                                            <input type="hidden" id="hdnYearID" value="@pm.FeeYear">
+                                                            <input type="hidden" name="Status" id="hdnFeeStatus" value="@(pm.Waiver == 0 ? 1 : 0)">
+                                                        </label>
+                                                        <div class="icheckbox_flat-blue checked pull-right pMonth_@pm.FeeMonth" onclick="ExcludeMonthFee(this,@pm.FeeMonth,@feedetail.FeeTypeID);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                            <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                        </div>
+                                                    }
+                                                }
+                                                else if (Math.Round(PayableAmount - feedetail.PaidAmount) > 0)
+                                                {
+                                                    <div class="icheckbox_flat-blue checked pull-right pMonth_@pm.FeeMonth" onclick="ExcludeMonthFee(this,@pm.FeeMonth,@feedetail.FeeTypeID);" aria-checked="false" aria-disabled="false" style="position: relative;">
+                                                        <ins class="iCheck-helper helpcheck" style="position: absolute; top: 0%; left: 0%; display: block; width: 100%; height: 100%; margin: 0px; padding: 0px; background: rgb(255, 255, 255); border: 0px; opacity: 0;"></ins>
+                                                    </div>
+                                                }
+                                            </td>
+                                        }
+
+                                        if (!isFound)
+                                        {
+                                            <td>-</td>
+                                        }
+                                    }
+
+                                }
+                                <td id="RowTotal">@((ft.ApplicableFee).ToString("0.00"))</td>
+                            </tr>
+                        }
+                        @{
+
+                            decimal TotalTotal = 0;
+                            <tr style="background-color: beige;">
+                                <td>Total Amount</td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        <td id="MonthTotal_@pm.FeeMonth">@((pm.ApplicableFee).ToString("0.00"))</td>
+                                    }
+                                    <td id="TotalTotal">@Model.Months.Sum(c => c.ApplicableFee).ToString("0.00")</td>
+                                }
+                            </tr>
+                            <tr style="background-color: aliceblue;">
+                                <td>Total Paid</td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        <td>@pm.PaymentRecieved.ToString("0.00")</td>
+                                    }
+                                    <td>@Model.Months.Sum(c => c.PaymentRecieved).ToString("0.00")</td>
+                                }
+                            </tr>
+                            <tr style="background-color: rgba(255, 0, 0, 0.52);color: white;">
+                                <td>Total Remaining</td>
+                                @{
+                                    foreach (SMEnterprise.Models.PayDetailMonthsModel pm in Model.Months)
+                                    {
+                                        <td id="MonthRemainingTotal_@pm.FeeMonth">@((pm.ApplicableFee - pm.PaymentRecieved).ToString("0.00"))</td>
+                                    }
+                                    <td id="tdTotalRemainingAmount">@Model.Months.Sum(c => c.ApplicableFee - c.PaymentRecieved).ToString("0.00")</td>
+                                }
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        }
+    </div>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-10" style="text-align:right;">
+            <button type="button" class="btn btn-primary" onclick="PrintDemantRecipt();"><i class="fa fa-print"></i> Print</button>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+     function PrintDemantRecipt() {
+            var contents = $("#divList").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+         frameDoc.document.write('</head><body>');
+             frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
+
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 1000);
+        }
+</script>
