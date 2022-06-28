@@ -1393,6 +1393,38 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+
+        public async Task<FeePaymentModel> GetFeePaymentDetailsForPrint(FeePaymentModel objModel)
+        {
+            FeePaymentModel objNew = new FeePaymentModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                DateTime qdate = new DateTime(objModel.Year, objModel.Month, 1).AddMonths(1).AddDays(-1);
+                if (qdate.Day < objModel.Day)
+                {
+                    objModel.Day = qdate.Day;
+                }
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", objModel.StudentID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SessionID", objModel.SessionID);
+                paramater.Add("@QDate", new DateTime(objModel.Year, objModel.Month, objModel.Day));
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+
+                using (var multi = await con.QueryMultipleAsync("sp_GetStudentFeeDataForPrint", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
+                    objModel.Months = multi.Read<PayDetailMonthsModel>().ToList();
+                    objModel.PaymentDetails = multi.Read<FeeDetailsModel>().ToList();
+                    objModel.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                    objModel.StudentDetails = multi.Read<StudentModel>().SingleOrDefault();
+                    objModel.SessionStartDate = multi.Read<DateTime>().SingleOrDefault();
+                    objModel.SessionEndDate = multi.Read<DateTime>().SingleOrDefault();
+                    objModel.FeePaymentMode = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return objModel;
+        }
         public async Task<FeePaymentModel> GetFeePaymentReciptDetails(int PaymentID)
         {
             FeePaymentModel objNew = new FeePaymentModel();
