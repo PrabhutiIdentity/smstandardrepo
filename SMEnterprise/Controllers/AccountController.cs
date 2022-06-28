@@ -777,6 +777,21 @@ namespace SMEnterprise.Controllers
             return PartialView("_FeePaymentDetailsPartialNew2", objModel);
         }
         [PermissionFilter]
+        public async Task<ActionResult> GetFeePaymentDetailsForPrint(FeePaymentModel objModel)
+        {
+            objModel.QDate = objModel.SessionEndDate;
+            objModel.Day = objModel.QDate.Day;
+            if (objModel.Month == 0)
+            {
+                objModel.Month = objModel.QDate.Month;
+                objModel.Year = objModel.QDate.Year;
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = await objAccountData.GetFeePaymentDetailsForPrint(objModel);
+            objModel.FeeDate = CommonUsage.GetCurrentDate();
+            return PartialView("_FeeDetailsViewDataPartial", objModel);
+        }
+        [PermissionFilter]
         public ActionResult GetFeeDiscountDetails(FeeDiscountRequestMaster objModel)
         {
             objModel.RequestDate = CommonUsage.GetCurrentDate();
