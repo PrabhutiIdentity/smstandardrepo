@@ -4206,6 +4206,9 @@ namespace SMEnterprise.Repository
                 paramater.Add("@DuePaidMonth", oModel.DuePaidMonth);
                 paramater.Add("@Concession", oModel.Concession);
                 paramater.Add("@OpType", oModel.OpType);
+                paramater.Add("@CreatedBy", oModel.CreatedBy);
+                paramater.Add("@TCSLNo", oModel.TCSLNo);
+                paramater.Add("@SBranchID", oModel.SBranchID);
                 return con.Query<int>("sp_InsertUpdateTCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }
@@ -4291,6 +4294,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PSchoolCity", oModel.PSchoolCity);
                 paramater.Add("@PSChoolState", oModel.PSChoolState);
                 paramater.Add("@OpType", oModel.OpType);
+               
                 return con.Query<int>("sp_UpdateStudentSLCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }

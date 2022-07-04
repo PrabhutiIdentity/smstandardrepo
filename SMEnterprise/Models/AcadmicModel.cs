@@ -141,7 +141,9 @@ namespace SMEnterprise.Models
 
         public string StudentName { get; set; }
         public string ClassName { get; set; }
-
+        public int CreatedBy { get; set; }
+        public string TCSLNo { get; set; }
+        public int SBranchID { get; set; }
     }
     public class AcadmicModel
     {

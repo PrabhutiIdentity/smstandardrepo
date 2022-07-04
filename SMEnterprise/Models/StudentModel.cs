@@ -139,6 +139,7 @@ namespace SMEnterprise.Models
         public string MotherName { get; set; }
         public string GuardianName { get; set; }
         public string MiniAddress { get; set; }
+        public int TCGenerated { get; set; }
     }
     public class StudentModel
     {
