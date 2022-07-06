@@ -106,6 +106,9 @@ namespace SMEnterprise.Models
         public List<string> Subjects { get; set; }
 
         public List<SessionModel> Sessions { get; set; }
+        public int CreatedBy { get; set; }
+        public string TCSLNo { get; set; }
+        public string Character { get; set; }
 
     }
     public class TCListModel
@@ -141,7 +144,9 @@ namespace SMEnterprise.Models
 
         public string StudentName { get; set; }
         public string ClassName { get; set; }
-
+        public int CreatedBy { get; set; }
+        public string TCSLNo { get; set; }
+        public int SBranchID { get; set; }
     }
     public class AcadmicModel
     {
