@@ -13,7 +13,7 @@
 }
 <style>
     .modal-lg {
-        width: 95%!important;
+        width: 95% !important;
     }
 
     .btn {
@@ -59,12 +59,10 @@
                 {
                     <div class="row std-mng-head">
 
-                        <div class="col-md-8 class-section">
+                        <div class="col-md-12 class-section">
                             <div class="row">
-                                <div class="col-md-2">
-                                    <span style="color:white;">Search Student</span>
-                                </div>
-                                <div class="col-md-3 padding">
+
+                                <div class="col-md-4 padding">
                                     <label class="col-md-4 text-right">Session :</label>
                                     <div class="col-md-8">
                                         <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
@@ -75,18 +73,21 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-3 padding">
-                                    <label class="col-md-4 text-right">TC Type :</label>
-                                    <div class="col-md-8">
-                                        <select class="form-control" name="TCType" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                <!--<div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">TC Type :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="TCType" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
 
-                                            <option value="0">New TC Format </option>
-                                            @*<option value="1">Old TC Format </option>*@
+                                        <option value="0">New TC Format </option>-->
+                                @*<option value="1">Old TC Format </option>*@
 
-                                        </select>
+                                <!--</select>
                                     </div>
+                                </div>-->
+                                <div class="col-md-2">
+                                    <span style="color:white;">Search Student</span>
                                 </div>
-                                <div class="col-md-5 padding">
+                                <div class="col-md-4 padding">
                                     <input type="text" name="SearchText" class="form-control" placeholder="Search by StudentID/Student Name/Roll/SRNo/FamilyID/Aadhar No/Father Name" value="@Model.SearchText" />
                                 </div>
                                 <div class="col-md-2 padding-L" style="padding-left: 10px;">
@@ -154,6 +155,23 @@
                                             @c.MiniAddress
                                         </td>
                                         <td>
+                                            @using (Html.BeginForm("GenerateTC", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                            {
+                                                <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                                                <input type="hidden" name="StudentID" value="@c.StudentID" />
+                                                @*<button type="submit" onclick="return GenerateTC(this);" class="btn btn-link">Generate TC</button>*@
+                                                if (c.TCGenerated == 0)
+                                                {
+                                                    <button type="submit" onclick="return GenerateTC(this);" class="btn btn-link">Generate TC</button>
+                                                }
+                                                else
+                                                {
+                                                    <button type="submit" onclick="return GenerateTC(this);" class="btn btn-link">Edit</button>
+                                                    <a href="/Account/ViewTCForStudent/@Model.SessionID/@c.StudentID" target="_blank" class="btn btn-link">View</a>
+                                                }
+                                            }
+                                        </td>
+                                        <td>
                                             @if (c.SLCGenerated == 0)
                                             {
                                                 <a href="javascript:void(0);" onclick="OpenSLCDetails(this,@c.StudentID,@Model.SessionID)" class="btn btn-link">Generate</a>
@@ -209,12 +227,12 @@
 {
 
     <script>
-        function OpenSLCDetails(sender,StudentID,SessionID) {
+        function OpenSLCDetails(sender, StudentID, SessionID) {
             $('.se-pre-con').css('display', '');
             $.ajax(
                 {
                     type: "POST",
-                    url: "/Account/GetStudentSLCDetails/" + StudentID + "/"+SessionID,
+                    url: "/Account/GetStudentSLCDetails/" + StudentID + "/" + SessionID,
                     cache: false,
                     processData: false,
                     contentType: false,

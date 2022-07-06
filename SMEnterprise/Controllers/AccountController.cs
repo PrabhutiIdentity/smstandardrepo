@@ -1869,6 +1869,20 @@ namespace SMEnterprise.Controllers
             objAccountData.GetTCDetails(oModel);
             return View(oModel);
         }
+
+        [PermissionFilter]
+        public ActionResult ViewTCForStudent(string ID = null, string ID2 = null)
+        {
+            TCDetailsModel objModel = new TCDetailsModel();
+            //int  SessionID= CommonUsage.ConvertToInt(ID);
+            //int StudentID = CommonUsage.ConvertToInt(ID2);
+
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.SessionID= CommonUsage.ConvertToInt(ID);
+            objModel.StudentID = CommonUsage.ConvertToInt(ID2);
+            objAccountData.GetTCDetails(objModel);
+            return RedirectToAction("GetTCForStudent", objModel);
+        }
         #endregion
         #region Reports
 
