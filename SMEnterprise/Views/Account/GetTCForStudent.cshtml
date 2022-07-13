@@ -10,9 +10,7 @@
         background-color: #fefefe !important;
     }
 
-    .innerBanner:after {
-        position: static !important;
-    }
+   
 
     #tcdiv .summerfield-form {
         position: relative;
@@ -81,7 +79,7 @@
                             <div class="row" style="text-align:center; margin:0 0 35px 0;">
                                 <div class="col-md-3 tcdisplay">
                                     <div class="tc-img">
-                                        <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                                        <img onerror="return OnImageError(this,2);" style="height:100px;width:100px" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
                                     </div>
                                 </div>
                                 <div class="col-md-6 tcdisplay">
@@ -91,9 +89,9 @@
                                         <p style="text-transform:capitalize; font-size:13px;">स्थानांतरण प्रमाण पत्र / Transfer Certificate</p>
                                     </div>
                                 </div>
-                                <div class="col-md-3 tcdisplay">
+                                <div class="col-md-3 tcdisplay" style="padding-left: 150px;">
                                     <div class="tc-img">
-                                        <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetails.StudentID)_@Model.StudentDetails.Photo" style="max-height:100px" />
+                                        <img onerror="return OnImageError(this,2);" style="height:100px;width:100px" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetails.StudentID)_@Model.StudentDetails.Photo" style="max-height:100px" />
                                     </div>
                                 </div>
                             </div>
@@ -125,7 +123,7 @@
                                             <div class="row" style="margin: 0;">
                                                 <div class="col-md-4 tcdisplay form-group">
                                                     <label for="name"><b>विद्यालय सं./</b>School No.</label>
-                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.Branch.SchoolNo">
+                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.Branch.SchoolCode">
                                                 </div>
                                                 <div class="col-md-4 tcdisplay form-group" style="margin-left:-60px">
                                                     <label for="name">Affiliation No.</label>
@@ -167,23 +165,10 @@
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <p><b>क्या अनु.जाति/ज.जा./पिछङा वर्ग से संबन्धित है</b></p>
-                                                @{
-                                                    string CategoryText = "";
-                                                    if (Model.StudentDetails.Category == 2)
-                                                    {
-                                                        CategoryText = "SC";
-                                                    }
-                                                    else if (Model.StudentDetails.Category == 3)
-                                                    { CategoryText = "ST"; }
-                                                    else if (Model.StudentDetails.Category == 4)
-                                                    { CategoryText = "OBC"; }
-                                                    else
-                                                    {
-                                                        CategoryText = "No";
-                                                    }
-                                                }
+                                            
+                                                
                                                 <label for="add">Whether the pupil belongs to SC/ST/OBC Category</label>
-                                                <input type="text" class="form-control chm-input11" id="add" readonly value="@CategoryText">
+                                                <input type="text" class="form-control chm-input11" id="add" readonly value="@Model.StudentDetails.CategoryName">
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <label for="pstcode"><b>प्रवेश पुस्तिका के अनुसार जन्मतिथि/</b>Date of birth according to the Admission Register</label>
@@ -227,12 +212,12 @@
                                             <div class="col-md-12 form-group">
                                                 <!--<p></p>-->
                                                 <label for="pstcode"><b>क्या उच्च कक्षा में पदोन्नति का अधिकारी है :/</b>Whether qualified for promotion to the next higher class:</label>
-                                                <input type="text" class="form-control chm-input26" id="pstcode" readonly value="@(Model.TCDetails.IsSCBLastExamPassed==0?"No":"Yes"+Model.TCDetails.ClassName)">
+                                                <input type="text" class="form-control chm-input26" id="pstcode" readonly value="@(Model.TCDetails.IsSCBLastExamPassed==0?"No":"Yes"+ "    " +Model.TCDetails.ClassName)">
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <p><b>क्या विद्यार्थी ने विद्यालय की सभी देय राशि का भुगतान कर दिया है :</b></p>
                                                 <label for="pstcode">Whether the pupil has paid all dues to the Vidyalaya</label>
-                                                <input type="text" class="form-control chm-input27" id="pstcode">
+                                                <input type="text" class="form-control chm-input27" id="pstcode" readonly value="@Model.TCDetails.DuePaidMonth">
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <p><b>क्या विद्यार्थी का कोई शुल्क रियायत प्रदान की गई थी यदि हाँ, तो उसकी प्रकृति:</b></p>
@@ -242,7 +227,7 @@
                                             <div class="col-md-12 form-group">
                                                 <p><b>क्या विद्यार्थी ऐन.सी.सी. कैडेट/स्काउट है ? विवरण दे</b></p>
                                                 <label for="pstcode">Whether the pupil is NCC Cadet/Boy Scout/Girl Guide(give details)</label>
-                                                <input type="text" class="form-control chm-input29" id="pstcode" readonly value="@(Model.TCDetails.IsNCC==0?"No":"Yes "+Model.TCDetails.NCCDetails)">
+                                                <input type="text" class="form-control chm-input29" id="pstcode" readonly value="@(Model.TCDetails.IsNCC==0?"No":"Yes "+ "    " +Model.TCDetails.NCCDetails)">
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <p><b>विद्यालय से विद्यार्थी के नाम काटे जाने की तिथि :</b></p>
@@ -255,7 +240,7 @@
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <label for="pstcode"><b>अंतिम तिथि तक उपस्थितियों की कुल संख्या/</b>No.of meetings upto date</label>
-                                                <input type="text" class="form-control chm-input32" id="pstcode">
+                                                <input type="text" class="form-control chm-input32" id="pstcode" value="@Model.TCDetails.WorkingDays">
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <label for="pstcode"><b>विद्यार्थी की विद्यालय दिवसों की कुल उपस्थितियाँ /</b>No.of school days the pupil attended</label>
@@ -263,7 +248,7 @@
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <label for="pstcode"><b>सामान्य आचरण /</b>General Conduct</label>
-                                                <input type="text" class="form-control chm-input34" id="pstcode" @Model.TCDetails.GeneralConduct>
+                                                <input type="text" class="form-control chm-input34" id="pstcode" value="@Model.TCDetails.GeneralConduct">
                                             </div>
                                             <div class="col-md-12 form-group">
                                                 <p><b>क्या विद्यालय सरकारी /अल्प संख्यक /स्वतंत्र श्रेणी में आता है :</b></p>
