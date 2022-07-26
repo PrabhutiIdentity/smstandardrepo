@@ -1,0 +1,77 @@
+﻿@model SMEnterprise.Models.OrderModel
+<!-- // Click this button automatically when this page load using javascript -->
+<!-- You can hide this button -->
+<button id="rzp-button1" hidden>Pay</button>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+    var options = {
+
+    "key": "@Model.razorpayKey", // Enter the Key ID generated from the Dashboard
+    "amount": "@Model.Amount", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+        "currency": "@Model.currency",
+        "name": "@Model.Name",
+    "description": "@Model.Description",
+    "image": "https://example.com/your_logo", // You can give your logo url
+    "order_id": "@Model.OrderID",
+    "handler": function (response){
+        // After payment successfully made response will come here
+        // Set the data in hidden form
+        document.getElementById('rzp_paymentid').value = response.razorpay_payment_id;
+        document.getElementById('rzp_orderid').value = response.razorpay_order_id;
+
+        // // Let's submit the form automatically
+        document.getElementById('rzp-paymentresponse').click();
+    },
+        //"handler": function (response) {
+        //    alert(response.Razorpay_payment_id);
+        //    alert(response.Razorpay_Order_id);
+        //    $('#rzp_paymentid').val(response.Razorpay_payment_id);
+        //    $('#rzp_orderid').val(response.Razorpay_Order_id);
+        //    document.getElementById('rzp-paymentresponse').click();
+        //},
+    "prefill": {
+        "name": "@Model.Name",
+        "email": "@Model.EmailID",
+        "contact": "@Model.ContactNumber"
+    },
+    "notes": {
+        "address": "@Model.Address"
+    },
+    "theme": {
+        "color": "#F37254"
+    }
+};
+var rzp1 = new Razorpay(options);
+
+
+
+window.onload = function(){
+    document.getElementById('rzp-button1').click();
+};
+
+document.getElementById('rzp-button1').onclick = function(e){
+    rzp1.open();
+    e.preventDefault();
+}
+</script>
+
+<!-- This form is hidden, and submit when payment successfully made -->
+@using (Html.BeginForm("Complete", "Payment"))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="FeeMonth" value="@Model.FeeMonth">
+    <input type="hidden" name="FeeYear" value="@Model.FeeYear">
+    <input type="hidden" name="ApplicableFee" value="@Model.ApplicableFee">
+    <input type="hidden" name="StudentID" value="@Model.StudentID">
+
+    @Html.Hidden("rzp_paymentid")
+    @Html.Hidden("rzp_orderid")
+    <button type="submit" id="rzp-paymentresponse" class="btn btn-primary" hidden>Submit</button>
+}
+
+@*<form action="/Payment/Complete">
+        <input type="hidden" name="PaymentID" id="rzp_paymentid" />
+        <input type="hidden" name="OrderID" id="rzp_orderid" />
+        <button type="submit" id="rzp-paymentresponse" class="btn btn-primary" hidden>Submit</button>
+
+    </form>*@

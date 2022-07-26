@@ -1,0 +1,133 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+
+@model SMEnterprise.Models.StudentModel
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<section class="teacher-prolile-01">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-3 t-profile-left">
+                <div class="teacher-contact">
+                    <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" style="max-height:100px" />
+                </div>
+            </div>
+            <div class="col-sm-9 t-profile-right">
+                <div class="row all-corsess-wapper">
+                    <div class="col-sm-12">
+                        <div class="all-courses">
+                            <h3>Fee Payment Details</h3>
+                            <div class="profile__courses__inner">
+                                <ul class="profile__courses__list list-unstyled">
+                                    <li>Student Name: <b>@Model.Name</b></li>
+                                    <li>DOB: <b>@Model.DOB.ToString("dd MMM yyyy")</b></li>
+                                    <li>Class: <b>@Model.ClassName</b></li>
+                                    <li>Father Name: <b>@Model.FatherName</b></li>
+                                    <li>Mother Name: <b>@Model.MotherName</b></li>
+                                    @*<li>Amount(In Paisa): <b>@ViewBag.OrderDetails.Amount</b></li>*@
+                                </ul>
+                                @*<ul class="profile__courses__right list-unstyled">
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li></li>
+                                        <li>@Model.MotherName</li>
+                                        <li>Rs 250 + 2% transaction charge</li>
+                                    </ul>*@
+                            </div>
+                        </div>
+                        <div class="form-group register-btn">
+
+                            <button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>
+                        </div>
+                    </div>
+                    <div style="display:none">
+                        @using (Html.BeginForm("Complete", "Payment"))
+                        {
+                            @Html.AntiForgeryToken()
+
+                            @Html.Hidden("rzp_paymentid")
+                            @Html.Hidden("rzp_orderid")
+                            <button type="submit" id="rzp-paymentresponse" class="btn btn-primary" hidden>Submit</button>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+     var options = {
+
+    "key": "@ViewBag.OrderDetails.razorpayKey", // Enter the Key ID generated from the Dashboard
+    "amount": "@ViewBag.OrderDetails.Amount", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+    "currency": "@ViewBag.OrderDetails.currency",
+    "name": "@ViewBag.OrderDetails.Name",
+    "description": "@ViewBag.OrderDetails.Description",
+    "image": "@Url.Content("~/images/JosephLogo-new.png")", // You can give your logo url
+    "order_id": "@ViewBag.OrderDetails.PGOrderID",
+         "handler": function (response) {
+           //  console.log(response);
+        // After payment successfully made response will come here
+        // Set the data in hidden form
+        document.getElementById('rzp_paymentid').value = response.razorpay_payment_id;
+        document.getElementById('rzp_orderid').value = response.razorpay_order_id;
+
+        // // Let's submit the form automatically
+        document.getElementById('rzp-paymentresponse').click();
+    },
+        //"handler": function (response) {
+        //    alert(response.Razorpay_payment_id);
+        //    alert(response.Razorpay_Order_id);
+        //    $('#rzp_paymentid').val(response.Razorpay_payment_id);
+        //    $('#rzp_orderid').val(response.Razorpay_Order_id);
+        //    document.getElementById('rzp-paymentresponse').click();
+        //},
+    "prefill": {
+        "name": "@ViewBag.OrderDetails.Name",
+        "email": "@ViewBag.OrderDetails.EmailID",
+        "contact": "@ViewBag.OrderDetails.ContactNumber"
+    },
+    "notes": {
+        "address": "@ViewBag.OrderDetails.Address"
+    },
+    "theme": {
+        "color": "#F37254"
+    }
+};
+    var rzp1 = new Razorpay(options);
+
+    function TakePayment() {
+        rzp1.open();
+        e.preventDefault();
+    }
+</script>
+@*<section class="contact-area-02">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <form action="/payment/CreatePayment">
+                        <label for="fname">Name:</label><br>
+                        <input type="text" id="fname" name="Name" readonly value="@Model.StudentName"><br><br />
+                        <label for="lname">Email ID:</label><br>
+                        <input type="text" id="lname" name="EmailID" value=""><br><br>
+                        <label for="lname">Contact no:</label><br>
+                        <input type="text" id="lname" name="ContactNumber" value="@Model.TelephoneNoReg"><br><br>
+                        <label for="lname">Amount:</label><br>
+                        <input type="text" id="lname" name="Amount" placeholder="Rs.250 + 2% Tax"><br><br>
+                        <label for="lname">Address:</label><br>
+                        <input type="text" id="lname" name="Address" value=" "><br><br>
+                        <input type="submit" class="form-control" value="Submit">
+                    </form>
+                </div>
+                <div class="col-md-6">
+
+                </div>
+            </div>
+        </div>
+    </section>
+    <br />
+    <br />*@
