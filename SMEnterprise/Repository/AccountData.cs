@@ -4873,5 +4873,62 @@ namespace SMEnterprise.Repository
             }
         }
         #endregion
+
+        #region onlinePayment
+
+        public StudentModel GetStudentDetailsForPayment(int StudentID, int SBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentID", StudentID);
+                paramater.Add("@SBranchID", SBranchID);
+
+                return con.Query<StudentModel>("sp_GetStudentDetailForOnlinePayment", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public int InsertOrderID(OrderModel obj)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@OrderID", obj.OrderID);
+                paramater.Add("@Amount", obj.Amount);
+                paramater.Add("@Date", obj.Date);
+                paramater.Add("@Name", obj.Name);
+                paramater.Add("@PGOrderID", obj.PGOrderID);
+                paramater.Add("@Status", obj.Status);
+
+
+                return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        public int UpdateStudentFeePaymentStatus(OrderModel obj)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@PGOrderID", obj.PGOrderID);
+                paramater.Add("@PGPaymentID", obj.PGPaymentID);
+                paramater.Add("@StudentID", obj.StudentID);
+                paramater.Add("@QDate", obj.QDate);
+                paramater.Add("@CurDate", obj.CurDate);
+                paramater.Add("@PaymentDate", obj.PaymentDate);
+                paramater.Add("@PaymentAmount", obj.PaymentAmount);
+                paramater.Add("@Remark", obj.Remark);
+                paramater.Add("@ReferanceNumber", obj.ReferanceNumber);
+                paramater.Add("@PaymentMode", obj.PaymentMode);
+                paramater.Add("@CollectedBy", obj.CollectedBy);
+                paramater.Add("@SBranchID", obj.SBranchID);
+                paramater.Add("@Status", obj.Status);
+                paramater.Add("@FeeMonth", obj.FeeMonth);
+                paramater.Add("@FeeYear", obj.FeeYear);
+                //paramater.Add("@ApplicableFee", obj.ApplicableFee);
+
+                return con.Query<int>("sp_UpdateStudentFeePaymentStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        #endregion
     }
 }

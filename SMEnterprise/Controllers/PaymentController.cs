@@ -12,15 +12,13 @@ namespace SMEnterprise.Controllers
     public class PaymentController : Controller
     {
         // GET: Payment
+        // GET: Payment
         public ActionResult Index(OrderModel oModel)
         {
             int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             AccountData Accountdata = new AccountData();
-            StudentOnlineFeeDetailModel model = Accountdata.GetStudentDetailsForPayment(StudentID, SBranchID);
-            model.FeeMonth = oModel.FeeMonth;
-            model.ApplicableFee = oModel.ApplicableFee;
-            model.FeeYear = oModel.FeeYear;
+            StudentModel model = Accountdata.GetStudentDetailsForPayment(StudentID, SBranchID);
             OrderModel om = new OrderModel();
             om.FeeMonth = oModel.FeeMonth;
             om.FeeYear = oModel.FeeYear;
