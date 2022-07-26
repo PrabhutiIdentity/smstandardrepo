@@ -15,14 +15,14 @@
 
     <div class="clearfix"></div>
     <div class="">
-        
+
         <div class="clearfix"></div>
         <div class="row">
             <div class="col-md-12">
                 <div class="x_panel">
                     <div class="x_title">
                         <h2>
-                            Fee Summery 
+                            Fee Summery
                         </h2><br />
                         <span class="pull-right">
                             Total Fee : @Model.MonthlySummery.Sum(c => c.ApplicableFee).ToString("0.00") Discounts : @Model.MonthlySummery.Sum(c => c.Discount).ToString("0.00")
@@ -36,7 +36,7 @@
                             @foreach (var mys in Model.MonthlySummery)
                             {
                                 <div class="panel">
-                                    <a class="panel-heading" role="tab" id="heading_@(mys.FeeYear)_@mys.FeeMonth" data-toggle="collapse" data-parent="#accordion" href="#collapse_@(mys.FeeYear)_@mys.FeeMonth" aria-expanded="true" aria-controls="collapse_@(mys.FeeYear)_@mys.FeeMonth">                                    
+                                    <a class="panel-heading" role="tab" id="heading_@(mys.FeeYear)_@mys.FeeMonth" data-toggle="collapse" data-parent="#accordion" href="#collapse_@(mys.FeeYear)_@mys.FeeMonth" aria-expanded="true" aria-controls="collapse_@(mys.FeeYear)_@mys.FeeMonth">
                                         <table style="width:100%">
                                             <tr>
                                                 <td style="width:20%">
@@ -93,7 +93,22 @@
                                                         <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee).ToString("0.00")</td>
                                                         <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.RDiscount).ToString("0.00")</td>
                                                         <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.PaidAmount).ToString("0.00")</td>
-                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee-x.RDiscount-x.PaidAmount).ToString("0.00")</td>
+                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")</td>
+                                                    </tr>
+                                                    <tr>
+                                                        <td colspan="5" style="text-align:right">
+                                                            @using (Html.BeginForm("Index", "Payment", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                            {
+                                                                <input type="hidden" name="StudentID" value="@Model.StudentID" />
+                                                                <input type="hidden" id="feemonth" name="FeeMonth" value="@mys.FeeMonth" />
+                                                                <input type="hidden" name="FeeYear" value="@mys.FeeYear" />
+                                                                <input type="hidden" name="ApplicableFee" value="@mys.ApplicableFee" />
+                                                                <button type="submit" class="btn btn-link">Pay Now</button>
+                                                                @*<h5><a href="/Payment/Index/@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee-x.RDiscount-x.PaidAmount).ToString("0")" class="">Pay Now</a></h5>*@
+                                                            }
+                                                        </td>
+
+                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")</td>
                                                     </tr>
                                                 </tfoot>
                                             </table>
@@ -118,9 +133,9 @@
     <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
     <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
     <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
-<script src="@Url.Content("~/js/jszip.min.js")"></script>
-<script src="@Url.Content("~/js/pdfmake.min.js")"></script>
-<script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
     <script>
         $(document).ready(function () {
             var handleDataTableButtons = function () {
