@@ -140,10 +140,11 @@
                                 <table id="tblCategory" class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
+                                            <th style="width: 2%">#</th>
                                             <th style="width: 15%">Student</th>
                                             <th style="width: 10%">Max. Marks</th>
                                             <th style="width: 10%">Pass Marks</th>
-                                            <th style="width: 30%;" >Score</th>
+                                            <th style="width: 30%;">Score</th>
                                             <th style="width: 8%">Grade</th>
                                             <th style="width: 7%">Points</th>
                                             <th style="width: 20%">Status</th>
@@ -151,10 +152,13 @@
                                     </thead>
                                     @{
 
-                                        int count = 0;
+                                        int count = 1;
                                         foreach (ExamResultDetailModel c in Model.ExamResults)
                                         {
                                             <tr>
+                                                <td>
+                                                    @count
+                                                </td>
                                                 <td>
                                                     <input type="hidden" name="ExamResults[@count].ResultID" value="@c.ResultID" />
                                                     <input type="hidden" name="ExamResults[@count].ExamID" value="@c.ExamID" />
@@ -218,23 +222,23 @@
 
                                             </tr>
 
-                                                            count++;
-                                                        }
+                                            count++;
+                                        }
 
 
 
                                     }
                                 </table>
 
-                                                        if (Model.IsLocked == 0)
-                                                        {
-                                                            <div>
-                                                                <button href="javascript:void(0);" id="btnSaveResult" onclick="$(this).css('display', 'none');" type="submit" class="btn btn-block btn-info pull-right">Save</button>
-                                                            </div>
-                                                            }
-                                                        }
+                                if (Model.IsLocked == 0)
+                                {
+                                    <div>
+                                        <button href="javascript:void(0);" id="btnSaveResult" onclick="$(this).css('display', 'none');" type="submit" class="btn btn-block btn-info pull-right">Save</button>
+                                    </div>
+                                }
+                            }
                         </div>
-                                                        }
+                    }
                 </div>
             </div>
         </div>
@@ -252,38 +256,38 @@
         function ClassChanged(sender) {
             $('#ddlSection').html('<option value="0">Loading....</option>');
             $.ajax(
-    {
-        type: "POST",
-        url: "/Teacher/GetSectionsForTeacherClass/" + $(sender).val(),
-        cache: false,
-        processData: false,
-        contentType: false,
-        success: function (html) {
-            $('#ddlSection').html('');
-            $('#ddlSection').append(html);
-        },
-        error: function (e) {
-            alert("errorn");
-        }
-    });
+                {
+                    type: "POST",
+                    url: "/Teacher/GetSectionsForTeacherClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
         }
         function SectionChanged(sender) {
             $('#ddlSubjects').html('<option value="0">Loading....</option>');
             $.ajax(
-    {
-        type: "POST",
-        url: "/Teacher/GetSubjectsForTeacherSection/" + $(sender).val(),
-        cache: false,
-        processData: false,
-        contentType: false,
-        success: function (html) {
-            $('#ddlSubjects').html('');
-            $('#ddlSubjects').append(html);
-        },
-        error: function (e) {
-            alert("errorn");
-        }
-    });
+                {
+                    type: "POST",
+                    url: "/Teacher/GetSubjectsForTeacherSection/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSubjects').html('');
+                        $('#ddlSubjects').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
         }
 
         $(function () {

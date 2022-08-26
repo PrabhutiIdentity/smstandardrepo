@@ -136,7 +136,7 @@
                 <div class="x_panel">
                     @using (Html.BeginForm("UpdateTeacherResults", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
                     {
-                       
+
                         <input type="hidden" name="ClassID" value="@Model.ClassID" />
                         <input type="hidden" name="SectionID" value="@Model.SectionID" />
                         <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
@@ -146,19 +146,20 @@
                             @if (Model.ExamResults.Count == 0)
                             {
                                 <div>No Exam Defined</div>
-                                }
-                                else
-                                {
-                                   
-                                    <table id="tblCategory" class="table table-bordered table-hover">
+                            }
+                            else
+                            {
+
+                                <table id="tblCategory" class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
+                                            <th style="width: 2%">#</th>
                                             <th style="width: 10%">Photo</th>
                                             <th style="width: 15%">Student</th>
 
-                                            
+
                                             @if (Model.MarkingScheme == 0)
-                                           
+
                                             {
                                                 <th style="width: 10%">Max. Marks</th>
                                                 <th style="width: 10%">Pass Marks</th>
@@ -176,10 +177,13 @@
                                     </thead>
                                     @{
 
-                                        int count = 0;
+                                        int count = 1;
                                         foreach (ExamResultDetailModel c in Model.ExamResults)
                                         {
                                             <tr>
+                                                <td>
+                                                    @count
+                                                </td>
                                                 <td>
                                                     <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
                                                     <input type="hidden" name="ExamResults[@count].ResultID" value="@c.ResultID" />
