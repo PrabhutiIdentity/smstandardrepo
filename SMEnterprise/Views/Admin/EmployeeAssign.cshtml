@@ -147,9 +147,9 @@
                                     <div class="col-md-6">
                                         <label class="Employee">Select Employee</label>
                                         <select class="form-control" name="EmployeeID" ID="ddlEmployeeID" onchange="GetEmployeeClass(this);">
-                                            @foreach (var e in Model.Employeelist)
+                                            @if (Model.Employeelist != null && Model.Employeelist.Count > 0)
                                             {
-                                                <option value="@e.ID">@e.Name </option>
+                                                @Html.Partial("_EmployeeListPartial", Model.Employeelist)
                                             }
                                         </select>
                                     </div>
@@ -211,11 +211,15 @@
             $('#ddlEmployeeTypeID').val(EmployeeTypeID);
             console.log(EmployeeID);
             $('#ddlEmployeeID').val(EmployeeID);
-           
+
         }
-        var sessionID = $('#hdnSessionID').val();
-        var teacherId = $('#ddlEmployeeID').val();
-        GetClassList(sessionID, teacherId);
+        else {
+            var sessionID = $('#hdnSessionID').val();
+         //   var teacherId = $('#ddlEmployeeID').val();
+            var teacherId = EmployeeID;
+            GetClassList(sessionID, teacherId);
+        }
+       
     }
     //$(function () {
     //    $("#tblCategory").DataTable({
@@ -244,10 +248,32 @@
         $('#ddlPromoteSection').html('<option value="0">Loading....</option>');
         var sessionID = $('#hdnSessionID').val();
         var teacherId = $('#ddlEmployeeID').val();
+        var employeeTypeID = $('#ddlEmployeeTypeID').val();
         debugger;
+        GetEmployeelistByID(sessionID, employeeTypeID)
         GetClassList(sessionID, teacherId);
     }
+    function GetEmployeelistByID(sessionID, employeeTypeID) {
+        $.ajax(
+            {
+                type: "POST",
+                url: "/Admin/GetEmployeelist/" + employeeTypeID + "/" + sessionID,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    debugger;
+                    $('#ddlEmployeeID').html('');
+                    $('#ddlEmployeeID').html('<option value="0">--Select Employee--</option>');
+                    $('#ddlEmployeeID').append(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+    }
     function GetClassList(sessionID, teacherId) {
+        debugger;
         $.ajax(
             {
                 type: "POST",

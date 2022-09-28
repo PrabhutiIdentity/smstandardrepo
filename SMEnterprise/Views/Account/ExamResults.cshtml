@@ -157,10 +157,14 @@
                                             <th style="width: 10%">Photo</th>
                                             <th style="width: 15%">Student</th>
 
-
-                                            @if (Model.MarkingScheme == 0)
-
+                                            @if (Model.MarkingScheme == 1)
                                             {
+
+                                                <th style="width: 10%">Grade</th>
+                                            }
+                                            else
+                                            {
+
                                                 <th style="width: 10%">Max. Marks</th>
                                                 <th style="width: 10%">Pass Marks</th>
                                                 <th style="width: 10%">Score</th>
@@ -168,10 +172,7 @@
                                                 <th style="width: 7%">Points</th>
                                                 <th style="width: 30%">Status</th>
                                             }
-                                            else
-                                            {
-                                                <th style="width: 10%">Grade</th>
-                                            }
+
 
                                         </tr>
                                     </thead>
@@ -196,9 +197,24 @@
                                                     <br />@c.StudentSID
                                                     <br />@c.RollNo
                                                 </td>
-
-                                                @if (Model.MarkingScheme == 0)
+                                                @if (Model.MarkingScheme == 1)
                                                 {
+                                                    <td>
+                                                        <input type="hidden" id="hdnMaxMarks" value="0" />
+                                                        <input type="hidden" id="hdnPassMarks" value="0" />
+                                                        @if (Model.IsLocked == 0)
+                                                        {
+                                                            <input type="text" id="txtGrade" class="form-control" tabindex="-1" name="ExamResults[@count].Grade" value="@c.Grade" />
+                                                        }
+                                                        else
+                                                        {
+                                                            @c.Grade
+                                                        }
+                                                    </td>
+                                                }
+                                                else
+                                                {
+
                                                     <td style="text-align:center">
                                                         @c.MaxMarks
                                                         <input type="hidden" id="hdnMaxMarks" value="@c.MaxMarks" />
@@ -252,21 +268,6 @@
                                                                     <input type="hidden" id="hdnStatus" name="ExamResults[@count].Status" value="@c.Status" />
                                                                 </div>
                                                             </div>
-                                                        }
-                                                    </td>
-                                                }
-                                                else
-                                                {
-                                                    <td>
-                                                        <input type="hidden" id="hdnMaxMarks" value="0" />
-                                                        <input type="hidden" id="hdnPassMarks" value="0" />
-                                                        @if (Model.IsLocked == 0)
-                                                        {
-                                                            <input type="text" id="txtGrade" class="form-control" tabindex="-1" name="ExamResults[@count].Grade" value="@c.Grade" />
-                                                        }
-                                                        else
-                                                        {
-                                                            @c.Grade
                                                         }
                                                     </td>
                                                 }
