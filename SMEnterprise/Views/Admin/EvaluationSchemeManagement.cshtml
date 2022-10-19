@@ -43,8 +43,10 @@
                                                 @foreach (SchoolSessionModel e in Model.Sessions)
                                                 {
                                                     <option value="@e.SessionID" @(e.SessionID == Model.SessionID ? "Selected" : "")>@e.SessionName @(e.SessionStatus == 1 ? "(Active)" : "")</option>
+
                                                 }
                                             </select>
+                                            <input type="hidden" name="ddlSessionID" id="hdnddlSessionID" value="" />
                                         </div>
                                     </div>
 
@@ -71,20 +73,20 @@
                                 <th style="width: 30%">Name</th>
                                 <th style="width: 45%">Classes</th>
                                 <th style="width: 15%">
-                                    <a href="javascript:void(0)" class="btn btn-link" onclick="GetClassList(0);">Add New</a>
+                                    <a href="javascript:void(0)" class="btn btn-link" onclick="GetClassList(0,0);">Add New</a>
                                 </th>
                             </tr>
                         </thead>
                         @{
-
+                           
                             if (Model.Sessions.Count() == 0)
                             {
                                 <tr>
-                                    <td colspan="4" style="text-align:center">
+                                                            <td colspan="4" style="text-align:center">
 
-                                        <a href="/Admin/SessionManagement" class="btn btn-link">Sessions Not Added, Please Add.</a>
-
-                                    </td>
+                                                                <a href="/Admin/SessionManagement" class="btn btn-link">Sessions Not Added, Please Add.</a>
+                                                              
+                                                            </td>
                                 </tr>
                             }
                             else if (Model.Schemes.Count() == 0)
@@ -92,7 +94,7 @@
                                 <tr>
                                     <td colspan="4" style="text-align:center">
                                         <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditScheme" onclick="EditScheme(0,'0','');">No Evaluation Scheme Added, Please Add one.</a>
-                                      
+                                     
                                     </td>
                                 </tr>
                             }
@@ -119,7 +121,7 @@
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                <a href="javascript:void(0)" class="btn btn-link" onclick="GetClassList(@c.EvaluationSchemeID);">Edit</a>
+                                                <a href="javascript:void(0)" class="btn btn-link" onclick="GetClassList(@c.EvaluationSchemeID,@c.SessionID);">Edit</a>
                                                 @using (Html.BeginForm("UpdateEvaluationScheme", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
                                                 {
                                                     <input type="hidden" name="OpType" value="-1" />
@@ -166,8 +168,21 @@
         $('#liEvaluationSchemeManagement').closest('ul').closest('li').addClass('active');
         $('#liEvaluationSchemeManagement').addClass('active');
     });
-    function GetClassList(EvaluationSchemeID) {
-        var SessionID = $("#hdnSessionID").val();
+    function GetClassList(EvaluationSchemeID, SessionID) {
+      //  debugger;
+       
+        if (SessionID == 0) {
+            var ddlvalue = $('#ddlSession').find('option:selected').val()
+            //alert(ddlvalue.toString())
+
+            var SessionID = ddlvalue.toString();
+                
+           
+        }
+        else {
+             var SessionID = $("#hdnSessionID").val();
+        }
+      
         $.ajax(
             {
                 type: "POST",
