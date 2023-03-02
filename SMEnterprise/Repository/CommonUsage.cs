@@ -20,7 +20,7 @@ using System.Reflection;
 
 namespace SMEnterprise.Repository
 {
- 
+
     public static class DateToWords
     {
         private static CultureInfo ci = new CultureInfo("en-US");
@@ -92,6 +92,10 @@ namespace SMEnterprise.Repository
             List<T> data = new List<T>();
             foreach (DataRow row in dt.Rows)
             {
+                if(string.IsNullOrEmpty(row["Name"]?.ToString()))
+                {
+                    break;
+                }
                 T item = GetItem<T>(row);
                 data.Add(item);
             }
@@ -450,8 +454,8 @@ namespace SMEnterprise.Repository
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
             TimeSpan tsIndia = tzi.GetUtcOffset(new DateTime());
             TimeSpan tsDifference = tsIndia.Subtract(tsLocal);
-           //   return DateTime.Now.Add(tsDifference).AddHours(-1);
-              return DateTime.Now.Add(tsDifference).AddHours(0);
+            return DateTime.Now.Add(tsDifference).AddHours(-1);
+            //  return DateTime.Now.Add(tsDifference).AddHours(0);
         }
         public static DateTime GetServerDate()
         {
@@ -1162,9 +1166,9 @@ namespace SMEnterprise.Repository
                 oledbConn.Open();
                 using (DataTable Sheets = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null))
                 {
-
-                    for (int i = 0; i < Sheets.Rows.Count; i++)
+                    if(Sheets.Rows.Count>0)
                     {
+                        var i = 0;
                         string worksheets = Sheets.Rows[i]["TABLE_NAME"].ToString();
                         OleDbCommand cmd = new OleDbCommand(String.Format("SELECT * FROM [{0}]", worksheets), oledbConn);
                         OleDbDataAdapter oleda = new OleDbDataAdapter();
@@ -1172,6 +1176,16 @@ namespace SMEnterprise.Repository
 
                         oleda.Fill(ds);
                     }
+
+                    //for (int i = 0; i < Sheets.Rows.Count; i++)
+                    //{
+                    //    string worksheets = Sheets.Rows[i]["TABLE_NAME"].ToString();
+                    //    OleDbCommand cmd = new OleDbCommand(String.Format("SELECT * FROM [{0}]", worksheets), oledbConn);
+                    //    OleDbDataAdapter oleda = new OleDbDataAdapter();
+                    //    oleda.SelectCommand = cmd;
+
+                    //    oleda.Fill(ds);
+                    //}
 
                     dt = ds.Tables[0];
                 }

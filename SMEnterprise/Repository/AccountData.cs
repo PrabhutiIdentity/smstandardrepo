@@ -4649,6 +4649,7 @@ namespace SMEnterprise.Repository
 
 
         public int UpdatePassword(int UserID, int UserType, string Password)
+        
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {

@@ -136,7 +136,7 @@
                 <div class="x_panel">
                     @using (Html.BeginForm("UpdateTeacherResults", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
                     {
-                       
+
                         <input type="hidden" name="ClassID" value="@Model.ClassID" />
                         <input type="hidden" name="SectionID" value="@Model.SectionID" />
                         <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
@@ -146,23 +146,24 @@
                             @if (Model.ExamResults.Count == 0)
                             {
                                 <div>No Exam Defined</div>
-                                }
-                                else
-                                {
-                                   
-                                    <table id="tblCategory" class="table table-bordered table-hover">
+                            }
+                            else
+                            {
+
+                                <table id="tblCategory" class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
-                                            <th style="width: 10%">Photo</th>
+                                            <th style="width: 8%">Photo</th>
+                                            <th style="width: 7%">SR No</th>
                                             <th style="width: 15%">Student</th>
+                                            <th style="width: 7%">Roll No</th>
 
-                                            
                                             @if (Model.MarkingScheme == 0)
-                                           
+
                                             {
-                                                <th style="width: 10%">Max. Marks</th>
-                                                <th style="width: 10%">Pass Marks</th>
-                                                <th style="width: 10%">Score</th>
+                                                <th style="width: 9%">Max. Marks</th>
+                                                <th style="width: 9%">Pass Marks</th>
+                                                <th style="width: 7%">Score</th>
                                                 <th style="width: 8%">Grade</th>
                                                 <th style="width: 7%">Points</th>
                                                 <th style="width: 30%">Status</th>
@@ -187,11 +188,13 @@
                                                     <input type="hidden" name="ExamResults[@count].StudentID" value="@c.StudentID" />
 
                                                 </td>
+                                                <td>@c.SchoolUID</td>
                                                 <td>
                                                     @c.StudentName
                                                     <br />@c.StudentSID
-                                                    <br />@c.RollNo
+                                                   
                                                 </td>
+                                                <td>@c.RollNo</td>
 
                                                 @if (Model.MarkingScheme == 0)
                                                 {
@@ -288,10 +291,24 @@
 
 @section scripts
 {
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
     <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
 
-    <script>
 
+    <script>
+        $(document).ready(function () {
+            if ($("#tblCategory").length) {
+                $("#tblCategory").DataTable({
+                    ordering: true,
+                    order: [[1, 'asc']],
+                    "pageLength": 100,
+                    bSort: true,
+
+                });
+            }
+        });
+    </script>
+    <script>
         function ClassChanged(sender) {
             $('#ddlEvaluations').html('<option value="0">Loading....</option>');
             $('#ddlSection').html('<option value="0">Loading....</option>');
