@@ -647,6 +647,14 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetClassWiseBusStudents(SBranchID, 0, objModel.ID);
             return View(objModel);
         }
+        
+            [PermissionFilter]
+        public ActionResult QuotaWiseStudents(QuotaClassStudentListModel objModel)
+        {
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetQuotaWiseStudents(SBranchID, objModel.ID);
+            return View(objModel);
+        }
         [PermissionFilter]
         public ActionResult HouseWiseStudents(HouseClassStudentListModel objModel)
         {

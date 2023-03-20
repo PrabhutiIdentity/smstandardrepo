@@ -157,6 +157,7 @@
                     <table id="tblCategory" class="table table-bordered table-hover">
                         <thead>
                             <tr>
+                                <th style="width: 2%">#</th>
                                 <th style="width: 10%">Photo</th>
                                 <th style="width: 15%">Student Details</th>
                                 <th style="width: 22%">Parent's </th>
@@ -171,7 +172,7 @@
                             </tr>
                         </thead>
                         @{
-                            int count = 0;
+                            int count = 1;
                             foreach (StudentModel c in Model.Students)
                             {
                                 var catName = "";
@@ -183,102 +184,105 @@
                                 {
                                     catName = c.CategoryName;
                                 }
-                                <tr>
+                                                <tr>
+                                                    <td>
+                                                        @count
+                                                    </td>
 
-                                    <td>
-                                        <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
-                                        <br />
-                                        @c.StudentSID  <br />
-                                        Cat :@catName
-                                    </td>
-                                    <td>
-                                        Name : @c.Name
-                                        <br />
-                                        SID : @c.StudentSID  <br />
-                                        SR. No. :@c.SchoolUID<br />
-                                        Roll No. : @c.RollNo<br />
-                                        SSSID :@c.SSSID
-                                    </td>
+                                                    <td>
+                                                        <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                                        <br />
+                                                        @c.StudentSID  <br />
+                                                        Cat :@catName
+                                                    </td>
+                                                    <td>
+                                                        Name : @c.Name
+                                                        <br />
+                                                        SID : @c.StudentSID  <br />
+                                                        SR. No. :@c.SchoolUID<br />
+                                                        Roll No. : @c.RollNo<br />
+                                                        SSSID :@c.SSSID
+                                                    </td>
 
-                                    <td>
-                                        User ID: @c.SParentID <br />
-                                        F Name: @c.FatherName<br />
-                                        M Name: @c.MotherName<br />
-                                        G Name: @c.GuardianName
-                                    </td>
-                                    <td>@c.BloodGroup</td>
-                                    <td>
-                                        @c.AadharCardNo
-                                    </td>
-                                    <td>
+                                                    <td>
+                                                        User ID: @c.SParentID <br />
+                                                        F Name: @c.FatherName<br />
+                                                        M Name: @c.MotherName<br />
+                                                        G Name: @c.GuardianName
+                                                    </td>
+                                                    <td>@c.BloodGroup</td>
+                                                    <td>
+                                                        @c.AadharCardNo
+                                                    </td>
+                                                    <td>
 
-                                        F :  @c.FatherMobileNo<br />
-                                        M :  @c.MotherMobileNo <br />
-                                        G :  @c.GuardianMobileNo
-                                    </td>
-                                    <td>
-                                        @if (c.HostelRoomID != 0)
-                                        {
-                                            <label class='badge bg-green'>Yes</label>
-                                        }
-                                        else
-                                        {
-                                            <label class='badge bg-blue'>No</label>
-                                        }
-                                    </td>
-                                    <td>
-                                        @if (c.StopID != 0)
-                                        {
-                                            <label class='badge bg-green'>Yes</label>
-                                        }
-                                        else
-                                        {
-                                            <label class='badge bg-blue'>No</label>
-                                        }
-                                    </td>
+                                                        F :  @c.FatherMobileNo<br />
+                                                        M :  @c.MotherMobileNo <br />
+                                                        G :  @c.GuardianMobileNo
+                                                    </td>
+                                                    <td>
+                                                        @if (c.HostelRoomID != 0)
+                                                        {
+                                                            <label class='badge bg-green'>Yes</label>
+                                                        }
+                                                        else
+                                                        {
+                                                            <label class='badge bg-blue'>No</label>
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        @if (c.StopID != 0)
+                                                        {
+                                                            <label class='badge bg-green'>Yes</label>
+                                                        }
+                                                        else
+                                                        {
+                                                            <label class='badge bg-blue'>No</label>
+                                                        }
+                                                    </td>
 
-                                    <td>
-                                        <div class="row">
+                                                    <td>
+                                                        <div class="row">
 
-                                            <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
-                                            <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
-                                            <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
-                                            <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
-                                            <input type="hidden" name="SessionEndDate" id="hdnSessionEndDate" value="@c.SessionEndDate" />
-                                            <a href="javascript:void(0);" onclick="ShowFeeDetails(this,@c.StudentID);" class="btn btn-link">Prtin Fee Details </a>
-                                        </div>
-                                    </td>
+                                                            <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
+                                                            <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
+                                                            <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
+                                                            <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
+                                                            <input type="hidden" name="SessionEndDate" id="hdnSessionEndDate" value="@c.SessionEndDate" />
+                                                            <a href="javascript:void(0);" onclick="ShowFeeDetails(this,@c.StudentID);" class="btn btn-link">Prtin Fee Details </a>
+                                                        </div>
+                                                    </td>
 
-                                    <td>
-                                        <div class="row">
+                                                    <td>
+                                                        <div class="row">
 
-                                            @using (Html.BeginForm("DeleteStudent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
-                                            {
-                                                <input type="hidden" name="ClassID" value="@Model.ClassID" />
-                                                <input type="hidden" name="SectionID" value="@Model.SectionID" />
-                                                <input type="hidden" name="StudentID" value="@c.StudentID" />
-                                                if (Model.ClassID > 0)
-                                                {
-                                                    <button type="submit" disabled onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
-                                                else
-                                                {
-                                                    <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
-                                                @*<button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>*@
-                                            }
+                                                            @using (Html.BeginForm("DeleteStudent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                            {
+                                                                <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                                                                <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                                                                <input type="hidden" name="StudentID" value="@c.StudentID" />
+                                                                if (Model.ClassID > 0)
+                                                                {
+                                                                    <button type="submit" disabled onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
+                                                                else
+                                                                {
+                                                                    <button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button> }
+                                                                @*<button type="submit" onclick="return DeleteStudent(this);" class="btn btn-link bg-red">Delete</button>*@
+                                                            }
 
-                                        </div>
-                                    </td>
-                                    <td>
+                                                        </div>
+                                                    </td>
+                                                    <td>
 
-                                        <label class="switch switch-candy-yellow col-md-6">
-                                            <input type="checkbox" class="switch-input" @(c.IsBlock == 1 ? "checked" : "")>
-                                            <span class="switch-label IsBlock" id="mdlIsBlock" onclick="$(this).closest('label').find('#hdnIsBlock').val($(this).closest('label').find('#hdnIsBlock').val() == '0' ? '1' : '0');" data-on="Block" data-off="UnBlock"></span>
-                                            <span class="switch-handle" id="shTranding"></span>
-                                            <input type="hidden" name="StudentID" id="hdnStudentID" value="@c.StudentID" />
-                                            <input type="hidden" name="IsBlock" id="hdnIsBlock" value="@c.IsBlock">
-                                        </label>
-                                    </td>
-                                </tr>
+                                                        <label class="switch switch-candy-yellow col-md-6">
+                                                            <input type="checkbox" class="switch-input" @(c.IsBlock == 1 ? "checked" : "")>
+                                                            <span class="switch-label IsBlock" id="mdlIsBlock" onclick="$(this).closest('label').find('#hdnIsBlock').val($(this).closest('label').find('#hdnIsBlock').val() == '0' ? '1' : '0');" data-on="Block" data-off="UnBlock"></span>
+                                                            <span class="switch-handle" id="shTranding"></span>
+                                                            <input type="hidden" name="StudentID" id="hdnStudentID" value="@c.StudentID" />
+                                                            <input type="hidden" name="IsBlock" id="hdnIsBlock" value="@c.IsBlock">
+                                                        </label>
+                                                    </td>
+                                                </tr>
 
                                 count++;
                             }

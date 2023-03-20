@@ -21,7 +21,7 @@
                 <h1>
                     @Model.SBranchDetails.BranchSchoolName <br /><ad style="font-size:21px!important;"> @Html.Raw(Model.SBranchDetails.Address == null ? "" : Model.SBranchDetails.Address.Replace("\n", "<br/>"))</ad>
                 </h1>
-               
+
             </div>
             <div class="col-3" style="text-align: right;    width: 95px;">
                 <img src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" />
@@ -127,19 +127,19 @@
 
                         @foreach (SMEnterprise.Models.FeeDetailsModel f in Model.PaymentDetails)
                         {
-                          
-                        <tr>
-                            <td>@(counter).</td>
-                            <td>@f.FeeTypeName</td>
-                            <td>₹ @f.NetApplicablePayment</td>
-                            <td>₹ @f.DiscAmt</td>
-                            <td>₹ @f.PaymentRecieved</td>
-                        </tr>
+
+                            <tr>
+                                <td>@(counter).</td>
+                                <td>@f.FeeTypeName</td>
+                                <td>₹ @f.NetApplicablePayment</td>
+                                <td>₹ @f.DiscAmt</td>
+                                <td>₹ @f.PaymentRecieved</td>
+                            </tr>
                             counter++;
 
                             // Feature selected Month Fee Calculaion
 
-                            TotalAmount = TotalAmount + f.PaymentRecieved ;
+                            TotalAmount = TotalAmount + f.PaymentRecieved;
                             TotalPayable = TotalPayable + f.NetApplicablePayment;
 
                             // Current Month Fee Calculaion
@@ -150,7 +150,7 @@
                             Discount = Discount + f.DiscAmt;
                         }
 
-
+                        
                     </tbody>
                     <tbody class="total">
                         <tr>
@@ -172,11 +172,23 @@
         </div>
         <div class="row bottom-sec">
             <div class="col-sm-8">
+               
 
-                Note : - Fee must be paid up to @(Model.LastPayDay)th date of every month otherwise student will have to pay fine Rs. @Model.LateFee/-.
+                @if (Model.SBranchDetails.SBranchID == 15)
+                {
+                    <p> Note: Fee must be paid up to 15 th date of the month otherwise student will have to pay fine Rs. 500/- After 20th and Rs. 1000/- after 25th.</p>
+                }
+                else
+                {
+            <p>  Note: -Fee must be paid up to @(Model.LastPayDay)th date of every month otherwise student will have to pay fine Rs. @Model.LateFee / -</p>
+                }
+
+
+
+                @*Note : - Fee must be paid up to @(Model.LastPayDay)th date of every month otherwise student will have to pay fine Rs. @Model.LateFee/-.*@
             </div>
-            <b>@Model.CollectedBy</b>
-            <div class="col-sm-4 principle">Accountant</div>
+                <b>@Model.CollectedBy</b>
+                <div class="col-sm-4 principle">Accountant</div>
+            </div>
         </div>
     </div>
-</div>

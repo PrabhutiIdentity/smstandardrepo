@@ -244,6 +244,34 @@ namespace SMEnterprise.Repository
             }
         }
 
+        public QuotaClassStudentListModel GetQuotaWiseStudents(int SBranchID, int QuotaID)
+        {
+
+            QuotaClassStudentListModel objModel = new QuotaClassStudentListModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@QuotaID", QuotaID);
+
+                using (var multi = con.QueryMultiple("sp_GetQuotaWiseStudents", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Students = multi.Read<StudentModel>().ToList();
+                    objModel.Quotas = multi.Read<StudentQuotaModel>().ToList();
+                    objModel.ID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
+                    }
+                }
+                return objModel;
+            }
+        }
         public HouseClassStudentListModel GetHouseWiseStudents(int SBranchID, int HouseID)
         {
 
@@ -965,7 +993,7 @@ namespace SMEnterprise.Repository
                     objModel.Sessions = multi.Read<SessionModel>().ToList();
                     objModel.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
                     objModel.SessionName = multi.Read<string>().SingleOrDefault();
-                  
+
                 }
                 if (objModel.Student == null)
                 {
@@ -2707,6 +2735,13 @@ namespace SMEnterprise.Repository
                     objModel.Sessions = multi.Read<NameIDModel>().ToList();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.Attendances = multi.Read<SMEnterpriseDB.Models.StudentAttendanceMasterT>().ToList();
+
+                    try
+                    {
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch
+                    { }
                 }
             }
             return objModel;
@@ -2968,7 +3003,7 @@ namespace SMEnterprise.Repository
         }
         // Shishupal Work on Exam Date Sheet For School
         // Date : 17 Nov 2021
-        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID,int EvaluationSchemeID)
+        public IEnumerable<NameIDModel> GetEvaluationTypesExam(int SBranchID, int EvaluationSchemeID)
         {
             EvaluationTypePageModelExam objModel = new EvaluationTypePageModelExam();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -3018,14 +3053,14 @@ namespace SMEnterprise.Repository
                 var paramater = new DynamicParameters();
                 paramater.Add("@SessionID", objModel.SessionID);
                 paramater.Add("@SBranchID", objModel.SBranchID);
-             
+
                 using (var multi = con.QueryMultiple("sp_ClassStudentCategoryGenderCount", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
 
                     objModel.Data = multi.Read<ClassGenderCategoryCountModel>().ToList();
                     objModel.Classes = multi.Read<ClassModel>().ToList();
                     objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();                    
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
                     try
                     {
@@ -3346,7 +3381,7 @@ namespace SMEnterprise.Repository
                     catch (Exception ex)
                     { }
                 }
-                
+
             }
             return objModel;
         }
@@ -3761,7 +3796,7 @@ namespace SMEnterprise.Repository
                     try
                     {
                         objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                      
+
                     }
                     catch
                     {
@@ -4000,7 +4035,7 @@ namespace SMEnterprise.Repository
         }
         public int InsertSMSSending(SMSSendTaskModel objModel)
         {
-             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
@@ -4294,7 +4329,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PSchoolCity", oModel.PSchoolCity);
                 paramater.Add("@PSChoolState", oModel.PSChoolState);
                 paramater.Add("@OpType", oModel.OpType);
-               
+
                 return con.Query<int>("sp_UpdateStudentSLCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }
@@ -4335,8 +4370,8 @@ namespace SMEnterprise.Repository
                     }
                     oModel.Subjects = multi.Read<string>().ToList();
                     oModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    oModel.Sessions =multi.Read<SessionModel>().ToList();
-                   
+                    oModel.Sessions = multi.Read<SessionModel>().ToList();
+
 
                 }
             }
@@ -4614,6 +4649,7 @@ namespace SMEnterprise.Repository
 
 
         public int UpdatePassword(int UserID, int UserType, string Password)
+        
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {

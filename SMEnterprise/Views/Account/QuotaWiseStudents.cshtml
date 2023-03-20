@@ -3,15 +3,14 @@
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
-@model SMEnterprise.Models.StudentsPageModel
+@model SMEnterprise.Models.QuotaClassStudentListModel
 @section IncludeCss
 {
-    <title>Students Report</title>
+    <title>Students Management</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
     <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
     <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
 }
-
 <style>
     .btn {
         padding: 3px 6px;
@@ -51,62 +50,25 @@
         <div class="clearfix"></div>
         <div class="row">
             <div class="col-md-12">
-                @using (Html.BeginForm("StudentClassReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                @using (Html.BeginForm("QuotaWiseStudents", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
                 {
                     <div class="row std-mng-head">
 
                         <div class="col-md-12 class-section">
                             <div class="row">
 
-                                <div class="col-md-1 padding">
-                                </div>
                                 <div class="col-md-3 padding">
-                                    <label class="col-md-4 text-right">Session :</label>
+                                    <label class="col-md-4 text-right">Admission Quota :</label>
                                     <div class="col-md-8">
-                                        <select class="form-control" name="SessionID" id="ddlSessions">
-                                            <option value="0">--Select Session--</option>
-                                            @foreach (NameIDModel el in Model.Sessions)
+                                        <select class="form-control" name="ID" id="ddlQuota" onchange="$('#frmGetStudents').submit();">
+
+                                            @foreach (StudentQuotaModel el in Model.Quotas)
                                             {
-                                                <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1=="1"?"(Active)":"")</option>
+                                                <option value="@el.ID" @(el.ID == Model.ID ? "selected" : "")>@el.Name</option>
                                             }
+                                            <option value="0">No Quota</option>
+                                            <option value="-1">Custom Fee</option>
                                         </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 padding">
-                                    <label class="col-md-4 text-right">Class :</label>
-                                    <div class="col-md-8">
-                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
-                                            <option value="0">--Select Class--</option>
-                                            @foreach (ClassModel el in Model.Classes)
-                                            {
-                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 padding">
-                                    <div class="row">
-                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
-                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
-
-                                            <select name="SectionID" class="form-control" id="ddlSection">
-                                                <option value="0">--Select Section--</option>
-                                                @foreach (SectionModel el in Model.Sections)
-                                                {
-                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
-                                                }
-                                            </select>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="col-md-1 padding">
-                                    <div class="row">
-
-                                        <div class="col-md-12">
-                                            <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -118,29 +80,19 @@
 
                     <div class="x_content">
 
-                        <table id="tblCategory" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
+                        <table id="tblCategory" class="table table-bordered table-hover display nowrap">
                             <thead>
                                 <tr>
+                                    @*<th>Photo</th>*@
                                     <th>SR.No.</th>
                                     <th>Student Name </th>
                                     <th>StudentID</th>
-                                    <th>Gender</th>
-                                    <th>Aadhar CardNo</th>
-                                    <th>Father Name </th>
-                                    <th>Mother Name </th>
-                                    <th>DOB</th>
-                                    <th>Age</th>
                                     <th>Class</th>
                                     <th>Section</th>
-                                    <th>DOA</th>
-                                    <th>House</th>
-                                    <th>Mobile No</th>
-
-                                    <th>Transport</th>
-                                    <th>Stoppage</th>
-                                    <th>Bus/Van</th>
-                                    <th>Address</th>
-                                    <th>Hostel</th>
+                                    <th>Gender</th>
+                                    <th>Father Name </th>
+                                    <th>Mother Name </th>
+                                    <th>Phone Number</th>
                                 </tr>
                             </thead>
                             @{
@@ -148,20 +100,25 @@
                                 foreach (StudentModel c in Model.Students)
                                 {
                                     <tr>
+
+                                        @*<td>
+                                                <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                            </td>*@
                                         <td>
                                             @c.SchoolUID
-
                                         </td>
                                         <td>
                                             @c.Name
-
-
-
+                                        </td>
+                                        <td>
+                                            @c.StudentSID
+                                        </td>
+                                        <td>
+                                            @c.ClassName
                                         </td>
                                         <td>
 
-                                            @c.StudentSID
-
+                                            @c.SectionName
                                         </td>
                                         <td>
                                             @if (@c.Gender != 0)
@@ -173,75 +130,18 @@
                                                 <label>Male</label>
                                             }
                                         </td>
-                                        <td>@c.AadharCardNo</td>
                                         <td>
                                             @c.FatherName
                                         </td>
                                         <td>
                                             @c.MotherName
                                         </td>
-                                        <td>
-                                            @c.DOB.ToString("dd MMM, yyyy")
-
-                                        </td>
-                                        <td>
-                                            @c.Age
-
-                                        </td>
-                                        <td>
-                                            @c.ClassName
-                                        </td>
-                                        <td>
-
-                                            @c.SectionName
-                                        </td>
-                                        <td>
-                                            @c.DOJ.ToString("dd MMM, yyyy")
-                                        </td>
-                                        <td>
-
-                                            @c.HouseName
-
-                                        </td>
 
                                         <td>
-
-                                            @c.FatherMobileNo
-
+                                            G :  @c.GuardianMobileNo <br />
+                                            F :  @c.FatherMobileNo<br />
+                                            M :  @c.MotherMobileNo
                                         </td>
-
-                                        <td>
-                                            @if (c.StopID != 0)
-                                            {
-                                                <label class='badge bg-green'>Yes</label>
-                                            }
-                                            else
-                                            {
-                                                <label>NA</label>
-                                            }
-                                        </td>
-                                        <td>@c.StopName</td>
-                                        <td>
-
-                                            @c.BusNo
-
-                                        </td>
-                                        <td>
-
-                                            @c.MiniAddress
-
-                                        </td>
-                                        <td>
-                                            @if (c.HostelRoomID != 0)
-                                            {
-                                                <label class='badge bg-green'>Yes</label>
-                                            }
-                                            else
-                                            {
-                                                <label>NA</label>
-                                            }
-                                        </td>
-
                                     </tr>
 
                                     count++;
@@ -257,9 +157,9 @@
     </div>
 </div>
 
-
 @section scripts
 {
+
     @*<script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
         <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>*@
     <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
@@ -281,11 +181,10 @@
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
     <script>
         $(document).ready(function () {
-           // var repname = '@PermissionManager.GetLoggedInUser().Description' +'<br /> Student Records ' + $('#ddlSessions option:selected').text() + ' ' + $('#ddlClass option:selected').text() + ' ' + $('#ddlSection option:selected').text();
-
+         //   var repname = '@PermissionManager.GetLoggedInUser().Description' + '<br /> Student Records display House Wise : ' + $('#ddlHouses option:selected').text();
             var handleDataTableButtons = function () {
                  var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
-                var rpname = 'Student Records' + $('#ddlSessions option:selected').text() + ' Class Section :' + $('#ddlClass option:selected').text() + ' ' + $('#ddlSection option:selected').text();
+                var rpname = 'Student Records display Quota Wise : ' + $('#ddlHouses option:selected').text();
             var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
 
                 if ($("#tblCategory").length) {
@@ -298,10 +197,10 @@
                                 extend: "copy",
                                 className: "btn-sm",
                                 footer: true,
-                                text: '<i class="fa fa- copy"></i> Copy',
-                                
+                                text: '<i class="fa fa-copy"></i> Copy',
+
                             message: printdate,
-                             messageTop: '@Model.BranchDetails.BranchSchoolName',
+                             messageTop: '@Model.Branch.BranchSchoolName',
                             messageBottom: repname,
                             title: rpname
                             },
@@ -311,7 +210,7 @@
                                 text: '<i class="fas fa-file-csv"></i> CSV',
                                  footer: true,
                           message: printdate,
-                            messageTop: '@Model.BranchDetails.BranchSchoolName',
+                            messageTop: '@Model.Branch.BranchSchoolName',
                             messageBottom: repname,
                             title: rpname
                             },
@@ -322,7 +221,7 @@
                                 footer: true,
                          messageTop: rpname,
                           messageBottom: repname,
-                          title: '@Model.BranchDetails.BranchSchoolName'
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                             {
                                 extend: "pdfHtml5",
@@ -341,7 +240,7 @@
                                           {
                                               alignment: 'left',
                                               italics: true,
-                                              text: '@Model.BranchDetails.BranchSchoolName',
+                                              text: '@Model.Branch.BranchSchoolName',
                                               fontSize: 14,
                                               margin: [0, 0]
                                           }
@@ -362,7 +261,7 @@
                           message: printdate,
                           messageTop: rpname,
                           messageBottom: repname,
-                          title: '@Model.BranchDetails.BranchSchoolName'
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                         ],
                         responsive: true
@@ -383,12 +282,13 @@
     </script>
     <script>
 
+
         function ClassChanged(sender) {
             $('#ddlSection').html('<option value="0">Loading....</option>');
             $.ajax(
                 {
                     type: "POST",
-                    url: "/Account/GetSectionOnClass/" + $(sender).val(),
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
                     cache: false,
                     processData: false,
                     contentType: false,
@@ -403,6 +303,5 @@
                 });
         }
     </script>
-
-
 }
+<!-- /.content -->
