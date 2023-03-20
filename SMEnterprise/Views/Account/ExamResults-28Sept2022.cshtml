@@ -1,15 +1,13 @@
 ﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 @model SMEnterprise.Models.TeacherResultPageModel
 @section IncludeCss
 {
     <title>Exam Results</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
-    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
-    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
 }
 <style>
     .btn {
@@ -58,13 +56,25 @@
         <div class="clearfix"></div>
         <div class="row">
             <div class="col-md-12">
-                @using (Html.BeginForm("ExamResults", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                @using (Html.BeginForm("ExamResults", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
                 {
 
                     <div class="row std-mng-head col-md-12">
 
                         <div class="col-md-12 class-section">
                             <div class="row">
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right" style="padding-right: 0px;">Session :</label>
+                                    <div class="col-md-8">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#ddlClass').trigger('change');">
+                                            <option value="0">--Select Session--</option>
+                                            @foreach (SchoolSessionModel el in Model.Sessions)
+                                            {
+                                                <option value="@el.SessionID" @(el.SessionID == Model.SessionID ? "selected" : "")>@el.SessionName @(el.SessionStatus == 1 ? "(Active)" : "")</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="col-md-2 padding">
                                     <label class="col-md-6 text-right" style="padding-right: 0px;">Class</label>
                                     <div class="col-md-6">
@@ -72,17 +82,6 @@
                                             @foreach (NameIDModel el in Model.Classes)
                                             {
                                                 <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 padding">
-                                    <label class="col-md-4 text-right">Evaluation</label>
-                                    <div class="col-md-8">
-                                        <select name="EvaluationID" class="form-control smallfont" id="ddlEvaluations">
-                                            @foreach (NameIDModel el in Model.Evaluations)
-                                            {
-                                                <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
                                             }
                                         </select>
                                     </div>
@@ -99,6 +98,18 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-md-3 padding">
+                                    <label class="col-md-4 text-right">Evaluation</label>
+                                    <div class="col-md-8">
+                                        <select name="EvaluationID" class="form-control smallfont" id="ddlEvaluations" onchange="EvaluationChanged();">
+                                            @foreach (NameIDModel el in Model.Evaluations)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+
                                 <div class="col-md-4 padding">
                                     <label class="col-md-4 text-right">Subject</label>
                                     <div class="col-md-8">
@@ -123,8 +134,9 @@
                     </div>
                 }
                 <div class="x_panel">
-                    @using (Html.BeginForm("UpdateTeacherResults", "Teacher", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
+                    @using (Html.BeginForm("UpdateTeacherResults", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @class = "form-horizontal form-label-left" }))
                     {
+
                         <input type="hidden" name="ClassID" value="@Model.ClassID" />
                         <input type="hidden" name="SectionID" value="@Model.SectionID" />
                         <input type="hidden" name="SubjectID" value="@Model.SubjectID" />
@@ -137,17 +149,31 @@
                             }
                             else
                             {
+
                                 <table id="tblCategory" class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
                                             <th style="width: 2%">#</th>
+                                            <th style="width: 10%">Photo</th>
                                             <th style="width: 15%">Student</th>
-                                            <th style="width: 10%">Max. Marks</th>
-                                            <th style="width: 10%">Pass Marks</th>
-                                            <th style="width: 30%;">Score</th>
-                                            <th style="width: 8%">Grade</th>
-                                            <th style="width: 7%">Points</th>
-                                            <th style="width: 20%">Status</th>
+
+                                            @if (Model.MarkingScheme == 1)
+                                            {
+
+                                                <th style="width: 10%">Grade</th>
+                                            }
+                                            else
+                                            {
+
+                                                <th style="width: 10%">Max. Marks</th>
+                                                <th style="width: 10%">Pass Marks</th>
+                                                <th style="width: 10%">Score</th>
+                                                <th style="width: 8%">Grade</th>
+                                                <th style="width: 7%">Points</th>
+                                                <th style="width: 30%">Status</th>
+                                            }
+
+
                                         </tr>
                                     </thead>
                                     @{
@@ -160,76 +186,96 @@
                                                     @count
                                                 </td>
                                                 <td>
+                                                    <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
                                                     <input type="hidden" name="ExamResults[@count].ResultID" value="@c.ResultID" />
                                                     <input type="hidden" name="ExamResults[@count].ExamID" value="@c.ExamID" />
                                                     <input type="hidden" name="ExamResults[@count].StudentID" value="@c.StudentID" />
+
+                                                </td>
+                                                <td>
                                                     @c.StudentName
                                                     <br />@c.StudentSID
                                                     <br />@c.RollNo
                                                 </td>
-
-                                                <td>
-                                                    @c.MaxMarks
-                                                    <input type="hidden" id="hdnMaxMarks" value="@c.MaxMarks" />
-                                                </td>
-                                                <td>
-                                                    @c.PassMarks
-                                                    <input type="hidden" id="hdnPassMarks" value="@c.PassMarks" />
-                                                </td>
-                                                <td>
-                                                    @if (Model.IsLocked == 0)
-                                                    {
-                                                        <input type="number" step="0.01" style="min-width:100px" class="form-control StudentScore" name="ExamResults[@count].MarksScored" value="@c.MarksScored" />
-                                                    }
-                                                    else
-                                                    {
-                                                        @c.MarksScored
-                                                    }
-                                                </td>
-                                                <td>
-                                                    <input type="text" id="txtGrade" readonly class="form-control" tabindex="-1" name="ExamResults[@count].Grade" value="@c.Grade" />
-                                                </td>
-                                                <td>
-                                                    <input type="text" id="txtGradePoints" readonly class="form-control" tabindex="-1" name="ExamResults[@count].GradePoints" value="@c.GradePoints" />
-                                                </td>
-                                                <td>
-                                                    @{
-                                                        var bkColor = "#dbc7b4";
-                                                        if (c.ResultID != 0)
+                                                @if (Model.MarkingScheme == 1)
+                                                {
+                                                    <td>
+                                                        <input type="hidden" id="hdnMaxMarks" value="0" />
+                                                        <input type="hidden" id="hdnPassMarks" value="0" />
+                                                        @if (Model.IsLocked == 0)
                                                         {
-                                                            bkColor = "#606d73";
+                                                            <input type="text" id="txtGrade" class="form-control" tabindex="-1" name="ExamResults[@count].Grade" value="@c.Grade" />
                                                         }
+                                                        else
+                                                        {
+                                                            @c.Grade
+                                                        }
+                                                    </td>
+                                                }
+                                                else
+                                                {
 
-                                                        <div class="block">
-                                                            <div id='radios-@c.StudentID' style='background-color:@bkColor;width:70px!important")'>
-                                                                <input id='rbML_@c.StudentID' name='options_@c.StudentID' type="radio" @( c.Status == -1 ? "checked" : "")>
-                                                                <label for='rbML_@c.StudentID'>M/L</label>
-                                                                <input id='rbUndeclared_@c.StudentID' name='options_@c.StudentID' type="radio" @( c.Status == 0 ? "checked" : "")>
-                                                                <label for='rbUndeclared_@c.StudentID'>Undeclared</label>
-                                                                <input id='rbFail_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 3 ? "checked" : "")>
-                                                                <label for='rbFail_@c.StudentID'>Fail</label>
+                                                    <td style="text-align:center">
+                                                        @c.MaxMarks
+                                                        <input type="hidden" id="hdnMaxMarks" value="@c.MaxMarks" />
+                                                    </td>
+                                                    <td style="text-align:center">
+                                                        @c.PassMarks
+                                                        <input type="hidden" id="hdnPassMarks" value="@c.PassMarks" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="hidden" id="hdnOldMarks" value="@c.MarksScored">
+                                                        @if (Model.IsLocked == 0)
+                                                        {
+                                                            @*<input type="number" step="0.01" class="form-control StudentScore" max="@c.MaxMarks" name="ExamResults[@count].MarksScored" value="@c.MarksScored" />*@
+                                                            <input type="number" id="txtStudentScore" step="0.01" class="form-control StudentScore" name="ExamResults[@count].MarksScored" value="@c.MarksScored" />
+                                                        }
+                                                        else
+                                                        {
+                                                            @c.MarksScored
+                                                        }
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="txtGrade" readonly class="form-control" tabindex="-1" name="ExamResults[@count].Grade" value="@c.Grade" />
+                                                    </td>
+                                                    <td>
+                                                        <input type="text" id="txtGradePoints" readonly class="form-control" tabindex="-1" name="ExamResults[@count].GradePoints" value="@c.GradePoints" />
+                                                    </td>
+                                                    <td>
+                                                        @{
+                                                            var bkColor = "#dbc7b4";
+                                                            if (c.ResultID != 0)
+                                                            {
+                                                                bkColor = "#606d73";
+                                                            }
 
-                                                                <input id='rbGrace_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 2 ? "checked" : "")>
-                                                                <label for='rbGrace_@c.StudentID'>Grace</label>
+                                                            <div class="block">
+                                                                <div id='radios-@c.StudentID' style='background-color:@bkColor;width:70px!important")'>
+                                                                    <input id='rbML_@c.StudentID' name='options_@c.StudentID' type="radio" @( c.Status == -1 ? "checked" : "")>
+                                                                    <label for='rbML_@c.StudentID'>M/L</label>
 
-                                                                <input id='rbPass_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 1 ? "checked" : "")>
-                                                                <label for='rbPass_@c.StudentID'>Pass</label>
-                                                                <input type="hidden" id="hdnStatus" name="ExamResults[@count].Status" value="@c.Status" />
+                                                                    <input id='rbUndeclared_@c.StudentID' name='options_@c.StudentID' type="radio" @( c.Status == 0 ? "checked" : "")>
+                                                                    <label for='rbUndeclared_@c.StudentID'>Undeclared</label>
+
+                                                                    <input id='rbFail_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 3 ? "checked" : "")>
+                                                                    <label for='rbFail_@c.StudentID'>Fail</label>
+
+                                                                    <input id='rbGrace_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 2 ? "checked" : "")>
+                                                                    <label for='rbGrace_@c.StudentID'>Grace</label>
+
+                                                                    <input id='rbPass_@c.StudentID' name='options_@c.StudentID' type="radio" @(c.Status == 1 ? "checked" : "")>
+                                                                    <label for='rbPass_@c.StudentID'>Pass</label>
+                                                                    <input type="hidden" id="hdnStatus" name="ExamResults[@count].Status" value="@c.Status" />
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    }
-                                                </td>
-
+                                                        }
+                                                    </td>
+                                                }
                                             </tr>
-
                                             count++;
                                         }
-
-
-
                                     }
                                 </table>
-
                                 if (Model.IsLocked == 0)
                                 {
                                     <div>
@@ -247,36 +293,45 @@
 
 @section scripts
 {
-    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
-    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
     <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
 
     <script>
 
         function ClassChanged(sender) {
+            $('#ddlEvaluations').html('<option value="0">Loading....</option>');
             $('#ddlSection').html('<option value="0">Loading....</option>');
             $.ajax(
                 {
                     type: "POST",
-                    url: "/Teacher/GetSectionsForTeacherClass/" + $(sender).val(),
+                    url: "/Account/GetSectionEvaluationsOnClass/" + $(sender).val() + "/" + $('#ddlSessions').val(),
                     cache: false,
                     processData: false,
                     contentType: false,
-                    success: function (html) {
+                    success: function (data) {
                         $('#ddlSection').html('');
-                        $('#ddlSection').append(html);
+                        $('#ddlEvaluations').html('');
+                        $('#ddlSection').html('<option value="0">--Select--</option>');
+                        for (var i = 0; i < data.Sections.length; i++) {
+                            $('#ddlSection').append('<option value="' + data.Sections[i].ID + '">' + data.Sections[i].Name + '</option>');
+                        }
+                        for (var i = 0; i < data.Evaluations.length; i++) {
+                            $('#ddlEvaluations').append('<option value="' + data.Evaluations[i].ID + '">' + data.Evaluations[i].Name + '</option>');
+                        }
                     },
                     error: function (e) {
                         alert("errorn");
                     }
                 });
         }
+        function EvaluationChanged() {
+            $('#ddlSection').trigger('onchange');
+        }
         function SectionChanged(sender) {
             $('#ddlSubjects').html('<option value="0">Loading....</option>');
             $.ajax(
                 {
                     type: "POST",
-                    url: "/Teacher/GetSubjectsForTeacherSection/" + $(sender).val(),
+                    url: "/Account/GetSubjectsForSectionEvaluation/" + $(sender).val() + "/" + $('#ddlEvaluations').val(),
                     cache: false,
                     processData: false,
                     contentType: false,
@@ -356,24 +411,22 @@
             //    table.search('').columns().search('').draw();
             //    return true;
             //});
+
             $('.StudentScore').change(function () {
-                //var passMarks = parseInt($(this).closest('tr').find('#hdnPassMarks').val());
-                //var BScore =100/parseFloat($(this).closest('tr').find('#hdnMaxMarks').val());
-                //var score = parseInt($(this).val()) * BScore;
-                //if (score > 100)
-                //{
-                //    $(this).val('0');
-                //    ShowNotification('error', 'Marks can not be more than Max Marks!!!!', 'error');
-                //}
-                //else if (score >= passMarks) {
-                //    $(this).closest('tr').find("label[for^='rbPass']").click();
-                //}
-                //else {
-                //    $(this).closest('tr').find("label[for^='rbFail']").click();
-                //}
+                var oldMarks = parseFloat($(this).closest('tr').find('#hdnOldMarks').val());
                 var passMarks = parseFloat($(this).closest('tr').find('#hdnPassMarks').val());
                 var BScore = 100 / parseFloat($(this).closest('tr').find('#hdnMaxMarks').val());
                 var score = parseFloat($(this).val()) * BScore;
+                if (parseFloat($(this).val()) > parseFloat($(this).closest('tr').find('#hdnMaxMarks').val())) {
+                    alert("Please Enter Marks less then Maximum Marks !!!!!");
+                    if (oldMarks > 0) {
+                        $(this).closest('td').find('#txtStudentScore').val(oldMarks);
+                    }
+                    else {
+                        $(this).closest('td').find('#txtStudentScore').val('0.00');
+                    }
+                    $(this).closest('td').find('#txtStudentScore').focus();
+                }
                 if (parseFloat($(this).val()) >= passMarks) {
                     $(this).closest('tr').find("label[for^='rbPass']").click();
                 }

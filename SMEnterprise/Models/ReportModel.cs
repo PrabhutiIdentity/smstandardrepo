@@ -22,10 +22,20 @@ namespace SMEnterprise.Models
         public string SectionName { get; set; }
         public string TeacherName { get; set; }
     }
+    public class QuotaClassStudentListModel
+    {
+        public int ID { get; set; }
+        public int Type { get; set; }
+        public List<StudentQuotaModel> Quotas { get; set; }
+        public List<ClassSectionModel> ClassSections { get; set; }
+        public List<StudentModel> Students { get; set; }
+        public SBranchModel Branch { get; set; }
+    }
     public class HouseClassStudentListModel
     {
         public int ID { get; set; }
         public int Type { get; set; }
+      
         public List<HouseModel> Houses { get; set; }
         public List<ClassSectionModel> ClassSections { get; set; }
         public List<StudentModel> Students { get; set; }

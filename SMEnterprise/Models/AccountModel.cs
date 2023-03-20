@@ -157,7 +157,7 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Sessions { get; set; }
         public List<SMEnterpriseDB.Models.StudentAttendanceMasterT> Attendances { get; set; }
 
-       
+        public SBranchModel Branch { get; set; }
 
     }
     #region Bulk Student Data Upload
