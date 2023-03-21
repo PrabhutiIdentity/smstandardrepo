@@ -45,6 +45,7 @@ namespace SMEnterprise.Controllers
                         PermissionManager.setPermissions(AttemptedUser);
                         Session["UserID"] = PermissionManager.GetLoggedInUser().UserID;
                         Session["SBranchID"] = PermissionManager.GetLoggedInUser().SBranchID;
+                        Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
                         CommonData objCData = new CommonData();
                         if (AttemptedUser.RoleID== (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle|| AttemptedUser.RoleID == (int)RoleType.Director)
                         {
