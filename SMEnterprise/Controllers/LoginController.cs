@@ -29,12 +29,12 @@ namespace SMEnterprise.Controllers
             if (ModelState.IsValid)
             {
                 //  bool success = true;
-               // bool rememberme = login.rememberMe;
+                // bool rememberme = login.rememberMe;
                 //  bool success = WebSecurity.Login(login.username, login.password, rememberme);
                 UserModel AttemptedUser = objILoginData.GetUserByUserName(login.username);
 
-                
-                if (AttemptedUser!=null &&( AttemptedUser.Password != null || AttemptedUser.Password != ""))
+
+                if (AttemptedUser != null && (AttemptedUser.Password != null || AttemptedUser.Password != ""))
                 {
 
                     string svalue = login.salt;
@@ -45,9 +45,13 @@ namespace SMEnterprise.Controllers
                         PermissionManager.setPermissions(AttemptedUser);
                         Session["UserID"] = PermissionManager.GetLoggedInUser().UserID;
                         Session["SBranchID"] = PermissionManager.GetLoggedInUser().SBranchID;
-                        Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
+                        try
+                        {
+                            Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
+                        }
+                        catch { }
                         CommonData objCData = new CommonData();
-                        if (AttemptedUser.RoleID== (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle|| AttemptedUser.RoleID == (int)RoleType.Director)
+                        if (AttemptedUser.RoleID == (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle || AttemptedUser.RoleID == (int)RoleType.Director)
                         {
                             objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
                             return RedirectToAction("Dashboard", "Admin");
@@ -76,7 +80,7 @@ namespace SMEnterprise.Controllers
                         {
                             return RedirectToAction("Dashboard", "Library");
                         }
-                        else if (AttemptedUser.RoleID == (int)RoleType.Reception|| AttemptedUser.RoleID == (int)RoleType.Receptionist)
+                        else if (AttemptedUser.RoleID == (int)RoleType.Reception || AttemptedUser.RoleID == (int)RoleType.Receptionist)
                         {
                             return RedirectToAction("Dashboard", "Reception");
                         }
@@ -84,7 +88,7 @@ namespace SMEnterprise.Controllers
                         {
                             return RedirectToAction("Index", "Home");
                         }
-                       
+
                     }
                 }
                 else
@@ -92,7 +96,7 @@ namespace SMEnterprise.Controllers
                     ViewBag.LoginError = "Username or Password is incorrect !!!!";
                     return RedirectToAction("Index", "Home");
                 }
-               
+
                 //FormsAuthentication.SetAuthCookie("Admin", false);
 
                 //if (success == true)
@@ -151,7 +155,7 @@ namespace SMEnterprise.Controllers
             {
                 ModelState.AddModelError("Error", "Please enter Username and Password");
             }
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
 
         }
         public ActionResult LoginPartial(Login login)
@@ -206,8 +210,8 @@ namespace SMEnterprise.Controllers
                 objUserModel.CreatedDate = CommonUsage.GetCurrentDate();
                 objUserModel.Password = register.password;
                 objUserModel.RoleID = 2;
-                objUserModel.UserID =objILoginData.InsertUser(objUserModel);
-                if(objUserModel.UserID > 0)
+                objUserModel.UserID = objILoginData.InsertUser(objUserModel);
+                if (objUserModel.UserID > 0)
                 {
                     PermissionManager.setPermissions(objUserModel);
                 }
@@ -215,7 +219,7 @@ namespace SMEnterprise.Controllers
             else
             {
                 ModelState.AddModelError("Error", "Please enter all details");
-                
+
             }
             return RedirectToAction("Index", "Home");
         }
@@ -396,7 +400,7 @@ namespace SMEnterprise.Controllers
             return View("RoleAddToUser");
         }
 
-       
+
         [ValidateAntiForgeryToken]
         public ActionResult logout()
         {
