@@ -592,6 +592,9 @@ namespace SMEnterprise.Controllers
         {
             int iID = CommonUsage.ConvertToInt(ID);
             FeePaymentModel model = await objAccountData.GetFeePaymentReciptDetails(iID);
+            var xmlData = CommonUsage.SerializeToXML<FeePaymentModel>(model);
+            var html = CommonUsage.ConvertToHTML(xmlData, "https://pschoolstorage.blob.core.windows.net/report-formats/PrintFeeReceipt.xslt");
+
             return PartialView("_PrintFeeRecipt", model);
         }
         [PermissionFilter]
