@@ -107,7 +107,7 @@
                                         <div class="row">
                                             <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Search List : </label>
                                             <div class="col-md-7 padding-L" style="padding-left: 10px;">
-                                                <input type="text" class="form-control" id="txtsearch" placeholder="Search Text" onkeyup="Search(this);" />
+                                                <input type="text" class="form-control" id="txtsearch" placeholder="comma separated text for multiple" onkeyup="Search(this);" />
                                             </div>
 
                                         </div>
@@ -273,29 +273,34 @@
         <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
         <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
         <script>
-        function Search(sender) {
-            var sText = $(sender).val();
-            console.log(sText);
-            if (sText == "") {
-                $('.listitem').css('display', '');
-            }
-            else {
-                $(".listitem").each(function () {
-                    var isExist = false;
-                    $(this).find(".searchable").each(function () {
-                        if ($(this).html().toLowerCase().includes(sText.toLowerCase()) == true) {
-                            isExist = true;
+            function Search(sender) {
+                var sText = $(sender).val().split(',');
+                console.log(sText);
+                if (sText[0] == "") {
+                    $('.listitem').css('display', '');
+                }
+                else {
+                    $(".listitem").each(function () {
+                        var isExist = false;
+
+                        $(this).find(".searchable").each(function () {
+                            $srch = $(this);
+                            $.each(sText, function (index, value) {
+                                if ($srch.html().toLowerCase().includes(value.toLowerCase()) == true) {
+                                    isExist = true;
                                 }
+                            });
+
+                        });
+                        if (isExist == true) {
+                            $(this).css('display', '');
+                        }
+                        else {
+                            $(this).css('display', 'none');
+                        }
                     });
-                    if (isExist == true) {
-                        $(this).css('display', '');
-                    }
-                    else {
-                         $(this).css('display', 'none');
-                    }
-                  });
+                }
             }
-        }
         $(function () {
             $("#tblCategory").DataTable();
         });
