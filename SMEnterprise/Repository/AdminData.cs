@@ -4340,6 +4340,13 @@ namespace SMEnterprise.Repository
                     oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
                     // oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+
+                        oModel.Branches = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return oModel;
