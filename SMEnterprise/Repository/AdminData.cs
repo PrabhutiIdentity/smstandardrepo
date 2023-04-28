@@ -4331,9 +4331,12 @@ namespace SMEnterprise.Repository
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
+             
                 paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
-                
+                paramater.Add("@StartDate", oModel.StartDate);
+                paramater.Add("@EndDate", oModel.EndDate);
+
 
                 using (var multi = con.QueryMultiple("sp_GetSessionStudentAdmissionDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {

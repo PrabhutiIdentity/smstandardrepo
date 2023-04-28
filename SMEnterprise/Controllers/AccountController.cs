@@ -3274,9 +3274,11 @@ namespace SMEnterprise.Controllers
             if (oModel.StartDate.Year == 1)
             {
                 oModel.StartDate = CommonUsage.GetCurrentDate();
-                oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
-                oModel.EndDate = CommonUsage.GetCurrentDate();
-                oModel.EndDate = oModel.EndDate.AddDays(-oModel.EndDate.Day + 1);
+                oModel.StartDate = new DateTime(oModel.StartDate.Year, oModel.StartDate.Month, 1);
+                // oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
+              oModel.EndDate = CommonUsage.GetCurrentDate();
+                //oModel.EndDate = oModel.EndDate.AddDays(-oModel.EndDate.Day + 1);
+                oModel.EndDate = oModel.EndDate.AddMonths(1).AddDays(-1);
             }
             objAdminData.GetStudentAdmssionDetail(oModel);
             return View(oModel);
