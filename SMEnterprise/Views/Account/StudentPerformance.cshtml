@@ -1,4 +1,4 @@
-﻿@using SMEnterprise.Models;
+﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
@@ -100,7 +100,6 @@
                                     <label class="col-md-4 text-right padding-R">Evaluation : </label>
                                     <div class="col-md-8 padding-L" style="padding-left: 10px;">
                                         <select name="EvaluationID" class="form-control" id="ddlEvaluation" onchange="$('#frmGetStudents').submit();">
-                                      
                                             @foreach (NameIDModel el in Model.Evaluations)
                                             {
                                                 <option value="@el.ID" @(el.ID == Model.EvaluationID ? "selected" : "")>@el.Name</option>
@@ -113,32 +112,14 @@
                         </div>
                     </div>
                 }
-            <div>
-                <div class="col-md-6 padding">
-
-                    @using (Html.BeginForm("StudentPerformanceDetailsClassShine", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
-                    {
-                        <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
-                        <input type="hidden" name="SessionID" value="@Model.SessionID" />
-                        <input type="hidden" name="SectionID" value="@Model.SectionID" />
-                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
-                        <input type="submit" value="GetCompleteReports" />
-                    }
-                </div>
-                <div class="col-md-4 padding">
-                    <label class="col-md-3 text-right" style="padding-right: 0px;">Get Complete Result</label>
-                    <div class="col-md-9">
-                        <select class="form-control" name="EvaluationID" ID="ddlEvaluations">
-
-                            @foreach (var sev in Model.SubEvaluations)
-                            {
-                                <option value="@sev.ID" @(sev.ID == Model.EvaluationID ? "Selected" : "")>@sev.Name</option>
-                            }
-                        </select>
-                    </div>
-                </div>
-                <div class="col-md-2 padding"> go</div>
-                </div>
+                @using (Html.BeginForm("StudentPerformanceDetailsClass", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                {
+                    <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
+                    <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                    <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                    <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                    <input type="submit" value="GetCompleteReports" />
+                }
                 <div class="x_panel">
 
                     <div class="x_content">
@@ -164,7 +145,7 @@
                                         <td>
                                             <ss> @c.Name</ss><br />
                                             @c.StudentSID<br />
-                                            @c.RollNo
+                                            Roll No:@c.RollNo
 
                                         </td>
 
@@ -175,21 +156,48 @@
                                             <div>
                                                 <li class="dropdown">
                                                     <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">View Result</a>
-                                                    <ul class="dropdown-menu" role="menu">
+                                                    @*<ul class="dropdown-menu" role="menu">
                                                         @foreach (var se in Model.SubEvaluations)
                                                         {
                                                             <li>
                                                                 <a href="/Account/StudentResultDetails/@c.StudentSessionUID/@se.ID/@Model.SessionID" target="_blank"> @se.Name</a>
                                                             </li>
                                                         }
-                                                    </ul>
+                                                    </ul>*@
+                                                    @if (Model.ClassID == 19 || Model.ClassID == 20 || Model.ClassID == 35 || Model.ClassID == 36)
+                                                        {
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                @foreach (var se in Model.SubEvaluations)
+                                                                {
+                                                                    // class XI & XII for both branch
 
+                                                                    <li>
+                                                                        <a href="/Account/StudentResultDetails11/@c.StudentSessionUID/@se.ID/@Model.SessionID" target="_blank"> @se.Name</a>
+                                                                    </li>
+
+
+                                                                }
+                                                            </ul>
+                                                         }
+                                                         else
+                                                         {
+                                                            <ul class="dropdown-menu" role="menu">
+                                                                @foreach (var se in Model.SubEvaluations)
+                                                                {
+
+                                                                    <li>
+                                                                        <a href="/Account/StudentResultDetails/@c.StudentSessionUID/@se.ID/@Model.SessionID" target="_blank"> @se.Name</a>
+                                                                    </li>
+
+
+                                                                }
+                                                            </ul>
+                                                        }
                                                 </li>
                                             </div>
                                         </td>
                                         <td>
-                                            <a href="/Account/StudentPerformanceResult1/@c.StudentSessionUID/@Model.EvaluationID/@Model.SessionID" target="_blank"> View Report</a>
-
+                                            <a href="/Account/StudentPerformanceDetails/@c.StudentSessionUID/@Model.EvaluationID/@Model.SessionID" target="_blank"> View Report</a>
                                         </td>
                                     </tr>
 
@@ -214,29 +222,7 @@
     <script src="@Url.Content("~/js/jquery.radios-to-slider.min.js")"></script>
 
     <script>
-        function EvaluationMainChanged(sender) {
 
-            $('#ddlEvaluations').html('<option value="0">Loading....</option>');
-            $.ajax(
-                {
-                    type: "POST",
-                    url: "/Account/GetClassGroups/" + $(sender).val(),
-                    cache: false,
-                    processData: false,
-                    contentType: false,
-                    success: function (data) {
-
-                        $('#ddlEvaluations').html('');
-
-                        for (var i = 0; i < data.Evaluations.length; i++) {
-                            $('#ddlEvaluations').append('<option value="' + data.Evaluations[i].EvaluationID + '">' + data.Evaluations[i].EvaluationName + '</option>');
-                        }
-                    },
-                    error: function (e) {
-                        alert("errorn");
-                    }
-                });
-        }
 
         function ClassChanged(sender) {
             $('#ddlSection').html('<option value="0">Loading....</option>');
