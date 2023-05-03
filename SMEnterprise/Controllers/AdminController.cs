@@ -1894,6 +1894,35 @@ namespace SMEnterprise.Controllers
             objData.FeeStructure = null;
             return RedirectToAction("FeeStructureManagement", "Admin", objData);
         }
+
+        #endregion
+
+        #region Transport Fee
+     //   [PermissionFilter]
+        //public ActionResult TransportFeeManagement(RouteModel Model = null)
+        //{
+        //    if (Model == null)
+        //    {
+        //        Model = new RouteModel();
+        //    }
+        //    if (Session["SBranchID"] == null)
+        //    {
+        //        Session["SBranchID"] = 1;
+        //    }
+        //    Model.OperationDate = CommonUsage.GetCurrentDate();
+        //    Model.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+        //    //Model = objAdminData.GetFeeStructure(Model);
+        //    //return View(Model);
+
+        //    //
+          
+        //       // int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+        //      //  IEnumerable<RouteModel> objModel = objAdminData.GetTransportRoutes(SBranchID);
+        //       // return View(objModel);
+          
+        //    //
+        //}
+        
         #endregion
         #region Salary Management
         [PermissionFilter]

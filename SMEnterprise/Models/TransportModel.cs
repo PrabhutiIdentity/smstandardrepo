@@ -109,6 +109,7 @@ namespace SMEnterprise.Models
         public int UserID { get; set; }
         public int SBranchID { get; set; }
         public int OpType { get; set; }
+        public int SessionID { get; set; }
         public DateTime OperationDate { get; set; }
         public List<RouteStoppageModel> Stops { get; set; }
     }
