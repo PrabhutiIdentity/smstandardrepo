@@ -1,7 +1,10 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
+using System.Data;
+
 
 namespace SMEnterprise.Models
 {
@@ -97,6 +100,111 @@ namespace SMEnterprise.Models
         public IEnumerable<NameIDModel> Drivers { get; set; }
         public IEnumerable<NameIDModel> Conductors { get; set; }
     }
+
+    public class EditTransportFeeModel
+    {
+        public int RouteID { get; set; }
+        public int StopID { get; set; }
+        public int CityID { get; set; }
+        public int AreaID { get; set; }
+        public int SessionID { get; set; }
+        public int SBranchID { get; set; }
+
+        public int UserID { get; set; }
+        public DateTime OperationDate { get; set; }
+        public List<TransportFeeModel> TransportFee { get; set; }
+        public List<RoteStopModel> Routes { get; set; }
+        public List<SchoolSessionModel> Sessions { get; set; }
+        public List<RouteStoppageModel> Stops { get; set; }
+        public DataTable GetTransportFeeDataTable()
+        {
+
+            DataTable dtTransportFeeDetails = new DataTable();
+            dtTransportFeeDetails.SetTypeName("ut_TransportFeeDetail");
+            dtTransportFeeDetails.Columns.Add("ID");
+            dtTransportFeeDetails.Columns.Add("StopID");
+            dtTransportFeeDetails.Columns.Add("RouteID");
+            dtTransportFeeDetails.Columns.Add("CityID");
+            dtTransportFeeDetails.Columns.Add("AreaID");
+            dtTransportFeeDetails.Columns.Add("Amount");
+            dtTransportFeeDetails.Columns.Add("SBranchID");
+            dtTransportFeeDetails.Columns.Add("SessionID");
+            dtTransportFeeDetails.Columns.Add("CreatedDate");
+            dtTransportFeeDetails.Columns.Add("ModifiedDate");
+
+            foreach (TransportFeeModel e in TransportFee)
+            {
+                DataRow dr = dtTransportFeeDetails.NewRow();
+                dr["ID"] = e.ID;
+                dr["StopID"] = e.StopID;
+                dr["RouteID"] = e.RouteID;
+                dr["CityID"] = e.CityID;
+                dr["AreaID"] = e.AreaID;
+                dr["Amount"] = e.Amount;
+                dr["SBranchID"] = e.SBranchID;
+                dr["SessionID"] = e.SessionID;
+                dr["CreatedDate"] = e.CreatedDate;
+                dr["ModifiedDate"] = e.ModifiedDate;
+
+                dtTransportFeeDetails.Rows.Add(dr);
+            }
+
+            return dtTransportFeeDetails;
+        }
+    }
+    public class TransportFeeModel
+    {
+        private int iD;
+        private int routeID;
+        private int stopID;
+        private int cityID;
+        private int areaID;
+        private DateTime operationDate;
+        private decimal amount;
+
+        public int ID { get => iD; set => iD = value; }
+        public int RouteID { get => routeID; set => routeID = value; }
+        public string RouteName { get; set; }
+        public int IsApproved { get; set; }
+        public int SBranchID { get; set; }
+        public int OpType { get; set; }
+        public int SessionID { get; set; }
+
+
+        public decimal Amount { get => amount; set => amount = value; }
+        public int StopID { get => stopID; set => stopID = value; }
+        public int CityID { get => cityID; set => cityID = value; }
+        public string CityName { get; set; }
+        public int AreaID { get => areaID; set => areaID = value; }
+        public string AreaName { get; set; }
+
+        public DateTime CreatedDate { get; set; }
+        public DateTime ModifiedDate { get; set; }
+        public DateTime OperationDate
+        {
+            get
+            {
+                return operationDate;
+            }
+
+            set
+            {
+                operationDate = value;
+            }
+        }
+
+    }
+
+
+
+    public class RoteStopModel
+    {
+        public int SessionID { get; set; }
+
+        public int SBranchID { get; set; }
+        public int RouteID { get; set; }
+        public string RouteName { get; set; }
+    }
     public class RouteModel
     {
         public int RouteID { get; set; }
@@ -112,8 +220,20 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public DateTime OperationDate { get; set; }
         public List<RouteStoppageModel> Stops { get; set; }
+
+        // modify from transport fee session wise
+        public decimal Amount { get; set; }
+        public int StopID { get; set; }
+        public int CityID { get; set; }
+        public string CityName { get; set; }
+        public int AreaID { get; set; }
+        public string AreaName { get; set; }
+        public List<NameIDModel> Routes { get; set; }
+        public List<SchoolSessionModel> Sessions { get; set; }
+
+        //
     }
-    public  class RouteStoppageModel
+    public class RouteStoppageModel
     {
         public int IsDone { get; set; }
         public int Applicable { get; set; }
@@ -138,11 +258,17 @@ namespace SMEnterprise.Models
         public string Latitude { get; set; }
         public string Longitude { get; set; }
         public decimal Rate { get; set; }
+
         public DateTime OperationDate { get; set; }
+
         public List<NameIDModel> Areas { get; set; }
         public List<NameIDModel> Cities { get; set; }
         public List<NameIDModel> States { get; set; }
         public List<NameIDModel> Countries { get; set; }
+        public string RouteName { get; set; }
+        public string CityName { get; set; }
+        public decimal Amount { get; set; }
+
     }
     public class RouteVehicleModel
     {
