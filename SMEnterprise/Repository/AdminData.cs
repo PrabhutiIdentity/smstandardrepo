@@ -1250,6 +1250,43 @@ namespace SMEnterprise.Repository
         }
         #endregion
         #region Transport Management
+
+        
+
+         public EditTransportFeeModel GetTransportRouteFee(EditTransportFeeModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@RouteID", objModel.RouteID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SessionID", objModel.SessionID);
+
+                using (var multi = con.QueryMultiple("sp_GetFeeForTransport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.TransportFee = multi.Read<TransportFeeModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    objModel.Routes = multi.Read<RoteStopModel>().ToList();
+                    objModel.RouteID = multi.Read<int>().SingleOrDefault();
+
+                }
+            }
+            return objModel;
+        }
+        public int InsertUpdateTransportFee(EditTransportFeeModel objData)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TransportDetails", objData.GetTransportFeeDataTable());
+                paramater.Add("@SessionID", objData.SessionID);
+                paramater.Add("@SBranchID", objData.SBranchID);
+
+                con.Query<int>("sp_UpdateTransportFee", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                return 1;
+            }
+        }
         public IEnumerable<DriverConductorModel> GetDriverConductors(int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -2524,6 +2561,8 @@ namespace SMEnterprise.Repository
             }
         }
         #endregion
+     
+        
         #region Salary Management
         public IEnumerable<SalaryCategoryModel> GetSalaryTypesOld(int SBranchID)
         {

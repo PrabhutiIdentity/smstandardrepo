@@ -1898,31 +1898,35 @@ namespace SMEnterprise.Controllers
         #endregion
 
         #region Transport Fee
-     //   [PermissionFilter]
-        //public ActionResult TransportFeeManagement(RouteModel Model = null)
-        //{
-        //    if (Model == null)
-        //    {
-        //        Model = new RouteModel();
-        //    }
-        //    if (Session["SBranchID"] == null)
-        //    {
-        //        Session["SBranchID"] = 1;
-        //    }
-        //    Model.OperationDate = CommonUsage.GetCurrentDate();
-        //    Model.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-        //    //Model = objAdminData.GetFeeStructure(Model);
-        //    //return View(Model);
+        [PermissionFilter]
+        public ActionResult TransportFeeManagement(EditTransportFeeModel Model = null)
+        {
+            if (Model == null)
+            {
+                Model = new EditTransportFeeModel();
+            }
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            Model.OperationDate = CommonUsage.GetCurrentDate();
+            Model.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            Model = objAdminData.GetTransportRouteFee(Model);
+            return View(Model);
 
-        //    //
-          
-        //       // int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-        //      //  IEnumerable<RouteModel> objModel = objAdminData.GetTransportRoutes(SBranchID);
-        //       // return View(objModel);
-          
-        //    //
-        //}
-        
+        }
+        [PermissionFilter]
+        public ActionResult UpdateTransportRouteFee(EditTransportFeeModel objData)
+        {
+            objData.OperationDate = CommonUsage.GetCurrentDate();
+            if (objData.TransportFee != null)
+            {
+                objAdminData.InsertUpdateTransportFee(objData);
+            }
+            objData.TransportFee = null;
+            return RedirectToAction("TransportFeeManagement", "Admin", objData);
+        }
+
         #endregion
         #region Salary Management
         [PermissionFilter]
