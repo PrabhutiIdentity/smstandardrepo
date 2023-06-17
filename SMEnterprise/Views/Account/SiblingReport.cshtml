@@ -8,7 +8,7 @@
 {
     <title>Students Report</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
-    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+
     <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
 }
 
@@ -51,7 +51,7 @@
         <div class="clearfix"></div>
         <div class="row">
             <div class="col-md-12">
-                @using (Html.BeginForm("StudentClassReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                @using (Html.BeginForm("SiblingReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
                 {
                     <div class="row std-mng-head">
 
@@ -60,10 +60,10 @@
 
                                 <div class="col-md-1 padding">
                                 </div>
-                                <div class="col-md-6 padding">
+                                <div class="col-md-3 padding">
                                     <label class="col-md-4 text-right">Session :</label>
                                     <div class="col-md-8">
-                                        <select class="form-control" name="SessionID" id="ddlSessions">
+                                        <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
                                             <option value="0">--Select Session--</option>
                                             @foreach (NameIDModel el in Model.Sessions)
                                             {
@@ -72,49 +72,13 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="col-md-3 padding">
-                                    <label class="col-md-4 text-right">Class :</label>
-                                    <div class="col-md-8">
-                                        <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
-                                            <option value="0">--Select Class--</option>
-                                            @foreach (ClassModel el in Model.Classes)
-                                            {
-                                                <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4 padding">
-                                    <div class="row">
-                                        <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
-                                        <div class="col-md-7 padding-L" style="padding-left: 10px;">
 
-                                            <select name="SectionID" class="form-control" id="ddlSection">
-                                                <option value="0">--Select Section--</option>
-                                                @foreach (SectionModel el in Model.Sections)
-                                                {
-                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
-                                                }
-                                            </select>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-
-                                <div class="col-md-1 padding">
-                                    <div class="row">
-
-                                        <div class="col-md-12">
-                                            <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
                     </div>
                 }
+
                 <div class="x_panel">
 
                     <div class="x_content">
@@ -122,11 +86,11 @@
                         <table id="tblCategory" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
                             <thead>
                                 <tr>
-                                    <th>SR.No.</th>
+                                    <th>#</th>
                                     <th>Student Name </th>
+                                    <th>SR.No.</th>
                                     <th>StudentID</th>
                                     <th>Gender</th>
-                                    <th>Aadhar CardNo</th>
                                     <th>Father Name </th>
                                     <th>Mother Name </th>
                                     <th>DOB</th>
@@ -135,28 +99,33 @@
                                     <th>Section</th>
                                     <th>DOA</th>
                                     <th>House</th>
-                                    <th>Mobile No</th>
-
+                                    <th>F.Mobile No</th>
+                                    <th>M.Mobile No</th>
+                                    <th>Aadhar Number</th>
+                                    <th>Quota Name</th>
                                     <th>Transport</th>
                                     <th>Stoppage</th>
                                     <th>Bus/Van</th>
                                     <th>Address</th>
-                                    <th>Hostel</th>
+
                                 </tr>
                             </thead>
                             @{
-                                int count = 0;
+                                int count = 1;
                                 foreach (StudentModel c in Model.Students)
                                 {
                                     <tr>
                                         <td>
-                                            @c.SchoolUID
-
+                                            @count
                                         </td>
+
                                         <td>
                                             @c.Name
 
 
+                                        </td>
+                                        <td>
+                                            @c.SchoolUID
 
                                         </td>
                                         <td>
@@ -174,7 +143,6 @@
                                                 <label>Male</label>
                                             }
                                         </td>
-                                        <td>@c.AadharCardNo</td>
                                         <td>
                                             @c.FatherName
                                         </td>
@@ -210,7 +178,13 @@
                                             @c.FatherMobileNo
 
                                         </td>
+                                        <td>
 
+                                            @c.MotherMobileNo
+
+                                        </td>
+                                        <td>@c.AadharCardNo</td>
+                                        <td>@c.QuotaName</td>
                                         <td>
                                             @if (c.StopID != 0)
                                             {
@@ -232,16 +206,7 @@
                                             @c.MiniAddress
 
                                         </td>
-                                        <td>
-                                            @if (c.HostelRoomID != 0)
-                                            {
-                                                <label class='badge bg-green'>Yes</label>
-                                            }
-                                            else
-                                            {
-                                                <label>NA</label>
-                                            }
-                                        </td>
+                                       
 
                                     </tr>
 
@@ -270,18 +235,28 @@
     <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
     <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
 
+    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
+        <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+
+        <script src="@Url.Content("~/js/jszip.min.js")"></script>
+        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+
     <script>
         $(document).ready(function () {
-           // var repname = '@PermissionManager.GetLoggedInUser().Description' +'<br /> Student Records ' + $('#ddlSessions option:selected').text() + ' ' + $('#ddlClass option:selected').text() + ' ' + $('#ddlSection option:selected').text();
 
             var handleDataTableButtons = function () {
-                 var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
-                var rpname = 'Sibling Student Records' + $('#ddlSessions option:selected').text() ;
+                  var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+                var rpname = 'All Student Records ' +  'Session ' + $('#ddlSessions option:selected').text() ;
             var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
 
                 if ($("#tblCategory").length) {
                     $("#tblCategory").DataTable({
+
                         "pageLength": 100,
                         bSort: true,
                         dom: "Bfrtip",
@@ -290,6 +265,7 @@
                                 extend: "copy",
                                 className: "btn-sm",
                                 footer: true,
+                                orientation: 'landscape',
                                 text: '<i class="fa fa- copy"></i> Copy',
 
                             message: printdate,
@@ -301,7 +277,8 @@
                                 extend: "csv",
                                 className: "btn-sm",
                                 text: '<i class="fas fa-file-csv"></i> CSV',
-                                 footer: true,
+                                footer: true,
+                                orientation: 'landscape',
                           message: printdate,
                             messageTop: '@Model.BranchDetails.BranchSchoolName',
                             messageBottom: repname,
@@ -312,6 +289,7 @@
                                 className: "btn-sm",
                                 text: '<i class="fa fa-table fainfo" aria-hidden="true"></i> Excel',
                                 footer: true,
+                                orientation: 'landscape',
                          messageTop: rpname,
                           messageBottom: repname,
                           title: '@Model.BranchDetails.BranchSchoolName'
@@ -350,7 +328,8 @@
                                 extend: "print",
                                 className: "btn-sm",
                                 text: '<i class="fa fa-print"></i> Print',
-                                 footer: true,
+                                footer: true,
+                                orientation: 'landscape',
                           message: printdate,
                           messageTop: rpname,
                           messageBottom: repname,
@@ -374,27 +353,6 @@
         });
     </script>
 
-    <script>
 
-        function ClassChanged(sender) {
-            $('#ddlSection').html('<option value="0">Loading....</option>');
-            $.ajax(
-                {
-                    type: "POST",
-                    url: "/Account/GetSectionOnClass/" + $(sender).val(),
-                    cache: false,
-                    processData: false,
-                    contentType: false,
-                    success: function (html) {
-                        $('#ddlSection').html('');
-                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
-                        $('#ddlSection').append(html);
-                    },
-                    error: function (e) {
-                        alert("errorn");
-                    }
-                });
-        }
-    </script>
 
 }
