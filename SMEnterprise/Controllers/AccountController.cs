@@ -2127,6 +2127,17 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetStudentClassReport(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
             return View(objModel);
         }
+
+        public ActionResult SiblingReport(StudentsPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentsPageModel();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetSiblingReport(SBranchID, objModel.SessionID);
+            return View(objModel);
+        }
         public ActionResult AllStudentReportEWS(StudentsPageModel objModel)
         {
             if (objModel == null)
