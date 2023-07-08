@@ -121,6 +121,8 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetStudents(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
             return View(objModel);
         }
+       
+        
         [PermissionFilter]
         public ActionResult StudentInActive(StudentsPageModel objModel)
         {
@@ -1762,6 +1764,17 @@ namespace SMEnterprise.Controllers
         #endregion
 
         #region TC
+        [PermissionFilter]
+        public ActionResult StudentTcReport(StudentsPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentsPageModel();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetTCStudentList(SBranchID, objModel.SessionID);
+            return View(objModel);
+        }
         [PermissionFilter]
         public ActionResult StudentList(StudentsPageModel objModel)
         {

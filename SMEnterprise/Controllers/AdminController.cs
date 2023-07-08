@@ -2432,6 +2432,7 @@ namespace SMEnterprise.Controllers
         public ActionResult UpdateGallery(GalleryModel Data)
         {
             Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
+            Data.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
             if (Data.OpType == -1)
             {
@@ -2916,7 +2917,8 @@ namespace SMEnterprise.Controllers
             //oModel.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
             objAdminData.DeleteProduct(ProductID);
-            return View(oModel);
+            return RedirectToAction("Products", "Admin");
+            
         }
 
         [PermissionFilter]

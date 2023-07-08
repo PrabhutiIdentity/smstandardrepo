@@ -130,6 +130,7 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+       
         public StudentsPageModel GetStudentInactive(int ClassID, int SectionID, int SBranchID, int SessionID)
         {
 
@@ -4233,11 +4234,43 @@ namespace SMEnterprise.Repository
                     return objModel;
                 }
             }
-            #endregion
+        #endregion
 
-            #region TC Related
+        #region TC Related
+        public StudentsPageModel GetTCStudentList(int SBranchID, int SessionID)
+        {
 
-            public int InsertUpdateTC(TCModel oModel)
+            StudentsPageModel objModel = new StudentsPageModel();
+         
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+               
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("spn_GetTCStudentList", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Students = multi.Read<StudentModel>().ToList();
+                   
+                  
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                       
+                    }
+                    catch
+                    {
+
+                    }
+
+                }
+            }
+            return objModel;
+        }
+
+        public int InsertUpdateTC(TCModel oModel)
             {
                 using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
                 {

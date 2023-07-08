@@ -3214,6 +3214,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Status", objData.Status);
                 paramater.Add("@OpType", objData.OpType);
                 paramater.Add("@Images", objData.GetImages());
+                paramater.Add("@SbranchID", objData.SBranchID);
 
                 return con.Query<int>("spn_InsertUpdateGallery", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
