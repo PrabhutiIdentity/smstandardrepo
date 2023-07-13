@@ -1250,6 +1250,43 @@ namespace SMEnterprise.Repository
         }
         #endregion
         #region Transport Management
+
+        
+
+         public EditTransportFeeModel GetTransportRouteFee(EditTransportFeeModel objModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@RouteID", objModel.RouteID);
+                paramater.Add("@SBranchID", objModel.SBranchID);
+                paramater.Add("@SessionID", objModel.SessionID);
+
+                using (var multi = con.QueryMultiple("sp_GetFeeForTransport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.TransportFee = multi.Read<TransportFeeModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    objModel.Routes = multi.Read<RoteStopModel>().ToList();
+                    objModel.RouteID = multi.Read<int>().SingleOrDefault();
+
+                }
+            }
+            return objModel;
+        }
+        public int InsertUpdateTransportFee(EditTransportFeeModel objData)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@TransportDetails", objData.GetTransportFeeDataTable());
+                paramater.Add("@SessionID", objData.SessionID);
+                paramater.Add("@SBranchID", objData.SBranchID);
+
+                con.Query<int>("sp_UpdateTransportFee", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                return 1;
+            }
+        }
         public IEnumerable<DriverConductorModel> GetDriverConductors(int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -2524,6 +2561,8 @@ namespace SMEnterprise.Repository
             }
         }
         #endregion
+     
+        
         #region Salary Management
         public IEnumerable<SalaryCategoryModel> GetSalaryTypesOld(int SBranchID)
         {
@@ -3175,6 +3214,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Status", objData.Status);
                 paramater.Add("@OpType", objData.OpType);
                 paramater.Add("@Images", objData.GetImages());
+                paramater.Add("@SbranchID", objData.SBranchID);
 
                 return con.Query<int>("spn_InsertUpdateGallery", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
@@ -4331,15 +4371,25 @@ namespace SMEnterprise.Repository
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
+             
                 paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@SBranchID", oModel.SBranchID);
-                
+                paramater.Add("@StartDate", oModel.StartDate);
+                paramater.Add("@EndDate", oModel.EndDate);
+
 
                 using (var multi = con.QueryMultiple("sp_GetSessionStudentAdmissionDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
                     // oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+
+                        oModel.Branches = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return oModel;

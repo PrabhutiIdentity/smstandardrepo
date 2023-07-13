@@ -230,7 +230,7 @@ namespace SMEnterprise.Models
         public string MotherEducationID { get; set; }
         public string MotherAadhaar { get; set; }
         public string FatherAadhaar { get; set; }
-      
+      public string QuotaName { get; set; }
         public string RollNo { get; set; }
         public string ClassName { get; set; }
         public string SectionName { get; set; }

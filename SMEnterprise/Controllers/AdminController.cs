@@ -1894,6 +1894,39 @@ namespace SMEnterprise.Controllers
             objData.FeeStructure = null;
             return RedirectToAction("FeeStructureManagement", "Admin", objData);
         }
+
+        #endregion
+
+        #region Transport Fee
+        [PermissionFilter]
+        public ActionResult TransportFeeManagement(EditTransportFeeModel Model = null)
+        {
+            if (Model == null)
+            {
+                Model = new EditTransportFeeModel();
+            }
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            Model.OperationDate = CommonUsage.GetCurrentDate();
+            Model.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            Model = objAdminData.GetTransportRouteFee(Model);
+            return View(Model);
+
+        }
+        [PermissionFilter]
+        public ActionResult UpdateTransportRouteFee(EditTransportFeeModel objData)
+        {
+            objData.OperationDate = CommonUsage.GetCurrentDate();
+            if (objData.TransportFee != null)
+            {
+                objAdminData.InsertUpdateTransportFee(objData);
+            }
+            objData.TransportFee = null;
+            return RedirectToAction("TransportFeeManagement", "Admin", objData);
+        }
+
         #endregion
         #region Salary Management
         [PermissionFilter]
@@ -2399,6 +2432,7 @@ namespace SMEnterprise.Controllers
         public ActionResult UpdateGallery(GalleryModel Data)
         {
             Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
+            Data.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
             if (Data.OpType == -1)
             {
@@ -2883,7 +2917,8 @@ namespace SMEnterprise.Controllers
             //oModel.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
             objAdminData.DeleteProduct(ProductID);
-            return View(oModel);
+            return RedirectToAction("Products", "Admin");
+            
         }
 
         [PermissionFilter]

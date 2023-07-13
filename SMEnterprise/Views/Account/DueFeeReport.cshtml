@@ -89,7 +89,7 @@
                 <thead>
                     <tr>
 
-                        @*<th>Class/Section</th>*@
+                        <th>#</th>
                         <th>Student ID</th>
                         <th>SR No</th>
                         <th>Student</th>
@@ -103,34 +103,62 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (SMEnterprise.Models.DemandReciptModel d in Model.Recipts)
-                    {
-                        <tr>
-                            @*<td>@d.ClassName</td>*@
-                            <td>@d.StudentSID</td>
-                            <td>@d.SchoolUID</td>
-                            <td>@d.Name</td>
-                            <td>@d.FatherName</td>
-                            <td>@d.MobileNo</td>
-                            <td>@d.PreviousDues.ToString("0.00")</td>
-                            <td>@((d.ApplicableFee + d.LateFee).ToString("0.00")) <br />@d.MonthName</td>
-                            <td>@d.DiscAmt.ToString("0.00")</td>
-                            <td>@d.PaymentAmount.ToString("0.00")</td>
-                            <td>@((d.PreviousDues + d.ApplicableFee + d.LateFee - d.PaymentAmount - d.DiscAmt).ToString("0.00"))</td>
-                        </tr>
+                    @{
+                        int count = 1;
+                        decimal TotalDue = 0;
+                        decimal PaymentAmount = 0;
+                        decimal CurrentAmount = 0;
+                        decimal DiscAmt = 0;
+                        decimal PreviousDues = 0;
+                        foreach (SMEnterprise.Models.DemandReciptModel d in Model.Recipts)
+                        {
+                            TotalDue = TotalDue + (d.PreviousDues + d.ApplicableFee - d.PaymentAmount - d.DiscAmt);
+                            DiscAmt = DiscAmt + d.DiscAmt;
+                            PreviousDues = PreviousDues + d.PreviousDues;
+                            CurrentAmount = CurrentAmount + d.ApplicableFee;
+                                        <tr>
+                                            <td>@count</td>
+                                            <td>@d.StudentSID</td>
+                                            <td>@d.SchoolUID</td>
+                                            <td>@d.Name</td>
+                                            <td>@d.FatherName</td>
+                                            <td>@d.MobileNo</td>
+                                            <td>@d.PreviousDues.ToString("0.00")</td>
+                                            <td>@((d.ApplicableFee + d.LateFee).ToString("0.00")) <br />@d.MonthName</td>
+                                            <td>@d.DiscAmt.ToString("0.00")</td>
+                                            <td>@d.PaymentAmount.ToString("0.00")</td>
+                                            <td>@((d.PreviousDues + d.ApplicableFee + d.LateFee - d.PaymentAmount - d.DiscAmt).ToString("0.00"))</td>
+                                        </tr>
+
+                            count++;
+                        }
 
                     }
-                    @*<tr>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th>
-                              @Model.Recipts.Sum(a => a.PreviousDues).ToString("0.00")
-                            </th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                        </tr>*@
+<tfoot>
+    <tr style="background-color: #606d73;color: white;">
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+        </td>
+        <td>
+            
+        </td>
+        <td>
+            <b>Class Month Due</b>
+        </td>
+
+        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @PreviousDues.ToString("N2")</b></td>
+        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @CurrentAmount.ToString("N2")</b></td>
+        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @DiscAmt.ToString("N2")</b></td>
+        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @PaymentAmount.ToString("N2")</b></td>
+
+        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalDue.ToString("N2")</b></td>
+    </tr>
+                </tfoot>
                 </tbody>
             </table>
         </div>
@@ -145,68 +173,87 @@
     <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
     <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
-    @*<script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
-
-        <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
-        <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
-
-        <script src="@Url.Content("~/js/jszip.min.js")"></script>
-        <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
-        <script src="@Url.Content("~/js/vfs_fonts.js")"></script>*@
+   
     <script>
         $(document).ready(function () {
          var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
-            var repname = '@Model.Branch.BranchSchoolName' + ' Class:' + $('#ddlClass option:selected').text() + ' / ' + $('#ddlSection option:selected').text() + ' Due Fee Report'
-            var rpname ='Due Fee Report'
-            var repname1 = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
+                var rpname = ' Due Report for ' + 'Class ' + $('#ddlClass option:selected').text() + '' + '/ ' + $('#ddlSection option:selected').text() + '' + ' & Session (' + $('#ddlSessions option:selected').text() + ')';
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
 
             var handleDataTableButtons = function () {
                 if ($("#tblCategory").length) {
                     $("#tblCategory").DataTable({
                         "pageLength": 40,
 
-                        bSort: true,
+                        "paging": true,
+                        "pagingType": "simple_numbers",
                         dom: "Bfrtip",
                         buttons: [
-                           {
-                                extend: "copy",
-                                className: "btn-sm",
-                                text: '<i class="far fa-copy"></i> Copy',
+                            {
+                               extend: "copy",
+                            className: "btn-sm",
+                                footer: true,
                                 message: printdate,
-                                title: repname
+                             messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
                             },
                             {
-                                extend: "csv",
-                                 className: "btn-sm",
-
-                                @*className: "btn-sm",*@
-                                text: '<i class="fas fa-file-csv"></i> CSV',
+                                 extend: "csv",
+                          className: "btn-sm",
+                                footer: true,
                                 message: printdate,
-                                title: repname
+                            messageTop: '@Model.Branch.BranchSchoolName' + "Hi",
+                            messageBottom: repname,
+                            title: rpname
                             },
                             {
-                                extend: "excel",
-                                className: "btn-sm",
-                                text: '<i class=""fa fa-table fainfo" aria-hidden="true""></i> Excel',
-                                messageTop: rpname,
-                                messageBottom: repname1,
-                                message: printdate,
-                                title: repname
+                                  extend: "excel",
+                          className: "btn-sm",
+                          footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                             {
                                 extend: "pdfHtml5",
-                                className: "btn btn-dark rounded-0",
-                                text: '<i class="fa fa-file-pdf-o"></i> Pdf',
+                          className: "btn-sm",
+                          footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                                },
                                 message: printdate,
-                                title: repname
+                          messageBottom: repname,
+                          title: rpname
                             },
                             {
-                                 extend: "print",
-                                 className: "btn btn-dark rounded-0",
-                                 text: '<i class="fa fa-print"></i> Print',
-                                 message: printdate,
-                                 title: repname
-
+                                extend: "print",
+                          className: "btn-sm",
+                                footer: true,
+                                orientation: 'landscape',
+                                message: rpname,
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
                             },
                         ],
                         responsive: true

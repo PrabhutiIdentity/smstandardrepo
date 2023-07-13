@@ -42,3 +42,44 @@ BEGIN
    WHERE d.ParentID=e.ParentID  
 END  
  go 
+
+alter procedure [dbo].[spn_GetStudentRecordsClassSection]    
+(    
+@ClassID int,    
+@SectionID int,    
+@SBranchID int,    
+@SessionID int=0    
+)    
+as     
+begin     
+ Declare @Status int=1    
+ if(@SessionID=0)    
+ begin    
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID    
+ end    
+ if(@SectionID=0)    
+ begin    
+  select @ClassID=min(ClassID) from ClassMaster where Status=1 and SBranchID=@SBranchID    
+  select @SectionID=min(ID) from Class_Sections where Status=1 and ClassID=@ClassID    
+ end    
+    
+ Select SS.StudentSessionUID, SS.RollNo, SM.Name,SM.ParentID, SM.StudentID,PM.FatherMobileNo,PM.MotherMobileNo,PM.FatherName,PM.MotherName,SM.SchoolUID,SM.Photo    
+ ,SM.DOB,SM.DOJ,SM.GuardianMobileNo,SM.MiniAddress,SM.AadharCardNo     
+  ,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.[StudentID] AS VARCHAR(6)),6)  as StudentSID    
+  from StudentMaster SM right outer join Student_Session SS on SS.StudentID=SM.StudentID    
+  left outer join ParentMaster PM on PM.ParentID=SM.ParentID    
+  Where SS.SectionID=@SectionID and SS.SessionID=@SessionID  and ss.status=1  
+  order by SM.Name    
+     
+ select ClassID,ClassName from ClassMaster where SBranchID=@SBranchID    
+    
+ select ID,Name from Class_Sections where ClassID=@ClassID    
+    
+ select isnull(@ClassID,0)    
+ select isnull(@SectionID,0)    
+    
+ Select SessionName as Name,SessionID as ID,SessionStatus as Extra1 from SessionMaster where SBranchID=@SBranchID    
+     
+ select isnull(@SessionID,0)    
+end    
+    go

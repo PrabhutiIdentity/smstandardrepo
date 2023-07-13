@@ -15,8 +15,9 @@ using System.Text.RegularExpressions;
 using System.Data;
 using System.Data.OleDb;
 using System.Reflection;
-
-
+using System.Xml.Xsl;
+using System.Xml;
+using System.Xml.Serialization;
 
 namespace SMEnterprise.Repository
 {
@@ -87,6 +88,36 @@ namespace SMEnterprise.Repository
     }
     public class CommonUsage
     {
+        public static string ConvertToHTML(string xmlstring, string xsltUri)
+        {
+            XslCompiledTransform objXSLTransform = new XslCompiledTransform();
+            objXSLTransform.Load(xsltUri);
+            StringBuilder htmlOutput = new StringBuilder();
+            TextWriter htmlWriter = new StringWriter(htmlOutput);
+
+            // Creating XmlReader object to read XML content    
+            XmlReader reader = XmlReader.Create(new StringReader(xmlstring));
+
+            // Call Transform() method to create html string and write in TextWriter object.    
+            objXSLTransform.Transform(reader, null, htmlWriter);
+
+            // Closing xmlreader object    
+            reader.Close();
+            return htmlOutput.ToString();
+        }
+
+        public static string SerializeToXML<T>(T obj) where T : class
+        {
+            XmlSerializer xsSubmit = new XmlSerializer(typeof(T));
+            using (var sww = new StringWriter())
+            {
+                using (XmlTextWriter writer = new XmlTextWriter(sww) { Formatting = System.Xml.Formatting.Indented })
+                {
+                    xsSubmit.Serialize(writer, obj);
+                    return sww.ToString();
+                }
+            }
+        }
         public static List<T> ConvertDataTable<T>(DataTable dt)
         {
             List<T> data = new List<T>();
