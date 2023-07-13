@@ -1,0 +1,151 @@
+
+alter procedure [dbo].[sp_InsertUpdateTCDetails]              
+(              
+@TCID int,              
+@StudentID int,              
+@SessionID int,              
+@IsSCBLastExamPassed int,              
+@SCBLastExamName nvarchar(50),              
+@SCBLastExamResult nvarchar(50),              
+@FailedCount int,              
+@PromotedToClass int,              
+@WorkingDays int,              
+@PresentDays int,              
+@IsNCC int,              
+@NCCDetails nvarchar(50),              
+@Games nvarchar(500),              
+@GeneralConduct nvarchar(50),              
+@DateOfApplication date,              
+@DateOfIssue date,              
+@ReasonForLeaving nvarchar(500),              
+@Remarks nvarchar(MAX),              
+@DuePaidMonth nvarchar(20),              
+@Concession nvarchar(20),              
+@OpType int,          
+@TCSLNo nvarchar(50),             
+@SBranchID int,           
+@CreatedBy int                 
+          
+)              
+as               
+begin               
+ if(@Optype=-1)              
+ begin              
+  Delete from TCDetails where TCID=@TCID              
+ end              
+ else              
+ begin              
+  if(@TCID=0)              
+  begin              
+   Insert into TCDetails (StudentID,SessionID,IsSCBLastExamPassed,SCBLastExamName,SCBLastExamResult,FailedCount,PromotedToClass,WorkingDays,PresentDays,IsNCC,NCCDetails,Games,GeneralConduct,DateOfApplication,DateOfIssue,ReasonForLeaving,Remarks,  
+   DuePaidMonth,Concession,CreatedBy,TCSLNo,SBranchID)              
+   Values(@StudentID,@SessionID,@IsSCBLastExamPassed,@SCBLastExamName,@SCBLastExamResult,@FailedCount,@PromotedToClass,@WorkingDays,@PresentDays,@IsNCC,@NCCDetails,@Games,@GeneralConduct,@DateOfApplication,@DateOfIssue,@ReasonForLeaving,@Remarks,  
+   @DuePaidMonth,@Concession,@CreatedBy,@TCSLNo,@SBranchID)              
+   select @TCID=Cast(Scope_Identity() as int)   
+     if(@TCID!=0)
+	   begin
+		Update Student_Session set Isleft=1,status=0 where StudentID=@StudentID and sessionid=@SessionID 
+		and StudentID in ( select StudentID from  TCDetails where TCID=@TCID) 
+		end
+  end              
+  else              
+  begin              
+   Update TCDetails set StudentID=@StudentID,SessionID=@SessionID,IsSCBLastExamPassed=@IsSCBLastExamPassed,SCBLastExamName=@SCBLastExamName,SCBLastExamResult=@SCBLastExamResult,FailedCount=@FailedCount,PromotedToClass=@PromotedToClass,  
+   WorkingDays=@WorkingDays,PresentDays=@PresentDays,IsNCC=@IsNCC,NCCDetails=@NCCDetails,Games=@Games,              
+   GeneralConduct=@GeneralConduct,DateOfApplication=@DateOfApplication,DateOfIssue=@DateOfIssue,ReasonForLeaving=@ReasonForLeaving,Remarks=@Remarks,DuePaidMonth=@DuePaidMonth,Concession=@Concession,TCSLNo=@TCSLNo              
+   where  TCID=@TCID              
+  end              
+ end              
+ --if(@StudentID!=0)            
+ --begin            
+ -- Update Student_Session set Isleft=1,status=0 where StudentID=@StudentID and sessionid=@SessionID           
+ --end            
+            
+ select @TCID              
+end 
+
+go
+-- Inactive Studentlist
+
+alter  procedure [dbo].[spn_GetInActiveStudentsByClassSection]                
+(                
+@ClassID int,                
+@SectionID int,                
+@SBranchID int,                
+@SessionID int=0                
+)                
+as                 
+begin                 
+ Declare @Status int                
+ if(@SessionID=0)                
+ begin                
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID                
+ end                
+ select @Status=SessionStatus from SessionMaster where SessionID=@SessionID                
+ if(@SectionID<>0)                
+ begin                
+  Select SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, SM.Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,SS.RollNo,SM.AccessCardNo,SM.AadharCardNo                
+   ,'PAR'+RIGHT(REPLICATE('0',6)+CAST(SM.ParentID AS VARCHAR(6)),6) as [SParentID]            
+  ,PM.FatherMobileNo,PM.MotherMobileNo,AadharCardNo ,PM.ParentID,PM.FatherName,PM.MotherName,SM.SSSID,SM.FamilyID,                
+  SS.FromDate as SessionStartDate, SS.ToDate as SessionEndDate,                
+  SM.HostelRoomID,SM.StopID,SM.Gender,SM.SchoolUID,MiniAddress,HM.Name as HouseName               
+  from StudentMaster SM left outer join Student_Session SS on SS.StudentID=SM.StudentID                
+  left outer join HouseMaster HM on HM.ID=SS.HouseID                
+  left outer join Parentmaster PM on PM.ParentID=SM.ParentID       
+    where SS.ClassID=@ClassID and SS.SectionID=@SectionID and SS.SessionID=@SessionID  and SS.status=0 and isnull(isleft,0)!=1 and
+  --where (SS.ClassID=@ClassID and SS.SectionID=@SectionID and SS.SessionID=@SessionID   
+  -- and SS.StudentID not in (Select StudentID from Student_Session where Status!=0)) and                 
+  SS.SBranchID=@SBranchID order by Gender desc,Name                 
+ end                
+ else                
+ begin                  
+ set @ClassID=0                
+   Select SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, SM.Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,'' as RollNo,SM.AccessCardNo,SM.AadharCardNo,                
+  SM.HostelRoomID,SM.StopID,SM.Gender,AadharCardNo,          
+   'PAR'+RIGHT(REPLICATE('0',6)+CAST(SM.ParentID AS VARCHAR(6)),6) as [SParentID],            
+  PM.FatherMobileNo,PM.MotherMobileNo,PM.ParentID,PM.FatherName,SM.SchoolUID,PM.MotherName,SM.SSSID,SM.FamilyID,                
+  MiniAddress                
+  from StudentMaster SM   left outer join Parentmaster PM on PM.ParentID=SM.ParentID                
+   where  SM.SBranchID=@SBranchID and StudentID not in (select StudentID from Student_Session SS where  SS.StudentID=SM.StudentID) order by Gender desc,Name               
+ end                
+                 
+ select ClassID,ClassName from ClassMaster where SBranchID=@SBranchID                
+                
+ select ID,Name from Class_Sections where ClassID=@ClassID                
+                
+ select @ClassID                
+ select @SectionID                
+                
+ Select SessionName as Name,SessionID as ID,SessionStatus as Extra1 from SessionMaster where SBranchID=@SBranchID                
+                 
+ select @SessionID                
+                
+ select * from SBranchMaster where SBranchID=@SBranchID                
+end   
+go
+
+
+go
+
+create proc [dbo].[sp_GetIssuedTCs]  
+(  
+ @SBranchID int,  
+ @SessionID int  
+)  
+AS  
+BEGIN  
+  select SessionID as ID,SessionName as Name,SessionStatus as Extra1 from SessionMaster where SBranchID=@SBranchID  
+  if(@SessionID=0)  
+  begin  
+   Select top 1 @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID order by SessionStatus desc  
+  end  
+  select TCID,TC.StudentID,SM.Name as StudentName,CM.ClassName,PromotedToClass,DateOfApplication,DateOfIssue from TCDetails TC  
+  left outer join StudentMaster SM on SM.StudentID=TC.StudentID  
+  left outer join ClassMaster CM on CM.ClassID=TC.PromotedToClass  
+   where SessionID=@SessionID  
+  
+   select isnull(@SessionID,0)  
+END 
+go 
+  
+  go

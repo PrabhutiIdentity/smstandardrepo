@@ -2,13 +2,27 @@
 @{
     ViewBag.Title = "StudentDetails";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var permissions = (EmployeePermissionsModel)Session["Permissions"];
+    var canEditCustomFee = true;
+    @*if (permissions.isPermissionsSet > 0)
+        {
+            var customFeePermission = permissions.Permissions.FirstOrDefault(x => x.Module == 1 && x.Action == 1);
+            if (customFeePermission != null && customFeePermission.Status == 1)
+            {
+                canEditCustomFee = true;
+            }
+            else
+            {
+                canEditCustomFee = false;
+            }
+        }*@
 }
 @model SMEnterprise.Models.StudentEditModel
 @section IncludeCss
 {
     <title>P-School | Student Management</title>
-    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")">
-    <link rel="stylesheet" href="@Url.Content("~/css/Admin/blue.css")">
+    <link rel="stylesheet" href="@Url.Content(" ~ /css/select2.min.css")">
+    <link rel="stylesheet" href="@Url.Content(" ~ /css/Admin/blue.css")">
     <style>
         div[aria-role="alertdialog"] {
             z-index: 2 !important;
@@ -49,43 +63,45 @@
 
                     <div class="" role="tabpanel" data-example-id="togglable-tabs">
                         <ul id="myTab" class="nav nav-tabs bar_tabs" role="tablist">
-                            <li role="presentation" class="@(Model.CurrentTab == 1 || Model.Student.StudentID == 0 ? " active" : "")">
+                            <li role="presentation" class="@(Model.CurrentTab == 1 || Model.Student.StudentID == 0 ? " active" : "" )">
                                 <a href="#tab_Personal" id="Personal-tab" role="tab" data-toggle="tab" aria-expanded="true">Personal</a>
                             </li>
                             @if (Model.Student.StudentID != 0)
                             {
-                                <li role="presentation" class="@(Model.CurrentTab == 2 ? " active" : "")">
+                                <li role="presentation" class="@(Model.CurrentTab == 2 ? " active" : "" )">
                                     <a href="#tab_Parent" role="tab" id="Parent-tab" data-toggle="tab" aria-expanded="false">Parent</a>
                                 </li>
-                                <li role="presentation" class="@(Model.CurrentTab == 3 ? " active" : "")">
+                                <li role="presentation" class="@(Model.CurrentTab == 3 ? " active" : "" )">
                                     <a href="#tab_address" role="tab" id="address-tab" data-toggle="tab" aria-expanded="false">Address</a>
                                 </li>
-                                <li role="presentation" class="@(Model.CurrentTab == 4 ? " active" : "")">
+                                <li role="presentation" class="@(Model.CurrentTab == 4 ? " active" : "" )">
                                     <a href="#tab_guardian" role="tab" id="guardian -tab" data-toggle="tab" aria-expanded="false">Guardian </a>
                                 </li>
-                                <li role="presentation" class="@(Model.CurrentTab == 5 ? " active" : "")">
+                                <li role="presentation" class="@(Model.CurrentTab == 5 ? " active" : "" )">
                                     <a href="#tab_documents" role="tab" id="documents -tab" data-toggle="tab" aria-expanded="false">Documents </a>
                                 </li>
-                                <li role="presentation" class="@(Model.CurrentTab == 6 ? " active" : "")">
+                                <li role="presentation" class="@(Model.CurrentTab == 6 ? " active" : "" )">
                                     <a href="#tab_session " role="tab" id="session -tab" data-toggle="tab" aria-expanded="false">Session </a>
                                 </li>
-                                <li role="presentation" class="@(Model.CurrentTab == 7 ? " active" : "")">
+                                <li role="presentation" class="@(Model.CurrentTab == 7 ? " active" : "" )">
                                     <a href="#tab_transport" role="tab" id="transport-tab" data-toggle="tab" aria-expanded="false">Transport </a>
                                 </li>
                                 if (Model.Hostel.Hostels != null)
                                 {
-                                    <li role="presentation" class="@(Model.CurrentTab == 8 ? " active" : "")">
+                                    <li role="presentation" class="@(Model.CurrentTab == 8 ? " active" : "" )">
                                         <a href="#tab_hostel" role="tab" id="hostel-tab" data-toggle="tab" aria-expanded="false">Hostel  </a>
                                     </li>
                                 }
-
-                                <li role="presentation" class="@(Model.CurrentTab == 9 ? " active" : "")">
-                                    <a href="#tab_Fee" role="tab" id="Fee-tab" data-toggle="tab" aria-expanded="false">Custom Fee  </a>
-                                </li>
+                                if (canEditCustomFee)
+                                {
+                                    <li role="presentation" class="@(Model.CurrentTab == 9 ? " active" : "" )">
+                                        <a href="#tab_Fee" role="tab" id="Fee-tab" data-toggle="tab" aria-expanded="false">Custom Fee  </a>
+                                    </li>
+                                }
                             }
                         </ul>
                         <div id="myTabContent" class="tab-content">
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 1 ? " active in" : "")" id="tab_Personal" aria-labelledby="home-tab">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 1 ? " active in" : "" )" id="tab_Personal" aria-labelledby="home-tab">
                                 @using (Html.BeginForm("SaveStudentPersonal", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
                                 {
                                     <div class="row">
@@ -96,7 +112,7 @@
                                                 </label>
                                                 <div class="col-md-8 col-sm-9 col-xs-12">
                                                     <figure class="figure profile-box" style="height: 150px;">
-                                                        <img id="imgStudentImage" onerror="return OnImageError(this, @Model.Student.Gender);" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" class="img-responsive thumbImage">
+                                                        <img id="imgStudentImage" onerror="return OnImageError(this, @Model.Student.Gender);" src="@Url.Content(" ~ /Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" class="img-responsive thumbImage">
                                                     </figure>
                                                     <input type="hidden" id="hdnImageName" name="Photo" value="@Model.Student.Photo" />
                                                 </div>
@@ -108,7 +124,7 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <input type="hidden" id="hdnStudentID" name="StudentID" value="@Model.Student.StudentID" />
-                                                        <input style="background-color:@(Model.Student.StudentID == 0 ? " antiquewhite" : "aliceblue");" type="text" id="txtAdmissionUID" class="form-control col-md-7 col-xs-12" disabled="" value="@Model.Student.StudentSID">
+                                                        <input style="background-color:@(Model.Student.StudentID == 0 ? " antiquewhite" : "aliceblue" );" type="text" id="txtAdmissionUID" class="form-control col-md-7 col-xs-12" disabled="" value="@Model.Student.StudentSID">
                                                     </div>
                                                 </div>
                                                 <div class="form-group col-md-6">
@@ -135,10 +151,10 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <select type="text" id="ddlNationality" name="Nationality" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="0" @(Model.Student.Nationality == 0 ? "selected" : "")>NA</option>
+                                                            <option value="0" @(Model.Student.Nationality == 0 ? "selected" : "" )>NA</option>
                                                             @foreach (var s in Model.Nationalities)
                                                             {
-                                                                <option value="@s.ID" @(Model.Student.Nationality == s.ID ? "selected" : "")>@s.Name</option>
+                                                                <option value="@s.ID" @(Model.Student.Nationality == s.ID ? "selected" : "" )>@s.Name</option>
                                                             }
                                                         </select>
                                                     </div>
@@ -149,7 +165,7 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <label class="switch switch-green col-md-6">
-                                                            <input type="checkbox" class="switch-input" @(Model.Student.Gender == 0 ? "checked" : "")>
+                                                            <input type="checkbox" class="switch-input" @(Model.Student.Gender == 0 ? "checked" : "" )>
                                                             <span class="switch-label" onclick="$(this).closest('label').find('#hdnStudentGender').val($(this).closest('label').find('#hdnStudentGender').val() == '0' ? '1' : '0');" data-on="Male" data-off="Female"></span>
                                                             <span class="switch-handle" id="shTranding"></span>
                                                             <input type="hidden" name="Gender" id="hdnStudentGender" value="@Model.Student.Gender">
@@ -193,9 +209,9 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <select id="ddlReligion" name="NotificationSMSTo" class="form-control col-md-7 col-xs-12">
-                                                            <option value="0" @(Model.Student.NotificationSMSTo == 0 ? "selected" : "")>On Father's Mobile</option>
-                                                            <option value="1" @(Model.Student.NotificationSMSTo == 1 ? "selected" : "")>On Mother's Mobile</option>
-                                                            <option value="2" @(Model.Student.NotificationSMSTo == 2 ? "selected" : "")>On Guardian</option>
+                                                            <option value="0" @(Model.Student.NotificationSMSTo == 0 ? "selected" : "" )>On Father's Mobile</option>
+                                                            <option value="1" @(Model.Student.NotificationSMSTo == 1 ? "selected" : "" )>On Mother's Mobile</option>
+                                                            <option value="2" @(Model.Student.NotificationSMSTo == 2 ? "selected" : "" )>On Guardian</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -205,10 +221,10 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <select type="text" id="ddlReligion" name="ReligionID" class="form-control col-md-7 col-xs-12">
-                                                            <option value="0" @(Model.Student.ReligionID == 0 ? "selected" : "")>NA</option>
+                                                            <option value="0" @(Model.Student.ReligionID == 0 ? "selected" : "" )>NA</option>
                                                             @foreach (var s in Model.Religions)
                                                             {
-                                                                <option value="@s.ID" @(Model.Student.ReligionID == s.ID ? "selected" : "")>@s.Name</option>
+                                                                <option value="@s.ID" @(Model.Student.ReligionID == s.ID ? "selected" : "" )>@s.Name</option>
                                                             }
                                                         </select>
                                                     </div>
@@ -219,9 +235,9 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <select id="ddlSDisability" name="Disability" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="1" @(Model.Student.Disability == 1 ? "selected" : "")>None</option>
-                                                            <option value="2" @(Model.Student.Disability == 2 ? "selected" : "")>Handicap</option>
-                                                            <option value="3" @(Model.Student.Disability == 3 ? "selected" : "")>Other</option>
+                                                            <option value="1" @(Model.Student.Disability == 1 ? "selected" : "" )>None</option>
+                                                            <option value="2" @(Model.Student.Disability == 2 ? "selected" : "" )>Handicap</option>
+                                                            <option value="3" @(Model.Student.Disability == 3 ? "selected" : "" )>Other</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -231,10 +247,10 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <select id="ddlSCategory" name="Category" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="0" @(Model.Student.Category == 0 ? "selected" : "")>NA</option>
+                                                            <option value="0" @(Model.Student.Category == 0 ? "selected" : "" )>NA</option>
                                                             @foreach (var s in Model.SocialCategories)
                                                             {
-                                                                <option value="@s.ID" @(Model.Student.Category == s.ID ? "selected" : "")>@s.Name</option>
+                                                                <option value="@s.ID" @(Model.Student.Category == s.ID ? "selected" : "" )>@s.Name</option>
                                                             }
                                                         </select>
                                                     </div>
@@ -245,10 +261,10 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <select id="ddlSMotherTongue" name="MotherTongueID" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="0" @(Model.Student.MotherTongueID == 0 ? "selected" : "")>NA</option>
+                                                            <option value="0" @(Model.Student.MotherTongueID == 0 ? "selected" : "" )>NA</option>
                                                             @foreach (var s in Model.MotherTongues)
                                                             {
-                                                                <option value="@s.ID" @(Model.Student.MotherTongueID == s.ID ? "selected" : "")>@s.Name</option>
+                                                                <option value="@s.ID" @(Model.Student.MotherTongueID == s.ID ? "selected" : "" )>@s.Name</option>
                                                             }
                                                         </select>
                                                     </div>
@@ -259,15 +275,15 @@
                                                     </label>
                                                     <div class="col-md-9 col-sm-9 col-xs-12">
                                                         <select id="ddlSBloodGroup" name="BloodGroup" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option @(Model.Student.BloodGroup == "NA" ? "selected" : "")>NA</option>
-                                                            <option @(Model.Student.BloodGroup == "A+" ? "selected" : "")>A+</option>
-                                                            <option @(Model.Student.BloodGroup == "A-" ? "selected" : "")>A-</option>
-                                                            <option @(Model.Student.BloodGroup == "B+" ? "selected" : "")>B+</option>
-                                                            <option @(Model.Student.BloodGroup == "B-" ? "selected" : "")>B-</option>
-                                                            <option @(Model.Student.BloodGroup == "O-" ? "selected" : "")>O-</option>
-                                                            <option @(Model.Student.BloodGroup == "O+" ? "selected" : "")>O+</option>
-                                                            <option @(Model.Student.BloodGroup == "AB+" ? "selected" : "")>AB-</option>
-                                                            <option @(Model.Student.BloodGroup == "AB+" ? "selected" : "")>AB+</option>
+                                                            <option @(Model.Student.BloodGroup == "NA" ? "selected" : "" )>NA</option>
+                                                            <option @(Model.Student.BloodGroup == "A+" ? "selected" : "" )>A+</option>
+                                                            <option @(Model.Student.BloodGroup == "A-" ? "selected" : "" )>A-</option>
+                                                            <option @(Model.Student.BloodGroup == "B+" ? "selected" : "" )>B+</option>
+                                                            <option @(Model.Student.BloodGroup == "B-" ? "selected" : "" )>B-</option>
+                                                            <option @(Model.Student.BloodGroup == "O-" ? "selected" : "" )>O-</option>
+                                                            <option @(Model.Student.BloodGroup == "O+" ? "selected" : "" )>O+</option>
+                                                            <option @(Model.Student.BloodGroup == "AB+" ? "selected" : "" )>AB-</option>
+                                                            <option @(Model.Student.BloodGroup == "AB+" ? "selected" : "" )>AB+</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -413,13 +429,13 @@
                                     </div>
                                 }
                             </div>
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 2 ? " active in" : "")" id="tab_Parent" aria-labelledby="profile-tab">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 2 ? " active in" : "" )" id="tab_Parent" aria-labelledby="profile-tab">
                                 @using (Html.BeginForm("SaveStudentParent", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
                                 {
                                     <div class="form-group col-md-6">
                                         <label class="control-label col-md-4 col-sm-3 col-xs-12" for="txtParentID">Parent ID : </label>
                                         <div class="col-md-8 col-sm-9 col-xs-12 input-group">
-                                            <input style="background-color:@(Model.ParantDetails.ParentID == 0 ? " antiquewhite" : "aliceblue");" value="@Model.ParantDetails.ParentSID" type="text" id="txtParentID" class="form-control" placeholder="Parent ID (If Exist)">
+                                            <input style="background-color:@(Model.ParantDetails.ParentID == 0 ? " antiquewhite" : "aliceblue" );" value="@Model.ParantDetails.ParentSID" type="text" id="txtParentID" class="form-control" placeholder="Parent ID (If Exist)">
                                             <span class="input-group-btn">
                                                 <a href="javascript:void(0);" class="btn btn-primary" onclick="CheckParantDetails();"><i class="fa fa-refresh"></i></a>
                                             </span>
@@ -437,11 +453,11 @@
                                                     <figure class="figure profile-box" style="height: 150px;">
                                                         @if (Model.ParantDetails.FatherImage != null)
                                                         {
-                                                            <img id="imgFatherImage" onerror="return OnImageError(this, 0);" src="@Url.Content("~/Images/ParentImage/Father/")@(Model.ParantDetails.ParentID)_1_@Model.ParantDetails.FatherImage" class="img-responsive thumbImage" />
+                                                            <img id="imgFatherImage" onerror="return OnImageError(this, 0);" src="@Url.Content(" ~ /Images/ParentImage/Father/")@(Model.ParantDetails.ParentID)_1_@Model.ParantDetails.FatherImage" class="img-responsive thumbImage" />
                                                         }
                                                         else
                                                         {
-                                                            <img id="imgFatherImage" onerror="return OnImageError(this, 0);" src="@Url.Content("~/Images/MaleNoImage.png")" class="img-responsive thumbImage" />
+                                                            <img id="imgFatherImage" onerror="return OnImageError(this, 0);" src="@Url.Content(" ~ /Images/MaleNoImage.png")" class="img-responsive thumbImage" />
                                                         }
 
                                                     </figure>
@@ -472,8 +488,8 @@
                                                 <div class="col-md-8 col-sm-8 col-xs-12">
                                                     <input type="text" name="FatherOccupationID" value="@Model.ParantDetails.FatherOccupationID" class="form-control" id="ddlPFatherOccupation" placeholder="Father's Occupation" aria-describedby="inputSuccess2Status">
                                                     @*<select id="ddlPFatherOccupation" name="FatherOccupationID" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="1" @(Model.ParantDetails.FatherOccupationID == 1 ? "selected" : "" )>Service</option>
-                                                            <option value="2" @(Model.ParantDetails.FatherOccupationID == 2 ? "selected" : "" )>Other</option>
+                                                            <option value="1" @(Model.ParantDetails.FatherOccupationID==1 ? "selected" : "" )>Service</option>
+                                                            <option value="2" @(Model.ParantDetails.FatherOccupationID==2 ? "selected" : "" )>Other</option>
                                                         </select>*@
                                                 </div>
                                             </div>
@@ -509,15 +525,15 @@
                                                 </label>
                                                 <div class="col-md-8 col-sm-9 col-xs-12">
                                                     <select id="ddlPFatherBloodGroup" name="FatherBloodGroup" required="required" class="form-control col-md-7 col-xs-12">
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "NA" ? "selected" : "")>NA</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "A+" ? "selected" : "")>A+</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "A-" ? "selected" : "")>A-</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "B+" ? "selected" : "")>B+</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "B-" ? "selected" : "")>B-</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "O-" ? "selected" : "")>O-</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "O+" ? "selected" : "")>O+</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "AB+" ? "selected" : "")>AB-</option>
-                                                        <option @(Model.ParantDetails.FatherBloodGroup == "AB+" ? "selected" : "")>AB+</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "NA" ? "selected" : "" )>NA</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "A+" ? "selected" : "" )>A+</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "A-" ? "selected" : "" )>A-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "B+" ? "selected" : "" )>B+</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "B-" ? "selected" : "" )>B-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "O-" ? "selected" : "" )>O-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "O+" ? "selected" : "" )>O+</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "AB+" ? "selected" : "" )>AB-</option>
+                                                        <option @(Model.ParantDetails.FatherBloodGroup == "AB+" ? "selected" : "" )>AB+</option>
                                                     </select>
                                                 </div>
                                             </div>
@@ -528,8 +544,8 @@
                                                 <div class="col-md-8 col-sm-9 col-xs-12">
                                                     <input type="text" name="FatherEducationID" value="@Model.ParantDetails.FatherEducationID" class="form-control" id="ddlPFatherEducation" placeholder="Father's Education" aria-describedby="inputSuccess2Status">
                                                     @*<select id="ddlPFatherEducation" name="FatherEducationID" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="1" @(Model.ParantDetails.FatherEducationID == 1 ? "selected" : "" )>Graduate</option>
-                                                            <option value="2" @(Model.ParantDetails.FatherEducationID == 2 ? "selected" : "" )>Other</option>
+                                                            <option value="1" @(Model.ParantDetails.FatherEducationID==1 ? "selected" : "" )>Graduate</option>
+                                                            <option value="2" @(Model.ParantDetails.FatherEducationID==2 ? "selected" : "" )>Other</option>
                                                         </select>*@
                                                 </div>
                                             </div>
@@ -551,13 +567,13 @@
                                                     <figure class="figure profile-box" style="height: 150px;">
                                                         @if (Model.ParantDetails.MotherImage != null)
                                                         {
-                                                            <img id="imgMotherImage" onerror="return OnImageError(this, 1);" src="@Url.Content("~/Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage" class="img-responsive thumbImage" />
+                                                            <img id="imgMotherImage" onerror="return OnImageError(this, 1);" src="@Url.Content(" ~ /Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage" class="img-responsive thumbImage" />
                                                         }
                                                         else
                                                         {
-                                                            <img id="imgFatherImage" src="@Url.Content("~/Images/FemaleNoImage.png")" class="img-responsive thumbImage" />
+                                                            <img id="imgFatherImage" src="@Url.Content(" ~ /Images/FemaleNoImage.png")" class="img-responsive thumbImage" />
                                                         }
-                                                        @*<img id="imgMotherImage" onerror="return OnImageError(this, 1);" src="@Url.Content("~/Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage" class="img-responsive thumbImage" />*@
+                                                        @*<img id="imgMotherImage" onerror="return OnImageError(this, 1);" src="@Url.Content(" ~ /Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage" class="img-responsive thumbImage" />*@
                                                     </figure>
                                                 </div>
                                                 <input type="file" name="MotherImageUploader" onchange="ImageChanged(this, 'mother');" />
@@ -586,8 +602,8 @@
                                                 <div class="col-md-8 col-sm-8 col-xs-12">
                                                     <input type="text" name="MotherOccupationID" value="@Model.ParantDetails.MotherOccupationID" class="form-control" id="ddlPMotherOccupation" placeholder="Mother's Occupation" aria-describedby="inputSuccess2Status">
                                                     @*<select id="ddlPMotherOccupation" name="MotherOccupationID" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="1" @(Model.ParantDetails.MotherOccupationID == 1 ? "selected" : "" )>Service</option>
-                                                            <option value="2" @(Model.ParantDetails.MotherOccupationID == 2 ? "selected" : "" )>Other</option>
+                                                            <option value="1" @(Model.ParantDetails.MotherOccupationID==1 ? "selected" : "" )>Service</option>
+                                                            <option value="2" @(Model.ParantDetails.MotherOccupationID==2 ? "selected" : "" )>Other</option>
                                                         </select>*@
                                                 </div>
                                             </div>
@@ -625,15 +641,15 @@
                                                 </label>
                                                 <div class="col-md-8 col-sm-9 col-xs-12">
                                                     <select id="ddlPMotherBloodGroup" name="MotherBloodGroup" required="required" class="form-control col-md-7 col-xs-12">
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "NA" ? "selected" : "")>NA</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "A+" ? "selected" : "")>A+</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "A-" ? "selected" : "")>A-</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "B+" ? "selected" : "")>B+</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "B-" ? "selected" : "")>B-</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "O-" ? "selected" : "")>O-</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "O+" ? "selected" : "")>O+</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "AB-" ? "selected" : "")>AB-</option>
-                                                        <option @(Model.ParantDetails.MotherBloodGroup == "AB+" ? "selected" : "")>AB+</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "NA" ? "selected" : "" )>NA</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "A+" ? "selected" : "" )>A+</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "A-" ? "selected" : "" )>A-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "B+" ? "selected" : "" )>B+</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "B-" ? "selected" : "" )>B-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "O-" ? "selected" : "" )>O-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "O+" ? "selected" : "" )>O+</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "AB-" ? "selected" : "" )>AB-</option>
+                                                        <option @(Model.ParantDetails.MotherBloodGroup == "AB+" ? "selected" : "" )>AB+</option>
 
                                                     </select>
                                                 </div>
@@ -647,8 +663,8 @@
                                                     <input type="text" name="MotherEducationID" value="@Model.ParantDetails.MotherEducationID" class="form-control" id="ddlPMotherEducation" placeholder="Mother's Education" aria-describedby="inputSuccess2Status">
 
                                                     @*<select id="ddlPMotherEducation" name="MotherEducationID" required="required" class="form-control col-md-7 col-xs-12">
-                                                            <option value="1" @(Model.ParantDetails.MotherEducationID == 1 ? "selected" : "" )>Graduate</option>
-                                                            <option value="2" @(Model.ParantDetails.MotherEducationID == 2 ? "selected" : "" )>Other</option>
+                                                            <option value="1" @(Model.ParantDetails.MotherEducationID==1 ? "selected" : "" )>Graduate</option>
+                                                            <option value="2" @(Model.ParantDetails.MotherEducationID==2 ? "selected" : "" )>Other</option>
                                                         </select>*@
                                                 </div>
                                             </div>
@@ -721,7 +737,7 @@
                                     </div>
                                 }
                             </div>
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 3 ? " active in" : "")" id="tab_address">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 3 ? " active in" : "" )" id="tab_address">
                                 @using (Html.BeginForm("SaveStudentAddress", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
                                 {
                                     <div class="form-horizontal form-label-left">
@@ -773,7 +789,7 @@
                                                                 <option value="0">--Select--</option>
                                                                 @foreach (var li in Model.Cities)
                                                                 {
-                                                                    <option value="@li.ID" @(li.ID == Model.Student.Cadd_DistrictCode ? "selected" : "")>@li.Name</option>
+                                                                <option value="@li.ID" @(li.ID==Model.Student.Cadd_DistrictCode ? "selected" : "" )>@li.Name</option>
                                                                 }
                                                                 <option value="-1">Add New</option>
                                                             </select>
@@ -786,7 +802,7 @@
                                                                 <option value="0">--Select--</option>
                                                                 @foreach (var li in Model.Areas)
                                                                 {
-                                                                    <option value="@li.ID" @(li.ID == Model.Student.Cadd_AreaCode ? "selected" : "")>@li.Name</option>
+                                                                <option value="@li.ID" @(li.ID==Model.Student.Cadd_AreaCode ? "selected" : "" )>@li.Name</option>
                                                                 }
                                                                 <option value="-1">Add New</option>
                                                             </select>
@@ -801,7 +817,7 @@
                                     </div>
                                 }
                             </div>
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 4 ? " active in" : "")" id="tab_guardian">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 4 ? " active in" : "" )" id="tab_guardian">
                                 @using (Html.BeginForm("SaveStudentGuardian", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
                                 {
                                     <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
@@ -818,8 +834,8 @@
                                                     <label class="control-label col-md-4 col-sm-3 col-xs-12">Gurdian Relation : </label>
                                                     <div class="col-md-8 col-sm-9 col-xs-12 input-group">
                                                         <select class="form-control" name="RelationWithGuardian">
-                                                            <option value="1" @(Model.Student.RelationWithGuardian == 1 ? "selected" : "")>Uncle</option>
-                                                            <option value="2" @(Model.Student.RelationWithGuardian == 1 ? "selected" : "")>Cousin</option>
+                                                            <option value="1" @(Model.Student.RelationWithGuardian == 1 ? "selected" : "" )>Uncle</option>
+                                                            <option value="2" @(Model.Student.RelationWithGuardian == 1 ? "selected" : "" )>Cousin</option>
                                                         </select>
                                                     </div>
                                                 </div>
@@ -845,7 +861,7 @@
                                     </div>
                                 }
                             </div>
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 5 ? " active in" : "")" id="tab_documents">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 5 ? " active in" : "" )" id="tab_documents">
                                 @using (Html.BeginForm("SaveStudentDocuments", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
                                 {
                                     <div class="form-horizontal form-label-left">
@@ -857,7 +873,7 @@
                                                     <div class="row">
                                                         <label class="lbl-txt col-md-12 padding-L text-left">Birth Certificate : </label>
                                                         <div class="col-md-7">
-                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Birth_@Model.Student.BirthCertificate" id="imgBirthCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <img src="@Url.Content(" ~ /Images/StudentDocuments/")@(Model.Student.StudentID)_Birth_@Model.Student.BirthCertificate" id="imgBirthCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
                                                             <input type="hidden" value="@Model.Student.BirthCertificate" name="BirthCertificate" />
                                                         </div>
                                                         <div class="col-md-10">
@@ -869,7 +885,7 @@
                                                     <div class="row">
                                                         <label class="lbl-txt col-md-12 padding-L text-left">Address Proof : </label>
                                                         <div class="col-md-7">
-                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Address_@Model.Student.AddressProof" id="imgAddressProof" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <img src="@Url.Content(" ~ /Images/StudentDocuments/")@(Model.Student.StudentID)_Address_@Model.Student.AddressProof" id="imgAddressProof" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
                                                             <input type="hidden" value="@Model.Student.AddressProof" name="AddressProof" />
                                                         </div>
                                                         <div class="col-md-10">
@@ -893,7 +909,7 @@
                                                     <div class="row">
                                                         <label class="lbl-txt col-md-12 padding-L text-left">Transfer Certificate : </label>
                                                         <div class="col-md-7">
-                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Transfer_@Model.Student.TransferCertificate" id="imgTransferCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <img src="@Url.Content(" ~ /Images/StudentDocuments/")@(Model.Student.StudentID)_Transfer_@Model.Student.TransferCertificate" id="imgTransferCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
                                                             <input type="hidden" name="TransferCertificate" value="@Model.Student.TransferCertificate" />
                                                         </div>
                                                         <div class="col-md-10">
@@ -905,7 +921,7 @@
                                                     <div class="row">
                                                         <label class="lbl-txt col-md-12 padding-L text-left">Category Certificate : </label>
                                                         <div class="col-md-7">
-                                                            <img src="@Url.Content("~/Images/StudentDocuments/")@(Model.Student.StudentID)_Category_@Model.Student.CategoryCertificate" id="imgCategoryCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
+                                                            <img src="@Url.Content(" ~ /Images/StudentDocuments/")@(Model.Student.StudentID)_Category_@Model.Student.CategoryCertificate" id="imgCategoryCertificate" onerror="return OnImageError(this,3)" class="img-responsive thumbImage" onclick="ViewDocument(this)">
                                                             <input type="hidden" value="@Model.Student.CategoryCertificate" name="CategoryCertificate" />
                                                         </div>
                                                         <div class="col-md-10">
@@ -922,7 +938,7 @@
                                     </div>
                                 }
                             </div>
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 6 ? " active in" : "")" id="tab_session">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 6 ? " active in" : "" )" id="tab_session">
                                 <div class="form-horizontal form-label-left">
 
                                     <input type="hidden" id="hdnStudentID" value="@Model.Student.StudentID" />
@@ -934,7 +950,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 7 ? " active in" : "")" id="tab_transport">
+                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 7 ? " active in" : "" )" id="tab_transport">
 
                                 <div class="row">
                                     <div class="col-md-12">
@@ -1010,7 +1026,7 @@
                                                             <select class="form-control" id="ddlHHostels" onchange="HostelChanged(this)">
                                                                 @foreach (var o in Model.Hostel.Hostels)
                                                                 {
-                                                                    <option value="@o.ID" @(o.ID == Model.Hostel.HostelID ? "selected" : "")>@o.Name</option>
+                                                                    <option value="@o.ID" @(o.ID == Model.Hostel.HostelID ? "selected" : "" )>@o.Name</option>
                                                                 }
                                                             </select>
                                                         </div>
@@ -1021,7 +1037,7 @@
                                                             <select class="form-control" id="ddlHFloors" onchange="HostelFloorChanged(this)">
                                                                 @foreach (var o in Model.Hostel.Floors)
                                                                 {
-                                                                    <option value="@o.ID" @(o.ID == Model.Hostel.FloorID ? "selected" : "")>@o.Name</option>
+                                                                    <option value="@o.ID" @(o.ID == Model.Hostel.FloorID ? "selected" : "" )>@o.Name</option>
                                                                 }
                                                             </select>
                                                         </div>
@@ -1030,7 +1046,7 @@
                                                         <label class="control-label col-md-6 col-sm-3 col-xs-12">Applicable : </label>
                                                         <div class="col-md-6 col-sm-9 col-xs-12 input-group">
                                                             <label class="switch switch-green col-md-6">
-                                                                <input type="checkbox" class="switch-input" @(Model.Hostel.Applicable == 1 ? "checked" : "")>
+                                                                <input type="checkbox" class="switch-input" @(Model.Hostel.Applicable == 1 ? "checked" : "" )>
                                                                 <span class="switch-label" onclick="HostalStatusChanged(this);" data-on="Yes" data-off="No"></span>
                                                                 <span class="switch-handle" id="shTranding"></span>
                                                                 <input type="hidden" name="Applicable" id="hdnHostelApplicable" value="@Model.Hostel.Applicable">
@@ -1040,7 +1056,7 @@
                                                     <div class="form-group col-md-6 pull-right" id="divHostalChangedDate" style="padding-left: 40px;display:none;">
                                                         <label class="control-label col-md-6 col-sm-3 col-xs-12" id="lblTransportChangeDate">Changed from (mm-dd-yyyy) </label>
                                                         <div class="col-md-6 col-sm-9 col-xs-12 input-group">
-                                                            <input type="date" name="ChangedDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("yyyy-MM-dd")" />
+                                                            <input type="date" name="ChangedDate" class="form-control" value="@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString(" yyyy-MM-dd")" />
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1072,36 +1088,39 @@
                                     }
                                 </div>
                             }
-                            <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 9 ? " active in" : "")" id="tab_Fee" aria-labelledby="Fee-tab">
+                            @if (canEditCustomFee)
+                            {
+                                <div role="tabpanel" class="tab-pane fade @(Model.CurrentTab == 9 ? " active in" : "" )" id="tab_Fee" aria-labelledby="Fee-tab">
 
-                                <div class="row">
-                                    <div class="col-md-8 form-group">
-                                        <label>Student's Session</label>
-                                        <select class="form-control" id="ddlCFSessions" onchange="StudentCustomFeeSessionChanged(this);">
-                                            @foreach (var sess in Model.Sessions)
-                                            {
-                                                <option value="@sess.StudentSessionUID">@sess.SessionName @sess.ClassName/@sess.SectionName From @sess.FromDate.ToString("dd MMM, yyyy") To @sess.ToDate.ToString("dd MMM, yyyy") (@(sess.Status == 0 ? "Inactive" : "Active"))</option>
-                                            }
-                                        </select>
-                                    </div>
-                                </div>
-                                @using (Html.BeginForm("SaveStudentCustomeFee", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmStudentCustomFees", @class = "form-horizontal form-label-left" }))
-                                {
-                                    if (Model.Sessions.Count() > 0)
-                                    {
-                                        @Html.Partial("_StudentCustomFeeEditPartial", Model)
-                                    }
-                                    else
-                                    {
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <h4>No Session assigned to student.</h4>
-                                            </div>
+                                    <div class="row">
+                                        <div class="col-md-8 form-group">
+                                            <label>Student's Session</label>
+                                            <select class="form-control" id="ddlCFSessions" onchange="StudentCustomFeeSessionChanged(this);">
+                                                @foreach (var sess in Model.Sessions)
+                                                {
+                                                    <option value="@sess.StudentSessionUID">@sess.SessionName @sess.ClassName/@sess.SectionName From @sess.FromDate.ToString("dd MMM, yyyy") To @sess.ToDate.ToString("dd MMM, yyyy") (@(sess.Status == 0 ? "Inactive" : "Active"))</option>
+                                                }
+                                            </select>
                                         </div>
-                                    }
+                                    </div>
+                                    @using (Html.BeginForm("SaveStudentCustomeFee", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmStudentCustomFees", @class = "form-horizontal form-label-left" }))
+                                    {
+                                        if (Model.Sessions.Count() > 0)
+                                        {
+                                            @Html.Partial("_StudentCustomFeeEditPartial", Model)
+                                        }
+                                        else
+                                        {
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <h4>No Session assigned to student.</h4>
+                                                </div>
+                                            </div>
+                                        }
 
-                                }
-                            </div>
+                                    }
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
@@ -1162,748 +1181,748 @@
     <script src="@Url.Content("~/js/select2.full.min.js")"></script>
     <script>
 
-        function DeleteTransportChange(sender)
-        {
-            if(confirm("Do you Really want to remove this entry, this might result in Fee Mismatch...." ))
-            {
-                $(sender).closest('form').submit();
-            }
-        }
-        function OpenTransportEdit(StudentID, THChangeID) {
+    function DeleteTransportChange(sender)
+    {
+    if(confirm("Do you Really want to remove this entry, this might result in Fee Mismatch...." ))
+    {
+    $(sender).closest('form').submit();
+    }
+    }
+    function OpenTransportEdit(StudentID, THChangeID) {
 
-            $('.se-pre-con').css('display', '');
-             $.ajax(
-                 {
-                     type: "POST",
-                     url: "/Account/EditTransportDetails/" + StudentID + "/" + THChangeID,
-                     cache: false,
-                     processData: false,
-                     contentType: false,
-                     success: function (html) {
-                         $('#mdlEditTransport').find('.modal-body').html(html);
-                         $('#mdlEditTransport').modal('toggle');
-                         $('.se-pre-con').css('display', 'none');
-                     },
-                     error: function (e) {
-                         alert("errorn");
-                     }
-                 });
-        }
-        function OptionalSubjectClicked(sender) {
-            if ($(sender).hasClass('bg-green')) {
-                $(sender).removeClass('bg-green');
-                $(sender).attr('title', 'This subject is not opted');
-                $(sender).addClass('bg-red');
-                $(sender).find('#hdnOpType').val(0);
-            }
-            else {
-                $(sender).attr('title', 'Student Opted for this subject');
-                $(sender).addClass('bg-green');
-                $(sender).removeClass('bg-red');
-                $(sender).find('#hdnOpType').val(1);
-            }
-        }
+    $('.se-pre-con').css('display', '');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/EditTransportDetails/" + StudentID + "/" + THChangeID,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    $('#mdlEditTransport').find('.modal-body').html(html);
+    $('#mdlEditTransport').modal('toggle');
+    $('.se-pre-con').css('display', 'none');
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    function OptionalSubjectClicked(sender) {
+    if ($(sender).hasClass('bg-green')) {
+    $(sender).removeClass('bg-green');
+    $(sender).attr('title', 'This subject is not opted');
+    $(sender).addClass('bg-red');
+    $(sender).find('#hdnOpType').val(0);
+    }
+    else {
+    $(sender).attr('title', 'Student Opted for this subject');
+    $(sender).addClass('bg-green');
+    $(sender).removeClass('bg-red');
+    $(sender).find('#hdnOpType').val(1);
+    }
+    }
 
-        function StudentCustomFeeSessionChanged(sender) {
+    function StudentCustomFeeSessionChanged(sender) {
 
-                $('.se-pre-con').css('display', '');
-            $.ajax(
-                 {
-                     type: "POST",
-                     url: "/Account/StudentSessionCustomFeeDetails/" + $(sender).val(),
-                     cache: false,
-                     processData: false,
-                     contentType: false,
-                     success: function (html) {
-                         $('#frmStudentCustomFees').html(html);
-                        $('.se-pre-con').css('display', 'none');
-                     },
-                     error: function (e) {
-                         alert("errorn");
-                     }
-                 });
-        }
-        function SessionSectionChanged(sender) {
-            $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Loading Optional Subjects....</label>')
-            $.ajax(
-                 {
-                     type: "POST",
-                     url: "/Account/GetSectionOptionalSubjects/" + $(sender).val(),
-                     cache: false,
-                     processData: false,
-                     contentType: false,
-                     success: function (data) {
-                         var OSubject = '';
-                         for (var i = 0; i < data.length; i++) {
-                             OSubject = OSubject + '<label class="badge bg-red OptedSubjects" onclick="OptionalSubjectClicked(this);" title="This subject is not opted">' +
-                                            '<input type="hidden" id="hdnSSOSID" name="SubjectsOpted[' + i + '].Extra1" value="0">' +
-                                            '<input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[' + i + '].ID" value="' + data[i].ID + '">' +
-                                           ' <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[' + i + '].Name" value="0">' +
-                                            '<input type="hidden" id="hdnOpType" name="SubjectsOpted[' + i + '].Extra2" value="0">' +
-                                            data[i].Name +
-                                        '</label>';
-                         }
-                         $(sender).closest('.x_content').find('#divOptionalSubjects').html(OSubject);
-                     },
-                     error: function (e) {
-                         alert("errorn");
-                     }
-                 });
-        }
+    $('.se-pre-con').css('display', '');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/StudentSessionCustomFeeDetails/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    $('#frmStudentCustomFees').html(html);
+    $('.se-pre-con').css('display', 'none');
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    function SessionSectionChanged(sender) {
+    $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Loading Optional Subjects....</label>')
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetSectionOptionalSubjects/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (data) {
+    var OSubject = '';
+    for (var i = 0; i < data.length; i++) {
+    OSubject = OSubject + '<label class="badge bg-red OptedSubjects" onclick="OptionalSubjectClicked(this);" title="This subject is not opted">' +
+    '<input type="hidden" id="hdnSSOSID" name="SubjectsOpted[' + i + '].Extra1" value="0">' +
+    '<input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[' + i + '].ID" value="' + data[i].ID + '">' +
+    ' <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[' + i + '].Name" value="0">' +
+    '<input type="hidden" id="hdnOpType" name="SubjectsOpted[' + i + '].Extra2" value="0">' +
+    data[i].Name +
+    '</label>';
+    }
+    $(sender).closest('.x_content').find('#divOptionalSubjects').html(OSubject);
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
 
-        function CustomFeeStatusChanged(sender) {
-            var curStatus = $(sender).closest('label').find('#hdnCustomFeeApplicable').val();
-            $(sender).closest('label').find('#hdnCustomFeeApplicable').val(curStatus == '0' ? '1' : '0');
+    function CustomFeeStatusChanged(sender) {
+    var curStatus = $(sender).closest('label').find('#hdnCustomFeeApplicable').val();
+    $(sender).closest('label').find('#hdnCustomFeeApplicable').val(curStatus == '0' ? '1' : '0');
 
-        }
-        function HostalCheckChanged(sender) {
-            $('#divHostalChangedDate').css('display', '');
-        }
-        function TransportCheckChanged(sender, StopID) {
-            $('#hdnTStopID').val(StopID);
-            $('#divTransportChangedDate').css('display', '');
-        }
-        function TransportStatusChanged(sender) {
-            var curStatus = $(sender).closest('label').find('#hdnTransportApplicable').val();
-            if (curStatus == 1) {
-                $('#dvEndDate').css('display', '');
-            }
-            else {
-                $('#dvEndDate').css('display', 'none');
-            }
-            $(sender).closest('label').find('#hdnTransportApplicable').val(curStatus == '0' ? '1' : '0');
+    }
+    function HostalCheckChanged(sender) {
+    $('#divHostalChangedDate').css('display', '');
+    }
+    function TransportCheckChanged(sender, StopID) {
+    $('#hdnTStopID').val(StopID);
+    $('#divTransportChangedDate').css('display', '');
+    }
+    function TransportStatusChanged(sender) {
+    var curStatus = $(sender).closest('label').find('#hdnTransportApplicable').val();
+    if (curStatus == 1) {
+    $('#dvEndDate').css('display', '');
+    }
+    else {
+    $('#dvEndDate').css('display', 'none');
+    }
+    $(sender).closest('label').find('#hdnTransportApplicable').val(curStatus == '0' ? '1' : '0');
 
-            $('#divTransportChangedDate').css('display', '');
-        }
-        function StatusChanged(sender) {
-            var curStatus = $(sender).closest('label').find('#hdnSessionStatus').val();
-            if (curStatus == 1) {
-                $('#dvSessionStatus').css('display', '');
-            }
-            else {
-                $('#dvSessionStatus').css('display', 'none');
-            }
-            $(sender).closest('label').find('#hdnSessionStatus').val(curStatus == '0' ? '1' : '0');
-
-
-        }
-        function HostalStatusChanged(sender) {
-            var curStatus = $(sender).closest('label').find('#hdnHostelApplicable').val();
-            $(sender).closest('label').find('#hdnHostelApplicable').val(curStatus == '0' ? '1' : '0');
-
-            $('#divHostalChangedDate').css('display', '');
-        }
-        function CheckStudentDetails() {
-            var Name = $('#txtName').val();
-            Name = Name.replace(" ", "").replace(".", "");
-            if (Name.length < 2) {
-                ShowNotification('Student Name', 'Student Name must Contain atleast 2 characters ("." and Space not Counted)', 'error');
-                return false;
-            }
-            else {
-                return true;
-            }
-        }
-        function CheckParentForm() {
-            var FathName = $('#txtPFatherName').val();
-            FathName = FathName.replace(" ", "").replace(".", "");
-            if (FathName.length < 4) {
-                ShowNotification('Father Name', 'Father Name must Contain atleast 4 characters ("." and Space not Counted)', 'error');
-                return false;
-            }
-            else {
-                return true;
-            }
-        }
-        var basePath = '@Url.Content("~/Images")';
-        $(function () {
+    $('#divTransportChangedDate').css('display', '');
+    }
+    function StatusChanged(sender) {
+    var curStatus = $(sender).closest('label').find('#hdnSessionStatus').val();
+    if (curStatus == 1) {
+    $('#dvSessionStatus').css('display', '');
+    }
+    else {
+    $('#dvSessionStatus').css('display', 'none');
+    }
+    $(sender).closest('label').find('#hdnSessionStatus').val(curStatus == '0' ? '1' : '0');
 
 
-            //$('.icheckRadio').on('ifChanged', function (event) {
-            //    if ($(this).is(":checked")) {
-            //        $(this).closest('form').find('#hdnTransportStopID').val($(this).attr('value'));
-            //    }
-            //});
-            //$('.icheckRadioH').on('ifChanged', function (event) {
-            //    if ($(this).is(":checked")) {
-            //        $(this).closest('form').find('#hdnHostelRoomID').val($(this).attr('value'));
-            //    }
-            //});
-            $('.dateinput').daterangepicker({
-                singleDatePicker: true,
-                calender_style: "picker_1"
-            }, function (start, end, label) {
-                console.log(start.toISOString(), end.toISOString(), label);
-            });
-            $("#ddlCadd_CountryCode").select2({
-                placeholder: "Select a Country",
-                allowClear: true
-            });
-            $("#ddlCadd_StateCode").select2({
-                placeholder: "Select a State",
-                allowClear: true
-            });
-            $("#ddlCadd_DistrictCode").select2({
-                placeholder: "Select a City",
-                allowClear: true
-            });
-            $("#ddlCadd_AreaCode").select2({
-                placeholder: "Select a Area",
-                allowClear: true
-            });
-            $("#ddlCadd_CountryCode").closest('.input-group').find('.select2-container').css('width', '100%');
-            $("#ddlCadd_StateCode").closest('.input-group').find('.select2-container').css('width', '100%');
-            $("#ddlCadd_DistrictCode").closest('.input-group').find('.select2-container').css('width', '100%');
-            $("#ddlCadd_AreaCode").closest('.input-group').find('.select2-container').css('width', '100%');
-        });
+    }
+    function HostalStatusChanged(sender) {
+    var curStatus = $(sender).closest('label').find('#hdnHostelApplicable').val();
+    $(sender).closest('label').find('#hdnHostelApplicable').val(curStatus == '0' ? '1' : '0');
 
-        function ImageChanged(fileBox, Type) {
-
-            if (fileBox.files && fileBox.files[0]) {
-                MainImageName = fileBox.files[0].name;
-                if (fileBox.files[0].size / 1024 < 5000) {
-
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        if (Type == 'student') {
-                            $('#imgStudentImage').attr('src', e.target.result);
-                        }
-                        if (Type == 'father') {
-                            $('#imgFatherImage').attr('src', e.target.result);
-                        }
-                        if (Type == 'mother') {
-                            $('#imgMotherImage').attr('src', e.target.result);
-                        }
-                        if (Type == 'birth') {
-                            $('#imgBirthCertificate').attr('src', e.target.result);
-                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-                        }
-                        if (Type == 'address') {
-                            $('#imgAddressProof').attr('src', e.target.result);
-                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-                        }
-                        if (Type == 'transfer') {
-                            $('#imgTransferCertificate').attr('src', e.target.result);
-                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-                        }
-                        if (Type == 'category') {
-                            $('#imgCategoryCertificate').attr('src', e.target.result);
-                            $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-                        }
-                    }
-                    reader.readAsDataURL(fileBox.files[0]);
-                }
-                else {
-                    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
-                    clearFileInput(fileBox);
-                }
-            }
-        }
-        function clearFileInput(ctrl) {
-            try {
-                ctrl.value = null;
-            } catch (ex) { }
-            if (ctrl.value) {
-                ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
-            }
-        }
-
-        function CheckParantDetails() {
-            $.ajax(
-        {
-            type: "POST",
-            url: "/Account/GetParentDetailsOnParentID/" + $('#txtParentID').val(),
-            cache: false,
-            processData: false,
-            contentType: false,
-            success: function (data) {
-                $('#txtParentID').val(data.ParentSID);
-                $('#txtParentID').css('background-color', 'aliceblue');
-
-                $('#hdnParentID').val(data.ParentID);
-                $('#imgFatherImage').attr('src', basePath + '/ParentImage/Father/' + data.ParentID + '_1_' + data.FatherImage);
-                $('#hdnFatherImage').val(data.FatherImage);
-                $('#txtPFatherName').val(data.FatherName);
-                $('#ddlPFatherOccupation').val(data.FatherOccupationID);
-                $('#txtPFatherMobile').val(data.FatherMobileNo);
-                $('#txtPFatherEmailID').val(data.FatherEmailID);
-                $('#ddlPFatherBloodGroup').val(data.FatherBloodGroup);
-                $('#ddlPFatherEducation').val(data.FatherEducationID);
-                $('#ddlPFatherAadhaar').val(data.FatherAadhaar);
-                $('#txtPLandLineNumber').val(data.HomeLandLineNo);
-
-                $('#imgMotherImage').attr('src', basePath + '/ParentImage/Mother/' + data.ParentID + '_2_' + data.MotherImage);
-                $('#hdnMotherImage').val(data.MotherImage);
-                $('#txtPMotherName').val(data.MotherName);
-                $('#ddlPMotherOccupation').val(data.MotherOccupationID);
-                $('#txtPMotherMobile').val(data.MotherMobileNo);
-                $('#txtPMotherEmailID').val(data.MotherEmailID);
-                $('#ddlPMotherBloodGroup').val(data.MotherBloodGroup);
-                $('#ddlPMotherEducation').val(data.MotherEducationID);
-                $('#ddlPMotherAadhaar').val(data.MotherAadhaar);
+    $('#divHostalChangedDate').css('display', '');
+    }
+    function CheckStudentDetails() {
+    var Name = $('#txtName').val();
+    Name = Name.replace(" ", "").replace(".", "");
+    if (Name.length < 2) {
+    ShowNotification('Student Name', 'Student Name must Contain atleast 2 characters ("." and Space not Counted)', 'error');
+    return false;
+    }
+    else {
+    return true;
+    }
+    }
+    function CheckParentForm() {
+    var FathName = $('#txtPFatherName').val();
+    FathName = FathName.replace(" ", "").replace(".", "");
+    if (FathName.length < 4) {
+    ShowNotification('Father Name', 'Father Name must Contain atleast 4 characters ("." and Space not Counted)', 'error');
+    return false;
+    }
+    else {
+    return true;
+    }
+    }
+    var basePath = '@Url.Content("~/Images")';
+    $(function () {
 
 
-                $('#txtPadd_HouseNo').val(data.Padd_HouseNo);
-                $('#txtPadd_Street').val(data.Padd_Street);
-                $('#txtPadd_Area').val(data.Padd_Area);
-                $('#txtPadd_Sector').val(data.Padd_Sector);
-                $('#txtPadd_PinCode').val(data.Padd_PinCode);
-                $('#txtPadd_District').val(data.Padd_District);
-                $('#txtPadd_State').val(data.Padd_State);
-                $('#txtPadd_Country').val(data.Padd_Country);
-                $('#txtPAccessCardNo').val(data.AccessCardNo);
+    //$('.icheckRadio').on('ifChanged', function (event) {
+    //    if ($(this).is(":checked")) {
+    //        $(this).closest('form').find('#hdnTransportStopID').val($(this).attr('value'));
+    //    }
+    //});
+    //$('.icheckRadioH').on('ifChanged', function (event) {
+    //    if ($(this).is(":checked")) {
+    //        $(this).closest('form').find('#hdnHostelRoomID').val($(this).attr('value'));
+    //    }
+    //});
+    $('.dateinput').daterangepicker({
+    singleDatePicker: true,
+    calender_style: "picker_1"
+    }, function (start, end, label) {
+    console.log(start.toISOString(), end.toISOString(), label);
+    });
+    $("#ddlCadd_CountryCode").select2({
+    placeholder: "Select a Country",
+    allowClear: true
+    });
+    $("#ddlCadd_StateCode").select2({
+    placeholder: "Select a State",
+    allowClear: true
+    });
+    $("#ddlCadd_DistrictCode").select2({
+    placeholder: "Select a City",
+    allowClear: true
+    });
+    $("#ddlCadd_AreaCode").select2({
+    placeholder: "Select a Area",
+    allowClear: true
+    });
+    $("#ddlCadd_CountryCode").closest('.input-group').find('.select2-container').css('width', '100%');
+    $("#ddlCadd_StateCode").closest('.input-group').find('.select2-container').css('width', '100%');
+    $("#ddlCadd_DistrictCode").closest('.input-group').find('.select2-container').css('width', '100%');
+    $("#ddlCadd_AreaCode").closest('.input-group').find('.select2-container').css('width', '100%');
+    });
 
-            },
-            error: function (e) {
-                ShowNotification('Not Found', 'Parent Not Found, Please check ParentID Again!!!!', 'error');
+    function ImageChanged(fileBox, Type) {
 
-                $('#txtParentID').css('background-color', 'antiquewhite');
+    if (fileBox.files && fileBox.files[0]) {
+    MainImageName = fileBox.files[0].name;
+    if (fileBox.files[0].size / 1024 < 5000) {
 
-                $('#hdnParentID').val(0);
-                $('#imgFatherImage').attr('src', '');
-                $('#hdnFatherImage').val('');
-                $('#txtPFatherName').val('');
-                $('#ddlPFatherOccupation').val(0);
-                $('#txtPFatherMobile').val('');
-                $('#txtPFatherEmailID').val('');
-                $('#ddlPFatherBloodGroup').val('NA');
-                $('#ddlPFatherEducation').val(0);
-                $('#txtPLandLineNumber').val('');
+    var reader = new FileReader();
+    reader.onload = function (e) {
+    if (Type == 'student') {
+    $('#imgStudentImage').attr('src', e.target.result);
+    }
+    if (Type == 'father') {
+    $('#imgFatherImage').attr('src', e.target.result);
+    }
+    if (Type == 'mother') {
+    $('#imgMotherImage').attr('src', e.target.result);
+    }
+    if (Type == 'birth') {
+    $('#imgBirthCertificate').attr('src', e.target.result);
+    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+    }
+    if (Type == 'address') {
+    $('#imgAddressProof').attr('src', e.target.result);
+    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+    }
+    if (Type == 'transfer') {
+    $('#imgTransferCertificate').attr('src', e.target.result);
+    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+    }
+    if (Type == 'category') {
+    $('#imgCategoryCertificate').attr('src', e.target.result);
+    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+    }
+    }
+    reader.readAsDataURL(fileBox.files[0]);
+    }
+    else {
+    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+    clearFileInput(fileBox);
+    }
+    }
+    }
+    function clearFileInput(ctrl) {
+    try {
+    ctrl.value = null;
+    } catch (ex) { }
+    if (ctrl.value) {
+    ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+    }
+    }
 
-                $('#imgMotherImage').attr('src', '');
-                $('#hdnMotherImage').val('');
-                $('#txtPMotherName').val('');
-                $('#ddlPMotherOccupation').val(0);
-                $('#txtPMotherMobile').val('');
-                $('#txtPMotherEmailID').val('');
-                $('#ddlPMotherBloodGroup').val('NA');
-                $('#ddlPMotherEducation').val(0);
-                $('#txtPadd_HouseNo').val('');
-                $('#txtPadd_Street').val('');
-                $('#txtPadd_Area').val('');
-                $('#txtPadd_Sector').val('');
-                $('#txtPadd_PinCode').val('');
-                $('#txtPadd_District').val('');
-                $('#txtPadd_State').val('');
-                $('#txtPadd_Country').val('');
-            }
-        });
-        }
-        function AddLocationCancel() {
-            AddLocation.remove();
-        }
-        //For checking details filled during Session save
-        function CheckSessionEditForm(sender) {
-            if ($('#ddlSessionEditClass').val() == 0) {
-                ShowNotification('Class', 'Please Select Class...','info');
-                return false;
-            }
-            if ($('#ddlSections').val() == 0) {
-                ShowNotification('Section', 'Please Select Section...','info');
-                return false;
-            }
-            else {
-                return true;
-            }
-        }
-        function CancelSessionEdit() {
-            EditSessionForm.remove();
-        }
-        function SaveLocation(sender) {
-            var Type = $(sender).closest('#frmAddLocation').find('#hdnSenderType').val();
-            var Value = $(sender).closest('#frmAddLocation').find('#txtLocationName').val();
-            var MasterID = 0;
-            var ctrID = '';
-            if (Type == 1) {
-                ctrID = '#ddlCadd_CountryCode';
+    function CheckParantDetails() {
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetParentDetailsOnParentID/" + $('#txtParentID').val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (data) {
+    $('#txtParentID').val(data.ParentSID);
+    $('#txtParentID').css('background-color', 'aliceblue');
 
-            }
-            else if (Type == 2) {
-                ctrID = '#ddlCadd_StateCode';
-                MasterID = $('#ddlCadd_CountryCode').val();
-            }
-            else if (Type == 3) {
-                ctrID = '#ddlCadd_DistrictCode';
-                MasterID = $('#ddlCadd_StateCode').val();
+    $('#hdnParentID').val(data.ParentID);
+    $('#imgFatherImage').attr('src', basePath + '/ParentImage/Father/' + data.ParentID + '_1_' + data.FatherImage);
+    $('#hdnFatherImage').val(data.FatherImage);
+    $('#txtPFatherName').val(data.FatherName);
+    $('#ddlPFatherOccupation').val(data.FatherOccupationID);
+    $('#txtPFatherMobile').val(data.FatherMobileNo);
+    $('#txtPFatherEmailID').val(data.FatherEmailID);
+    $('#ddlPFatherBloodGroup').val(data.FatherBloodGroup);
+    $('#ddlPFatherEducation').val(data.FatherEducationID);
+    $('#ddlPFatherAadhaar').val(data.FatherAadhaar);
+    $('#txtPLandLineNumber').val(data.HomeLandLineNo);
 
-            }
-            else if (Type == 4) {
-                ctrID = '#ddlCadd_AreaCode';
-                MasterID = $('#ddlCadd_DistrictCode').val();
+    $('#imgMotherImage').attr('src', basePath + '/ParentImage/Mother/' + data.ParentID + '_2_' + data.MotherImage);
+    $('#hdnMotherImage').val(data.MotherImage);
+    $('#txtPMotherName').val(data.MotherName);
+    $('#ddlPMotherOccupation').val(data.MotherOccupationID);
+    $('#txtPMotherMobile').val(data.MotherMobileNo);
+    $('#txtPMotherEmailID').val(data.MotherEmailID);
+    $('#ddlPMotherBloodGroup').val(data.MotherBloodGroup);
+    $('#ddlPMotherEducation').val(data.MotherEducationID);
+    $('#ddlPMotherAadhaar').val(data.MotherAadhaar);
 
-            }
-            $.ajax(
-                    {
-                        type: "POST",
-                        url: "/Account/AddLocation/" + MasterID + "/" + Type + "/" + Value,
-                        cache: false,
-                        processData: false,
-                        contentType: false,
-                        success: function (html) {
 
-                            $(ctrID).html(html);
-                            $(ctrID).append('<option value="-1">Add New</option>');
-                            $(ctrID).select2('val', '0');
+    $('#txtPadd_HouseNo').val(data.Padd_HouseNo);
+    $('#txtPadd_Street').val(data.Padd_Street);
+    $('#txtPadd_Area').val(data.Padd_Area);
+    $('#txtPadd_Sector').val(data.Padd_Sector);
+    $('#txtPadd_PinCode').val(data.Padd_PinCode);
+    $('#txtPadd_District').val(data.Padd_District);
+    $('#txtPadd_State').val(data.Padd_State);
+    $('#txtPadd_Country').val(data.Padd_Country);
+    $('#txtPAccessCardNo').val(data.AccessCardNo);
 
-                            AddLocation.remove();
-                        },
-                        error: function (e) {
-                            alert("errorn");
-                        }
-                    });
+    },
+    error: function (e) {
+    ShowNotification('Not Found', 'Parent Not Found, Please check ParentID Again!!!!', 'error');
 
-        }
-        var AddLocation;
-        function CountryChanged(sender, tab) {
-            if ($(sender).val() == "-1" && tab == 0) {
-                $('#frmAddLocation').find('#hdnSenderType').val(1);
-                $('#frmAddLocation').find('#ssType').text('Country');
-                $('#frmAddLocation').find('#txtLocationName').val('');
-                AddLocation = new PNotify({
-                    text: $('#form_notice').html(),
-                    icon: false,
-                    width: 'auto',
-                    hide: false,
-                    addclass: 'dark',
-                    styling: 'bootstrap3',
-                    buttons: {
-                        closer: false,
-                        sticker: false
-                    },
-                    insert_brs: false
-                });
-            }
-            else {
-                if (tab == 0) {
-                    $('#ddlCadd_StateCode').html('<option value="-1">Loading....</option>');
-                }
-                else {
-                    $('#ddlTStates').html('<option value="-1">Loading....</option>');
-                    $('#tbTransportRouteDetails').html('');
-                    $('#ddlTCities').html('<option value="-1">--Select--</option>');
+    $('#txtParentID').css('background-color', 'antiquewhite');
 
-                    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
-                    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-                    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-                }
-                $.ajax(
-                    {
+    $('#hdnParentID').val(0);
+    $('#imgFatherImage').attr('src', '');
+    $('#hdnFatherImage').val('');
+    $('#txtPFatherName').val('');
+    $('#ddlPFatherOccupation').val(0);
+    $('#txtPFatherMobile').val('');
+    $('#txtPFatherEmailID').val('');
+    $('#ddlPFatherBloodGroup').val('NA');
+    $('#ddlPFatherEducation').val(0);
+    $('#txtPLandLineNumber').val('');
 
-                        type: "POST",
-                        url: "/Account/GetCountryStates/" + $(sender).val(),
-                        cache: false,
-                        processData: false,
-                        contentType: false,
-                        success: function (html) {
-                            if (tab == 0) {
-                                $('#ddlCadd_StateCode').html(html);
-                                $('#ddlCadd_StateCode').append('<option value="-1">Add New</option>');
-                                $("#ddlCadd_StateCode").select2('val', '0');
-                            }
-                            else {
-                                $('#ddlTStates').html(html);
-                            }
-                        },
-                        error: function (e) {
-                            alert("errorn");
-                        }
-                    });
-            }
-        }
-        function StateChanged(sender, tab) {
-            if ($(sender).val() == "-1" && tab == 0) {
-                $('#frmAddLocation').find('#hdnSenderType').val(2);
-                $('#frmAddLocation').find('#ssType').text('State');
-                $('#frmAddLocation').find('#txtLocationName').val('');
-                AddLocation = new PNotify({
-                    text: $('#form_notice').html(),
-                    icon: false,
-                    width: 'auto',
-                    hide: false,
-                    addclass: 'dark',
-                    styling: 'bootstrap3',
-                    buttons: {
-                        closer: false,
-                        sticker: false
-                    },
-                    insert_brs: false
-                });
-            }
-            else {
-                if (tab == 0) {
-                    $('#ddlCadd_DistrictCode').html('<option value="-1">Loading....</option>');
-                }
-                else {
-                    $('#tbTransportRouteDetails').html('');
-                    $('#ddlTCities').html('<option value="-1">Loading....</option>');
+    $('#imgMotherImage').attr('src', '');
+    $('#hdnMotherImage').val('');
+    $('#txtPMotherName').val('');
+    $('#ddlPMotherOccupation').val(0);
+    $('#txtPMotherMobile').val('');
+    $('#txtPMotherEmailID').val('');
+    $('#ddlPMotherBloodGroup').val('NA');
+    $('#ddlPMotherEducation').val(0);
+    $('#txtPadd_HouseNo').val('');
+    $('#txtPadd_Street').val('');
+    $('#txtPadd_Area').val('');
+    $('#txtPadd_Sector').val('');
+    $('#txtPadd_PinCode').val('');
+    $('#txtPadd_District').val('');
+    $('#txtPadd_State').val('');
+    $('#txtPadd_Country').val('');
+    }
+    });
+    }
+    function AddLocationCancel() {
+    AddLocation.remove();
+    }
+    //For checking details filled during Session save
+    function CheckSessionEditForm(sender) {
+    if ($('#ddlSessionEditClass').val() == 0) {
+    ShowNotification('Class', 'Please Select Class...','info');
+    return false;
+    }
+    if ($('#ddlSections').val() == 0) {
+    ShowNotification('Section', 'Please Select Section...','info');
+    return false;
+    }
+    else {
+    return true;
+    }
+    }
+    function CancelSessionEdit() {
+    EditSessionForm.remove();
+    }
+    function SaveLocation(sender) {
+    var Type = $(sender).closest('#frmAddLocation').find('#hdnSenderType').val();
+    var Value = $(sender).closest('#frmAddLocation').find('#txtLocationName').val();
+    var MasterID = 0;
+    var ctrID = '';
+    if (Type == 1) {
+    ctrID = '#ddlCadd_CountryCode';
 
-                    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
-                    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-                    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-                }
-                $.ajax(
-                    {
-                        type: "POST",
-                        url: "/Account/GetStateCities/" + $(sender).val(),
-                        cache: false,
-                        processData: false,
-                        contentType: false,
-                        success: function (html) {
-                            if (tab == 0) {
-                                $('#ddlCadd_DistrictCode').html(html);
-                                $('#ddlCadd_DistrictCode').append('<option value="-1">Add New</option>');
-                                $("#ddlCadd_DistrictCode").select2('val', '0');
-                            }
-                            else {
-                                $('#ddlTCities').html(html);
-                            }
-                        },
-                        error: function (e) {
-                            alert("errorn");
-                        }
-                    });
-            }
-        }
-        function CityChanged(sender, tab) {
-            if ($(sender).val() == "-1" && tab == 0) {
-                $('#frmAddLocation').find('#hdnSenderType').val(3);
-                $('#frmAddLocation').find('#ssType').text('City');
-                $('#frmAddLocation').find('#txtLocationName').val('');
-                AddLocation = new PNotify({
-                    text: $('#form_notice').html(),
-                    icon: false,
-                    width: 'auto',
-                    hide: false,
-                    addclass: 'dark',
-                    styling: 'bootstrap3',
-                    buttons: {
-                        closer: false,
-                        sticker: false
-                    },
-                    insert_brs: false
-                });
-            }
-            else {
-                if (tab == 0) {
-                    $('#ddlCadd_AreaCode').html('<option value="-1">Loading....</option>');
-                }
-                else {
-                    $('#ddlTStops').html('<option value="-1">Loading....</option>');
-                    $('#ddlTAreas').html('<option value="-1">Loading....</option>');
-                    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-                    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-                }
-                $.ajax(
-                    {
-                        type: "POST",
-                        url: "/Account/GetCityAreas/" + $(sender).val(),
-                        cache: false,
-                        processData: false,
-                        contentType: false,
-                        success: function (html) {
-                            if (tab == 0) {
-                                $('#ddlCadd_AreaCode').html(html);
-                                $('#ddlCadd_AreaCode').append('<option value="-1">Add New</option>');
-                                $("#ddlCadd_AreaCode").select2('val', '0');
-                            }
-                            else {
-                                $('#ddlTAreas').html(html);
-                            }
-                        },
-                        error: function (e) {
-                            alert("errorn");
-                        }
-                    });
-            }
-        }
-        function AreaChanged(sender, tab) {
-            if ($(sender).val() == "-1" && tab == 0) {
-                $('#frmAddLocation').find('#hdnSenderType').val(4);
-                $('#frmAddLocation').find('#ssType').text('Area');
-                $('#frmAddLocation').find('#txtLocationName').val('');
-                AddLocation = new PNotify({
-                    text: $('#form_notice').html(),
-                    icon: false,
-                    width: 'auto',
-                    hide: false,
-                    addclass: 'dark',
-                    styling: 'bootstrap3',
-                    buttons: {
-                        closer: false,
-                        sticker: false
-                    },
-                    insert_brs: false
-                });
-            }
-            else {
-                $('#ddlTStops').html('<option value="-1">Loading....</option>');
-                $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-                $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-                $.ajax(
-                   {
-                       type: "POST",
-                       url: "/Account/GetAreaRoutes/" + $(sender).val(),
-                       cache: false,
-                       processData: false,
-                       contentType: false,
-                       success: function (html) {
+    }
+    else if (Type == 2) {
+    ctrID = '#ddlCadd_StateCode';
+    MasterID = $('#ddlCadd_CountryCode').val();
+    }
+    else if (Type == 3) {
+    ctrID = '#ddlCadd_DistrictCode';
+    MasterID = $('#ddlCadd_StateCode').val();
 
-                           $('#ddlTRoutes').html(html);
-                       },
-                       error: function (e) {
-                           alert("errorn");
-                       }
-                   });
-            }
-        }
-        function TransportRouteChanged(sender) {
-            $('#ddlTStops').html('<option value="-1">Loading....</option>');
-            $('#ddlTVehicles').html('<option value="-1">Loading....</option>');
-            $.ajax(
-               {
-                   type: "POST",
-                   url: "/Account/GetRouteVehicles/" + $(sender).val(),
-                   cache: false,
-                   processData: false,
-                   contentType: false,
-                   success: function (data) {
-                       $('#divFilledStatus').html('Filled Seats :0  Capacity : 0');
-                       $('#ddlTVehicles').html('');
-                       $('#ddlTVehicles').append('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-                       for (var i = 0; i < data.length; i++) {
+    }
+    else if (Type == 4) {
+    ctrID = '#ddlCadd_AreaCode';
+    MasterID = $('#ddlCadd_DistrictCode').val();
 
-                           $('#ddlTVehicles').append('<option capacity="' + data[i].Extra2 + '" filled="' + data[i].Extra1 + '" value="' + data[i].ID + '">' + data[i].Name + ' </option>');
-                       }
-                   },
-                   error: function (e) {
-                       alert("errorn");
-                   }
-               });
-        }
-        function TransportRouteVehicleChanged(sender) {
-            $('#divFilledStatus').html('Filled Seats :' + $("#ddlTVehicles option:selected").attr('filled') + ' Capacity : ' + $("#ddlTVehicles option:selected").attr('capacity') + '');
+    }
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/AddLocation/" + MasterID + "/" + Type + "/" + Value,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
 
-            $('#ddlTStops').html('<option value="-1">Loading....</option>');
-            $.ajax(
-               {
-                   type: "POST",
-                   url: "/Account/GetVehicleRouteStoppages/" + $(sender).val() + "/" + $('#hdnTransportStopID').val(),
-                   cache: false,
-                   processData: false,
-                   contentType: false,
-                    success: function (data) {
-                        $('#ddlTStops').html('');
-                        var stops = data.Stops;
-                         for (var i = 0; i < stops.length; i++) {
-                           $('#ddlTStops').append('<option value="' + stops[i].StopID + '" '+(stops[i].StopID==data.StopDetails.StopID?'selected':'')+' >' + stops[i].AreaName +' ('+ stops[i].Time + ') Rs.'+stops[i].Rate + '</option>');
-                       }
-                   },
-                   error: function (e) {
-                       alert("errorn");
-                   }
-               });
-        }
-        function HostelChanged(sender) {
-            $('#tbdHostelRooms').html('');
-            $('#ddlHFloors').html('<option value="-1">Loading....</option>');
-            $.ajax(
-               {
-                   type: "POST",
-                   url: "/Account/GetHostelFloors/" + $(sender).val(),
-                   cache: false,
-                   processData: false,
-                   contentType: false,
-                   success: function (html) {
-                       $('#ddlHFloors').html('');
+    $(ctrID).html(html);
+    $(ctrID).append('<option value="-1">Add New</option>');
+    $(ctrID).select2('val', '0');
 
-                       $('#ddlHFloors').html(html);
+    AddLocation.remove();
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
 
-                   },
-                   error: function (e) {
-                       alert("errorn");
-                   }
-               });
-        }
-        function HostelFloorChanged(sender) {
-            $('#tbdHostelRooms').html('<tr><td colspan="8">Loading....</td></tr>');
-            $.ajax(
-               {
-                   type: "POST",
-                   url: "/Account/GetHostelFloorRooms/" + $('#ddlHHostels').val() + "/" + $(sender).val(),
-                   cache: false,
-                   processData: false,
-                   contentType: false,
-                   success: function (html) {
-                       $('#tbdHostelRooms').html(html);
-                   },
-                   error: function (e) {
-                       alert("errorn");
-                   }
-               });
-        }
-        var EditSessionForm;
-        function AddSession(sender) {
-            var StudentID = $(sender).closest('div').find('#hdnStudentID').val();
-            GetEditSession(sender, StudentID);
-        }
-        function EditSession(sender) {
-            var StudentID = $(sender).closest('td').find('#hdnStudentID').val();
-            GetEditSession(sender, StudentID);
-        }
-        function GetEditSession(sender, StudentID) {
-            $.ajax(
-                    {
-                        type: "POST",
-                        url: "/Account/EditSessionDetails/" + $(sender).attr('id') + "/" + StudentID,
-                        cache: false,
-                        processData: false,
-                        contentType: false,
-                        success: function (html) {
-                            EditSessionForm = new PNotify({
-                                text: html,
-                                icon: false,
-                                width: '70%',
-                                hide: false,
-                                addclass: 'dark',
-                                styling: 'bootstrap3',
-                                buttons: {
-                                    closer: false,
-                                    sticker: false
-                                },
-                                insert_brs: false
-                            });
+    }
+    var AddLocation;
+    function CountryChanged(sender, tab) {
+    if ($(sender).val() == "-1" && tab == 0) {
+    $('#frmAddLocation').find('#hdnSenderType').val(1);
+    $('#frmAddLocation').find('#ssType').text('Country');
+    $('#frmAddLocation').find('#txtLocationName').val('');
+    AddLocation = new PNotify({
+    text: $('#form_notice').html(),
+    icon: false,
+    width: 'auto',
+    hide: false,
+    addclass: 'dark',
+    styling: 'bootstrap3',
+    buttons: {
+    closer: false,
+    sticker: false
+    },
+    insert_brs: false
+    });
+    }
+    else {
+    if (tab == 0) {
+    $('#ddlCadd_StateCode').html('<option value="-1">Loading....</option>');
+    }
+    else {
+    $('#ddlTStates').html('<option value="-1">Loading....</option>');
+    $('#tbTransportRouteDetails').html('');
+    $('#ddlTCities').html('<option value="-1">--Select--</option>');
 
-                            $('.').css('margin-right', '100px');
-                        },
-                        error: function (e) {
-                            alert("errorn");
-                        }
-                    });
-        }
-        function SchoolSessionChanged(sender) {
-            $('#txtStartDate').val($('#ddlSchoolSessions option:selected').attr('startDate'));
-            $('#txtEndDate').val($('#ddlSchoolSessions option:selected').attr('endDate'));
-        }
-        function SessionClassChanged(sender) {
-            $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>')
+    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
+    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+    }
+    $.ajax(
+    {
 
-            $('#ddlSections').html('<option value="-1">Loading....</option>');
-            $.ajax(
-                 {
-                     type: "POST",
-                     url: "/Account/GetSectionOnClass/" + $(sender).val(),
-                     cache: false,
-                     processData: false,
-                     contentType: false,
-                     success: function (html) {
-                         $('#ddlSections').html('');
-                         $('#ddlSections').html('<option value="0">--Select--</option>');
-                         $('#ddlSections').append(html);
-                     },
-                     error: function (e) {
-                         alert("errorn");
-                     }
-                 });
-        }
+    type: "POST",
+    url: "/Account/GetCountryStates/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    if (tab == 0) {
+    $('#ddlCadd_StateCode').html(html);
+    $('#ddlCadd_StateCode').append('<option value="-1">Add New</option>');
+    $("#ddlCadd_StateCode").select2('val', '0');
+    }
+    else {
+    $('#ddlTStates').html(html);
+    }
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    }
+    function StateChanged(sender, tab) {
+    if ($(sender).val() == "-1" && tab == 0) {
+    $('#frmAddLocation').find('#hdnSenderType').val(2);
+    $('#frmAddLocation').find('#ssType').text('State');
+    $('#frmAddLocation').find('#txtLocationName').val('');
+    AddLocation = new PNotify({
+    text: $('#form_notice').html(),
+    icon: false,
+    width: 'auto',
+    hide: false,
+    addclass: 'dark',
+    styling: 'bootstrap3',
+    buttons: {
+    closer: false,
+    sticker: false
+    },
+    insert_brs: false
+    });
+    }
+    else {
+    if (tab == 0) {
+    $('#ddlCadd_DistrictCode').html('<option value="-1">Loading....</option>');
+    }
+    else {
+    $('#tbTransportRouteDetails').html('');
+    $('#ddlTCities').html('<option value="-1">Loading....</option>');
+
+    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
+    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+    }
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetStateCities/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    if (tab == 0) {
+    $('#ddlCadd_DistrictCode').html(html);
+    $('#ddlCadd_DistrictCode').append('<option value="-1">Add New</option>');
+    $("#ddlCadd_DistrictCode").select2('val', '0');
+    }
+    else {
+    $('#ddlTCities').html(html);
+    }
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    }
+    function CityChanged(sender, tab) {
+    if ($(sender).val() == "-1" && tab == 0) {
+    $('#frmAddLocation').find('#hdnSenderType').val(3);
+    $('#frmAddLocation').find('#ssType').text('City');
+    $('#frmAddLocation').find('#txtLocationName').val('');
+    AddLocation = new PNotify({
+    text: $('#form_notice').html(),
+    icon: false,
+    width: 'auto',
+    hide: false,
+    addclass: 'dark',
+    styling: 'bootstrap3',
+    buttons: {
+    closer: false,
+    sticker: false
+    },
+    insert_brs: false
+    });
+    }
+    else {
+    if (tab == 0) {
+    $('#ddlCadd_AreaCode').html('<option value="-1">Loading....</option>');
+    }
+    else {
+    $('#ddlTStops').html('<option value="-1">Loading....</option>');
+    $('#ddlTAreas').html('<option value="-1">Loading....</option>');
+    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+    }
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetCityAreas/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    if (tab == 0) {
+    $('#ddlCadd_AreaCode').html(html);
+    $('#ddlCadd_AreaCode').append('<option value="-1">Add New</option>');
+    $("#ddlCadd_AreaCode").select2('val', '0');
+    }
+    else {
+    $('#ddlTAreas').html(html);
+    }
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    }
+    function AreaChanged(sender, tab) {
+    if ($(sender).val() == "-1" && tab == 0) {
+    $('#frmAddLocation').find('#hdnSenderType').val(4);
+    $('#frmAddLocation').find('#ssType').text('Area');
+    $('#frmAddLocation').find('#txtLocationName').val('');
+    AddLocation = new PNotify({
+    text: $('#form_notice').html(),
+    icon: false,
+    width: 'auto',
+    hide: false,
+    addclass: 'dark',
+    styling: 'bootstrap3',
+    buttons: {
+    closer: false,
+    sticker: false
+    },
+    insert_brs: false
+    });
+    }
+    else {
+    $('#ddlTStops').html('<option value="-1">Loading....</option>');
+    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetAreaRoutes/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+
+    $('#ddlTRoutes').html(html);
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    }
+    function TransportRouteChanged(sender) {
+    $('#ddlTStops').html('<option value="-1">Loading....</option>');
+    $('#ddlTVehicles').html('<option value="-1">Loading....</option>');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetRouteVehicles/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (data) {
+    $('#divFilledStatus').html('Filled Seats :0  Capacity : 0');
+    $('#ddlTVehicles').html('');
+    $('#ddlTVehicles').append('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+    for (var i = 0; i < data.length; i++) {
+
+    $('#ddlTVehicles').append('<option capacity="' + data[i].Extra2 + '" filled="' + data[i].Extra1 + '" value="' + data[i].ID + '">' + data[i].Name + ' </option>');
+    }
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    function TransportRouteVehicleChanged(sender) {
+    $('#divFilledStatus').html('Filled Seats :' + $("#ddlTVehicles option:selected").attr('filled') + ' Capacity : ' + $("#ddlTVehicles option:selected").attr('capacity') + '');
+
+    $('#ddlTStops').html('<option value="-1">Loading....</option>');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetVehicleRouteStoppages/" + $(sender).val() + "/" + $('#hdnTransportStopID').val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (data) {
+    $('#ddlTStops').html('');
+    var stops = data.Stops;
+    for (var i = 0; i < stops.length; i++) {
+    $('#ddlTStops').append('<option value="' + stops[i].StopID + '" '+(stops[i].StopID==data.StopDetails.StopID?'selected':'')+' >' + stops[i].AreaName +' ('+ stops[i].Time + ') Rs.'+stops[i].Rate + '</option>');
+    }
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    function HostelChanged(sender) {
+    $('#tbdHostelRooms').html('');
+    $('#ddlHFloors').html('<option value="-1">Loading....</option>');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetHostelFloors/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    $('#ddlHFloors').html('');
+
+    $('#ddlHFloors').html(html);
+
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    function HostelFloorChanged(sender) {
+    $('#tbdHostelRooms').html('<tr><td colspan="8">Loading....</td></tr>');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetHostelFloorRooms/" + $('#ddlHHostels').val() + "/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    $('#tbdHostelRooms').html(html);
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    var EditSessionForm;
+    function AddSession(sender) {
+    var StudentID = $(sender).closest('div').find('#hdnStudentID').val();
+    GetEditSession(sender, StudentID);
+    }
+    function EditSession(sender) {
+    var StudentID = $(sender).closest('td').find('#hdnStudentID').val();
+    GetEditSession(sender, StudentID);
+    }
+    function GetEditSession(sender, StudentID) {
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/EditSessionDetails/" + $(sender).attr('id') + "/" + StudentID,
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    EditSessionForm = new PNotify({
+    text: html,
+    icon: false,
+    width: '70%',
+    hide: false,
+    addclass: 'dark',
+    styling: 'bootstrap3',
+    buttons: {
+    closer: false,
+    sticker: false
+    },
+    insert_brs: false
+    });
+
+    $('.').css('margin-right', '100px');
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
+    function SchoolSessionChanged(sender) {
+    $('#txtStartDate').val($('#ddlSchoolSessions option:selected').attr('startDate'));
+    $('#txtEndDate').val($('#ddlSchoolSessions option:selected').attr('endDate'));
+    }
+    function SessionClassChanged(sender) {
+    $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>')
+
+    $('#ddlSections').html('<option value="-1">Loading....</option>');
+    $.ajax(
+    {
+    type: "POST",
+    url: "/Account/GetSectionOnClass/" + $(sender).val(),
+    cache: false,
+    processData: false,
+    contentType: false,
+    success: function (html) {
+    $('#ddlSections').html('');
+    $('#ddlSections').html('<option value="0">--Select--</option>');
+    $('#ddlSections').append(html);
+    },
+    error: function (e) {
+    alert("errorn");
+    }
+    });
+    }
     </script>
 }

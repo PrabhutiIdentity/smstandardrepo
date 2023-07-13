@@ -130,6 +130,7 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+       
         public StudentsPageModel GetStudentInactive(int ClassID, int SectionID, int SBranchID, int SessionID)
         {
 
@@ -3100,1871 +3101,1925 @@ namespace SMEnterprise.Repository
             return objModel;
         }
 
+        public StudentsPageModel GetSiblingReport(int SBranchID, int SessionID)
+        {
+            StudentsPageModel objModel = new StudentsPageModel();
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                using (var multi = con.QueryMultiple("sp_GetSiblingStudentList", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+
+                    objModel.Students = multi.Read<StudentModel>().ToList();
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                   
+                }
+            }
+            return objModel;
+        }
         public StudentsPageModel GetAllStudentReportEWS(int SBranchID, int SessionID)
-        {
-            StudentsPageModel objModel = new StudentsPageModel();
-            //objModel.SectionID = SectionID;
-            //  objModel.ClassID = ClassID;
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                var paramater = new DynamicParameters();
-                //paramater.Add("@ClassID", ClassID);
-                // paramater.Add("@SectionID", SectionID);
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("spn_GetAllStudentDetailsEWS", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                StudentsPageModel objModel = new StudentsPageModel();
+                //objModel.SectionID = SectionID;
+                //  objModel.ClassID = ClassID;
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
                 {
-
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-                    // objModel.Classes = multi.Read<ClassModel>().ToList();
-                    //   objModel.Sections = multi.Read<SectionModel>().ToList();
-                    //   objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    //  objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-            return objModel;
-        }
-        public StudentsPageModel GetAllStudentReport(int SBranchID, int SessionID)
-        {
-            StudentsPageModel objModel = new StudentsPageModel();
-            //objModel.SectionID = SectionID;
-            //  objModel.ClassID = ClassID;
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                //paramater.Add("@ClassID", ClassID);
-                // paramater.Add("@SectionID", SectionID);
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("spn_GetAllStudentDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-                    // objModel.Classes = multi.Read<ClassModel>().ToList();
-                    //   objModel.Sections = multi.Read<SectionModel>().ToList();
-                    //   objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    //  objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    try
+                    var paramater = new DynamicParameters();
+                    //paramater.Add("@ClassID", ClassID);
+                    // paramater.Add("@SectionID", SectionID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    paramater.Add("@SessionID", SessionID);
+                    using (var multi = con.QueryMultiple("spn_GetAllStudentDetailsEWS", paramater, null, 0, commandType: CommandType.StoredProcedure))
                     {
 
-                        objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch (Exception ex)
-                    { }
-                }
-            }
-            return objModel;
-        }
-
-        public StudentsPageModel GetStudentClassReport(int ClassID, int SectionID, int SBranchID, int SessionID)
-        {
-            StudentsPageModel objModel = new StudentsPageModel();
-            objModel.SectionID = SectionID;
-            objModel.ClassID = ClassID;
-            objModel.SessionID = SessionID;
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", ClassID);
-                paramater.Add("@SectionID", SectionID);
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("spn_GetStudentClassSectionDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-                    objModel.Classes = multi.Read<ClassModel>().ToList();
-                    objModel.Sections = multi.Read<SectionModel>().ToList();
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    try
-                    {
-
-                        objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch (Exception ex)
-                    { }
-                }
-            }
-            return objModel;
-        }
-        public AbsentStudentReportModel GetAbsentStudentReport(AbsentStudentReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@Year", objModel.Year);
-                paramater.Add("@Month", objModel.Month);
-                paramater.Add("@Day", objModel.Day);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("spn_GetAbsentStudentListForReview", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.Classes = multi.Read<ClassModel>().ToList();
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-                }
-            }
-            return objModel;
-        }
-        public StudentFeeModel GetMonthlyFeeCollection(StudentFeeModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@Month", objModel.Month);
-                paramater.Add("@Year", objModel.Year);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetMonthFeeCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
-                }
-            }
-            return objModel;
-        }
-
-        public CollectionReportModel GetCustomCollectionReport(CollectionReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@FromDate", objModel.FromDate);
-                paramater.Add("@ToDate", objModel.ToDate);
-                paramater.Add("@ReportType", objModel.ReportType);
-                paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@QuarterID", objModel.QuarterID);
-                using (var multi = con.QueryMultiple("GetCustomCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
-                    objModel.Report = multi.Read<FeePaymentModel>().ToList();
-                }
-            }
-            return objModel;
-        }
-        public CollectionReportModel GetCollectionReport(CollectionReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@FromDate", objModel.FromDate);
-                paramater.Add("@ToDate", objModel.ToDate);
-                paramater.Add("@ReportType", objModel.ReportType);
-                paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@QuarterID", objModel.QuarterID);
-                using (var multi = con.QueryMultiple("sp_GetFeeCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
-                    objModel.Report = multi.Read<FeePaymentModel>().ToList();
-                    try
-                    {
-
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch (Exception ex)
-                    { }
-                }
-            }
-            return objModel;
-        }
-        public CollectionReportModel GetCollectionFeeReport(CollectionReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@FromDate", objModel.FromDate);
-                paramater.Add("@ToDate", objModel.ToDate);
-                paramater.Add("@ReportType", objModel.ReportType);
-                paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@QuarterID", objModel.QuarterID);
-                using (var multi = con.QueryMultiple("GetStudentFeeRecordDaily", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
-                    objModel.FeeType = multi.Read<NameIDModel>().ToList();
-                    objModel.Report = multi.Read<FeePaymentModel>().ToList();
-                    objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
-                    try
-                    {
-
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch (Exception ex)
-                    { }
-                }
-            }
-            return objModel;
-        }
-        public CollectionReportModel GetDatewiseCollectionFeeReport(CollectionReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@FromDate", objModel.FromDate);
-                paramater.Add("@ToDate", objModel.ToDate);
-                paramater.Add("@ReportType", objModel.ReportType);
-                paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@QuarterID", objModel.QuarterID);
-                using (var multi = con.QueryMultiple("GetStudentFeeRecordDateWiseMonthly", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
-                    objModel.FeeType = multi.Read<NameIDModel>().ToList();
-                    objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
-                    try
-                    {
-
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch (Exception ex)
-                    { }
-                }
-            }
-            return objModel;
-        }
-        public ExpenceManagementModel GetMonthlyExpenceReport(ExpenceManagementModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@Month", objModel.Month);
-                paramater.Add("@Year", objModel.Year);
-                using (var multi = con.QueryMultiple("sp_GetExpenceReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.Expences = multi.Read<ExpenceModel>().ToList();
-                    try
-                    {
-
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch (Exception ex)
-                    { }
-                }
-            }
-            return objModel;
-        }
-        public IEnumerable<FeePaymentModel> GetStudentFeePayments(int StudentID, int SBranchID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-
-                paramater.Add("@StudentID", StudentID);
-                paramater.Add("@SBranchID", SBranchID);
-
-                return con.Query<FeePaymentModel>("sp_GetStudentFeePaymentList", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
-            }
-        }
-        public DailyAttandanceReportModel GetDailyAbsentReport(DailyAttandanceReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@Year", objModel.ReportDate.Year);
-                paramater.Add("@Month", objModel.ReportDate.Month);
-                paramater.Add("@Day", objModel.ReportDate.Day);
-                using (var multi = con.QueryMultiple("spr_GetDailyAttandanceReportMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.Report = multi.Read<DailyAttandanceModel>().ToList();
-                    try
-                    {
-
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch (Exception ex)
-                    { }
-                }
-
-            }
-            return objModel;
-        }
-        #endregion
-        #region Exam Result Module
-        public TeacherResultPageModel GetMiniExamResults(TeacherResultPageModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SubjectID", objModel.SubjectID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationMode", 0);
-                paramater.Add("@SessionID", objModel.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetClassGroupWiseExamResultsMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.Subjects = multi.Read<NameIDModel>().ToList();
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.ExamResults = multi.Read<ExamResultDetailModel>().ToList();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    if (objModel.Classes.Count > 0)
-                    {
-                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                        objModel.SubjectID = multi.Read<int>().SingleOrDefault();
-                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    }
-                    objModel.IsLocked = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    try
-                    {
-                        objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
-
-                    }
-                    catch
-                    {
-
+                        objModel.Students = multi.Read<StudentModel>().ToList();
+                        // objModel.Classes = multi.Read<ClassModel>().ToList();
+                        //   objModel.Sections = multi.Read<SectionModel>().ToList();
+                        //   objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        //  objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
                     }
                 }
+                return objModel;
             }
-            return objModel;
-        }
-        public IEnumerable<NameIDModel> GetSubjectsForSection(int SectionID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            public StudentsPageModel GetAllStudentReport(int SBranchID, int SessionID)
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SectionID", SectionID);
-                return con.Query<NameIDModel>("spn_GetSubjectsForSections", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
-            }
-        }
-        public IEnumerable<NameIDModel> GetSubjectsForSectionEvalluation(int SectionID, int EvaluationID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SectionID", SectionID);
-                paramater.Add("@EvaluationID", EvaluationID);
-                return con.Query<NameIDModel>("spn_GetSubjectsForSectionEvaluations", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
-            }
-        }
-        public int UpdateStudentResults(TeacherResultPageModel objModel)
-        {
-
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                DataTable dtResult = objModel.GetResultDetailsDataTable();
-                paramater.Add("@ExamResultDetails", dtResult);
-                return con.Query<int>("sp_UpdateExamResults", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-
-        }
-        public StudentResultScrutinyListModel GetStudentsResultScrutiny(StudentResultScrutinyListModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@SessionID", objModel.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentEvaluationResultScrutiny", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                StudentsPageModel objModel = new StudentsPageModel();
+                //objModel.SectionID = SectionID;
+                //  objModel.ClassID = ClassID;
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
                 {
-
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.StudentResult = multi.Read<StudentResultScrutinyModel>().ToList();
-
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    try
-                    {
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-
-                    }
-                    catch
+                    var paramater = new DynamicParameters();
+                    //paramater.Add("@ClassID", ClassID);
+                    // paramater.Add("@SectionID", SectionID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    paramater.Add("@SessionID", SessionID);
+                    using (var multi = con.QueryMultiple("spn_GetAllStudentDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
                     {
 
-                    }
-                }
-            }
-            return objModel;
-        }
-
-        public StudentResultScrutinyListModel StudentResultList(StudentResultScrutinyListModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@SessionID", objModel.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentResultSummery", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.StudentResult = multi.Read<StudentResultScrutinyModel>().ToList();
-                    objModel.Subjects2 = multi.Read<SubjectModel>().ToList();
-                    objModel.Exams = multi.Read<ExamModel>().ToList();
-                    objModel.Result = multi.Read<ExamResultDetailModel>().ToList();
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    objModel.ClassName = multi.Read<string>().SingleOrDefault();
-                    objModel.SectionName = multi.Read<string>().SingleOrDefault();
-                    objModel.SessionName = multi.Read<string>().SingleOrDefault();
-                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                }
-            }
-            return objModel;
-        }
-
-
-        public StudentResultScrutinyListModel GetClassResultReport(StudentResultScrutinyListModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@SessionID", objModel.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetClassEvaluationResultReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.Result = multi.Read<ExamResultDetailModel>().ToList();
-                    objModel.Subjects = multi.Read<NameIDModel>().ToList();
-                    objModel.StudentResult = multi.Read<StudentResultScrutinyModel>().ToList();
-
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    try
-                    {
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-
-                    }
-                    catch
-                    {
-
-                    }
-                }
-            }
-            return objModel;
-        }
-
-        public StudentResultScrutinyListModel GetStudentsResultCheck(StudentResultScrutinyListModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@SubEvaluationID", objModel.SubEvaluationID);
-                paramater.Add("@SessionID", objModel.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentEvaluationResultCheck", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.Subjects = multi.Read<NameIDModel>().ToList();
-                    objModel.StudentResult2 = multi.Read<StudentResultCheckModel>().ToList();
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    objModel.SubEvaluationID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-            return objModel;
-        }
-
-        public StudentPerformanceListModel GetStudentsPerformanceShine(StudentPerformanceListModel objModel)
-        {
-
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationMode", 0);
-                paramater.Add("@SessionID", objModel.SessionID);
-
-                using (var multi = con.QueryMultiple("sp_GetClassSectionWiseStudentPerformancesMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.StudentPerformances = multi.Read<StudentPerformanceModel>().ToList();
-                    if (objModel.Classes.Count > 0)
-                    {
-                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    }
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    objModel.TotalParameters = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
-                }
-            }
-            return objModel;
-        }
-        public StudentPerformanceListModel GetStudentsPerformanceMini(StudentPerformanceListModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@EvaluationID", objModel.EvaluationID);
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationMode", 0);
-                paramater.Add("@SessionID", objModel.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetClassSectionWiseStudentPerformancesMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.Evaluations = multi.Read<NameIDModel>().ToList();
-                    objModel.StudentPerformances = multi.Read<StudentPerformanceModel>().ToList();
-                    if (objModel.Classes.Count > 0)
-                    {
-                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    }
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                    objModel.TotalParameters = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                    objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
-                }
-            }
-            return objModel;
-        }
-        public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StudentSessionUID", model.StudentSessionUID);
-                paramater.Add("@EvaluationID", model.EvaluationID);
-                paramater.Add("@SBranchID", model.SBranchID);
-                paramater.Add("@EvaluationMode", 0);
-                using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    model.PerformanceParameters = multi.Read<PerformanceParameterModel>().ToList();
-                    model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
-                    model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
-                    model.Result = multi.Read<ExamResultDetailModel>().ToList();
-                    model.Student = multi.Read<StudentModel>().SingleOrDefault();
-                    model.CGPA = multi.Read<decimal>().SingleOrDefault();
-                    model.EvaluationName = multi.Read<string>().SingleOrDefault();
-                    model.FilledParameter = multi.Read<int>().SingleOrDefault();
-                    model.TotalParameter = multi.Read<int>().SingleOrDefault();
-                }
-            }
-            return model;
-        }
-        public int UpdateStudentPerformance(PerformanceParameterDetailModel objModel)
-        {
-
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@PerformanceDetails", objModel.GetPerformanceValuesDatatable());
-                return con.Query<int>("sp_UpdateStudentPerformanceDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-
-        }
-        #endregion
-        public void GetBranchParents(ParentPageModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@SText", oModel.SText);
-                paramater.Add("@SessionID", oModel.SessionID);
-
-                using (var multi = con.QueryMultiple("sp_GetParentList", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.Parents = multi.Read<ParentModel>().ToList();
-                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-        }
-        public void GetParentWiseFeeDetails(ParentFeeDetailsPageModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ParentID", objModel.ParentID);
-                paramater.Add("@PaymentID", objModel.PaymentID);
-                paramater.Add("@Day", objModel.Day);
-                paramater.Add("@Month", objModel.Month);
-                paramater.Add("@Year", objModel.Year);
-                paramater.Add("@QDate", CommonUsage.GetCurrentDate());
-                paramater.Add("@SessionID", objModel.SessionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("spn_GetParentChildsFeeDetailsNEW", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    objModel.Students = multi.Read<StudentModel>().ToList();
-                    objModel.FeeDetails = multi.Read<ParentStudentFeeDetails>().ToList();
-                    objModel.Session = multi.Read<SchoolSessionModel>().SingleOrDefault();
-                    objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
-                }
-            }
-        }
-
-        public void UpdateParentFeePayment(ParentFeeDetailsPageModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-
-                paramater.Add("@ParentID", oModel.ParentID);
-                paramater.Add("@ReferanceNumber", oModel.ReferanceNumber);
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@Month", oModel.Month);
-                paramater.Add("@Year", oModel.Year);
-                paramater.Add("@QDate", oModel.QDate);
-                paramater.Add("@Remark", oModel.Remark);
-                paramater.Add("@PaymentMode", oModel.PaymentMode);
-                paramater.Add("@CollectedBy", oModel.CollectedBy);
-                paramater.Add("@PaymentAmount", oModel.PaymentAmount);
-                paramater.Add("@ApplicableAmount", oModel.ApplicableAmount);
-                paramater.Add("@DiscountAmount", oModel.DiscountAmount);
-                paramater.Add("@PaymentDetail", oModel.GetFeePaymentsDataTable());
-
-                using (var multi = con.QueryMultiple("sp_SaveParentPayemnt", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    oModel.PaymentRecieptNo = multi.Read<string>().SingleOrDefault();
-                    oModel.PaymentID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-        }
-        #region Stock Management
-        public StockManagementModel GetStockTransfers(StockManagementModel objModel)
-        {
-
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StartDate", objModel.StartDate);
-                paramater.Add("@EndDate", objModel.EndDate);
-                paramater.Add("@TrType", objModel.TrType);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetStockTransactions", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.Transactions = multi.Read<StockTransaferMasterModel>().ToList();
-                    try
-                    {
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-
-                    }
-                    catch
-                    {
-
-                    }
-                }
-            }
-            return objModel;
-        }
-        public StockTransaferMasterModel GetVendorsStockTransfers(int STID, int SBranchID)
-        {
-            StockTransaferMasterModel oModel = new StockTransaferMasterModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@STID", STID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetVendorsForStockTransaction", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.VendorID = multi.Read<int>().SingleOrDefault();
-                    oModel.Vendors = multi.Read<VendorModel>().ToList();
-                }
-            }
-            return oModel;
-        }
-        public StockTransaferMasterModel GetEmployeesStockTransfers(int STID, int SBranchID, int EmployeeTypeID)
-        {
-            StockTransaferMasterModel oModel = new StockTransaferMasterModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@STID", STID);
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@EmployeeTypeID", EmployeeTypeID);
-                using (var multi = con.QueryMultiple("sp_GetEmployeesForStockTransaction", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.EmployeeTypes = multi.Read<NameIDModel>().ToList();
-                    oModel.Employees = multi.Read<NameIDModel>().ToList();
-                    oModel.RefID = multi.Read<int>().SingleOrDefault();
-                    oModel.EmployeeTypeID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-            return oModel;
-        }
-        public StockTransaferMasterModel GetStudentsStockTransfers(int STID, int SBranchID)
-        {
-            StockTransaferMasterModel oModel = new StockTransaferMasterModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@STID", STID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetStudentsForStockTransaction", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    oModel.Classes = multi.Read<NameIDModel>().ToList();
-                    oModel.Sections = multi.Read<NameIDModel>().ToList();
-                    oModel.Students = multi.Read<NameIDModel>().ToList();
-                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    oModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    oModel.SectionID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-            return oModel;
-        }
-        public IEnumerable<NameIDModel> GetStudentListOnSessionSection(int SessionID, int SectionID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SectionID", SectionID);
-                paramater.Add("@SessionID", SessionID);
-                return con.Query<NameIDModel>("getStudentListOnSessionSection", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
-            }
-        }
-        public StockTransaferMasterModel GetStockTransferDetails(int STID, int SBranchID)
-        {
-            StockTransaferMasterModel objModel = new StockTransaferMasterModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@STID", STID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetStockTransactionDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel = multi.Read<StockTransaferMasterModel>().SingleOrDefault();
-                    if (objModel == null)
-                    {
-                        objModel = new StockTransaferMasterModel();
-                    }
-                    objModel.Details = multi.Read<StockTransaferDetailModel>().ToList();
-                    objModel.Products = multi.Read<ProductModel>().ToList();
-                    if (objModel.TrType == 0)
-                    {
-                        objModel.VendorID = multi.Read<int>().SingleOrDefault();
-                        objModel.Vendors = multi.Read<VendorModel>().ToList();
-                        objModel.Sessions = new List<NameIDModel>();
-                        objModel.Classes = new List<NameIDModel>();
-                        objModel.Students = new List<NameIDModel>();
-                        objModel.Sections = new List<NameIDModel>();
-                        objModel.EmployeeTypes = new List<NameIDModel>();
-                        objModel.Employees = new List<NameIDModel>();
-                    }
-                    if (objModel.TrType != 0)
-                    {
-                        if (objModel.RefType == 0)
+                        objModel.Students = multi.Read<StudentModel>().ToList();
+                        // objModel.Classes = multi.Read<ClassModel>().ToList();
+                        //   objModel.Sections = multi.Read<SectionModel>().ToList();
+                        //   objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        //  objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        try
                         {
-                            objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                            objModel.Classes = multi.Read<NameIDModel>().ToList();
-                            objModel.Sections = multi.Read<NameIDModel>().ToList();
-                            objModel.Students = multi.Read<NameIDModel>().ToList();
-                            objModel.SessionID = multi.Read<int>().SingleOrDefault();
+
+                            objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+                }
+                return objModel;
+            }
+
+            public StudentsPageModel GetStudentClassReport(int ClassID, int SectionID, int SBranchID, int SessionID)
+            {
+                StudentsPageModel objModel = new StudentsPageModel();
+                objModel.SectionID = SectionID;
+                objModel.ClassID = ClassID;
+                objModel.SessionID = SessionID;
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ClassID", ClassID);
+                    paramater.Add("@SectionID", SectionID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    paramater.Add("@SessionID", SessionID);
+                    using (var multi = con.QueryMultiple("spn_GetStudentClassSectionDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Students = multi.Read<StudentModel>().ToList();
+                        objModel.Classes = multi.Read<ClassModel>().ToList();
+                        objModel.Sections = multi.Read<SectionModel>().ToList();
+                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        try
+                        {
+
+                            objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+                }
+                return objModel;
+            }
+            public AbsentStudentReportModel GetAbsentStudentReport(AbsentStudentReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@Year", objModel.Year);
+                    paramater.Add("@Month", objModel.Month);
+                    paramater.Add("@Day", objModel.Day);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    using (var multi = con.QueryMultiple("spn_GetAbsentStudentListForReview", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.Classes = multi.Read<ClassModel>().ToList();
+                        objModel.Students = multi.Read<StudentModel>().ToList();
+                    }
+                }
+                return objModel;
+            }
+            public StudentFeeModel GetMonthlyFeeCollection(StudentFeeModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@Month", objModel.Month);
+                    paramater.Add("@Year", objModel.Year);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetMonthFeeCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
+                    }
+                }
+                return objModel;
+            }
+
+            public CollectionReportModel GetCustomCollectionReport(CollectionReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@FromDate", objModel.FromDate);
+                    paramater.Add("@ToDate", objModel.ToDate);
+                    paramater.Add("@ReportType", objModel.ReportType);
+                    paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@QuarterID", objModel.QuarterID);
+                    using (var multi = con.QueryMultiple("GetCustomCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
+                        objModel.Report = multi.Read<FeePaymentModel>().ToList();
+                    }
+                }
+                return objModel;
+            }
+            public CollectionReportModel GetCollectionReport(CollectionReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@FromDate", objModel.FromDate);
+                    paramater.Add("@ToDate", objModel.ToDate);
+                    paramater.Add("@ReportType", objModel.ReportType);
+                    paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@QuarterID", objModel.QuarterID);
+                    using (var multi = con.QueryMultiple("sp_GetFeeCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
+                        objModel.Report = multi.Read<FeePaymentModel>().ToList();
+                        try
+                        {
+
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+                }
+                return objModel;
+            }
+            public CollectionReportModel GetCollectionFeeReport(CollectionReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@FromDate", objModel.FromDate);
+                    paramater.Add("@ToDate", objModel.ToDate);
+                    paramater.Add("@ReportType", objModel.ReportType);
+                    paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@QuarterID", objModel.QuarterID);
+                    using (var multi = con.QueryMultiple("GetStudentFeeRecordDaily", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
+                        objModel.FeeType = multi.Read<NameIDModel>().ToList();
+                        objModel.Report = multi.Read<FeePaymentModel>().ToList();
+                        objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
+                        try
+                        {
+
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+                }
+                return objModel;
+            }
+            public CollectionReportModel GetDatewiseCollectionFeeReport(CollectionReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@FromDate", objModel.FromDate);
+                    paramater.Add("@ToDate", objModel.ToDate);
+                    paramater.Add("@ReportType", objModel.ReportType);
+                    paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@QuarterID", objModel.QuarterID);
+                    using (var multi = con.QueryMultiple("GetStudentFeeRecordDateWiseMonthly", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
+                        objModel.FeeType = multi.Read<NameIDModel>().ToList();
+                        objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
+                        try
+                        {
+
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+                }
+                return objModel;
+            }
+            public ExpenceManagementModel GetMonthlyExpenceReport(ExpenceManagementModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@Month", objModel.Month);
+                    paramater.Add("@Year", objModel.Year);
+                    using (var multi = con.QueryMultiple("sp_GetExpenceReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.Expences = multi.Read<ExpenceModel>().ToList();
+                        try
+                        {
+
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+                }
+                return objModel;
+            }
+            public IEnumerable<FeePaymentModel> GetStudentFeePayments(int StudentID, int SBranchID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+
+                    paramater.Add("@StudentID", StudentID);
+                    paramater.Add("@SBranchID", SBranchID);
+
+                    return con.Query<FeePaymentModel>("sp_GetStudentFeePaymentList", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+                }
+            }
+            public DailyAttandanceReportModel GetDailyAbsentReport(DailyAttandanceReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@Year", objModel.ReportDate.Year);
+                    paramater.Add("@Month", objModel.ReportDate.Month);
+                    paramater.Add("@Day", objModel.ReportDate.Day);
+                    using (var multi = con.QueryMultiple("spr_GetDailyAttandanceReportMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.Report = multi.Read<DailyAttandanceModel>().ToList();
+                        try
+                        {
+
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        }
+                        catch (Exception ex)
+                        { }
+                    }
+
+                }
+                return objModel;
+            }
+            #endregion
+            #region Exam Result Module
+            public TeacherResultPageModel GetMiniExamResults(TeacherResultPageModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@EvaluationID", objModel.EvaluationID);
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SubjectID", objModel.SubjectID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@EvaluationMode", 0);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetClassGroupWiseExamResultsMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Sections = multi.Read<NameIDModel>().ToList();
+                        objModel.Subjects = multi.Read<NameIDModel>().ToList();
+                        objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.ExamResults = multi.Read<ExamResultDetailModel>().ToList();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                        if (objModel.Classes.Count > 0)
+                        {
                             objModel.ClassID = multi.Read<int>().SingleOrDefault();
                             objModel.SectionID = multi.Read<int>().SingleOrDefault();
-
-                            objModel.EmployeeTypes = new List<NameIDModel>();
-                            objModel.Employees = new List<NameIDModel>();
-                            objModel.Vendors = new List<VendorModel>();
+                            objModel.SubjectID = multi.Read<int>().SingleOrDefault();
+                            objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
                         }
-                        else
+                        objModel.IsLocked = multi.Read<int>().SingleOrDefault();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        try
                         {
-                            objModel.EmployeeTypes = multi.Read<NameIDModel>().ToList();
-                            objModel.Employees = multi.Read<NameIDModel>().ToList();
-                            objModel.RefID = multi.Read<int>().SingleOrDefault();
-                            objModel.EmployeeTypeID = multi.Read<int>().SingleOrDefault();
-                            objModel.Students = new List<NameIDModel>();
+                            objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
+
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+                return objModel;
+            }
+            public IEnumerable<NameIDModel> GetSubjectsForSection(int SectionID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SectionID", SectionID);
+                    return con.Query<NameIDModel>("spn_GetSubjectsForSections", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+                }
+            }
+            public IEnumerable<NameIDModel> GetSubjectsForSectionEvalluation(int SectionID, int EvaluationID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SectionID", SectionID);
+                    paramater.Add("@EvaluationID", EvaluationID);
+                    return con.Query<NameIDModel>("spn_GetSubjectsForSectionEvaluations", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+                }
+            }
+            public int UpdateStudentResults(TeacherResultPageModel objModel)
+            {
+
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    DataTable dtResult = objModel.GetResultDetailsDataTable();
+                    paramater.Add("@ExamResultDetails", dtResult);
+                    return con.Query<int>("sp_UpdateExamResults", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+
+            }
+            public StudentResultScrutinyListModel GetStudentsResultScrutiny(StudentResultScrutinyListModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@EvaluationID", objModel.EvaluationID);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetStudentEvaluationResultScrutiny", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Sections = multi.Read<NameIDModel>().ToList();
+                        objModel.StudentResult = multi.Read<StudentResultScrutinyModel>().ToList();
+
+                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                        try
+                        {
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+                return objModel;
+            }
+
+            public StudentResultScrutinyListModel StudentResultList(StudentResultScrutinyListModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@EvaluationID", objModel.EvaluationID);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetStudentResultSummery", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Sections = multi.Read<NameIDModel>().ToList();
+                        objModel.StudentResult = multi.Read<StudentResultScrutinyModel>().ToList();
+                        objModel.Subjects2 = multi.Read<SubjectModel>().ToList();
+                        objModel.Exams = multi.Read<ExamModel>().ToList();
+                        objModel.Result = multi.Read<ExamResultDetailModel>().ToList();
+                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                        objModel.ClassName = multi.Read<string>().SingleOrDefault();
+                        objModel.SectionName = multi.Read<string>().SingleOrDefault();
+                        objModel.SessionName = multi.Read<string>().SingleOrDefault();
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                }
+                return objModel;
+            }
+
+
+            public StudentResultScrutinyListModel GetClassResultReport(StudentResultScrutinyListModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@EvaluationID", objModel.EvaluationID);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetClassEvaluationResultReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Sections = multi.Read<NameIDModel>().ToList();
+                        objModel.Result = multi.Read<ExamResultDetailModel>().ToList();
+                        objModel.Subjects = multi.Read<NameIDModel>().ToList();
+                        objModel.StudentResult = multi.Read<StudentResultScrutinyModel>().ToList();
+
+                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                        try
+                        {
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+                return objModel;
+            }
+
+            public StudentResultScrutinyListModel GetStudentsResultCheck(StudentResultScrutinyListModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@EvaluationID", objModel.EvaluationID);
+                    paramater.Add("@SubEvaluationID", objModel.SubEvaluationID);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetStudentEvaluationResultCheck", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Sections = multi.Read<NameIDModel>().ToList();
+                        objModel.Subjects = multi.Read<NameIDModel>().ToList();
+                        objModel.StudentResult2 = multi.Read<StudentResultCheckModel>().ToList();
+                        objModel.Students = multi.Read<StudentModel>().ToList();
+
+                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                        objModel.SubEvaluationID = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+                return objModel;
+            }
+
+            public StudentPerformanceListModel GetStudentsPerformanceShine(StudentPerformanceListModel objModel)
+            {
+
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@EvaluationID", objModel.EvaluationID);
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@EvaluationMode", 0);
+                    paramater.Add("@SessionID", objModel.SessionID);
+
+                    using (var multi = con.QueryMultiple("sp_GetClassSectionWiseStudentPerformancesMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Sections = multi.Read<NameIDModel>().ToList();
+                        objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.StudentPerformances = multi.Read<StudentPerformanceModel>().ToList();
+                        if (objModel.Classes.Count > 0)
+                        {
+                            objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                            objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        }
+                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                        objModel.TotalParameters = multi.Read<int>().SingleOrDefault();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                        objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
+                    }
+                }
+                return objModel;
+            }
+            public StudentPerformanceListModel GetStudentsPerformanceMini(StudentPerformanceListModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@EvaluationID", objModel.EvaluationID);
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@EvaluationMode", 0);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetClassSectionWiseStudentPerformancesMini", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Sections = multi.Read<NameIDModel>().ToList();
+                        objModel.Evaluations = multi.Read<NameIDModel>().ToList();
+                        objModel.StudentPerformances = multi.Read<StudentPerformanceModel>().ToList();
+                        if (objModel.Classes.Count > 0)
+                        {
+                            objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                            objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        }
+                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                        objModel.TotalParameters = multi.Read<int>().SingleOrDefault();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                        objModel.SubEvaluations = multi.Read<NameIDModel>().ToList();
+                    }
+                }
+                return objModel;
+            }
+            public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StudentSessionUID", model.StudentSessionUID);
+                    paramater.Add("@EvaluationID", model.EvaluationID);
+                    paramater.Add("@SBranchID", model.SBranchID);
+                    paramater.Add("@EvaluationMode", 0);
+                    using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        model.PerformanceParameters = multi.Read<PerformanceParameterModel>().ToList();
+                        model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
+                        model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
+                        model.Result = multi.Read<ExamResultDetailModel>().ToList();
+                        model.Student = multi.Read<StudentModel>().SingleOrDefault();
+                        model.CGPA = multi.Read<decimal>().SingleOrDefault();
+                        model.EvaluationName = multi.Read<string>().SingleOrDefault();
+                        model.FilledParameter = multi.Read<int>().SingleOrDefault();
+                        model.TotalParameter = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+                return model;
+            }
+            public int UpdateStudentPerformance(PerformanceParameterDetailModel objModel)
+            {
+
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@PerformanceDetails", objModel.GetPerformanceValuesDatatable());
+                    return con.Query<int>("sp_UpdateStudentPerformanceDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+
+            }
+            #endregion
+            public void GetBranchParents(ParentPageModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@SText", oModel.SText);
+                    paramater.Add("@SessionID", oModel.SessionID);
+
+                    using (var multi = con.QueryMultiple("sp_GetParentList", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.Parents = multi.Read<ParentModel>().ToList();
+                        oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+            }
+            public void GetParentWiseFeeDetails(ParentFeeDetailsPageModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ParentID", objModel.ParentID);
+                    paramater.Add("@PaymentID", objModel.PaymentID);
+                    paramater.Add("@Day", objModel.Day);
+                    paramater.Add("@Month", objModel.Month);
+                    paramater.Add("@Year", objModel.Year);
+                    paramater.Add("@QDate", CommonUsage.GetCurrentDate());
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    using (var multi = con.QueryMultiple("spn_GetParentChildsFeeDetailsNEW", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        objModel.Students = multi.Read<StudentModel>().ToList();
+                        objModel.FeeDetails = multi.Read<ParentStudentFeeDetails>().ToList();
+                        objModel.Session = multi.Read<SchoolSessionModel>().SingleOrDefault();
+                        objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
+                        objModel.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    }
+                }
+            }
+
+            public void UpdateParentFeePayment(ParentFeeDetailsPageModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+
+                    paramater.Add("@ParentID", oModel.ParentID);
+                    paramater.Add("@ReferanceNumber", oModel.ReferanceNumber);
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@Month", oModel.Month);
+                    paramater.Add("@Year", oModel.Year);
+                    paramater.Add("@QDate", oModel.QDate);
+                    paramater.Add("@Remark", oModel.Remark);
+                    paramater.Add("@PaymentMode", oModel.PaymentMode);
+                    paramater.Add("@CollectedBy", oModel.CollectedBy);
+                    paramater.Add("@PaymentAmount", oModel.PaymentAmount);
+                    paramater.Add("@ApplicableAmount", oModel.ApplicableAmount);
+                    paramater.Add("@DiscountAmount", oModel.DiscountAmount);
+                    paramater.Add("@PaymentDetail", oModel.GetFeePaymentsDataTable());
+
+                    using (var multi = con.QueryMultiple("sp_SaveParentPayemnt", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        oModel.PaymentRecieptNo = multi.Read<string>().SingleOrDefault();
+                        oModel.PaymentID = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+            }
+            #region Stock Management
+            public StockManagementModel GetStockTransfers(StockManagementModel objModel)
+            {
+
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StartDate", objModel.StartDate);
+                    paramater.Add("@EndDate", objModel.EndDate);
+                    paramater.Add("@TrType", objModel.TrType);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetStockTransactions", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.Transactions = multi.Read<StockTransaferMasterModel>().ToList();
+                        try
+                        {
+                            objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                        }
+                        catch
+                        {
+
+                        }
+                    }
+                }
+                return objModel;
+            }
+            public StockTransaferMasterModel GetVendorsStockTransfers(int STID, int SBranchID)
+            {
+                StockTransaferMasterModel oModel = new StockTransaferMasterModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@STID", STID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetVendorsForStockTransaction", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.VendorID = multi.Read<int>().SingleOrDefault();
+                        oModel.Vendors = multi.Read<VendorModel>().ToList();
+                    }
+                }
+                return oModel;
+            }
+            public StockTransaferMasterModel GetEmployeesStockTransfers(int STID, int SBranchID, int EmployeeTypeID)
+            {
+                StockTransaferMasterModel oModel = new StockTransaferMasterModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@STID", STID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    paramater.Add("@EmployeeTypeID", EmployeeTypeID);
+                    using (var multi = con.QueryMultiple("sp_GetEmployeesForStockTransaction", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.EmployeeTypes = multi.Read<NameIDModel>().ToList();
+                        oModel.Employees = multi.Read<NameIDModel>().ToList();
+                        oModel.RefID = multi.Read<int>().SingleOrDefault();
+                        oModel.EmployeeTypeID = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+                return oModel;
+            }
+            public StockTransaferMasterModel GetStudentsStockTransfers(int STID, int SBranchID)
+            {
+                StockTransaferMasterModel oModel = new StockTransaferMasterModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@STID", STID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetStudentsForStockTransaction", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        oModel.Classes = multi.Read<NameIDModel>().ToList();
+                        oModel.Sections = multi.Read<NameIDModel>().ToList();
+                        oModel.Students = multi.Read<NameIDModel>().ToList();
+                        oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                        oModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        oModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+                return oModel;
+            }
+            public IEnumerable<NameIDModel> GetStudentListOnSessionSection(int SessionID, int SectionID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SectionID", SectionID);
+                    paramater.Add("@SessionID", SessionID);
+                    return con.Query<NameIDModel>("getStudentListOnSessionSection", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+                }
+            }
+            public StockTransaferMasterModel GetStockTransferDetails(int STID, int SBranchID)
+            {
+                StockTransaferMasterModel objModel = new StockTransaferMasterModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@STID", STID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetStockTransactionDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel = multi.Read<StockTransaferMasterModel>().SingleOrDefault();
+                        if (objModel == null)
+                        {
+                            objModel = new StockTransaferMasterModel();
+                        }
+                        objModel.Details = multi.Read<StockTransaferDetailModel>().ToList();
+                        objModel.Products = multi.Read<ProductModel>().ToList();
+                        if (objModel.TrType == 0)
+                        {
+                            objModel.VendorID = multi.Read<int>().SingleOrDefault();
+                            objModel.Vendors = multi.Read<VendorModel>().ToList();
                             objModel.Sessions = new List<NameIDModel>();
                             objModel.Classes = new List<NameIDModel>();
+                            objModel.Students = new List<NameIDModel>();
                             objModel.Sections = new List<NameIDModel>();
-                            objModel.Vendors = new List<VendorModel>();
+                            objModel.EmployeeTypes = new List<NameIDModel>();
+                            objModel.Employees = new List<NameIDModel>();
+                        }
+                        if (objModel.TrType != 0)
+                        {
+                            if (objModel.RefType == 0)
+                            {
+                                objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                                objModel.Classes = multi.Read<NameIDModel>().ToList();
+                                objModel.Sections = multi.Read<NameIDModel>().ToList();
+                                objModel.Students = multi.Read<NameIDModel>().ToList();
+                                objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                                objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                                objModel.SectionID = multi.Read<int>().SingleOrDefault();
+
+                                objModel.EmployeeTypes = new List<NameIDModel>();
+                                objModel.Employees = new List<NameIDModel>();
+                                objModel.Vendors = new List<VendorModel>();
+                            }
+                            else
+                            {
+                                objModel.EmployeeTypes = multi.Read<NameIDModel>().ToList();
+                                objModel.Employees = multi.Read<NameIDModel>().ToList();
+                                objModel.RefID = multi.Read<int>().SingleOrDefault();
+                                objModel.EmployeeTypeID = multi.Read<int>().SingleOrDefault();
+                                objModel.Students = new List<NameIDModel>();
+                                objModel.Sessions = new List<NameIDModel>();
+                                objModel.Classes = new List<NameIDModel>();
+                                objModel.Sections = new List<NameIDModel>();
+                                objModel.Vendors = new List<VendorModel>();
+                            }
                         }
                     }
                 }
-            }
-            return objModel;
-        }
-
-        public int UpdateStockTransaction(StockTransaferMasterModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@STID", oModel.STID);
-                paramater.Add("@TrDate", oModel.TrDate);
-                paramater.Add("@TrType", oModel.TrType);
-                paramater.Add("@RefID", oModel.RefID);
-                paramater.Add("@RefType", oModel.RefType);
-                paramater.Add("@Remark", oModel.Remark);
-                paramater.Add("@ClassID", oModel.ClassID);
-                paramater.Add("@SectionID", oModel.SectionID);
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@CreatedDate", oModel.CreatedDate);
-                paramater.Add("@Status", oModel.Status);
-                paramater.Add("@OpType", oModel.OpType);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@Details", oModel.GetDetailsDataTable());
-                paramater.Add("@EmployeeTypeID", oModel.EmployeeTypeID);
-                paramater.Add("@VendorID", oModel.VendorID);
-                return con.Query<int>("sp_UpdateStockTransaction", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+                return objModel;
             }
 
-        }
-        public PrintSaleReceiptModel GetSaleTransactionPrintData(int STID, int SBranchID)
-        {
-            PrintSaleReceiptModel objNew = new PrintSaleReceiptModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            public int UpdateStockTransaction(StockTransaferMasterModel oModel)
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@STID", STID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetStockTransactionPrintDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
                 {
-                    objNew.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
-                    objNew.Transfer = multi.Read<StockTransaferMasterModel>().SingleOrDefault();
-                    objNew.Products = multi.Read<StockTransaferDetailModel>().AsList();
-                    objNew.Customer = multi.Read<SaleReceiptCustomerModel>().SingleOrDefault();
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@STID", oModel.STID);
+                    paramater.Add("@TrDate", oModel.TrDate);
+                    paramater.Add("@TrType", oModel.TrType);
+                    paramater.Add("@RefID", oModel.RefID);
+                    paramater.Add("@RefType", oModel.RefType);
+                    paramater.Add("@Remark", oModel.Remark);
+                    paramater.Add("@ClassID", oModel.ClassID);
+                    paramater.Add("@SectionID", oModel.SectionID);
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    paramater.Add("@CreatedDate", oModel.CreatedDate);
+                    paramater.Add("@Status", oModel.Status);
+                    paramater.Add("@OpType", oModel.OpType);
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@Details", oModel.GetDetailsDataTable());
+                    paramater.Add("@EmployeeTypeID", oModel.EmployeeTypeID);
+                    paramater.Add("@VendorID", oModel.VendorID);
+                    return con.Query<int>("sp_UpdateStockTransaction", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
                 }
-            }
-
-            return objNew;
-        }
-        #endregion
-        #region SMS Management
-        public int InsertUpdateSMSRequest(SMSRequestModel ObjData)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SMSBalID", ObjData.SMSBalID);
-                paramater.Add("@SMSCredited", ObjData.SMSCredited);
-                paramater.Add("@RequestDate", ObjData.RequestDate);
-                paramater.Add("@Status", ObjData.Status);
-                paramater.Add("@SBranchID", ObjData.SBranchID);
-
-                return con.Query<int>("spn_InsertSMSBalance", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
 
             }
-        }
-        public List<SMSRequestModel> GetSMSRequestHistory(int SBranchID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            public PrintSaleReceiptModel GetSaleTransactionPrintData(int STID, int SBranchID)
             {
-
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", SBranchID);
-                return con.Query<SMSRequestModel>("spn_GetSMSRechargeHostory", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
-            }
-        }
-        public SMSTemplatePageModel GetSMSTemplates()
-        {
-            SMSTemplatePageModel objModel = new SMSTemplatePageModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                using (var multi = con.QueryMultiple("spn_GetSMSTemplates", null, null, 0, commandType: CommandType.StoredProcedure))
+                PrintSaleReceiptModel objNew = new PrintSaleReceiptModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
                 {
-                    objModel.Templates = multi.Read<SMSTemplateModel>().ToList();
-                    objModel.Types = multi.Read<NameIDModel>().ToList();
-                }
-            }
-            return objModel;
-        }
-        public int InsertUpdateSMSTemplate(SMSTemplateModel ObjData)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@TemplateID", ObjData.TemplateID);
-                paramater.Add("@Title", ObjData.Title);
-                paramater.Add("@SMSType", ObjData.SMSType);
-                paramater.Add("@Template", ObjData.Template);
-                paramater.Add("@OpType", ObjData.OpType);
-
-                return con.Query<int>("spn_InsertUpdateSMSTemplate", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-
-            }
-        }
-        public int InsertSMSSending(SMSSendTaskModel objModel)
-        {
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SMSTemplateID", objModel.SMSTemplateID);
-                paramater.Add("@SMSTypeID", objModel.SMSTypeID);
-                paramater.Add("@SMSSendDate", objModel.SMSSendDate);
-                paramater.Add("@TemplateText", objModel.TemplateText);
-                paramater.Add("@RecieverCatIDs", objModel.RecieverCats);
-                paramater.Add("@Title", objModel.Title);
-                paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
-                //paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@content_id", objModel.Content_id);
-                return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-
-        }
-        public SMSCreateModel GetCreateSMSPageData(SMSCreateModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@SMSType", objModel.SelectedSMSType);
-                paramater.Add("@Recievers", objModel.ReciverCats);
-                paramater.Add("@Year", objModel.Year);
-                paramater.Add("@Month", objModel.Month);
-                paramater.Add("@Day", objModel.Day);
-                using (var multi = con.QueryMultiple("spn_GetCreateSMSPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.SMSTypes = multi.Read<NameIDModel>().ToList();
-                    objModel.Templates = multi.Read<SMSTemplateModel>().ToList();
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Recievers = multi.Read<SMSRecieverDetailModel>().ToList();
-                    objModel.SelectedSMSType = multi.Read<int>().SingleOrDefault();
-                    objModel.ReciverCats = multi.Read<string>().SingleOrDefault();
-                }
-            }
-            return objModel;
-        }
-
-        public SMSSendTaskModel GetSMSSendingDetails(int SMSSendingID)
-        {
-            SMSSendTaskModel objModel = new SMSSendTaskModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SMSSendingID", SMSSendingID);
-                using (var multi = con.QueryMultiple("spn_GetSMSSendingDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel = multi.Read<SMSSendTaskModel>().SingleOrDefault();
-                    objModel.Recievers = multi.Read<SMSRecieverDetailModel>().ToList();
-                }
-            }
-            return objModel;
-        }
-        public List<SMSRecieverDetailModel> GetSMSRecieverList(SMSCreateModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@SMSType", objModel.SelectedSMSType);
-                paramater.Add("@Recievers", objModel.ReciverCats);
-                paramater.Add("@Year", objModel.Year);
-                paramater.Add("@Month", objModel.Month);
-                paramater.Add("@Day", objModel.Day);
-
-                return con.Query<SMSRecieverDetailModel>("spn_GetRecieverListForManualSMS", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
-            }
-        }
-        public int UpdateSMSProcessingStatus(SMSStatusModel data)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SMSType", data.SMSType);
-                paramater.Add("@SMSID", data.SMSID);
-                paramater.Add("@RecieverType", data.RecieverType);
-                paramater.Add("@RecieverID", data.RecieverID);
-                paramater.Add("@MobileNumber", data.MobileNumber);
-                paramater.Add("@ReasonFailure", data.ReasonFailure);
-                paramater.Add("@SMSDateTime", data.SMSDateTime);
-                paramater.Add("@Status", data.Status);
-                paramater.Add("@Content_id", data.SMSContentID);
-                return con.Query<int>("spn_UpdateSMSProcessingLog", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-
-            }
-        }
-        public List<SMSSendTaskModel> GetSMSSendingHistory(int SBranchID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", SBranchID);
-                return con.Query<SMSSendTaskModel>("spn_GetSMSSendingHistory", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
-
-            }
-        }
-        #endregion
-
-        #region Other Certificate Related
-        public SOCertificateDetails GetStudentSOCDetails(int StudentID, int SessionID)
-        {
-            SOCertificateDetails objModel = new SOCertificateDetails();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StudentID", StudentID);
-                paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
-                    if (objModel == null)
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@STID", STID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetStockTransactionPrintDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
                     {
-                        objModel = new SOCertificateDetails();
-                        objModel.StudentID = StudentID;
-                        objModel.SessionID = SessionID;
-                        objModel.CertDate = CommonUsage.GetCurrentDate();
+                        objNew.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                        objNew.Transfer = multi.Read<StockTransaferMasterModel>().SingleOrDefault();
+                        objNew.Products = multi.Read<StockTransaferDetailModel>().AsList();
+                        objNew.Customer = multi.Read<SaleReceiptCustomerModel>().SingleOrDefault();
                     }
-                    objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
-                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                }
+
+                return objNew;
+            }
+            #endregion
+            #region SMS Management
+            public int InsertUpdateSMSRequest(SMSRequestModel ObjData)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SMSBalID", ObjData.SMSBalID);
+                    paramater.Add("@SMSCredited", ObjData.SMSCredited);
+                    paramater.Add("@RequestDate", ObjData.RequestDate);
+                    paramater.Add("@Status", ObjData.Status);
+                    paramater.Add("@SBranchID", ObjData.SBranchID);
+
+                    return con.Query<int>("spn_InsertSMSBalance", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+                }
+            }
+            public List<SMSRequestModel> GetSMSRequestHistory(int SBranchID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", SBranchID);
+                    return con.Query<SMSRequestModel>("spn_GetSMSRechargeHostory", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+                }
+            }
+            public SMSTemplatePageModel GetSMSTemplates()
+            {
+                SMSTemplatePageModel objModel = new SMSTemplatePageModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    using (var multi = con.QueryMultiple("spn_GetSMSTemplates", null, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.Templates = multi.Read<SMSTemplateModel>().ToList();
+                        objModel.Types = multi.Read<NameIDModel>().ToList();
+                    }
                 }
                 return objModel;
             }
-        }
-        public int InsertUpdateOCertificates(SOCertificateDetails oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            public int InsertUpdateSMSTemplate(SMSTemplateModel ObjData)
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ID", oModel.ID);
-                paramater.Add("@CertID", oModel.CertID);
-
-                paramater.Add("@StudentID", oModel.StudentID);
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@DueStatus", oModel.DueStatus);
-                paramater.Add("@Character", oModel.Character);
-                paramater.Add("@CreatedBy", oModel.CreatedBy);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@CertDate", oModel.CertDate);
-                paramater.Add("@BirthPlace", oModel.BirthPlace);
-                paramater.Add("@ModifiedBy", oModel.ModifiedBy);
-                paramater.Add("@OpType", 0);
-
-                return con.Query<int>("sp_UpdateStudentSOCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-        public SOCertificateDetails GetStudentSOCPrintDetails(int StudentID, int SessionID)
-        {
-            SOCertificateDetails objModel = new SOCertificateDetails();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StudentID", StudentID);
-                paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentSOCDetailsForPrint", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
                 {
-                    objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
-                    if (objModel == null)
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@TemplateID", ObjData.TemplateID);
+                    paramater.Add("@Title", ObjData.Title);
+                    paramater.Add("@SMSType", ObjData.SMSType);
+                    paramater.Add("@Template", ObjData.Template);
+                    paramater.Add("@OpType", ObjData.OpType);
+
+                    return con.Query<int>("spn_InsertUpdateSMSTemplate", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+                }
+            }
+            public int InsertSMSSending(SMSSendTaskModel objModel)
+            {
+                int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SMSTemplateID", objModel.SMSTemplateID);
+                    paramater.Add("@SMSTypeID", objModel.SMSTypeID);
+                    paramater.Add("@SMSSendDate", objModel.SMSSendDate);
+                    paramater.Add("@TemplateText", objModel.TemplateText);
+                    paramater.Add("@RecieverCatIDs", objModel.RecieverCats);
+                    paramater.Add("@Title", objModel.Title);
+                    paramater.Add("@Recievers", objModel.GetRecieverDetailsDataTable());
+                    //paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    paramater.Add("@content_id", objModel.Content_id);
+                    return con.Query<int>("sp_InsertSMSSending", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+
+            }
+            public SMSCreateModel GetCreateSMSPageData(SMSCreateModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@SMSType", objModel.SelectedSMSType);
+                    paramater.Add("@Recievers", objModel.ReciverCats);
+                    paramater.Add("@Year", objModel.Year);
+                    paramater.Add("@Month", objModel.Month);
+                    paramater.Add("@Day", objModel.Day);
+                    using (var multi = con.QueryMultiple("spn_GetCreateSMSPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
                     {
-                        objModel = new SOCertificateDetails();
-                        objModel.StudentID = StudentID;
-                        objModel.SessionID = SessionID;
-                        objModel.CertDate = CommonUsage.GetCurrentDate();
+                        objModel.SMSTypes = multi.Read<NameIDModel>().ToList();
+                        objModel.Templates = multi.Read<SMSTemplateModel>().ToList();
+                        objModel.Classes = multi.Read<NameIDModel>().ToList();
+                        objModel.Recievers = multi.Read<SMSRecieverDetailModel>().ToList();
+                        objModel.SelectedSMSType = multi.Read<int>().SingleOrDefault();
+                        objModel.ReciverCats = multi.Read<string>().SingleOrDefault();
                     }
-                    objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
-                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
-                    objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
-                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
                 }
                 return objModel;
             }
-        }
+
+            public SMSSendTaskModel GetSMSSendingDetails(int SMSSendingID)
+            {
+                SMSSendTaskModel objModel = new SMSSendTaskModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SMSSendingID", SMSSendingID);
+                    using (var multi = con.QueryMultiple("spn_GetSMSSendingDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel = multi.Read<SMSSendTaskModel>().SingleOrDefault();
+                        objModel.Recievers = multi.Read<SMSRecieverDetailModel>().ToList();
+                    }
+                }
+                return objModel;
+            }
+            public List<SMSRecieverDetailModel> GetSMSRecieverList(SMSCreateModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@SMSType", objModel.SelectedSMSType);
+                    paramater.Add("@Recievers", objModel.ReciverCats);
+                    paramater.Add("@Year", objModel.Year);
+                    paramater.Add("@Month", objModel.Month);
+                    paramater.Add("@Day", objModel.Day);
+
+                    return con.Query<SMSRecieverDetailModel>("spn_GetRecieverListForManualSMS", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+                }
+            }
+            public int UpdateSMSProcessingStatus(SMSStatusModel data)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SMSType", data.SMSType);
+                    paramater.Add("@SMSID", data.SMSID);
+                    paramater.Add("@RecieverType", data.RecieverType);
+                    paramater.Add("@RecieverID", data.RecieverID);
+                    paramater.Add("@MobileNumber", data.MobileNumber);
+                    paramater.Add("@ReasonFailure", data.ReasonFailure);
+                    paramater.Add("@SMSDateTime", data.SMSDateTime);
+                    paramater.Add("@Status", data.Status);
+                    paramater.Add("@Content_id", data.SMSContentID);
+                    return con.Query<int>("spn_UpdateSMSProcessingLog", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+                }
+            }
+            public List<SMSSendTaskModel> GetSMSSendingHistory(int SBranchID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", SBranchID);
+                    return con.Query<SMSSendTaskModel>("spn_GetSMSSendingHistory", paramater, null, true, 0, commandType: CommandType.StoredProcedure).ToList();
+
+                }
+            }
+            #endregion
+
+            #region Other Certificate Related
+            public SOCertificateDetails GetStudentSOCDetails(int StudentID, int SessionID)
+            {
+                SOCertificateDetails objModel = new SOCertificateDetails();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StudentID", StudentID);
+                    paramater.Add("@SessionID", SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetStudentSOCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
+                        if (objModel == null)
+                        {
+                            objModel = new SOCertificateDetails();
+                            objModel.StudentID = StudentID;
+                            objModel.SessionID = SessionID;
+                            objModel.CertDate = CommonUsage.GetCurrentDate();
+                        }
+                        objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
+                        objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                    }
+                    return objModel;
+                }
+            }
+            public int InsertUpdateOCertificates(SOCertificateDetails oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ID", oModel.ID);
+                    paramater.Add("@CertID", oModel.CertID);
+
+                    paramater.Add("@StudentID", oModel.StudentID);
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    paramater.Add("@DueStatus", oModel.DueStatus);
+                    paramater.Add("@Character", oModel.Character);
+                    paramater.Add("@CreatedBy", oModel.CreatedBy);
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@CertDate", oModel.CertDate);
+                    paramater.Add("@BirthPlace", oModel.BirthPlace);
+                    paramater.Add("@ModifiedBy", oModel.ModifiedBy);
+                    paramater.Add("@OpType", 0);
+
+                    return con.Query<int>("sp_UpdateStudentSOCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            public SOCertificateDetails GetStudentSOCPrintDetails(int StudentID, int SessionID)
+            {
+                SOCertificateDetails objModel = new SOCertificateDetails();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StudentID", StudentID);
+                    paramater.Add("@SessionID", SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetStudentSOCDetailsForPrint", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel = multi.Read<SOCertificateDetails>().SingleOrDefault();
+                        if (objModel == null)
+                        {
+                            objModel = new SOCertificateDetails();
+                            objModel.StudentID = StudentID;
+                            objModel.SessionID = SessionID;
+                            objModel.CertDate = CommonUsage.GetCurrentDate();
+                        }
+                        objModel.Session = multi.Read<SessionModel>().SingleOrDefault();
+                        objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                        objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    return objModel;
+                }
+            }
         #endregion
 
         #region TC Related
-
-        public int InsertUpdateTC(TCModel oModel)
+        public StudentsPageModel GetTCStudentList(int SBranchID, int SessionID)
         {
+
+            StudentsPageModel objModel = new StudentsPageModel();
+         
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
-                paramater.Add("@TCID", oModel.TCID);
-                paramater.Add("@StudentID", oModel.StudentID);
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@IsSCBLastExamPassed", oModel.IsSCBLastExamPassed);
-                paramater.Add("@SCBLastExamName", oModel.SCBLastExamName);
-                paramater.Add("@SCBLastExamResult", oModel.SCBLastExamResult);
-                paramater.Add("@FailedCount", oModel.FailedCount);
-                paramater.Add("@PromotedToClass", oModel.PromotedToClass);
-                paramater.Add("@WorkingDays", oModel.WorkingDays);
-                paramater.Add("@PresentDays", oModel.PresentDays);
-                paramater.Add("@IsNCC", oModel.IsNCC);
-                paramater.Add("@NCCDetails", oModel.NCCDetails);
-                paramater.Add("@Games", oModel.Games);
-                paramater.Add("@GeneralConduct", oModel.GeneralConduct);
-                paramater.Add("@DateOfApplication", oModel.DateOfApplication);
-                paramater.Add("@DateOfIssue", oModel.DateOfIssue);
-                paramater.Add("@ReasonForLeaving", oModel.ReasonForLeaving);
-                paramater.Add("@Remarks", oModel.Remarks);
-                paramater.Add("@DuePaidMonth", oModel.DuePaidMonth);
-                paramater.Add("@Concession", oModel.Concession);
-                paramater.Add("@OpType", oModel.OpType);
-                paramater.Add("@CreatedBy", oModel.CreatedBy);
-                paramater.Add("@TCSLNo", oModel.TCSLNo);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                return con.Query<int>("sp_InsertUpdateTCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-        public SLCCertificateDetails GetStudentSLCDetails(int StudentID, int SessionID)
-        {
-            SLCCertificateDetails objModel = new SLCCertificateDetails();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StudentID", StudentID);
-                paramater.Add("@SessionID", SessionID);
-
-                using (var multi = con.QueryMultiple("sp_GetStudentSLCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel = multi.Read<SLCCertificateDetails>().SingleOrDefault();
-                    if (objModel == null)
-                    {
-                        objModel = new SLCCertificateDetails();
-                        objModel.StudentID = StudentID;
-                        objModel.SessionID = SessionID;
-                        objModel.TCDate = CommonUsage.GetCurrentDate();
-                    }
-                    objModel.Sessions = multi.Read<SessionModel>().ToList();
-                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
-                }
-                return objModel;
-            }
-        }
-        public SLCCertificateDetails GetStudentSLCPrintDetails(int StudentID, int SessionID)
-        {
-
-            SLCCertificateDetails objModel = new SLCCertificateDetails();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StudentID", StudentID);
-                paramater.Add("@SessionID", SessionID);
-
-                using (var multi = con.QueryMultiple("sp_GetStudentSLCPrintDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel = multi.Read<SLCCertificateDetails>().SingleOrDefault();
-                    if (objModel == null)
-                    {
-                        objModel = new SLCCertificateDetails();
-                        objModel.StudentID = StudentID;
-                        objModel.SessionID = SessionID;
-                        objModel.TCDate = CommonUsage.GetCurrentDate();
-                    }
-                    objModel.Sessions = multi.Read<SessionModel>().ToList();
-                    objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
-                    objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
-                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                }
-                return objModel;
-            }
-        }
-
-        public int InsertUpdateSLC(SLCCertificateDetails oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@CertID", oModel.CertID);
-                paramater.Add("@StudentID", oModel.StudentID);
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@Stream", oModel.Stream);
-                paramater.Add("@DuesCleared", oModel.DuesCleared);
-                paramater.Add("@Character", oModel.Character);
-                paramater.Add("@Promotion", oModel.Promotion);
-                paramater.Add("@TCDate", oModel.TCDate);
-                paramater.Add("@CreatedDate", oModel.CreatedDate);
-                paramater.Add("@CreatedBy", oModel.CreatedBy);
-                paramater.Add("@TCSLNo", oModel.TCSLNo);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@SessionSLCDetails", oModel.GetStudentSLCSessionDetails());
-                paramater.Add("@DOB", oModel.DOB);
-                paramater.Add("@DOJ", oModel.DOJ);
-                paramater.Add("@SchoolUID", oModel.SchoolUID);
-                paramater.Add("@PSchoolName", oModel.PSchoolName);
-                paramater.Add("@PSchoolMedium", oModel.PSchoolMedium);
-                paramater.Add("@PClassName", oModel.PClassName);
-                paramater.Add("@PSResult", oModel.PSResult);
-                paramater.Add("@PSchoolCity", oModel.PSchoolCity);
-                paramater.Add("@PSChoolState", oModel.PSChoolState);
-                paramater.Add("@OpType", oModel.OpType);
-
-                return con.Query<int>("sp_UpdateStudentSLCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-
-        public void GetTCList(TCListModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@SessionID", oModel.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetIssuedTCs", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    oModel.TCList = multi.Read<TCModel>().ToList();
-                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
-                }
-            }
-        }
-        public void GetTCDetails(TCDetailsModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@StudentID", oModel.StudentID);
-                using (var multi = con.QueryMultiple("sp_GetTCDetailsAdmin", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.StudentDetails = multi.Read<StudentModel>().SingleOrDefault();
-                    oModel.Classes = multi.Read<ClassModel>().ToList();
-                    oModel.TCDetails = multi.Read<TCModel>().SingleOrDefault();
-                    if (oModel.TCDetails == null)
-                    {
-                        oModel.TCDetails = new TCModel();
-                        oModel.TCDetails.DateOfApplication = CommonUsage.GetCurrentDate();
-                        oModel.TCDetails.DateOfIssue = CommonUsage.GetCurrentDate();
-                    }
-                    oModel.Subjects = multi.Read<string>().ToList();
-                    oModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    oModel.Sessions = multi.Read<SessionModel>().ToList();
-
-
-                }
-            }
-        }
-        #endregion
-        #region Fee Refund
-        public void GetFeeRefunds(FeeRefundPageModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@FromDate", oModel.FromDate);
-                paramater.Add("@ToDate", oModel.ToDate);
-                paramater.Add("@Status", oModel.Status);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                oModel.Refunds = con.Query<FeeRefundModel>("sp_GetRefunds", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
-            }
-        }
-        public int UpdateFeeRefund(FeeRefundModel objModel)
-        {
-
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@RefundID", objModel.RefundID);
-                paramater.Add("@RefundTo", objModel.RefundTo);
-                paramater.Add("@RefundDate", objModel.RefundDate);
-                paramater.Add("@CreatedDate", objModel.CreatedDate);
-                paramater.Add("@RefundBy", objModel.RefundBy);
-                paramater.Add("@Reason", objModel.Reason);
-                paramater.Add("@SessionID", objModel.SessionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@RefundAmount", objModel.RefundAmount);
-                paramater.Add("@Status", objModel.Status);
-                return con.Query<int>("sp_InsertUpdateRefund", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-
-        }
-        public FeeRefundEditModel GetFeeRefundDetails(int RefundID, int SBranchID)
-        {
-            FeeRefundEditModel oModel = new FeeRefundEditModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@RefundID", RefundID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetRefundDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-
-                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    oModel.Classes = multi.Read<NameIDModel>().ToList();
-                    oModel.Sections = multi.Read<NameIDModel>().ToList();
-                    oModel.Students = multi.Read<NameIDModel>().ToList();
-                    oModel.RefundDetails = multi.Read<FeeRefundModel>().SingleOrDefault();
-
-                    if (oModel.RefundDetails == null)
-                    {
-                        oModel.RefundDetails = new FeeRefundModel();
-                        oModel.RefundDetails.SessionID = multi.Read<int>().SingleOrDefault();
-                        oModel.RefundDetails.ClassID = multi.Read<int>().SingleOrDefault();
-                        oModel.RefundDetails.SectionID = multi.Read<int>().SingleOrDefault();
-                        oModel.RefundDetails.RefundTo = multi.Read<int>().SingleOrDefault();
-                        oModel.RefundDetails.StudentSessionUID = multi.Read<int>().SingleOrDefault();
-                        oModel.RefundDetails.RefundDate = CommonUsage.GetCurrentDate();
-                    }
-
-                }
-            }
-            return oModel;
-        }
-        public FeeRefundPrintModel GetFeeRefundPrintData(int RefundID, int SBranchID)
-        {
-            FeeRefundPrintModel objNew = new FeeRefundPrintModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@RefundID", RefundID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetRefundPrintData", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objNew.RefundDetails = multi.Read<FeeRefundModel>().SingleOrDefault();
-                    objNew.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
-                }
-            }
-
-            return objNew;
-        }
-        #endregion
-        #region Extra Income Related
-        public void GetExtraIncomes(ExtraIncomePageModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@PaymentMode", oModel.PaymentMode);
-                paramater.Add("@StartDate", oModel.StartDate);
-                paramater.Add("@EndDate", oModel.EndDate);
-                using (var multi = con.QueryMultiple("sp_GetExtraIncomePageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.Heads = multi.Read<ExtraIncomeHeadModel>().ToList();
-                    oModel.Incomes = multi.Read<ExtraIncomeModel>().ToList();
-                }
-            }
-        }
-        public ExtraIncomePageModel GetExtraIncomeDetails(int ID, int SBranchID)
-        {
-            ExtraIncomePageModel oModel = new ExtraIncomePageModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ID", ID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetExtraIncomeDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.Heads = multi.Read<ExtraIncomeHeadModel>().ToList();
-                    oModel.IncomeDetail = multi.Read<ExtraIncomeModel>().SingleOrDefault();
-                }
-            }
-            return oModel;
-        }
-        public int UpdateExtraIncome(ExtraIncomeModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ID", objModel.ID);
-                paramater.Add("@Title", objModel.Title);
-                paramater.Add("@PaidBy", objModel.PaidBy);
-                paramater.Add("@EIHeadID", objModel.EIHeadID);
-                paramater.Add("@Amount", objModel.Amount);
-                paramater.Add("@Description", objModel.Description);
-                paramater.Add("@Status", objModel.Status);
-                paramater.Add("@PaidDate", objModel.PaidDate);
-                paramater.Add("@CreatedDate", objModel.CreatedDate);
-                paramater.Add("@RecievedBy", objModel.RecievedBy);
-                paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@ReferanceNo", objModel.ReferanceNo);
-                paramater.Add("@PayerAddress", objModel.PayerAddress);
-                paramater.Add("@PayerCity", objModel.PayerCity);
-                paramater.Add("@PayerState", objModel.PayerState);
-                paramater.Add("@PayerPin", objModel.PayerPin);
-                paramater.Add("@PayerContact", objModel.PayerContact);
-                paramater.Add("@PayerPAN", objModel.PayerPAN);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@UserID", objModel.UserID);
-                paramater.Add("@OpType", objModel.OpType);
-                return con.Query<int>("sp_UpdateExtraIncome", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-        #endregion
-
-        #region Expense Book Related
-        public CollectionReportModel GetExpenseBookMonthlyReport(CollectionReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                ExpenseDetailsModel objexpense;
-                var paramater = new DynamicParameters();
-                paramater.Add("@FromDate", objModel.FromDate);
-                paramater.Add("@ToDate", objModel.ToDate);
-                //paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetDayBookReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
-                    objModel.FeeType = multi.Read<NameIDModel>().ToList();
-                    objModel.ExpenceType = multi.Read<NameIDModel>().ToList();
-                    objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
-                    objModel.ExpenseReportType = multi.Read<ExpenseDetailsModel>().ToList();
-
-                    //try
-                    //{
-
-                    //    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    //}
-                    //catch (Exception ex)
-                    //{ }
-                }
-            }
-            return objModel;
-        }
-        #endregion
-        #region Day Book Related
-
-
-        public CollectionReportModel GetDayBookMonthlyReport(CollectionReportModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                ExpenseDetailsModel objexpense;
-                var paramater = new DynamicParameters();
-                paramater.Add("@FromDate", objModel.FromDate);
-                paramater.Add("@ToDate", objModel.ToDate);
-                //paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetDayBookReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
-                    objModel.FeeType = multi.Read<NameIDModel>().ToList();
-                    objModel.ExpenceType = multi.Read<NameIDModel>().ToList();
-                    objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
-                    objModel.ExpenseReportType = multi.Read<ExpenseDetailsModel>().ToList();
-
-                    //try
-                    //{
-
-                    //    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                    //}
-                    //catch (Exception ex)
-                    //{ }
-                }
-            }
-            return objModel;
-        }
-        public void GetDayBook(DayBookPageModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                paramater.Add("@PaymentMode", oModel.PaymentMode);
-                paramater.Add("@StartDate", oModel.StartDate);
-                paramater.Add("@EndDate", oModel.EndDate);
-                using (var multi = con.QueryMultiple("sp_GetDayBookPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.DayBookHead = multi.Read<DayBookHeadModel>().ToList();
-                    oModel.DayBooks = multi.Read<DayBookModel>().ToList();
-                }
-            }
-        }
-        public DayBookPageModel GetDayBookDetails(int DBookID, int SBranchID)
-        {
-            DayBookPageModel oModel = new DayBookPageModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@DBookID", DBookID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetDayBookDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.DayBookHead = multi.Read<DayBookHeadModel>().ToList();
-                    oModel.DayBook = multi.Read<DayBookModel>().SingleOrDefault();
-                }
-            }
-            return oModel;
-        }
-        public int UpdateDayBook(DayBookModel objModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ID", objModel.DBookID);
-                paramater.Add("@Title", objModel.Title);
-                paramater.Add("@IncomeExpenceBy", objModel.IncomeExpenceBy);
-                paramater.Add("@DayBookID", objModel.DayBookID);
-                paramater.Add("@Amount", objModel.Amount);
-                paramater.Add("@Description", objModel.Description);
-                paramater.Add("@Status", objModel.Status);
-                paramater.Add("@Type", objModel.Type);
-                paramater.Add("@Date", objModel.Date);
-                paramater.Add("@CreatedDate", objModel.CreatedDate);
-                paramater.Add("@RecievedBy", objModel.RecievedBy);
-                paramater.Add("@PaymentMode", objModel.PaymentMode);
-                paramater.Add("@ReferanceNo", objModel.ReferanceNo);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@UserID", objModel.UserID);
-                paramater.Add("@OpType", objModel.OpType);
-                return con.Query<int>("sp_UpdateDayBook", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-        #endregion
-
-        #region change Password
-
-
-        public int UpdatePassword(int UserID, int UserType, string Password)
-        
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@UserID", UserID);
-                paramater.Add("@UserType", UserType);
-                paramater.Add("@Password", Password);
-
-                return con.Query<int>("sp_ChangePassword", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-        #endregion
-
-        #region Student Block
-        public int UpdateIsBlock(int isBlock, int studentID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@isBlock", isBlock);
-                paramater.Add("@studentID", studentID);
-                return con.Query<int>("SP_UpdateIsBlock", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-
-            }
-
-        }
-        #endregion
-
-
-        #region TransportFee
-
-
-        public async Task<FeePaymentModel> GetFeeDetailsNewForTransport(FeePaymentModel objModel)
-        {
-            FeePaymentModel objNew = new FeePaymentModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                DateTime qdate = new DateTime(objModel.Year, objModel.Month, 1).AddMonths(1).AddDays(-1);
-                if (qdate.Day < objModel.Day)
-                {
-                    objModel.Day = qdate.Day;
-                }
-                var paramater = new DynamicParameters();
-                paramater.Add("@StudentID", objModel.StudentID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@SessionID", objModel.SessionID);
-                paramater.Add("@QDate", new DateTime(objModel.Year, objModel.Month, objModel.Day));
-                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-
-                using (var multi = await con.QueryMultipleAsync("sp_GetStudentFeeViewDataForTransport", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
-                    objModel.Months = multi.Read<PayDetailMonthsModel>().ToList();
-                    objModel.PaymentDetails = multi.Read<FeeDetailsModel>().ToList();
-                    objModel.SessionStartDate = multi.Read<DateTime>().SingleOrDefault();
-                    objModel.SessionEndDate = multi.Read<DateTime>().SingleOrDefault();
-                    objModel.FeePaymentMode = multi.Read<int>().SingleOrDefault();
-                }
-            }
-            return objModel;
-        }
-
-
-        public FeePaymentRowModel SaveStudentTransportFeePayments(FeePaymentModel objData)
-        {
-            FeePaymentRowModel obj = new FeePaymentRowModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-
-                paramater.Add("@StudentID", objData.StudentID);
-                paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
-                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-                paramater.Add("@PaymentDate", objData.PaymentDate);
-                paramater.Add("@PaymentAmount", objData.PaymentAmount);
-                paramater.Add("@WaiverMonths", objData.WaiverMonths);
-                paramater.Add("@Remark", objData.Remark);
-                paramater.Add("@ReferanceNumber", objData.ReferanceNumber);
-                paramater.Add("@PaymentMode", objData.PaymentMode);
-                paramater.Add("@CollectedBy", objData.CollectedBy);
-                paramater.Add("@SessionID", objData.SessionID);
-                paramater.Add("@ExcludedFees", objData.ExcludedFees);
-                paramater.Add("@UserID", objData.UserID);
-                paramater.Add("@SBranchID", objData.SBranchID);
-
-                using (var multi = con.QueryMultiple("spn_SaveTransportFeePaymentV2", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    obj.StudentDetails = multi.Read<FeePaymentModel>().SingleOrDefault();
-                    obj.PaymentID = multi.Read<int>().SingleOrDefault();
-                }
-
-                return obj;
-            }
-        }
-        #endregion
-
-        public async Task<AdmissionEnquiryMasterModel> GetBranchDetails(int BranchID)
-        {
-            AdmissionEnquiryMasterModel objNew = new AdmissionEnquiryMasterModel();
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@BranchID", BranchID);
-                using (var multi = await con.QueryMultipleAsync("sp_GetBranchDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objNew.BranchID = multi.Read<int>().SingleOrDefault();
-                    objNew.BranchData = multi.Read<SBranchModel>().SingleOrDefault();
-                    objNew.Religions = multi.Read<NameIDModel>().ToList();
-                    objNew.Casts = multi.Read<NameIDModel>().ToList();
-                    objNew.Classes = multi.Read<ClassModel>().ToList();
-                    objNew.SessionNames = multi.Read<NameIDModel>().ToList();
-                }
-            }
-
-            return objNew;
-        }
-        public AdmissionEnquiryMasterModel UpdateAdmissionEnquiry(AdmissionEnquiryMasterModel objData)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@EnquiryID", objData.EnquiryID);
-                paramater.Add("@EDate", CommonUsage.GetCurrentDate());
-                paramater.Add("@FatherName", objData.FatherName);
-                paramater.Add("@MotherName", objData.MotherName);
-                paramater.Add("@FatherMobileNo", objData.FatherMobileNo);
-                paramater.Add("@MotherMobileNo", objData.MotherMobileNo);
-                paramater.Add("@FatherEmailID", objData.FatherEmailID);
-                paramater.Add("@MotherEmailID", objData.MotherEmailID);
-                paramater.Add("@FOccupation", objData.FOccupation);
-                paramater.Add("@MOccupation", objData.MOccupation);
-                paramater.Add("@FamilyIncome", objData.FamilyIncome);
-                paramater.Add("@Address", objData.Address);
-                paramater.Add("@StudentName", objData.StudentName);
-                paramater.Add("@AppliedForSession", objData.AppliedForSession);
-                paramater.Add("@AppliedForClass", objData.AppliedForClass);
-                paramater.Add("@CurrentClass", objData.CurrentClass);
-                paramater.Add("@ESource", objData.ESource);
-                paramater.Add("@CurrentSchool", objData.CurrentSchool);
-                paramater.Add("@CurrentSchoolAddress", objData.CurrentSchoolAddress);
-                paramater.Add("@ReasonForChange", objData.ReasonForChange);
-                paramater.Add("@Gender", objData.Gender);
-                paramater.Add("@Nationality", objData.Nationality);
-                paramater.Add("@CurrentEducationSystem", objData.CurrentEducationSystem);
-                paramater.Add("@StudentDOB", objData.DateOfBirth);
-                paramater.Add("@EStatus", objData.EStatus);
-                paramater.Add("@EPossibility", objData.EPossibility);
-                paramater.Add("@NextFollowUpDate", CommonUsage.GetCurrentDate());
-                paramater.Add("@SBranchID", objData.SBranchID);
-                paramater.Add("@UserID", objData.UserID);
-                paramater.Add("@CreatedDate", CommonUsage.GetCurrentDate());
-                paramater.Add("@StudentID", objData.StudentID);
-                paramater.Add("@PaymentStatus", objData.PaymentStatus);
-                paramater.Add("@PaymentDetails", objData.PaymentDetails);
-                paramater.Add("@AssignedTo", objData.AssignedTo);
-                paramater.Add("@Image", objData.Image);
-                paramater.Add("@StudentAadharNo", objData.StudentAadharNo);
-                paramater.Add("@FatherAadhaarNo", objData.FatherAadhaarNo);
-                paramater.Add("@MotherAadhaarNo", objData.MotherAadhaarNo);
-                paramater.Add("@Caste", objData.Caste);
-                paramater.Add("@DateOfBirth", objData.DateOfBirth);
-                paramater.Add("@TelephoneNoOff", objData.TelephoneNoOff);
-                paramater.Add("@TelephoneNoReg", objData.TelephoneNoReg);
-                paramater.Add("@Sibling", objData.Sibling);
-                paramater.Add("@SiblingName", objData.SiblingName);
-                paramater.Add("@SiblingClass", objData.SiblingClass);
-                paramater.Add("@MotherQuaAndOcc", objData.MotherQuaAndOcc);
-                paramater.Add("@FatherQuaAndOcc", objData.FatherQuaAndOcc);
-                paramater.Add("@TemporaryAddress", objData.TemporaryAddress);
-                paramater.Add("@PermanentAddress", objData.PermanentAddress);
-                paramater.Add("@Religion", objData.ReligionID);
-
-                return con.Query<AdmissionEnquiryMasterModel>("spn_InsertUpdateAdmissionEnquiry", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-        public AdmissionEnquiryMasterModel GetEnquiryDetails(int EnquiryID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@EnquiryID", EnquiryID);
-
-                return con.Query<AdmissionEnquiryMasterModel>("sp_GetEnquiryDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
-            }
-        }
-        public StudentAdmissionReportModel GetSessionAdmissionReport(StudentAdmissionReportModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SessionID", oModel.SessionID);
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                //paramater.Add("@StartDate", oModel.StartDate);
-                using (var multi = con.QueryMultiple("sp_GetSessionAdmissionsDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
-                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    oModel.Branches = multi.Read<SBranchModel>().SingleOrDefault();
-                }
-            }
-            return oModel;
-        }
-        #region Bulk Student Data Upload
-        public BulkUploadInfoModel GetBulkUploadInfo(BulkUploadInfoModel oModel)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", oModel.SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetBulkUploadInfo", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    oModel.Religion = multi.Read<NameIDModel>().ToList();
-                    oModel.Categroy = multi.Read<NameIDModel>().ToList();
-                    oModel.Quota = multi.Read<NameIDModel>().ToList();
-                }
-            }
-            return oModel;
-        }
-        public BulkStudentUploadModel GetBulkUploadData(int ClassID, int SectionID, int SBranchID, int SessionID)
-        {
-
-            BulkStudentUploadModel objModel = new BulkStudentUploadModel();
-            objModel.SectionID = SectionID;
-            objModel.ClassID = ClassID;
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-            {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", ClassID);
-                paramater.Add("@SectionID", SectionID);
+               
                 paramater.Add("@SBranchID", SBranchID);
                 paramater.Add("@SessionID", SessionID);
-                using (var multi = con.QueryMultiple("spn_GetBulkUploadPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using (var multi = con.QueryMultiple("spn_GetTCStudentList", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
-                    objModel.Classes = multi.Read<ClassModel>().ToList();
-                    objModel.Sections = multi.Read<SectionModel>().ToList();
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    objModel.Students = multi.Read<StudentModel>().ToList();
+                   
+                  
                     objModel.Sessions = multi.Read<NameIDModel>().ToList();
                     objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    try
+                    {
+                        objModel.BranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                       
+                    }
+                    catch
+                    {
+
+                    }
+
                 }
             }
             return objModel;
         }
 
-        public int UpdateBulkStudentsEnt(BulkStudentUploadModel objModel)
-        {
-            //Added for bulk upload
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+        public int InsertUpdateTC(TCModel oModel)
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", objModel.ClassID);
-                paramater.Add("@SectionID", objModel.SectionID);
-                paramater.Add("@SessionID", objModel.SessionID);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@Students", objModel.GetStudentsDataTableEnt());
-                return con.Query<int>("sp_BulkUploadStudentsEnt", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@TCID", oModel.TCID);
+                    paramater.Add("@StudentID", oModel.StudentID);
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    paramater.Add("@IsSCBLastExamPassed", oModel.IsSCBLastExamPassed);
+                    paramater.Add("@SCBLastExamName", oModel.SCBLastExamName);
+                    paramater.Add("@SCBLastExamResult", oModel.SCBLastExamResult);
+                    paramater.Add("@FailedCount", oModel.FailedCount);
+                    paramater.Add("@PromotedToClass", oModel.PromotedToClass);
+                    paramater.Add("@WorkingDays", oModel.WorkingDays);
+                    paramater.Add("@PresentDays", oModel.PresentDays);
+                    paramater.Add("@IsNCC", oModel.IsNCC);
+                    paramater.Add("@NCCDetails", oModel.NCCDetails);
+                    paramater.Add("@Games", oModel.Games);
+                    paramater.Add("@GeneralConduct", oModel.GeneralConduct);
+                    paramater.Add("@DateOfApplication", oModel.DateOfApplication);
+                    paramater.Add("@DateOfIssue", oModel.DateOfIssue);
+                    paramater.Add("@ReasonForLeaving", oModel.ReasonForLeaving);
+                    paramater.Add("@Remarks", oModel.Remarks);
+                    paramater.Add("@DuePaidMonth", oModel.DuePaidMonth);
+                    paramater.Add("@Concession", oModel.Concession);
+                    paramater.Add("@OpType", oModel.OpType);
+                    paramater.Add("@CreatedBy", oModel.CreatedBy);
+                    paramater.Add("@TCSLNo", oModel.TCSLNo);
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    return con.Query<int>("sp_InsertUpdateTCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+                }
             }
-        }
-        #endregion
-
-        #region onlinePayment
-
-        public StudentModel GetStudentDetailsForPayment(int StudentID, int SBranchID)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            public SLCCertificateDetails GetStudentSLCDetails(int StudentID, int SessionID)
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StudentID", StudentID);
-                paramater.Add("@SBranchID", SBranchID);
+                SLCCertificateDetails objModel = new SLCCertificateDetails();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StudentID", StudentID);
+                    paramater.Add("@SessionID", SessionID);
 
-                return con.Query<StudentModel>("sp_GetStudentDetailForOnlinePayment", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                    using (var multi = con.QueryMultiple("sp_GetStudentSLCDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel = multi.Read<SLCCertificateDetails>().SingleOrDefault();
+                        if (objModel == null)
+                        {
+                            objModel = new SLCCertificateDetails();
+                            objModel.StudentID = StudentID;
+                            objModel.SessionID = SessionID;
+                            objModel.TCDate = CommonUsage.GetCurrentDate();
+                        }
+                        objModel.Sessions = multi.Read<SessionModel>().ToList();
+                        objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                    }
+                    return objModel;
+                }
             }
-        }
-        public int InsertOrderID(OrderModel obj)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            public SLCCertificateDetails GetStudentSLCPrintDetails(int StudentID, int SessionID)
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@OrderID", obj.OrderID);
-                paramater.Add("@Amount", obj.Amount);
-                paramater.Add("@Date", obj.Date);
-                paramater.Add("@Name", obj.Name);
-                paramater.Add("@PGOrderID", obj.PGOrderID);
-                paramater.Add("@Status", obj.Status);
 
+                SLCCertificateDetails objModel = new SLCCertificateDetails();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StudentID", StudentID);
+                    paramater.Add("@SessionID", SessionID);
 
-                return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                    using (var multi = con.QueryMultiple("sp_GetStudentSLCPrintDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel = multi.Read<SLCCertificateDetails>().SingleOrDefault();
+                        if (objModel == null)
+                        {
+                            objModel = new SLCCertificateDetails();
+                            objModel.StudentID = StudentID;
+                            objModel.SessionID = SessionID;
+                            objModel.TCDate = CommonUsage.GetCurrentDate();
+                        }
+                        objModel.Sessions = multi.Read<SessionModel>().ToList();
+                        objModel.Student = multi.Read<StudentModel>().SingleOrDefault();
+                        objModel.Parent = multi.Read<ParentModel>().SingleOrDefault();
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    return objModel;
+                }
             }
-        }
-        public int UpdateStudentFeePaymentStatus(OrderModel obj)
-        {
-            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+
+            public int InsertUpdateSLC(SLCCertificateDetails oModel)
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@PGOrderID", obj.PGOrderID);
-                paramater.Add("@PGPaymentID", obj.PGPaymentID);
-                paramater.Add("@StudentID", obj.StudentID);
-                paramater.Add("@QDate", obj.QDate);
-                paramater.Add("@CurDate", obj.CurDate);
-                paramater.Add("@PaymentDate", obj.PaymentDate);
-                paramater.Add("@PaymentAmount", obj.PaymentAmount);
-                paramater.Add("@Remark", obj.Remark);
-                paramater.Add("@ReferanceNumber", obj.ReferanceNumber);
-                paramater.Add("@PaymentMode", obj.PaymentMode);
-                paramater.Add("@CollectedBy", obj.CollectedBy);
-                paramater.Add("@SBranchID", obj.SBranchID);
-                paramater.Add("@Status", obj.Status);
-                paramater.Add("@FeeMonth", obj.FeeMonth);
-                paramater.Add("@FeeYear", obj.FeeYear);
-                //paramater.Add("@ApplicableFee", obj.ApplicableFee);
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@CertID", oModel.CertID);
+                    paramater.Add("@StudentID", oModel.StudentID);
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    paramater.Add("@Stream", oModel.Stream);
+                    paramater.Add("@DuesCleared", oModel.DuesCleared);
+                    paramater.Add("@Character", oModel.Character);
+                    paramater.Add("@Promotion", oModel.Promotion);
+                    paramater.Add("@TCDate", oModel.TCDate);
+                    paramater.Add("@CreatedDate", oModel.CreatedDate);
+                    paramater.Add("@CreatedBy", oModel.CreatedBy);
+                    paramater.Add("@TCSLNo", oModel.TCSLNo);
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@SessionSLCDetails", oModel.GetStudentSLCSessionDetails());
+                    paramater.Add("@DOB", oModel.DOB);
+                    paramater.Add("@DOJ", oModel.DOJ);
+                    paramater.Add("@SchoolUID", oModel.SchoolUID);
+                    paramater.Add("@PSchoolName", oModel.PSchoolName);
+                    paramater.Add("@PSchoolMedium", oModel.PSchoolMedium);
+                    paramater.Add("@PClassName", oModel.PClassName);
+                    paramater.Add("@PSResult", oModel.PSResult);
+                    paramater.Add("@PSchoolCity", oModel.PSchoolCity);
+                    paramater.Add("@PSChoolState", oModel.PSChoolState);
+                    paramater.Add("@OpType", oModel.OpType);
 
-                return con.Query<int>("sp_UpdateStudentFeePaymentStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                    return con.Query<int>("sp_UpdateStudentSLCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
+                }
             }
-        }
 
-        #endregion
+            public void GetTCList(TCListModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    using (var multi = con.QueryMultiple("sp_GetIssuedTCs", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        oModel.TCList = multi.Read<TCModel>().ToList();
+                        oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+            }
+            public void GetTCDetails(TCDetailsModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    paramater.Add("@StudentID", oModel.StudentID);
+                    using (var multi = con.QueryMultiple("sp_GetTCDetailsAdmin", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.StudentDetails = multi.Read<StudentModel>().SingleOrDefault();
+                        oModel.Classes = multi.Read<ClassModel>().ToList();
+                        oModel.TCDetails = multi.Read<TCModel>().SingleOrDefault();
+                        if (oModel.TCDetails == null)
+                        {
+                            oModel.TCDetails = new TCModel();
+                            oModel.TCDetails.DateOfApplication = CommonUsage.GetCurrentDate();
+                            oModel.TCDetails.DateOfIssue = CommonUsage.GetCurrentDate();
+                        }
+                        oModel.Subjects = multi.Read<string>().ToList();
+                        oModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        oModel.Sessions = multi.Read<SessionModel>().ToList();
+
+
+                    }
+                }
+            }
+            #endregion
+            #region Fee Refund
+            public void GetFeeRefunds(FeeRefundPageModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@FromDate", oModel.FromDate);
+                    paramater.Add("@ToDate", oModel.ToDate);
+                    paramater.Add("@Status", oModel.Status);
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    oModel.Refunds = con.Query<FeeRefundModel>("sp_GetRefunds", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+                }
+            }
+            public int UpdateFeeRefund(FeeRefundModel objModel)
+            {
+
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@RefundID", objModel.RefundID);
+                    paramater.Add("@RefundTo", objModel.RefundTo);
+                    paramater.Add("@RefundDate", objModel.RefundDate);
+                    paramater.Add("@CreatedDate", objModel.CreatedDate);
+                    paramater.Add("@RefundBy", objModel.RefundBy);
+                    paramater.Add("@Reason", objModel.Reason);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@RefundAmount", objModel.RefundAmount);
+                    paramater.Add("@Status", objModel.Status);
+                    return con.Query<int>("sp_InsertUpdateRefund", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+
+            }
+            public FeeRefundEditModel GetFeeRefundDetails(int RefundID, int SBranchID)
+            {
+                FeeRefundEditModel oModel = new FeeRefundEditModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@RefundID", RefundID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetRefundDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+
+                        oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        oModel.Classes = multi.Read<NameIDModel>().ToList();
+                        oModel.Sections = multi.Read<NameIDModel>().ToList();
+                        oModel.Students = multi.Read<NameIDModel>().ToList();
+                        oModel.RefundDetails = multi.Read<FeeRefundModel>().SingleOrDefault();
+
+                        if (oModel.RefundDetails == null)
+                        {
+                            oModel.RefundDetails = new FeeRefundModel();
+                            oModel.RefundDetails.SessionID = multi.Read<int>().SingleOrDefault();
+                            oModel.RefundDetails.ClassID = multi.Read<int>().SingleOrDefault();
+                            oModel.RefundDetails.SectionID = multi.Read<int>().SingleOrDefault();
+                            oModel.RefundDetails.RefundTo = multi.Read<int>().SingleOrDefault();
+                            oModel.RefundDetails.StudentSessionUID = multi.Read<int>().SingleOrDefault();
+                            oModel.RefundDetails.RefundDate = CommonUsage.GetCurrentDate();
+                        }
+
+                    }
+                }
+                return oModel;
+            }
+            public FeeRefundPrintModel GetFeeRefundPrintData(int RefundID, int SBranchID)
+            {
+                FeeRefundPrintModel objNew = new FeeRefundPrintModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@RefundID", RefundID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetRefundPrintData", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objNew.RefundDetails = multi.Read<FeeRefundModel>().SingleOrDefault();
+                        objNew.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                }
+
+                return objNew;
+            }
+            #endregion
+            #region Extra Income Related
+            public void GetExtraIncomes(ExtraIncomePageModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@PaymentMode", oModel.PaymentMode);
+                    paramater.Add("@StartDate", oModel.StartDate);
+                    paramater.Add("@EndDate", oModel.EndDate);
+                    using (var multi = con.QueryMultiple("sp_GetExtraIncomePageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.Heads = multi.Read<ExtraIncomeHeadModel>().ToList();
+                        oModel.Incomes = multi.Read<ExtraIncomeModel>().ToList();
+                    }
+                }
+            }
+            public ExtraIncomePageModel GetExtraIncomeDetails(int ID, int SBranchID)
+            {
+                ExtraIncomePageModel oModel = new ExtraIncomePageModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ID", ID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetExtraIncomeDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.Heads = multi.Read<ExtraIncomeHeadModel>().ToList();
+                        oModel.IncomeDetail = multi.Read<ExtraIncomeModel>().SingleOrDefault();
+                    }
+                }
+                return oModel;
+            }
+            public int UpdateExtraIncome(ExtraIncomeModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ID", objModel.ID);
+                    paramater.Add("@Title", objModel.Title);
+                    paramater.Add("@PaidBy", objModel.PaidBy);
+                    paramater.Add("@EIHeadID", objModel.EIHeadID);
+                    paramater.Add("@Amount", objModel.Amount);
+                    paramater.Add("@Description", objModel.Description);
+                    paramater.Add("@Status", objModel.Status);
+                    paramater.Add("@PaidDate", objModel.PaidDate);
+                    paramater.Add("@CreatedDate", objModel.CreatedDate);
+                    paramater.Add("@RecievedBy", objModel.RecievedBy);
+                    paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@ReferanceNo", objModel.ReferanceNo);
+                    paramater.Add("@PayerAddress", objModel.PayerAddress);
+                    paramater.Add("@PayerCity", objModel.PayerCity);
+                    paramater.Add("@PayerState", objModel.PayerState);
+                    paramater.Add("@PayerPin", objModel.PayerPin);
+                    paramater.Add("@PayerContact", objModel.PayerContact);
+                    paramater.Add("@PayerPAN", objModel.PayerPAN);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@UserID", objModel.UserID);
+                    paramater.Add("@OpType", objModel.OpType);
+                    return con.Query<int>("sp_UpdateExtraIncome", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            #endregion
+
+            #region Expense Book Related
+            public CollectionReportModel GetExpenseBookMonthlyReport(CollectionReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    ExpenseDetailsModel objexpense;
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@FromDate", objModel.FromDate);
+                    paramater.Add("@ToDate", objModel.ToDate);
+                    //paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetDayBookReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
+                        objModel.FeeType = multi.Read<NameIDModel>().ToList();
+                        objModel.ExpenceType = multi.Read<NameIDModel>().ToList();
+                        objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
+                        objModel.ExpenseReportType = multi.Read<ExpenseDetailsModel>().ToList();
+
+                        //try
+                        //{
+
+                        //    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        //}
+                        //catch (Exception ex)
+                        //{ }
+                    }
+                }
+                return objModel;
+            }
+            #endregion
+            #region Day Book Related
+
+
+            public CollectionReportModel GetDayBookMonthlyReport(CollectionReportModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    ExpenseDetailsModel objexpense;
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@FromDate", objModel.FromDate);
+                    paramater.Add("@ToDate", objModel.ToDate);
+                    //paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetDayBookReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
+                        objModel.FeeType = multi.Read<NameIDModel>().ToList();
+                        objModel.ExpenceType = multi.Read<NameIDModel>().ToList();
+                        objModel.FeeReportType = multi.Read<PaymentDetailsModel>().ToList();
+                        objModel.ExpenseReportType = multi.Read<ExpenseDetailsModel>().ToList();
+
+                        //try
+                        //{
+
+                        //    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                        //}
+                        //catch (Exception ex)
+                        //{ }
+                    }
+                }
+                return objModel;
+            }
+            public void GetDayBook(DayBookPageModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    paramater.Add("@PaymentMode", oModel.PaymentMode);
+                    paramater.Add("@StartDate", oModel.StartDate);
+                    paramater.Add("@EndDate", oModel.EndDate);
+                    using (var multi = con.QueryMultiple("sp_GetDayBookPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.DayBookHead = multi.Read<DayBookHeadModel>().ToList();
+                        oModel.DayBooks = multi.Read<DayBookModel>().ToList();
+                    }
+                }
+            }
+            public DayBookPageModel GetDayBookDetails(int DBookID, int SBranchID)
+            {
+                DayBookPageModel oModel = new DayBookPageModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@DBookID", DBookID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetDayBookDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.DayBookHead = multi.Read<DayBookHeadModel>().ToList();
+                        oModel.DayBook = multi.Read<DayBookModel>().SingleOrDefault();
+                    }
+                }
+                return oModel;
+            }
+            public int UpdateDayBook(DayBookModel objModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ID", objModel.DBookID);
+                    paramater.Add("@Title", objModel.Title);
+                    paramater.Add("@IncomeExpenceBy", objModel.IncomeExpenceBy);
+                    paramater.Add("@DayBookID", objModel.DayBookID);
+                    paramater.Add("@Amount", objModel.Amount);
+                    paramater.Add("@Description", objModel.Description);
+                    paramater.Add("@Status", objModel.Status);
+                    paramater.Add("@Type", objModel.Type);
+                    paramater.Add("@Date", objModel.Date);
+                    paramater.Add("@CreatedDate", objModel.CreatedDate);
+                    paramater.Add("@RecievedBy", objModel.RecievedBy);
+                    paramater.Add("@PaymentMode", objModel.PaymentMode);
+                    paramater.Add("@ReferanceNo", objModel.ReferanceNo);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@UserID", objModel.UserID);
+                    paramater.Add("@OpType", objModel.OpType);
+                    return con.Query<int>("sp_UpdateDayBook", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            #endregion
+
+            #region change Password
+
+
+            public int UpdatePassword(int UserID, int UserType, string Password)
+
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@UserID", UserID);
+                    paramater.Add("@UserType", UserType);
+                    paramater.Add("@Password", Password);
+
+                    return con.Query<int>("sp_ChangePassword", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            #endregion
+
+            #region Student Block
+            public int UpdateIsBlock(int isBlock, int studentID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@isBlock", isBlock);
+                    paramater.Add("@studentID", studentID);
+                    return con.Query<int>("SP_UpdateIsBlock", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+                }
+
+            }
+            #endregion
+
+
+            #region TransportFee
+
+
+            public async Task<FeePaymentModel> GetFeeDetailsNewForTransport(FeePaymentModel objModel)
+            {
+                FeePaymentModel objNew = new FeePaymentModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    DateTime qdate = new DateTime(objModel.Year, objModel.Month, 1).AddMonths(1).AddDays(-1);
+                    if (qdate.Day < objModel.Day)
+                    {
+                        objModel.Day = qdate.Day;
+                    }
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StudentID", objModel.StudentID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    paramater.Add("@QDate", new DateTime(objModel.Year, objModel.Month, objModel.Day));
+                    paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+
+                    using (var multi = await con.QueryMultipleAsync("sp_GetStudentFeeViewDataForTransport", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
+                        objModel.Months = multi.Read<PayDetailMonthsModel>().ToList();
+                        objModel.PaymentDetails = multi.Read<FeeDetailsModel>().ToList();
+                        objModel.SessionStartDate = multi.Read<DateTime>().SingleOrDefault();
+                        objModel.SessionEndDate = multi.Read<DateTime>().SingleOrDefault();
+                        objModel.FeePaymentMode = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+                return objModel;
+            }
+
+
+            public FeePaymentRowModel SaveStudentTransportFeePayments(FeePaymentModel objData)
+            {
+                FeePaymentRowModel obj = new FeePaymentRowModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+
+                    paramater.Add("@StudentID", objData.StudentID);
+                    paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
+                    paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                    paramater.Add("@PaymentDate", objData.PaymentDate);
+                    paramater.Add("@PaymentAmount", objData.PaymentAmount);
+                    paramater.Add("@WaiverMonths", objData.WaiverMonths);
+                    paramater.Add("@Remark", objData.Remark);
+                    paramater.Add("@ReferanceNumber", objData.ReferanceNumber);
+                    paramater.Add("@PaymentMode", objData.PaymentMode);
+                    paramater.Add("@CollectedBy", objData.CollectedBy);
+                    paramater.Add("@SessionID", objData.SessionID);
+                    paramater.Add("@ExcludedFees", objData.ExcludedFees);
+                    paramater.Add("@UserID", objData.UserID);
+                    paramater.Add("@SBranchID", objData.SBranchID);
+
+                    using (var multi = con.QueryMultiple("spn_SaveTransportFeePaymentV2", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        obj.StudentDetails = multi.Read<FeePaymentModel>().SingleOrDefault();
+                        obj.PaymentID = multi.Read<int>().SingleOrDefault();
+                    }
+
+                    return obj;
+                }
+            }
+            #endregion
+
+            public async Task<AdmissionEnquiryMasterModel> GetBranchDetails(int BranchID)
+            {
+                AdmissionEnquiryMasterModel objNew = new AdmissionEnquiryMasterModel();
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@BranchID", BranchID);
+                    using (var multi = await con.QueryMultipleAsync("sp_GetBranchDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objNew.BranchID = multi.Read<int>().SingleOrDefault();
+                        objNew.BranchData = multi.Read<SBranchModel>().SingleOrDefault();
+                        objNew.Religions = multi.Read<NameIDModel>().ToList();
+                        objNew.Casts = multi.Read<NameIDModel>().ToList();
+                        objNew.Classes = multi.Read<ClassModel>().ToList();
+                        objNew.SessionNames = multi.Read<NameIDModel>().ToList();
+                    }
+                }
+
+                return objNew;
+            }
+            public AdmissionEnquiryMasterModel UpdateAdmissionEnquiry(AdmissionEnquiryMasterModel objData)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@EnquiryID", objData.EnquiryID);
+                    paramater.Add("@EDate", CommonUsage.GetCurrentDate());
+                    paramater.Add("@FatherName", objData.FatherName);
+                    paramater.Add("@MotherName", objData.MotherName);
+                    paramater.Add("@FatherMobileNo", objData.FatherMobileNo);
+                    paramater.Add("@MotherMobileNo", objData.MotherMobileNo);
+                    paramater.Add("@FatherEmailID", objData.FatherEmailID);
+                    paramater.Add("@MotherEmailID", objData.MotherEmailID);
+                    paramater.Add("@FOccupation", objData.FOccupation);
+                    paramater.Add("@MOccupation", objData.MOccupation);
+                    paramater.Add("@FamilyIncome", objData.FamilyIncome);
+                    paramater.Add("@Address", objData.Address);
+                    paramater.Add("@StudentName", objData.StudentName);
+                    paramater.Add("@AppliedForSession", objData.AppliedForSession);
+                    paramater.Add("@AppliedForClass", objData.AppliedForClass);
+                    paramater.Add("@CurrentClass", objData.CurrentClass);
+                    paramater.Add("@ESource", objData.ESource);
+                    paramater.Add("@CurrentSchool", objData.CurrentSchool);
+                    paramater.Add("@CurrentSchoolAddress", objData.CurrentSchoolAddress);
+                    paramater.Add("@ReasonForChange", objData.ReasonForChange);
+                    paramater.Add("@Gender", objData.Gender);
+                    paramater.Add("@Nationality", objData.Nationality);
+                    paramater.Add("@CurrentEducationSystem", objData.CurrentEducationSystem);
+                    paramater.Add("@StudentDOB", objData.DateOfBirth);
+                    paramater.Add("@EStatus", objData.EStatus);
+                    paramater.Add("@EPossibility", objData.EPossibility);
+                    paramater.Add("@NextFollowUpDate", CommonUsage.GetCurrentDate());
+                    paramater.Add("@SBranchID", objData.SBranchID);
+                    paramater.Add("@UserID", objData.UserID);
+                    paramater.Add("@CreatedDate", CommonUsage.GetCurrentDate());
+                    paramater.Add("@StudentID", objData.StudentID);
+                    paramater.Add("@PaymentStatus", objData.PaymentStatus);
+                    paramater.Add("@PaymentDetails", objData.PaymentDetails);
+                    paramater.Add("@AssignedTo", objData.AssignedTo);
+                    paramater.Add("@Image", objData.Image);
+                    paramater.Add("@StudentAadharNo", objData.StudentAadharNo);
+                    paramater.Add("@FatherAadhaarNo", objData.FatherAadhaarNo);
+                    paramater.Add("@MotherAadhaarNo", objData.MotherAadhaarNo);
+                    paramater.Add("@Caste", objData.Caste);
+                    paramater.Add("@DateOfBirth", objData.DateOfBirth);
+                    paramater.Add("@TelephoneNoOff", objData.TelephoneNoOff);
+                    paramater.Add("@TelephoneNoReg", objData.TelephoneNoReg);
+                    paramater.Add("@Sibling", objData.Sibling);
+                    paramater.Add("@SiblingName", objData.SiblingName);
+                    paramater.Add("@SiblingClass", objData.SiblingClass);
+                    paramater.Add("@MotherQuaAndOcc", objData.MotherQuaAndOcc);
+                    paramater.Add("@FatherQuaAndOcc", objData.FatherQuaAndOcc);
+                    paramater.Add("@TemporaryAddress", objData.TemporaryAddress);
+                    paramater.Add("@PermanentAddress", objData.PermanentAddress);
+                    paramater.Add("@Religion", objData.ReligionID);
+
+                    return con.Query<AdmissionEnquiryMasterModel>("spn_InsertUpdateAdmissionEnquiry", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            public AdmissionEnquiryMasterModel GetEnquiryDetails(int EnquiryID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@EnquiryID", EnquiryID);
+
+                    return con.Query<AdmissionEnquiryMasterModel>("sp_GetEnquiryDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            public StudentAdmissionReportModel GetSessionAdmissionReport(StudentAdmissionReportModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SessionID", oModel.SessionID);
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    //paramater.Add("@StartDate", oModel.StartDate);
+                    using (var multi = con.QueryMultiple("sp_GetSessionAdmissionsDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
+                        oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        oModel.Branches = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                }
+                return oModel;
+            }
+            #region Bulk Student Data Upload
+            public BulkUploadInfoModel GetBulkUploadInfo(BulkUploadInfoModel oModel)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", oModel.SBranchID);
+                    using (var multi = con.QueryMultiple("sp_GetBulkUploadInfo", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        oModel.Religion = multi.Read<NameIDModel>().ToList();
+                        oModel.Categroy = multi.Read<NameIDModel>().ToList();
+                        oModel.Quota = multi.Read<NameIDModel>().ToList();
+                    }
+                }
+                return oModel;
+            }
+            public BulkStudentUploadModel GetBulkUploadData(int ClassID, int SectionID, int SBranchID, int SessionID)
+            {
+
+                BulkStudentUploadModel objModel = new BulkStudentUploadModel();
+                objModel.SectionID = SectionID;
+                objModel.ClassID = ClassID;
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ClassID", ClassID);
+                    paramater.Add("@SectionID", SectionID);
+                    paramater.Add("@SBranchID", SBranchID);
+                    paramater.Add("@SessionID", SessionID);
+                    using (var multi = con.QueryMultiple("spn_GetBulkUploadPageData", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        objModel.Classes = multi.Read<ClassModel>().ToList();
+                        objModel.Sections = multi.Read<SectionModel>().ToList();
+                        objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                        objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                        objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                        objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    }
+                }
+                return objModel;
+            }
+
+            public int UpdateBulkStudentsEnt(BulkStudentUploadModel objModel)
+            {
+                //Added for bulk upload
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@ClassID", objModel.ClassID);
+                    paramater.Add("@SectionID", objModel.SectionID);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    paramater.Add("@SBranchID", objModel.SBranchID);
+                    paramater.Add("@Students", objModel.GetStudentsDataTableEnt());
+                    return con.Query<int>("sp_BulkUploadStudentsEnt", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            #endregion
+
+            #region onlinePayment
+
+            public StudentModel GetStudentDetailsForPayment(int StudentID, int SBranchID)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@StudentID", StudentID);
+                    paramater.Add("@SBranchID", SBranchID);
+
+                    return con.Query<StudentModel>("sp_GetStudentDetailForOnlinePayment", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            public int InsertOrderID(OrderModel obj)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@OrderID", obj.OrderID);
+                    paramater.Add("@Amount", obj.Amount);
+                    paramater.Add("@Date", obj.Date);
+                    paramater.Add("@Name", obj.Name);
+                    paramater.Add("@PGOrderID", obj.PGOrderID);
+                    paramater.Add("@Status", obj.Status);
+
+
+                    return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+            public int UpdateStudentFeePaymentStatus(OrderModel obj)
+            {
+                using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@PGOrderID", obj.PGOrderID);
+                    paramater.Add("@PGPaymentID", obj.PGPaymentID);
+                    paramater.Add("@StudentID", obj.StudentID);
+                    paramater.Add("@QDate", obj.QDate);
+                    paramater.Add("@CurDate", obj.CurDate);
+                    paramater.Add("@PaymentDate", obj.PaymentDate);
+                    paramater.Add("@PaymentAmount", obj.PaymentAmount);
+                    paramater.Add("@Remark", obj.Remark);
+                    paramater.Add("@ReferanceNumber", obj.ReferanceNumber);
+                    paramater.Add("@PaymentMode", obj.PaymentMode);
+                    paramater.Add("@CollectedBy", obj.CollectedBy);
+                    paramater.Add("@SBranchID", obj.SBranchID);
+                    paramater.Add("@Status", obj.Status);
+                    paramater.Add("@FeeMonth", obj.FeeMonth);
+                    paramater.Add("@FeeYear", obj.FeeYear);
+                    //paramater.Add("@ApplicableFee", obj.ApplicableFee);
+
+                    return con.Query<int>("sp_UpdateStudentFeePaymentStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+            }
+
+            #endregion
+        }
     }
-}

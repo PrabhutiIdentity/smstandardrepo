@@ -1,0 +1,50 @@
+--StudentAdmissionReport
+alter procedure sp_GetSessionStudentAdmissionDetail --1,'2021-12-01'                
+(       
+@SessionID int,               
+@SBranchID int,        
+@StartDate date,
+@EndDate date    
+        
+)                
+As                
+BEGIN                
+   --declare @StartDate date      
+   --declare @EndDate date      
+        
+    --Select @StartDate=SessionStartDate, @EndDate=SessionEndDate from SessionMaster where SBranchID=@SBranchID and SessionID=@SessionID        
+      
+      
+      
+       
+              
+ --SELECT             
+ --SM.StudentID, 'STUD' + RIGHT(REPLICATE('0', 6) + CAST(SM.StudentID AS VARCHAR(6)), 6) AS StudentSID, SM.Name,SM.SchoolUID, SM.DOB,SM.DOJ,                
+ --             SM.GuardianName, SM.GuardianMobileNo, SM.Photo, SS.RollNo, SM.AccessCardNo,              
+ --    'PAR' + RIGHT(REPLICATE('0', 6) + CAST(PM.ParentID AS VARCHAR(6)), 6) AS SParentID, PM.FatherName, PM.FatherMobileNo,PM.FatherDOB,PM.MotherName, PM.MotherMobileNo, SM.AadharCardNo,              
+                 
+ --             SM.Gender, SS.ClassID, SS.SectionID,ISNULL((SELECT ClassName FROM dbo.ClassMaster AS CM WHERE (ClassID = SS.ClassID)), 'NA') AS ClassName,               
+ --    ISNULL((SELECT Name FROM dbo.Class_Sections AS CS WHERE (ID = SS.SectionID)), 'NA') AS SectionName              
+                 
+            
+ Select SM.StudentID,'STUD' + RIGHT(REPLICATE('0', 6) + CAST(SM.StudentID AS VARCHAR(6)), 6) AS StudentSID,SM.Name,SM.SchoolUID, SM.DOB,SM.DOJ,          
+   SM.GuardianName, SM.GuardianMobileNo, SM.Photo, SS.RollNo, SM.AccessCardNo,          
+ 'PAR' + RIGHT(REPLICATE('0', 6) + CAST(PM.ParentID AS VARCHAR(6)), 6) AS SParentID, PM.FatherName, PM.FatherMobileNo,PM.FatherDOB,PM.MotherName, PM.MotherMobileNo, SM.AadharCardNo          
+ ,SS.ClassID,CM.ClassName,SS.SectionID ,CS.Name as SectionName            
+                  
+FROM  dbo.StudentMaster SM           
+ left Outer join Student_Session SS on SS.StudentID=SM.StudentID           
+ left Outer Join ClassMaster CM on CM.ClassID=SS.ClassID                
+ left outer join ParentMaster PM on PM.ParentID = SM.ParentID                
+ left outer join Class_Sections CS on CS.ClassID = CM.ClassID             
+ where SS.ClassID=CM.ClassID and SS.SectionID=CS.ID               
+         
+   and ss.SessionID=@SessionID and SM.SBranchID=@SBranchID               
+ and   DOJ between  @StartDate and @EndDate           
+ order by DOJ desc             
+             
+ Select SessionID as ID, SessionName as Name,SessionStatus as Extra1,SessionStartDate as StartDate, SessionEndDate as EndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate    desc            
+                
+ Select @SessionID=SessionID from SessionMaster where SbranchID=@SBranchID and SessionStatus=1             
+  select * from sbranchmaster where    SBranchID=@SBranchID              
+END 

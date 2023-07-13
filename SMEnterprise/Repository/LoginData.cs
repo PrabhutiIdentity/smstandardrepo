@@ -28,6 +28,22 @@ namespace SMEnterprise.Repository
                 return con.Query<Users>("Usp_GetAllUsers", null, null, true, 0, CommandType.StoredProcedure).ToList();
             }
         }
+        public EmployeePermissionsModel GetUserPermissions(int userId,int sbranchId)
+        {
+            EmployeePermissionsModel UM = new EmployeePermissionsModel() ;
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var para = new DynamicParameters();
+                para.Add("@userId", userId);
+                para.Add("@sbranchId", sbranchId);
+                using (var multi = con.QueryMultiple("sp_GetUserPermissions", para, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    UM.Permissions = multi.Read<EmployeePermissionListModel>().ToList();
+                    UM.isPermissionsSet = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return UM;
+        }
         public UserModel GetUserByUserName(string UserName)
         {
             UserModel UM;
