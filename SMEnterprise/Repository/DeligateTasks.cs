@@ -162,6 +162,8 @@ namespace SMEnterprise.Repository
                     objModel.SMSType = data.SMSTypeID;
                     objModel.SMSID = data.SMSSendingID;
                     objModel.Content_id = data.Content_id;
+                    objModel.DLT_TE_ID = data.Content_id;
+
                     objModel.Status = 1;
                     objData.UpdateSMSProcessingStatus(objModel);
                     var hubContext = GlobalHost.ConnectionManager.GetHubContext<MyHub>();
