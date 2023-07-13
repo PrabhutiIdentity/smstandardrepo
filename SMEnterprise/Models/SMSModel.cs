@@ -156,6 +156,7 @@ namespace SMEnterprise.Models
         public DateTime SMSDateTime { get; set; }
         public string SMSContentID { get; set; }
         public string Content_id { get; set; }
+        public string DLT_TE_ID { get; set; }
     }
     public class SMSRequestModel
     {
@@ -178,6 +179,7 @@ namespace SMEnterprise.Models
         public int IsApproved { get; set; }
         public string Content_id { get; set; }
         public int SBranchID { get; set; }
+        public string DLT_TE_ID { get; set; }
     }
     public class SMSTemplatePageModel
     {
