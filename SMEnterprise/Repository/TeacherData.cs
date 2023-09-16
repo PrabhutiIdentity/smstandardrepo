@@ -314,7 +314,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SectionID", objModel.SectionID);
                 paramater.Add("@SubjectID", objModel.SubjectID);
                 paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationMode", objStartupModel.EvaluationMode);
+                paramater.Add("@EvaluationMode",0);
+              //  paramater.Add("@EvaluationMode", objStartupModel.EvaluationMode);
                 using (var multi = con.QueryMultiple("sp_GetClassGroupWiseExamResults", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
 
@@ -330,6 +331,15 @@ namespace SMEnterprise.Repository
                         objModel.SubjectID = multi.Read<int>().SingleOrDefault();
                         objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
                         //objModel.IsLocked = multi.Read<int>().SingleOrDefault();
+                    }
+                    try
+                    {
+                        objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
                     }
                 }
             }
