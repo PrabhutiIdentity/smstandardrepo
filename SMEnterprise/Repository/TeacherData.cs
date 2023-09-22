@@ -406,12 +406,12 @@ namespace SMEnterprise.Repository
                     model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.Result = multi.Read<ExamResultDetailModel>().ToList();
-                    try
-                    {
+                    //try
+                    //{
                        
-                        model.ResultGrade = multi.Read<ExamResultDetailModel>().ToList();
-                    }
-                    catch { }
+                    //    model.ResultGrade = multi.Read<ExamResultDetailModel>().ToList();
+                    //}
+                    //catch { }
 
 
                     model.Student = multi.Read<StudentModel>().SingleOrDefault();
