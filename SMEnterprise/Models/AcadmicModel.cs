@@ -1016,6 +1016,7 @@ namespace SMEnterprise.Models
         public List<EvaluationModel> MainEvaluations { get; set; }
         public List<EvaluationModel> SubEvaluations { get; set; }
         public List<ExamResultDetailModel> Result { get; set; }
+        public List<ExamResultDetailModel> ResultGrade { get; set; }
         public List<EducationLevelSectionModel> ReportSections { get; set; }
         public List<NameIDModel> StudentSessions { get; set; }
         public List<NameIDModel> SubjectTypes { get; set; }

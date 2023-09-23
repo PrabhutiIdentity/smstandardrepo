@@ -319,6 +319,8 @@ namespace SMEnterprise.Controllers
             objModel.ExamResults = null;
             return RedirectToAction("ExamResults", "Teacher", objModel);
         }
+      
+
         [PermissionFilter]
         public ActionResult StudentPerformance(StudentPerformanceListModel objModel)
         {
