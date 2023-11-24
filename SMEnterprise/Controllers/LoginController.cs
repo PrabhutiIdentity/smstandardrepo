@@ -45,6 +45,7 @@ namespace SMEnterprise.Controllers
                         PermissionManager.setPermissions(AttemptedUser);
                         Session["UserID"] = PermissionManager.GetLoggedInUser().UserID;
                         Session["SBranchID"] = PermissionManager.GetLoggedInUser().SBranchID;
+                        //Session["SchoolID"] = PermissionManager.GetLoggedInUser().SchoolID;
                         try
                         {
                             Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
