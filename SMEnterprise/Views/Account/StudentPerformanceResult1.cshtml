@@ -200,26 +200,45 @@
                                     <tr>
                                         @foreach (EvaluationModel tme in Model.MainEvaluations)
                                         {
-                                            foreach (var et in Model.EvaluationTypes)
+                                            if (tme.EvaluationID == 137 || tme.EvaluationID == 138 || tme.EvaluationID == 144 || tme.EvaluationID == 152)
                                             {
-                                                var exams = 0;
-                                                var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == tme.EvaluationID);
-                                                foreach (var e in eva)
+                                                foreach (var et in Model.EvaluationTypes.Where(x => x.ReferenceID == tme.EvaluationID))
                                                 {
+                                                    var exams = 0;
+                                                    var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == tme.EvaluationID);
+                                                    foreach (var e in eva)
+                                                    {
 
-                                                    exams = exams + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+                                                        exams = exams + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
 
+                                                    }
+                                                    <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" colspan="@(exams)">@et.EvaluationTypeName  </td>
                                                 }
-                                                <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" colspan="@(exams)">@et.EvaluationTypeName  </td>
                                             }
+                                            else
+                                            {
+                                                foreach (var et in Model.EvaluationTypes)
+                                                {
+                                                    var exams = 0;
+                                                    var eva = Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == tme.EvaluationID);
+                                                    foreach (var e in eva)
+                                                    {
+
+                                                        exams = exams + Model.Exams.Where(c => c.EvaluationID == e.EvaluationID).Select(p => p.SubjectType).Distinct().Count();
+
+                                                    }
+                                                    <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" colspan="@(exams)">@et.EvaluationTypeName  </td>
+                                                }
+                                            }
+
                                             <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Total</td>
                                             <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Grade</td>
                                         }
                                         @*@if (Model.EvaluationID == -1)
-                            {
-                                <td style="vertical-align: middle; border: 1px solid #808080;padding: 0px;" rowspan="3"><b>Marks Obtained</b>  <br /> (@Model.MainEvaluations.Sum(x => x.Weightage)) </td>
-                                <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" rowspan="3"><b>Grade</b></td>
-                            }*@
+        {
+            <td style="vertical-align: middle; border: 1px solid #808080;padding: 0px;" rowspan="3"><b>Marks Obtained</b>  <br /> (@Model.MainEvaluations.Sum(x => x.Weightage)) </td>
+            <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" rowspan="3"><b>Grade</b></td>
+        }*@
                                     </tr>
                                     <tr>
                                         @foreach (EvaluationModel eme in Model.MainEvaluations)
