@@ -159,11 +159,18 @@
                             var divisionAll = "First";
                             decimal totaltotal = 0;
                             decimal totalObtscored = 0;
-                            decimal term = 0;
-                            decimal term1 = 0;
-                            decimal term2 = 0;
-                            decimal totalmax1 = 100;
 
+                            int evaluID = 0;
+                            decimal termscored = 0;
+                            decimal termscored1 = 0;
+                            decimal termscored2 = 0;
+                            decimal totalMark = 0;
+                            decimal totalmaxMark1 = 0;
+                            decimal totalmaxMark2 = 0;
+                            decimal totalscoredForAllT = 0;
+                            decimal TotalMaxMarksForAllT = 0;
+                            decimal totalscoredForAllTN = 0;
+                            decimal TotalMaxMarksForAllTN = 0;
 
                             <table id="tblResult" class="table table-bordered table-hover" style="width: 100%; padding: 0px;">
 
@@ -303,8 +310,8 @@
                                     decimal totalscored = 0;
                                     decimal totalmax = 0;
                                     decimal totalmarksresult = 0;
-                                    int evaluID = 0;
-                                  
+
+
 
                                     <tr>
                                         <td style="vertical-align: middle;border:1px solid #808080">@sub.SubjectName</td>
@@ -370,13 +377,15 @@
                                                 if (@evaluID == 137 || @evaluID == 138)
                                                 {
                                                     <td style="vertical-align: middle;border:1px solid #808080">@(totalscored*25/100)</td>
-                                                    term1 = totalscored * 25 / 100;
+                                                    termscored1 = totalscored * 25 / 100;
+                                                    totalmaxMark1 = 25;
                                                 }
                                                 else if (@evaluID == 144 || @evaluID == 152)
                                                 {
                                                     @* <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00")</td>*@
                                                     <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
-                                                    term2 = totalscored;
+                                                    termscored2 = totalscored;
+                                                    totalmaxMark2 = totalmax;
                                                 }
                                                 else
                                                 {
@@ -384,9 +393,11 @@
                                                 }
 
                                                 @*<td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>*@
-                                            }
-                                            else
-                                            {
+                                           
+
+                                        }
+                                        else
+                                        {
 
 
                                                 <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
@@ -394,15 +405,18 @@
 
                                             totalscoredForAll = totalscoredForAll + totalscored;
                                             TotalMaxMarksForAll = TotalMaxMarksForAll + totalmax;
+
                                             totalmarksresult = +totalscored;
                                             totalmax = +totalmax;
                                             totalscored = 0;
                                             totalmax = 0;
-                                            term = term1 + term2;
+                                            termscored =  termscored1 + termscored2;
+                                            totalMark =  totalmaxMark1 + totalmaxMark2;
+                                           
 
                                         }
-                                        <td>@term.ToString("0.00")</td>
-                                        <td style="vertical-align: middle;border:1px solid #808080">@(totalmax1 == 0 ? "--" : AcadmicModel.CalculateGradeShine(term, totalmax1))</td>
+                                        <td>@termscored.ToString("0.00")</td>
+                                        <td style="vertical-align: middle;border:1px solid #808080">@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</td>
                                     </tr>
                                     TotalMaxMarks = TotalMaxMarks + totalmax;
                                     TotalScoredMarks = TotalScoredMarks + totalscored;
@@ -415,9 +429,9 @@
                                         @if (Model.EvaluationID == -1)
                                         {
                                             @*<td style="vertical-align: middle;border:1px solid #808080;text-align:right;" colspan="@(0+1)"> Total </td>
-            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@TotalScoredMarks.ToString("N2")</td>
-            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
-                                       
+                                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@TotalScoredMarks.ToString("N2")</td>
+                                                <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
+
                                         }
                                         else
                                         {
@@ -435,10 +449,11 @@
                                                 }
                                             }
                                             <td style="vertical-align: middle;border:1px solid #808080;text-align:right;" colspan="@(colsT+1)"> Total </td>
-                                            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@totalscoredForAll.ToString("N2")</td>
-                                            @*<td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
-                                            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarksForAll == 0 ? "--" : (totalscoredForAll * 100 / TotalMaxMarksForAll).ToString("0.00") + "% ") (@(TotalMaxMarksForAll == 0 ? "--" :  AcadmicModel.CalculateGradeShine(totalscoredForAll, TotalMaxMarksForAll)))</td>
 
+                                            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@totalscoredForAll.ToString("N2")</td>
+                                            <td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarksForAll == 0 ? "--" : (totalscoredForAll * 100 / TotalMaxMarksForAll).ToString("0.00") + "% ") (@(TotalMaxMarksForAll == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscoredForAll, TotalMaxMarksForAll)))</td>
+
+                                            @*<td style="vertical-align: middle;border:1px solid #808080;text-align:center;">@(TotalMaxMarks == 0 ? "--" : (TotalScoredMarks * 100 / TotalMaxMarks).ToString("0.00") + "% ") @(TotalMaxMarks == 0 ? "--" : AcadmicModel.CalculateGradeShine(TotalScoredMarks, TotalMaxMarks))</td>*@
                                         }
                                     </tr>
 
@@ -449,16 +464,26 @@
                             <table style="width:100%;border: 1px solid #ddd;">
                                 @if (Model.EvaluationID == -1)
                                 {
-                                    totaltotal = Model.Result.Sum(x => x.etMaxMarks);
-                                    totalObtscored = Model.Result.Sum(x => x.etMarksScored);
-                                    divisionAll = @AcadmicModel.CalculateGradeDivisionShine(totalscoredForAll, TotalMaxMarksForAll);
-                                    GradeAll = @AcadmicModel.CalculateGradeShine(totalscoredForAll, TotalMaxMarksForAll);
-                                    <tr>
-                                        <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@totalscoredForAll.ToString("0.00")</b> / <b>@TotalMaxMarksForAll.ToString("0.00")</b></td>
-                                        <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(TotalMaxMarksForAll == 0 ? 0 : totalscoredForAll * 100 / TotalMaxMarksForAll, 2).ToString("0.00") %</b></td>
-                                        <td style="width:20%;text-align:center;"> Grade : <b>@GradeAll</b> </td>
-                                        <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@divisionAll</b> </td>
-                                    </tr>
+                                    @*totaltotal = Model.Result.Sum(x => x.etMaxMarks);
+                                        totalObtscored = Model.Result.Sum(x => x.etMarksScored);
+                                        divisionAll = @AcadmicModel.CalculateGradeDivisionShine(totalscoredForAll, TotalMaxMarksForAll);
+                                        GradeAll = @AcadmicModel.CalculateGradeShine(totalscoredForAll, TotalMaxMarksForAll);
+
+                                        <tr>
+                                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@totalscoredForAll.ToString("0.00")</b> / <b>@TotalMaxMarksForAll.ToString("0.00")</b></td>
+                                            <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(TotalMaxMarksForAll == 0 ? 0 : totalscoredForAll * 100 / TotalMaxMarksForAll, 2).ToString("0.00") %</b></td>
+                                            <td style="width:20%;text-align:center;"> Grade : <b>@GradeAll</b> </td>
+                                            <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@divisionAll</b> </td>
+                                        </tr>*@
+
+                                
+                                    @*<tr>
+                                        <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalScoredMarks.ToString("0.00")</b> / <b>@TotalMaxMarksForAllT.ToString("0.00")</b></td>
+                                        <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(totalMark == 0 ? 0 : termscored * 100 / totalMark, 2).ToString("0.00") %</b></td>
+                                        <td style="width:20%;text-align:center;"> Grade : <b>@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</b> </td>
+                                        <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@AcadmicModel.CalculateGradeDivisionShine(termscored, totalMark);</b> </td>
+                                    </tr>*@
+
                                 }
                                 else
                                 {
