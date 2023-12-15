@@ -161,16 +161,16 @@
                             decimal totalObtscored = 0;
 
                             int evaluID = 0;
-                            int evaluTypeID = 0;
                             decimal termscored = 0;
                             decimal termscored1 = 0;
                             decimal termscored2 = 0;
-                            decimal termscoredVIII = 0;
                             decimal totalMark = 0;
                             decimal totalmaxMark1 = 0;
                             decimal totalmaxMark2 = 0;
-                            decimal totalmaxMarkVIII = 0;
-
+                            decimal totalscoredForAllT = 0;
+                            decimal TotalMaxMarksForAllT = 0;
+                            decimal totalscoredForAllTN = 0;
+                            decimal TotalMaxMarksForAllTN = 0;
 
                             <table id="tblResult" class="table table-bordered table-hover" style="width: 100%; padding: 0px;">
 
@@ -203,7 +203,7 @@
                                     }
                                     @if (Model.EvaluationID == -1)
                                     {
-                                        <td colspan="2" style="vertical-align: middle; border: 1px solid #808080; padding: 0px;"><b>Sub Total</b></td>
+                                        <td colspan="2" style="font-size: 0.7em; vertical-align: middle; border: 1px solid #808080; padding: 0px;"><b>Sub Total</b></td>
                                     }
                                 </tr>
 
@@ -244,15 +244,10 @@
                                                     <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" colspan="@(exams)">@et.EvaluationTypeName  </td>
                                                 }
                                             }
-                                            if (tme.EvaluationID == 138 || tme.EvaluationID == 137)
+                                            if (tme.EvaluationID == 137 || tme.EvaluationID == 138)
                                             {
                                                 <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Total</td>
                                                 <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Weightage of <br /> all FAs and SA-1 <b /> 25</td>
-                                            }
-                                            else if (tme.EvaluationID == 152)
-                                            {
-                                                <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Weightage of SA - II<br /> will be of 50 marks</td>
-                                                <td style="vertical-align: middle;border:1px solid #808080" rowspan="3"> Total</td>
                                             }
                                             else
                                             {
@@ -313,9 +308,6 @@
                                 @foreach (var sub in Model.Subjects.Where(c => c.MainSubID == 0))
                                 {
                                     decimal totalscored = 0;
-                                    decimal totalscored1 = 0;
-                                    decimal totalscoredBoard = 0;
-                                    decimal totalscoredNon = 0;
                                     decimal totalmax = 0;
                                     decimal totalmarksresult = 0;
 
@@ -328,7 +320,6 @@
                                             foreach (var et in Model.EvaluationTypes)
                                             {
                                                 evaluID = me.EvaluationID;
-                                                evaluTypeID = et.EvaluationTypeID;
                                                 foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID))
                                                 {
 
@@ -346,16 +337,7 @@
                                                                 {
                                                                     totalscored = totalscored + result.MarksScored;
                                                                     <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("N2")</td>
-                                                                    if (ex.EvaluationID == 154)
-                                                                    {
-                                                                        totalscoredBoard = totalscoredBoard + result.MarksScored;
-                                                                    }
-                                                                    else if (ex.EvaluationID == 153)
-                                                                    {
-                                                                        totalscoredNon = totalscoredNon + result.MarksScored;
-                                                                    }
                                                                 }
-
                                                                 else
                                                                 {
                                                                     <td style="vertical-align: middle;border:1px solid #808080">-</td>
@@ -371,21 +353,13 @@
                                                                     if (result != null)
                                                                     {
                                                                         totalscored = totalscored + result.MarksScored;
+
                                                                         <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("0.00")</td>
-                                                                        if (ex.EvaluationID == 154)
-                                                                        {
-                                                                            totalscoredBoard = totalscoredBoard + result.MarksScored;
-                                                                        }
-                                                                        else if (ex.EvaluationID == 153)
-                                                                        {
-                                                                            totalscoredNon = totalscoredNon + result.MarksScored;
-                                                                        }
                                                                     }
                                                                     else
                                                                     {
                                                                         <td style="vertical-align: middle;border:1px solid #808080">--</td>
                                                                     }
-
                                                                 }
                                                                 else
                                                                 {
@@ -396,27 +370,17 @@
                                                     }
                                                 }
                                             }
-                                            @* <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00") </td>*@
+                                            <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00")</td>
                                             if (Model.EvaluationID == -1)
                                             {
 
                                                 if (@evaluID == 137 || @evaluID == 138)
                                                 {
-                                                    <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00") </td>
                                                     <td style="vertical-align: middle;border:1px solid #808080">@(totalscored*25/100)</td>
                                                     termscored1 = totalscored * 25 / 100;
                                                     totalmaxMark1 = 25;
                                                 }
-                                                else if (@evaluID == 152 && @evaluTypeID == 51)
-                                                {
-                                                    <td style="vertical-align: middle;border:1px solid #808080">@(totalscoredBoard / 2)</td>
-
-
-                                                    totalmaxMarkVIII = (totalscoredBoard / 2) + totalscoredNon;
-                                                    <td style="vertical-align: middle;border:1px solid #808080">@totalmaxMarkVIII.ToString("0.00") </td>
-
-                                                }
-                                                else if (@evaluID == 144)
+                                                else if (@evaluID == 144 || @evaluID == 152)
                                                 {
                                                     @* <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00")</td>*@
                                                     <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
@@ -429,11 +393,11 @@
                                                 }
 
                                                 @*<td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>*@
+                                           
 
-
-                                            }
-                                            else
-                                            {
+                                        }
+                                        else
+                                        {
 
 
                                                 <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
@@ -446,23 +410,13 @@
                                             totalmax = +totalmax;
                                             totalscored = 0;
                                             totalmax = 0;
-                                            termscored = termscored1 + termscored2;
-                                            totalMark = totalmaxMark1 + totalmaxMark2;
-                                            termscoredVIII = termscored1 + totalmaxMarkVIII;
+                                            termscored =  termscored1 + termscored2;
+                                            totalMark =  totalmaxMark1 + totalmaxMark2;
+                                           
 
                                         }
-                                        @*<td>@termscored.ToString("0.00")</td>
-                                            <td style="vertical-align: middle;border:1px solid #808080">@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</td>*@
-                                        @if (Model.EvaluationID == -1 && @evaluID == 152)
-                                        {
-                                            <td>@termscoredVIII.ToString("0.00")</td>
-                                            <td style="vertical-align: middle;border:1px solid #808080">@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscoredVIII, 100))</td>
-                                        }
-                                        else
-                                        {
                                         <td>@termscored.ToString("0.00")</td>
                                         <td style="vertical-align: middle;border:1px solid #808080">@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</td>
-                                        }
                                     </tr>
                                     TotalMaxMarks = TotalMaxMarks + totalmax;
                                     TotalScoredMarks = TotalScoredMarks + totalscored;
@@ -522,13 +476,13 @@
                                             <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@divisionAll</b> </td>
                                         </tr>*@
 
-
+                                
                                     @*<tr>
-                                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalScoredMarks.ToString("0.00")</b> / <b>@TotalMaxMarksForAllT.ToString("0.00")</b></td>
-                                            <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(totalMark == 0 ? 0 : termscored * 100 / totalMark, 2).ToString("0.00") %</b></td>
-                                            <td style="width:20%;text-align:center;"> Grade : <b>@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</b> </td>
-                                            <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@AcadmicModel.CalculateGradeDivisionShine(termscored, totalMark);</b> </td>
-                                        </tr>*@
+                                        <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalScoredMarks.ToString("0.00")</b> / <b>@TotalMaxMarksForAllT.ToString("0.00")</b></td>
+                                        <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(totalMark == 0 ? 0 : termscored * 100 / totalMark, 2).ToString("0.00") %</b></td>
+                                        <td style="width:20%;text-align:center;"> Grade : <b>@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</b> </td>
+                                        <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@AcadmicModel.CalculateGradeDivisionShine(termscored, totalMark);</b> </td>
+                                    </tr>*@
 
                                 }
                                 else
