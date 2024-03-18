@@ -422,7 +422,6 @@ namespace ESSL
                         if (objModel.DeviceID != 0 && objModel.EmployeeType != 1)
                         {
                             //string attdata = "(" + objModel.DeviceID + ",'" + objDeviceLogs.DeviceEmpCode + "','" + objDeviceLogs.LogDate + "','" + objDeviceLogs.DownloadDate.ToString("yyy-MM-dd HH:mm:ss") + "')";
-
                             //BeehiveAttService.AttendanceServiceClient bAtt = new BeehiveAttService.AttendanceServiceClient();
                             //bool bStatus = bAtt.SaveAttendanceSQL(CommonUsage.BeehiveSecretCode, CommonUsage.BeehiveAPIKey, attdata);
                         }
