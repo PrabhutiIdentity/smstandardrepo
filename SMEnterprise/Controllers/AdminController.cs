@@ -2390,7 +2390,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult NewsManagement()
         {
-            IEnumerable<NewsModel> objModel = objAdminData.GetNews();
+		
+			IEnumerable<NewsModel> objModel = objAdminData.GetNews();
             return View(objModel);
         }
         [PermissionFilter]
@@ -2398,7 +2399,10 @@ namespace SMEnterprise.Controllers
         {
 
             objData.ActiveDate = CommonUsage.GetCurrentDate();
-            if (objData.AttachmentFile != null)
+			objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+
+
+			if (objData.AttachmentFile != null)
             {
                 if (objData.Attachment != null && objData.NewsID != 0)
                 {

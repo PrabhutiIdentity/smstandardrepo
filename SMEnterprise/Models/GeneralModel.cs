@@ -253,7 +253,8 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase AttachmentFile { get; set; }
         public int Status { get; set; }
         public int OpType { get; set; }
-    }
+		public int SBranchID { get; set; }
+	}
     public class GalleryModel
     {
         public int GalleryID { get; set; }
