@@ -714,7 +714,7 @@ namespace SMEnterprise.Controllers
             objModel.SchoolID = PermissionManager.GetLoggedInUser().SchoolID;
             if (objModel.SBranchID == 2 && objModel.SchoolID == 1068)
             {
-
+               
             }
             else
             {

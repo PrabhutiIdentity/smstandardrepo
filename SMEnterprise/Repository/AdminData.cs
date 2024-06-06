@@ -3136,11 +3136,13 @@ namespace SMEnterprise.Repository
         }
         public int InsertUpdateNews(NewsModel objData)
         {
+
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@NewsID", objData.NewsID);
-                paramater.Add("@Title", objData.Title);
+				paramater.Add("@SBranchID", objData.SBranchID);
+				paramater.Add("@Title", objData.Title);
                 paramater.Add("@Description", objData.Description);
                 paramater.Add("@ActiveDate", objData.ActiveDate);
                 paramater.Add("@Status", objData.Status);
