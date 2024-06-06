@@ -99,14 +99,13 @@
                                 <th style="width: 12%">Class / Section </th>
                                 <th style="width: 12%">Aadhar Number</th>
                                 <th style="width: 12%">Contact</th>
-                                
+
                                 <th style="width: 15%">View</th>
-                                <th style="width: 7%">Action</th>
-                                <th style="width: 7%">Status</th>
+                                <th style="width: 15%">Print TC</th>
                             </tr>
                         </thead>
                         @{
-                            int count = 1;
+                            int count = 0;
                             foreach (StudentModel c in Model.Students)
                             {
                                 var catName = "";
@@ -164,8 +163,25 @@
                                                             <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
                                                             <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
                                                             <input type="hidden" name="SessionEndDate" id="hdnSessionEndDate" value="@c.SessionEndDate" />
-                                                            <a href="javascript:void(0);" onclick="ShowFeeDetails(this,@c.StudentID);" class="btn btn-link">Prtin Fee Details </a>
+                                                            @*<a href="javascript:void(0);" onclick="ShowFeeDetails(this,@c.StudentID);" class="btn btn-link">Prtin Fee Details </a>*@
                                                         </div>
+                                                    </td>
+
+                                                    <td>
+                                                        @if (c.IsSelected > 0 && c.OpType > 0)
+                                                        {
+                                                            <a href="/Account/ViewStudentSLC/@c.StudentID/@Model.SessionID" target="_blank" class="btn btn-link">TC Format 1</a>
+                                                            <a href="/Account/ViewTCForStudent/@Model.SessionID/@c.StudentID" target="_blank" class="btn btn-link">TC Format 2</a>
+                                                        }
+                                                        else if (c.IsSelected > 0)
+                                                        {
+                                                            <a href="/Account/ViewStudentSLC/@c.StudentID/@Model.SessionID" target="_blank" class="btn btn-link">TC</a>
+                                                        }
+                                                        else if (c.OpType > 0)
+                                                        {
+                                                            <a href="/Account/ViewTCForStudent/@Model.SessionID/@c.StudentID" target="_blank" class="btn btn-link">TC</a>
+                                                        }
+
                                                     </td>
 
                                                 </tr>

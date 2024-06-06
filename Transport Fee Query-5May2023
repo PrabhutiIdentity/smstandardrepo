@@ -98,6 +98,9 @@ where TFM.RouteID=@RouteID  and TFM.SbranchID=@SbranchID and TFM.SessionID=@Sess
 END   
 go
 
+
+
+
   alterproc [dbo].[spn_GetVehicleRouteStoppages]    
 (          
  @VehicleRouteID int          
@@ -149,68 +152,69 @@ END
 go
 
 
-alter Function [dbo].[fn_GetStudentTransportFeeAmount] --4,2019,785,0,0,1,0,19,1,5,2,50,50,4  
-(  
-@Month int,  
-@Year int,  
-@StudentID int,  
-@TransportFeeMode int,  
-@ClassID int,  
-@GroupID int,  
-@SBranchID int,  
-@SessionID int=1   
-)  
- Returns numeric(10,2)  
-as  
-begin  
-  declare @MonthsYear as Table(month int,year int)  
-  Insert into @MonthsYear select @Month,@Year  
-  Declare @Amount decimal(18,2)=0,@ClassTransportFee numeric(18,2)  
-  Declare @Quota int  
-  declare @IsCustomFee int  
-  select top 1 @IsCustomFee=isnull(IsCustomFee,0) from Student_Session where StudentID=@StudentID and SessionID=@SessionID  
-  --select @Quota=QuotaID from Student_Session where StudentID=@StudentID and SessionID=@SessionID  
-  --select * from [StudentFeeDetails]  
-  if(@TransportFeeMode=1)  
-  begin  
-   select @ClassTransportFee=sum(isnull(isnull(SFD.FeeAmount,CFS.FeeAmount),0)) from ClassFeeStructureMaster CFS left outer join  
-   [dbo].[StudentFeeDetails] SFD on SFD.FeeTypeID=CFS.FeeTypeID and SFD.StudentID=@StudentID and SFD.SessionID=(case when @IsCustomFee=1 then @SessionID else -1 end) and SFD.IsApplicable=1  
-   where ClassID=@ClassID and GroupID=@GroupID and SBranchID=@SBranchID   
-   and CFS.FeeTypeID in (select FeeTypeID from FeeTypeMaster where FeeTypeApplicable=5) and CFS.SessionID=@SessionID  
-  end  
-  if((select count(*) from TransportHostalAllocationDelocation where UserType=0 and ChangeType=0 and UserID=@StudentID)>0)  
-  begin  
-   declare @LMonth int  
-   declare @LYear int  
-   DECLARE cur_Months CURSOR  
-   STATIC FOR select Month,Year from @MonthsYear  
-   OPEN cur_Months   
-   FETCH NEXT FROM cur_Months INTO @LMonth,@LYear  
-   WHILE @@FETCH_STATUS = 0  
-   Begin    
-    Declare @MStartDate date=cast(cast(@LYear as nvarchar(5))+'-'+cast(@LMonth as nvarchar(3))+'-1' as date)  
-    Declare @MEndDate date= EOMONTH(@MStartDate)  
-     Select @Amount=isnull(@Amount,0)+ isnull(sum(Amount*(Days+1)/TotalDays),0) from (  
-     select StartDate,EndDate,KeyID,ChangeType,DATEDIFF(DAY, StartDate,isnull(EndDate,@MEndDate)) as Days,datepart(day,@MEndDate) as TotalDays,  
-     (case when @TransportFeeMode=1 then   
-     (@ClassTransportFee) else   
-      --(select isnull(Rate,0) from TransportRouteDetails TRM where TRM.StopID=KeyID) end) as Amount from 
-	   (select isnull(Amount,0) from TransportFeeMaster TFM where TFM.StopID=KeyID and TFM.SessionID=@SessionID and TFM.Sbranchid=@SBranchID ) end) as Amount from   
-     (select (case when  StartDate is null or StartDate<@MStartDate then @MStartDate else StartDate end) as StartDate,  
-     (case when EndDate is null or EndDate>@MEndDate then @MEndDate else EndDate end) as EndDate  
-     , KeyID,ChangeType  
-     from TransportHostalAllocationDelocation where UserType=0 and ChangeType=0 and UserID=@StudentID and (StartDate<EndDate or EndDate is null)  
-     and ((StartDate between @MStartDate and @MEndDate or StartDate<@MStartDate) and (isnull(EndDate,@MEndDate) between @MStartDate and @MEndDate or EndDate>@MEndDate))  
-      )t)tt   
-     
-    FETCH NEXT FROM cur_Months INTO @LMonth,@LYear  
-   end  
-   close cur_Months   
-   deallocate cur_Months   
-  end  
-  Return isnull(@Amount,0)  
-end
-
+alter Function [dbo].[fn_GetStudentTransportFeeAmount] --4,2019,785,0,0,1,0,19,1,5,2,50,50,4          
+ (          
+ @Month int,          
+ @Year int,          
+ @StudentID int,          
+ @TransportFeeMode int,          
+ @ClassID int,          
+ @GroupID int,          
+ @SBranchID int,          
+ @SessionID int=1           
+ )          
+  Returns numeric(10,2)          
+ as          
+ begin          
+   declare @MonthsYear as Table(month int,year int)          
+   Insert into @MonthsYear select @Month,@Year          
+   Declare @Amount decimal(18,2)=0,@ClassTransportFee numeric(18,2)          
+   --Declare @Quota int          
+   declare @IsCustomFee int          
+   select top 1 @IsCustomFee=isnull(IsCustomFee,0) from Student_Session where StudentID=@StudentID and SessionID=@SessionID          
+        
+   --select @Quota=QuotaID from Student_Session where StudentID=@StudentID and SessionID=@SessionID          
+   --select * from [StudentFeeDetails]          
+   if(@TransportFeeMode=1)          
+   begin          
+    select @ClassTransportFee=sum(isnull(isnull(SFD.FeeAmount,CFS.FeeAmount),0)) from ClassFeeStructureMaster CFS left outer join          
+    [dbo].[StudentFeeDetails] SFD on SFD.FeeTypeID=CFS.FeeTypeID and SFD.StudentID=@StudentID and SFD.SessionID=(case when @IsCustomFee=1 then @SessionID else -1 end) and SFD.IsApplicable=1          
+    where ClassID=@ClassID and GroupID=@GroupID and SBranchID=@SBranchID           
+    and CFS.FeeTypeID in (select FeeTypeID from FeeTypeMaster where FeeTypeApplicable=5) and CFS.SessionID=@SessionID          
+   end          
+   if((select count(*) from TransportHostalAllocationDelocation where UserType=0 and ChangeType=0 and UserID=@StudentID)>0)          
+   begin          
+    declare @LMonth int =@Month        
+declare @LYear int    =@Year        
+            
+ --DECLARE cur_Months CURSOR          
+ --   STATIC FOR select Month,Year from @MonthsYear          
+ --   OPEN cur_Months           
+ --   FETCH NEXT FROM cur_Months INTO @LMonth,@LYear          
+ --   WHILE @@FETCH_STATUS = 0          
+ --   Begin            
+     Declare @MStartDate date=cast(cast(@LYear as nvarchar(5))+'-'+cast(@LMonth as nvarchar(3))+'-1' as date)          
+     Declare @MEndDate date= EOMONTH(@MStartDate)          
+      Select @Amount=isnull(@Amount,0)+ isnull(sum(Amount*(Days+1)/TotalDays),0) from (          
+      select StartDate,EndDate,KeyID,ChangeType,DATEDIFF(DAY, StartDate,isnull(EndDate,@MEndDate)) as Days,datepart(day,@MEndDate) as TotalDays,          
+      (case when @TransportFeeMode=1 then           
+      (@ClassTransportFee) else           
+       --(select isnull(Rate,0) from TransportRouteDetails TRM where TRM.StopID=KeyID) end) as Amount from      
+      (select isnull(Amount,0) from TransportFeeMaster TFM where TFM.StopID=KeyID and TFM.SessionID=@SessionID and TFM.Sbranchid=@SBranchID ) end) as Amount from      
+      (select (case when  StartDate is null or StartDate<@MStartDate then @MStartDate else StartDate end) as StartDate,          
+      (case when EndDate is null or EndDate>@MEndDate then @MEndDate else EndDate end) as EndDate          
+      , KeyID,ChangeType          
+      from TransportHostalAllocationDelocation where UserType=0 and ChangeType=0 and UserID=@StudentID and (StartDate<EndDate or EndDate is null)          
+      and ((StartDate between @MStartDate and @MEndDate or StartDate<@MStartDate) and (isnull(EndDate,@MEndDate) between @MStartDate and @MEndDate or EndDate>@MEndDate))          
+       )t)tt           
+              
+    -- FETCH NEXT FROM cur_Months INTO @LMonth,@LYear          
+    --end          
+    --close cur_Months           
+    --deallocate cur_Months           
+   end          
+   Return isnull(@Amount,0)          
+ end 
 go
 
 

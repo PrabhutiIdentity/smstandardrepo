@@ -443,7 +443,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SBranchID", model.SBranchID);
                 paramater.Add("@EvaluationMode", objStartupModel.EvaluationMode);
                 paramater.Add("@SessionID", model.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail2", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using ( var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail2", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
