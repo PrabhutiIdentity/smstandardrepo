@@ -253,7 +253,8 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase AttachmentFile { get; set; }
         public int Status { get; set; }
         public int OpType { get; set; }
-    }
+		public int SBranchID { get; set; }
+	}
     public class GalleryModel
     {
         public int GalleryID { get; set; }
@@ -504,6 +505,18 @@ namespace SMEnterprise.Models
         public int TAssigned { get; set; }
 
         public int MarkingScheme { get; set; }
+    }
+    public class StudentQuotaModel
+    {
+        public int ID { get; set; }
+        public int SBranchID { get; set; }
+        public string Name { get; set; }
+
+        public int StudentCount { get; set; }
+        public List<StudentModel> Students { get; set; }
+        public int OpType { get; set; }
+        public int UserID { get; set; }
+        public DateTime OperationDate { get; set; }
     }
     public class HouseModel
     {

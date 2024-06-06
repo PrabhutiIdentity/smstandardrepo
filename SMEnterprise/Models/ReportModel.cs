@@ -22,10 +22,20 @@ namespace SMEnterprise.Models
         public string SectionName { get; set; }
         public string TeacherName { get; set; }
     }
+    public class QuotaClassStudentListModel
+    {
+        public int ID { get; set; }
+        public int Type { get; set; }
+        public List<StudentQuotaModel> Quotas { get; set; }
+        public List<ClassSectionModel> ClassSections { get; set; }
+        public List<StudentModel> Students { get; set; }
+        public SBranchModel Branch { get; set; }
+    }
     public class HouseClassStudentListModel
     {
         public int ID { get; set; }
         public int Type { get; set; }
+      
         public List<HouseModel> Houses { get; set; }
         public List<ClassSectionModel> ClassSections { get; set; }
         public List<StudentModel> Students { get; set; }
@@ -36,6 +46,7 @@ namespace SMEnterprise.Models
         public string AreaName { get; set; }
         public int AreaID { get; set; }
         public int Students { get; set; }
+        public decimal Rate { get; set; }
         public decimal Amount { get; set; }
     }
     public class BusStudentListModel

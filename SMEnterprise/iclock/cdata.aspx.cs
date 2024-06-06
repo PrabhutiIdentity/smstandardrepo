@@ -59,7 +59,7 @@ namespace ESSL
                             int contentLength = Request.ContentLength;
                             str = Encoding.ASCII.GetString(numArray);
 
-                            //objEsslData.InsertTestData("Page Load string : "+ SerialNumber+"#" + "\n" + str);
+                            objEsslData.InsertTestData("Try CDAta : "+ SerialNumber+"#" + "\n" + str);
                         }
                         catch (Exception ex)
                         {
@@ -71,6 +71,7 @@ namespace ESSL
                         if (Request.QueryString["table"] != null && Request.QueryString["table"].Trim() == "ATTLOG")
                         {
                             string TransactionStamp = this.Request.QueryString["Stamp"];
+                            objEsslData.InsertTestData("AttLog string : " + SerialNumber + "#"+ TransactionStamp+":" + "\n" + str);
                             if (!AddDeviceLogsForWebMonthwise(SerialNumber, str, TransactionStamp))
                             {
                                 HttpContext.Current.Response.Write("Error Occured\r");
@@ -312,9 +313,11 @@ namespace ESSL
                     objDeviceLogs.PunchDirectionId = CommonUsage.ConvertToInt(Left1);
                     objDeviceLogs.DeviceDirection = Left1 != "0" ? "out" : "in";
                     string str1;
+                
                     try
                     {
                         str1 = strArray2[2];
+                        objEsslData.InsertTestData("AttMonthLog string : " + SerialNumber + "#" + objDeviceLogs.DeviceEmpCode +"#" + TransactionStamp + ":" + "\n" + "Str1" + str1);
                     }
                     catch (Exception ex)
                     {
@@ -326,6 +329,7 @@ namespace ESSL
                     try
                     {
                         str2 = strArray2[3];
+                        objEsslData.InsertTestData("AttMonthLog string : " + SerialNumber + "#" + objDeviceLogs.DeviceEmpCode + "#" + TransactionStamp + ":" + "\n" + "Str2" + str2);
                     }
                     catch (Exception ex)
                     {
@@ -358,6 +362,7 @@ namespace ESSL
                 objEsslData.InsertTestData("Insert Attendence  end: " + ex.Message);
                 finalResult = false;
             }
+            objEsslData.InsertTestData("AttMonthLog string : " + SerialNumber + "#" +  TransactionStamp + ":" + "\n" + "finalResult" + finalResult);
             return finalResult;
         }
         public bool AddDeviceLogsForWebMonthwiseOld(string SerialNumber, string strData, string TransactionStamp)
@@ -417,7 +422,6 @@ namespace ESSL
                         if (objModel.DeviceID != 0 && objModel.EmployeeType != 1)
                         {
                             //string attdata = "(" + objModel.DeviceID + ",'" + objDeviceLogs.DeviceEmpCode + "','" + objDeviceLogs.LogDate + "','" + objDeviceLogs.DownloadDate.ToString("yyy-MM-dd HH:mm:ss") + "')";
-
                             //BeehiveAttService.AttendanceServiceClient bAtt = new BeehiveAttService.AttendanceServiceClient();
                             //bool bStatus = bAtt.SaveAttendanceSQL(CommonUsage.BeehiveSecretCode, CommonUsage.BeehiveAPIKey, attdata);
                         }

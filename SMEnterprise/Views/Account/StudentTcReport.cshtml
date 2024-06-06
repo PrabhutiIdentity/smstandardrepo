@@ -1,0 +1,285 @@
+﻿﻿﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentsPageModel
+@section IncludeCss
+{
+    <title>Students Management</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+
+}
+
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+
+    .thumbImageGrid {
+        max-width: 75px;
+        max-height: 75px;
+    }
+
+     
+    *html1 .thumbImageGrid {
+        width: expression((this.width/this.height)>=1?75:'auto');
+        height: expression((this.width/this.height)<1?100:'auto');
+    }
+
+    .thumbImageMain {
+        max-width: 125px;
+        max-height: 125px;
+    }
+
+    *html .thumbImageMain {
+        width: expression((this.width/this.height)>=1?125:'auto');
+        height: expression((this.width/this.height)<1?125:'auto');
+    }
+
+    #tblCategory > tbody > tr > td {
+        vertical-align: middle;
+    }
+</style>
+<div class="">
+
+    <div class="clearfix"></div>
+
+
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("StudentTcReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            {
+                <div class="row std-mng-head">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+
+                            <div class="col-md-2 padding">
+                                <a href="/Account/StudentDetails/0/1" target="_blank" class="btn btn-success pull-right" style="color:white;">Add Student</a>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Session :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                        @foreach (NameIDModel el in Model.Sessions)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                      
+                           
+                        </div>
+                    </div>
+
+                </div>
+            }
+            @*Date: 14 Jan 2022 || Shishupal*@
+            @*Start-- Student Count Information Class Wise*@
+
+
+           
+            @*End-- Student Count Information Class Wise*@
+            <div class="x_panel">
+
+                <div class="x_content">
+
+                    <table id="tblCategory" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 2%">#</th>
+                                <th style="width: 10%">Photo</th>
+                                <th style="width: 15%">Student Details</th>
+                                <th style="width: 22%">Parent's </th>
+                                <th style="width: 12%">Class / Section </th>
+                                <th style="width: 12%">Aadhar Number</th>
+                                <th style="width: 12%">Contact</th>
+
+                                <th style="width: 15%">View</th>
+                                <th style="width: 15%">Print TC</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+                            foreach (StudentModel c in Model.Students)
+                            {
+                                var catName = "";
+                                if (c.Category == 0)
+                                {
+                                    catName = "Other";
+                                }
+                                else
+                                {
+                                    catName = c.CategoryName;
+                                }
+                                                <tr>
+                                                    <td>
+                                                        @count
+                                                    </td>
+
+                                                    <td>
+                                                        <img id="imgPhoto" onerror="return OnImageError(this,@(c.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(c.StudentID)_@c.Photo" />
+                                                        <br />
+                                                        @c.StudentSID  <br />
+                                                        Cat :@catName
+                                                    </td>
+                                                    <td>
+                                                        Name : @c.Name
+                                                        <br />
+                                                        SID : @c.StudentSID  <br />
+                                                        SR. No. :@c.SchoolUID<br />
+                                                        Roll No. : @c.RollNo<br />
+                                                        SSSID :@c.SSSID
+                                                    </td>
+
+                                                    <td>
+                                                        User ID: @c.SParentID <br />
+                                                        F Name: @c.FatherName<br />
+                                                        M Name: @c.MotherName<br />
+                                                        G Name: @c.GuardianName
+                                                    </td>
+                                                    <td>@c.ClassName / @c.SectionName</td>
+                                                    <td>
+                                                        @c.AadharCardNo
+                                                    </td>
+                                                    <td>
+
+                                                        F :  @c.FatherMobileNo<br />
+                                                        M :  @c.MotherMobileNo <br />
+                                                        G :  @c.GuardianMobileNo
+                                                    </td>
+                                                   
+
+                                                    <td>
+                                                        <div class="row">
+
+                                                            <a href="/Account/StudentDetails/@c.StudentID/1" target="_blank" class="btn btn-link">View</a>
+                                                            <a href="javascript:void(0);" onclick="PrintStudentDetails(this,@c.StudentID);" class="btn btn-link Closed">Print</a>
+                                                            <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditPassword" onclick="EditPassword(@c.ParentID);">Change Password</a>
+                                                            <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
+                                                            <input type="hidden" name="SessionEndDate" id="hdnSessionEndDate" value="@c.SessionEndDate" />
+                                                            @*<a href="javascript:void(0);" onclick="ShowFeeDetails(this,@c.StudentID);" class="btn btn-link">Prtin Fee Details </a>*@
+                                                        </div>
+                                                    </td>
+
+                                                    <td>
+                                                        @if (c.IsSelected > 0 && c.OpType > 0)
+                                                        {
+                                                            <a href="/Account/ViewStudentSLC/@c.StudentID/@Model.SessionID" target="_blank" class="btn btn-link">TC Format 1</a>
+                                                            <a href="/Account/ViewTCForStudent/@Model.SessionID/@c.StudentID" target="_blank" class="btn btn-link">TC Format 2</a>
+                                                        }
+                                                        else if (c.IsSelected > 0)
+                                                        {
+                                                            <a href="/Account/ViewStudentSLC/@c.StudentID/@Model.SessionID" target="_blank" class="btn btn-link">TC</a>
+                                                        }
+                                                        else if (c.OpType > 0)
+                                                        {
+                                                            <a href="/Account/ViewTCForStudent/@Model.SessionID/@c.StudentID" target="_blank" class="btn btn-link">TC</a>
+                                                        }
+
+                                                    </td>
+
+                                                </tr>
+
+                                count++;
+                            }
+
+                        }
+                    </table>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="modal fade bs-example-modal-lg" id="modelViewDetails" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 640px;">
+            <div class="modal-content">
+                <div class="modal-body" id="mbdViewStudentDetails">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+@section pageBottom{
+  
+
+    <div class="modal fade" id="quickViewModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content" style="min-width: 1215px;">
+                <div class="modal-body">
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/MD5.js")" type="text/javascript"></script>
+
+    <script>
+        $(function () {
+            $("#tblCategory").DataTable();
+
+        });
+       
+    
+
+
+
+        function PrintStudentDetails(sender, ID) {
+
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/StudentViewDetails/" + ID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#mbdViewStudentDetails').html(html);
+                        $('#modelViewDetails').modal('toggle');
+                    },
+                    error: function (e) {
+                        alert("Hi");
+                    }
+                });
+        }
+
+     
+
+        function ShowFeeDetails(sender,ID) {
+            $.ajax({
+                url: "/Account/GetFeePaymentDetailsForPrint/",
+                type: "GET",
+                data: { StudentID: ID, SessionID: $('#hdnSessionID').val(), SessionEndDate : $('#hdnSessionEndDate').val() },
+
+                success: function (html) {
+                    if (html != null) {
+                        debugger;
+                        $('#quickViewModal').find('.modal-body').html(html);
+                        $('#quickViewModal').modal('show');
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                },
+            });
+        }
+    </script>
+}
+<!-- /.content -->

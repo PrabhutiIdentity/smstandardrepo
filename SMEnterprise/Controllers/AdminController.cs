@@ -11,7 +11,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using BigBlueButtonAPI.Core;
 using System.Web.Security;
-using System.Threading.Tasks;
+
 
 
 namespace SMEnterprise.Controllers
@@ -1894,6 +1894,39 @@ namespace SMEnterprise.Controllers
             objData.FeeStructure = null;
             return RedirectToAction("FeeStructureManagement", "Admin", objData);
         }
+
+        #endregion
+
+        #region Transport Fee
+        [PermissionFilter]
+        public ActionResult TransportFeeManagement(EditTransportFeeModel Model = null)
+        {
+            if (Model == null)
+            {
+                Model = new EditTransportFeeModel();
+            }
+            if (Session["SBranchID"] == null)
+            {
+                Session["SBranchID"] = 1;
+            }
+            Model.OperationDate = CommonUsage.GetCurrentDate();
+            Model.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            Model = objAdminData.GetTransportRouteFee(Model);
+            return View(Model);
+
+        }
+        [PermissionFilter]
+        public ActionResult UpdateTransportRouteFee(EditTransportFeeModel objData)
+        {
+            objData.OperationDate = CommonUsage.GetCurrentDate();
+            if (objData.TransportFee != null)
+            {
+                objAdminData.InsertUpdateTransportFee(objData);
+            }
+            objData.TransportFee = null;
+            return RedirectToAction("TransportFeeManagement", "Admin", objData);
+        }
+
         #endregion
         #region Salary Management
         [PermissionFilter]
@@ -2357,7 +2390,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult NewsManagement()
         {
-            IEnumerable<NewsModel> objModel = objAdminData.GetNews();
+		
+			IEnumerable<NewsModel> objModel = objAdminData.GetNews();
             return View(objModel);
         }
         [PermissionFilter]
@@ -2365,7 +2399,10 @@ namespace SMEnterprise.Controllers
         {
 
             objData.ActiveDate = CommonUsage.GetCurrentDate();
-            if (objData.AttachmentFile != null)
+			objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+
+
+			if (objData.AttachmentFile != null)
             {
                 if (objData.Attachment != null && objData.NewsID != 0)
                 {
@@ -2399,6 +2436,7 @@ namespace SMEnterprise.Controllers
         public ActionResult UpdateGallery(GalleryModel Data)
         {
             Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
+            Data.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
             if (Data.OpType == -1)
             {
@@ -2883,7 +2921,8 @@ namespace SMEnterprise.Controllers
             //oModel.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
             objAdminData.DeleteProduct(ProductID);
-            return View(oModel);
+            return RedirectToAction("Products", "Admin");
+            
         }
 
         [PermissionFilter]
