@@ -314,7 +314,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SectionID", objModel.SectionID);
                 paramater.Add("@SubjectID", objModel.SubjectID);
                 paramater.Add("@SBranchID", objModel.SBranchID);
-                paramater.Add("@EvaluationMode", objStartupModel.EvaluationMode);
+                paramater.Add("@EvaluationMode",0);
+              //  paramater.Add("@EvaluationMode", objStartupModel.EvaluationMode);
                 using (var multi = con.QueryMultiple("sp_GetClassGroupWiseExamResults", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
 
@@ -330,6 +331,15 @@ namespace SMEnterprise.Repository
                         objModel.SubjectID = multi.Read<int>().SingleOrDefault();
                         objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
                         //objModel.IsLocked = multi.Read<int>().SingleOrDefault();
+                    }
+                    try
+                    {
+                        objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
                     }
                 }
             }
@@ -396,6 +406,14 @@ namespace SMEnterprise.Repository
                     model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.Result = multi.Read<ExamResultDetailModel>().ToList();
+                    //try
+                    //{
+                       
+                    //    model.ResultGrade = multi.Read<ExamResultDetailModel>().ToList();
+                    //}
+                    //catch { }
+
+
                     model.Student = multi.Read<StudentModel>().SingleOrDefault();
                     model.CGPA = multi.Read<decimal>().SingleOrDefault();
                     model.EvaluationName = multi.Read<string>().SingleOrDefault();
@@ -425,7 +443,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SBranchID", model.SBranchID);
                 paramater.Add("@EvaluationMode", objStartupModel.EvaluationMode);
                 paramater.Add("@SessionID", model.SessionID);
-                using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail2", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                using ( var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail2", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
                     model.SubEvaluations = multi.Read<EvaluationModel>().ToList();

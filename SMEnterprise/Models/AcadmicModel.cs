@@ -928,6 +928,7 @@ namespace SMEnterprise.Models
         public int StudentSessionUID { get; set; }
         public int StudentID { get; set; }
         public string StudentSID { get; set; }
+        public DateTime DOB { get; set; }
         public string RollNo { get; set; }
         public string SchoolUID { get; set; }
         public int Gender { get; set; }
@@ -1015,6 +1016,7 @@ namespace SMEnterprise.Models
         public List<EvaluationModel> MainEvaluations { get; set; }
         public List<EvaluationModel> SubEvaluations { get; set; }
         public List<ExamResultDetailModel> Result { get; set; }
+        public List<ExamResultDetailModel> ResultGrade { get; set; }
         public List<EducationLevelSectionModel> ReportSections { get; set; }
         public List<NameIDModel> StudentSessions { get; set; }
         public List<NameIDModel> SubjectTypes { get; set; }

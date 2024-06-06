@@ -121,6 +121,8 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.GetStudents(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
             return View(objModel);
         }
+       
+        
         [PermissionFilter]
         public ActionResult StudentInActive(StudentsPageModel objModel)
         {
@@ -592,6 +594,9 @@ namespace SMEnterprise.Controllers
         {
             int iID = CommonUsage.ConvertToInt(ID);
             FeePaymentModel model = await objAccountData.GetFeePaymentReciptDetails(iID);
+          //  var xmlData = CommonUsage.SerializeToXML<FeePaymentModel>(model);
+         //   var html = CommonUsage.ConvertToHTML(xmlData, "https://pschoolstorage.blob.core.windows.net/report-formats/PrintFeeReceipt.xslt");
+
             return PartialView("_PrintFeeRecipt", model);
         }
         [PermissionFilter]
@@ -645,6 +650,14 @@ namespace SMEnterprise.Controllers
         {
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetClassWiseBusStudents(SBranchID, 0, objModel.ID);
+            return View(objModel);
+        }
+        
+            [PermissionFilter]
+        public ActionResult QuotaWiseStudents(QuotaClassStudentListModel objModel)
+        {
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetQuotaWiseStudents(SBranchID, objModel.ID);
             return View(objModel);
         }
         [PermissionFilter]
@@ -701,7 +714,7 @@ namespace SMEnterprise.Controllers
             objModel.SchoolID = PermissionManager.GetLoggedInUser().SchoolID;
             if (objModel.SBranchID == 2 && objModel.SchoolID == 1068)
             {
-
+               
             }
             else
             {
@@ -1752,6 +1765,17 @@ namespace SMEnterprise.Controllers
 
         #region TC
         [PermissionFilter]
+        public ActionResult StudentTcReport(StudentsPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentsPageModel();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetTCStudentList(SBranchID, objModel.SessionID);
+            return View(objModel);
+        }
+        [PermissionFilter]
         public ActionResult StudentList(StudentsPageModel objModel)
         {
             if (objModel == null)
@@ -2114,6 +2138,17 @@ namespace SMEnterprise.Controllers
             }
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetStudentClassReport(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
+            return View(objModel);
+        }
+
+        public ActionResult SiblingReport(StudentsPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentsPageModel();
+            }
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetSiblingReport(SBranchID, objModel.SessionID);
             return View(objModel);
         }
         public ActionResult AllStudentReportEWS(StudentsPageModel objModel)
@@ -3263,9 +3298,11 @@ namespace SMEnterprise.Controllers
             if (oModel.StartDate.Year == 1)
             {
                 oModel.StartDate = CommonUsage.GetCurrentDate();
-                oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
-                oModel.EndDate = CommonUsage.GetCurrentDate();
-                oModel.EndDate = oModel.EndDate.AddDays(-oModel.EndDate.Day + 1);
+                oModel.StartDate = new DateTime(oModel.StartDate.Year, oModel.StartDate.Month, 1);
+                // oModel.StartDate = oModel.StartDate.AddDays(-oModel.StartDate.Day + 1);
+              oModel.EndDate = CommonUsage.GetCurrentDate();
+                //oModel.EndDate = oModel.EndDate.AddDays(-oModel.EndDate.Day + 1);
+                oModel.EndDate = oModel.EndDate.AddMonths(1).AddDays(-1);
             }
             objAdminData.GetStudentAdmssionDetail(oModel);
             return View(oModel);

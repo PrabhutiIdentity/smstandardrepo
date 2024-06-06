@@ -71,7 +71,7 @@
                                 <th style="width: 30%">Name</th>
                                 <th style="width: 45%">Classes</th>
                                 <th style="width: 15%">
-                                    <a href="javascript:void(0)" class="btn btn-link" onclick="GetClassList(0);">Add New</a>
+                                    <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditScheme" onclick="EditScheme(0,'0','');">Add New</a>
                                 </th>
                             </tr>
                         </thead>
@@ -92,7 +92,7 @@
                                 <tr>
                                     <td colspan="4" style="text-align:center">
                                         <a href="javascript:void(0)" class="btn btn-link" data-toggle="modal" data-target="#mdlEditScheme" onclick="EditScheme(0,'0','');">No Evaluation Scheme Added, Please Add one.</a>
-                                      
+
                                     </td>
                                 </tr>
                             }
@@ -107,8 +107,6 @@
                                             @(count + 1)
                                             <input type="hidden" name="ID" id="hdnEvaluationSchemeID" value="@c.EvaluationSchemeID" />
                                             <input type="hidden" name="ClassIDs" id="hdnEvaluationSchemeClasses" value="@c.ClassIDs" />
-                                            <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
-
                                         </td>
                                         <td>
                                             @c.EvaluationSchemeName
@@ -119,7 +117,7 @@
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                <a href="javascript:void(0)" class="btn btn-link" onclick="GetClassList(@c.EvaluationSchemeID);">Edit</a>
+                                                <a href="javascript:void(0)" data-toggle="modal" data-target="#mdlEditScheme" class="btn btn-link" onclick="EditScheme(@c.EvaluationSchemeID,'@c.ClassIDs',' @c.EvaluationSchemeName');">Edit</a>
                                                 @using (Html.BeginForm("UpdateEvaluationScheme", "Admin", FormMethod.Post, new { style = "display: inline-block;", role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
                                                 {
                                                     <input type="hidden" name="OpType" value="-1" />
@@ -145,46 +143,47 @@
     <div id="mdlEditScheme" class="modal fade" role="dialog">
         <div class="modal-dialog">
 
+            <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title">Evaluation Scheme</h4>
                 </div>
                 <div class="modal-body">
-                    <!-- Modal content-->
+                    <form role="form" action="/admin/UpdateEvaluationScheme">
+                        <div class="box-body">
+                            <div class="form-group">
+                                <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
+                                <input type="hidden" name="ClassIDs" id="hdnClassIDs" />
+                                <input type="hidden" name="EvaluationSchemeID" id="hdnEditEvaluationSchemeID" />
+                                <label for="txtSchemeTitle">Scheme Title</label>
+                                <input type="text" required name="EvaluationSchemeName" class="form-control" id="txtSchemeTitle" placeholder="Enter Evaluation Scheme Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="exampleInputPassword1">Classes</label>
+                                <div class="row EClassList">
+                                    @foreach (var cls in Model.Classes)
+                                    {
+                                        <div class="col-md-6">
+                                            <input type="checkbox" clsid="@cls.ClassID" esid="@cls.EvaluationSchemeID" id="chkClass_@cls.ClassID" class="minimal class-checkbox">@cls.ClassName <span class="eSchemeName">(@cls.EducationLevelName)</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.box-body -->
 
+                        <div class="box-footer">
+                            <button type="submit" class="btn btn-primary pull-right" onclick="return SaveEvaluationScheme();">Submit</button>
+                        </div>
+                    </form>
                 </div>
             </div>
+
         </div>
     </div>
 }
 <script>
-    $(function () {
-        $("#tblCategory").DataTable({
-            "ordering": false
-        });
-        $('#liEvaluationSchemeManagement').closest('ul').closest('li').addClass('active');
-        $('#liEvaluationSchemeManagement').addClass('active');
-    });
-    function GetClassList(EvaluationSchemeID) {
-        var SessionID = $("#hdnSessionID").val();
-        $.ajax(
-            {
-                type: "POST",
-                url: "/Admin/GetEvaluationClass/" + EvaluationSchemeID + "/" + SessionID,
-                cache: false,
-                processData: false,
-                contentType: false,
-                success: function (html) {
-                    $('#mdlEditScheme').find('.modal-body').html(html);
-                    $('#mdlEditScheme').modal('show');
-                },
-                error: function (e) {
-                    alert("errorn");
-                }
-            });
-    }
-
     function SaveEvaluationScheme() {
         var classes = '';
         $(".EClassList").find('.class-checkbox').each(function () {
@@ -221,7 +220,6 @@
             }
         });
     }
-
     //$(function () {
     //    $("#tblCategory").DataTable({
     //        "ordering": false

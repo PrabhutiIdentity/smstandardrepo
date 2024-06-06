@@ -209,6 +209,7 @@ namespace SMEnterprise.Repository
         public int Status { get; set; }
         public int SMSID { get; set; }
         public string Content_id { get; set; }
+        public string DLT_TE_ID { get; set; }
         public string SMSContentID { get; set; }
     }
     public class SMSRecieverModel
@@ -219,6 +220,7 @@ namespace SMEnterprise.Repository
         public string MobileNo { get; set; }
         public string deviceToken { get; set; }
         public string Content_id { get; set; }
+        public string DLT_TE_ID { get; set; }
         public string SMSContentID { get; set; }
     }
     public class StudentBirthdaySMSModel
