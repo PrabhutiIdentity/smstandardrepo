@@ -46,6 +46,7 @@ namespace SMEnterprise.Models
         public string AreaName { get; set; }
         public int AreaID { get; set; }
         public int Students { get; set; }
+        public decimal Rate { get; set; }
         public decimal Amount { get; set; }
     }
     public class BusStudentListModel
