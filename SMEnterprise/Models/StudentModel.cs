@@ -230,14 +230,14 @@ namespace SMEnterprise.Models
         public string MotherEducationID { get; set; }
         public string MotherAadhaar { get; set; }
         public string FatherAadhaar { get; set; }
-      public string QuotaName { get; set; }
+        public string QuotaName { get; set; }
         public string RollNo { get; set; }
         public string ClassName { get; set; }
         public string SectionName { get; set; }
         public string BloodGroup { get; set; }
         public string AccessCardNo { get; set; }
         public int HostelRoomID { get; set; }
-      
+
         public string StopName { get; set; }
         public int ClassID { get; set; }
         public int SectionID { get; set; }

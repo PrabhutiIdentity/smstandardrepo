@@ -52,6 +52,7 @@ namespace SMEnterprise.Models
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
         public int etCountUsed { get; set; }
+        public int ReferenceID { get; set; }
     }
     public class SubEvaluationListModel
     {
