@@ -473,6 +473,14 @@ namespace SMEnterprise.Controllers
             objModel.CurrentTab = 1;
             return PartialView("_StudentViewPartial", objModel);
         }
+        public ActionResult TCRequest(string id = null)
+        {
+            int StudentID = CommonUsage.ConvertToInt(id);
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            StudentEditModel objModel = objAccountData.GetStudentDetailsPrint(StudentID, SBranchID);
+            objModel.CurrentTab = 1;
+            return PartialView("_StudentTCPartial", objModel);
+        }
 
         [PermissionFilter]
         public ActionResult GetSectionOptionalSubjects(string id = null)

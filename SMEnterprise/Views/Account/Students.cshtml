@@ -250,6 +250,7 @@
                                                             <input type="hidden" name="SessionID" id="hdnSessionID" value="@Model.SessionID" />
                                                             <input type="hidden" name="SessionEndDate" id="hdnSessionEndDate" value="@c.SessionEndDate" />
                                                             <a href="javascript:void(0);" onclick="ShowFeeDetails(this,@c.StudentID);" class="btn btn-link">Prtin Fee Details </a>
+                                                            <a href="javascript:void(0);" onclick="TCRequest(this,@c.StudentID);" class="btn btn-link Closed">TC Request</a>
                                                         </div>
                                                     </td>
 
@@ -490,6 +491,25 @@
             }
         }
         function PrintStudentDetails(sender, ID) {
+
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Account/StudentViewDetails/" + ID,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#mbdViewStudentDetails').html(html);
+                        $('#modelViewDetails').modal('toggle');
+                    },
+                    error: function (e) {
+                        alert("Hi");
+                    }
+                });
+        }
+        
+        function TCRequest(sender, ID) {
 
             $.ajax(
                 {
