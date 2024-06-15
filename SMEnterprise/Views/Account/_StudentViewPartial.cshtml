@@ -1,6 +1,6 @@
 ﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
-
+@model  StudentEditModel
 <div class="" style="background-color: white;">
 
     <div class="row">
@@ -13,8 +13,8 @@
         <div class="x_title">
             <h2>Student Information</h2>
             <button type="button" class="btn btn-primary pull-right" onclick="Printpage(0);"><i class="fa fa-print"></i> Student Information</button>
-            
-            <button type="button" class="btn btn-primary pull-right" onclick="Printpage(2);"><i class="fa fa-print"></i> Student TC Request</button>
+
+            <button type="button" class="btn btn-primary pull-right" onclick="Printpage(3);"><i class="fa fa-print"></i> Student TC Request</button>
             <button type="button" class="btn btn-primary pull-right" onclick="Printpage(2);"><i class="fa fa-print"></i> Character Certificate</button>
             <button type="button" class="btn btn-primary pull-right" onclick="Printpage(1);"><i class="fa fa-print"></i> Health Card</button>
             <button style="width:100px; height:30px" class="btn btn-info" data-dismiss="modal">Close</button>
@@ -634,36 +634,23 @@
             <table class="table" style="border-bottom: 0px solid #000;padding-bottom: 1px;" cellspacing="2">
                 <tr>
                     <td colspan="3">
-                        <table class="table">
-                            <tr style="width:100%">
-                                <td style="width:15%;text-align:left;">
+                        <table class="table" style="width:100%;">
+                            <tr>
+                                <td style="width:10%;">
                                     <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
                                 </td>
+                                <td style="width: 80%; text-align:center;">
+                                    <p style="margin-top: 2px;margin-bottom: 5px;font-size: 33px;color:blue;"><b>@Model.SBranchDetails.BranchSchoolName</b></p>
+                                    <p style="margin-bottom: 2px;font-size: 18px;text-align:centre;color:#153693;">
+                                        <b> @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))</b>
 
-                                <td style="width:70%;text-align:center;">
-                                    <table style="width:100%">
-                                        <tr>
-                                            <td style="text-align: left;vertical-align: middle;">
-
-                                                <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.SBranchDetails.BranchSchoolName</p>
-
-
-                                                <p style="margin-bottom: 2px;font-size: 16px;text-align: center;">
-                                                    @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
-
-                                                </p>
-                                                <p style="margin-bottom: 2px;text-align: center;"> <b>Ph.</b> @Model.SBranchDetails.ContactNo,  <b> Email :</b> @Model.SBranchDetails.EmailID</p>
-
-                                            </td>
-                                        </tr>
-                                    </table>
-
-
+                                    </p>
+                                    <p style="margin-bottom: 2px;color: black; ">   <b> Email :</b> @Model.SBranchDetails.EmailID</p>
+                                    <!--<b>Ph.</b> @Model.SBranchDetails.ContactNo-->
                                 </td>
-                                <td style="width:15%">
-                                    &nbsp;
+                                <td style="width:10%;">
+                                    <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
                                 </td>
-
                             </tr>
                         </table>
                     </td>
@@ -672,6 +659,7 @@
                 <tr>
                     <td colspan="3" style="text-align: center;font-size:16px;">
                         <p style="margin-bottom: 2px;text-align: center;">  <b> विद्यालय छोडने के लिये आवेदन पत्र</b> / School Leaving Application Form</p>
+
 
                     </td>
                 </tr>
@@ -682,56 +670,85 @@
                                 <div class="chm-form01">
                                     <form class="form-inline">
                                         <div class="col-md-12 form-group">
-                                            <label for="name"><b>सत्र /</b>Session</label>
-                                            <input type="text" class="form-control chm-input03" id="name" readonly value="________________">
+                                            <label for="name">सत्र / Session : </label> <strong>________________</strong>
+                                            <p></p>
                                         </div>
                                         <div class="col-md-12 form-group">
-                                            <label for="name"><b>प्रार्थना पत्र की तिथि /</b>Date of Application Form</label>
-                                            <input type="text" class="form-control chm-input03" id="name" value="@DateTime.Now.ToString("dd-MM-yyyy")">
+                                            <label for="name">प्रार्थना पत्र की तिथि / Date of Application Form : </label>
+                                            <strong>@DateTime.Now.ToString("dd-MM-yyyy")</strong>
+                                            <p></p>
                                         </div>
                                         <div class="col-md-12 form-group">
-                                            <label for="name"><b>विद्यार्थी का नाम/</b>Student Name</label>
-                                            <input type="text" class="form-control chm-input03" id="name" readonly value="@Model.Student.Name">
-                                        </div>
-                                        <div class="col-md-12 form-group">
-                                            <label for="wopd"><b>माता का नाम/</b>Mother's Name</label>
-                                            <input type="text" class="form-control chm-input03" id="MotherName" readonly value="@Model.Student.MotherName">
-                                        </div>
-                                        <div class="col-md-12 form-group">
-                                            <label for="con"><b>पिता का नाम/</b>Father's Name</label>
-                                            <input type="text" class="form-control chm-input03" id="FatherName" readonly value="@Model.Student.FatherName">
-                                        </div>
-                                        <div class="col-md-12 form-group">
-                                            <label for="email"><b>राष्ट्रीयता/</b>Nationality</label>
-                                            <input type="email" class="form-control chm-input03" id="Nationality" readonly value="@Model.Student.NationalityText">
-                                        </div>
-                                        <div class="col-md-12 form-group">
-                                            <label for="email"><b>कक्षा /</b>Class</label>
-                                            <input type="email" class="form-control chm-input03" id="ClassName" readonly value="@Model.Student.ClassName / @Model.Student.SectionName">
-                                        </div>
-                                        <div class="col-md-12 form-group">
-                                            <label for="email"><b>कक्षा उत्तीर्ण करने का वर्ष /</b>Year of passing the class</label>
-                                            <input type="email" class="form-control chm-input03" id="passingclass" value="________________">
-                                        </div>
-                                        <div class="col-md-12 form-group">
-                                            <label for="email"><b>निवास /</b> Address</label>
-                                            <input type="email" class="form-control chm-input03" id="MiniAddress" value="@Model.Student.MiniAddress">
+                                            <label for="name">विद्यार्थी का नाम / Student Name : </label>
+                                            <strong>@Model.Student.Name</strong>
+                                            <p></p>
                                         </div>
 
                                         <div class="col-md-12 form-group">
-                                            <p><b> अनु.जाति/ज.जा./पिछङा/सामान्य वर्ग से संबन्धित है</b></p>
-
-
-                                            <label for="add"><b>छात्र किस जाति/श्रेणी से संबंधित है / </b>Which Category does the student belong to?</label>
-                                            <input type="text" class="form-control chm-input11" id="add" readonly value="@Model.Student.CategoryName">
+                                            <label for="wopd">माता का नाम / Mother's Name : </label>
+                                            <strong>@Model.ParantDetails.MotherName</strong>
+                                            <p></p>
                                         </div>
                                         <div class="col-md-12 form-group">
-                                            <label for="pstcode"><b>विद्यालय छोड़ने का कारण/</b>Reason for leaving the School</label>
-                                            <input type="text" class="form-control chm-input31" id="pstcode" value="________________________________________________________________________________________________">
+                                            <label for="con">पिता का नाम / Father's Name : </label>
+                                            <strong>@Model.ParantDetails.FatherName</strong>
+                                            <p></p>
                                         </div>
                                         <div class="col-md-12 form-group">
-                                            <label for="pstcode"><b>मोबाइल नंबर/</b>Mobile Number</label>
-                                            <input type="text" class="form-control chm-input03" id="FatherMobileNo" value="@Model.ParantDetails.FatherMobileNo">
+                                            <label for="email">राष्ट्रीयता / Nationality : </label>
+                                            <strong>@Model.Student.NationalityText</strong>
+                                            <p></p>
+                                        </div>
+                                        @if (Model.Sessions != null)
+                                        {
+                                            var sessClassName = "";
+                                            var sessSectionName = "";
+                                            <div class="col-md-12 form-group">
+                                                <label for="email">कक्षा / Class : </label>
+                                                @{
+                                                    var sessoion = Model.Sessions.FirstOrDefault(x => x.Status == 1);
+                                                    if (sessoion != null)
+                                                    {
+                                                        sessClassName = sessoion.ClassName;
+                                                        sessSectionName = sessoion.SectionName;
+                                                    }
+                                                }
+
+
+                                                <strong>@sessClassName / @sessSectionName</strong>
+                                                <p></p>
+                                            </div>
+                                        }
+                                        <div class="col-md-12 form-group">
+                                            <label for="email">कक्षा उत्तीर्ण करने का वर्ष / Year of passing the class : </label>
+                                            <strong>________________</strong>
+                                            <p></p>
+                                        </div>
+                                        <div class="col-md-12 form-group">
+                                            <label for="email">निवास / Address : </label>
+                                            <strong>@Model.Student.MiniAddress</strong>
+                                            <p></p>
+                                        </div>
+
+                                        <div class="col-md-12 form-group">
+
+                                            <label for="add">छात्र किस जाति/श्रेणी से संबंधित है / Which Category does the student belong to? : </label>
+                                            <strong>@Model.Student.CategoryName </strong>
+                                            <p></p>
+                                        </div>
+                                        <div class="col-md-12 form-group">
+                                            <label for="pstcode">विद्यालय छोड़ने का कारण / Reason for leaving the School : </label>
+                                            <strong>............................................................................................................</strong>
+                                            <p></p>
+                                        </div>
+                                        <div class="col-md-12 form-group">
+                                            <label for="pstcode">मोबाइल नंबर / Mobile Number : </label>
+                                            <strong>@Model.ParantDetails.FatherMobileNo</strong>
+                                        </div>
+                                        <div class="col-md-12 form-group">
+                                            <br />
+                                            Note :
+                                            <p>जिस कक्षा की टी०सी० ले रहे है उसका अंक पत्र संलग्न करे <br />Attach the mark sheet of the class for which you are taking TC </p>
                                         </div>
                                     </form>
                                 </div>
@@ -748,34 +765,41 @@
 
 
 
-            <table class="table" style="border-bottom: 0px solid #000;padding-bottom: 1px;" cellspacing="2">
+            <table>
                 <tr>
                     <td colspan="2">
-                        Note :
-                        <p>जिस कक्षा की टी०सी० ले रहे है उसका अंक पत्र संलग्न करे <br />Attach the mark sheet of the class for which you are taking TC </p>
                     </td>
                 </tr>
                 <tr>
                     <td colspan="2" style="text-align:right;">
 
                         <p>मै प्रमाणित करता हू कि उपरोक्त वर्णन सत्य है  <br /> I certify that the above description is true </p>
-                    </td>
-                </tr>
-                <tr>
-
-                    <td style="padding-left:10px;text-align:left; width:50%">
-                        <span>विद्यार्थी के हस्ताक्षर / Student's Signature </span>
-                    </td>
-                    <td style="padding-left:10px;text-align:left; width:50%">
-                        <span> पिता या संरक्षक के हस्ताक्षर  /  Signature of father or guardian </span>
-                    </td>
-
-                </tr>
-                <tr>
-                    <td colspan="2">
                         <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                        <br />
+                    </td>
+                </tr>
+                <tr>
 
+                    <td style="padding-left:10px;text-align:left; width:40%">
+                        <span>विद्यार्थी के हस्ताक्षर <br /> Student's Signature </span>
+                    </td>
+                    <td style="padding-left:10px;text-align:right; width:60%">
+                        <span> पिता या संरक्षक के हस्ताक्षर  <br />  Signature of father or guardian </span>
+                        <br />
+                        <br />
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="2" style="text-align:center;">
+                        <br />
+                        <br />
                         <p>कार्यालय प्रयोग हेतु  / For office use  </p>
+                        <hr />
                     </td>
                 </tr>
                 <tr>
@@ -783,12 +807,12 @@
 
 
                         <p>
-                            प्रमाणित किया जाता है कि छात्र / छात्रा ---@Model.Student.Name--- की सम्पूर्ण शुल्क जमा है अत : स्थानान्तरण प्रमाण पत्र प्रदान करने की संस्तुति की जाती है
+                            प्रमाणित किया जाता है कि छात्र / छात्रा .... @Model.Student.Name .... की सम्पूर्ण शुल्क जमा है अत : स्थानान्तरण प्रमाण पत्र प्रदान करने की संस्तुति की जाती है
 
                         </p>
 
                         <p>
-                            It is certified that the entire fee of the student ---@Model.Student.Name--- is deposited and hence it is recommended to provide transfer certificate
+                            It is certified that the entire fee of the student .... @Model.Student.Name .... is deposited and hence it is recommended to provide transfer certificate
                             <br />
                         </p>
                         <br />
@@ -798,14 +822,16 @@
 
                     <td style="padding-left:10px;text-align:left; width:50%"></td>
                     <td style="padding-left:10px;text-align:right; width:50%">
-                        हस्ताक्षर शुल्क प्रभारी / Signature Fee Charges
+                        <br /><br />
+                        हस्ताक्षर शुल्क प्रभारी <br /> Signature Fee Charges
                     </td>
 
                 </tr>
                 <tr>
                     <td colspan="2">
-
-
+                        <br />
+                        <br />
+                        <hr />
                         <p>
                             स्थानान्तरण प्रमाण पत्र प्रदान करने की संस्तुति की जाती है / Transfer certificate is recommended to be granted
 
@@ -822,7 +848,8 @@
 
                     <td style="padding-left:10px;text-align:left; width:50%"></td>
                     <td style="padding-left:10px;text-align:right; width:50%">
-                        हस्ताक्षर प्रधानाचार्य / Signature Principal
+                        <br /><br />
+                        हस्ताक्षर प्रधानाचार्य <br /> Signature Principal
                     </td>
 
                 </tr>
@@ -841,6 +868,7 @@
         </div>
 
     </div>
+    <br/>
     <div class="x_panel">
         <div class="x_title">
             <h2>Health Card</h2>
@@ -1149,7 +1177,7 @@
         </div>
     </div>
 </div>
-    <script>
+<script>
             /* function Printpage() {*/
             function Printpage(type) {
             var contents = '';
@@ -1165,7 +1193,7 @@
             else if (type == 3) {
                 contents = $(".StudentTCRequest").html();
             }
-                
+
             else {
                // contents = $(".StudentHealth").html();
             }
@@ -1192,4 +1220,4 @@
         }, 500);
     }
 
-    </script>
+</script>
