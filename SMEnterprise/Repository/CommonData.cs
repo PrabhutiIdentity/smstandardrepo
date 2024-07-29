@@ -243,7 +243,7 @@ namespace SMEnterprise.Repository
         }
         public int InsertError(int UserID, string URL, string Data)
         {
-            using (SqlConnection con = new SqlConnection("Data Source=173.249.36.15;Initial Catalog=PSchoolonline;Persist Security Info=True;User ID=Pschool;Password=P@school@"))
+            using (SqlConnection con = new SqlConnection("Data Source=173.249.36.15,1405;Initial Catalog=PSchoolonline;Persist Security Info=True;User ID=Pschool;Password=P@school@"))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@LogDate", CommonUsage.GetCurrentDate());
