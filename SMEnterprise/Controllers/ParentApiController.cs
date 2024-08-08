@@ -701,7 +701,16 @@ namespace SMEnterprise.Controllers
             {
                 int SBranchID = objModel.UserID == data.ID ? objModel.SBranchID : -1;
                 CommonData objCommonData = new CommonData();
-                Object Data = await objCommonData.GetEventCalander(data.Month, data.Year, SBranchID, 1, data.ID);
+                int Year = CommonUsage.GetCurrentDate().Year;
+                int Month = CommonUsage.GetCurrentDate().Month;
+             
+                //   Object Data = await objCommonData.GetEventCalander(data.Month, data.Year, objModel.SBranchID, 1, data.ID);
+
+                Object Data = await objCommonData.GetEventCalander(Month, Year, objModel.SBranchID, 1, data.ID);
+
+
+
+             
                 if (Data != null)
                 {
                     objWraper.Code = 200;
