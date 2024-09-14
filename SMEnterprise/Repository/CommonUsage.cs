@@ -467,7 +467,7 @@ namespace SMEnterprise.Repository
         public static string StopIndexBasePath = "StopIndex";
         public static string DatabasebackupDirecotry = "~/Backup/Database";
         public static string ParentAppSMSTemplate = "Hello [Reciever],%0a Please download our app from [PlayStoreLink] to stay updated with school activities, your Username is [UserName] and Password is [Password]";
-        //  public static string ParentAppSMSTemplate = "Hello [Reciever],%0  your Username is [UserName] and Password is [Password]";
+        //public static string ParentAppSMSTemplate = "Hello [Reciever],%0  your Username is [UserName] and Password is [Password]";
         public static string[] MonthNames = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
         public static DateTime SessionStart;
         public static DateTime SessionEnd;
