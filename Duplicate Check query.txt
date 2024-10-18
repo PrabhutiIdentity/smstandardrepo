@@ -1,12 +1,12 @@
 
-select ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID,count(*)
+select ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID,SessionID,count(*)
 from [dbo].[PerformanceParameterMaster]
-group by ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID
+group by ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID,SessionID
 having count(*)>1
 
-WITH CTE(ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID,DuplicateCount)
+WITH CTE(ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID,SessionID,DuplicateCount)
 AS (SELECT ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID,
-           ROW_NUMBER() OVER(PARTITION BY ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID
+           ROW_NUMBER() OVER(PARTITION BY ParamID,MainParamID,ParamName,ParamDesc,ParamType,SBranchID,SessionID
            ORDER BY ParamID) AS DuplicateCount
     FROM [dbo].[PerformanceParameterMaster] )
 DELETE FROM CTE
