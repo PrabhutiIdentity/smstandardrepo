@@ -113,33 +113,33 @@ namespace SMEnterprise
         protected void Application_PreRequestHandlerExecute(object sender, EventArgs e)
         {
             HttpContext con = HttpContext.Current;
-            if (!con.Request.Url.ToString().Contains("KeepAlive") && !con.Request.Url.ToString().Contains("/Images/") && !con.Request.Url.ToString().Contains("/GetSessionState/"))
-            {
-                int UserID = 1;
-                //try
-                //{
-                //    UserID = CommonUsage.ConvertToInt(con.Session["UserID"].ToString());
-                //}
-                //catch (Exception ex)
-                //{
-                //    UserID = -1;
-                //}
-                if (UserID != 0)
-                {
-                    DateTime dt = DateTime.Now;
-                    CommonData objcd = new CommonData();
-                    string Data = "";
-                    StreamReader stream = new StreamReader(con.Request.InputStream);
-                    string x = stream.ReadToEnd();
-                    con.Request.InputStream.Position = 0;
-                    foreach (string key in con.Request.Form.AllKeys)
-                    {
-                        Data = Data + "ѱ" + key + ":" + Newtonsoft.Json.JsonConvert.SerializeObject(con.Request.Form[key].ToString());
-                    }
-                    Data = Data + "φ" + x;
-                    objcd.InsertLog(UserID, con.Request.Url.ToString(), Data);
-                }
-            }
+            //if (!con.Request.Url.ToString().Contains("KeepAlive") && !con.Request.Url.ToString().Contains("/Images/") && !con.Request.Url.ToString().Contains("/GetSessionState/"))
+            //{
+            //    int UserID = 1;
+            //    //try
+            //    //{
+            //    //    UserID = CommonUsage.ConvertToInt(con.Session["UserID"].ToString());
+            //    //}
+            //    //catch (Exception ex)
+            //    //{
+            //    //    UserID = -1;
+            //    //}
+            //    if (UserID != 0)
+            //    {
+            //        DateTime dt = DateTime.Now;
+            //        CommonData objcd = new CommonData();
+            //        string Data = "";
+            //        StreamReader stream = new StreamReader(con.Request.InputStream);
+            //        string x = stream.ReadToEnd();
+            //        con.Request.InputStream.Position = 0;
+            //        foreach (string key in con.Request.Form.AllKeys)
+            //        {
+            //            Data = Data + "ѱ" + key + ":" + Newtonsoft.Json.JsonConvert.SerializeObject(con.Request.Form[key].ToString());
+            //        }
+            //        Data = Data + "φ" + x;
+            //        objcd.InsertLog(UserID, con.Request.Url.ToString(), Data);
+            //    }
+            //}
         }
         protected void Application_PostAuthorizeRequest()
         {

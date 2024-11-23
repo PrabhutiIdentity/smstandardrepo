@@ -33,21 +33,21 @@ namespace SMEnterprise.Controllers
         }
         public HomeController()
         {
-            CommonData objcd = new CommonData();
-            try
-            {
+            //CommonData objcd = new CommonData();
+            //try
+            //{
 
-                objcd.InsertLog(0, "Home Page", "Before BBB Client");
-                objcd.InsertLog(0, "BBBConfig", JsonConvert.SerializeObject(MvcApplication.BigBlueButtonAPISettings));
-                // this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
-                objcd.InsertLog(0, "Home Page", "After BBB Client");
-            }
-            catch (Exception ex)
-            {
-                DateTime dt = DateTime.Now;
-                string Data = "";
-                objcd.InsertLog(0, "Home Page Error", ex.Message);
-            }
+            //    objcd.InsertLog(0, "Home Page", "Before BBB Client");
+            //    objcd.InsertLog(0, "BBBConfig", JsonConvert.SerializeObject(MvcApplication.BigBlueButtonAPISettings));
+            //    // this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+            //    objcd.InsertLog(0, "Home Page", "After BBB Client");
+            //}
+            //catch (Exception ex)
+            //{
+            //    DateTime dt = DateTime.Now;
+            //    string Data = "";
+            //    objcd.InsertLog(0, "Home Page Error", ex.Message);
+            //}
         }
         // GET: Home
         public ActionResult Index()
