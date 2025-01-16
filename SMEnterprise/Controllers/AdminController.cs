@@ -2390,8 +2390,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult NewsManagement()
         {
-		
-			IEnumerable<NewsModel> objModel = objAdminData.GetNews();
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            IEnumerable<NewsModel> objModel = objAdminData.GetNews(SBranchID);
             return View(objModel);
         }
         [PermissionFilter]
@@ -2421,7 +2421,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult Gallery()
         {
-            IEnumerable<GalleryModel> objModel = objAdminData.GetGallery();
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            IEnumerable<GalleryModel> objModel = objAdminData.GetGallery(SBranchID);
             return View(objModel);
         }
         [PermissionFilter]
