@@ -1158,7 +1158,32 @@
                 <h4 class="modal-title">Update Transport Details</h4>
             </div>
             <div class="modal-body">
+                <div class="loader-container">
+                    <div class="loader"></div>
+                </div>
+                <div class="container"></div>
+            </div>
+            @*<div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>*@
+        </div>
 
+    </div>
+</div>
+<div id="mdlEditSession" class="modal fade bs-example-modal-lg" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Update Student Session Details</h4>
+            </div>
+            <div class="modal-body">
+                <div class="loader-container">
+                    <div class="loader"></div>
+                </div>
+                <div class="container"></div>
             </div>
             @*<div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -1181,748 +1206,773 @@
     <script src="@Url.Content("~/js/select2.full.min.js")"></script>
     <script>
 
-    function DeleteTransportChange(sender)
-    {
-    if(confirm("Do you Really want to remove this entry, this might result in Fee Mismatch...." ))
-    {
-    $(sender).closest('form').submit();
-    }
-    }
-    function OpenTransportEdit(StudentID, THChangeID) {
+    function DeleteTransportChange(sender) {
+     if (confirm("Do you Really want to remove this entry, this might result in Fee Mismatch....")) {
+         $(sender).closest('form').submit();
+     }
+ }
 
-    $('.se-pre-con').css('display', '');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/EditTransportDetails/" + StudentID + "/" + THChangeID,
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    $('#mdlEditTransport').find('.modal-body').html(html);
-    $('#mdlEditTransport').modal('toggle');
-    $('.se-pre-con').css('display', 'none');
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    function OptionalSubjectClicked(sender) {
-    if ($(sender).hasClass('bg-green')) {
-    $(sender).removeClass('bg-green');
-    $(sender).attr('title', 'This subject is not opted');
-    $(sender).addClass('bg-red');
-    $(sender).find('#hdnOpType').val(0);
-    }
-    else {
-    $(sender).attr('title', 'Student Opted for this subject');
-    $(sender).addClass('bg-green');
-    $(sender).removeClass('bg-red');
-    $(sender).find('#hdnOpType').val(1);
-    }
-    }
+ function OpenTransportEdit(StudentID, THChangeID) {
 
-    function StudentCustomFeeSessionChanged(sender) {
+     $('#mdlEditTransport').modal('toggle');
+     $('#mdlEditTransport').find('.modal-body').find(".loader-container").css('display', '');
+     $('#mdlEditTransport').find('.modal-body').find(".container").html('');
+     $('.se-pre-con').css('display', '');
+     $.ajax({
+         type: "POST",
+         url: "/Account/EditTransportDetails/" + StudentID + "/" + THChangeID,
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function (html) {
+             $('#mdlEditTransport').find('.modal-body').find(".loader-container").css('display', 'none');
+             $('#mdlEditTransport').find('.modal-body').find(".container").html(html);
+             //$('#mdlEditTransport').modal('toggle');
+             $('.se-pre-con').css('display', 'none');
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
 
-    $('.se-pre-con').css('display', '');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/StudentSessionCustomFeeDetails/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    $('#frmStudentCustomFees').html(html);
-    $('.se-pre-con').css('display', 'none');
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    function SessionSectionChanged(sender) {
-    $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Loading Optional Subjects....</label>')
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetSectionOptionalSubjects/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (data) {
-    var OSubject = '';
-    for (var i = 0; i < data.length; i++) {
-    OSubject = OSubject + '<label class="badge bg-red OptedSubjects" onclick="OptionalSubjectClicked(this);" title="This subject is not opted">' +
-    '<input type="hidden" id="hdnSSOSID" name="SubjectsOpted[' + i + '].Extra1" value="0">' +
-    '<input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[' + i + '].ID" value="' + data[i].ID + '">' +
-    ' <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[' + i + '].Name" value="0">' +
-    '<input type="hidden" id="hdnOpType" name="SubjectsOpted[' + i + '].Extra2" value="0">' +
-    data[i].Name +
-    '</label>';
-    }
-    $(sender).closest('.x_content').find('#divOptionalSubjects').html(OSubject);
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
+ function OptionalSubjectClicked(sender) {
+     if ($(sender).hasClass('bg-green')) {
+         $(sender).removeClass('bg-green');
+         $(sender).attr('title', 'This subject is not opted');
+         $(sender).addClass('bg-red');
+         $(sender).find('#hdnOpType').val(0);
+     } else {
+         $(sender).attr('title', 'Student Opted for this subject');
+         $(sender).addClass('bg-green');
+         $(sender).removeClass('bg-red');
+         $(sender).find('#hdnOpType').val(1);
+     }
+ }
 
-    function CustomFeeStatusChanged(sender) {
-    var curStatus = $(sender).closest('label').find('#hdnCustomFeeApplicable').val();
-    $(sender).closest('label').find('#hdnCustomFeeApplicable').val(curStatus == '0' ? '1' : '0');
+ function StudentCustomFeeSessionChanged(sender) {
 
-    }
-    function HostalCheckChanged(sender) {
-    $('#divHostalChangedDate').css('display', '');
-    }
-    function TransportCheckChanged(sender, StopID) {
-    $('#hdnTStopID').val(StopID);
-    $('#divTransportChangedDate').css('display', '');
-    }
-    function TransportStatusChanged(sender) {
-    var curStatus = $(sender).closest('label').find('#hdnTransportApplicable').val();
-    if (curStatus == 1) {
-    $('#dvEndDate').css('display', '');
-    }
-    else {
-    $('#dvEndDate').css('display', 'none');
-    }
-    $(sender).closest('label').find('#hdnTransportApplicable').val(curStatus == '0' ? '1' : '0');
+     $('.se-pre-con').css('display', '');
+     $.ajax({
+         type: "POST",
+         url: "/Account/StudentSessionCustomFeeDetails/" + $(sender).val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(html) {
+             $('#frmStudentCustomFees').html(html);
+             $('.se-pre-con').css('display', 'none');
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
 
-    $('#divTransportChangedDate').css('display', '');
-    }
-    function StatusChanged(sender) {
-    var curStatus = $(sender).closest('label').find('#hdnSessionStatus').val();
-    if (curStatus == 1) {
-    $('#dvSessionStatus').css('display', '');
-    }
-    else {
-    $('#dvSessionStatus').css('display', 'none');
-    }
-    $(sender).closest('label').find('#hdnSessionStatus').val(curStatus == '0' ? '1' : '0');
+ function SessionSectionChanged(sender) {
+     $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Loading Optional Subjects....</label>')
+     $.ajax({
+         type: "POST",
+         url: "/Account/GetSectionOptionalSubjects/" + $(sender).val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(data) {
+             var OSubject = '';
+             for (var i = 0; i < data.length; i++) {
+                 OSubject = OSubject + '<label class="badge bg-red OptedSubjects" onclick="OptionalSubjectClicked(this);" title="This subject is not opted">' +
+                     '<input type="hidden" id="hdnSSOSID" name="SubjectsOpted[' + i + '].Extra1" value="0">' +
+                     '<input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[' + i + '].ID" value="' + data[i].ID + '">' +
+                     ' <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[' + i + '].Name" value="0">' +
+                     '<input type="hidden" id="hdnOpType" name="SubjectsOpted[' + i + '].Extra2" value="0">' +
+                     data[i].Name +
+                     '</label>';
+             }
+             $(sender).closest('.x_content').find('#divOptionalSubjects').html(OSubject);
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
 
+ function CustomFeeStatusChanged(sender) {
+     var curStatus = $(sender).closest('label').find('#hdnCustomFeeApplicable').val();
+     $(sender).closest('label').find('#hdnCustomFeeApplicable').val(curStatus == '0' ? '1' : '0');
 
-    }
-    function HostalStatusChanged(sender) {
-    var curStatus = $(sender).closest('label').find('#hdnHostelApplicable').val();
-    $(sender).closest('label').find('#hdnHostelApplicable').val(curStatus == '0' ? '1' : '0');
+ }
 
-    $('#divHostalChangedDate').css('display', '');
-    }
-    function CheckStudentDetails() {
-    var Name = $('#txtName').val();
-    Name = Name.replace(" ", "").replace(".", "");
-    if (Name.length < 2) {
-    ShowNotification('Student Name', 'Student Name must Contain atleast 2 characters ("." and Space not Counted)', 'error');
-    return false;
-    }
-    else {
-    return true;
-    }
-    }
-    function CheckParentForm() {
-    var FathName = $('#txtPFatherName').val();
-    FathName = FathName.replace(" ", "").replace(".", "");
-    if (FathName.length < 4) {
-    ShowNotification('Father Name', 'Father Name must Contain atleast 4 characters ("." and Space not Counted)', 'error');
-    return false;
-    }
-    else {
-    return true;
-    }
-    }
-    var basePath = '@Url.Content("~/Images")';
-    $(function () {
+ function HostalCheckChanged(sender) {
+     $('#divHostalChangedDate').css('display', '');
+ }
+
+ function TransportCheckChanged(sender, StopID) {
+     $('#hdnTStopID').val(StopID);
+     $('#divTransportChangedDate').css('display', '');
+ }
+
+ function TransportStatusChanged(sender) {
+     var curStatus = $(sender).closest('label').find('#hdnTransportApplicable').val();
+     if (curStatus == 1) {
+         $('#dvEndDate').css('display', '');
+     } else {
+         $('#dvEndDate').css('display', 'none');
+     }
+     $(sender).closest('label').find('#hdnTransportApplicable').val(curStatus == '0' ? '1' : '0');
+
+     $('#divTransportChangedDate').css('display', '');
+ }
+
+ function StatusChanged(sender) {
+     var curStatus = $(sender).closest('label').find('#hdnSessionStatus').val();
+     if (curStatus == 1) {
+         $('#dvSessionStatus').css('display', '');
+     } else {
+         $('#dvSessionStatus').css('display', 'none');
+     }
+     $(sender).closest('label').find('#hdnSessionStatus').val(curStatus == '0' ? '1' : '0');
 
 
-    //$('.icheckRadio').on('ifChanged', function (event) {
-    //    if ($(this).is(":checked")) {
-    //        $(this).closest('form').find('#hdnTransportStopID').val($(this).attr('value'));
-    //    }
-    //});
-    //$('.icheckRadioH').on('ifChanged', function (event) {
-    //    if ($(this).is(":checked")) {
-    //        $(this).closest('form').find('#hdnHostelRoomID').val($(this).attr('value'));
-    //    }
-    //});
-    $('.dateinput').daterangepicker({
-    singleDatePicker: true,
-    calender_style: "picker_1"
-    }, function (start, end, label) {
-    console.log(start.toISOString(), end.toISOString(), label);
-    });
-    $("#ddlCadd_CountryCode").select2({
-    placeholder: "Select a Country",
-    allowClear: true
-    });
-    $("#ddlCadd_StateCode").select2({
-    placeholder: "Select a State",
-    allowClear: true
-    });
-    $("#ddlCadd_DistrictCode").select2({
-    placeholder: "Select a City",
-    allowClear: true
-    });
-    $("#ddlCadd_AreaCode").select2({
-    placeholder: "Select a Area",
-    allowClear: true
-    });
-    $("#ddlCadd_CountryCode").closest('.input-group').find('.select2-container').css('width', '100%');
-    $("#ddlCadd_StateCode").closest('.input-group').find('.select2-container').css('width', '100%');
-    $("#ddlCadd_DistrictCode").closest('.input-group').find('.select2-container').css('width', '100%');
-    $("#ddlCadd_AreaCode").closest('.input-group').find('.select2-container').css('width', '100%');
-    });
+ }
 
-    function ImageChanged(fileBox, Type) {
+ function HostalStatusChanged(sender) {
+     var curStatus = $(sender).closest('label').find('#hdnHostelApplicable').val();
+     $(sender).closest('label').find('#hdnHostelApplicable').val(curStatus == '0' ? '1' : '0');
 
-    if (fileBox.files && fileBox.files[0]) {
-    MainImageName = fileBox.files[0].name;
-    if (fileBox.files[0].size / 1024 < 5000) {
+     $('#divHostalChangedDate').css('display', '');
+ }
 
-    var reader = new FileReader();
-    reader.onload = function (e) {
-    if (Type == 'student') {
-    $('#imgStudentImage').attr('src', e.target.result);
-    }
-    if (Type == 'father') {
-    $('#imgFatherImage').attr('src', e.target.result);
-    }
-    if (Type == 'mother') {
-    $('#imgMotherImage').attr('src', e.target.result);
-    }
-    if (Type == 'birth') {
-    $('#imgBirthCertificate').attr('src', e.target.result);
-    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-    }
-    if (Type == 'address') {
-    $('#imgAddressProof').attr('src', e.target.result);
-    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-    }
-    if (Type == 'transfer') {
-    $('#imgTransferCertificate').attr('src', e.target.result);
-    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-    }
-    if (Type == 'category') {
-    $('#imgCategoryCertificate').attr('src', e.target.result);
-    $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
-    }
-    }
-    reader.readAsDataURL(fileBox.files[0]);
-    }
-    else {
-    ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
-    clearFileInput(fileBox);
-    }
-    }
-    }
-    function clearFileInput(ctrl) {
-    try {
-    ctrl.value = null;
-    } catch (ex) { }
-    if (ctrl.value) {
-    ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
-    }
-    }
+ function CheckStudentDetails() {
+     var Name = $('#txtName').val();
+     Name = Name.replace(" ", "").replace(".", "");
+     if (Name.length < 2) {
+         ShowNotification('Student Name', 'Student Name must Contain atleast 2 characters ("." and Space not Counted)', 'error');
+         return false;
+     } else {
+         return true;
+     }
+ }
 
-    function CheckParantDetails() {
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetParentDetailsOnParentID/" + $('#txtParentID').val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (data) {
-    $('#txtParentID').val(data.ParentSID);
-    $('#txtParentID').css('background-color', 'aliceblue');
-
-    $('#hdnParentID').val(data.ParentID);
-    $('#imgFatherImage').attr('src', basePath + '/ParentImage/Father/' + data.ParentID + '_1_' + data.FatherImage);
-    $('#hdnFatherImage').val(data.FatherImage);
-    $('#txtPFatherName').val(data.FatherName);
-    $('#ddlPFatherOccupation').val(data.FatherOccupationID);
-    $('#txtPFatherMobile').val(data.FatherMobileNo);
-    $('#txtPFatherEmailID').val(data.FatherEmailID);
-    $('#ddlPFatherBloodGroup').val(data.FatherBloodGroup);
-    $('#ddlPFatherEducation').val(data.FatherEducationID);
-    $('#ddlPFatherAadhaar').val(data.FatherAadhaar);
-    $('#txtPLandLineNumber').val(data.HomeLandLineNo);
-
-    $('#imgMotherImage').attr('src', basePath + '/ParentImage/Mother/' + data.ParentID + '_2_' + data.MotherImage);
-    $('#hdnMotherImage').val(data.MotherImage);
-    $('#txtPMotherName').val(data.MotherName);
-    $('#ddlPMotherOccupation').val(data.MotherOccupationID);
-    $('#txtPMotherMobile').val(data.MotherMobileNo);
-    $('#txtPMotherEmailID').val(data.MotherEmailID);
-    $('#ddlPMotherBloodGroup').val(data.MotherBloodGroup);
-    $('#ddlPMotherEducation').val(data.MotherEducationID);
-    $('#ddlPMotherAadhaar').val(data.MotherAadhaar);
+ function CheckParentForm() {
+     var FathName = $('#txtPFatherName').val();
+     FathName = FathName.replace(" ", "").replace(".", "");
+     if (FathName.length < 4) {
+         ShowNotification('Father Name', 'Father Name must Contain atleast 4 characters ("." and Space not Counted)', 'error');
+         return false;
+     } else {
+         return true;
+     }
+ }
+ var basePath = '@Url.Content("~/Images")';
+ $(function() {
 
 
-    $('#txtPadd_HouseNo').val(data.Padd_HouseNo);
-    $('#txtPadd_Street').val(data.Padd_Street);
-    $('#txtPadd_Area').val(data.Padd_Area);
-    $('#txtPadd_Sector').val(data.Padd_Sector);
-    $('#txtPadd_PinCode').val(data.Padd_PinCode);
-    $('#txtPadd_District').val(data.Padd_District);
-    $('#txtPadd_State').val(data.Padd_State);
-    $('#txtPadd_Country').val(data.Padd_Country);
-    $('#txtPAccessCardNo').val(data.AccessCardNo);
+     //$('.icheckRadio').on('ifChanged', function (event) {
+     //    if ($(this).is(":checked")) {
+     //        $(this).closest('form').find('#hdnTransportStopID').val($(this).attr('value'));
+     //    }
+     //});
+     //$('.icheckRadioH').on('ifChanged', function (event) {
+     //    if ($(this).is(":checked")) {
+     //        $(this).closest('form').find('#hdnHostelRoomID').val($(this).attr('value'));
+     //    }
+     //});
+     $('.dateinput').daterangepicker({
+         singleDatePicker: true,
+         calender_style: "picker_1"
+     }, function(start, end, label) {
+         console.log(start.toISOString(), end.toISOString(), label);
+     });
+     $("#ddlCadd_CountryCode").select2({
+         placeholder: "Select a Country",
+         allowClear: true
+     });
+     $("#ddlCadd_StateCode").select2({
+         placeholder: "Select a State",
+         allowClear: true
+     });
+     $("#ddlCadd_DistrictCode").select2({
+         placeholder: "Select a City",
+         allowClear: true
+     });
+     $("#ddlCadd_AreaCode").select2({
+         placeholder: "Select a Area",
+         allowClear: true
+     });
+     $("#ddlCadd_CountryCode").closest('.input-group').find('.select2-container').css('width', '100%');
+     $("#ddlCadd_StateCode").closest('.input-group').find('.select2-container').css('width', '100%');
+     $("#ddlCadd_DistrictCode").closest('.input-group').find('.select2-container').css('width', '100%');
+     $("#ddlCadd_AreaCode").closest('.input-group').find('.select2-container').css('width', '100%');
+ });
 
-    },
-    error: function (e) {
-    ShowNotification('Not Found', 'Parent Not Found, Please check ParentID Again!!!!', 'error');
+ function ImageChanged(fileBox, Type) {
 
-    $('#txtParentID').css('background-color', 'antiquewhite');
+     if (fileBox.files && fileBox.files[0]) {
+         MainImageName = fileBox.files[0].name;
+         if (fileBox.files[0].size / 1024 < 5000) {
 
-    $('#hdnParentID').val(0);
-    $('#imgFatherImage').attr('src', '');
-    $('#hdnFatherImage').val('');
-    $('#txtPFatherName').val('');
-    $('#ddlPFatherOccupation').val(0);
-    $('#txtPFatherMobile').val('');
-    $('#txtPFatherEmailID').val('');
-    $('#ddlPFatherBloodGroup').val('NA');
-    $('#ddlPFatherEducation').val(0);
-    $('#txtPLandLineNumber').val('');
+             var reader = new FileReader();
+             reader.onload = function(e) {
+                 if (Type == 'student') {
+                     $('#imgStudentImage').attr('src', e.target.result);
+                 }
+                 if (Type == 'father') {
+                     $('#imgFatherImage').attr('src', e.target.result);
+                 }
+                 if (Type == 'mother') {
+                     $('#imgMotherImage').attr('src', e.target.result);
+                 }
+                 if (Type == 'birth') {
+                     $('#imgBirthCertificate').attr('src', e.target.result);
+                     $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                 }
+                 if (Type == 'address') {
+                     $('#imgAddressProof').attr('src', e.target.result);
+                     $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                 }
+                 if (Type == 'transfer') {
+                     $('#imgTransferCertificate').attr('src', e.target.result);
+                     $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                 }
+                 if (Type == 'category') {
+                     $('#imgCategoryCertificate').attr('src', e.target.result);
+                     $(fileBox).closest('.col-md-10').find('.bootstrap-filestyle').find('input').val(fileBox.files[0].name);
+                 }
+             }
+             reader.readAsDataURL(fileBox.files[0]);
+         } else {
+             ShowNotification('Large Image', 'Kindly Upload Image of Size less the 5MB', 'error');
+             clearFileInput(fileBox);
+         }
+     }
+ }
 
-    $('#imgMotherImage').attr('src', '');
-    $('#hdnMotherImage').val('');
-    $('#txtPMotherName').val('');
-    $('#ddlPMotherOccupation').val(0);
-    $('#txtPMotherMobile').val('');
-    $('#txtPMotherEmailID').val('');
-    $('#ddlPMotherBloodGroup').val('NA');
-    $('#ddlPMotherEducation').val(0);
-    $('#txtPadd_HouseNo').val('');
-    $('#txtPadd_Street').val('');
-    $('#txtPadd_Area').val('');
-    $('#txtPadd_Sector').val('');
-    $('#txtPadd_PinCode').val('');
-    $('#txtPadd_District').val('');
-    $('#txtPadd_State').val('');
-    $('#txtPadd_Country').val('');
-    }
-    });
-    }
-    function AddLocationCancel() {
-    AddLocation.remove();
-    }
-    //For checking details filled during Session save
-    function CheckSessionEditForm(sender) {
-    if ($('#ddlSessionEditClass').val() == 0) {
-    ShowNotification('Class', 'Please Select Class...','info');
-    return false;
-    }
-    if ($('#ddlSections').val() == 0) {
-    ShowNotification('Section', 'Please Select Section...','info');
-    return false;
-    }
-    else {
-    return true;
-    }
-    }
-    function CancelSessionEdit() {
-    EditSessionForm.remove();
-    }
-    function SaveLocation(sender) {
-    var Type = $(sender).closest('#frmAddLocation').find('#hdnSenderType').val();
-    var Value = $(sender).closest('#frmAddLocation').find('#txtLocationName').val();
-    var MasterID = 0;
-    var ctrID = '';
-    if (Type == 1) {
-    ctrID = '#ddlCadd_CountryCode';
+ function clearFileInput(ctrl) {
+     try {
+         ctrl.value = null;
+     } catch (ex) {}
+     if (ctrl.value) {
+         ctrl.parentNode.replaceChild(ctrl.cloneNode(true), ctrl);
+     }
+ }
 
-    }
-    else if (Type == 2) {
-    ctrID = '#ddlCadd_StateCode';
-    MasterID = $('#ddlCadd_CountryCode').val();
-    }
-    else if (Type == 3) {
-    ctrID = '#ddlCadd_DistrictCode';
-    MasterID = $('#ddlCadd_StateCode').val();
+ function CheckParantDetails() {
+     $.ajax({
+         type: "POST",
+         url: "/Account/GetParentDetailsOnParentID/" + $('#txtParentID').val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(data) {
+             $('#txtParentID').val(data.ParentSID);
+             $('#txtParentID').css('background-color', 'aliceblue');
 
-    }
-    else if (Type == 4) {
-    ctrID = '#ddlCadd_AreaCode';
-    MasterID = $('#ddlCadd_DistrictCode').val();
+             $('#hdnParentID').val(data.ParentID);
+             $('#imgFatherImage').attr('src', basePath + '/ParentImage/Father/' + data.ParentID + '_1_' + data.FatherImage);
+             $('#hdnFatherImage').val(data.FatherImage);
+             $('#txtPFatherName').val(data.FatherName);
+             $('#ddlPFatherOccupation').val(data.FatherOccupationID);
+             $('#txtPFatherMobile').val(data.FatherMobileNo);
+             $('#txtPFatherEmailID').val(data.FatherEmailID);
+             $('#ddlPFatherBloodGroup').val(data.FatherBloodGroup);
+             $('#ddlPFatherEducation').val(data.FatherEducationID);
+             $('#ddlPFatherAadhaar').val(data.FatherAadhaar);
+             $('#txtPLandLineNumber').val(data.HomeLandLineNo);
 
-    }
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/AddLocation/" + MasterID + "/" + Type + "/" + Value,
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
+             $('#imgMotherImage').attr('src', basePath + '/ParentImage/Mother/' + data.ParentID + '_2_' + data.MotherImage);
+             $('#hdnMotherImage').val(data.MotherImage);
+             $('#txtPMotherName').val(data.MotherName);
+             $('#ddlPMotherOccupation').val(data.MotherOccupationID);
+             $('#txtPMotherMobile').val(data.MotherMobileNo);
+             $('#txtPMotherEmailID').val(data.MotherEmailID);
+             $('#ddlPMotherBloodGroup').val(data.MotherBloodGroup);
+             $('#ddlPMotherEducation').val(data.MotherEducationID);
+             $('#ddlPMotherAadhaar').val(data.MotherAadhaar);
 
-    $(ctrID).html(html);
-    $(ctrID).append('<option value="-1">Add New</option>');
-    $(ctrID).select2('val', '0');
 
-    AddLocation.remove();
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
+             $('#txtPadd_HouseNo').val(data.Padd_HouseNo);
+             $('#txtPadd_Street').val(data.Padd_Street);
+             $('#txtPadd_Area').val(data.Padd_Area);
+             $('#txtPadd_Sector').val(data.Padd_Sector);
+             $('#txtPadd_PinCode').val(data.Padd_PinCode);
+             $('#txtPadd_District').val(data.Padd_District);
+             $('#txtPadd_State').val(data.Padd_State);
+             $('#txtPadd_Country').val(data.Padd_Country);
+             $('#txtPAccessCardNo').val(data.AccessCardNo);
 
-    }
-    var AddLocation;
-    function CountryChanged(sender, tab) {
-    if ($(sender).val() == "-1" && tab == 0) {
-    $('#frmAddLocation').find('#hdnSenderType').val(1);
-    $('#frmAddLocation').find('#ssType').text('Country');
-    $('#frmAddLocation').find('#txtLocationName').val('');
-    AddLocation = new PNotify({
-    text: $('#form_notice').html(),
-    icon: false,
-    width: 'auto',
-    hide: false,
-    addclass: 'dark',
-    styling: 'bootstrap3',
-    buttons: {
-    closer: false,
-    sticker: false
-    },
-    insert_brs: false
-    });
-    }
-    else {
-    if (tab == 0) {
-    $('#ddlCadd_StateCode').html('<option value="-1">Loading....</option>');
-    }
-    else {
-    $('#ddlTStates').html('<option value="-1">Loading....</option>');
-    $('#tbTransportRouteDetails').html('');
-    $('#ddlTCities').html('<option value="-1">--Select--</option>');
+         },
+         error: function(e) {
+             ShowNotification('Not Found', 'Parent Not Found, Please check ParentID Again!!!!', 'error');
 
-    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
-    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-    }
-    $.ajax(
-    {
+             $('#txtParentID').css('background-color', 'antiquewhite');
 
-    type: "POST",
-    url: "/Account/GetCountryStates/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    if (tab == 0) {
-    $('#ddlCadd_StateCode').html(html);
-    $('#ddlCadd_StateCode').append('<option value="-1">Add New</option>');
-    $("#ddlCadd_StateCode").select2('val', '0');
-    }
-    else {
-    $('#ddlTStates').html(html);
-    }
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    }
-    function StateChanged(sender, tab) {
-    if ($(sender).val() == "-1" && tab == 0) {
-    $('#frmAddLocation').find('#hdnSenderType').val(2);
-    $('#frmAddLocation').find('#ssType').text('State');
-    $('#frmAddLocation').find('#txtLocationName').val('');
-    AddLocation = new PNotify({
-    text: $('#form_notice').html(),
-    icon: false,
-    width: 'auto',
-    hide: false,
-    addclass: 'dark',
-    styling: 'bootstrap3',
-    buttons: {
-    closer: false,
-    sticker: false
-    },
-    insert_brs: false
-    });
-    }
-    else {
-    if (tab == 0) {
-    $('#ddlCadd_DistrictCode').html('<option value="-1">Loading....</option>');
-    }
-    else {
-    $('#tbTransportRouteDetails').html('');
-    $('#ddlTCities').html('<option value="-1">Loading....</option>');
+             $('#hdnParentID').val(0);
+             $('#imgFatherImage').attr('src', '');
+             $('#hdnFatherImage').val('');
+             $('#txtPFatherName').val('');
+             $('#ddlPFatherOccupation').val(0);
+             $('#txtPFatherMobile').val('');
+             $('#txtPFatherEmailID').val('');
+             $('#ddlPFatherBloodGroup').val('NA');
+             $('#ddlPFatherEducation').val(0);
+             $('#txtPLandLineNumber').val('');
 
-    $('#ddlTAreas').html('<option value="-1">--Select--</option>');
-    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-    }
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetStateCities/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    if (tab == 0) {
-    $('#ddlCadd_DistrictCode').html(html);
-    $('#ddlCadd_DistrictCode').append('<option value="-1">Add New</option>');
-    $("#ddlCadd_DistrictCode").select2('val', '0');
-    }
-    else {
-    $('#ddlTCities').html(html);
-    }
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    }
-    function CityChanged(sender, tab) {
-    if ($(sender).val() == "-1" && tab == 0) {
-    $('#frmAddLocation').find('#hdnSenderType').val(3);
-    $('#frmAddLocation').find('#ssType').text('City');
-    $('#frmAddLocation').find('#txtLocationName').val('');
-    AddLocation = new PNotify({
-    text: $('#form_notice').html(),
-    icon: false,
-    width: 'auto',
-    hide: false,
-    addclass: 'dark',
-    styling: 'bootstrap3',
-    buttons: {
-    closer: false,
-    sticker: false
-    },
-    insert_brs: false
-    });
-    }
-    else {
-    if (tab == 0) {
-    $('#ddlCadd_AreaCode').html('<option value="-1">Loading....</option>');
-    }
-    else {
-    $('#ddlTStops').html('<option value="-1">Loading....</option>');
-    $('#ddlTAreas').html('<option value="-1">Loading....</option>');
-    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-    }
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetCityAreas/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    if (tab == 0) {
-    $('#ddlCadd_AreaCode').html(html);
-    $('#ddlCadd_AreaCode').append('<option value="-1">Add New</option>');
-    $("#ddlCadd_AreaCode").select2('val', '0');
-    }
-    else {
-    $('#ddlTAreas').html(html);
-    }
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    }
-    function AreaChanged(sender, tab) {
-    if ($(sender).val() == "-1" && tab == 0) {
-    $('#frmAddLocation').find('#hdnSenderType').val(4);
-    $('#frmAddLocation').find('#ssType').text('Area');
-    $('#frmAddLocation').find('#txtLocationName').val('');
-    AddLocation = new PNotify({
-    text: $('#form_notice').html(),
-    icon: false,
-    width: 'auto',
-    hide: false,
-    addclass: 'dark',
-    styling: 'bootstrap3',
-    buttons: {
-    closer: false,
-    sticker: false
-    },
-    insert_brs: false
-    });
-    }
-    else {
-    $('#ddlTStops').html('<option value="-1">Loading....</option>');
-    $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
-    $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetAreaRoutes/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
+             $('#imgMotherImage').attr('src', '');
+             $('#hdnMotherImage').val('');
+             $('#txtPMotherName').val('');
+             $('#ddlPMotherOccupation').val(0);
+             $('#txtPMotherMobile').val('');
+             $('#txtPMotherEmailID').val('');
+             $('#ddlPMotherBloodGroup').val('NA');
+             $('#ddlPMotherEducation').val(0);
+             $('#txtPadd_HouseNo').val('');
+             $('#txtPadd_Street').val('');
+             $('#txtPadd_Area').val('');
+             $('#txtPadd_Sector').val('');
+             $('#txtPadd_PinCode').val('');
+             $('#txtPadd_District').val('');
+             $('#txtPadd_State').val('');
+             $('#txtPadd_Country').val('');
+         }
+     });
+ }
 
-    $('#ddlTRoutes').html(html);
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    }
-    function TransportRouteChanged(sender) {
-    $('#ddlTStops').html('<option value="-1">Loading....</option>');
-    $('#ddlTVehicles').html('<option value="-1">Loading....</option>');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetRouteVehicles/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (data) {
-    $('#divFilledStatus').html('Filled Seats :0  Capacity : 0');
-    $('#ddlTVehicles').html('');
-    $('#ddlTVehicles').append('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
-    for (var i = 0; i < data.length; i++) {
+ function AddLocationCancel() {
+     AddLocation.remove();
+ }
+        //For checking details filled during Session save
+        function CheckSessionEditForm(sender) {
+           
+         if ($('#ddlSessionEditClass').val() == 0) {
+             ShowNotification('Class', 'Please Select Class...', 'info');
+             return false;
+         }
+         if ($('#ddlSections').val() == 0) {
+             ShowNotification('Section', 'Please Select Section...', 'info');
+             return false;
+         } else {
+             var sessionId = $('#mdlEditSession').find('#ddlSchoolSessions').val();
+             var studentSessionUID = $('#mdlEditSession').find('#hdnStudentSessionUID').val();
+             if (studentSessionUID == 0) {
+                 if ($('#divSessionsList').find(".sestr_" + sessionId).length == 0) {
+                     return true;
+                 }
+                 else {
+                     ShowNotification('Session', 'Session already exists for this student, please change session.', 'info');
+                     return false;
+                 }
+             }
+             else {
+                 if ($('#divSessionsList').find(".sestr_" + studentSessionUID + "-" + sessionId).length == 0) {
+                     ShowNotification('Session', 'Session already exists for this student, please change session.', 'info');
+                     return false;
+                 }
+                 else {
+                     return true;
+                 }
+             }
+         }
+ }
 
-    $('#ddlTVehicles').append('<option capacity="' + data[i].Extra2 + '" filled="' + data[i].Extra1 + '" value="' + data[i].ID + '">' + data[i].Name + ' </option>');
-    }
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    function TransportRouteVehicleChanged(sender) {
-    $('#divFilledStatus').html('Filled Seats :' + $("#ddlTVehicles option:selected").attr('filled') + ' Capacity : ' + $("#ddlTVehicles option:selected").attr('capacity') + '');
+ function CancelSessionEdit() {
+     //EditSessionForm.remove();
 
-    $('#ddlTStops').html('<option value="-1">Loading....</option>');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetVehicleRouteStoppages/" + $(sender).val() + "/" + $('#hdnTransportStopID').val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (data) {
-    $('#ddlTStops').html('');
-    var stops = data.Stops;
-    for (var i = 0; i < stops.length; i++) {
-    $('#ddlTStops').append('<option value="' + stops[i].StopID + '" '+(stops[i].StopID==data.StopDetails.StopID?'selected':'')+' >' + stops[i].AreaName +' ('+ stops[i].Time + ') Rs.'+stops[i].Rate + '</option>');
-    }
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    function HostelChanged(sender) {
-    $('#tbdHostelRooms').html('');
-    $('#ddlHFloors').html('<option value="-1">Loading....</option>');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetHostelFloors/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    $('#ddlHFloors').html('');
+     $('#mdlEditSession').modal('toggle');
+ }
 
-    $('#ddlHFloors').html(html);
+ function SaveLocation(sender) {
+     var Type = $(sender).closest('#frmAddLocation').find('#hdnSenderType').val();
+     var Value = $(sender).closest('#frmAddLocation').find('#txtLocationName').val();
+     var MasterID = 0;
+     var ctrID = '';
+     if (Type == 1) {
+         ctrID = '#ddlCadd_CountryCode';
 
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    function HostelFloorChanged(sender) {
-    $('#tbdHostelRooms').html('<tr><td colspan="8">Loading....</td></tr>');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetHostelFloorRooms/" + $('#ddlHHostels').val() + "/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    $('#tbdHostelRooms').html(html);
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    var EditSessionForm;
-    function AddSession(sender) {
-    var StudentID = $(sender).closest('div').find('#hdnStudentID').val();
-    GetEditSession(sender, StudentID);
-    }
-    function EditSession(sender) {
-    var StudentID = $(sender).closest('td').find('#hdnStudentID').val();
-    GetEditSession(sender, StudentID);
-    }
-    function GetEditSession(sender, StudentID) {
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/EditSessionDetails/" + $(sender).attr('id') + "/" + StudentID,
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    EditSessionForm = new PNotify({
-    text: html,
-    icon: false,
-    width: '70%',
-    hide: false,
-    addclass: 'dark',
-    styling: 'bootstrap3',
-    buttons: {
-    closer: false,
-    sticker: false
-    },
-    insert_brs: false
-    });
+     } else if (Type == 2) {
+         ctrID = '#ddlCadd_StateCode';
+         MasterID = $('#ddlCadd_CountryCode').val();
+     } else if (Type == 3) {
+         ctrID = '#ddlCadd_DistrictCode';
+         MasterID = $('#ddlCadd_StateCode').val();
 
-    $('.').css('margin-right', '100px');
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
-    function SchoolSessionChanged(sender) {
-    $('#txtStartDate').val($('#ddlSchoolSessions option:selected').attr('startDate'));
-    $('#txtEndDate').val($('#ddlSchoolSessions option:selected').attr('endDate'));
-    }
-    function SessionClassChanged(sender) {
-    $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>')
+     } else if (Type == 4) {
+         ctrID = '#ddlCadd_AreaCode';
+         MasterID = $('#ddlCadd_DistrictCode').val();
 
-    $('#ddlSections').html('<option value="-1">Loading....</option>');
-    $.ajax(
-    {
-    type: "POST",
-    url: "/Account/GetSectionOnClass/" + $(sender).val(),
-    cache: false,
-    processData: false,
-    contentType: false,
-    success: function (html) {
-    $('#ddlSections').html('');
-    $('#ddlSections').html('<option value="0">--Select--</option>');
-    $('#ddlSections').append(html);
-    },
-    error: function (e) {
-    alert("errorn");
-    }
-    });
-    }
+     }
+     $.ajax({
+         type: "POST",
+         url: "/Account/AddLocation/" + MasterID + "/" + Type + "/" + Value,
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(html) {
+
+             $(ctrID).html(html);
+             $(ctrID).append('<option value="-1">Add New</option>');
+             $(ctrID).select2('val', '0');
+
+             AddLocation.remove();
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+
+ }
+ var AddLocation;
+
+ function CountryChanged(sender, tab) {
+     if ($(sender).val() == "-1" && tab == 0) {
+         $('#frmAddLocation').find('#hdnSenderType').val(1);
+         $('#frmAddLocation').find('#ssType').text('Country');
+         $('#frmAddLocation').find('#txtLocationName').val('');
+         AddLocation = new PNotify({
+             text: $('#form_notice').html(),
+             icon: false,
+             width: 'auto',
+             hide: false,
+             addclass: 'dark',
+             styling: 'bootstrap3',
+             buttons: {
+                 closer: false,
+                 sticker: false
+             },
+             insert_brs: false
+         });
+     } else {
+         if (tab == 0) {
+             $('#ddlCadd_StateCode').html('<option value="-1">Loading....</option>');
+         } else {
+             $('#ddlTStates').html('<option value="-1">Loading....</option>');
+             $('#tbTransportRouteDetails').html('');
+             $('#ddlTCities').html('<option value="-1">--Select--</option>');
+
+             $('#ddlTAreas').html('<option value="-1">--Select--</option>');
+             $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+             $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+         }
+         $.ajax({
+
+             type: "POST",
+             url: "/Account/GetCountryStates/" + $(sender).val(),
+             cache: false,
+             processData: false,
+             contentType: false,
+             success: function(html) {
+                 if (tab == 0) {
+                     $('#ddlCadd_StateCode').html(html);
+                     $('#ddlCadd_StateCode').append('<option value="-1">Add New</option>');
+                     $("#ddlCadd_StateCode").select2('val', '0');
+                 } else {
+                     $('#ddlTStates').html(html);
+                 }
+             },
+             error: function(e) {
+                 alert("errorn");
+             }
+         });
+     }
+ }
+
+ function StateChanged(sender, tab) {
+     if ($(sender).val() == "-1" && tab == 0) {
+         $('#frmAddLocation').find('#hdnSenderType').val(2);
+         $('#frmAddLocation').find('#ssType').text('State');
+         $('#frmAddLocation').find('#txtLocationName').val('');
+         AddLocation = new PNotify({
+             text: $('#form_notice').html(),
+             icon: false,
+             width: 'auto',
+             hide: false,
+             addclass: 'dark',
+             styling: 'bootstrap3',
+             buttons: {
+                 closer: false,
+                 sticker: false
+             },
+             insert_brs: false
+         });
+     } else {
+         if (tab == 0) {
+             $('#ddlCadd_DistrictCode').html('<option value="-1">Loading....</option>');
+         } else {
+             $('#tbTransportRouteDetails').html('');
+             $('#ddlTCities').html('<option value="-1">Loading....</option>');
+
+             $('#ddlTAreas').html('<option value="-1">--Select--</option>');
+             $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+             $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+         }
+         $.ajax({
+             type: "POST",
+             url: "/Account/GetStateCities/" + $(sender).val(),
+             cache: false,
+             processData: false,
+             contentType: false,
+             success: function(html) {
+                 if (tab == 0) {
+                     $('#ddlCadd_DistrictCode').html(html);
+                     $('#ddlCadd_DistrictCode').append('<option value="-1">Add New</option>');
+                     $("#ddlCadd_DistrictCode").select2('val', '0');
+                 } else {
+                     $('#ddlTCities').html(html);
+                 }
+             },
+             error: function(e) {
+                 alert("errorn");
+             }
+         });
+     }
+ }
+
+ function CityChanged(sender, tab) {
+     if ($(sender).val() == "-1" && tab == 0) {
+         $('#frmAddLocation').find('#hdnSenderType').val(3);
+         $('#frmAddLocation').find('#ssType').text('City');
+         $('#frmAddLocation').find('#txtLocationName').val('');
+         AddLocation = new PNotify({
+             text: $('#form_notice').html(),
+             icon: false,
+             width: 'auto',
+             hide: false,
+             addclass: 'dark',
+             styling: 'bootstrap3',
+             buttons: {
+                 closer: false,
+                 sticker: false
+             },
+             insert_brs: false
+         });
+     } else {
+         if (tab == 0) {
+             $('#ddlCadd_AreaCode').html('<option value="-1">Loading....</option>');
+         } else {
+             $('#ddlTStops').html('<option value="-1">Loading....</option>');
+             $('#ddlTAreas').html('<option value="-1">Loading....</option>');
+             $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+             $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+         }
+         $.ajax({
+             type: "POST",
+             url: "/Account/GetCityAreas/" + $(sender).val(),
+             cache: false,
+             processData: false,
+             contentType: false,
+             success: function(html) {
+                 if (tab == 0) {
+                     $('#ddlCadd_AreaCode').html(html);
+                     $('#ddlCadd_AreaCode').append('<option value="-1">Add New</option>');
+                     $("#ddlCadd_AreaCode").select2('val', '0');
+                 } else {
+                     $('#ddlTAreas').html(html);
+                 }
+             },
+             error: function(e) {
+                 alert("errorn");
+             }
+         });
+     }
+ }
+
+ function AreaChanged(sender, tab) {
+     if ($(sender).val() == "-1" && tab == 0) {
+         $('#frmAddLocation').find('#hdnSenderType').val(4);
+         $('#frmAddLocation').find('#ssType').text('Area');
+         $('#frmAddLocation').find('#txtLocationName').val('');
+         AddLocation = new PNotify({
+             text: $('#form_notice').html(),
+             icon: false,
+             width: 'auto',
+             hide: false,
+             addclass: 'dark',
+             styling: 'bootstrap3',
+             buttons: {
+                 closer: false,
+                 sticker: false
+             },
+             insert_brs: false
+         });
+     } else {
+         $('#ddlTStops').html('<option value="-1">Loading....</option>');
+         $('#ddlTRoutes').html('<option value="-1">--Select--</option>');
+         $('#ddlTVehicles').html('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+         $.ajax({
+             type: "POST",
+             url: "/Account/GetAreaRoutes/" + $(sender).val(),
+             cache: false,
+             processData: false,
+             contentType: false,
+             success: function(html) {
+
+                 $('#ddlTRoutes').html(html);
+             },
+             error: function(e) {
+                 alert("errorn");
+             }
+         });
+     }
+ }
+
+ function TransportRouteChanged(sender) {
+     $('#ddlTStops').html('<option value="-1">Loading....</option>');
+     $('#ddlTVehicles').html('<option value="-1">Loading....</option>');
+     $.ajax({
+         type: "POST",
+         url: "/Account/GetRouteVehicles/" + $(sender).val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(data) {
+             $('#divFilledStatus').html('Filled Seats :0  Capacity : 0');
+             $('#ddlTVehicles').html('');
+             $('#ddlTVehicles').append('<option capacity="0" filled="0" value="0" selected="">--Select--</option>');
+             for (var i = 0; i < data.length; i++) {
+
+                 $('#ddlTVehicles').append('<option capacity="' + data[i].Extra2 + '" filled="' + data[i].Extra1 + '" value="' + data[i].ID + '">' + data[i].Name + ' </option>');
+             }
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
+
+ function TransportRouteVehicleChanged(sender) {
+     $('#divFilledStatus').html('Filled Seats :' + $("#ddlTVehicles option:selected").attr('filled') + ' Capacity : ' + $("#ddlTVehicles option:selected").attr('capacity') + '');
+
+     $('#ddlTStops').html('<option value="-1">Loading....</option>');
+     $.ajax({
+         type: "POST",
+         url: "/Account/GetVehicleRouteStoppages/" + $(sender).val() + "/" + $('#hdnTransportStopID').val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(data) {
+             $('#ddlTStops').html('');
+             var stops = data.Stops;
+             for (var i = 0; i < stops.length; i++) {
+                 $('#ddlTStops').append('<option value="' + stops[i].StopID + '" ' + (stops[i].StopID == data.StopDetails.StopID ? 'selected' : '') + ' >' + stops[i].AreaName + ' (' + stops[i].Time + ') Rs.' + stops[i].Rate + '</option>');
+             }
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
+
+ function HostelChanged(sender) {
+     $('#tbdHostelRooms').html('');
+     $('#ddlHFloors').html('<option value="-1">Loading....</option>');
+     $.ajax({
+         type: "POST",
+         url: "/Account/GetHostelFloors/" + $(sender).val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(html) {
+             $('#ddlHFloors').html('');
+
+             $('#ddlHFloors').html(html);
+
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
+
+ function HostelFloorChanged(sender) {
+     $('#tbdHostelRooms').html('<tr><td colspan="8">Loading....</td></tr>');
+     $.ajax({
+         type: "POST",
+         url: "/Account/GetHostelFloorRooms/" + $('#ddlHHostels').val() + "/" + $(sender).val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(html) {
+             $('#tbdHostelRooms').html(html);
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
+ var EditSessionForm;
+
+ function AddSession(sender) {
+     var StudentID = $(sender).closest('div').find('#hdnStudentID').val();
+     GetEditSession(sender, StudentID);
+ }
+
+ function EditSession(sender) {
+     var StudentID = $(sender).closest('td').find('#hdnStudentID').val();
+     GetEditSession(sender, StudentID);
+ }
+
+        function GetEditSession(sender, StudentID) {
+
+            $('#mdlEditSession').modal('toggle');
+            $('#mdlEditSession').find('.modal-body').find(".loader-container").css('display', '');
+            $('#mdlEditSession').find('.modal-body').find(".container").html('');
+     $.ajax({
+         type: "POST",
+         url: "/Account/EditSessionDetails/" + $(sender).attr('id') + "/" + StudentID,
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function (html) {
+
+             $('#mdlEditSession').find('.modal-body').find(".loader-container").css('display', 'none');
+             $('#mdlEditSession').find('.modal-body').find(".container").html(html);
+             //$('#mdlEditTransport').modal('toggle');
+             //$('.se-pre-con').css('display', 'none');
+             //EditSessionForm = new PNotify({
+             //    text: html,
+             //    icon: false,
+             //    width: '70%',
+             //    hide: false,
+             //    addclass: 'dark',
+             //    styling: 'bootstrap3',
+             //    buttons: {
+             //        closer: false,
+             //        sticker: false
+             //    },
+             //    insert_brs: false
+             //});
+
+             //$('.').css('margin-right', '100px');
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
+
+ function SchoolSessionChanged(sender) {
+     $('#txtStartDate').val($('#ddlSchoolSessions option:selected').attr('startDate'));
+     $('#txtEndDate').val($('#ddlSchoolSessions option:selected').attr('endDate'));
+ }
+
+ function SessionClassChanged(sender) {
+     $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>')
+
+     $('#ddlSections').html('<option value="-1">Loading....</option>');
+     $.ajax({
+         type: "POST",
+         url: "/Account/GetSectionOnClass/" + $(sender).val(),
+         cache: false,
+         processData: false,
+         contentType: false,
+         success: function(html) {
+             $('#ddlSections').html('');
+             $('#ddlSections').html('<option value="0">--Select--</option>');
+             $('#ddlSections').append(html);
+         },
+         error: function(e) {
+             alert("errorn");
+         }
+     });
+ }
     </script>
 }
