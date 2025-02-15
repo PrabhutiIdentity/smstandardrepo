@@ -3127,11 +3127,14 @@ namespace SMEnterprise.Repository
         }
         #endregion
         #region News Management
-        public IEnumerable<NewsModel> GetNews()
+        public IEnumerable<NewsModel> GetNews( int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                return con.Query<NewsModel>("sp_GetNewsList", null, null, true, 0, CommandType.StoredProcedure).ToList();
+                var paramater = new DynamicParameters();
+
+                paramater.Add("@SBranchID", SBranchID);
+                return con.Query<NewsModel>("sp_GetNewsList", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
             }
         }
         public int InsertUpdateNews(NewsModel objData)
@@ -3152,11 +3155,14 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_InsertUpdateNews", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
-        public IEnumerable<GalleryModel> GetGallery()
+        public IEnumerable<GalleryModel> GetGallery(int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                return con.Query<GalleryModel>("sp_GetGalleryList", null, null, true, 0, CommandType.StoredProcedure).ToList();
+                var paramater = new DynamicParameters();
+
+                paramater.Add("@SBranchID", SBranchID);
+                return con.Query<GalleryModel>("sp_GetGalleryList", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
             }
         }
         public List<GalleryModel> GetAppGalleryList(int SBranchID)

@@ -44,8 +44,46 @@
 
     </script>
     <style>
-        .nav-md .container.body .col-md-3.left_col{
-            z-index:1;
+    /* Loader Styles */
+    .loader {
+      border: 8px solid #f3f3f3; /* Light grey */
+      border-top: 8px solid #3498db; /* Blue */
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: auto;
+    }
+
+    /* Spin Animation */
+    @("@keyframes") spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Center the loader inside the container */
+    .loader-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100px; /* Adjust height as needed */
+      background-color: #f9f9f9; /* Light background */
+    }
+    </style>
+
+    <style>
+        .pnotify {
+            z-index: 1051 !important; /* Ensure this is higher than the modal z-index */
+        }
+        .ui-pnotify{
+            z-index:9999
+        }
+        .nav-md .container.body .col-md-3.left_col {
+            z-index: 1;
         }
        .no-js #loader { display: none;  }
 .js #loader { display: block; position: absolute; left: 100px; top: 0; }
@@ -123,6 +161,13 @@
 <body class="nav-md">
     <div class="se-pre-con" style="display: none; "></div>
     <div class="container body">
+        @{
+            var Role = SMEnterprise.Models.PermissionManager.GetLoggedInUser().Role;
+            var RoleID = SMEnterprise.Models.PermissionManager.GetLoggedInUser().RoleID;
+            var UserID = SMEnterprise.Models.PermissionManager.GetLoggedInUser().UserID;
+            var SBranchID = SMEnterprise.Models.PermissionManager.GetLoggedInUser().SBranchID;
+        }
+
 
         <div class="main_container">
             <div class="col-md-3 left_col ">
@@ -188,6 +233,18 @@
                                         <li>
                                             <a href="/Account/StudentLeaves">Student Leaves</a>
                                         </li>
+                                        @*
+                                            @if (UserID == 12051 && SBranchID == 10007)
+                                        {
+
+                                        }
+                                        else
+                                        {
+                                            <li>
+                                                <a href="/Account/StudentsFee">Manage Fee</a>
+                                            </li>
+                                        }
+                                            *@
                                         <li>
                                             <a href="/Account/StudentsFee">Manage Fee</a>
                                         </li>
@@ -207,7 +264,7 @@
                                         <li>
                                             <a href="/Account/StudentTcReport">List of Students' TCs</a>
                                         </li>
-                                        
+
                                         <li>
                                             <a href="/Account/BulkUploadInfo">Upload Information</a>
                                         </li>
@@ -399,7 +456,7 @@
 
 
                                         <li>
-                                            <a href="/Account/DemandRecipt">Demand Recipt</a>
+                                            <a href="/Account/DemandRecipt">Demand Receipt</a>
                                         </li>
                                         <li><a href="/Account/MonthlyDueFeeReport">Monthly DueFee Report</a></li>
                                         <li><a href="/Account/ReportDueFee">Due Fee Report1</a></li>
@@ -583,6 +640,7 @@
                 type: Type,
                 addclass: 'dark',
                 styling: 'bootstrap3',
+                z_index: 1060
             });
             notice.get().click(function () {
                 notice.remove();
