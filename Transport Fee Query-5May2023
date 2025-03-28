@@ -22,13 +22,9 @@ SessionID int,
 CreatedDate datetime,
 ModifiedDate datetime
 )
-
-
-
-spn_InsertUpdateTransportRouteStoppages
-
-
 go
+
+
 
   CREATE TYPE [dbo].[ut_TransportFeeDetail] AS TABLE(
 	[ID] [int] NULL,
@@ -43,116 +39,115 @@ go
 	[ModifiedDate] [datetime] NULL
 )
 GO
-
-
-CREATE proc [dbo].[sp_UpdateTransportFee]  
-(  
-@TransportDetails ut_TransportFeeDetail READONLY,  
-@SessionID int, 
-@SBranchID int 
-)  
-AS  
-BEGIN    
- Delete e   
- FROM  TransportFeeMaster e, @TransportDetails d   
- WHERE d.StopID=e.StopID and d.RouteID=e.RouteID and d.CityID=e.CityID and d.AreaID=e.AreaID  and d.SBranchID=@SBranchID and e.SessionID=@SessionID
-  
- INSERT INTO TransportFeeMaster(StopID, RouteID, CityID,AreaID,Amount,SBranchID,SessionID,CreatedDate)  
- SELECT StopID, RouteID, CityID,AreaID,Amount,@SBranchID,@SessionID,CreatedDate  
- FROM @TransportDetails TD  
-END  
-GO
-
-
-CREATE proc [dbo].[sp_GetFeeForTransport]      
+    
+CREATE proc [dbo].[sp_UpdateTransportFee]      
 (      
-@RouteID int,    
-@SBranchID int,      
-@SessionID int=0      
+@TransportDetails ut_TransportFeeDetail READONLY,      
+@SessionID int,     
+@SBranchID int     
 )      
 AS      
-BEGIN      
- if(@RouteID=0)      
- begin      
- select @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID and SessionStatus=1      
-  select @RouteID=min(RouteID) from TransportRoutemaster where isapproved=1 and SBranchID=@SBranchID      
+BEGIN        
+ Delete e       
+ FROM  TransportFeeMaster e, @TransportDetails d       
+ WHERE d.StopID=e.StopID and d.RouteID=e.RouteID and d.CityID=e.CityID and d.AreaID=e.AreaID  and d.SBranchID=@SBranchID and e.SessionID=@SessionID    
       
- end      
-      
- Select TFM.StopID,TFM.RouteID,(Select RouteName from TransportRoutemaster TRM Where TRM.RouteID=TFM.RouteID) as RouteName,    
- TFM.CityID,(Select CityName from CityMaster CM Where CM.CityID=TFM.CityID) as CityName,    
- TFM.AreaID, (Select [AreaName] from AreaMaster AM Where AM.AreaID=TRD.AreaID) as AreaName,    
- Amount,SbranchID,SessionID    
-  from TransportRouteDetails TRD inner join TransportFeeMaster TFM on TRD.Stopid=TFM.StopID     
-where TFM.RouteID=@RouteID  and TFM.SbranchID=@SbranchID and TFM.SessionID=@SessionID    
-   --   where TFM.RouteID=11  and TFM.SbranchID=3 and TFM.SessionID=4    
- order by TRD.SequenceNo       
-    
-  select isnull(@SessionID,0)       
-     
-    
- Select SessionID,SessionName,SessionStatus from SessionMaster where SBranchID=@SBranchID     
- Select RouteID,RouteName from TransportRoutemaster where isapproved=1 and SBranchID=@SBranchID     
- select isnull(@RouteID,0)     
-     
-END   
-go
-
-
-
-
-  alterproc [dbo].[spn_GetVehicleRouteStoppages]    
-(          
- @VehicleRouteID int          
-)          
-AS          
-BEGIN     
-declare @SessionID int  
-declare @SBranchID int  
-  
- Select @SBranchID=SBranchID from Transport_Vehicle_Route where  VehicleRouteID=@VehicleRouteID     
-  
- Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID     
- Select StopID,VehicleRouteID,TRD.AreaID,  
-TRD.Rate as Rate1,  
-(select isnull(Amount,0) from TransportFeeMaster TFM  where TFM.RouteID=TRD.RouteID and TFM.StopID=TRD.StopID   and  TFM.SessionID=@SessionID and TFM.Sbranchid=@SBranchID )  as Rate,   
- AM.AreaName,AM.Latitude,AM.Longitude,        
- (case when SequenceNo=4 then 1 else case when SequenceNo<4 then  0 else 2 end end) as IsDone,          
- cast(DATEADD(MINUTE,  TVR.DelayFromRouteTime, [time]  ) as nvarchar(8))as [Time],HaltDuration,HaltDurationR,SequenceNo,SequenceNoR          
- ,cast(DATEADD(MINUTE,  TVR.DelayFromRouteTime, [timeR]  ) as nvarchar(8)) as [TimeR],          
- HaltDurationR,SequenceNoR from TransportRouteDetails TRD left outer join Transport_Vehicle_Route TVR on TVR.RouteID=TRD.RouteID          
- left outer join AreaMaster AM on AM.AreaID=TRD.AreaID          
- where tvr.VehicleRouteID=@VehicleRouteID           
- order by SequenceNo          
+ INSERT INTO TransportFeeMaster(StopID, RouteID, CityID,AreaID,Amount,SBranchID,SessionID,CreatedDate)      
+ SELECT StopID, RouteID, CityID,AreaID,Amount,@SBranchID,@SessionID,CreatedDate      
+ FROM @TransportDetails TD      
 END      
-  
 
 go
 
-alter proc [dbo].[spn_GetTransportRouteStoppages]    
-(    
-@RouteID int    
-)    
-AS    
-BEGIN    
-declare @SessionID int  
-declare @SBranchID int  
-  
- Select @SBranchID=SBranchID from Transport_Vehicle_Route where  RouteID=@RouteID     
-  
- Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID     
- Select StopID,RouteID,CountryID,StateID,CityID,AreaID,Rate as Rate1,   
- (select isnull(Amount,0) from TransportFeeMaster TFM  where TFM.RouteID=TRD.RouteID and TFM.AreaID=TRD.AreaID and  TFM.SessionID=@SessionID and TFM.Sbranchid=@SBranchID )  as Rate,   
-  
- (Select [AreaName] from AreaMaster AM Where AM.AreaID=TRD.AreaID) as AreaName,    
- cast([Time] as nvarchar(8)) as [Time],HaltDuration,SequenceNo,SequenceNoR,cast([TimeR] as nvarchar(8)) as TimeR,HaltDurationR    
-  from TransportRouteDetails TRD where RouteID=@RouteID    
- order by SequenceNo    
-END    
+CREATE proc [dbo].[sp_GetFeeForTransport]        
+(        
+@RouteID int,      
+@SBranchID int,        
+@SessionID int=0        
+)        
+AS        
+BEGIN        
+ if(@RouteID=0)        
+ begin        
+ select @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID and SessionStatus=1        
+  select @RouteID=min(RouteID) from TransportRoutemaster where isapproved=1 and SBranchID=@SBranchID        
+        
+ end        
+        
+ Select TFM.StopID,TFM.RouteID,(Select RouteName from TransportRoutemaster TRM Where TRM.RouteID=TFM.RouteID) as RouteName,      
+ TFM.CityID,(Select CityName from CityMaster CM Where CM.CityID=TFM.CityID) as CityName,      
+ TFM.AreaID, (Select [AreaName] from AreaMaster AM Where AM.AreaID=TRD.AreaID) as AreaName,      
+ Amount,SbranchID,SessionID      
+  from TransportRouteDetails TRD inner join TransportFeeMaster TFM on TRD.Stopid=TFM.StopID       
+where TFM.RouteID=@RouteID  and TFM.SbranchID=@SbranchID and TFM.SessionID=@SessionID      
+   --   where TFM.RouteID=11  and TFM.SbranchID=3 and TFM.SessionID=4      
+ order by TRD.SequenceNo         
+      
+  select isnull(@SessionID,0)         
+       
+      
+ Select SessionID,SessionName,SessionStatus from SessionMaster where SBranchID=@SBranchID       
+ Select RouteID,RouteName from TransportRoutemaster where isapproved=1 and SBranchID=@SBranchID       
+ select isnull(@RouteID,0)       
+       
+END     
+
 go
 
+ alter proc [dbo].[spn_GetVehicleRouteStoppages]      
+(            
+ @VehicleRouteID int            
+)            
+AS            
+BEGIN       
+declare @SessionID int    
+declare @SBranchID int    
+    
+ Select @SBranchID=SBranchID from Transport_Vehicle_Route where  VehicleRouteID=@VehicleRouteID       
+    
+ Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID       
+ Select StopID,VehicleRouteID,TRD.AreaID,    
+TRD.Rate as Rate1,    
+(select isnull(Amount,0) from TransportFeeMaster TFM  where TFM.RouteID=TRD.RouteID and TFM.StopID=TRD.StopID   and  TFM.SessionID=@SessionID and TFM.Sbranchid=@SBranchID )  as Rate,     
+ AM.AreaName,AM.Latitude,AM.Longitude,          
+ (case when SequenceNo=4 then 1 else case when SequenceNo<4 then  0 else 2 end end) as IsDone,            
+ cast(DATEADD(MINUTE,  TVR.DelayFromRouteTime, [time]  ) as nvarchar(8))as [Time],HaltDuration,HaltDurationR,SequenceNo,SequenceNoR            
+ ,cast(DATEADD(MINUTE,  TVR.DelayFromRouteTime, [timeR]  ) as nvarchar(8)) as [TimeR],            
+ HaltDurationR,SequenceNoR from TransportRouteDetails TRD left outer join Transport_Vehicle_Route TVR on TVR.RouteID=TRD.RouteID            
+ left outer join AreaMaster AM on AM.AreaID=TRD.AreaID            
+ where tvr.VehicleRouteID=@VehicleRouteID             
+ order by SequenceNo            
+END        
+    
+	go
 
-alter Function [dbo].[fn_GetStudentTransportFeeAmount] --4,2019,785,0,0,1,0,19,1,5,2,50,50,4          
+	alter proc [dbo].[spn_GetTransportRouteStoppages]        
+(        
+@RouteID int        
+)        
+AS        
+BEGIN        
+declare @SessionID int      
+declare @SBranchID int      
+      
+ Select @SBranchID=SBranchID from Transport_Vehicle_Route where  RouteID=@RouteID         
+      
+ Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID         
+ --print @SBranchID  
+ --print @SessionID  
+ Select StopID,RouteID,CountryID,StateID,CityID,AreaID,Rate as Rate1,       
+ (select top 1 isnull(Amount,0) from TransportFeeMaster TFM  where TFM.RouteID=TRD.RouteID and TFM.AreaID=TRD.AreaID and  TFM.SessionID=@SessionID and TFM.Sbranchid=@SBranchID order by id desc)  as Rate,       
+      
+ (Select [AreaName] from AreaMaster AM Where AM.AreaID=TRD.AreaID) as AreaName,        
+ cast([Time] as nvarchar(8)) as [Time],HaltDuration,SequenceNo,SequenceNoR,cast([TimeR] as nvarchar(8)) as TimeR,HaltDurationR        
+  from TransportRouteDetails TRD where RouteID=@RouteID        
+ order by SequenceNo        
+END   
+
+go
+
+    
+ alter Function [dbo].[fn_GetStudentTransportFeeAmount] --4,2019,785,0,0,1,0,19,1,5,2,50,50,4          
  (          
  @Month int,          
  @Year int,          
@@ -214,106 +209,105 @@ declare @LYear int    =@Year
     --deallocate cur_Months           
    end          
    Return isnull(@Amount,0)          
- end 
-go
+ end   
 
+ go
 
-alter proc [dbo].[spn_InsertUpdateTransportRouteStoppages]    
-(    
-@StopID int,    
-@RouteID int,    
-@CountryID int,    
-@StateID int,    
-@CityID int,    
-@AreaID int,    
-@Time time(7),    
-@HaltDuration int,    
-@SequenceNo int,    
-@TimeR time(7),    
-@HaltDurationR int,    
-@SequenceNoR int,    
-@UserID int,    
-@OperationDate datetime,    
-@OpType int,    
-@Rate numeric(18,2)=0    
-)    
-AS    
-  
-BEGIN   
- declare @SessionID int  
- select @SessionID=SessionID from SessionMaster where SBranchID=@UserID and SessionStatus=1    
-  
- if(@OpType=-1)    
- begin    
-  select @SequenceNo=SequenceNo,@RouteID=RouteID from TransportRouteDetails where StopID=@StopID     
-  Delete from TransportRouteDetails where StopID=@StopID    
-  Update [dbo].[TransportRouteDetails] set [SequenceNo]= [SequenceNo]-1 where SequenceNo>@SequenceNo  and RouteID=@RouteID     
- end    
- else if(@StopID=0)    
- begin    
-  if(@SequenceNo=0)    
-  begin    
-  Select @SequenceNo=isnull(max(SequenceNo),0)+1 from TransportRouteDetails where RouteID=@RouteID    
-  end    
-  else    
-  Begin    
-   Update [dbo].[TransportRouteDetails] set [SequenceNo]= SequenceNo+1 where (SequenceNo=@SequenceNo or SequenceNo>@SequenceNo) and RouteID=@RouteID    
-   Update [dbo].[TransportRouteDetails] set [SequenceNoR]= SequenceNoR+1 where (SequenceNoR=@SequenceNoR or SequenceNoR>@SequenceNoR) and RouteID=@RouteID    
-    
-  end    
-    
-   Insert TransportRouteDetails (RouteID,CountryID,StateID,CityID,AreaID,[Time],HaltDuration,SequenceNo,[TimeR],HaltDurationR,SequenceNoR,UserID,CreatedDate,Rate)    
-   values(@RouteID,@CountryID,@StateID,@CityID,@AreaID,@Time,@HaltDuration,@SequenceNo,@TimeR,@HaltDurationR,@SequenceNoR,@UserID,@OperationDate,@Rate)    
      
-   declare @StID int  
+alter proc [dbo].[spn_InsertUpdateTransportRouteStoppages]      
+(      
+@StopID int,      
+@RouteID int,      
+@CountryID int,      
+@StateID int,      
+@CityID int,      
+@AreaID int,      
+@Time time(7),      
+@HaltDuration int,      
+@SequenceNo int,      
+@TimeR time(7),      
+@HaltDurationR int,      
+@SequenceNoR int,      
+@UserID int,      
+@OperationDate datetime,      
+@OpType int,      
+@Rate numeric(18,2)=0      
+)      
+AS      
+    
+BEGIN     
+ declare @SessionID int    
+ select @SessionID=SessionID from SessionMaster where SBranchID=@UserID and SessionStatus=1      
+    
+ if(@OpType=-1)      
+ begin      
+  select @SequenceNo=SequenceNo,@RouteID=RouteID from TransportRouteDetails where StopID=@StopID       
+  Delete from TransportRouteDetails where StopID=@StopID      
+  Update [dbo].[TransportRouteDetails] set [SequenceNo]= [SequenceNo]-1 where SequenceNo>@SequenceNo  and RouteID=@RouteID       
+ end      
+ else if(@StopID=0)      
+ begin      
+  if(@SequenceNo=0)      
+  begin      
+  Select @SequenceNo=isnull(max(SequenceNo),0)+1 from TransportRouteDetails where RouteID=@RouteID      
+  end      
+  else      
+  Begin      
+   Update [dbo].[TransportRouteDetails] set [SequenceNo]= SequenceNo+1 where (SequenceNo=@SequenceNo or SequenceNo>@SequenceNo) and RouteID=@RouteID      
+   Update [dbo].[TransportRouteDetails] set [SequenceNoR]= SequenceNoR+1 where (SequenceNoR=@SequenceNoR or SequenceNoR>@SequenceNoR) and RouteID=@RouteID      
       
-    
-    SET @StID = SCOPE_IDENTITY();  
-   
+  end      
+      
+   Insert TransportRouteDetails (RouteID,CountryID,StateID,CityID,AreaID,[Time],HaltDuration,SequenceNo,[TimeR],HaltDurationR,SequenceNoR,UserID,CreatedDate,Rate)      
+   values(@RouteID,@CountryID,@StateID,@CityID,@AreaID,@Time,@HaltDuration,@SequenceNo,@TimeR,@HaltDurationR,@SequenceNoR,@UserID,@OperationDate,@Rate)      
+       
+   declare @StID int    
         
-   insert TransportFeeMaster (StopID,RouteID,CityID,AreaID,Amount,SbranchID,SessionID,CreatedDate)  
-   values(@StID,@RouteID,@CityID,@AreaID,@Rate,@UserID,@SessionID,getdate())  
+      
+    SET @StID = SCOPE_IDENTITY();    
      
- end    
- else    
- begin    
-  declare @OldSequence int    
-  declare @OldSequenceR int    
-  select @OldSequence=SequenceNo,@OldSequenceR=SequenceNoR from TransportRouteDetails where StopID= @StopID    
+          
+   insert TransportFeeMaster (StopID,RouteID,CityID,AreaID,Amount,SbranchID,SessionID,CreatedDate)    
+   values(@StID,@RouteID,@CityID,@AreaID,@Rate,@UserID,@SessionID,getdate())    
+       
+ end      
+ else      
+ begin      
+  declare @OldSequence int      
+  declare @OldSequenceR int      
+  select @OldSequence=SequenceNo,@OldSequenceR=SequenceNoR from TransportRouteDetails where StopID= @StopID      
+      
+  if(@OldSequence>@SequenceNo)      
+  begin      
+  Update [dbo].[TransportRouteDetails] set [SequenceNo]= SequenceNo+1 where (SequenceNo=@SequenceNo or SequenceNo>@SequenceNo) and SequenceNo<@OldSequence and RouteID=@RouteID      
+  end      
+  else if(@OldSequence<@SequenceNo)      
+  begin      
+  Update [dbo].[TransportRouteDetails] set [SequenceNo]= [SequenceNo]-1 where (SequenceNo=@SequenceNo or SequenceNo<@SequenceNo) and (SequenceNo>@OldSequence or SequenceNo=@OldSequence ) and RouteID=@RouteID      
+  end      
+  if(@OldSequenceR>@SequenceNoR)      
+  begin      
+  Update [dbo].[TransportRouteDetails] set [SequenceNoR]= SequenceNoR+1 where (SequenceNoR=@SequenceNoR or SequenceNoR>@SequenceNoR) and SequenceNoR<@OldSequenceR and RouteID=@RouteID      
+  end      
+  else if(@OldSequenceR<@SequenceNoR)      
+  begin      
+  Update [dbo].[TransportRouteDetails] set [SequenceNoR]= [SequenceNoR]-1 where (SequenceNoR=@SequenceNoR or SequenceNoR<@SequenceNoR) and (SequenceNoR>@OldSequenceR or SequenceNoR=@OldSequenceR ) and RouteID=@RouteID      
+  end      
+      
+      
+  Update TransportRouteDetails Set RouteID=@RouteID, CountryID=@CountryID, StateID=@StateID, CityID=@CityID, AreaID=@AreaID,Rate=@Rate,      
+   [Time]=@Time, HaltDuration=@HaltDuration, SequenceNo=@SequenceNo,[TimeR]=@TimeR, HaltDurationR=@HaltDurationR,       
+   SequenceNoR=@SequenceNoR, UserID=@UserID, ModifiedDate=@OperationDate      
+   where StopID=@StopID      
     
-  if(@OldSequence>@SequenceNo)    
-  begin    
-  Update [dbo].[TransportRouteDetails] set [SequenceNo]= SequenceNo+1 where (SequenceNo=@SequenceNo or SequenceNo>@SequenceNo) and SequenceNo<@OldSequence and RouteID=@RouteID    
-  end    
-  else if(@OldSequence<@SequenceNo)    
-  begin    
-  Update [dbo].[TransportRouteDetails] set [SequenceNo]= [SequenceNo]-1 where (SequenceNo=@SequenceNo or SequenceNo<@SequenceNo) and (SequenceNo>@OldSequence or SequenceNo=@OldSequence ) and RouteID=@RouteID    
-  end    
-  if(@OldSequenceR>@SequenceNoR)    
-  begin    
-  Update [dbo].[TransportRouteDetails] set [SequenceNoR]= SequenceNoR+1 where (SequenceNoR=@SequenceNoR or SequenceNoR>@SequenceNoR) and SequenceNoR<@OldSequenceR and RouteID=@RouteID    
-  end    
-  else if(@OldSequenceR<@SequenceNoR)    
-  begin    
-  Update [dbo].[TransportRouteDetails] set [SequenceNoR]= [SequenceNoR]-1 where (SequenceNoR=@SequenceNoR or SequenceNoR<@SequenceNoR) and (SequenceNoR>@OldSequenceR or SequenceNoR=@OldSequenceR ) and RouteID=@RouteID    
-  end    
+   Update TransportFeeMaster set Amount=@Rate,ModifiedDate=getdate()     
+   where StopID=@StopID and RouteID=@RouteID and CityID=@CityID and AreaID=@AreaID    
+   and Sbranchid=@UserID and sessionid=@SessionID    
     
-    
-  Update TransportRouteDetails Set RouteID=@RouteID, CountryID=@CountryID, StateID=@StateID, CityID=@CityID, AreaID=@AreaID,Rate=@Rate,    
-   [Time]=@Time, HaltDuration=@HaltDuration, SequenceNo=@SequenceNo,[TimeR]=@TimeR, HaltDurationR=@HaltDurationR,     
-   SequenceNoR=@SequenceNoR, UserID=@UserID, ModifiedDate=@OperationDate    
-   where StopID=@StopID    
-  
-   Update TransportFeeMaster set Amount=@Rate,ModifiedDate=getdate()   
-   where StopID=@StopID and RouteID=@RouteID and CityID=@CityID and AreaID=@AreaID  
-   and Sbranchid=@UserID and sessionid=@SessionID  
-  
- end    
-    
- select @RouteID    
-    
- exec dbo.spn_GetTransportRouteStoppages @RouteID    
-    
-END    
-
-go
+ end      
+      
+ select @RouteID      
+      
+ exec dbo.spn_GetTransportRouteStoppages @RouteID      
+      
+END      
