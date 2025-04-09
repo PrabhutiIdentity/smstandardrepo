@@ -5,7 +5,7 @@
 
 @model SMEnterprise.Models.StudentModel
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+@*<script src="https://checkout.razorpay.com/v1/checkout.js"></script>*@
 <section class="teacher-prolile-01">
     <div class="container">
         <div class="row">
@@ -25,22 +25,38 @@
                                     <li>DOB: <b>@Model.DOB.ToString("dd MMM yyyy")</b></li>
                                     <li>Class: <b>@Model.ClassName</b></li>
                                     <li>Father Name: <b>@Model.FatherName</b></li>
+                                    <li>Contact No: <b>@Model.FatherMobileNo</b></li>
                                     <li>Mother Name: <b>@Model.MotherName</b></li>
-                                    @*<li>Amount(In Paisa): <b>@ViewBag.OrderDetails.Amount</b></li>*@
+                                    <li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth  </b></li>
+                                    <li>Amount(In Rupees): <b>@ViewBag.OrderDetails.ApplicableFee</b></li>
                                 </ul>
-                                @*<ul class="profile__courses__right list-unstyled">
-                                        <li></li>
-                                        <li></li>
-                                        <li></li>
-                                        <li></li>
-                                        <li>@Model.MotherName</li>
-                                        <li>Rs 250 + 2% transaction charge</li>
-                                    </ul>*@
+                               
                             </div>
                         </div>
                         <div class="form-group register-btn">
 
-                            <button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>
+                            @* <button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>*@
+                            <form action="https://secure.payu.in/_payment" method="post">
+                                @*@using (Html.BeginForm("ProcessPayment", "Payment", FormMethod.Post, new { @id = "payUForm" }))
+        {*@
+                                <input type="hidden" name="key" value="JVDkAA" />
+                                <input type="hidden" name="txnid" value="@ViewBag.TransactionId" /> <!-- Unique Transaction ID @Guid.NewGuid().ToString()-->
+                                <input type="hidden" name="productinfo" value="Fee Payment" />
+                                <input type="hidden" name="amount" value="@((ViewBag.OrderDetails.ApplicableFee).ToString("0.00"))" />
+                                @* <input type="hidden" name="amount" value="@Math.Round(ViewBag.OrderDetails.ApplicableFee)" />*@
+                                <input type="hidden" name="email" value="@Model.EmailID ?? " info@prabhutisystems.com"" /> <!-- Ensure you have an email field in your model -->
+                                <input type="hidden" name="firstname" value="@Model.Name" />
+                               
+                                <input type="hidden" name="surl" value="https://localhost:44346/Payment/PaymentSuccess" /> <!-- URL on success -->
+                                <input type="hidden" name="furl" value="https://localhost:44346/Payment/PaymentFailure" /> <!-- URL on failure -->
+                              
+                              
+                                <!-- Add additional UDFs if necessary -->
+                                <input type="hidden" name="hash" value="@ViewBag.PaymentHash" />
+
+                                <button type="submit" class="btn btn-primary btn-lg">Pay Now</button>
+                                @*}*@
+                            </form>
                         </div>
                     </div>
                     <div style="display:none">
@@ -105,29 +121,3 @@
         e.preventDefault();
     }
 </script>
-@*<section class="contact-area-02">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <form action="/payment/CreatePayment">
-                        <label for="fname">Name:</label><br>
-                        <input type="text" id="fname" name="Name" readonly value="@Model.StudentName"><br><br />
-                        <label for="lname">Email ID:</label><br>
-                        <input type="text" id="lname" name="EmailID" value=""><br><br>
-                        <label for="lname">Contact no:</label><br>
-                        <input type="text" id="lname" name="ContactNumber" value="@Model.TelephoneNoReg"><br><br>
-                        <label for="lname">Amount:</label><br>
-                        <input type="text" id="lname" name="Amount" placeholder="Rs.250 + 2% Tax"><br><br>
-                        <label for="lname">Address:</label><br>
-                        <input type="text" id="lname" name="Address" value=" "><br><br>
-                        <input type="submit" class="form-control" value="Submit">
-                    </form>
-                </div>
-                <div class="col-md-6">
-
-                </div>
-            </div>
-        </div>
-    </section>
-    <br />
-    <br />*@
