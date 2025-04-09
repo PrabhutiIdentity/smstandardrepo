@@ -145,3 +145,46 @@ select * from student_session where studentid=
 -- insert paymentdetails table
 insert into paymentdetails(PaymentID,FeeTypeID,PayeeID,Amount,DiscPer,DiscAmt,NetApplicablePayment,PaymentRecieved,Year,Month,PaymentDate,SBranchID,DuesPaidCount,PaymentDetails,PaymentStatus,PaymentTitle)
 values()
+
+
+
+--- Dulicate count TransportFeeMaster
+
+select StopID,RouteID,	CityID,AreaID,Amount,SbranchID,SessionID,Count(*)
+from [dbo].TransportFeeMaster
+group by StopID,RouteID,	CityID,AreaID,Amount,SbranchID,SessionID
+having count(*)>1
+
+
+--Delete Duplicate TransportFeeMaster Record
+WITH CTE(StopID,RouteID,	CityID,AreaID,Amount,SbranchID,SessionID,DuplicateCount)
+AS (SELECT StopID,RouteID,	CityID,AreaID,Amount,SbranchID,SessionID,
+           ROW_NUMBER() OVER(PARTITION BY StopID,RouteID,	CityID,AreaID,Amount,SbranchID,SessionID
+           ORDER BY StopID) AS DuplicateCount
+    FROM [dbo].TransportFeeMaster )
+DELETE FROM CTE
+WHERE DuplicateCount > 1;
+
+
+
+---To eliminate duplicate records based on AreaID while retaining the one with the higher Amount, you can use a Common Table Expression (CTE) or a subquery method in SQL. Here's an example approach using a CTE:
+
+
+WITH RankedRecords AS (
+    SELECT 
+        ID, 
+        StopID, 
+        RouteID, 
+        CityID, 
+        AreaID, 
+        Amount, 
+        SbranchID, 
+        SessionID,
+        ROW_NUMBER() OVER (PARTITION BY AreaID ORDER BY Amount DESC) AS rn
+    FROM 
+        TransportFeeMaster where SbranchID=15 and sessionid=75
+)
+
+SELECT * FROM RankedRecords WHERE rn > 1;
+
+--DELETE FROM RankedRecords WHERE rn > 1

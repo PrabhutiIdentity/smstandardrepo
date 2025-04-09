@@ -33,6 +33,7 @@ namespace SMEnterprise.Repository
                     objData.Sessions = multi.Read<NameIDModel>().ToList();
                     objData.Enquiries = multi.Read<AdmissionEnquiryMasterModel>().ToList();
                     objData.Receptionists = multi.Read<NameIDModel>().ToList();
+                    objData.SessionID = multi.Read<int>().SingleOrDefault();
                 }
             }
             return objData;
@@ -57,6 +58,7 @@ namespace SMEnterprise.Repository
             {
                 objData.Enquiry = new AdmissionEnquiryMasterModel();
                 objData.Enquiry.EDate = CommonUsage.GetCurrentDate();
+                objData.Enquiry.StudentDOB = CommonUsage.GetCurrentDate().AddYears(-3); 
                 objData.Enquiry.NextFollowUpDate = CommonUsage.GetCurrentDate().AddDays(1);
             }
             return objData;

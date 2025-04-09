@@ -4984,9 +4984,15 @@ namespace SMEnterprise.Repository
                 {
                     var paramater = new DynamicParameters();
                     paramater.Add("@OrderID", obj.OrderID);
+                    paramater.Add("@StudentID", obj.StudentID);
+                paramater.Add("@Name", obj.Name);
+                paramater.Add("@EmailID", obj.EmailID);
+                    paramater.Add("@ContactNumber", obj.ContactNumber);
+                    paramater.Add("@FeeMonth", obj.FeeMonth);
+                    paramater.Add("@FeeYear", obj.FeeYear);
                     paramater.Add("@Amount", obj.Amount);
-                    paramater.Add("@Date", obj.Date);
-                    paramater.Add("@Name", obj.Name);
+                    paramater.Add("@SBranchID", obj.SBranchID);
+                    paramater.Add("@Date", obj.Date);                    
                     paramater.Add("@PGOrderID", obj.PGOrderID);
                     paramater.Add("@Status", obj.Status);
 
