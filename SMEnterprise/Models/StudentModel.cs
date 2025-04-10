@@ -149,6 +149,7 @@ namespace SMEnterprise.Models
         public string PSResult { get; set; }
         public string PSchoolCity { get; set; }
         public string PSchoolState { get; set; }
+        public int SessionID { get; set; }
         public string SParentID { get; set; }
         public int IsCustomFee { get; set; }
         public int IsBlock { get; set; }
