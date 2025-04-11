@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using Razorpay.Api;
 using SMEnterprise.Models;
 using System;
 using System.Collections.Generic;
@@ -1639,6 +1640,7 @@ namespace SMEnterprise.Repository
                 return con.Query<FeePaymentModel>("spn_SaveFeePayment", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+        
         public FeePaymentRowModel SaveStudentFeePayments(FeePaymentModel objData)
         {
             FeePaymentRowModel obj = new FeePaymentRowModel();
@@ -1656,7 +1658,8 @@ namespace SMEnterprise.Repository
                 }
                 else
                 {
-                    paramater.Add("@PaymentDate", objData.PaymentDate);
+                    //paramater.Add("@PaymentDate", objData.PaymentDate);
+                    paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
                 }
                 //  paramater.Add("@PaymentDate", objData.PaymentDate);
                 paramater.Add("@PaymentAmount", objData.PaymentAmount);
@@ -5000,6 +5003,19 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+        public int UpdateOrderStatus(string OrderID, string StudentID, string SessionID, string PGPaymentID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@OrderID", OrderID);
+                paramater.Add("@StudentID", StudentID);                
+                paramater.Add("@SessionID", SessionID);
+                paramater.Add("@PGPaymentID", PGPaymentID);
+                paramater.Add("@Status", 1);
+                return con.Query<int>("sp_UpdateOrderStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
         public int UpdateStudentFeePaymentStatus(OrderModel obj)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -5021,11 +5037,41 @@ namespace SMEnterprise.Repository
                 paramater.Add("@FeeMonth", obj.FeeMonth);
                 paramater.Add("@FeeYear", obj.FeeYear);
                 //paramater.Add("@ApplicableFee", obj.ApplicableFee);
-
                 return con.Query<int>("sp_UpdateStudentFeePaymentStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+        public FeePaymentRowModel SaveStudentFeePaymentOnline(FeePaymentModel objData)
+        {
+            FeePaymentRowModel obj = new FeePaymentRowModel();
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
 
+                paramater.Add("@StudentID", objData.StudentID);
+                paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                
+                paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
+                paramater.Add("@PaymentAmount", objData.PaymentAmount);
+                paramater.Add("@WaiverMonths", objData.WaiverMonths);
+                paramater.Add("@Remark", objData.Remark);
+                paramater.Add("@ReferanceNumber", objData.ReferanceNumber);
+                paramater.Add("@PaymentMode", 3);
+                paramater.Add("@CollectedBy", "Payment Gateway");
+                paramater.Add("@SessionID", objData.SessionID);
+                paramater.Add("@ExcludedFees", objData.ExcludedFees);
+                paramater.Add("@UserID", objData.UserID);
+                paramater.Add("@SBranchID", objData.SBranchID);
+
+                using (var multi = con.QueryMultiple("spn_SaveFeePaymentV2", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    obj.StudentDetails = multi.Read<FeePaymentModel>().SingleOrDefault();
+                    obj.PaymentID = multi.Read<int>().SingleOrDefault();
+                }
+
+                return obj;
+            }
+        }
         #endregion
     }
 }

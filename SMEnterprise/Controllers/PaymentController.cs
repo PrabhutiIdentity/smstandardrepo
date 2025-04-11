@@ -17,6 +17,7 @@ namespace SMEnterprise.Controllers
 {
     public class PaymentController : Controller
     {
+        AccountData accountData = new AccountData();
         // GET: Payment
         // GET: Payment
         public ActionResult Index(OrderModel oModel)
@@ -24,8 +25,8 @@ namespace SMEnterprise.Controllers
             string transactionId = Guid.NewGuid().ToString();
             int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            AccountData Accountdata = new AccountData();
-            StudentModel model = Accountdata.GetStudentDetailsForPayment(StudentID, SBranchID);
+          
+            StudentModel model = accountData.GetStudentDetailsForPayment(StudentID, SBranchID);
             OrderModel om = new OrderModel();
             om.FeeMonth = oModel.FeeMonth;
             om.FeeYear = oModel.FeeYear;
@@ -79,7 +80,7 @@ namespace SMEnterprise.Controllers
 
             };
             orderModel.Date = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
-            Accountdata.InsertOrderID(orderModel);
+            accountData.InsertOrderID(orderModel);
             ViewBag.OrderDetails = orderModel;
 
             #region
@@ -200,7 +201,7 @@ namespace SMEnterprise.Controllers
                 om.CurDate = CommonUsage.GetCurrentDate();
                 om.PaymentDate = CommonUsage.GetCurrentDate();
 
-                AccountData accountData = new AccountData();
+               
                 accountData.UpdateStudentFeePaymentStatus(om);
                 return RedirectToAction("Success", new { ID = orderId });
 
@@ -254,7 +255,7 @@ namespace SMEnterprise.Controllers
                     om.CurDate = CommonUsage.GetCurrentDate();
                     om.PaymentDate = CommonUsage.GetCurrentDate();
 
-                    AccountData accountData = new AccountData();
+                   
                     accountData.UpdateStudentFeePaymentStatus(om);
                
                 return RedirectToAction("Success", new { ID = orderId });
