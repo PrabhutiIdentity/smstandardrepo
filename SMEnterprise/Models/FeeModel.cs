@@ -549,6 +549,7 @@ namespace SMEnterprise.Models
 
     public class FeePaymentModel
     {
+        public decimal RefundAmount { get; set; }
         public int IsCustomFee { get; set; }
         public string MotherName { get; set; }
         public int UserID { get; set; }
