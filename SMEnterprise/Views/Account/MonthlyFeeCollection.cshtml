@@ -66,72 +66,91 @@
                                     <th>Details</th>
                                     <th>Date</th>
 
-                                    <th>Collected By</th>
-                                    <th>Amount</th>
+                                    <th>Collected By</th>                                
+                                    <th>Amount Recieved</th>
+                                    <th>Refund Amount</th>
+                                    <th>Actual Amount</th>
                                 </tr>
                             </thead>
                             @{
                                 int count = 1;
                                 decimal TotalPayment = 0;
+                                decimal TotalRefund = 0;
+                                decimal TotalAmount = 0;
                                 foreach (FeePaymentModel c in Model.FeePayments)
                                 {
                                     var PayMode = "";
                                     TotalPayment = TotalPayment + c.PaymentAmount;
-                            <tr>
-                                <td> @count</td>
-                                <td>
-                                    @c.Name<br />
-                                    @*@c.RollNo<br />*@
-                                    @*@if (!string.IsNullOrEmpty(c.SchoolUID))
-                                    {
-                                        <b>SR No:</b> @c.SchoolUID
-                                    }*@
-                                </td>
-                                <td>@c.SchoolUID</td>
-                                <td>
-                                    @c.ClassName
-                                </td>
-                                <td>
-                                    @c.SectionName
-                                </td>
-                                <td>
-                                    @c.SessionName
-                                </td>
-                                <td>
-                                    @if (c.PaymentMode == 0)
-                                    {
-                                        PayMode = "Cash Payment";
-                                    }
-                                    else if (c.PaymentMode == 1)
-                                    {
-                                        PayMode = "Cheque Payment";
-                                    }
-                                    else if (c.PaymentMode == 2)
-                                    {
-                                        PayMode = "NEFT Payment";
-                                    }
-                                    else if (c.PaymentMode == 2)
-                                    {
-                                        PayMode = "Other Payment";
-                                    }
-                                    @PayMode
-                                    <br />
-                                    @c.ReferanceNumber
-                                    <br />
-                                    @c.Remark
-                                    <br />
-                                    @c.PayMonths
-                                </td>
-                                <td>
-                                    @c.PaymentDate.ToString("dd MMM, yyyy")
-                                </td>
-                                <td>
-                                    @c.CollectedBy
-                                </td>
-                                <td>
-                                    <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
-                                </td>
-                            </tr>
+                                    TotalRefund = TotalRefund + c.RefundAmount;
+                                    TotalAmount = TotalPayment - TotalRefund;
+                                                        <tr>
+                                                            <td> @count</td>
+                                                            <td>
+                                                                @c.Name<br />
+                                                                @*@c.RollNo<br />*@
+                                                                @*@if (!string.IsNullOrEmpty(c.SchoolUID))
+            {
+                <b>SR No:</b> @c.SchoolUID
+            }*@
+                                                            </td>
+                                                            <td>@c.SchoolUID</td>
+                                                            <td>
+                                                                @c.ClassName
+                                                            </td>
+                                                            <td>
+                                                                @c.SectionName
+                                                            </td>
+                                                            <td>
+                                                                @c.SessionName
+                                                            </td>
+                                                            <td>
+                                                                @if (c.PaymentMode == 0)
+                                                                {
+                                                                    PayMode = "Cash Payment";
+                                                                }
+                                                                else if (c.PaymentMode == 1)
+                                                                {
+                                                                    PayMode = "Cheque Payment";
+                                                                }
+                                                                else if (c.PaymentMode == 2)
+                                                                {
+                                                                    PayMode = "NEFT Payment";
+                                                                }
+                                                                else if (c.PaymentMode == 2)
+                                                                {
+                                                                    PayMode = "Other Payment";
+                                                                }
+                                                                @PayMode
+                                                                <br />
+                                                                @c.ReferanceNumber
+                                                                <br />
+                                                                @c.Remark
+                                                                <br />
+                                                                @c.PayMonths
+                                                            </td>
+                                                            <td>
+                                                                @c.PaymentDate.ToString("dd MMM, yyyy")
+                                                            </td>
+                                                            <td>
+                                                                @c.CollectedBy
+                                                            </td>
+                                                            <td>
+                                                                <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
+                                                            </td>
+                                                            <td style="width:10%">
+                                                                <i class="fa fa-inr" aria-hidden="true"></i> @c.RefundAmount.ToString("N2")
+                                                            </td>
+                                                            <td style="width:10%">
+                                                                <i class="fa fa-inr" aria-hidden="true"></i>
+                                                                @{
+                                                                    decimal payAmount = c.PaymentAmount;
+                                                                    decimal refAmount = c.RefundAmount;
+
+                                                                    var Amount = payAmount - refAmount;
+                                                                }
+                                                                @Amount.ToString("N2");
+                                                            </td>
+                                                        </tr>
 
                                     count++;
                                 }
@@ -143,6 +162,8 @@
                                         <b> Total Collection</b>
                                     </td>
                                     <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
+                                    <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalRefund.ToString("N2")</b></td>
+                                    <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalAmount.ToString("N2")</b></td>
                                 </tr>
                             </tfoot>
                         </table>
