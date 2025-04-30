@@ -16,10 +16,10 @@ namespace SMEnterprise.Controllers
 {
     public class ParentApiController : ApiController
     {
-        private readonly BigBlueButtonAPIClient client;
+        //private readonly BigBlueButtonAPIClient client;
         public ParentApiController() : base()
         {
-            this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+            //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
         }
         [HttpGet]
         public CommonApiWraperModel ClearVehicleLocation()
@@ -1195,235 +1195,235 @@ namespace SMEnterprise.Controllers
         }
         #endregion
         #region Online Classes Related
-        [HttpPost]
-        public async Task<CommonApiWraperModel> GetBBBOnlineClassList(ParentApiParamModel data)
-        {
-            UserModel user = VerifyUser(data.UUID);
-            CommonApiWraperModel objWraper = new CommonApiWraperModel();
-            if (user != null)
-            {
-                // OnlineClassData objParentData = new OnlineClassData(); 
-                if (data.RDate.Year == 1)
-                {
-                    data.RDate = CommonUsage.GetCurrentDate();
-                }
-                var data1 = await (new BBBOnlineClassData()).GetStudentOnlineClassesSchedules(data.ID, data.RDate);
-                //objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
-                if (data1.Count() > 0)
-                {
-                    objWraper.Code = 200;
-                    objWraper.List = data1.ToList<object>();
-                }
-                else
-                {
-                    objWraper.Code = 404;
-                }
-                objWraper.Message = "Success";
-            }
-            else
-            {
-                objWraper.Code = 101;
-                objWraper.Message = "Unauthorized";
-            }
-            return objWraper;
-        }
-        [HttpPost]
-        public async Task<CommonApiWraperModel> GetOnlineClassList(ParentApiParamModel data)
-        {
-            UserModel user = VerifyUser(data.UUID);
-            CommonApiWraperModel objWraper = new CommonApiWraperModel();
-            if (user != null)
-            {
-                if (user.SBranchID != 18)
-                {
-                    // OnlineClassData objParentData = new OnlineClassData(); 
-                    if (data.RDate.Year == 1)
-                    {
-                        data.RDate = CommonUsage.GetCurrentDate();
-                    }
-                    var data1 = await (new BBBOnlineClassData()).GetStudentOnlineClassesSchedules(data.ID, data.RDate);
-                    //objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
-                    if (data1.Count() > 0)
-                    {
-                        objWraper.Code = 200;
-                        objWraper.List = data1.ToList<object>();
-                    }
-                    else
-                    {
-                        objWraper.Code = 404;
-                    }
-                    objWraper.Message = "Success";
-                }
-                else
-                {
-                    OnlineClassData objParentData = new OnlineClassData();
-                    DateTime CurDate = CommonUsage.GetCurrentDate();
-                    List<OnlineClassModel> data1 = await objParentData.GetStudentOnlineClassesSchedules(data.ID, CurDate);
-                    objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
-                    if (data1.Count() > 0)
-                    {
-                        objWraper.Code = 200;
-                        objWraper.List = data1.ToList<object>();
-                    }
-                    else
-                    {
-                        objWraper.Code = 404;
-                    }
-                    objWraper.Message = "Success";
-                }
-            }
-            else
-            {
-                objWraper.Code = 101;
-                objWraper.Message = "Unauthorized";
-            }
-            return objWraper;
-        }
-        [HttpPost]
-        public async Task<CommonApiWraperModel> GetOnlineClassListOld(ParentApiParamModel data)
-        {
-            UserModel user = VerifyUser(data.UUID);
-            CommonApiWraperModel objWraper = new CommonApiWraperModel();
-            if (user != null)
-            {
-                OnlineClassData objParentData = new OnlineClassData();
-                DateTime CurDate = CommonUsage.GetCurrentDate();
-                List<OnlineClassModel> data1 = await objParentData.GetStudentOnlineClassesSchedules(data.ID, CurDate);
-                objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
-                if (data1.Count() > 0)
-                {
-                    objWraper.Code = 200;
-                    objWraper.List = data1.ToList<object>();
-                }
-                else
-                {
-                    objWraper.Code = 404;
-                }
-                objWraper.Message = "Success";
-            }
-            else
-            {
-                objWraper.Code = 101;
-                objWraper.Message = "Unauthorized";
-            }
-            return objWraper;
-        }
-        [HttpPost]
-        public async Task<CommonApiWraperModel> JoinBBBOnlineClass(ParentApiParamModel data)
-        {
-            UserModel user = VerifyUser(data.UUID);
-            CommonApiWraperModel objWraper = new CommonApiWraperModel();
-            if (user != null)
-            {
-                BBBOnlineClassData onlineClassData = new BBBOnlineClassData();
-                //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
-                BBBOnlineClassModel cModel = (onlineClassData).GetOnlineClassDetailsByOCID(data.OCID);
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> GetBBBOnlineClassList(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        // OnlineClassData objParentData = new OnlineClassData(); 
+        //        if (data.RDate.Year == 1)
+        //        {
+        //            data.RDate = CommonUsage.GetCurrentDate();
+        //        }
+        //        var data1 = await (new BBBOnlineClassData()).GetStudentOnlineClassesSchedules(data.ID, data.RDate);
+        //        //objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //        if (data1.Count() > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = data1.ToList<object>();
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> GetOnlineClassList(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        if (user.SBranchID != 18)
+        //        {
+        //            // OnlineClassData objParentData = new OnlineClassData(); 
+        //            if (data.RDate.Year == 1)
+        //            {
+        //                data.RDate = CommonUsage.GetCurrentDate();
+        //            }
+        //            var data1 = await (new BBBOnlineClassData()).GetStudentOnlineClassesSchedules(data.ID, data.RDate);
+        //            //objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //            if (data1.Count() > 0)
+        //            {
+        //                objWraper.Code = 200;
+        //                objWraper.List = data1.ToList<object>();
+        //            }
+        //            else
+        //            {
+        //                objWraper.Code = 404;
+        //            }
+        //            objWraper.Message = "Success";
+        //        }
+        //        else
+        //        {
+        //            OnlineClassData objParentData = new OnlineClassData();
+        //            DateTime CurDate = CommonUsage.GetCurrentDate();
+        //            List<OnlineClassModel> data1 = await objParentData.GetStudentOnlineClassesSchedules(data.ID, CurDate);
+        //            objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //            if (data1.Count() > 0)
+        //            {
+        //                objWraper.Code = 200;
+        //                objWraper.List = data1.ToList<object>();
+        //            }
+        //            else
+        //            {
+        //                objWraper.Code = 404;
+        //            }
+        //            objWraper.Message = "Success";
+        //        }
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> GetOnlineClassListOld(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        OnlineClassData objParentData = new OnlineClassData();
+        //        DateTime CurDate = CommonUsage.GetCurrentDate();
+        //        List<OnlineClassModel> data1 = await objParentData.GetStudentOnlineClassesSchedules(data.ID, CurDate);
+        //        objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //        if (data1.Count() > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = data1.ToList<object>();
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> JoinBBBOnlineClass(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        BBBOnlineClassData onlineClassData = new BBBOnlineClassData();
+        //        //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
+        //        BBBOnlineClassModel cModel = (onlineClassData).GetOnlineClassDetailsByOCID(data.OCID);
 
-                var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
-                if (meetingStatus.returncode != Returncode.FAILED)
-                {
+        //        var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
+        //        if (meetingStatus.returncode != Returncode.FAILED)
+        //        {
 
-                    var joinDate = CommonUsage.GetCurrentDate();
-                    NameIDModel student = await onlineClassData.StudentJoinOnlineClass(0, joinDate, data.OCID, user.UserID, 1);
-                    var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
-                    requestJoin.userID = student.ID.ToString();
-                    requestJoin.fullName = student.Name;
-                    requestJoin.password = cModel.AttPassword;
-                    var setConfigRequest = new SetConfigXMLRequest
-                    {
-                        meetingID = cModel.MeetingID,
-                        configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
-                    };
-                    var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
-                    if (setConfigResult.returncode == Returncode.FAILED)
-                    {
-                        objWraper.Code = -1;
-                    }
-                    else
-                    {
-                        requestJoin.configToken = setConfigResult.configToken;
-                        // requestJoin.avatarURL = avatar;
-                        var url = client.GetJoinMeetingUrl(requestJoin);
-                        objWraper.Data = url;
-                    }
-                }
+        //            var joinDate = CommonUsage.GetCurrentDate();
+        //            NameIDModel student = await onlineClassData.StudentJoinOnlineClass(0, joinDate, data.OCID, user.UserID, 1);
+        //            var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
+        //            requestJoin.userID = student.ID.ToString();
+        //            requestJoin.fullName = student.Name;
+        //            requestJoin.password = cModel.AttPassword;
+        //            var setConfigRequest = new SetConfigXMLRequest
+        //            {
+        //                meetingID = cModel.MeetingID,
+        //                configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+        //            };
+        //            var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+        //            if (setConfigResult.returncode == Returncode.FAILED)
+        //            {
+        //                objWraper.Code = -1;
+        //            }
+        //            else
+        //            {
+        //                requestJoin.configToken = setConfigResult.configToken;
+        //                // requestJoin.avatarURL = avatar;
+        //                var url = client.GetJoinMeetingUrl(requestJoin);
+        //                objWraper.Data = url;
+        //            }
+        //        }
 
-                if (objWraper.Data != null)
-                {
-                    objWraper.Code = 200;
-                    objWraper.Message = "Preparing to join class";
-                }
-                else
-                {
-                    objWraper.Code = 404;
-                    objWraper.Message = "Class is not running now";
-                }
-            }
-            else
-            {
-                objWraper.Code = 101;
-                objWraper.Message = "Unauthorized";
-            }
-            return objWraper;
-        }
+        //        if (objWraper.Data != null)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.Message = "Preparing to join class";
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //            objWraper.Message = "Class is not running now";
+        //        }
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
 
-        [HttpPost]
-        public async Task<CommonApiWraperModel> JoinOnlineClass(ParentApiParamModel data)
-        {
-            UserModel user = VerifyUser(data.UUID);
-            CommonApiWraperModel objWraper = new CommonApiWraperModel();
-            if (user != null)
-            {
-                DateTime JoinedOn = CommonUsage.GetCurrentDate();
-                OnlineClassData objTeacherData = new OnlineClassData();
-                object List = await objTeacherData.StudentJoinOnlineClass(data.ID, JoinedOn, data.OCID, user.UserID);
-                if (List != null)
-                {
-                    objWraper.Code = 200;
-                    objWraper.Data = List;
-                }
-                else
-                {
-                    objWraper.Code = 404;
-                }
-                objWraper.Message = "Success";
-            }
-            else
-            {
-                objWraper.Code = 101;
-                objWraper.Message = "Unauthorized";
-            }
-            return objWraper;
-        }
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> JoinOnlineClass(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        DateTime JoinedOn = CommonUsage.GetCurrentDate();
+        //        OnlineClassData objTeacherData = new OnlineClassData();
+        //        object List = await objTeacherData.StudentJoinOnlineClass(data.ID, JoinedOn, data.OCID, user.UserID);
+        //        if (List != null)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.Data = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
 
-        [HttpPost]
-        public async Task<CommonApiWraperModel> LeaveOnlineClass(ParentApiParamModel data)
-        {
-            UserModel user = VerifyUser(data.UUID);
-            CommonApiWraperModel objWraper = new CommonApiWraperModel();
-            if (user != null)
-            {
-                DateTime JoinedOn = CommonUsage.GetCurrentDate();
-                OnlineClassData objTeacherData = new OnlineClassData();
-                int List = await objTeacherData.StudentLeaveOnlineClass(data.ID, JoinedOn, data.ID2);
-                if (List > 0)
-                {
-                    objWraper.Code = 200;
-                    objWraper.Data = List;
-                }
-                else
-                {
-                    objWraper.Code = 404;
-                }
-                objWraper.Message = "Success";
-            }
-            else
-            {
-                objWraper.Code = 101;
-                objWraper.Message = "Unauthorized";
-            }
-            return objWraper;
-        }
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> LeaveOnlineClass(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        DateTime JoinedOn = CommonUsage.GetCurrentDate();
+        //        OnlineClassData objTeacherData = new OnlineClassData();
+        //        int List = await objTeacherData.StudentLeaveOnlineClass(data.ID, JoinedOn, data.ID2);
+        //        if (List > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.Data = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
         #endregion
     }
 }
