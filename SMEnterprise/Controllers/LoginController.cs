@@ -56,7 +56,7 @@ namespace SMEnterprise.Controllers
                         CommonData objCData = new CommonData();
                         if (AttemptedUser.RoleID == (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle || AttemptedUser.RoleID == (int)RoleType.Director)
                         {
-                           var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID).ToList();
+                           var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
                             Session["SBrancheList"] = branches;
                             Session["SBranchID"] = branches.FirstOrDefault()?.SBranchID;
                             objCData.InitializeStartupSettings(AttemptedUser.SBranchID);

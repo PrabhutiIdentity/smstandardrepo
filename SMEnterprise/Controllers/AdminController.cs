@@ -93,7 +93,7 @@ namespace SMEnterprise.Controllers
         [ChildActionOnly]
         public ActionResult SBranches()
         {
-           var objModel= GetBranches();
+            var objModel = GetBranches();
             return PartialView("~/Views/Shared/_BranchListPartial.cshtml", objModel);
         }
         public List<SBranchModel> GetBranches()
@@ -107,12 +107,14 @@ namespace SMEnterprise.Controllers
             //}
             //else
             //{
-            UserID = PermissionManager.GetLoggedInUser().UserID;
-            SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            var user = PermissionManager.GetLoggedInUser();
+            UserID = user.UserID;
+            SBranchID = user.SBranchID;
+            var userType = user.RoleID;
             //}
             if (Session["SBrancheList"] == null)
             {
-                Session["SBrancheList"] = objAdminData.GetBranches(UserID, SBranchID).ToList();
+                Session["SBrancheList"] = objAdminData.GetBranches(UserID, SBranchID, userType).ToList();
             }
             List<SBranchModel> objModel = (List<SBranchModel>)Session["SBrancheList"];
             if (CommonUsage.ConvertToInt(Session["SBranchID"].ToString()) == 0)
@@ -791,11 +793,11 @@ namespace SMEnterprise.Controllers
 
             return PartialView("_SectionOptionsPartial", objModel);
         }
-        public ActionResult GetEmployeelist(string id = null,string id2 =  null)
+        public ActionResult GetEmployeelist(string id = null, string id2 = null)
         {
             int ID = CommonUsage.ConvertToInt(id);
             int ID2 = CommonUsage.ConvertToInt(id2);
-            IEnumerable<NameIDModel> objModel = objAdminData.GetEmployeeList(ID,ID2);
+            IEnumerable<NameIDModel> objModel = objAdminData.GetEmployeeList(ID, ID2);
 
             return PartialView("_EmployeeListPartial", objModel);
         }
@@ -1474,10 +1476,10 @@ namespace SMEnterprise.Controllers
         {
             int ID = CommonUsage.ConvertToInt(id);
             int ID2 = CommonUsage.ConvertToInt(id2);
-            
+
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            EditEvaluationModel objModel = objAdminData.GetEditEvaluationSchemes(ID,ID2);
-            return PartialView("_EditEvaluationScheme",objModel);
+            EditEvaluationModel objModel = objAdminData.GetEditEvaluationSchemes(ID, ID2);
+            return PartialView("_EditEvaluationScheme", objModel);
         }
         [PermissionFilter]
         public ActionResult EmployeeAssign(string ID = null)
@@ -1796,7 +1798,7 @@ namespace SMEnterprise.Controllers
             var noFeeMonths = await objAdminData.GetClassesNoFeeMonthNew(objModel.SBranchID, objModel.SessionID);
             return View(noFeeMonths);
         }
-      
+
         [PermissionFilter]
         public async Task<ActionResult> UpdateClassNoFeeMonths(ClassPageModel noFeeMonth)
         {
@@ -2387,10 +2389,10 @@ namespace SMEnterprise.Controllers
         {
 
             objData.ActiveDate = CommonUsage.GetCurrentDate();
-			objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
 
-			if (objData.AttachmentFile != null)
+            if (objData.AttachmentFile != null)
             {
                 if (objData.Attachment != null && objData.NewsID != 0)
                 {
@@ -2911,7 +2913,7 @@ namespace SMEnterprise.Controllers
 
             objAdminData.DeleteProduct(ProductID);
             return RedirectToAction("Products", "Admin");
-            
+
         }
 
         [PermissionFilter]
