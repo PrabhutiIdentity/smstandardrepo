@@ -903,11 +903,14 @@ namespace SMEnterprise.Models
         public string FeeTypeName { get; set; }
         public string PaymentNoRange { get; set; }
         public int PayeeID { get; set; }
+
         public decimal Amount { get; set; }
         public decimal DiscPer { get; set; }
         public decimal DiscAmt { get; set; }
         public decimal NetApplicablePayment { get; set; }
         public decimal PaymentRecieved { get; set; }
+        
+              public decimal RefundAmount { get; set; }
         public string Year { get; set; }
         public int Month { get; set; }
         public DateTime PaymentDate { get; set; }
