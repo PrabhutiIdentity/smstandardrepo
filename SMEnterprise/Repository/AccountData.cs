@@ -1658,8 +1658,8 @@ namespace SMEnterprise.Repository
                 }
                 else
                 {
-                    //paramater.Add("@PaymentDate", objData.PaymentDate);
-                    paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
+                   paramater.Add("@PaymentDate", objData.PaymentDate);
+                   //  paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
                 }
                 //  paramater.Add("@PaymentDate", objData.PaymentDate);
                 paramater.Add("@PaymentAmount", objData.PaymentAmount);

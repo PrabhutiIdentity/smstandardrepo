@@ -174,6 +174,7 @@ public class ClassGenderCategoryCountModel
     }
     public class CollectionReportModel
     {
+
         public string UUID { get; set; }
         public SBranchModel Branch { get; set; }
         public DateTime FromDate { get; set; }
