@@ -1527,6 +1527,15 @@ namespace SMEnterprise.Repository
                 {
                     objModel.MonthlySummery = multi.Read<StudentYearMonthFeeSummeryModel>().ToList();
                     objModel.FeeWiseDetails = multi.Read<StudentYearMonthFeeTypeFeeDetailModel>().ToList();
+                    try
+                    {
+                        objModel.SBranch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                    }
+                    catch
+                    {
+
+                    }
                 }
             }
         }

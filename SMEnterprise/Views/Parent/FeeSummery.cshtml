@@ -33,8 +33,13 @@
                     <div class="x_content">
 
                         <div class="accordion" id="accordion" role="tablist" aria-multiselectable="true">
+
                             @foreach (var mys in Model.MonthlySummery)
                             {
+
+
+
+
                                 <div class="panel">
                                     <a class="panel-heading" role="tab" id="heading_@(mys.FeeYear)_@mys.FeeMonth" data-toggle="collapse" data-parent="#accordion" href="#collapse_@(mys.FeeYear)_@mys.FeeMonth" aria-expanded="true" aria-controls="collapse_@(mys.FeeYear)_@mys.FeeMonth">
                                         <table style="width:100%">
@@ -53,6 +58,24 @@
                                                 </td>
                                                 <td style="width:20%">
                                                     Amount Due: @((mys.ApplicableFee - mys.Discount - mys.PaymentRecieved).ToString("0.00"))
+                                                </td>
+                                                <td style="width:20%">
+                                                    @{
+                                                        // Calculate the raw numeric amount due first (e.g., decimal)
+                                                        var currentAmountDue = mys.ApplicableFee - mys.Discount - mys.PaymentRecieved;
+                                                    }
+
+                                                    @if (currentAmountDue <= 0) // Check if amount is zero or less (meaning paid)
+                                                    {
+                                                        <span style="font-weight: bold; color: green;">Paid</span>
+                                                    }
+                                                    else
+                                                    {
+                                                       
+                                                            <span style="font-weight: bold; color: darkred;">Pay</span>
+                                                       
+
+                                                    }
                                                 </td>
                                             </tr>
                                         </table>
@@ -96,19 +119,49 @@
                                                         <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")</td>
                                                     </tr>
                                                     <tr>
+                                                        @*<td colspan="5" style="text-align:right">
+                                                                @using (Html.BeginForm("PayNow", "PayU", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "makePayment", @class = "form-horizontal" }))
+                                                                {
+                                                                    <input type="hidden" name="StudentID" value="@Model.StudentID" />
+                                                                    <input type="hidden" id="feemonth" name="FeeMonth" value="@mys.FeeMonth" />
+                                                                    <input type="hidden" name="FeeYear" value="@mys.FeeYear" />
+                                                                    <input type="hidden" name="ApplicableFee" id="totalApplicableFee" value="@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")" />
+
+
+                                                                        <button type="submit" class="btn btn-link">Pay Now</button>
+
+                                                                }
+                                                            </td>*@
                                                         <td colspan="5" style="text-align:right">
-                                                            @using (Html.BeginForm("PayNow", "PayU", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "makePayment", @class = "form-horizontal" }))
+                                                           
+
+                                                            @if (currentAmountDue <= 0) 
                                                             {
-                                                                <input type="hidden" name="StudentID" value="@Model.StudentID" />
-                                                                <input type="hidden" id="feemonth" name="FeeMonth" value="@mys.FeeMonth" />
-                                                                <input type="hidden" name="FeeYear" value="@mys.FeeYear" />
-                                                                <input type="hidden" name="ApplicableFee" id="totalApplicableFee" value="@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")" />
-                                                               
-                                                                
-                                                                    <button type="submit" class="btn btn-link">Pay Now</button>
-                                                                
+                                                                @*<span style="font-weight: bold; color: green;">Paid</span>*@
+                                                            }
+                                                            else
+                                                            {
+                                                                if (Model.SBranch.SBranchID == 41)
+                                                                {
+                                                                    using (Html.BeginForm("Index", "Payment", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                                    {
+                                                                        <input type="hidden" name="StudentID" value="@Model.StudentID" />
+                                                                        <input type="hidden" id="feemonth" name="FeeMonth" value="@mys.FeeMonth" />
+                                                                        <input type="hidden" name="FeeYear" value="@mys.FeeYear" />
+
+                                                                        <input type="hidden" name="ApplicableFee" id="totalApplicableFee" value="@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")" />
+                                                                        <button type="submit" class="btn btn-link" color: darkred;>Pay Now</button>
+
+                                                                    }
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span style="font-weight: bold; color: darkred;">Pay</span>
+                                                                }
+
                                                             }
                                                         </td>
+
 
                                                         <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")</td>
                                                     </tr>

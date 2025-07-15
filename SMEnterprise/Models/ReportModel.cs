@@ -110,10 +110,12 @@ namespace SMEnterprise.Models
     public class StudentSessionFeeStatusPageModel
     {
         public int StudentID { get; set; }
+        public int SBranchID { get; set; }
         public string name { get; set; }
         public DateTime CurDate { get; set; }
         public List<StudentYearMonthFeeSummeryModel> MonthlySummery { get; set; }
         public List<StudentYearMonthFeeTypeFeeDetailModel> FeeWiseDetails { get; set; }
+        public SBranchModel SBranch { get; set; }
     }
 public class ClassGenderCategoryCountModel
     {

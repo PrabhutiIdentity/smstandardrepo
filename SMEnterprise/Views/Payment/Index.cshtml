@@ -5,7 +5,7 @@
 
 @model SMEnterprise.Models.StudentModel
 
-@*<script src="https://checkout.razorpay.com/v1/checkout.js"></script>*@
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <section class="teacher-prolile-01">
     <div class="container">
         <div class="row">
@@ -27,45 +27,55 @@
                                     <li>Father Name: <b>@Model.FatherName</b></li>
                                     <li>Contact No: <b>@Model.FatherMobileNo</b></li>
                                     <li>Mother Name: <b>@Model.MotherName</b></li>
-                                    <li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth  </b></li>
-                                    <li>Amount(In Rupees): <b>@ViewBag.OrderDetails.ApplicableFee</b></li>
+                                    @*<li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth  </b></li>
+                                        <li>Amount(In Rupees): <b>@ViewBag.OrderDetails.ApplicableFee</b></li>*@
+                                    @if (ViewBag.OrderDetails != null)
+                                    {
+                                        <li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth</b></li>
+                                        <li>Amount(In Rupees): <b>@(Convert.ToDecimal(ViewBag.OrderDetails.ApplicableFee))</b></li>
+                                        @* ApplicableFee is already in Rupees *@
+                                    }
+                                    else
+                                    {
+                                        <li>Fee details not available. Please select a fee to pay.</li>
+                                    }
                                 </ul>
-                               
+
                             </div>
                         </div>
                         <div class="form-group register-btn">
+                          
+                            <button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>
 
-                            @* <button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>*@
-                            <form action="https://secure.payu.in/_payment" method="post">
-                                @*@using (Html.BeginForm("ProcessPayment", "Payment", FormMethod.Post, new { @id = "payUForm" }))
-        {*@
-                                <input type="hidden" name="key" value="JVDkAA" />
-                                <input type="hidden" name="txnid" value="@ViewBag.TransactionId" /> <!-- Unique Transaction ID @Guid.NewGuid().ToString()-->
-                                <input type="hidden" name="productinfo" value="Fee Payment" />
-                                <input type="hidden" name="amount" value="@((ViewBag.OrderDetails.ApplicableFee).ToString("0.00"))" />
-                                @* <input type="hidden" name="amount" value="@Math.Round(ViewBag.OrderDetails.ApplicableFee)" />*@
-                                <input type="hidden" name="email" value="@Model.EmailID ?? " info@prabhutisystems.com"" /> <!-- Ensure you have an email field in your model -->
-                                <input type="hidden" name="firstname" value="@Model.Name" />
-                               
-                                <input type="hidden" name="surl" value="https://localhost:44346/Payment/PaymentSuccess" /> <!-- URL on success -->
-                                <input type="hidden" name="furl" value="https://localhost:44346/Payment/PaymentFailure" /> <!-- URL on failure -->
-                              
-                              
-                                <!-- Add additional UDFs if necessary -->
-                                <input type="hidden" name="hash" value="@ViewBag.PaymentHash" />
+                            @*  @using (Html.BeginForm("ProcessPayment", "Payment", FormMethod.Post, new { @id = "payUForm" }))
+                                {
+                                    <input type="hidden" name="key" value="JVDkAA" />
+                                    <input type="hidden" name="txnid" value="@ViewBag.TransactionId" /> <!-- Unique Transaction ID @Guid.NewGuid().ToString()-->
+                                    <input type="hidden" name="productinfo" value="Fee Payment" />
+                                    <input type="hidden" name="amount" value="@((ViewBag.OrderDetails.ApplicableFee).ToString("0.00"))" />
 
-                                <button type="submit" class="btn btn-primary btn-lg">Pay Now</button>
-                                @*}*@
-                            </form>
+                                    <input type="hidden" name="email" value="@Model.EmailID ?? " info@prabhutisystems.com"" /> <!-- Ensure you have an email field in your model -->
+                                    <input type="hidden" name="firstname" value="@Model.Name" />
+
+                                    <input type="hidden" name="surl" value="https://localhost:44346/Payment/PaymentSuccess" /> <!-- URL on success -->
+                                    <input type="hidden" name="furl" value="https://localhost:44346/Payment/PaymentFailure" /> <!-- URL on failure -->
+
+
+                                    <!-- Add additional UDFs if necessary -->
+                                    <input type="hidden" name="hash" value="@ViewBag.PaymentHash" />
+
+                                    <button type="submit" class="btn btn-primary btn-lg">Pay Now</button>
+                                }
+                            *@
                         </div>
                     </div>
                     <div style="display:none">
-                        @using (Html.BeginForm("Complete", "Payment"))
+                        @using (Html.BeginForm("Complete", "Payment", FormMethod.Post, new { id = "paymentResponseForm" }))
                         {
                             @Html.AntiForgeryToken()
-
                             @Html.Hidden("rzp_paymentid")
                             @Html.Hidden("rzp_orderid")
+                          
                             <button type="submit" id="rzp-paymentresponse" class="btn btn-primary" hidden>Submit</button>
                         }
                     </div>
@@ -75,49 +85,53 @@
     </div>
 </section>
 
+
 <script>
-     var options = {
 
-    "key": "@ViewBag.OrderDetails.razorpayKey", // Enter the Key ID generated from the Dashboard
-    "amount": "@ViewBag.OrderDetails.Amount", // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-    "currency": "@ViewBag.OrderDetails.currency",
-    "name": "@ViewBag.OrderDetails.Name",
-    "description": "@ViewBag.OrderDetails.Description",
-    "image": "@Url.Content("~/images/JosephLogo-new.png")", // You can give your logo url
-    "order_id": "@ViewBag.OrderDetails.PGOrderID",
-         "handler": function (response) {
-           //  console.log(response);
-        // After payment successfully made response will come here
-        // Set the data in hidden form
-        document.getElementById('rzp_paymentid').value = response.razorpay_payment_id;
-        document.getElementById('rzp_orderid').value = response.razorpay_order_id;
+            var options = {
+                "key": "@ViewBag.OrderDetails.razorpayKey", // Key ID from ViewBag
+                "amount": "@ViewBag.OrderDetails.Amount", // Amount in paise from ViewBag
+                "currency": "@ViewBag.OrderDetails.currency",
+                "name": "@ViewBag.OrderDetails.Name",
+                "description": "@ViewBag.OrderDetails.Description",
+                "image": "@Url.Content("~/ images / JosephLogo - new.png")",
+                "order_id": "@ViewBag.OrderDetails.PGOrderID", // Razorpay Order ID from ViewBag
+                "handler": function(response) {
+                console.log("Payment response:", response);
 
-        // // Let's submit the form automatically
-        document.getElementById('rzp-paymentresponse').click();
-    },
-        //"handler": function (response) {
-        //    alert(response.Razorpay_payment_id);
-        //    alert(response.Razorpay_Order_id);
-        //    $('#rzp_paymentid').val(response.Razorpay_payment_id);
-        //    $('#rzp_orderid').val(response.Razorpay_Order_id);
-        //    document.getElementById('rzp-paymentresponse').click();
-        //},
-    "prefill": {
-        "name": "@ViewBag.OrderDetails.Name",
-        "email": "@ViewBag.OrderDetails.EmailID",
-        "contact": "@ViewBag.OrderDetails.ContactNumber"
-    },
-    "notes": {
-        "address": "@ViewBag.OrderDetails.Address"
-    },
-    "theme": {
-        "color": "#F37254"
-    }
-};
+                // Set the data in hidden form fields
+                document.getElementById('rzp_paymentid').value = response.razorpay_payment_id;
+                    document.getElementById('rzp_orderid').value = response.razorpay_order_id;
+
+
+                // Submit the form automatically
+                    document.getElementById('rzp-paymentresponse').click();
+
+            },
+                "prefill": {
+                "name": "@ViewBag.OrderDetails.Name",
+                    "email": "@ViewBag.OrderDetails.EmailID",
+                    "contact": "@ViewBag.OrderDetails.ContactNumber"
+                },
+                "notes": {
+                "address": "@ViewBag.OrderDetails.Address",
+                    "StudentID ": "@Model.StudentID", // Using Model for student data
+                    "fee_month": "@ViewBag.OrderDetails.FeeMonth",
+                    "fee_year": "@ViewBag.OrderDetails.FeeYear"
+                },
+                "theme": {
+                "color": "#F37254"
+                }
+        };
     var rzp1 = new Razorpay(options);
+    console.log("Razorpay Options (Index Page):", options);
 
-    function TakePayment() {
+    function TakePayment(e) {
         rzp1.open();
         e.preventDefault();
     }
+
+
+
+
 </script>

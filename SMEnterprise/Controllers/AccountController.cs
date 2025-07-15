@@ -1880,15 +1880,16 @@ namespace SMEnterprise.Controllers
                 objAccountData.GetTCDetails(objModel);
                 return View(objModel);
             }
-            else
-            {
-                objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
-                objAccountData.GetTCDetails(objModel);
-                //ViewBag.Message = "Success";
-                //return View(objModel);
-                return RedirectToAction("GetTCForStudent", objModel);
-                //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
-            }
+            
+          else
+    {
+        objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
+        objAccountData.GetTCDetails(objModel);
+        //ViewBag.Message = "Success";
+        //return View(objModel);
+        return RedirectToAction("GetTCForStudent", objModel);
+        //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
+    }
         }
         [PermissionFilter]
         public ActionResult GetTCForStudent(TCDetailsModel oModel)
