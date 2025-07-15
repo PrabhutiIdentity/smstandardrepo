@@ -2426,8 +2426,9 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateGallery(GalleryModel Data)
         {
-            Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
             Data.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
+            
 
             if (Data.OpType == -1)
             {

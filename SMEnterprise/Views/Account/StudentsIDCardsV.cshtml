@@ -51,7 +51,7 @@
         <div class="clearfix"></div>
         <div class="row">
             <div class="col-md-12">
-                @using (Html.BeginForm("StudentsIDCards", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                @using (Html.BeginForm("StudentsIDCardsV", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
                 {
                     <div class="row std-mng-head">
 
@@ -125,21 +125,15 @@
                                         <table style="width:100%;height:100%">
                                             <thead class="redbk" style="background-color: #5aba9a;">
                                                 <tr>
-                                                    <th colspan="3" style="text-align:center">
+                                                    <td style="text-align:left;width:35%;">
                                                         <img style="max-height:10mm;max-width:10mm" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_@(Model.BranchDetails.Logo)" />
-                                                    </th>
-                                                </tr>
-                                                <tr>
-                                                    <th colspan="3" style="text-align:center;color:white;">
+                                                    </td>
+                                                    <td style="text-align:left;vertical-align:middle; width:65%; color: white;">
                                                         <h2 style="font-size: 3mm;margin: 0mm;">@Model.BranchDetails.BranchSchoolName</h2>
-                                                        <span style="font-size: 2.4mm;">
-                                                            Email ID :@Model.BranchDetails.EmailID
-                                                        </span>
-                                                        <span style="font-size: 2.4mm;">
-                                                            Contact Number : @Model.BranchDetails.ContactNo
-                                                        </span>
-                                                    </th>
+
+                                                    </td>
                                                 </tr>
+                                               
                                             </thead>
                                             <tbody>
                                                 <tr>
@@ -149,112 +143,84 @@
                                                 </tr>
                                                 <tr>
                                                     <td colspan="3" style="text-align:center;">
-                                                        <img id="imgPhoto" onerror="return OnImageError(this,0);" style="max-height:20mm;max-width:20mm" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(stu.StudentID)_@stu.Photo" />
+                                                        <img id="imgPhoto" onerror="return OnImageError(this,0);" style="max-height:18mm;max-width:20mm" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(stu.StudentID)_@stu.Photo" />
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <td colspan="3" style="text-align:center;">
-                                                        <h2 style="font-size: 4mm;" class="searchable">@stu.Name</h2>
-                                                    </td>
-                                                </tr>
+                                                        <h2 style="font-size: 4mm;" class="searchable">
+                                                            @stu.Name <br /><strong style="font-size: 2.1mm;">
 
-                                                <tr style="font-size: 2.1mm;">
-                                                    <td style="padding-left: 11px;">
-                                                        Sr No.
-                                                    </td>
-                                                    <td colspan="2" class="searchable">: @stu.SchoolUID</td>
-                                                </tr>
-                                                <tr style="font-size: 2.1mm;">
-                                                    <td style="padding-left: 11px;">
-                                                        Class
-                                                    </td>
-                                                    <td colspan="2">
-                                                        : @Model.ClassName (@Model.SectionName)
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td></td>
-                                                    <td></td>
-                                                    <td rowspan="4" style="text-align:right;padding-bottom: 10px;padding-right: 5px;">
-                                                        <img onerror="return OnImageError(this,2);" style="max-height:35px;max-width:100px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_P_@Model.BranchDetails.PrincipalSignature" />
+                                                            @if (!string.IsNullOrEmpty(@stu.SchoolUID))
+                                                            {
+                                                                <text>SR No. : @stu.SchoolUID | </text>
+                                                            }
+                                                            Reg No : @stu.StudentSID
+                                                        </strong>
+                                                    </h2>
+                                                </td>
+                                            </tr>
 
-                                                    </td>
-                                                </tr>
-                                                <tr style="font-size: 2.1mm;">
-                                                    <td style="padding-left: 11px;">
-                                                        DOB
-                                                    </td>
-                                                    <td>
-                                                        : @stu.DOB.ToString("dd MMM, yyyy")
-                                                    </td>
-                                                </tr>
-                                                <tr style="font-size: 2.1mm;">
-                                                    <td style="padding-left: 11px;">
-                                                        Blood Group
-                                                    </td>
-                                                    <td>: @stu.BloodGroup</td>
-                                                </tr>
-                                                <tr style="font-size: 2.1mm;">
-                                                    <td style="padding-left: 11px;">
-                                                        Contact No
-                                                    </td>
-                                                    <td class="searchable">: @stu.FatherMobileNo </td>
-                                                </tr>
-                                           
-                                                <tr>
-                                                    <td colspan="3" style="text-align:right;padding-right: 12px;"> Principal</td>
-                                                </tr>
+                                            <tr style="font-size: 2.1mm;">
+                                                <td style="padding-left: 11px;">
+                                                    Class
+                                                </td>
+                                                <td colspan="2">
+                                                    : <b>@Model.ClassName / @Model.SectionName</b>
+                                                </td>
+                                            </tr>
+
+                                            <tr style="font-size: 2.1mm;">
+                                                <td style="padding-left: 11px;">
+                                                    DOB
+                                                </td>
+                                                <td>
+                                                    : @stu.DOB.ToString("dd MMM, yyyy")
+                                                </td>
+                                            </tr>
+                                            <tr style="font-size: 2.1mm;">
+                                                <td style="padding-left: 11px;">
+                                                    Father Name
+                                                </td>
+                                                <td>:  @stu.FatherName</td>
+                                            </tr>
+                                            <tr style="font-size: 2.1mm;">
+                                                <td style="padding-left: 11px;">
+                                                    Contact No
+                                                </td>
+                                                <td class="searchable">: @stu.FatherMobileNo </td>
+                                            </tr>
+                                            <tr style="font-size: 2.1mm;">
+                                                <td style="padding-left: 11px;">
+                                                    Address
+                                                </td>
+                                                <td class="searchable">:   @stu.MiniAddress </td>
+                                            </tr>
+
+
                                             </tbody>
-                                        </table>
-                                    </div>
-                                    <div class="frontdiv" style="height: 85.60mm;width:53.98mm;float:left;border: 1px solid black;border-radius: 5px;margin: 5px;">
-                                        <table style="width:100%;height:100%">
-                                            <tbody>
-                                                <tr>
-                                                    <td colspan="2" style="text-align:center;height: 18mm;background-color: #5aba9a;color:white;">
-                                                        <h4 style="margin:0;font-size: 3mm;">  Residential Address</h4>
-                                                        @if (stu.MiniAddress != null)
-                                                        {
-                                                            <span style="text-align:center;white-space:pre-line"> @Html.Raw(stu.MiniAddress.Replace("\n", "<br/>"))</span>
-                                                        }
-
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="width:25%;text-align:left">
-                                                        <img onerror="return OnImageError(this,2);" style="max-height:50px;max-width:80px" alt="Photo" src="@Url.Content("~/Images/ParentImage/Father/")@(stu.ParentID)_1_@stu.FatherImage" />
-                                                    </td>
-                                                    <td style="text-align:left">
-                                                        @stu.FatherName
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td style="width:25%;text-align:left">
-                                                        <img onerror="return OnImageError(this,1);" style="max-height:50px;max-width:80px" alt="Photo" src="@Url.Content("~/Images/ParentImage/Mother/")@(stu.ParentID)_2_@stu.MotherImage" />
-                                                    </td>
-                                                    <td style="text-align:left">
-                                                        @stu.MotherName
-                                                    </td>
-                                                </tr>
-                                                @*<tr>
-                                                        <td colspan="2" style="text-align:center;padding-top: 16px;padding-bottom:15px">
-                                                            <img onerror="return OnImageError(this,2);" style="max-height:100px;max-width:100px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_@(Model.BranchDetails.Logo)" />
-                                                        </td>
-                                                    </tr>*@
+                                            <tfoot>
                                                 <tr style="background-color: #5aba9a;">
-                                                    <td colspan="2" style="text-align:center;color:white;">
-                                                        <h2 style="font-size:3mm;margin: 0;">@Model.BranchDetails.BranchSchoolName</h2>
+                                                    <td colspan="3" style="text-align:center;color:white;">
+                                                        
                                                         @if (Model.BranchDetails.Address != null)
                                                         {
-                                                            <p style="margin:0px;font-size: 2mm;white-space:pre-line">
+                                                            <p style="margin:0px;font-size: 2mm;">
                                                                 @Html.Raw(Model.BranchDetails.Address)
                                                             </p>
                                                         }
+                                                        @*<p style="font-size: 2.4mm;">
+                                                            Email ID :@Model.BranchDetails.EmailID 
+                                                        </p>*@
+                                                        <p style="font-size: 2.4mm;">
+                                                            Contact Number : @Model.BranchDetails.ContactNo
+                                                        </p>
                                                     </td>
                                                 </tr>
-                                            </tbody>
+                                            </tfoot>
                                         </table>
                                     </div>
+                                  
                                 </div>
                             }
                         </div>
