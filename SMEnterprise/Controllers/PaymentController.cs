@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -29,64 +30,58 @@ namespace SMEnterprise.Controllers
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
            
             StudentModel studentmodel = accountData.GetStudentDetailsForPayment(StudentID, SBranchID);
-            OrderModel om = new OrderModel();
-            om.FeeMonth = oModel.FeeMonth;
-            om.FeeYear = oModel.FeeYear;
-            om.ApplicableFee = oModel.ApplicableFee;
-            om.StudentID = oModel.StudentID;
-            om.SBranchID = SBranchID;
-            om.SessionID = studentmodel.SessionID;
-            
-            TempData["OrderDetails"] = om;
+           
 
             OnlinePaymentModel _Payment = new OnlinePaymentModel();
 
             _Payment.Amount = Convert.ToInt32(oModel.ApplicableFee*100);// Converted to paise
             _Payment.ContactNumber = studentmodel.FatherMobileNo;
             _Payment.Name = studentmodel.Name;
-            _Payment.EmailID = string.IsNullOrEmpty(studentmodel.EmailID) ? "info@prabhutisystems.com" : studentmodel.EmailID;
+            _Payment.EmailID = string.IsNullOrEmpty(studentmodel.EmailID) ? "cmps2016@gmail.com" : studentmodel.EmailID;
 
                         
             RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
             Dictionary<string, object> options = new Dictionary<string, object>();
-            //options.Add("amount", _Payment.Amount * 100);  // Amount will in paise
-            options.Add("amount", _Payment.Amount);  
+            options.Add("amount", _Payment.Amount);  // Amount will in paise         
             options.Add("receipt", transactionId);
             options.Add("currency", "INR");
             options.Add("payment_capture", "0"); // 1 - automatic  , 2 - manual
                                                  //options.Add("notes", "-- You can put any notes here --");
 
+             Order order = client.Order.Create(options);
             Order orderResponse = client.Order.Create(options);
-            string OrderID = orderResponse["id"].ToString();
+            string RazorpayOrderID = orderResponse["id"].ToString();
 
             // Create order model for return on view
             OrderModel orderModel = new OrderModel
             {
-                PGOrderID = orderResponse.Attributes["id"],
+                PGOrderID = transactionId.ToString(),
 
                 razorpayKey = _razorpayKeyId,
                 Amount = _Payment.Amount,
                 currency = "INR",
-                OrderID = transactionId.ToString(),
+                OrderID = RazorpayOrderID,
                 Name = _Payment.Name,
                 EmailID = _Payment.EmailID,
                 ContactNumber = _Payment.ContactNumber,
                 Address = _Payment.Address,
                 Description = "Chamba School Name",
                 FeeMonth = oModel.FeeMonth,
-
                 FeeYear = oModel.FeeYear,
                 ApplicableFee = oModel.ApplicableFee,
                 StudentID = oModel.StudentID,
+                SessionID = studentmodel.SessionID,
                 SBranchID = SBranchID,
-                SessionID = studentmodel.SessionID
 
             };
+           
+
+
             orderModel.Date = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
             accountData.InsertOrderID(orderModel);
             ViewBag.OrderDetails = orderModel;
+            TempData["OrderDetails"] = orderModel;
 
-           
 
             return View(studentmodel);
         }
@@ -127,6 +122,74 @@ namespace SMEnterprise.Controllers
             accountData.InsertOrderID(orderModel);
             // Return on PaymentPage with Order data
             return View("PaymentPage", orderModel);
+        }
+
+        [HttpPost]
+        public ActionResult PaymentCallback(OrderModel objModel)
+        {
+            string paymentId = Request.Form["razorpay_payment_id"];
+            string OrderID = Request.Form["razorpay_order_id"];
+            objModel = accountData.GetOrderForPayment(OrderID);
+            RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
+           
+
+            Dictionary<string, string> attributes = new Dictionary<string, string>();
+            attributes.Add("razorpay_payment_id", paymentId);
+            attributes.Add("razorpay_order_id", Request.Form["razorpay_order_id"]);
+            attributes.Add("razorpay_signature", Request.Form["razorpay_signature"]);
+            Utils.verifyPaymentSignature(attributes);
+
+         
+            Razorpay.Api.Payment payment = client.Payment.Fetch(paymentId);
+
+            // This code is for capture the payment
+            Dictionary<string, object> options = new Dictionary<string, object>();
+            options.Add("amount", payment.Attributes["amount"]);
+            options.Add("currency", "INR");
+            Razorpay.Api.Payment paymentCaptured = payment.Capture(options);
+            string amt = paymentCaptured.Attributes["amount"];
+            //  int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            
+                
+            if (paymentCaptured.Attributes["status"] == "captured")
+            {
+                OrderModel om = new OrderModel();
+                FeePaymentModel FeeModel = new FeePaymentModel();
+                om.PGOrderID = paymentId;
+                om.PGPaymentID = paymentId;
+                om.Status = 1;
+                om.FeeMonth = objModel.FeeMonth;
+                om.FeeYear = objModel.FeeYear;
+                //om.ApplicableFee = objModel.ApplicableFee;
+                om.PaymentAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100;
+                om.StudentID = objModel.StudentID;
+                om.SBranchID = objModel.SBranchID;
+                om.PaymentMode = 3;
+                om.QDate = CommonUsage.GetCurrentDate();
+                om.CurDate = CommonUsage.GetCurrentDate();
+                om.PaymentDate = CommonUsage.GetCurrentDate();
+
+                FeeModel.SBranchID = objModel.SBranchID;
+                FeeModel.StudentID = objModel.StudentID;
+                FeeModel.SessionID = objModel.SessionID;
+                FeeModel.FeeAmount = objModel.ApplicableFee;
+                FeeModel.FeePaymentMode = 3;
+                FeeModel.PaymentAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100;
+                FeeModel.ReferanceNumber = paymentId;
+                FeeModel.Remark = "Paid by PaymentGateway";
+                FeeModel.Month = objModel.FeeMonth;
+                FeeModel.Year = objModel.FeeYear;
+
+                accountData.UpdateOrderStatus(paymentId, objModel.StudentID.ToString(), objModel.SessionID.ToString(), paymentId);
+                FeePaymentRowModel objData = accountData.SaveStudentFeePaymentOnline(FeeModel);
+               
+                return RedirectToAction("Success", new { ID = paymentId });
+               
+            }
+            else
+            {
+                return RedirectToAction("Failed");
+            }
         }
 
         [HttpPost]
@@ -182,7 +245,7 @@ namespace SMEnterprise.Controllers
                 FeeModel.FeePaymentMode = 3;
                 FeeModel.PaymentAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100;
                 FeeModel.ReferanceNumber = paymentId;
-                FeeModel.Remark = "Paid by PayU PaymentGateway";
+                FeeModel.Remark = "Paid by PaymentGateway";
                 FeeModel.Month = objModel.FeeMonth; 
                 FeeModel.Year = objModel.FeeYear; 
               

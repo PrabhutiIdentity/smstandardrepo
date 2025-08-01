@@ -1537,6 +1537,8 @@ namespace SMEnterprise.Repository
 
                     }
                 }
+
+              
             }
         }
         public int UpdateFeeDiscountRequest(FeeDiscountRequestMaster objData)
@@ -4990,6 +4992,17 @@ namespace SMEnterprise.Repository
                 return con.Query<StudentModel>("sp_GetStudentDetailForOnlinePayment", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+        public OrderModel GetOrderForPayment(string OrderID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@OrderId", OrderID);
+               
+
+                return con.Query<OrderModel>("GetPaymentOrder", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
         public int InsertOrderID(OrderModel obj)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -5002,10 +5015,11 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ContactNumber", obj.ContactNumber);
                 paramater.Add("@FeeMonth", obj.FeeMonth);
                 paramater.Add("@FeeYear", obj.FeeYear);
-                paramater.Add("@Amount", obj.Amount);
+                paramater.Add("@Amount", obj.ApplicableFee);
                 paramater.Add("@SBranchID", obj.SBranchID);
                 paramater.Add("@Date", obj.Date);
                 paramater.Add("@PGOrderID", obj.PGOrderID);
+                paramater.Add("@SessionID", obj.SessionID);
                 paramater.Add("@Status", obj.Status);
 
 
