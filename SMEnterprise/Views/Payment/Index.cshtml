@@ -5,7 +5,7 @@
 
 @model SMEnterprise.Models.StudentModel
 
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+@*<script src="https://checkout.razorpay.com/v1/checkout.js"></script>*@
 <section class="teacher-prolile-01">
     <div class="container">
         <div class="row">
@@ -28,44 +28,82 @@
                                     <li>Contact No: <b>@Model.FatherMobileNo</b></li>
                                     <li>Mother Name: <b>@Model.MotherName</b></li>
                                     @*<li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth  </b></li>
-                                        <li>Amount(In Rupees): <b>@ViewBag.OrderDetails.ApplicableFee</b></li>*@
-                                    @if (ViewBag.OrderDetails != null)
+                                    <li>Amount(In Rupees): <b>@ViewBag.OrderDetails.ApplicableFee</b></li>*@
+                                    @{
+                                        var order = ViewBag.OrderDetails as SMEnterprise.Models.OrderModel;
+                                    }
+                                    @if (order != null)
+                                    {
+                                        <li>Fee Month: <b>@order.FeeMonth</b></li>
+                                        <li>Amount: <b>@order.ApplicableFee</b></li>
+
+
+                                    }
+                                    @*@if (ViewBag.OrderDetails != null)
                                     {
                                         <li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth</b></li>
                                         <li>Amount(In Rupees): <b>@(Convert.ToDecimal(ViewBag.OrderDetails.ApplicableFee))</b></li>
-                                        @* ApplicableFee is already in Rupees *@
-                                    }
-                                    else
-                                    {
-                                        <li>Fee details not available. Please select a fee to pay.</li>
-                                    }
+
+                                    }*@
+
                                 </ul>
 
                             </div>
                         </div>
                         <div class="form-group register-btn">
-                          
-                            <button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>
+                            @*Razor pay use without embeded*@
+                            @*<button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>*@
+                            @{
+                                var testOrder = ViewBag.OrderDetails;
+                            }
+                            @if (testOrder == null)
+                            {
+                                <p style="color:red;">OrderDetails is null!</p>
+                            }
+                            @if (ViewBag.OrderDetails != null)
+                            {
+                                <form method="POST" action="https://api.razorpay.com/v1/checkout/embedded">
 
+                                    <input type="hidden" name="key_id" value="@ViewBag.OrderDetails.razorpayKey" />
+                                    <input type="hidden" name="order_id" value="@ViewBag.OrderDetails.OrderID" />
+                                    <input type="hidden" name="amount" value="@ViewBag.OrderDetails.Amount" />
+                                    <input type="hidden" name="currency" value="INR" />
+                                    <input type="hidden" name="name" value="@ViewBag.OrderDetails.Description" />
+                                    <input type="hidden" name="description" value="Fee Payment for @ViewBag.OrderDetails.FeeMonth / @ViewBag.OrderDetails.FeeYear" />
+                                    <input type="hidden" name="image" value="https://pschool.identityinfo.in/Images/SBranchLogo/41_ChambaSchool-Logo.jpeg" />
+                                    <input type="hidden" name="prefill[email]" value="@ViewBag.OrderDetails.EmailID" />
+
+                                    <input type="hidden" name="prefill[contact]" value="@Model.FatherMobileNo" />
+                                    <input type="hidden" name="prefill[name]" value="@Model.Name" />
+                                    <input type="hidden" name="notes[student_id]" value="@Model.StudentID" />
+                                    <input type="hidden" name="notes[fee_month]" value="@ViewBag.OrderDetails.FeeMonth" />
+                                    <input type="hidden" name="notes[fee_year]" value="@ViewBag.OrderDetails.FeeYear" />
+                                    <input type="hidden" name="notes[invoice_id]" value="@(ViewBag.OrderDetails.OrderID)" />
+                                    <input type="hidden" name="callback_url" value="@Url.Action("PaymentCallback", "Payment", null, Request.Url.Scheme)" />
+                                    <button type="submit" class="btn btn-primary" style="color: darkred;">Pay Now</button>
+                                </form>
+                            }
+
+                            @*PayuMoney*@
                             @*  @using (Html.BeginForm("ProcessPayment", "Payment", FormMethod.Post, new { @id = "payUForm" }))
-                                {
-                                    <input type="hidden" name="key" value="JVDkAA" />
-                                    <input type="hidden" name="txnid" value="@ViewBag.TransactionId" /> <!-- Unique Transaction ID @Guid.NewGuid().ToString()-->
-                                    <input type="hidden" name="productinfo" value="Fee Payment" />
-                                    <input type="hidden" name="amount" value="@((ViewBag.OrderDetails.ApplicableFee).ToString("0.00"))" />
+        {
+            <input type="hidden" name="key" value="JVDkAA" />
+            <input type="hidden" name="txnid" value="@ViewBag.TransactionId" /> <!-- Unique Transaction ID @Guid.NewGuid().ToString()-->
+            <input type="hidden" name="productinfo" value="Fee Payment" />
+            <input type="hidden" name="amount" value="@((ViewBag.OrderDetails.ApplicableFee).ToString("0.00"))" />
 
-                                    <input type="hidden" name="email" value="@Model.EmailID ?? " info@prabhutisystems.com"" /> <!-- Ensure you have an email field in your model -->
-                                    <input type="hidden" name="firstname" value="@Model.Name" />
+            <input type="hidden" name="email" value="@Model.EmailID ?? " info@prabhutisystems.com"" /> <!-- Ensure you have an email field in your model -->
+            <input type="hidden" name="firstname" value="@Model.Name" />
 
-                                    <input type="hidden" name="surl" value="https://localhost:44346/Payment/PaymentSuccess" /> <!-- URL on success -->
-                                    <input type="hidden" name="furl" value="https://localhost:44346/Payment/PaymentFailure" /> <!-- URL on failure -->
+            <input type="hidden" name="surl" value="https://localhost:44346/Payment/PaymentSuccess" /> <!-- URL on success -->
+            <input type="hidden" name="furl" value="https://localhost:44346/Payment/PaymentFailure" /> <!-- URL on failure -->
 
 
-                                    <!-- Add additional UDFs if necessary -->
-                                    <input type="hidden" name="hash" value="@ViewBag.PaymentHash" />
+            <!-- Add additional UDFs if necessary -->
+            <input type="hidden" name="hash" value="@ViewBag.PaymentHash" />
 
-                                    <button type="submit" class="btn btn-primary btn-lg">Pay Now</button>
-                                }
+            <button type="submit" class="btn btn-primary btn-lg">Pay Now</button>
+        }
                             *@
                         </div>
                     </div>
@@ -86,7 +124,7 @@
 </section>
 
 
-<script>
+@*<script>
 
             var options = {
                 "key": "@ViewBag.OrderDetails.razorpayKey", // Key ID from ViewBag
@@ -134,4 +172,4 @@
 
 
 
-</script>
+</script>*@

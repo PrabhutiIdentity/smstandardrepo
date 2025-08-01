@@ -96,6 +96,7 @@ namespace SMEnterprise.Models
         public decimal Discount { get; set; }
         public decimal ApplicableFee { get; set; }
         public decimal PaymentRecieved { get; set; }
+        public string PayMonths { get; set; }
     }
     public class StudentYearMonthFeeTypeFeeDetailModel
     {
@@ -184,6 +185,8 @@ public class ClassGenderCategoryCountModel
         public int ReportType { get; set; }
         public int PaymentMode { get; set; }
         public int SBranchID { get; set; }
+        public DateTime FromDateWeekly { get; set; } // Added to capture weekly start date
+        public DateTime ToDateWeekly { get; set; }   // Added to capture weekly end date
         public List<FeePaymentModel> Report { get; set; }
         public List<NameIDModel> FeeType { get; set; }
         public List<NameIDModel> ExpenceType { get; set; }

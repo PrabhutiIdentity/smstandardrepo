@@ -1,15 +1,12 @@
-﻿@using SMEnterprise.Models;
+﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
-@model  SMEnterprise.Models.CollectionReportModel
+@model CollectionReportModel
 @section IncludeCss
 {
-    <title>
-        Monthly Collection Report
-
-    </title>
+    <title>Monthly Collection Report @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/mm/yyyy")</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
 }
 <style>
@@ -21,11 +18,11 @@
 <section class="content-header">
     <h1>
         Monthly Collection Report
-
+        <small>Control panel</small>
     </h1>
     <ol class="breadcrumb">
         <li><a href="/Account/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-        <li class="active">Monthly Collection Report</li>
+        <li class="active">Monthly Fee Wise Collection Report</li>
     </ol>
 </section>
 
@@ -36,7 +33,7 @@
         <div class="col-xs-12">
             <div class="">
                 <div class="box-header">
-                    @using (Html.BeginForm("ReportMonthlyCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+                    @using (Html.BeginForm("ReportMonthlyFeeCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
                     {
                         <div class="row std-mng-head">
 
@@ -81,39 +78,35 @@
                     }
                 </div>
                 <div class="box-body">
-                    <table id="PaymentsTable" class="table table-striped payments">
+                    <table id="PaymentsTable" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
                         <thead>
                             <tr>
-                                <th>S.No</th>
-                                <th>Reciept No</th>
-                                <th>Student ID</th>
-                                <th>SR No</th>
+
                                 <th>Payee</th>
+                                <th>Father Name</th>
                                 <th>Class</th>
                                 <th>Session</th>
                                 <th>Details</th>
                                 <th>Date</th>
-                                <th>Collected By</th>
-                                <th>Amount Recieved</th>
-                                <th>Refund Amount</th>
-                                <th>Actual Amount</th>
+                                <th>collection</th>
+                                @foreach (var com in Model.FeeType)
+                                {
+                                    <th>@com.Name</th>
+                                }
 
+                                <th style="width:10%">Amount</th>
                             </tr>
                         </thead>
                         @{
-                            int count = 1;
+                            int count = 0;
                             decimal TotalPayment = 0;
-                            decimal TotalRefund = 0;
-                            decimal TotalAmount = 0;
                             foreach (FeePaymentModel c in Model.Report)
                             {
                                 var PayMode = "";
                                 TotalPayment = TotalPayment + c.PaymentAmount;
-                                TotalRefund = TotalRefund + c.RefundAmount;
-                                TotalAmount = TotalPayment - TotalRefund;
+                                <tr>
 
-
-                                @*<td>
+                                    <td>
                                         <b>Reciept No:</b> @c.PaymentRecieptNo<br />
                                         <b>Name:</b> @c.Name <br />
                                         @if (!string.IsNullOrEmpty(c.SchoolUID))
@@ -122,69 +115,53 @@
                                         }
 
 
-                                    </td>*@
-                    <tr>
+                                    </td>
+                                    <td>@c.FatherName</td>
+                                    <td>
+                                        @c.ClassName / @c.SectionName
+                                    </td>
+                                    <td>
+                                        @c.SessionName
+                                    </td>
+                                    <td>
+                                        @if (c.PaymentMode == 0)
+                                        {
+                                            PayMode = "Cash Payment";
+                                        }
+                                        else if (c.PaymentMode == 1)
+                                        {
+                                            PayMode = "Cheque Payment";
+                                        }
+                                        else if (c.PaymentMode == 2)
+                                        {
+                                            PayMode = "NEFT Payment";
+                                        }
+                                        else if (c.PaymentMode == 2)
+                                        {
+                                            PayMode = "Other Payment";
+                                        }
+                                        @PayMode<br />
+                                        @c.PayMonths
+                                    </td>
+                                    <td>
+                                        @c.PaymentDate.ToString("dd MMM, yyyy")
+                                    </td>
+                                    <td>
+                                        @c.CollectedBy
+                                    </td>
+                                    @foreach (var FeeT in Model.FeeType)
+                                    {
+                                        var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentID == c.PaymentID).Sum(x => x.PaymentRecieved);
 
-                        <td>@count</td>
-                        <td style="width:10%">@c.PaymentRecieptNo</td>
-                        <td style="width:10%">@c.StudentSID</td>
-                        <td>@c.SchoolUID</td>
-                        <td style="width:15%"> @c.Name</td>
+                                        FeeT.Sum = FeeT.Sum + rep;
 
+                                        <td>@rep</td>
 
-                        <td style="width:10%">
-
-                            @c.ClassName / @c.SectionName
-                        </td>
-                        <td style="width:7%">
-                            @c.SessionName
-                        </td>
-
-                        <td style="width:20%">
-                            @if (c.PaymentMode == 0)
-                            {
-                                PayMode = "Cash Payment";
-                            }
-                            else if (c.PaymentMode == 1)
-                            {
-                                PayMode = "Cheque Payment";
-                            }
-                            else if (c.PaymentMode == 2)
-                            {
-                                PayMode = "NEFT Payment";
-                            }
-                            else if (c.PaymentMode == 2)
-                            {
-                                PayMode = "Other Payment";
-                            }
-                            @PayMode<br />
-                            @c.PayMonths
-                        </td>
-
-
-                        <td style="width:10%">
-                            @c.PaymentDate.ToString("dd MMM, yyyy")
-                        </td>
-                        <td style="width:7%">
-                            @c.CollectedBy
-                        </td>
-                        <td style="width:10%">
-                            <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
-                        </td>
-                        <td style="width:10%">
-                            <i class="fa fa-inr" aria-hidden="true"></i> @c.RefundAmount.ToString("N2")
-                        </td>
-                        <td style="width:10%">
-                            <i class="fa fa-inr" aria-hidden="true"></i>
-                            @{
-                                decimal payAmount = c.PaymentAmount;
-                                decimal refAmount = c.RefundAmount;
-
-                                var Amount = payAmount - refAmount;
-                            }
-                            @Amount.ToString("N2");
-                        </td>
-                    </tr>
+                                    }
+                                    <td>
+                                        <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
+                                    </td>
+                                </tr>
 
                                 count++;
                             }
@@ -192,16 +169,14 @@
                         }
                         <tfoot>
                             <tr style="background-color: #606d73;color: white;">
-                                <td>
-                                    <b> Total</b>
+                                <td colspan="6">
+                                    <b> Total Collection</b>
                                 </td>
-                                <td>
-                                    <b>  Month Collection</b>
-                                </td>
-                                <td colspan="8"></td>
+                                @foreach (var com in Model.FeeType)
+                                {
+                                    <td>@com.Sum</td>
+                                }
                                 <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
-                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalRefund.ToString("N2")</b></td>
-                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalAmount.ToString("N2")</b></td>
                             </tr>
                         </tfoot>
                     </table>
@@ -214,89 +189,47 @@
 </section>
 @section scripts
 {
-    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
-    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
-    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
-    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
-    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
-    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
     <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
     <script>
         $(document).ready(function () {
             var handleDataTableButtons = function () {
-                 var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
-                  var rpname ='Monthly Collection Report'
-            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
                 if ($("#PaymentsTable").length) {
                     $("#PaymentsTable").DataTable({
                         "paging": true,
-                        "pagingType": "simple_numbers",
+                        "pageLength": 30,
                         dom: "Bfrtip",
                         buttons: [
                             {
-                               extend: "copy",
-                            className: "btn-sm",
-                                footer: true,
-                                message: printdate,
-                             messageTop: '@Model.Branch.BranchSchoolName',
-                            messageBottom: repname,
-                            title: rpname
+                                extend: "copy",
+                                className: "btn-sm",
+                                footer: true
                             },
                             {
-                                 extend: "csv",
-                          className: "btn-sm",
-                                footer: true,
-                                message: printdate,
-                            messageTop: '@Model.Branch.BranchSchoolName',
-                            messageBottom: repname,
-                            title: rpname
+                                extend: "csv",
+                                className: "btn-sm",
+                                footer: true
                             },
                             {
-                                  extend: "excel",
-                          className: "btn-sm",
-                          footer: true,
-                         messageTop: rpname,
-                          messageBottom: repname,
-                          title: '@Model.Branch.BranchSchoolName'
+                                extend: "excel",
+                                className: "btn-sm",
+                                footer: true
                             },
                             {
                                 extend: "pdfHtml5",
-                          className: "btn-sm",
-                          footer: true,
-                          orientation: 'landscape',
-                          customize: function (doc) {
-
-                              doc.defaultStyle.fontSize = 7;
-                              doc.styles.tableHeader.fontSize = 10;
-
-                              doc['header'] = (function () {
-                                  return {
-                                      columns: [
-                                          {
-                                              alignment: 'left',
-                                              italics: true,
-                                              text: '@Model.Branch.BranchSchoolName',
-                                              fontSize: 14,
-                                              margin: [0, 0]
-                                          }
-                                      ],
-                                      margin: 20
-                                  }
-                              });
-                                },
-                                message: printdate,
-                          messageBottom: repname,
-                          title: rpname
+                                className: "btn-sm",
+                                footer: true
                             },
                             {
                                 extend: "print",
-                          className: "btn-sm",
-                                footer: true,
-                                orientation: 'landscape',
-                                message: printdate,
-                          messageTop: rpname,
-                          messageBottom: repname,
-                          title: '@Model.Branch.BranchSchoolName'
+                                className: "btn-sm",
+                                footer: true
                             },
                         ],
                         responsive: true
@@ -317,8 +250,8 @@
             TableManageButtons.init();
         });
         $(function () {
-            $('#liReportMonthlyCollection').closest('ul').closest('li').addClass('active');
-            $('#liReportMonthlyCollection').addClass('active');
+            $('#liReportMonthlyFeeCollection').closest('ul').closest('li').addClass('active');
+            $('#liReportMonthlyFeeCollection').addClass('active');
 
         });
     </script>

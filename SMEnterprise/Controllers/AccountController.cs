@@ -3226,7 +3226,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult ReportMonthlyCollection(CollectionReportModel objModel)
         {
-            objModel.ReportType = 2;
+           
+           objModel.ReportType = 2;
 
             if (objModel.FromDate.Year == 1)
             {
@@ -3237,6 +3238,7 @@ namespace SMEnterprise.Controllers
             {
                 objModel.ToDate = CommonUsage.GetCurrentDate();
             }
+           
 
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetCollectionReport(objModel);
