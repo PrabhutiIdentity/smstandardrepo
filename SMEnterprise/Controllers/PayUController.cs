@@ -159,7 +159,8 @@ namespace SMEnterprise.Controllers
                 objModel.Remark = "Paid by PayU PaymentGateway";
                 objModel.Month = CommonUsage.ConvertToInt(feeMonth);
                 objModel.Year = CommonUsage.ConvertToInt(feeYear);
-                objAccountData.UpdateOrderStatus(txnid,studentId,sessionId,mihpayid);
+                int Status = 1;
+                objAccountData.UpdateOrderStatus(txnid,studentId,sessionId,mihpayid, Status);
                 FeePaymentRowModel objData = objAccountData.SaveStudentFeePaymentOnline(objModel);
             }
             else

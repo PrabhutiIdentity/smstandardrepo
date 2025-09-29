@@ -26,11 +26,22 @@ namespace SMEnterprise.Controllers
         public ActionResult Index(OrderModel oModel)
         {
             string transactionId = Guid.NewGuid().ToString();
-            int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
+            //int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-           
+            int StudentID = oModel.StudentID;
+            
+
             StudentModel studentmodel = accountData.GetStudentDetailsForPayment(StudentID, SBranchID);
-           
+
+            StudentSessionFeeStatusPageModel oFeeModel = new StudentSessionFeeStatusPageModel();
+            oFeeModel.StudentID = StudentID;
+            accountData.GetStudentMonthWiseSessionFeeDetails(oFeeModel);
+
+            // Find the applicable fee details based on the month and year from the form
+            decimal applicableFee = oFeeModel.FeeWiseDetails.Where(c => c.FeeMonth == oModel.FeeMonth && c.FeeYear == oModel.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount);
+            oModel.ApplicableFee = applicableFee;
+
+
 
             OnlinePaymentModel _Payment = new OnlinePaymentModel();
 
@@ -129,28 +140,60 @@ namespace SMEnterprise.Controllers
         {
             string paymentId = Request.Form["razorpay_payment_id"];
             string OrderID = Request.Form["razorpay_order_id"];
-            objModel = accountData.GetOrderForPayment(OrderID);
+            OrderModel originalOrder = accountData.GetOrderForPayment(OrderID);
+
+            // If the order doesn't exist, handle the error.
+            if (originalOrder == null)
+            {
+                // Log error and redirect to failure page.
+                return RedirectToAction("Failed");
+            }
+            // 2. Verify the payment signature. This is a crucial security step.
             RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
-           
+            Razorpay.Api.Payment payment = client.Payment.Fetch(paymentId);
+
 
             Dictionary<string, string> attributes = new Dictionary<string, string>();
             attributes.Add("razorpay_payment_id", paymentId);
             attributes.Add("razorpay_order_id", Request.Form["razorpay_order_id"]);
             attributes.Add("razorpay_signature", Request.Form["razorpay_signature"]);
-            Utils.verifyPaymentSignature(attributes);
+            try
+            {
+                Utils.verifyPaymentSignature(attributes);
+            }
+            catch (Exception ex)
+            {
+               
+                return RedirectToAction("Failed");
+            }
 
-         
-            Razorpay.Api.Payment payment = client.Payment.Fetch(paymentId);
+            // 4. *** CRITICAL STEP: VALIDATE THE AMOUNT ***
+           
+            decimal paidAmountInPaise = Convert.ToDecimal(payment.Attributes["amount"]);
+            
+            decimal originalAmountInPaise = originalOrder.Amount*100; 
 
-            // This code is for capture the payment
+            // Check if the amounts match.
+            if (paidAmountInPaise != originalAmountInPaise)
+            {
+                // Amounts do not match. This is a fraud attempt.
+                // Log the discrepancy and do NOT process the payment.
+                int Status = -1;
+                string ReferanceNumber = "AmountMismatch";
+                accountData.UpdateOrderStatus(OrderID, originalOrder.StudentID.ToString(), originalOrder.SessionID.ToString(), ReferanceNumber, Status);
+                return RedirectToAction("Failed");
+            }
+
+            // 5. Capture the payment.
             Dictionary<string, object> options = new Dictionary<string, object>();
-            options.Add("amount", payment.Attributes["amount"]);
+            //options.Add("amount", payment.Attributes["amount"]);
+            options.Add("amount", paidAmountInPaise);
             options.Add("currency", "INR");
             Razorpay.Api.Payment paymentCaptured = payment.Capture(options);
-            string amt = paymentCaptured.Attributes["amount"];
-            //  int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            
-                
+
+            // 6. Proceed with the successful payment logic only if the status is "captured"
+
+            int StudentID = 0; int SBranchID = 0;
             if (paymentCaptured.Attributes["status"] == "captured")
             {
                 OrderModel om = new OrderModel();
@@ -158,29 +201,42 @@ namespace SMEnterprise.Controllers
                 om.PGOrderID = paymentId;
                 om.PGPaymentID = paymentId;
                 om.Status = 1;
-                om.FeeMonth = objModel.FeeMonth;
-                om.FeeYear = objModel.FeeYear;
-                //om.ApplicableFee = objModel.ApplicableFee;
-                om.PaymentAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100;
-                om.StudentID = objModel.StudentID;
-                om.SBranchID = objModel.SBranchID;
+                //om.FeeMonth = objModel.FeeMonth;
+                //om.FeeYear = objModel.FeeYear;
+                //om.StudentID = objModel.StudentID;
+                //om.SBranchID = objModel.SBranchID;
+
+                // --- SECURE: Use originalOrder for all data ---
+
+                om.FeeMonth = originalOrder.FeeMonth;
+                om.FeeYear = originalOrder.FeeYear;
+                om.StudentID = originalOrder.StudentID;
+                om.SBranchID = originalOrder.SBranchID;
+                om.PaymentAmount = paidAmountInPaise / 100;
+                StudentID = om.StudentID;
+                SBranchID = om.SBranchID;
                 om.PaymentMode = 3;
                 om.QDate = CommonUsage.GetCurrentDate();
                 om.CurDate = CommonUsage.GetCurrentDate();
                 om.PaymentDate = CommonUsage.GetCurrentDate();
 
-                FeeModel.SBranchID = objModel.SBranchID;
-                FeeModel.StudentID = objModel.StudentID;
-                FeeModel.SessionID = objModel.SessionID;
-                FeeModel.FeeAmount = objModel.ApplicableFee;
+                //FeeModel.SBranchID = objModel.SBranchID;
+                //FeeModel.StudentID = objModel.StudentID;
+                //FeeModel.SessionID = objModel.SessionID;
+                //FeeModel.FeeAmount = objModel.ApplicableFee;
+                FeeModel.SBranchID = originalOrder.SBranchID;
+                FeeModel.StudentID = originalOrder.StudentID;
+                FeeModel.SessionID = originalOrder.SessionID;
+                FeeModel.FeeAmount = originalOrder.Amount;
                 FeeModel.FeePaymentMode = 3;
-                FeeModel.PaymentAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100;
+                FeeModel.PaymentAmount = paidAmountInPaise / 100;
                 FeeModel.ReferanceNumber = paymentId;
                 FeeModel.Remark = "Paid by PaymentGateway";
-                FeeModel.Month = objModel.FeeMonth;
-                FeeModel.Year = objModel.FeeYear;
-
-                accountData.UpdateOrderStatus(paymentId, objModel.StudentID.ToString(), objModel.SessionID.ToString(), paymentId);
+                FeeModel.Month = originalOrder.FeeMonth;
+                FeeModel.Year = originalOrder.FeeYear;
+                // --- END SECURE BLOCK ---
+                int Status = 1;
+                accountData.UpdateOrderStatus(OrderID, om.StudentID.ToString(), om.SBranchID.ToString(), FeeModel.ReferanceNumber,Status);
                 FeePaymentRowModel objData = accountData.SaveStudentFeePaymentOnline(FeeModel);
                
                 return RedirectToAction("Success", new { ID = paymentId });
@@ -188,6 +244,9 @@ namespace SMEnterprise.Controllers
             }
             else
             {
+                int Status = -1;
+                string ReferanceNumber = "Failed";
+                accountData.UpdateOrderStatus(paymentId, StudentID.ToString(), SBranchID.ToString(), ReferanceNumber,Status);
                 return RedirectToAction("Failed");
             }
         }
@@ -247,9 +306,9 @@ namespace SMEnterprise.Controllers
                 FeeModel.ReferanceNumber = paymentId;
                 FeeModel.Remark = "Paid by PaymentGateway";
                 FeeModel.Month = objModel.FeeMonth; 
-                FeeModel.Year = objModel.FeeYear; 
-              
-                accountData.UpdateOrderStatus(paymentId, objModel.StudentID.ToString(), objModel.SessionID.ToString(), orderId);
+                FeeModel.Year = objModel.FeeYear;
+                int Status = 1;
+                accountData.UpdateOrderStatus(paymentId, objModel.StudentID.ToString(), objModel.SessionID.ToString(), FeeModel.ReferanceNumber,Status);
                 FeePaymentRowModel objData = accountData.SaveStudentFeePaymentOnline(FeeModel);
                 // accountData.UpdateStudentFeePaymentStatus(om);
                   return RedirectToAction("Success", new { ID = orderId });
@@ -274,7 +333,7 @@ namespace SMEnterprise.Controllers
             return Redirect("https://test.payu.in/_payment");
         }
 
-        public ActionResult PaymentFailure(FormCollection form)
+        public ActionResult Failed(FormCollection form)
         {
 
             return View("Failed");

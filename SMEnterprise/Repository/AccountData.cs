@@ -5020,13 +5020,13 @@ namespace SMEnterprise.Repository
                 paramater.Add("@Date", obj.Date);
                 paramater.Add("@PGOrderID", obj.PGOrderID);
                 paramater.Add("@SessionID", obj.SessionID);
-                paramater.Add("@Status", obj.Status);
+                paramater.Add("@Status", 0);
 
 
                 return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
-        public int UpdateOrderStatus(string OrderID, string StudentID, string SessionID, string PGPaymentID)
+        public int UpdateOrderStatus(string OrderID, string StudentID, string SessionID, string ReferanceNumber,int Status)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -5034,8 +5034,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@OrderID", OrderID);
                 paramater.Add("@StudentID", StudentID);                
                 paramater.Add("@SessionID", SessionID);
-                paramater.Add("@PGPaymentID", PGPaymentID);
-                paramater.Add("@Status", 1);
+                paramater.Add("@PGPaymentID", ReferanceNumber);
+                paramater.Add("@Status", Status);
                 return con.Query<int>("sp_UpdateOrderStatus", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
