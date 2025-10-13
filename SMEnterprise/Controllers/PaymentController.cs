@@ -14,15 +14,18 @@ using System.Web;
 using System.Web.Helpers;
 using System.Web.Mvc;
 using System.Web.UI.WebControls;
+using static Lucene.Net.Index.CheckIndex;
 
 namespace SMEnterprise.Controllers
 {
     public class PaymentController : Controller
     {
         AccountData accountData = new AccountData();
-        private readonly string _razorpayKeyId = "rzp_test_xsUBcEJ9m0np5p"; 
-        private readonly string _razorpaySecret = "aCtoOu3y7WibjJ4j3ckwV04V";
-      
+        //private readonly string _razorpayKeyId = "rzp_test_xsUBcEJ9m0np5p"; 
+        //private readonly string _razorpaySecret = "aCtoOu3y7WibjJ4j3ckwV04V";
+        private readonly string _razorpayKeyId = "rzp_live_RSpysm7E9l1iVG";
+        private readonly string _razorpaySecret = "BU5GhnJ4xZfN2IOny0FeRbKL";
+
         public ActionResult Index(OrderModel oModel)
         {
             string transactionId = Guid.NewGuid().ToString();
@@ -67,7 +70,7 @@ namespace SMEnterprise.Controllers
             OrderModel orderModel = new OrderModel
             {
                 PGOrderID = transactionId.ToString(),
-
+                razorpaySecret = _razorpaySecret,
                 razorpayKey = _razorpayKeyId,
                 Amount = _Payment.Amount,
                 currency = "INR",
@@ -85,8 +88,9 @@ namespace SMEnterprise.Controllers
                 SBranchID = SBranchID,
 
             };
-           
 
+            string hashString = orderModel.razorpayKey + "|" + orderModel.OrderID + "|" + orderModel.Amount + "|" + orderModel.Name + "|" + orderModel.EmailID + "|" + orderModel.Description + "|" + orderModel.StudentID + "|" + orderModel.FeeMonth + "|" + orderModel.FeeYear + "|" + orderModel.razorpaySecret;
+            orderModel.Hash = GenerateSha256(hashString);
 
             orderModel.Date = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
             accountData.InsertOrderID(orderModel);
@@ -97,6 +101,16 @@ namespace SMEnterprise.Controllers
             return View(studentmodel);
         }
       
+        public string GenerateSha256(string text)
+        {
+            byte[] message = Encoding.UTF8.GetBytes(text);
+            using (var hashString = new System.Security.Cryptography.SHA256Managed())
+            {
+                byte[] hashValue = hashString.ComputeHash(message);
+                var hex = BitConverter.ToString(hashValue).Replace("-", "").ToLower();
+                return hex;
+            }
+        }
         public ActionResult CreatePayment(Models.OnlinePaymentModel _Payment)
         {
             // Generate random receipt number for order
@@ -236,6 +250,11 @@ namespace SMEnterprise.Controllers
                 FeeModel.Year = originalOrder.FeeYear;
                 // --- END SECURE BLOCK ---
                 int Status = 1;
+                string hashSequence;
+               
+                hashSequence = _razorpayKeyId + "|" + OrderID + "|" + paidAmountInPaise + "|" + originalOrder.Name + "|" + originalOrder.EmailID + "|" + originalOrder.Description + "|" + om.StudentID + "|" + om.FeeMonth + "|" + om.FeeYear + "|" + om.PGPaymentID + "|" + _razorpaySecret;
+                string generatedHash = GenerateSha256(hashSequence);
+
                 accountData.UpdateOrderStatus(OrderID, om.StudentID.ToString(), om.SBranchID.ToString(), FeeModel.ReferanceNumber,Status);
                 FeePaymentRowModel objData = accountData.SaveStudentFeePaymentOnline(FeeModel);
                
@@ -308,6 +327,8 @@ namespace SMEnterprise.Controllers
                 FeeModel.Month = objModel.FeeMonth; 
                 FeeModel.Year = objModel.FeeYear;
                 int Status = 1;
+              
+
                 accountData.UpdateOrderStatus(paymentId, objModel.StudentID.ToString(), objModel.SessionID.ToString(), FeeModel.ReferanceNumber,Status);
                 FeePaymentRowModel objData = accountData.SaveStudentFeePaymentOnline(FeeModel);
                 // accountData.UpdateStudentFeePaymentStatus(om);
