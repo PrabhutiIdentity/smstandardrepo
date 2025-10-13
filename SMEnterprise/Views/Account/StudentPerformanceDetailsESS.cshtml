@@ -292,18 +292,35 @@
                                                                     }
 
                                                                 }
-																//
-                                                             
-                                                              <td>@Math.Round(EvalTotalMarks, 0)</td>
+                                                                //
+                                                                @*<td>@Math.Round(EvalMaxMarks, 0)</td>*@
+                                                                if (Model.Student.SBranchID == 15)
+                                                                {
+                                                                    if (Model.Student.ClassID == 153 || Model.Student.ClassID == 154 || Model.Student.ClassID == 155 || Model.Student.ClassID == 156)
+                                                                    {
+                                                                        <td style="text-decoration: @(EvalTotalMarks < (EvalMaxMarks * 0.35M) ? "underline" : "none")">@Math.Round(EvalTotalMarks, 0)</td>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <td style="text-decoration: @(EvalTotalMarks < (EvalMaxMarks * 0.40M) ? "underline" : "none")">@Math.Round(EvalTotalMarks, 0)</td>
+                                                                    }
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    <td>@Math.Round(EvalMaxMarks, 0)</td>
+
+                                                                }
                                                             }
-                                                            @if (Model.EvaluationID == -1)
-                                                            {
-                                                               
+
+                                                                @if (Model.EvaluationID == -1)
+                                                                {
+
                                                                     <td>@(subTotalMarks.ToString("0"))</td>
                                                                     <td>@(subTotalObtained.ToString("0"))</td>
                                                                     <td>@AcadmicModel.CalculateGrade(subTotalObtained, subTotalMarks)</td>
-                                                               
-                                                            }
+
+                                                                }
                                                             </tr>
                                                                     }
                                                                     privSubID = r.SubjectID;
@@ -317,19 +334,20 @@
                                                                     @*<td><b>@Math.Round(sube.MarksObtained, 2)</b></td>*@
                                                                     <td>@sube.TotalMarks.ToString("0")</td>
                                                                     <td>@sube.MarksObtained.ToString("0")</td>
-																	division = @AcadmicModel.CalculateGradeDivision(me.MarksObtained, me.TotalMarks);
-TotalMarksT = @Math.Round(me.TotalMarks, 2);
-TotalObtMarksT = @Math.Round(me.MarksObtained, 2);
-Grade = @AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks);
-GradeforPromote = @Grade;
+                                                                    division = @AcadmicModel.CalculateGradeDivision(me.MarksObtained, me.TotalMarks);
+                                                                    TotalMarksT = @Math.Round(me.TotalMarks, 2);
+                                                                    TotalObtMarksT = @Math.Round(me.MarksObtained, 2);
+                                                                    Grade = @AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks);
+                                                                    GradeforPromote = @Grade;
                                                                 }
-																   <td><b>@Math.Round(me.MarksObtained, 0)</b></td>
-
-                                                            }
-                                                            @*for Total Marks*@
-                                                            @if (Model.EvaluationID == -1)
-                                                            {
+                                                                <td><b>@Math.Round(me.MarksObtained, 0)</b></td>
                                                                
+
+                                                                    }
+                                                                    @*for Total Marks*@
+                                                                    @if (Model.EvaluationID == -1)
+                                                                    {
+
                                                                     <td><b>@(Model.MainEvaluations.Sum(x => x.TotalMarks).ToString("0"))</b></td>
                                                                     <td><b>@(Model.MainEvaluations.Sum(x => x.MarksObtained).ToString("0"))</b></td>
                                                                     <td>
@@ -337,18 +355,18 @@ GradeforPromote = @Grade;
                                                                             totaltotal = Model.MainEvaluations.Sum(x => x.TotalMarks);
                                                                             totalscored = Model.MainEvaluations.Sum(x => x.MarksObtained);
                                                                             GradeAll = AcadmicModel.CalculateGrade(totalscored, totaltotal);
-																			
-																			GradeforPromote = @GradeAll;
+
+                                                                            GradeforPromote = @GradeAll;
                                                                         }
                                                                         @GradeAll
-																		
+
 
 
                                                                     </td>
-                                                              
-                                                                @* <td>@AcadmicModel.CalculateGrade(Model.Result.Sum(x => x.rMarksScored), Model.Result.Sum(x => x.rMaxMarks))</td>*@
-                                                            }
-                                                        </tr>
+
+                                                                    @* <td>@AcadmicModel.CalculateGrade(Model.Result.Sum(x => x.rMarksScored), Model.Result.Sum(x => x.rMaxMarks))</td>*@
+                                                                }
+                                                                </tr>
                                                             }
                                                         </table>
                                                         <table style="width: 100%; border: 1px solid #ddd; background-color: #d7ebe5; font-size: 14px; color: black; ">
