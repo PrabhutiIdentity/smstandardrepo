@@ -18,6 +18,7 @@ using System.Reflection;
 using System.Xml.Xsl;
 using System.Xml;
 using System.Xml.Serialization;
+using ExcelDataReader;
 
 namespace SMEnterprise.Repository
 {
@@ -1186,54 +1187,59 @@ namespace SMEnterprise.Repository
                 return dt;
             }
 
-            public static DataTable ConvertXSLXtoDataTable(string strFilePath, string connString)
+            public static DataTable ConvertXSLXtoDataTable(string strFilePath)
             {
-                OleDbConnection oledbConn = new OleDbConnection(connString);
-                DataTable dt = new DataTable();
-                DataSet ds = new DataSet();
-                //try
-                //{
-
-                oledbConn.Open();
-                using (DataTable Sheets = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null))
+                // We don't need the connection string anymore, just the file path
+                using (var stream = File.Open(strFilePath, FileMode.Open, FileAccess.Read))
                 {
-                    if(Sheets.Rows.Count>0)
+                    // Auto-detects if it's .xls or .xlsx
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
                     {
-                        var i = 0;
-                        string worksheets = Sheets.Rows[i]["TABLE_NAME"].ToString();
-                        OleDbCommand cmd = new OleDbCommand(String.Format("SELECT * FROM [{0}]", worksheets), oledbConn);
-                        OleDbDataAdapter oleda = new OleDbDataAdapter();
-                        oleda.SelectCommand = cmd;
+                        // Configuration to treat the first row as the header
+                        var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+                        {
+                            ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                            {
+                                UseHeaderRow = true
+                            }
+                        });
 
-                        oleda.Fill(ds);
+                        // result.Tables[0] is your first worksheet, just like ds.Tables[0]
+                        return result.Tables.Count > 0 ? result.Tables[0] : new DataTable();
                     }
-
-                    //for (int i = 0; i < Sheets.Rows.Count; i++)
-                    //{
-                    //    string worksheets = Sheets.Rows[i]["TABLE_NAME"].ToString();
-                    //    OleDbCommand cmd = new OleDbCommand(String.Format("SELECT * FROM [{0}]", worksheets), oledbConn);
-                    //    OleDbDataAdapter oleda = new OleDbDataAdapter();
-                    //    oleda.SelectCommand = cmd;
-
-                    //    oleda.Fill(ds);
-                    //}
-
-                    dt = ds.Tables[0];
                 }
-
-                //}
-                //catch (Exception ex)
-                //{
-                //}
-                //finally
-                //{
-
-                oledbConn.Close();
-                //}
-
-                return dt;
-
             }
+            /*  public static DataTable ConvertXSLXtoDataTable(string strFilePath, string connString)
+              {
+                  OleDbConnection oledbConn = new OleDbConnection(connString);
+                  DataTable dt = new DataTable();
+                  DataSet ds = new DataSet();
+                  
+                  oledbConn.Open();
+                  using (DataTable Sheets = oledbConn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables, null))
+                  {
+                      if(Sheets.Rows.Count>0)
+                      {
+                          var i = 0;
+                          string worksheets = Sheets.Rows[i]["TABLE_NAME"].ToString();
+                          OleDbCommand cmd = new OleDbCommand(String.Format("SELECT * FROM [{0}]", worksheets), oledbConn);
+                          OleDbDataAdapter oleda = new OleDbDataAdapter();
+                          oleda.SelectCommand = cmd;
+
+                          oleda.Fill(ds);
+                      }
+
+                     
+
+                      dt = ds.Tables[0];
+                  }
+
+                 
+
+                  return dt;
+
+              }
+            */
 
         }
         #endregion 

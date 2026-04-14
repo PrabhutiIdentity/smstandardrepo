@@ -47,6 +47,17 @@ namespace SMEnterprise.Models
         public int SBranchID { get; set; }
         public string Hash { get; set; }
         public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
+
+        // ── NEW: multi-month support ──────────────────────────────
+        /// <summary>
+        /// JSON string of selected months, e.g.
+        /// [{"Month":4,"Year":2025,"Amount":81.00},{"Month":5,"Year":2025,"Amount":80.00}]
+        /// </summary>
+        public string SelectedMonthsJson { get; set; }
+
+        /// <summary>True when the order covers more than one month.</summary>
+        public bool IsMultiMonth { get; set; }
+
     }
     public class PaymentDetailModel
     {

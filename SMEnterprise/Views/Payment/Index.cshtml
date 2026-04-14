@@ -1,175 +1,681 @@
 ﻿@{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "Fee Payment";
     Layout = "~/Views/Shared/_ParentLayout.cshtml";
 }
-
 @model SMEnterprise.Models.StudentModel
 
-@*<script src="https://checkout.razorpay.com/v1/checkout.js"></script>*@
-<section class="teacher-prolile-01">
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-3 t-profile-left">
-                <div class="teacher-contact">
-                    <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" style="max-height:100px" />
+@section IncludeCss {
+    <title>P-School | Fee Payment</title>
+    <style>
+    /* =========================================
+       DESIGN SYSTEM — matches FeeSummary page
+    ========================================= */
+    :root {
+        --primary:      #667eea;
+        --primary-dark: #764ba2;
+        --accent:       #26B99A;
+        --accent-dark:  #1e9e85;
+        --danger:       #e74c3c;
+        --success:      #27ae60;
+        --warning:      #f39c12;
+        --text-main:    #2c3e50;
+        --text-muted:   #7f8c8d;
+        --bg-light:     #f8f9fa;
+        --border:       #e3e3e3;
+        --radius:       8px;
+        --shadow:       0 2px 8px rgba(0,0,0,0.10);
+        --shadow-lg:    0 8px 24px rgba(38,185,154,0.18);
+    }
+
+    /* ---- Page wrapper ---- */
+    .payment-page-wrapper {
+        padding: 10px 0 60px;
+    }
+
+    /* ---- Main card ---- */
+    .pay-card {
+        background: #fff;
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+        border: 1px solid var(--border);
+    }
+
+    /* ---- Card header (matches FeeSummary .x_title) ---- */
+    .pay-card-header {
+        padding: 22px 28px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    .pay-card-header h2 {
+        margin: 0;
+        font-size: 22px;
+        font-weight: 600;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .header-badge {
+        background: rgba(255,255,255,0.18);
+        border: 1px solid rgba(255,255,255,0.30);
+        border-radius: 20px;
+        padding: 4px 14px;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+
+    /* ---- Card body ---- */
+    .pay-card-body {
+        padding: 28px;
+    }
+
+    /* ---- Student Profile strip ---- */
+    .student-strip {
+        display: flex;
+        align-items: center;
+        gap: 22px;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #e8eaf6 100%);
+        border-radius: var(--radius);
+        border-left: 5px solid var(--primary);
+        margin-bottom: 24px;
+    }
+    .student-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        flex-shrink: 0;
+        background: #ddd;
+    }
+    .student-details {
+        flex: 1;
+        min-width: 0;
+    }
+    .student-name {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .class-chip {
+        background: var(--primary);
+        color: #fff;
+        border-radius: 12px;
+        padding: 2px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+    .student-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 22px;
+    }
+    .meta-item {
+        font-size: 13px;
+        color: #1565c0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .meta-item i { color: var(--primary); }
+    .meta-item b { color: var(--text-main); }
+
+    /* ---- Section label ---- */
+    .section-label {
+        font-size: 13px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: var(--text-muted);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+    }
+
+    /* ---- Selected months table ---- */
+    .months-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        border-radius: var(--radius);
+        overflow: hidden;
+        border: 1px solid #dee2e6;
+        margin-bottom: 24px;
+    }
+    .months-table thead tr {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    }
+    .months-table thead th {
+        padding: 12px 16px;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        border: none;
+    }
+    .months-table tbody tr {
+        transition: background 0.2s;
+    }
+    .months-table tbody tr:hover {
+        background: #e3f2fd;
+    }
+    .months-table tbody tr:nth-child(even) {
+        background: #fafafa;
+    }
+    .months-table tbody tr:nth-child(even):hover {
+        background: #e3f2fd;
+    }
+    .months-table tbody td {
+        padding: 13px 16px;
+        font-size: 14px;
+        color: var(--text-main);
+        border-bottom: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+    .months-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    .month-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        margin-right: 10px;
+        vertical-align: middle;
+        flex-shrink: 0;
+    }
+    .month-name-cell {
+        display: flex;
+        align-items: center;
+    }
+    .amount-cell {
+        font-weight: 700;
+        color: var(--danger);
+        font-size: 15px;
+    }
+    .status-chip {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+        padding: 3px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    /* Total row */
+    .months-table tfoot tr {
+        background: linear-gradient(to right, #e8f5e9 0%, #f1f8f4 100%);
+    }
+    .months-table tfoot td {
+        padding: 14px 16px;
+        font-weight: 700;
+        font-size: 15px;
+        color: var(--text-main);
+        border-top: 2px solid #c3e6cb;
+    }
+    .total-amount {
+        color: var(--success);
+        font-size: 18px;
+        font-weight: 800;
+    }
+
+    /* ---- Single month card (fallback) ---- */
+    .single-month-card {
+        background: linear-gradient(135deg, #e8f5e9 0%, #f1f8f4 100%);
+        border: 2px solid #c3e6cb;
+        border-radius: var(--radius);
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+    .single-month-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .big-month-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 20px;
+    }
+    .single-month-text .label-text {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+    .single-month-text .month-val {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+    .single-amount-block .label-text {
+        font-size: 12px;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+        text-align: right;
+    }
+    .single-amount-block .amount-val {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--danger);
+    }
+    .single-amount-block .currency {
+        font-size: 18px;
+        vertical-align: super;
+        margin-right: 2px;
+    }
+
+    /* ---- Total summary box ---- */
+    .total-summary-box {
+        background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+        border-radius: var(--radius);
+        padding: 20px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 14px;
+        margin-bottom: 28px;
+        box-shadow: var(--shadow-lg);
+    }
+    .total-summary-box .ts-label {
+        color: rgba(255,255,255,0.85);
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+    .total-summary-box .ts-value {
+        color: #fff;
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1;
+    }
+    .total-summary-box .ts-value .ts-currency {
+        font-size: 20px;
+        vertical-align: super;
+        margin-right: 2px;
+    }
+    .total-summary-box .ts-meta {
+        color: rgba(255,255,255,0.80);
+        font-size: 13px;
+        margin-top: 4px;
+    }
+    .ts-right { text-align: right; }
+
+    /* ---- Pay button ---- */
+    .btn-pay-razorpay {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+        color: var(--accent-dark);
+        border: none;
+        padding: 14px 36px;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: 700;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .btn-pay-razorpay:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+        background: #f0fdf4;
+        color: var(--accent-dark);
+        text-decoration: none;
+    }
+    .btn-pay-razorpay i {
+        font-size: 18px;
+    }
+
+    /* ---- Security strip ---- */
+    .security-strip {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 20px;
+        padding: 14px 20px;
+        background: #f8f9fa;
+        border-top: 1px solid var(--border);
+        flex-wrap: wrap;
+    }
+    .security-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+    .security-item i {
+        color: var(--success);
+        font-size: 14px;
+    }
+
+    /* ---- Responsive ---- */
+    @@media (max-width: 767px) {
+        .pay-card-body { padding: 18px; }
+        .student-strip { flex-direction: column; text-align: center; }
+        .student-name { justify-content: center; }
+        .student-meta { justify-content: center; }
+        .total-summary-box { flex-direction: column; }
+        .ts-right { text-align: left; }
+        .single-month-card { flex-direction: column; }
+        .single-amount-block .label-text,
+        .single-amount-block .amount-val { text-align: left; }
+    }
+    </style>
+}
+
+@{
+    var order = ViewBag.OrderDetails as SMEnterprise.Models.OrderModel;
+
+    // Parse selected months from TempData / ViewBag if available
+    List<SMEnterprise.Models.FeeSelectionViewModel> selectedMonths = null;
+    if (TempData["SelectedMonths"] != null)
+    {
+        selectedMonths = TempData["SelectedMonths"] as List<SMEnterprise.Models.FeeSelectionViewModel>;
+    }
+    bool isMultiMonth = selectedMonths != null && selectedMonths.Count > 1;
+
+    // Helper: month name from int
+    Func<int, int, string> MonthLabel = (m, y) =>
+        new DateTime(y, m, 1).ToString("MMMM yyyy");
+
+    // Abbreviation for icon
+    Func<int, string> MonthAbbr = (m) =>
+        new DateTime(2000, m, 1).ToString("MMM").ToUpper();
+}
+
+<div class="payment-page-wrapper">
+    <div class="row">
+        <div class="col-md-10 col-md-offset-1">
+
+            <div class="pay-card">
+
+                <!-- ===== HEADER ===== -->
+                <div class="pay-card-header">
+                    <h2>
+                        <i class="fa fa-credit-card"></i>
+                        Fee Payment
+                    </h2>
+                    <div>
+                        @if (isMultiMonth)
+                        {
+                            <span class="header-badge">
+                                <i class="fa fa-check-square-o"></i>
+                                @selectedMonths.Count months selected
+                            </span>
+                        }
+                        else if (order != null)
+                        {
+                            <span class="header-badge">
+                                <i class="fa fa-calendar"></i>
+                                @(order != null ? MonthLabel(order.FeeMonth, order.FeeYear) : "")
+                            </span>
+                        }
+                    </div>
                 </div>
-            </div>
-            <div class="col-sm-9 t-profile-right">
-                <div class="row all-corsess-wapper">
-                    <div class="col-sm-12">
-                        <div class="all-courses">
-                            <h3>Fee Payment Details</h3>
-                            <div class="profile__courses__inner">
-                                <ul class="profile__courses__list list-unstyled">
-                                    <li>Student Name: <b>@Model.Name</b></li>
-                                    <li>DOB: <b>@Model.DOB.ToString("dd MMM yyyy")</b></li>
-                                    <li>Class: <b>@Model.ClassName</b></li>
-                                    <li>Father Name: <b>@Model.FatherName</b></li>
-                                    <li>Contact No: <b>@Model.FatherMobileNo</b></li>
-                                    <li>Mother Name: <b>@Model.MotherName</b></li>
-                                    @*<li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth  </b></li>
-                                    <li>Amount(In Rupees): <b>@ViewBag.OrderDetails.ApplicableFee</b></li>*@
-                                    @{
-                                        var order = ViewBag.OrderDetails as SMEnterprise.Models.OrderModel;
-                                    }
-                                    @if (order != null)
-                                    {
-                                        <li>Fee Month: <b>@order.FeeMonth</b></li>
-                                        <li>Amount: <b>@order.ApplicableFee.ToString("F2")</b></li>
 
+                <div class="pay-card-body">
 
-                                    }
-                                    @*@if (ViewBag.OrderDetails != null)
-                                    {
-                                        <li>Fee Month: <b>@ViewBag.OrderDetails.FeeMonth</b></li>
-                                        <li>Amount(In Rupees): <b>@(Convert.ToDecimal(ViewBag.OrderDetails.ApplicableFee))</b></li>
+                    <!-- ===== STUDENT STRIP ===== -->
+                    <div class="student-strip">
+                        <img onerror="return OnImageError(this,2);"
+                             class="student-avatar"
+                             alt="@Model.Name"
+                             src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" />
 
-                                    }*@
-
-                                </ul>
-
+                        <div class="student-details">
+                            <div class="student-name">
+                                @Model.Name
+                                <span class="class-chip">@Model.ClassName</span>
+                            </div>
+                            <div class="student-meta">
+                                <span class="meta-item">
+                                    <i class="fa fa-birthday-cake"></i>
+                                    DOB: <b>@Model.DOB.ToString("dd MMM yyyy")</b>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fa fa-user"></i>
+                                    Father: <b>@Model.FatherName</b>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fa fa-phone"></i>
+                                    <b>@Model.FatherMobileNo</b>
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fa fa-user-o"></i>
+                                    Mother: <b>@Model.MotherName</b>
+                                </span>
                             </div>
                         </div>
-                        <div class="form-group register-btn">
-                            @*Razor pay use without embeded*@
-                            @*<button onclick="TakePayment()" class="btn btn-primary btn-lg">Pay Now</button>*@
-                            @{
-                                var testOrder = ViewBag.OrderDetails;
-                            }
-                            @if (testOrder == null)
-                            {
-                                <p style="color:red;">OrderDetails is null!</p>
-                            }
-                            @if (ViewBag.OrderDetails != null)
-                            {
-                                <form method="POST" action="https://api.razorpay.com/v1/checkout/embedded">
+                    </div>
 
-                                    <input type="hidden" name="key_id" value="@ViewBag.OrderDetails.razorpayKey" />
-                                    <input type="hidden" name="order_id" value="@ViewBag.OrderDetails.OrderID" />
-                                    @*<input type="hidden" name="amount" value="@ViewBag.OrderDetails.Amount" />*@
+                    @if (order == null)
+                    {
+                        <!-- Error state -->
+                        <div style="text-align:center; padding: 40px;">
+                            <i class="fa fa-exclamation-triangle" style="font-size:48px; color:#e74c3c;"></i>
+                            <h4 style="margin-top:16px; color:#e74c3c;">Payment Details Not Found</h4>
+                            <p style="color:#7f8c8d;">Could not load order details. Please go back and try again.</p>
+                            <a href="javascript:history.back()" class="btn btn-default">
+                                <i class="fa fa-arrow-left"></i> Go Back
+                            </a>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- ===== MONTHS SECTION ===== -->
+                        if (isMultiMonth)
+                        {
+                            <!-- MULTI-MONTH TABLE -->
+                            <div class="section-label">
+                                <i class="fa fa-list-ul" style="color:var(--primary);"></i>
+                                Selected Months for Payment
+                            </div>
+
+                            <table class="months-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Month</th>
+                                        <th style="text-align:right;">Amount Due (₹)</th>
+                                        <th style="text-align:center;">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @{ int idx = 1; decimal runningTotal = 0; }
+                                    @foreach (var sm in selectedMonths)
+                                    {
+                                        runningTotal += sm.Amount;
+                                        <tr>
+                                            <td style="color:var(--text-muted); font-weight:600;">@idx</td>
+                                            <td>
+                                                <div class="month-name-cell">
+                                                    <span class="month-icon">@MonthAbbr(sm.Month)</span>
+                                                    <div>
+                                                        <div style="font-weight:600;">@MonthLabel(sm.Month, sm.Year)</div>
+                                                        <div style="font-size:12px; color:var(--text-muted);">@sm.Year Academic Year</div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style="text-align:right;">
+                                                <span class="amount-cell">₹@sm.Amount.ToString("0.00")</span>
+                                            </td>
+                                            <td style="text-align:center;">
+                                                <span class="status-chip">
+                                                    <i class="fa fa-clock-o"></i> Pending
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        idx++;
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="2" style="text-align:right; color:var(--text-muted);">
+                                            <i class="fa fa-calculator"></i>
+                                            Total for @selectedMonths.Count month@(selectedMonths.Count == 1 ? "" : "s"):
+                                        </td>
+                                        <td style="text-align:right;">
+                                            <span class="total-amount">₹@order.ApplicableFee.ToString("0.00")</span>
+                                        </td>
+                                        <td></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        }
+                        else
+                        {
+                            <!-- SINGLE MONTH CARD -->
+                            <div class="section-label">
+                                <i class="fa fa-calendar" style="color:var(--primary);"></i>
+                                Payment for Month
+                            </div>
+
+                            <div class="single-month-card">
+                                <div class="single-month-info">
+                                    <div class="big-month-icon">
+                                        <i class="fa fa-calendar-o"></i>
+                                    </div>
+                                    <div class="single-month-text">
+                                        <div class="label-text">Fee Month</div>
+                                        <div class="month-val">@MonthLabel(order.FeeMonth, order.FeeYear)</div>
+                                    </div>
+                                </div>
+                                <div class="single-amount-block">
+                                    <div class="label-text">Amount Due</div>
+                                    <div class="amount-val">
+                                        <span class="currency">₹</span>@order.ApplicableFee.ToString("0.00")
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+                        <!-- ===== TOTAL + PAY BUTTON ===== -->
+                        <div class="total-summary-box">
+                            <div>
+                                <div class="ts-label">
+                                    <i class="fa fa-inr"></i>
+                                    Grand Total Payable
+                                </div>
+                                <div class="ts-value">
+                                    <span class="ts-currency">₹</span>@order.ApplicableFee.ToString("0.00")
+                                </div>
+                                <div class="ts-meta">
+                                    @if (isMultiMonth)
+                                    {
+                                        @:Covering @selectedMonths.Count months
+                                    }
+                                    else
+                                    {
+                                        @:For @MonthLabel(order.FeeMonth, order.FeeYear)
+                                    }
+                                    &nbsp;•&nbsp; Razorpay Secure Checkout
+                                </div>
+                            </div>
+                            <div class="ts-right">
+                                <form method="POST" action="https://api.razorpay.com/v1/checkout/embedded" id="razorpayForm">
+                                    <input type="hidden" name="key_id" value="@order.razorpayKey" />
+                                    <input type="hidden" name="order_id" value="@order.OrderID" />
                                     <input type="hidden" name="currency" value="INR" />
-                                    <input type="hidden" name="name" value="@ViewBag.OrderDetails.Description" />
-                                    <input type="hidden" name="description" value="Fee Payment for @ViewBag.OrderDetails.FeeMonth / @ViewBag.OrderDetails.FeeYear" />
+                                    <input type="hidden" name="name" value="@order.Description" />
+                                    <input type="hidden" name="description" value="Fee Payment — @(isMultiMonth ? selectedMonths.Count + " months" : MonthLabel(order.FeeMonth, order.FeeYear))" />
                                     <input type="hidden" name="image" value="https://pschool.identityinfo.in/Images/SBranchLogo/41_ChambaSchool-Logo.jpeg" />
-                                    <input type="hidden" name="prefill[email]" value="@ViewBag.OrderDetails.EmailID" />
-
+                                    <input type="hidden" name="prefill[email]" value="@order.EmailID" />
                                     <input type="hidden" name="prefill[contact]" value="@Model.FatherMobileNo" />
                                     <input type="hidden" name="prefill[name]" value="@Model.Name" />
                                     <input type="hidden" name="notes[student_id]" value="@Model.StudentID" />
-                                    @*<input type="hidden" name="notes[fee_month]" value="@ViewBag.OrderDetails.FeeMonth" />
-                                    <input type="hidden" name="notes[fee_year]" value="@ViewBag.OrderDetails.FeeYear" />*@
-                                    <input type="hidden" name="notes[invoice_id]" value="@(ViewBag.OrderDetails.OrderID)" />
-                                    <input type="hidden" name="callback_url" value="@Url.Action("PaymentCallback", "Payment", null, Request.Url.Scheme)" />
-                                    <button type="submit" class="btn btn-primary" style="color: darkred;">Pay Now</button>
+                                    <input type="hidden" name="notes[invoice_id]" value="@order.OrderID" />
+                                    <input type="hidden" name="callback_url"
+                                           value="@Url.Action("PaymentCallback", "Payment", null, Request.Url.Scheme)" />
+
+                                    <button type="submit" class="btn-pay-razorpay" id="btnPay">
+                                        <i class="fa fa-lock"></i>
+                                        Pay ₹@order.ApplicableFee.ToString("0.00") Securely
+                                    </button>
                                 </form>
-                            }
-
-                            @*PayuMoney*@
-                            @*  @using (Html.BeginForm("ProcessPayment", "Payment", FormMethod.Post, new { @id = "payUForm" }))
-        {
-            <input type="hidden" name="key" value="JVDkAA" />
-            <input type="hidden" name="txnid" value="@ViewBag.TransactionId" /> <!-- Unique Transaction ID @Guid.NewGuid().ToString()-->
-            <input type="hidden" name="productinfo" value="Fee Payment" />
-            <input type="hidden" name="amount" value="@((ViewBag.OrderDetails.ApplicableFee).ToString("0.00"))" />
-
-            <input type="hidden" name="email" value="@Model.EmailID ?? " info@prabhutisystems.com"" /> <!-- Ensure you have an email field in your model -->
-            <input type="hidden" name="firstname" value="@Model.Name" />
-
-            <input type="hidden" name="surl" value="https://localhost:44346/Payment/PaymentSuccess" /> <!-- URL on success -->
-            <input type="hidden" name="furl" value="https://localhost:44346/Payment/PaymentFailure" /> <!-- URL on failure -->
-
-
-            <!-- Add additional UDFs if necessary -->
-            <input type="hidden" name="hash" value="@ViewBag.PaymentHash" />
-
-            <button type="submit" class="btn btn-primary btn-lg">Pay Now</button>
-        }
-                            *@
+                            </div>
                         </div>
+                    }
+
+                </div><!-- /pay-card-body -->
+                <!-- ===== SECURITY STRIP ===== -->
+                <div class="security-strip">
+                    <div class="security-item">
+                        <i class="fa fa-lock"></i> 256-bit SSL Encrypted
                     </div>
-                    @*<div style="display:none">
-                        @using (Html.BeginForm("Complete", "Payment", FormMethod.Post, new { id = "paymentResponseForm" }))
-                        {
-                            @Html.AntiForgeryToken()
-                            @Html.Hidden("rzp_paymentid")
-                            @Html.Hidden("rzp_orderid")
-                          
-                            <button type="submit" id="rzp-paymentresponse" class="btn btn-primary" hidden>Submit</button>
-                        }
-                    </div>*@
+                    <div class="security-item">
+                        <i class="fa fa-shield"></i> Powered by Razorpay
+                    </div>
+                    <div class="security-item">
+                        <i class="fa fa-check-circle"></i> PCI DSS Compliant
+                    </div>
+                    <div class="security-item">
+                        <i class="fa fa-refresh"></i> Instant Confirmation
+                    </div>
                 </div>
-            </div>
+
+            </div><!-- /pay-card -->
+
         </div>
     </div>
-</section>
+</div>
 
-
-@*<script>
-
-            var options = {
-                "key": "@ViewBag.OrderDetails.razorpayKey", // Key ID from ViewBag
-                "amount": "@ViewBag.OrderDetails.Amount", // Amount in paise from ViewBag
-                "currency": "@ViewBag.OrderDetails.currency",
-                "name": "@ViewBag.OrderDetails.Name",
-                "description": "@ViewBag.OrderDetails.Description",
-                "image": "@Url.Content("~/ images / JosephLogo - new.png")",
-                "order_id": "@ViewBag.OrderDetails.PGOrderID", // Razorpay Order ID from ViewBag
-                "handler": function(response) {
-                console.log("Payment response:", response);
-
-                // Set the data in hidden form fields
-                document.getElementById('rzp_paymentid').value = response.razorpay_payment_id;
-                    document.getElementById('rzp_orderid').value = response.razorpay_order_id;
-
-
-                // Submit the form automatically
-                    document.getElementById('rzp-paymentresponse').click();
-
-            },
-                "prefill": {
-                "name": "@ViewBag.OrderDetails.Name",
-                    "email": "@ViewBag.OrderDetails.EmailID",
-                    "contact": "@ViewBag.OrderDetails.ContactNumber"
-                },
-                "notes": {
-                "address": "@ViewBag.OrderDetails.Address",
-                    "StudentID ": "@Model.StudentID", // Using Model for student data
-                    "fee_month": "@ViewBag.OrderDetails.FeeMonth",
-                    "fee_year": "@ViewBag.OrderDetails.FeeYear"
-                },
-                "theme": {
-                "color": "#F37254"
-                }
-        };
-    var rzp1 = new Razorpay(options);
-    console.log("Razorpay Options (Index Page):", options);
-
-    function TakePayment(e) {
-        rzp1.open();
-        e.preventDefault();
-    }
-
-
-
-
-</script>*@
+@section scripts {
+    <script>
+        // Prevent double-submit
+        document.getElementById('razorpayForm') && document.getElementById('razorpayForm').addEventListener('submit', function () {
+            var btn = document.getElementById('btnPay');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Redirecting to Payment...';
+            }
+        });
+    </script>
+}

@@ -194,11 +194,12 @@
 
                             @{
                                 decimal TotalDue = 0;
-                                
+
                                 int count = 0;
                                 foreach (FeePaymentModel c in Model.FeePayments)
                                 {
-                                    TotalDue = TotalDue + ((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid - c.Discounts);
+                                    // TotalDue = TotalDue + ((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid - c.Discounts);
+                                    TotalDue = TotalDue + ((c.FeeAmount + c.LateFee) - c.Paid - c.Discounts);
                                     <tr id="trFee_@c.StudentID">
                                         @c.SBranchID
                                         <td>
@@ -229,6 +230,10 @@
                                             Paid Amount :@c.Paid.ToString("N2")<br />
 
                                             <label class='badge bg-red'> Net Amount :@(((c.FeeAmount + c.PreviousDue + c.LateFee) - c.Paid - c.Discounts).ToString("N2"))</label>
+                                            @* <label class='badge bg-red'>
+            Net Amount : @(((c.FeeAmount + c.LateFee) - c.Paid - c.Discounts).ToString("N2"))
+
+        </label>*@
                                         </td>
                                         <td>
                                             @if ((c.FeeAmount + c.PreviousDue + c.LateFee - c.Paid - c.Discounts) == 0)
@@ -684,7 +689,12 @@
                     $('#modelConfirmPayment').modal('hide');
                 },
                 error: function (XMLHttpRequest, textStatus, errorThrown) {
-                    alert(XMLHttpRequest + " : " + textStatus + " : " + errorThrown);
+                    $('#btnSubmitPayment').removeAttr('disabled');
+                    var message = $.trim(XMLHttpRequest.responseText || '');
+                    if (message === '') {
+                        message = errorThrown || textStatus || 'Payment could not be saved.';
+                    }
+                    alert(message);
                 },
                 async: true,
                 processData: false

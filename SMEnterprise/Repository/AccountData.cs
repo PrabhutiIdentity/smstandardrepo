@@ -9,10 +9,22 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 
+
 namespace SMEnterprise.Repository
 {
     public class AccountData
     {
+        private sealed class LockedStudentFeeDetail
+        {
+            public int SFID { get; set; }
+            public int StudentID { get; set; }
+            public int FeeTypeID { get; set; }
+            public int SessionID { get; set; }
+            public decimal FeeAmount { get; set; }
+            public int IsApplicable { get; set; }
+            public string FeeTypeName { get; set; }
+        }
+
         public StudentsPageModel GetParentAppDetail(int ClassID, int SectionID, int SBranchID)
         {
             StudentsPageModel objModel = new StudentsPageModel();
@@ -738,6 +750,9 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PSchoolCity", objData.PSchoolCity);
                 paramater.Add("@PSchoolState", objData.PSchoolState);
 
+                paramater.Add("@PenNo", objData.PenNo);
+                paramater.Add("@ApaarID", objData.ApaarID);
+
                 return con.Query<int>("spn_InsertUpdateStudentBasicDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
@@ -1104,6 +1119,54 @@ namespace SMEnterprise.Repository
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
+                if (objData.CustomeFee == null)
+                {
+                    objData.CustomeFee = new List<StudentCustomFeeModel>();
+                }
+
+                var lockedCarryForwardRows = con.Query<LockedStudentFeeDetail>(
+                    @"SELECT
+                          SFD.SFID,
+                          SFD.StudentID,
+                          SFD.FeeTypeID,
+                          SFD.SessionID,
+                          SFD.FeeAmount,
+                          SFD.IsApplicable,
+                          FTM.FeeTypeName
+                      FROM StudentFeeDetails SFD
+                      INNER JOIN FeeTypeMaster FTM ON FTM.FeeTypeID = SFD.FeeTypeID
+                      WHERE SFD.SessionID = @StudentSessionUID
+                        AND LTRIM(RTRIM(FTM.FeeTypeName)) = 'Session-Carry-forward'",
+                    new { objData.StudentSessionUID }).ToList();
+
+                foreach (var lockedRow in lockedCarryForwardRows)
+                {
+                    var postedRow = objData.CustomeFee
+                        .FirstOrDefault(x => x.FeeTypeID == lockedRow.FeeTypeID && x.SessionID == lockedRow.SessionID);
+
+                    if (postedRow == null)
+                    {
+                        objData.CustomeFee.Add(new StudentCustomFeeModel
+                        {
+                            SFID = lockedRow.SFID,
+                            StudentID = lockedRow.StudentID,
+                            FeeTypeID = lockedRow.FeeTypeID,
+                            SessionID = lockedRow.SessionID,
+                            FeeAmount = lockedRow.FeeAmount,
+                            IsApplicable = lockedRow.IsApplicable,
+                            FeeTypeName = lockedRow.FeeTypeName
+                        });
+                        continue;
+                    }
+
+                    postedRow.SFID = lockedRow.SFID;
+                    postedRow.StudentID = lockedRow.StudentID;
+                    postedRow.SessionID = lockedRow.SessionID;
+                    postedRow.FeeAmount = lockedRow.FeeAmount;
+                    postedRow.IsApplicable = lockedRow.IsApplicable;
+                    postedRow.FeeTypeName = lockedRow.FeeTypeName;
+                }
+
                 var paramater = new DynamicParameters();
                 paramater.Add("@StudentSessionUID", objData.StudentSessionUID);
                 paramater.Add("@IsCustomFee", objData.IsCustomFee);
@@ -2823,6 +2886,44 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+        
+         public FeePaymentModel GetCollectionReport(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
+        {
+            FeePaymentModel objModel = new FeePaymentModel();
+            objModel.DemandMonth = QDate;
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@ClassID", ClassID);
+                paramater.Add("@SectionID", SectionID);
+                paramater.Add("@SBranchID", SBranchID);
+                paramater.Add("@SessionID", SessionID);
+                paramater.Add("@QDate", QDate);
+                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+                using (var multi = con.QueryMultiple("[sp_GetSessionCollection]", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    objModel.Classes = multi.Read<NameIDModel>().ToList();
+                    objModel.Sections = multi.Read<NameIDModel>().ToList();
+                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.StudentList = multi.Read<StudentModel>().ToList();
+                    //objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
+                    //objModel.FeeListDetail = multi.Read<FeeDetailsModel>().ToList();
+                    try
+                    {
+                        objModel.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch
+                    { }
+
+                }
+            }
+            return objModel;
+        }
+
         public DemandReciptListModel GetDemandReciptDataNew(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
         {
 
@@ -3294,9 +3395,11 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PaymentMode", objModel.PaymentMode);
                 paramater.Add("@SBranchID", objModel.SBranchID);
                 paramater.Add("@QuarterID", objModel.QuarterID);
+                paramater.Add("@SessionID", objModel.SessionID); // Pass new parameter
                 using (var multi = con.QueryMultiple("sp_GetFeeCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
+                 objModel.Sessions = multi.Read<SchoolSessionModel>().ToList(); // Read the new result set
                     objModel.Report = multi.Read<FeePaymentModel>().ToList();
                     try
                     {
@@ -3709,16 +3812,52 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+        
+         public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
+          {
+              using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+              {
+                  var paramater = new DynamicParameters();
+                  paramater.Add("@StudentSessionUID", model.StudentSessionUID);
+                  paramater.Add("@EvaluationID", model.EvaluationID);
+                  paramater.Add("@SBranchID", model.SBranchID);
+                  paramater.Add("@EvaluationMode", 0);
+                  using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                  {
+                      model.PerformanceParameters = multi.Read<PerformanceParameterModel>().ToList();
+                      model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
+                      model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
+                      model.Result = multi.Read<ExamResultDetailModel>().ToList();
+                      model.Student = multi.Read<StudentModel>().SingleOrDefault();
+                      model.CGPA = multi.Read<decimal>().SingleOrDefault();
+                      model.EvaluationName = multi.Read<string>().SingleOrDefault();
+                      model.FilledParameter = multi.Read<int>().SingleOrDefault();
+                      model.TotalParameter = multi.Read<int>().SingleOrDefault();
+                  }
+              }
+              return model;
+          }
+        
+
+        // ============================================================
+        //Rank
+        // ============================================================
+        /*
         public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
+                // ── existing SP call (unchanged) ─────────────────────
                 var paramater = new DynamicParameters();
                 paramater.Add("@StudentSessionUID", model.StudentSessionUID);
                 paramater.Add("@EvaluationID", model.EvaluationID);
                 paramater.Add("@SBranchID", model.SBranchID);
                 paramater.Add("@EvaluationMode", 0);
-                using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
+
+                using (var multi = con.QueryMultiple(
+                    "sp_GetStudentEvaluationPerformanceDetail",
+                    paramater, null, 0,
+                    commandType: CommandType.StoredProcedure))
                 {
                     model.PerformanceParameters = multi.Read<PerformanceParameterModel>().ToList();
                     model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
@@ -3730,9 +3869,28 @@ namespace SMEnterprise.Repository
                     model.FilledParameter = multi.Read<int>().SingleOrDefault();
                     model.TotalParameter = multi.Read<int>().SingleOrDefault();
                 }
+
+                // ── new: rank SP call ────────────────────────────────
+                // SessionID comes from the existing SP result via Student,
+                // but Student.SessionID may be 0 — use model.SessionID directly
+                var rankParams = new DynamicParameters();
+                rankParams.Add("@StudentSessionUID", model.StudentSessionUID);
+                rankParams.Add("@EvaluationID", model.EvaluationID == 0 ? -1 : model.EvaluationID);
+                rankParams.Add("@SBranchID", model.SBranchID);
+                rankParams.Add("@SessionID", model.SessionID);
+
+                using (var rankMulti = con.QueryMultiple(
+                    "sp_GetStudentRankInSection_test",
+                    rankParams,
+                    commandType: CommandType.StoredProcedure))
+                {
+                    model.TermRanks = rankMulti.Read<StudentTermRankModel>().ToList();
+                    model.OverallRank = rankMulti.Read<StudentOverallRankModel>().SingleOrDefault();
+                }
             }
             return model;
         }
+      */
         public int UpdateStudentPerformance(PerformanceParameterDetailModel objModel)
         {
 
@@ -5021,6 +5179,10 @@ namespace SMEnterprise.Repository
                 paramater.Add("@PGOrderID", obj.PGOrderID);
                 paramater.Add("@SessionID", obj.SessionID);
                 paramater.Add("@Status", 0);
+                // ── NEW parameters ────────────────────────────────────
+                paramater.Add("@SelectedMonthsJson", obj.SelectedMonthsJson);  // null for single month
+                paramater.Add("@IsMultiMonth", obj.IsMultiMonth);        // false for single month
+
 
 
                 return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();

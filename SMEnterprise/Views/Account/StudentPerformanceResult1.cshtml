@@ -213,8 +213,10 @@
                                     <tr>
                                         @foreach (EvaluationModel tme in Model.MainEvaluations)
                                         {
-
-                                            if (tme.EvaluationID == 137 || tme.EvaluationID == 138 || tme.EvaluationID == 144 || tme.EvaluationID == 152)
+                                            /* session 2023-24  class 3 and 5 and VIII : 137,138,144,152                
+											session 2024-25 class 3 and 5 : 177,183 */
+                                            /*session 2025-26 class 3 : 198,204 and 5 and VIII: 207,213 */
+                                            if (tme.EvaluationID == 137 || tme.EvaluationID == 138 || tme.EvaluationID == 144 || tme.EvaluationID == 152 || tme.EvaluationID == 168 || tme.EvaluationID == 174 || tme.EvaluationID == 177 || tme.EvaluationID == 183 || tme.EvaluationID == 198 || tme.EvaluationID == 204)
                                             {
                                                 foreach (var et in Model.EvaluationTypes.Where(x => x.OpType == tme.EvaluationID))
                                                 {
@@ -243,13 +245,14 @@
                                                     }
                                                     <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" colspan="@(exams)">@et.EvaluationTypeName  </td>
                                                 }
+
                                             }
-                                            if (tme.EvaluationID == 138 || tme.EvaluationID == 137)
+                                            if (tme.EvaluationID == 138 || tme.EvaluationID == 137 || tme.EvaluationID == 177 || tme.EvaluationID == 168 || tme.EvaluationID == 207 || tme.EvaluationID == 198)
                                             {
                                                 <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Total</td>
                                                 <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Weightage of <br /> all FAs and SA-1 <b /> 25</td>
                                             }
-                                            else if (tme.EvaluationID == 152)
+                                            else if (tme.EvaluationID == 152 || tme.EvaluationID == 174 || tme.EvaluationID == 213)
                                             {
                                                 <td style="vertical-align: middle;border:1px solid #808080" rowspan="3">Weightage of SA - II<br /> will be of 50 marks</td>
                                                 <td style="vertical-align: middle;border:1px solid #808080" rowspan="3"> Total</td>
@@ -264,8 +267,8 @@
                                         }
                                         @if (Model.EvaluationID == -1)
                                         {
-                                            <td style="vertical-align: middle; border: 1px solid #808080;padding: 0px;" rowspan="3"><b>Marks Obtained</b>  <br /> @*(@Model.MainEvaluations.Sum(x => x.Weightage))*@ </td>
-                                            <td style="vertical-align: middle; border: 1px solid #808080; padding: 0px;" rowspan="3"><b>Grade</b></td>
+                                            <td style="vertical-align: middle; border: 1px solid #808080;padding: 1px;" rowspan="3"><b>Marks Obtained</b>  <br /> @*(@Model.MainEvaluations.Sum(x => x.Weightage))*@ </td>
+                                            <td style="vertical-align: middle; border: 1px solid #808080; padding: 1px;" rowspan="3"><b>Grade</b></td>
                                         }
                                     </tr>
                                     <tr>
@@ -296,7 +299,7 @@
                                                         var isappl = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID && c.SubjectType == stype.TypeID).Count();
                                                         if (isappl > 0)
                                                         {
-                                                            <td style="vertical-align: middle;border:1px solid #808080">@stype.TypeName</td>
+                                                            <td style="vertical-align: middle;border:1px solid #808080">@stype.TypeName </td>
                                                         }
                                                     }
 
@@ -310,7 +313,7 @@
                                 }
 
 
-                                @{ 
+                                @{
                                     decimal totalAllSubjectScored = 0;
                                     decimal totalAllSubjectMarks = 0;
                                     foreach (var sub in Model.Subjects.Where(c => c.MainSubID == 0))
@@ -328,45 +331,19 @@
                                             <td style="vertical-align: middle;border:1px solid #808080">@sub.SubjectName</td>
                                             @foreach (var me in Model.MainEvaluations)
                                             {
-                                            foreach (var et in Model.EvaluationTypes)
-                                            {
-                                                evaluID = me.EvaluationID;
-                                                evaluTypeID = et.EvaluationTypeID;
-                                                foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID))
+                                                foreach (var et in Model.EvaluationTypes)
                                                 {
-
-                                                    foreach (var stype in Model.SubjectType)
+                                                    evaluID = me.EvaluationID;
+                                                    evaluTypeID = et.EvaluationTypeID;
+                                                    foreach (var set in Model.SubEvaluations.Where(c => c.EvaluationType == et.EvaluationTypeID && c.MasterID == me.EvaluationID))
                                                     {
-                                                        var isappl = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID && c.SubjectType == stype.TypeID).Count();
-                                                        if (isappl > 0)
-                                                        {
-                                                            var ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == stype.TypeID && c.EvaluationID == set.EvaluationID).SingleOrDefault();
-                                                            if (ex != null)
-                                                            {
-                                                                totalmax = totalmax + ex.MaxMarks;
-                                                                var result = Model.Result.Where(c => c.ExamID == ex.ExamID).SingleOrDefault();
-                                                                if (result != null)
-                                                                {
-                                                                    totalscored = totalscored + result.MarksScored;
-                                                                        <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("N2")</td>
-                                                                        if (ex.EvaluationID == 154)
-                                                                    {
-                                                                        totalscoredBoard = totalscoredBoard + result.MarksScored;
-                                                                    }
-                                                                    else if (ex.EvaluationID == 153)
-                                                                    {
-                                                                        totalscoredNon = totalscoredNon + result.MarksScored;
-                                                                    }
-                                                                }
 
-                                                                else
-                                                                {
-                                                                        <td style="vertical-align: middle;border:1px solid #808080">-</td>
-                                                                    }
-                                                            }
-                                                            else
+                                                        foreach (var stype in Model.SubjectType)
+                                                        {
+                                                            var isappl = Model.Exams.Where(c => c.EvaluationID == set.EvaluationID && c.SubjectType == stype.TypeID).Count();
+                                                            if (isappl > 0)
                                                             {
-                                                                ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == 0 && stype.IsDefault == 1 && c.EvaluationID == set.EvaluationID).SingleOrDefault();
+                                                                var ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == stype.TypeID && c.EvaluationID == set.EvaluationID).SingleOrDefault();
                                                                 if (ex != null)
                                                                 {
                                                                     totalmax = totalmax + ex.MaxMarks;
@@ -374,43 +351,71 @@
                                                                     if (result != null)
                                                                     {
                                                                         totalscored = totalscored + result.MarksScored;
-                                                                            <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("0.00")</td>
-                                                                            if (ex.EvaluationID == 154)
+                                                                        <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("N2") </td>
+                                                                        if (ex.EvaluationID == 154 || ex.EvaluationID == 176 || ex.EvaluationID == 216)
                                                                         {
                                                                             totalscoredBoard = totalscoredBoard + result.MarksScored;
                                                                         }
-                                                                        else if (ex.EvaluationID == 153)
+																		
+                                                                        else if (ex.EvaluationID == 153 || ex.EvaluationID == 175 || ex.EvaluationID == 215)
                                                                         {
                                                                             totalscoredNon = totalscoredNon + result.MarksScored;
+                                                                           
                                                                         }
                                                                     }
+
                                                                     else
                                                                     {
-                                                                            <td style="vertical-align: middle;border:1px solid #808080">--</td>
-                                                                        }
-
+                                                                        <td style="vertical-align: middle;border:1px solid #808080">-</td>
+                                                                    }
                                                                 }
                                                                 else
                                                                 {
+                                                                    ex = Model.Exams.Where(c => c.SubjectID == sub.SubjectID && c.SubjectType == 0 && stype.IsDefault == 1 && c.EvaluationID == set.EvaluationID).SingleOrDefault();
+                                                                    if (ex != null)
+                                                                    {
+                                                                        totalmax = totalmax + ex.MaxMarks;
+                                                                        var result = Model.Result.Where(c => c.ExamID == ex.ExamID).SingleOrDefault();
+                                                                        if (result != null)
+                                                                        {
+                                                                            totalscored = totalscored + result.MarksScored;
+                                                                            <td style="vertical-align: middle;border:1px solid #808080">@result.MarksScored.ToString("0.00") </td>
+                                                                            if (ex.EvaluationID == 154 || ex.EvaluationID == 176 || ex.EvaluationID == 216)
+                                                                            {
+                                                                                totalscoredBoard = totalscoredBoard + result.MarksScored;
+                                                                            }
+                                                                            else if (ex.EvaluationID == 153 || ex.EvaluationID == 175 || ex.EvaluationID == 215)
+                                                                            {
+                                                                                totalscoredNon = totalscoredNon + result.MarksScored;
+                                                                            }
+                                                                        }
+                                                                        else
+                                                                        {
+                                                                            <td style="vertical-align: middle;border:1px solid #808080">--</td>
+                                                                        }
+
+                                                                    }
+                                                                    else
+                                                                    {
                                                                         <td style="vertical-align: middle;border:1px solid #808080">---</td>
                                                                     }
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
-                                            }
                                                 @* <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00") </td>*@
                                                 if (Model.EvaluationID == -1)
                                                 {
 
-                                                    if (@evaluID == 137 || @evaluID == 138)
+                                                    if (evaluID == 137 || evaluID == 138 || evaluID == 177 || evaluID == 168 || evaluID == 207 || evaluID == 198) 
                                                     {
                                                         <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00") </td>
                                                         <td style="vertical-align: middle;border:1px solid #808080">@(totalscored * 25 / 100)</td>
                                                         termscored1 = totalscored * 25 / 100;
                                                         totalmaxMark1 = 25;
                                                     }
-                                                    else if (@evaluID == 152 && @evaluTypeID == 51)
+                                                    else if (evaluID == 152 && evaluTypeID == 51 || evaluID == 174 && evaluTypeID == 54 || evaluID == 213 && evaluTypeID == 69)
                                                     {
                                                         <td style="vertical-align: middle;border:1px solid #808080">@(totalscoredBoard / 2)</td>
 
@@ -419,9 +424,9 @@
                                                         <td style="vertical-align: middle;border:1px solid #808080">@totalmaxMarkVIII.ToString("0.00") </td>
 
                                                     }
-                                                    else if (@evaluID == 144)
+                                                    else if (evaluID == 144 || evaluID == 183 || evaluID == 204)
                                                     {
-                                                        @* <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00")</td>*@
+                                                     <td style="vertical-align: middle;border:1px solid #808080">@totalscored.ToString("0.00")</td>
                                                         <td style="vertical-align: middle;border:1px solid #808080">@(totalmax == 0 ? "--" : AcadmicModel.CalculateGradeShine(totalscored, totalmax))</td>
                                                         termscored2 = totalscored;
                                                         totalmaxMark2 = totalmax;
@@ -456,7 +461,7 @@
                                             }
                                             @*<td>@termscored.ToString("0.00")</td>
                                                 <td style="vertical-align: middle;border:1px solid #808080">@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</td>*@
-                                            @if (Model.EvaluationID == -1 && @evaluID == 152)
+                                            @if (Model.EvaluationID == -1 && @evaluID == 152 || @evaluID == 174 || @evaluID == 213)
                                             {
                                                 totalAllSubjectMarks = totalAllSubjectMarks + 100;
                                                 totalAllSubjectScored = totalAllSubjectScored + termscoredVIII;
@@ -467,7 +472,7 @@
                                             {
                                                 totalAllSubjectMarks = totalAllSubjectMarks + 100;
                                                 totalAllSubjectScored = totalAllSubjectScored + termscored;
-                                                <td>@termscored.ToString("0.00")</td>
+                                                <td style="vertical-align: middle;border:1px solid #808080">@termscored.ToString("0.00")</td>
                                                 <td style="vertical-align: middle;border:1px solid #808080">@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</td>
                                             }
                                         </tr>
@@ -531,20 +536,20 @@
 
 
                                     @*<tr>
-                                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalScoredMarks.ToString("0.00")</b> / <b>@TotalMaxMarksForAllT.ToString("0.00")</b></td>
-                                            <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(totalMark == 0 ? 0 : termscored * 100 / totalMark, 2).ToString("0.00") %</b></td>
-                                            <td style="width:20%;text-align:center;"> Grade : <b>@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</b> </td>
-                                            <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@AcadmicModel.CalculateGradeDivisionShine(termscored, totalMark);</b> </td>
+                                        <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalScoredMarks.ToString("0.00")</b> / <b>@TotalMaxMarksForAllT.ToString("0.00")</b></td>
+                                        <td style="width:25%;text-align:center;">Percentage : <b>@Math.Round(totalMark == 0 ? 0 : termscored * 100 / totalMark, 2).ToString("0.00") %</b></td>
+                                        <td style="width:20%;text-align:center;"> Grade : <b>@(totalMark == 0 ? "--" : AcadmicModel.CalculateGradeShine(termscored, totalMark))</b> </td>
+                                        <td style="width:25%;text-align:right;padding-right:20px"> Division : <b>@AcadmicModel.CalculateGradeDivisionShine(termscored, totalMark);</b> </td>
                                         </tr>*@
 
                                 }
                                 else
                                 {
                                     @*<tr>
-                                            <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalObtMarksT.ToString("0.00")</b> / <b>@TotalMarksT.ToString("0.00")</b></td>
-                                            <td style="width:25%;text-align:center;">Percentage :<b>@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2).ToString("0.00") %</b></td>
-                                            <td style="width:20%;text-align:center;"> Grade : <b>@Grade</b> </td>
-                                            <td style="width:25%;text-align:right;padding-right:20px"> Division :   <b>@division</b>  </td>
+                                        <td style="width:30%;text-align:left;padding-left:20px;">OverAll Marks : <b>@TotalObtMarksT.ToString("0.00")</b> / <b>@TotalMarksT.ToString("0.00")</b></td>
+                                        <td style="width:25%;text-align:center;">Percentage :<b>@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2).ToString("0.00") %</b></td>
+                                        <td style="width:20%;text-align:center;"> Grade : <b>@Grade</b> </td>
+                                        <td style="width:25%;text-align:right;padding-right:20px"> Division :   <b>@division</b>  </td>
                                         </tr>*@
                                 }
                             </table>
@@ -631,38 +636,38 @@
 </div>
 
 @section scripts
-{
+                                        {
     <script type="text/javascript">
-        function DrawAttandanceChart(data) {
-            new Chart(document.getElementById("canvas000"), {
-                type: 'line',
-                data: data
-            });
-        }
-        function PrintReport() {
-            var StudentName = $('#bStudentNate').html();
-            var ClassSection = $('#bClassSection').html();
-            var contents = $(".x_content").html();
-            var frame1 = $('<iframe />');
-            frame1[0].name = "frame1";
-            frame1.css({ "position": "absolute", "top": "-1000000px" });
-            $("body").append(frame1);
-            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
-            frameDoc.document.open();
-            //Create a new HTML document.
-            frameDoc.document.write('<html><head><title>Result For ' + StudentName + ' Class ' + ClassSection + '</title>');
-            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard1.css")" rel="stylesheet" type="text/css" />');
-            frameDoc.document.write('</head><body>');
-            //Append the external CSS file.
-            //Append the DIV contents.
-            frameDoc.document.write(contents);
-            frameDoc.document.write('</body></html>');
-            frameDoc.document.close();
-            setTimeout(function () {
-                window.frames["frame1"].focus();
-                window.frames["frame1"].print();
-                frame1.remove();
-            }, 500);
-        }
+                                        function DrawAttandanceChart(data) {
+                                        new Chart(document.getElementById("canvas000"), {
+                                        type: 'line',
+                                        data: data
+                                        });
+                                        }
+                                        function PrintReport() {
+                                        var StudentName = $('#bStudentNate').html();
+                                        var ClassSection = $('#bClassSection').html();
+                                        var contents = $(".x_content").html();
+                                        var frame1 = $('<iframe />');
+                                        frame1[0].name = "frame1";
+                                        frame1.css({ "position": "absolute", "top": "-1000000px" });
+                                        $("body").append(frame1);
+                                        var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+                                        frameDoc.document.open();
+                                        //Create a new HTML document.
+                                        frameDoc.document.write('<html><head><title>Result For ' + StudentName + ' Class ' + ClassSection + '</title>');
+                                        frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard1.css")" rel="stylesheet" type="text/css" />');
+                                        frameDoc.document.write('</head><body>');
+                                        //Append the external CSS file.
+                                        //Append the DIV contents.
+                                        frameDoc.document.write(contents);
+                                        frameDoc.document.write('</body></html>');
+                                        frameDoc.document.close();
+                                        setTimeout(function () {
+                                        window.frames["frame1"].focus();
+                                        window.frames["frame1"].print();
+                                        frame1.remove();
+                                        }, 500);
+                                        }
     </script>
 }

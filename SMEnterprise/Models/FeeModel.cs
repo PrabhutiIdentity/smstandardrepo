@@ -650,7 +650,8 @@ namespace SMEnterprise.Models
                 try
                 {
                     char[] splitter = { '\\' };
-                    if (ClassSection.Split(splitter).Length > 1)
+                    
+                        if (ClassSection.Split(splitter).Length > 1)
                     {
                         return ClassSection.Split(splitter)[1];
                     }
@@ -999,6 +1000,11 @@ namespace SMEnterprise.Models
         public decimal PaymentAmount { get; set; }
 
         public int ExistCount { get; set; }
+
+       // Add this if missing
+        public decimal FeeAmount { get; set; }
+        public decimal Discounts { get; set; }
+        public decimal Paid { get; set; }
     }
     public class DemandReciptListModel
     {

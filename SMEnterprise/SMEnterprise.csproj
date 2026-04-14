@@ -13,7 +13,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SMEnterprise</RootNamespace>
     <AssemblyName>SMEnterprise</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort>44345</IISExpressSSLPort>
@@ -33,6 +33,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -49,6 +50,12 @@
     </Reference>
     <Reference Include="Dapper, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Dapper.2.0.78\lib\net461\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelDataReader, Version=3.8.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelDataReader.3.8.0\lib\net462\ExcelDataReader.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelDataReader.DataSet, Version=3.8.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelDataReader.DataSet.3.8.0\lib\net462\ExcelDataReader.DataSet.dll</HintPath>
     </Reference>
     <Reference Include="Google.Apis, Version=1.45.0.0, Culture=neutral, PublicKeyToken=4b01fa6e34db77ab, processorArchitecture=MSIL">
       <HintPath>..\packages\Google.Apis.1.45.0\lib\net45\Google.Apis.dll</HintPath>
@@ -304,6 +311,9 @@
     </Reference>
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.1\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
@@ -571,6 +581,8 @@
     <Content Include="css\Admin\images\sort_both.png" />
     <Content Include="css\Admin\images\sort_desc.png" />
     <Content Include="css\Admin\images\sort_desc_disabled.png" />
+    <Content Include="css\DemandRecipt.css" />
+    <Content Include="css\DemandRecipt.print.css" />
     <Content Include="css\ExtraCss.css" />
     <Content Include="css\Gent\jquery.mCustomScrollbar.min.css" />
     <Content Include="css\AdmissionEnquiry.css" />
@@ -578,6 +590,7 @@
     <Content Include="css\main.css" />
     <Content Include="css\ReportCard1.css" />
     <Content Include="css\ResultScrutiny.css" />
+    <Content Include="css\student.css" />
     <Content Include="DBChanges\se-239-Evaluation-NotShowing-AdminCard-DeskSlip-DateSheet.sql" />
     <Content Include="iclock\cdata.aspx" />
     <Content Include="iclock\devicecmd.aspx" />
@@ -670,6 +683,7 @@
     <Content Include="js\dataTables.bootstrap.min.js" />
     <Content Include="js\dataTables.buttons.min.js" />
     <Content Include="js\daterangepicker.js" />
+    <Content Include="js\DemandRecipt.js" />
     <Content Include="js\Editor\bootstrap.bundle.js" />
     <Content Include="js\Editor\bootstrap.bundle.min.js" />
     <Content Include="js\Editor\bootstrap.js" />
@@ -700,6 +714,7 @@
     <Content Include="js\prettify.js" />
     <Content Include="js\prettify.min.js" />
     <Content Include="js\select2.full.min.js" />
+    <Content Include="js\student.js" />
     <Content Include="js\vfs_fonts.js" />
     <Content Include="MailAttachments\8_1_OPPO-Find-7-sample-shot_10.jpg" />
     <Content Include="Scripts\bootstrap.js" />
@@ -819,7 +834,7 @@
     <Content Include="Views\Account\ChangePassword.cshtml" />
     <Content Include="Views\Account\DailyAttandanceReport.cshtml" />
     <Content Include="Views\Account\Dashboard.cshtml" />
-    <Content Include="Views\Account\DemandRecipt.cshtml" />
+    <Content Include="Views\Account\DemandRecipt_28March2026.cshtml" />
     <Content Include="Views\Account\EmployeeAttandance.cshtml" />
     <Content Include="Views\Account\EmployeeDetails.cshtml" />
     <Content Include="Views\Account\EmployeeLeaves.cshtml" />
@@ -833,7 +848,7 @@
     <Content Include="Views\Account\SearchStudents.cshtml" />
     <Content Include="Views\Account\StudentAttandance.cshtml" />
     <Content Include="Views\Account\StudentClassReportF.cshtml" />
-    <Content Include="Views\Account\StudentDetails.cshtml" />
+    <Content Include="Views\Account\StudentDetails_newdesign.cshtml" />
     <Content Include="Views\Account\StudentLeaves.cshtml" />
     <Content Include="Views\Account\StudentPayments.cshtml" />
     <Content Include="Views\Account\Students.cshtml" />
@@ -1234,6 +1249,7 @@
     <Compile Include="Models\StartupModel.cs" />
     <Compile Include="Models\StudentAdmissionReportModel.cs" />
     <Compile Include="Models\StudentModel.cs" />
+    <Compile Include="Models\StudentRankmodel.cs" />
     <Compile Include="Models\SyllabusModel.cs" />
     <Compile Include="Models\TeacherApiModel.cs" />
     <Compile Include="Models\TimeTableModel.cs" />
@@ -1416,7 +1432,7 @@
     <Content Include="Views\Admin\VehicleLogs.cshtml" />
     <Content Include="Views\Account\StudentsIDCards.cshtml" />
     <Content Include="Views\Account\_FeePaymentDetailsPartialNew2.cshtml" />
-    <Content Include="Views\Parent\FeeSummery.cshtml" />
+    <Content Include="Views\Parent\FeeSummery1.cshtml" />
     <Content Include="Views\Account\_TransportAllocationEditPartial.cshtml" />
     <Content Include="Views\Admin\SMSConfigurations.cshtml" />
     <Content Include="Views\Admin\SMSConfigurationDetails.cshtml" />
@@ -1483,7 +1499,7 @@
     <Content Include="Views\Account\_StudentPerformanceDetailsPartialShine.cshtml" />
     <Content Include="Views\Account\StudentPerformanceDetailsClass.cshtml" />
     <Content Include="Views\Account\StudentResultDetails.cshtml" />
-    <Content Include="Views\Account\StudentPerformanceResult.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceResult-.cshtml" />
     <Content Include="Views\Account\StudentPerformanceDetails-.cshtml" />
     <Content Include="Views\Parent\StartOnlineExam - Copy.cshtml" />
     <Content Include="Views\Home\ReportCards.cshtml" />
@@ -1506,8 +1522,8 @@
     <Content Include="Views\Account\AllStudentReportF.cshtml" />
     <Content Include="Views\Account\ExamDate.cshtml" />
     <Content Include="Views\Account\StudentResultList - Copy.cshtml" />
-    <Content Include="Views\Account\StudentPerformanceDetails.cshtml" />
-    <Content Include="Views\Account\StudentPerformanceDetailsESS-Main.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceDetails_Rank_watermark.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceDetailsESS.cshtml" />
     <Content Include="Views\Account\StudentPerformanceDetailsGV.cshtml" />
     <Content Include="Views\Account\StudentPerformanceDetailsH.cshtml" />
     <Content Include="Views\Account\StudentPerformanceDetails123.cshtml" />
@@ -1543,7 +1559,7 @@
     <Content Include="Views\Account\_EvaluationsPartial.cshtml" />
     <Content Include="Views\Account\ExamDateSheet.cshtml" />
     <Content Include="Views\Account\StudentsFee.cshtml" />
-    <Content Include="Views\Account\StudentPerformance-Shine.cshtml" />
+    <Content Include="Views\Account\StudentPerformance-.cshtml" />
     <Content Include="Views\Account\StudentPerformanceResult1.cshtml" />
     <Content Include="Views\Account\StudentPerformanceDetailsClassShine.cshtml" />
     <Content Include="Views\Account\_StudentPerformanceDetailsPartial.cshtml" />
@@ -1595,7 +1611,6 @@
     <Content Include="Views\Admin\TransportFeeManagement.cshtml" />
     <Content Include="Views\Account\SiblingReport.cshtml" />
     <Content Include="Views\Account\StudentTcReport.cshtml" />
-    <Content Include="Views\Account\StudentPerformanceDetails - Copy.cshtml" />
     <Content Include="Views\Account\StudentPerformanceResult1 - Copy.cshtml" />
     <Content Include="Views\Account\_StudentTCPartial.cshtml" />
     <Content Include="Views\Account\EmployeeSalary1.cshtml" />
@@ -1605,8 +1620,23 @@
     <Content Include="Views\PayU\PayNow.cshtml" />
     <Content Include="Views\PayU\PaymentSuccess.cshtml" />
     <Content Include="Views\PayU\PaymentFailed.cshtml" />
-    <Content Include="Views\Account\StudentPerformanceDetailsESS.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceDetailsESS-Niraj-Main.cshtml" />
     <Content Include="Views\Account\DeskSlip1.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceResult.cshtml" />
+    <Content Include="Views\Account\ReportDueFee1.cshtml" />
+    <Content Include="Views\Account\CollectionReport.cshtml" />
+    <Content Include="Views\Parent\FeeSummery.cshtml" />
+    <Content Include="Views\Payment\Index1.cshtml" />
+    <Content Include="Views\Parent\FeeSummery-CheckBox.cshtml" />
+    <Content Include="Views\Account\StudentDetails - Copy %283%29.cshtml" />
+    <Content Include="Views\Account\StudentDetails.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceDetails-Rank.cshtml" />
+    <Content Include="Views\Account\DemandRecipt.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceDetails-main.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceDetails_Design1.cshtml" />
+    <Content Include="Views\Account\StudentPerformanceDetails.cshtml" />
+    <Content Include="Views\Account\_StudentPerformanceDetailsPartial - Copy.cshtml" />
+    <Content Include="Views\Account\GetTCForStudent - Copy.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

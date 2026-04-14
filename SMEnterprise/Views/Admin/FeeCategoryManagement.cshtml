@@ -167,6 +167,24 @@
 {
     <script src="@Url.Content("~/js/Admin/bootstrap-colorpicker.min.js")"></script>
     <script>
+        $(function () {
+            var errorMessage = '@Html.Raw(HttpUtility.JavaScriptStringEncode(Convert.ToString(TempData["ErrorMessage"] ?? "")))';
+            var successMessage = '@Html.Raw(HttpUtility.JavaScriptStringEncode(Convert.ToString(TempData["SuccessMessage"] ?? "")))';
+            if (errorMessage !== '') {
+                if (typeof ShowClosingNotification === 'function') {
+                    ShowClosingNotification('Error', errorMessage, 'error');
+                }
+                else {
+                    alert(errorMessage);
+                }
+            }
+            if (successMessage !== '') {
+                if (typeof ShowClosingNotification === 'function') {
+                    ShowClosingNotification('Success', successMessage, 'success');
+                }
+            }
+        });
+
         var monthList = ['Jan', 'Feb', 'March', 'April', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
         function AddFeeCategory() {
             $('#hdnMonths').val('');
