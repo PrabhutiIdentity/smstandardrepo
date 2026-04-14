@@ -1,0 +1,310 @@
+﻿@{
+    ViewBag.Title = "Fee Summary";
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+@section IncludeCss
+{
+    <title>P-School | Payments</title>
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+
+
+}
+@model SMEnterprise.Models.StudentSessionFeeStatusPageModel
+<div class="">
+
+    <div class="clearfix"></div>
+    <div class="">
+
+        <div class="clearfix"></div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>
+                            Fee Summery
+                        </h2><br />
+                        <span class="pull-right">
+                            Total Fee : @Model.MonthlySummery.Sum(c => c.ApplicableFee).ToString("0.00") Discounts : @Model.MonthlySummery.Sum(c => c.Discount).ToString("0.00")
+                            Payments : @Model.MonthlySummery.Sum(c => c.PaymentRecieved).ToString("0.00") Net Due : @Model.MonthlySummery.Sum(c => c.ApplicableFee - c.Discount - c.PaymentRecieved).ToString("0.00")
+                        </span>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+
+                        <div class="accordion" id="accordion" role="tablist" aria-multiselectable="true">
+
+                            @foreach (var mys in Model.MonthlySummery)
+                            {
+
+
+
+
+                                <div class="panel">
+                                    <a class="panel-heading" role="tab" id="heading_@(mys.FeeYear)_@mys.FeeMonth" data-toggle="collapse" data-parent="#accordion" href="#collapse_@(mys.FeeYear)_@mys.FeeMonth" aria-expanded="true" aria-controls="collapse_@(mys.FeeYear)_@mys.FeeMonth">
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td style="width:20%">
+                                                    @((new DateTime(mys.FeeYear, mys.FeeMonth, 1)).ToString("MMMM, yyyy"))
+                                                   
+                                                </td>
+                                                <td style="width:20%">
+                                                    Applicable Fee : @mys.ApplicableFee.ToString("0.00")
+                                                </td>
+                                                <td style="width:20%">
+                                                    Discount : @mys.Discount.ToString("0.00")
+                                                </td>
+                                                <td style="width:20%">
+                                                    Paid : @mys.PaymentRecieved.ToString("0.00")
+                                                </td>
+                                                <td style="width:20%">
+                                                    Amount Due: @((mys.ApplicableFee - mys.Discount - mys.PaymentRecieved).ToString("0.00"))
+                                                </td>
+                                                <td style="width:20%">
+                                                    @{
+                                                        // Calculate the raw numeric amount due first (e.g., decimal)
+                                                        var currentAmountDue = mys.ApplicableFee - mys.Discount - mys.PaymentRecieved;
+                                                    }
+
+                                                    @if (currentAmountDue <= 0) // Check if amount is zero or less (meaning paid)
+                                                    {
+                                                        <span style="font-weight: bold; color: green;">Paid</span>
+                                                    }
+                                                    else
+                                                    {
+
+                                                        <span style="font-weight: bold; color: darkred;">Pay</span>
+
+
+                                                    }
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                    <div id="collapse_@(mys.FeeYear)_@mys.FeeMonth" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading_@(mys.FeeYear)_@mys.FeeMonth">
+                                        <div class="panel-body">
+                                            <table class="table table-bordered">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Fee Head</th>
+                                                        <th>Fee Amount</th>
+                                                        <th>Discount</th>
+                                                        <th>Paid</th>
+                                                        <th>Net Due</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{
+                                                        var ctr = 1;
+                                                        foreach (var f in Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear))
+                                                        {
+                                                            <tr>
+                                                                <td>@ctr</td>
+                                                                <td>@f.FeeTypeName</td>
+                                                                <td>@f.ApplicableFee.ToString("0.00")</td>
+                                                                <td>@f.RDiscount.ToString("0.00")</td>
+                                                                <td>@f.PaidAmount.ToString("0.00")</td>
+                                                                <td>@((f.ApplicableFee-f.RDiscount-f.PaidAmount).ToString("0.00"))</td>
+                                                            </tr>
+                                                            ctr = ctr + 1;
+                                                        }
+                                                    }
+                                                </tbody>
+                                                <tfoot>
+                                                    <tr>
+                                                        <td colspan="2" style="text-align:right"><b>Total</b></td>
+                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee).ToString("0.00")</td>
+                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.RDiscount).ToString("0.00")</td>
+                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.PaidAmount).ToString("0.00")</td>
+                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")</td>
+                                                    </tr>
+                                                    <tr>
+                                                        @*<td colspan="5" style="text-align:right">
+                                                                @using (Html.BeginForm("PayNow", "PayU", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "makePayment", @class = "form-horizontal" }))
+                                                                {
+                                                                    <input type="hidden" name="StudentID" value="@Model.StudentID" />
+                                                                    <input type="hidden" id="feemonth" name="FeeMonth" value="@mys.FeeMonth" />
+                                                                    <input type="hidden" name="FeeYear" value="@mys.FeeYear" />
+                                                                    <input type="hidden" name="ApplicableFee" id="totalApplicableFee" value="@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")" />
+
+
+                                                                        <button type="submit" class="btn btn-link">Pay Now</button>
+
+                                                                }
+                                                            </td>*@
+                                                        <td colspan="5" style="text-align:right">
+
+
+                                                            @if (currentAmountDue <= 0)
+                                                            {
+                                                                @*<span style="font-weight: bold; color: green;">Paid</span>*@
+                                                            }
+                                                            else
+                                                            {
+                                                                if (Model.SBranch.SBranchID == 41)
+                                                                {
+
+                                                                    using (Html.BeginForm("Index", "Payment", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
+                                                                    {
+                                                                        <input type="hidden" name="StudentID" value="@Model.StudentID" />
+                                                                        <input type="hidden" id="feemonth" name="FeeMonth" value="@mys.FeeMonth" />
+                                                                        <input type="hidden" name="FeeYear" value="@mys.FeeYear" />
+
+                                                                        @*<input type="hidden" name="ApplicableFee" id="totalApplicableFee" value="@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")" readonly/>*@
+                                                                        <button type="submit" class="btn btn-link" color: darkred;>Pay Now</button>
+
+                                                                    }
+                                                                   
+                                                                }
+                                                                else
+                                                                {
+                                                                    <span style="font-weight: bold; color: darkred;">Pay</span>
+                                                                }
+
+                                                            }
+                                                        </td>
+
+
+                                                        <td>@Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear).Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount).ToString("0.00")</td>
+                                                    </tr>
+                                                </tfoot>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+                        dom: "Bfrtip",
+                        buttons: [
+                          {
+                              extend: "copy",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "csv",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "excel",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "pdfHtml5",
+                              className: "btn-sm"
+                          },
+                          {
+                              extend: "print",
+                              className: "btn-sm"
+                          },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
+        });
+        function ToggleDetails(sender) {
+
+
+            if ($(sender).hasClass("Closed")) {
+
+                $.ajax(
+                {
+                    type: "POST",
+                    url: "/Parent/GetFeeReciept/" + $(sender).attr('id'),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        // fill the div with the html returned by action
+                        $(sender)
+                            .closest("tr")
+                            .after("<tr><td colspan = '999' style='border-left: 3px solid #7b64a5;'>" + html + "</td></tr>");
+                        $(sender).closest("tr").css('background-color', 'rgba(123, 100, 165, 0.48)');
+                        var ele = document.getElementsByClassName("Open");
+                        if (ele.length > 0) {
+                            $(ele[0]).click();
+                            $(ele[0]).closest("tr").css('background-color', 'white');
+                            $(ele[0]).html('Close ');
+                        }
+
+                        $(sender).removeClass("Closed");
+                        $(sender).addClass("Open");
+
+                        $(sender).html('Close ');
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+            }
+            else {
+                $(sender).removeClass("Open");
+                $(sender).closest("tr").css('background-color', 'white');
+                $(sender).addClass("Closed");
+                $(sender).closest("tr").next().remove();
+                $(sender).html('<i class="fa fa-folder"></i> View Recipt');
+
+            }
+
+        }
+        function PrintRecipt() {
+            var contents = $("#divRecipt").html();//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}

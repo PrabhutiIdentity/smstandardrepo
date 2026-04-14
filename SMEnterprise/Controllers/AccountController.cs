@@ -837,26 +837,34 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult SaveFeePayment(FeePaymentModel objModel)
         {
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            //  objModel.QDate = CommonUsage.GetCurrentDate();
-            //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+            try
+            {
+                objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                //  objModel.QDate = CommonUsage.GetCurrentDate();
+                //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
 
 
-            //string FeeDate= objModel.FeeDate.ToShortDateString();
-            //if (FeeDate.Length>0)
-            //{
-            //    objModel.FeeDate = objModel.FeeDate;
-            //}
-            //else
-            //{
-            //    objModel.FeeDate = CommonUsage.GetCurrentDate();
-            //}
-            objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel.Day = objModel.QDate.Day;
-            FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
+                //string FeeDate= objModel.FeeDate.ToShortDateString();
+                //if (FeeDate.Length>0)
+                //{
+                //    objModel.FeeDate = objModel.FeeDate;
+                //}
+                //else
+                //{
+                //    objModel.FeeDate = CommonUsage.GetCurrentDate();
+                //}
+                objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
+                objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                objModel.Day = objModel.QDate.Day;
+                FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
 
-            return PartialView("_StudentFeeRowPartial", objData);
+                return PartialView("_StudentFeeRowPartial", objData);
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 400;
+                return Content(ex.Message);
+            }
         }
         [PermissionFilter]
         public JsonResult SendFeeCollectionSMS(string ID)
@@ -3126,6 +3134,19 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult CollectionReport(FeePaymentModel objData = null)
+        {
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+            if (objData.DemandMonth.Year == 1)
+            {
+                objData.DemandMonth = CommonUsage.GetCurrentDate();
+            }
+         
+            FeePaymentModel objModel = objAccountData.GetCollectionReport(SBranchID, objData.DemandMonth, objData.ClassID, objData.SectionID, objData.SessionID);
+            return View(objModel);
+        }
+        [PermissionFilter]
         public ActionResult ReportDailyFeeCollection(CollectionReportModel objModel)
         {
             objModel.ReportType = 1;
@@ -3151,6 +3172,7 @@ namespace SMEnterprise.Controllers
             {
                 objModel.FromDate = CommonUsage.GetCurrentDate().AddDays(-7);
                 objModel.PaymentMode = -1;
+                objModel.SessionID = 0;
             }
             if (objModel.ToDate.Year == 1)
             {
@@ -3439,19 +3461,27 @@ namespace SMEnterprise.Controllers
                         ViewBag.Data = dt;
                     }
                     //Connection String to Excel Workbook  
-                    else if (extension.Trim() == ".xls")
-                    {
-                        connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + path1 + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
-                        dt = Utility.ConvertXSLXtoDataTable(path1, connString);
-                        ViewBag.Data = dt;
-                    }
-                    else if (extension.Trim() == ".xlsx")
-                    {
+                    /* else if (extension.Trim() == ".xls")
+                     {
+                         connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + path1 + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
+                         dt = Utility.ConvertXSLXtoDataTable(path1, connString);
+                         ViewBag.Data = dt;
+                     }
+                     else if (extension.Trim() == ".xlsx")
+                     {
 
-                        connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path1 + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
-                        dt = Utility.ConvertXSLXtoDataTable(path1, connString);
-                        ViewBag.Data = dt;
+                         connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path1 + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
+                         dt = Utility.ConvertXSLXtoDataTable(path1, connString);
+                         ViewBag.Data = dt;
+                     }
+                    */
+                    else if (extension == ".xls" || extension == ".xlsx")
+                    {
+                        // NO MORE OLEDB PROVIDERS NEEDED!
+                        // Just pass the file path to your new Utility method
+                        dt = Utility.ConvertXSLXtoDataTable(path1);
                     }
+                    ViewBag.Data = dt;
                     objModel.Students = CommonUsage.ConvertDataTable<StudentBulkUploadModel>(dt);
                 }
                 else

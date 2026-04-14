@@ -1848,14 +1848,22 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateFeeType(FeeCategoryModel objData)
         {
-            if (Session["SBranchID"] == null)
+            try
             {
-                Session["SBranchID"] = 1;
+                if (Session["SBranchID"] == null)
+                {
+                    Session["SBranchID"] = 1;
+                }
+                objData.UserID = PermissionManager.GetLoggedInUser().UserID;
+                objData.OperationDate = CommonUsage.GetCurrentDate();
+                objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+                objAdminData.InsertUpdateFeeType(objData);
+                TempData["SuccessMessage"] = "Fee category updated successfully.";
             }
-            objData.UserID = PermissionManager.GetLoggedInUser().UserID;
-            objData.OperationDate = CommonUsage.GetCurrentDate();
-            objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            objAdminData.InsertUpdateFeeType(objData);
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = ex.Message;
+            }
             return RedirectToAction("FeeCategoryManagement", "Admin");
         }
         [PermissionFilter]

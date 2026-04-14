@@ -5,6 +5,8 @@ using System.Data;
 using System.Linq;
 using System.Web;
 
+
+
 namespace SMEnterprise.Models
 {
     public class SOCertificateDetails
@@ -1031,7 +1033,12 @@ namespace SMEnterprise.Models
         public int TotalParameter { get; set; }
         public int FilledParameter { get; set; }
         public List<EvaluationTypeModel> EvaluationTypes { get; set; }
+        // use for Rank
+        public List<StudentTermRankModel> TermRanks { get; set; }
+        public StudentOverallRankModel OverallRank { get; set; }
 
+
+        //
         public DataTable GetPerformanceValuesDatatable()
         {
 

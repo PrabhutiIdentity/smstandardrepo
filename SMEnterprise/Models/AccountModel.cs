@@ -102,6 +102,8 @@ namespace SMEnterprise.Models
             dtStudentDetails.Columns.Add("MotherName");
             dtStudentDetails.Columns.Add("MotherMobileNo");
             dtStudentDetails.Columns.Add("AadharCardNo");
+            dtStudentDetails.Columns.Add("PenNo");
+            dtStudentDetails.Columns.Add("ApaarID");
 
             foreach (StudentModel e in Students)
             {
@@ -119,6 +121,8 @@ namespace SMEnterprise.Models
                 dr["MotherName"] = e.MotherName;
                 dr["MotherMobileNo"] = e.MotherMobileNo;
                 dr["AadharCardNo"] = e.AadharCardNo;
+                dr["PenNo"] = e.PenNo;
+                dr["ApaarID"] = e.ApaarID;
                 dtStudentDetails.Rows.Add(dr);
             }
 

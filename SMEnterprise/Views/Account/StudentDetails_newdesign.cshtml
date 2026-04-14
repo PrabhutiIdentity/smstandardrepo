@@ -1,0 +1,1099 @@
+﻿@using SMEnterprise.Models
+@{
+    ViewBag.Title = "Student Details";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var permissions = (EmployeePermissionsModel)Session["Permissions"];
+    var canEditCustomFee = true;
+    @* Uncomment below to re-enable permission check:
+        if (permissions.isPermissionsSet > 0) {
+            var p = permissions.Permissions.FirstOrDefault(x => x.Module == 1 && x.Action == 1);
+            canEditCustomFee = (p != null && p.Status == 1);
+        } *@
+    var isNew = (Model.Student.StudentID == 0);
+}
+@model SMEnterprise.Models.StudentEditModel
+
+@section IncludeCss {
+    <title>P-School | Student Details</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/select2.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/css/student.css")" />
+}
+
+@* ════════════════════════════════════════
+       ROOT WRAPPER  (all design scoped here)
+    ════════════════════════════════════════ *@
+<div class="sd-wrap">
+
+    @* ── STUDENT BANNER ─────────────────── *@
+    @if (!isNew)
+    {
+        <div class="sd-banner">
+            <div class="sd-banner-photo">
+                <img src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo"
+                     onerror="this.style.display='none';this.parentNode.innerHTML='@Model.Student.Name.Substring(0,Math.Min(2,Model.Student.Name.Length)).ToUpper()'"
+                     alt="@Model.Student.Name" />
+            </div>
+            <div class="sd-banner-body">
+                <div class="sd-banner-name-row">
+                    <span class="sd-banner-name">@Model.Student.Name</span>
+                    <span class="sd-badge sd-badge-green">
+                        <span class="sd-badge-dot"></span>Active
+                    </span>
+                    <span class="sd-badge sd-badge-gray">@Model.Student.StudentSID</span>
+                </div>
+                <div class="sd-banner-meta">
+                    <span>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <rect x="1" y="2" width="10" height="9" rx="1" stroke="currentColor" stroke-width="1.1" />
+                            <path d="M4 1v2M8 1v2M1 5h10" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        DOB: @Model.Student.DOB.ToString("dd MMM yyyy")
+                    </span>
+                    <span>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <circle cx="6" cy="4" r="2" stroke="currentColor" stroke-width="1.1" />
+                            <path d="M1.5 10.5c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" />
+                        </svg>
+                        @(Model.Student.Gender == 0 ? "Male" : "Female")
+                    </span>
+                    <span>
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                            <path d="M6 1C4.3 1 3 2.3 3 4c0 2.5 3 6 3 6s3-3.5 3-6C9 2.3 7.7 1 6 1z" stroke="currentColor" stroke-width="1.1" />
+                            <circle cx="6" cy="4" r="1" fill="currentColor" />
+                        </svg>
+                        Joining: @Model.Student.DOJ.ToString("dd MMM yyyy")
+                    </span>
+                    @if (!string.IsNullOrEmpty(Model.Student.AadharCardNo))
+                    {
+                        <span>Aadhaar: @Model.Student.AadharCardNo</span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    @* ── TAB CARD ────────────────────────── *@
+    <div class="sd-card">
+
+        @* TAB NAV *@
+        <div class="sd-tab-nav">
+            <button class="sd-tab-btn @(Model.CurrentTab == 1 || isNew ? "active" : "")"
+                    onclick="sdSwitchTab('personal', this)">
+                <svg viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="4.5" r="2.5" stroke="currentColor" stroke-width="1.2" />
+                    <path d="M1.5 12c0-3 2.5-5.5 5.5-5.5S12.5 9 12.5 12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                </svg>
+                Personal
+            </button>
+
+            @if (!isNew)
+            {
+                <button class="sd-tab-btn @(Model.CurrentTab == 2 ? "active" : "")"
+                        onclick="sdSwitchTab('parent', this)">
+                    <svg viewBox="0 0 14 14" fill="none">
+                        <circle cx="4.5" cy="4" r="2" stroke="currentColor" stroke-width="1.2" />
+                        <circle cx="9.5" cy="4" r="2" stroke="currentColor" stroke-width="1.2" />
+                        <path d="M1 12c0-2.2 1.6-4 3.5-4M9.5 8c2 0 3.5 1.8 3.5 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                    </svg>
+                    Parent
+                </button>
+
+                <button class="sd-tab-btn @(Model.CurrentTab == 3 ? "active" : "")"
+                        onclick="sdSwitchTab('address', this)">
+                    <svg viewBox="0 0 14 14" fill="none">
+                        <path d="M7 1C5 1 3 2.8 3 5c0 3.3 4 8 4 8s4-4.7 4-8c0-2.2-2-4-4-4z" stroke="currentColor" stroke-width="1.2" />
+                        <circle cx="7" cy="5" r="1.3" stroke="currentColor" stroke-width="1.2" />
+                    </svg>
+                    Address
+                </button>
+
+                <button class="sd-tab-btn @(Model.CurrentTab == 4 ? "active" : "")"
+                        onclick="sdSwitchTab('guardian', this)">
+                    <svg viewBox="0 0 14 14" fill="none">
+                        <path d="M7 1l5 2v4c0 2.8-2 5-5 6.5C4 12 2 9.8 2 7V3z" stroke="currentColor" stroke-width="1.2" />
+                    </svg>
+                    Guardian
+                </button>
+
+                <button class="sd-tab-btn @(Model.CurrentTab == 5 ? "active" : "")"
+                        onclick="sdSwitchTab('documents', this)">
+                    <svg viewBox="0 0 14 14" fill="none">
+                        <path d="M3 1.5h5l3.5 3.5V12a.5.5 0 01-.5.5h-8A.5.5 0 013 12V2a.5.5 0 010-.5z" stroke="currentColor" stroke-width="1.2" />
+                        <path d="M8 1.5V5h3.5" stroke="currentColor" stroke-width="1.2" />
+                    </svg>
+                    Documents
+                </button>
+
+                <button class="sd-tab-btn @(Model.CurrentTab == 6 ? "active" : "")"
+                        onclick="sdSwitchTab('session', this)">
+                    <svg viewBox="0 0 14 14" fill="none">
+                        <rect x="1.5" y="2.5" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                        <path d="M4.5 1v3M9.5 1v3M1.5 6h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                    </svg>
+                    Session
+                </button>
+
+                <button class="sd-tab-btn @(Model.CurrentTab == 7 ? "active" : "")"
+                        onclick="sdSwitchTab('transport', this)">
+                    <svg viewBox="0 0 14 14" fill="none">
+                        <rect x="1" y="4.5" width="12" height="6" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                        <circle cx="4" cy="11" r="1.2" stroke="currentColor" stroke-width="1.2" />
+                        <circle cx="10" cy="11" r="1.2" stroke="currentColor" stroke-width="1.2" />
+                        <path d="M1 7h12M5 4.5V3M9 4.5V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                    </svg>
+                    Transport
+                </button>
+
+                if (Model.Hostel.Hostels != null)
+                {
+                    <button class="sd-tab-btn @(Model.CurrentTab == 8 ? "active" : "")"
+                            onclick="sdSwitchTab('hostel', this)">
+                        <svg viewBox="0 0 14 14" fill="none">
+                            <path d="M2 13V7l5-5 5 5v6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" />
+                            <rect x="5" y="9" width="4" height="4" rx=".5" stroke="currentColor" stroke-width="1.2" />
+                        </svg>
+                        Hostel
+                    </button>
+                }
+
+                if (canEditCustomFee)
+                {
+                    <button class="sd-tab-btn @(Model.CurrentTab == 9 ? "active" : "")"
+                            onclick="sdSwitchTab('fee', this)">
+                        <svg viewBox="0 0 14 14" fill="none">
+                            <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.2" />
+                            <path d="M7 4.5v5M5.5 5.8C5.5 5 6.2 4.5 7 4.5s1.5.5 1.5 1.3S8 7 7 7s-1.5.5-1.5 1.3S6.2 9.5 7 9.5s1.5-.5 1.5-1.3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                        </svg>
+                        Custom Fee
+                    </button>
+                }
+            }
+        </div>@* /sd-tab-nav *@
+
+        <div class="sd-tab-body">
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 1 — PERSONAL
+                ══════════════════════════════════════════════════════ *@
+            @using (Html.BeginForm("SaveStudentPersonal", "Account", FormMethod.Post,
+                    new { role = "form", enctype = "multipart/form-data", id = "frmPersonal" }))
+            {
+                <div id="sdTab-personal" class="sd-panel @(Model.CurrentTab == 1 || isNew ? "active" : "")">
+
+                    @* Photo strip *@
+                    <div class="sd-photo-strip">
+                        <div class="sd-photo-frame" id="sdPhotoFrameWrap">
+                            @if (!string.IsNullOrEmpty(Model.Student.Photo))
+                            {
+                                <img id="imgStudentPhoto"
+                                     src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo"
+                                     alt="@Model.Student.Name"
+                                     onerror="this.style.display='none'; document.getElementById('sdPhotoFallback').style.display='flex';" />
+                            }
+                            <div id="sdPhotoFallback" class="sd-photo-fallback"
+                                 style="display:@(string.IsNullOrEmpty(Model.Student.Photo) ? "flex" : "none")">
+                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                                    <circle cx="16" cy="12" r="6" stroke="currentColor" stroke-width="1.8" />
+                                    <path d="M4 28c0-6.6 5.4-12 12-12s12 5.4 12 12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                </svg>
+                                <span>@(isNew ? "No Photo" : Model.Student.Name.Substring(0, Math.Min(2, Model.Student.Name.Length)).ToUpper())</span>
+                            </div>
+                        </div>
+                        <div class="sd-photo-info">
+                            <h3>@(isNew ? "New Student" : Model.Student.Name)</h3>
+                            <p>@(isNew ? "Fill in details below" : Model.Student.DOB.ToString("dd-MM-yyyy") + " · " + Model.Student.StudentSID)</p>
+
+                            @* Gender toggle *@
+                            <div class="sd-gender-toggle">
+                                <button type="button"
+                                        class="sd-gender-opt @(Model.Student.Gender == 0 ? "male" : "")"
+                                        data-val="0"
+                                        onclick="sdSelectGender(0, this)">
+                                    Male
+                                </button>
+                                <button type="button"
+                                        class="sd-gender-opt @(Model.Student.Gender == 1 ? "female" : "")"
+                                        data-val="1"
+                                        onclick="sdSelectGender(1, this)">
+                                    Female
+                                </button>
+                            </div>
+                            <input type="hidden" id="hdnStudentGender" name="Gender" value="@Model.Student.Gender" />
+                            <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+                            <input type="hidden" name="Photo" id="hdnImageName" value="@Model.Student.Photo" />
+
+                            <label class="sd-upload-btn">
+                                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                    <path d="M6.5 1v8M3.5 4l3-3 3 3M2 10.5v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5v-1"
+                                          stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Choose Photo
+                                <input type="file" name="StudentImageUploader"
+                                       onchange="sdPreviewImage(this,'imgStudentPhoto')" />
+                            </label>
+                        </div>
+                    </div>
+
+                    @* ── Basic Information ── *@
+                    <div class="sd-section">Basic Information</div>
+                    <div class="sd-grid-3">
+                        <div class="sd-field">
+                            <label>Admission UID</label>
+                            <input class="sd-input sd-readonly" value="@Model.Student.StudentSID" readonly />
+                        </div>
+                        <div class="sd-field">
+                            <label>Name <span class="sd-req">*</span></label>
+                            <input class="sd-input" id="txtName" name="Name"
+                                   value="@Model.Student.Name" placeholder="Full name" required />
+                        </div>
+                        <div class="sd-field">
+                            <label>
+                                Birth Date <span class="sd-req">*</span>
+                                <small style="font-weight:400;color:var(--gray-400)">(mm/dd/yyyy)</small>
+                            </label>
+                            <div class="sd-input-wrap">
+                                <span class="sd-input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                                        <path d="M4 1v2M10 1v2M1 6h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                                    </svg>
+                                </span>
+                                <input class="sd-input sd-datepicker" name="DOB"
+                                       value="@Model.Student.DOB.ToShortDateString()"
+                                       placeholder="mm/dd/yyyy" required />
+                            </div>
+                        </div>
+                        <div class="sd-field">
+                            <label>
+                                Joining Date <span class="sd-req">*</span>
+                                <small style="font-weight:400;color:var(--gray-400)">(mm/dd/yyyy)</small>
+                            </label>
+                            <div class="sd-input-wrap">
+                                <span class="sd-input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                        <rect x="1" y="2" width="12" height="11" rx="1.5" stroke="currentColor" stroke-width="1.2" />
+                                        <path d="M4 1v2M10 1v2M1 6h12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                                    </svg>
+                                </span>
+                                <input class="sd-input sd-datepicker" name="DOJ"
+                                       value="@Model.Student.DOJ.ToShortDateString()"
+                                       placeholder="mm/dd/yyyy" required />
+                            </div>
+                        </div>
+                        <div class="sd-field">
+                            <label>Nationality</label>
+                            <select class="sd-select" name="Nationality">
+                                <option value="0" @(Model.Student.Nationality == 0 ? "selected" : "")>NA</option>
+                                @foreach (var n in Model.Nationalities)
+                                {
+                                    <option value="@n.ID" @(Model.Student.Nationality == n.ID ? "selected" : "")>@n.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="sd-field">
+                            <label>Religion</label>
+                            <select class="sd-select" name="ReligionID">
+                                <option value="0" @(Model.Student.ReligionID == 0 ? "selected" : "")>NA</option>
+                                @foreach (var r in Model.Religions)
+                                {
+                                    <option value="@r.ID" @(Model.Student.ReligionID == r.ID ? "selected" : "")>@r.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="sd-field">
+                            <label>Blood Group</label>
+                            <select class="sd-select" name="BloodGroup">
+                                @foreach (var bg in new[] { "NA", "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-" })
+                                {
+                                    <option @(Model.Student.BloodGroup == bg ? "selected" : "")>@bg</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="sd-field">
+                            <label>Mother Tongue</label>
+                            <select class="sd-select" name="MotherTongueID">
+                                <option value="0" @(Model.Student.MotherTongueID == 0 ? "selected" : "")>NA</option>
+                                @foreach (var m in Model.MotherTongues)
+                                {
+                                    <option value="@m.ID" @(Model.Student.MotherTongueID == m.ID ? "selected" : "")>@m.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="sd-field">
+                            <label>Category</label>
+                            <select class="sd-select" name="Category">
+                                <option value="0" @(Model.Student.Category == 0 ? "selected" : "")>NA</option>
+                                @foreach (var c in Model.SocialCategories)
+                                {
+                                    <option value="@c.ID" @(Model.Student.Category == c.ID ? "selected" : "")>@c.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    @* ── Identification ── *@
+                    <div class="sd-section">Identification</div>
+                    <div class="sd-grid-3">
+                        <div class="sd-field">
+                            <label>School UID</label>
+                            <input class="sd-input" name="SchoolUID" value="@Model.Student.SchoolUID"
+                                   placeholder="School's unique ID / Sr. No." />
+                        </div>
+                        <div class="sd-field">
+                            <label>Aadhaar <span class="sd-req">*</span></label>
+                            <input class="sd-input" name="AadharCardNo" value="@Model.Student.AadharCardNo"
+                                   placeholder="12-digit Aadhaar" />
+                        </div>
+                        <div class="sd-field">
+                            <label>Access Card <span class="sd-req">*</span></label>
+                            <input class="sd-input" name="AccessCardNo" value="@Model.Student.AccessCardNo"
+                                   placeholder="Access card number" />
+                        </div>
+                        <div class="sd-field">
+                            <label>Passport No.</label>
+                            <input class="sd-input" name="PassportNo" value="@Model.Student.PassportNo"
+                                   placeholder="Passport number" />
+                        </div>
+                        @* ── NEW FIELDS ── *@
+                        <div class="sd-field sd-new">
+                            <label>Pen No. <span class="sd-badge sd-badge-new">New</span></label>
+                            <input class="sd-input" name="PenNo" value="@Model.Student.PenNo"
+                                   placeholder="Permanent Education Number" />
+                        </div>
+                        <div class="sd-field sd-new">
+                            <label>Apaar ID <span class="sd-badge sd-badge-new">New</span></label>
+                            <input class="sd-input" name="ApaarID" value="@Model.Student.ApaarID"
+                                   placeholder="Academic Bank of Credits ID" />
+                        </div>
+                    </div>
+
+                    @* ── Notifications & Health ── *@
+                    <div class="sd-section">Notifications &amp; Health</div>
+                    <div class="sd-grid-3">
+                        <div class="sd-field">
+                            <label>SMS Notification</label>
+                            <select class="sd-select" name="NotificationSMSTo">
+                                <option value="0" @(Model.Student.NotificationSMSTo == 0 ? "selected" : "")>On Father's Mobile</option>
+                                <option value="1" @(Model.Student.NotificationSMSTo == 1 ? "selected" : "")>On Mother's Mobile</option>
+                                <option value="2" @(Model.Student.NotificationSMSTo == 2 ? "selected" : "")>On Guardian</option>
+                            </select>
+                        </div>
+                        <div class="sd-field">
+                            <label>Disability</label>
+                            <select class="sd-select" name="Disability">
+                                <option value="1" @(Model.Student.Disability == 1 ? "selected" : "")>None</option>
+                                <option value="2" @(Model.Student.Disability == 2 ? "selected" : "")>Handicap</option>
+                                <option value="3" @(Model.Student.Disability == 3 ? "selected" : "")>Other</option>
+                            </select>
+                        </div>
+                        <div class="sd-field">
+                            <label>Allergic Medicine</label>
+                            <input class="sd-input" name="Allergic_Medicine"
+                                   value="@Model.Student.Allergic_Medicine"
+                                   placeholder="List allergic medicines" />
+                        </div>
+                        <div class="sd-field sd-span-2">
+                            <label>Extra Curricular</label>
+                            <textarea class="sd-textarea" name="ExtraCurricular"
+                                      placeholder="Sports, clubs, activities…">@Model.Student.ExtraCurricular</textarea>
+                        </div>
+                    </div>
+
+                    @* ── Previous School ── *@
+                    <div class="sd-divider">Previous School Details</div>
+                    <div class="sd-grid-3">
+                        <div class="sd-field">
+                            <label>School Name</label>
+                            <input class="sd-input" name="PSchoolName" value="@Model.Student.PSchoolName" placeholder="Previous school name" />
+                        </div>
+                        <div class="sd-field">
+                            <label>School Medium</label>
+                            <input class="sd-input" name="PSchoolMedium" value="@Model.Student.PSchoolMedium" placeholder="e.g. Hindi / English" />
+                        </div>
+                        <div class="sd-field">
+                            <label>Class Attended</label>
+                            <input class="sd-input" name="PClassName" value="@Model.Student.PClassName" placeholder="e.g. Class 8" />
+                        </div>
+                        <div class="sd-field">
+                            <label>Result</label>
+                            <input class="sd-input" name="PSResult" value="@Model.Student.PSResult" placeholder="e.g. 85% / Pass" />
+                        </div>
+                        <div class="sd-field">
+                            <label>School City</label>
+                            <input class="sd-input" name="PSchoolCity" value="@Model.Student.PSchoolCity" placeholder="City" />
+                        </div>
+                        <div class="sd-field">
+                            <label>School State</label>
+                            <input class="sd-input" name="PSchoolState" value="@Model.Student.PSchoolState" placeholder="State" />
+                        </div>
+                    </div>
+
+                    @* ── Bank Details ── *@
+                    <div class="sd-divider">Student Bank Details for Scholarship</div>
+                    <div class="sd-grid-3">
+                        <div class="sd-field"><label>SSSID Number</label><input class="sd-input" name="SSSID" value="@Model.Student.SSSID" placeholder="SSSID" /></div>
+                        <div class="sd-field"><label>Family ID</label><input class="sd-input" name="FamilyID" value="@Model.Student.FamilyID" placeholder="Family ID" /></div>
+                        <div class="sd-field"><label>Bank Name</label><input class="sd-input" name="BankName" value="@Model.Student.BankName" placeholder="Bank name" /></div>
+                        <div class="sd-field"><label>Account Number</label><input class="sd-input" name="AccountNumber" value="@Model.Student.AccountNumber" placeholder="Account number" /></div>
+                        <div class="sd-field"><label>IFSC Code</label><input class="sd-input" name="IFSCCode" value="@Model.Student.IFSCCode" placeholder="IFSC code" /></div>
+                        <div class="sd-field"><label>Branch Name</label><input class="sd-input" name="BranchName" value="@Model.Student.BranchName" placeholder="Branch name" /></div>
+                    </div>
+
+                    <div class="sd-form-footer">
+                        <button type="button" class="sd-btn sd-btn-outline">Reset</button>
+                        <button type="submit" class="sd-btn sd-btn-primary"
+                                onclick="if(!CheckStudentDetails()) return false; sdSaveStart(this);">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Save Personal Details
+                        </button>
+                    </div>
+                </div>
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 2 — PARENT
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew)
+            {
+                using (Html.BeginForm("SaveStudentParent", "Account", FormMethod.Post,
+                        new { role = "form", enctype = "multipart/form-data", id = "frmParent" }))
+                {
+                    <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+                    <input type="hidden" id="hdnParentID" name="ParentID" value="@Model.ParantDetails.ParentID" />
+
+                    <div id="sdTab-parent" class="sd-panel @(Model.CurrentTab == 2 ? "active" : "")">
+
+                        @* Lookup bar — if another child already in school, enter their ParentID to fetch & reuse *@
+                        <div class="sd-lookup">
+                            <span class="sd-lookup-label">Parent ID :</span>
+                            <input class="sd-input" id="sdParentIDDisplay"
+                                   value="@Model.ParantDetails.ParentSID"
+                                   placeholder="e.g. PAR001234" />
+                            <button type="button" class="sd-btn sd-btn-outline sd-btn-sm" onclick="sdLookupParent()">
+                                <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                                    <circle cx="5.5" cy="5.5" r="4" stroke="currentColor" stroke-width="1.3" />
+                                    <path d="M10 10l-2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                                </svg>
+                                Fetch Details
+                            </button>
+                            <span class="sd-lookup-hint">If another sibling is already enrolled, enter their Parent ID to auto-fill all parent details.</span>
+                        </div>
+
+                        <div class="sd-parent-cols">
+                            @* Father *@
+                            <div class="sd-parent-card">
+                                <div class="sd-parent-head">
+                                    <div class="sd-parent-icon father">F</div>
+                                    <span class="sd-parent-title">Father's Details</span>
+                                </div>
+                                <div style="text-align:center;margin-bottom:.9rem">
+                                    <div class="sd-parent-photo father">
+                                        @if (!string.IsNullOrEmpty(Model.ParantDetails.FatherImage))
+                                        {
+                                            <img src="@Url.Content("~/Images/ParentImage/Father/")@(Model.ParantDetails.ParentID)_1_@Model.ParantDetails.FatherImage"
+                                                 alt="Father" onerror="this.style.display='none'" />
+                                        }
+                                        else
+                                        { <span>F</span>}
+                                    </div>
+                                    <label class="sd-upload-btn" style="justify-content:center">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                            <path d="M6 1v7M3 4l3-3 3 3M1.5 10v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V10"
+                                                  stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        Upload photo
+                                        <input type="file" name="FatherImageUploader" />
+                                    </label>
+                                    <input type="hidden" name="FatherImage" value="@Model.ParantDetails.FatherImage" />
+                                </div>
+                                <div class="sd-parent-fields">
+                                    <div class="sd-field"><label>Father Name</label><input id="sdFatherName" class="sd-input" name="FatherName" value="@Model.ParantDetails.FatherName" placeholder="Full name" /></div>
+                                    <div class="sd-field"><label>Aadhaar</label><input id="sdFatherAadhaar" class="sd-input" name="FatherAadhaar" value="@Model.ParantDetails.FatherAadhaar" placeholder="Aadhaar number" /></div>
+                                    <div class="sd-field"><label>Occupation</label><input id="sdFatherOccupation" class="sd-input" name="FatherOccupationID" value="@Model.ParantDetails.FatherOccupationID" placeholder="e.g. Teacher, Engineer" /></div>
+                                    <div class="sd-field">
+                                        <label>Date of Birth <small style="font-weight:400;color:var(--gray-400)">(mm/dd/yyyy)</small></label>
+                                        <input id="sdFatherDOB" class="sd-input sd-datepicker" name="FatherDOB"
+                                               value="@(Model.ParantDetails.FatherDOB.Year == 1 ? SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToShortDateString() : Model.ParantDetails.FatherDOB.ToShortDateString())"
+                                               placeholder="mm/dd/yyyy" />
+                                    </div>
+                                    <div class="sd-field"><label>Mobile</label><input id="sdFatherMobile" class="sd-input" name="FatherMobileNo" value="@Model.ParantDetails.FatherMobileNo" placeholder="Mobile number" /></div>
+                                    <div class="sd-field"><label>Email</label><input id="sdFatherEmail" class="sd-input" name="FatherEmailID" value="@Model.ParantDetails.FatherEmailID" placeholder="Email address" /></div>
+                                    <div class="sd-field">
+                                        <label>Blood Group</label>
+                                        <select id="sdFatherBloodGroup" class="sd-select" name="FatherBloodGroup">
+                                            @foreach (var bg in new[] { "NA", "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-" })
+                                            {
+                                                <option @(Model.ParantDetails.FatherBloodGroup == bg ? "selected" : "")>@bg</option>
+}
+                                        </select>
+                                    </div>
+                                    <div class="sd-field"><label>Education</label><input id="sdFatherEducation" class="sd-input" name="FatherEducationID" value="@Model.ParantDetails.FatherEducationID" placeholder="e.g. Graduate" /></div>
+                                    <div class="sd-field"><label>Landline No.</label><input id="sdLandline" class="sd-input" name="HomeLandLineNo" value="@Model.ParantDetails.HomeLandLineNo" placeholder="Home landline" /></div>
+                                </div>
+                            </div>
+
+                            @* Mother *@
+                            <div class="sd-parent-card">
+                                <div class="sd-parent-head">
+                                    <div class="sd-parent-icon mother">M</div>
+                                    <span class="sd-parent-title">Mother's Details</span>
+                                </div>
+                                <div style="text-align:center;margin-bottom:.9rem">
+                                    <div class="sd-parent-photo mother">
+                                        @if (!string.IsNullOrEmpty(Model.ParantDetails.MotherImage))
+                                        {
+                                            <img src="@Url.Content("~/Images/ParentImage/Mother/")@(Model.ParantDetails.ParentID)_2_@Model.ParantDetails.MotherImage"
+                                                 alt="Mother" onerror="this.style.display='none'" />
+                                        }
+                                        else
+                                        { <span>M</span>}
+                                    </div>
+                                    <label class="sd-upload-btn" style="justify-content:center">
+                                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                            <path d="M6 1v7M3 4l3-3 3 3M1.5 10v1a.5.5 0 00.5.5h8a.5.5 0 00.5-.5V10"
+                                                  stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                        Upload photo
+                                        <input type="file" name="MotherImageUploader" />
+                                    </label>
+                                    <input type="hidden" name="MotherImage" value="@Model.ParantDetails.MotherImage" />
+                                </div>
+                                <div class="sd-parent-fields">
+                                    <div class="sd-field"><label>Mother Name</label><input id="sdMotherName" class="sd-input" name="MotherName" value="@Model.ParantDetails.MotherName" placeholder="Full name" /></div>
+                                    <div class="sd-field"><label>Aadhaar</label><input id="sdMotherAadhaar" class="sd-input" name="MotherAadhaar" value="@Model.ParantDetails.MotherAadhaar" placeholder="Aadhaar number" /></div>
+                                    <div class="sd-field"><label>Occupation</label><input id="sdMotherOccupation" class="sd-input" name="MotherOccupationID" value="@Model.ParantDetails.MotherOccupationID" placeholder="e.g. Teacher, Homemaker" /></div>
+                                    <div class="sd-field">
+                                        <label>Date of Birth <small style="font-weight:400;color:var(--gray-400)">(mm/dd/yyyy)</small></label>
+                                        <input id="sdMotherDOB" class="sd-input sd-datepicker" name="MotherDOB"
+                                               value="@(Model.ParantDetails.MotherDOB.Year == 1 ? SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToShortDateString() : Model.ParantDetails.MotherDOB.ToShortDateString())"
+                                               placeholder="mm/dd/yyyy" />
+                                    </div>
+                                    <div class="sd-field"><label>Mobile</label><input id="sdMotherMobile" class="sd-input" name="MotherMobileNo" value="@Model.ParantDetails.MotherMobileNo" placeholder="Mobile number" /></div>
+                                    <div class="sd-field"><label>Email</label><input id="sdMotherEmail" class="sd-input" name="MotherEmailID" value="@Model.ParantDetails.MotherEmailID" placeholder="Email address" /></div>
+                                    <div class="sd-field">
+                                        <label>Blood Group</label>
+                                        <select id="sdMotherBloodGroup" class="sd-select" name="MotherBloodGroup">
+                                            @foreach (var bg in new[] { "NA", "A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-" })
+                                            {
+                                                <option @(Model.ParantDetails.MotherBloodGroup == bg ? "selected" : "")>@bg</option>
+}
+                                        </select>
+                                    </div>
+                                    <div class="sd-field"><label>Education</label><input id="sdMotherEducation" class="sd-input" name="MotherEducationID" value="@Model.ParantDetails.MotherEducationID" placeholder="e.g. Graduate" /></div>
+                                    <div class="sd-field"><label>Access Card No.</label><input id="sdParentAccessCard" class="sd-input" name="AccessCardNo" value="@Model.ParantDetails.AccessCardNo" placeholder="Access card number" /></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sd-divider">Parent's Address</div>
+                        <div class="sd-grid-4">
+                            <div class="sd-field"><label>House No.</label><input id="sdParentHouseNo" class="sd-input" name="Padd_HouseNo" value="@Model.ParantDetails.Padd_HouseNo" placeholder="House / flat no." /></div>
+                            <div class="sd-field"><label>Street / Road</label><input id="sdParentStreet" class="sd-input" name="Padd_Street" value="@Model.ParantDetails.Padd_Street" placeholder="Street" /></div>
+                            <div class="sd-field"><label>Area / City</label><input id="sdParentArea" class="sd-input" name="Padd_Area" value="@Model.ParantDetails.Padd_Area" placeholder="Area / City" /></div>
+                            <div class="sd-field"><label>Sector</label><input id="sdParentSector" class="sd-input" name="Padd_Sector" value="@Model.ParantDetails.Padd_Sector" placeholder="Sector" /></div>
+                            <div class="sd-field"><label>District</label><input id="sdParentDistrict" class="sd-input" name="Padd_District" value="@Model.ParantDetails.Padd_District" placeholder="District" /></div>
+                            <div class="sd-field"><label>State</label><input id="sdParentState" class="sd-input" name="Padd_State" value="@Model.ParantDetails.Padd_State" placeholder="State" /></div>
+                            <div class="sd-field"><label>Pin Code</label><input id="sdParentPin" class="sd-input" name="Padd_PinCode" value="@Model.ParantDetails.Padd_PinCode" placeholder="PIN / ZIP" /></div>
+                            <div class="sd-field"><label>Country</label><input id="sdParentCountry" class="sd-input" name="Padd_Country" value="@Model.ParantDetails.Padd_Country" placeholder="Country" /></div>
+                        </div>
+
+                        <div class="sd-form-footer">
+                            <button type="button" class="sd-btn sd-btn-outline">Reset</button>
+                            <button type="submit" class="sd-btn sd-btn-primary"
+                                    onclick="if(!CheckParentForm()) return false; sdSaveStart(this);">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Save Parent Details
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 3 — ADDRESS
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew)
+            {
+                using (Html.BeginForm("SaveStudentAddress", "Account", FormMethod.Post,
+                        new { role = "form", enctype = "multipart/form-data", id = "frmAddress" }))
+                {
+                    <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+
+                    <div id="sdTab-address" class="sd-panel @(Model.CurrentTab == 3 ? "active" : "")">
+                        <div class="sd-alert sd-alert-info">
+                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                                <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.3" />
+                                <path d="M7.5 7v4M7.5 5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                            </svg>
+                            These addresses are used for official communications and records.
+                        </div>
+                        <div class="sd-grid-2">
+                            <div class="sd-field">
+                                <label>Current / Correspondence Address</label>
+                                <textarea class="sd-textarea" name="MiniAddress" style="height:110px"
+                                          placeholder="House No., Street, Area, City, State, PIN…">@Model.Student.MiniAddress</textarea>
+                            </div>
+                            <div class="sd-field">
+                                <label>Permanent Address</label>
+                                <textarea class="sd-textarea" name="MiniAddress2" style="height:110px"
+                                          placeholder="House No., Street, Area, City, State, PIN…">@Model.Student.MiniAddress2</textarea>
+                            </div>
+                        </div>
+                        <div class="sd-form-footer">
+                            <button type="submit" class="sd-btn sd-btn-primary" onclick="sdSaveStart(this)">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Save Address
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 4 — GUARDIAN
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew)
+            {
+                using (Html.BeginForm("SaveStudentGuardian", "Account", FormMethod.Post,
+                        new { role = "form", enctype = "multipart/form-data", id = "frmGuardian" }))
+                {
+                    <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+
+                    <div id="sdTab-guardian" class="sd-panel @(Model.CurrentTab == 4 ? "active" : "")">
+                        <div class="sd-section">Guardian Details</div>
+                        <div class="sd-grid-2">
+                            <div class="sd-field">
+                                <label>Guardian Name</label>
+                                <input class="sd-input" name="GuardianName" value="@Model.Student.GuardianName" placeholder="Full name" />
+                            </div>
+                            <div class="sd-field">
+                                <label>Relation with Student</label>
+                                <select class="sd-select" name="RelationWithGuardian">
+                                    <option value="1" @(Model.Student.RelationWithGuardian == 1 ? "selected" : "")>Uncle</option>
+                                    <option value="2" @(Model.Student.RelationWithGuardian == 2 ? "selected" : "")>Cousin</option>
+                                    <option value="3" @(Model.Student.RelationWithGuardian == 3 ? "selected" : "")>Aunt</option>
+                                    <option value="4" @(Model.Student.RelationWithGuardian == 4 ? "selected" : "")>Grandparent</option>
+                                    <option value="5" @(Model.Student.RelationWithGuardian == 5 ? "selected" : "")>Elder Sibling</option>
+                                </select>
+                            </div>
+                            <div class="sd-field">
+                                <label>Mobile No.</label>
+                                <input class="sd-input" name="GuardianMobileNo" value="@Model.Student.GuardianMobileNo" placeholder="Mobile number" />
+                            </div>
+                            <div class="sd-field">
+                                <label>Email ID</label>
+                                <input class="sd-input" name="GuardianEmail" value="@Model.Student.GuardianEmail" placeholder="Email address" />
+                            </div>
+                        </div>
+                        <div class="sd-form-footer">
+                            <button type="submit" class="sd-btn sd-btn-primary" onclick="sdSaveStart(this)">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Save Guardian Details
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 5 — DOCUMENTS
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew)
+            {
+                using (Html.BeginForm("SaveStudentDocuments", "Account", FormMethod.Post,
+                        new { role = "form", enctype = "multipart/form-data", id = "frmDocuments" }))
+                {
+                    <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+
+                    <div id="sdTab-documents" class="sd-panel @(Model.CurrentTab == 5 ? "active" : "")">
+                        <div class="sd-section">Upload Documents</div>
+                        <div class="sd-doc-grid">
+
+                            @* Birth Certificate *@
+                            <div class="sd-doc-card">
+                                <div class="sd-doc-icon">
+                                    <svg viewBox="0 0 20 20" fill="none"><path d="M5 2h8l4 4v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" /><path d="M13 2v4h4" stroke="currentColor" stroke-width="1.4" /><path d="M6 10h8M6 13h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+                                </div>
+                                <div class="sd-doc-name">Birth Certificate</div>
+                                <div class="sd-doc-status @(!string.IsNullOrEmpty(Model.Student.BirthCertificate) ? "ok" : "")">
+                                    @(!string.IsNullOrEmpty(Model.Student.BirthCertificate) ? "Uploaded" : "No file uploaded")
+                                </div>
+                                <input type="hidden" name="BirthCertificate" value="@Model.Student.BirthCertificate" />
+                                <label class="sd-upload-btn sd-btn-sm">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 4l3-3 3 3M1.5 10v1.5h9V10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                    @(!string.IsNullOrEmpty(Model.Student.BirthCertificate) ? "Replace" : "Choose file")
+                                    <input type="file" name="BirthCertificateUploader" accept="image/*" />
+                                </label>
+                            </div>
+
+                            @* Address Proof *@
+                            <div class="sd-doc-card">
+                                <div class="sd-doc-icon">
+                                    <svg viewBox="0 0 20 20" fill="none"><path d="M5 2h8l4 4v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" /><path d="M13 2v4h4" stroke="currentColor" stroke-width="1.4" /><path d="M6 10h8M6 13h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+                                </div>
+                                <div class="sd-doc-name">Address Proof</div>
+                                <div class="sd-doc-status @(!string.IsNullOrEmpty(Model.Student.AddressProof) ? "ok" : "")">
+                                    @(!string.IsNullOrEmpty(Model.Student.AddressProof) ? "Uploaded" : "No file uploaded")
+                                </div>
+                                <input type="hidden" name="AddressProof" value="@Model.Student.AddressProof" />
+                                <label class="sd-upload-btn sd-btn-sm">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 4l3-3 3 3M1.5 10v1.5h9V10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                    @(!string.IsNullOrEmpty(Model.Student.AddressProof) ? "Replace" : "Choose file")
+                                    <input type="file" name="AddressCertificateUploader" accept="image/*" />
+                                </label>
+                            </div>
+
+                            @* Transfer Certificate *@
+                            <div class="sd-doc-card">
+                                <div class="sd-doc-icon">
+                                    <svg viewBox="0 0 20 20" fill="none"><path d="M5 2h8l4 4v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" /><path d="M13 2v4h4" stroke="currentColor" stroke-width="1.4" /><path d="M6 10h8M6 13h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+                                </div>
+                                <div class="sd-doc-name">Transfer Certificate</div>
+                                <div class="sd-doc-status @(!string.IsNullOrEmpty(Model.Student.TransferCertificate) ? "ok" : "")">
+                                    @(!string.IsNullOrEmpty(Model.Student.TransferCertificate) ? "Uploaded" : "No file uploaded")
+                                </div>
+                                <input type="hidden" name="TransferCertificate" value="@Model.Student.TransferCertificate" />
+                                <label class="sd-upload-btn sd-btn-sm">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 4l3-3 3 3M1.5 10v1.5h9V10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                    @(!string.IsNullOrEmpty(Model.Student.TransferCertificate) ? "Replace" : "Choose file")
+                                    <input type="file" name="TransferCertificateUploader" accept="image/*" />
+                                </label>
+                            </div>
+
+                            @* Category Certificate *@
+                            <div class="sd-doc-card">
+                                <div class="sd-doc-icon">
+                                    <svg viewBox="0 0 20 20" fill="none"><path d="M5 2h8l4 4v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4" /><path d="M13 2v4h4" stroke="currentColor" stroke-width="1.4" /><path d="M6 10h8M6 13h5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" /></svg>
+                                </div>
+                                <div class="sd-doc-name">Category Certificate</div>
+                                <div class="sd-doc-status @(!string.IsNullOrEmpty(Model.Student.CategoryCertificate) ? "ok" : "")">
+                                    @(!string.IsNullOrEmpty(Model.Student.CategoryCertificate) ? "Uploaded" : "No file uploaded")
+                                </div>
+                                <input type="hidden" name="CategoryCertificate" value="@Model.Student.CategoryCertificate" />
+                                <label class="sd-upload-btn sd-btn-sm">
+                                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M3 4l3-3 3 3M1.5 10v1.5h9V10" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                                    @(!string.IsNullOrEmpty(Model.Student.CategoryCertificate) ? "Replace" : "Choose file")
+                                    <input type="file" name="CategoryCertificateUploader" accept="image/*" />
+                                </label>
+                            </div>
+
+                        </div>
+                        <div class="sd-form-footer">
+                            <button type="submit" class="sd-btn sd-btn-primary" onclick="sdSaveStart(this)">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Save Documents
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 6 — SESSION
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew)
+            {
+                <div id="sdTab-session" class="sd-panel @(Model.CurrentTab == 6 ? "active" : "")">
+                    <div class="sd-toolbar">
+                        <span class="sd-toolbar-meta">@Model.Sessions.Count() session(s) assigned</span>
+                        <button type="button" class="sd-btn sd-btn-outline sd-btn-sm"
+                                onclick="sdOpenSession(0, @Model.Student.StudentID)">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                            </svg>
+                            Add New Session
+                        </button>
+                    </div>
+                    <div id="divSessionsList">
+                        @Html.Partial("_SessionListPartial", Model)
+                    </div>
+                </div>
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 7 — TRANSPORT
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew)
+            {
+                <div id="sdTab-transport" class="sd-panel @(Model.CurrentTab == 7 ? "active" : "")">
+                    <div class="sd-toolbar">
+                        <span class="sd-toolbar-meta">
+                            Transport allocation history
+                            @if (Model.THADDetails.Any())
+                            {
+                                <span style="margin-left:6px">· @Model.THADDetails.Count() record(s)</span>
+                            }
+                        </span>
+                        <button type="button" class="sd-btn sd-btn-outline sd-btn-sm"
+                                onclick="sdOpenTransport(@Model.Student.StudentID, 0)">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M6 2v8M2 6h8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                            </svg>
+                            Add New
+                        </button>
+                    </div>
+
+                    @if (Model.THADDetails.Any())
+                    {
+                        @* Table view for transport history *@
+                        <table class="sd-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Stop Name</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ int tIdx = 1; }
+                                @foreach (var t in Model.THADDetails)
+                                {
+                                    <tr>
+                                        <td style="color:var(--gray-400);font-size:12px">@tIdx</td>
+                                        <td>
+                                            <div style="display:flex;align-items:center;gap:8px">
+                                                <div class="sd-transport-bus" style="width:30px;height:30px;flex-shrink:0">
+                                                    <svg viewBox="0 0 18 18" fill="none" style="width:16px;height:16px">
+                                                        <rect x="1" y="5" width="16" height="9" rx="2" stroke="currentColor" stroke-width="1.3" />
+                                                        <circle cx="4.5" cy="14.5" r="1.5" stroke="currentColor" stroke-width="1.3" />
+                                                        <circle cx="13.5" cy="14.5" r="1.5" stroke="currentColor" stroke-width="1.3" />
+                                                        <path d="M1 9h16M6 5V3M12 5V3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" />
+                                                    </svg>
+                                                </div>
+                                                <span style="font-weight:500">@t.Name</span>
+                                            </div>
+                                        </td>
+                                        <td>@t.StartDate.ToString("dd MMM, yyyy")</td>
+                                        <td>
+                                            @if (t.EndDate.Year == 1)
+                                            {<span class="sd-chip sd-chip-active">Continued</span> }
+                                            else
+                                            { @t.EndDate.ToString("dd MMM, yyyy")}
+                                        </td>
+                                        <td>
+                                            @if (t.EndDate.Year == 1)
+                                            {<span class="sd-chip sd-chip-active">Active</span> }
+                                            else
+                                            { <span class="sd-chip sd-chip-inactive">Ended</span>}
+                                        </td>
+                                        <td>
+                                            <div class="sd-act-group">
+                                                <a class="sd-act sd-act-edit"
+                                                   onclick="sdOpenTransport(@Model.Student.StudentID, @t.THChangeID)">Edit</a>
+                                                @using (Html.BeginForm("SaveStudentTransport", "Account", FormMethod.Post,
+                                                        new { id = "frmTrans_" + t.THChangeID }))
+                                                {
+                                                    <input type="hidden" name="UserID" value="@Model.Student.StudentID" />
+                                                    <input type="hidden" name="THChangeID" value="@t.THChangeID" />
+                                                    <input type="hidden" name="OpType" value="-1" />
+                                                    <a class="sd-act sd-act-del"
+                                                       onclick="sdConfirmDelete(document.getElementById('frmTrans_@t.THChangeID'))">Remove</a>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    tIdx++;
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <div class="sd-alert sd-alert-info">
+                            <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                                <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.3" />
+                                <path d="M7.5 7v4M7.5 5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                            </svg>
+                            No transport history found. Click "Add New" to assign a stop.
+                        </div>
+                    }
+                </div>
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 8 — HOSTEL
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew && Model.Hostel.Hostels != null)
+            {
+                using (Html.BeginForm("SaveStudentHostel", "Account", FormMethod.Post,
+                        new { role = "form", enctype = "multipart/form-data", id = "frmHostel" }))
+                {
+                    <input type="hidden" name="StudentID" value="@Model.Student.StudentID" />
+
+                    <div id="sdTab-hostel" class="sd-panel @(Model.CurrentTab == 8 ? "active" : "")">
+                        <div class="sd-grid-3" style="margin-bottom:1.25rem">
+                            <div class="sd-field">
+                                <label>Hostel</label>
+                                <select class="sd-select" id="sdHostelSelect" onchange="sdHostelChanged(this)">
+                                    @foreach (var h in Model.Hostel.Hostels)
+                                    {
+                                        <option value="@h.ID" @(h.ID == Model.Hostel.HostelID ? "selected" : "")>@h.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="sd-field">
+                                <label>Floor</label>
+                                <select class="sd-select" id="sdHostelFloors" onchange="sdHostelFloorChanged(this)">
+                                    @foreach (var f in Model.Hostel.Floors)
+                                    {
+                                        <option value="@f.ID" @(f.ID == Model.Hostel.FloorID ? "selected" : "")>@f.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="sd-field">
+                                <label>Applicable</label>
+                                <div class="sd-gender-toggle" style="margin-top:0">
+                                    <button type="button"
+                                            class="sd-gender-opt @(Model.Hostel.Applicable == 1 ? "male" : "")"
+                                            onclick="$('#hdnHostelApplicable').val(1);$(this).addClass('male').siblings().removeClass('male female')">
+                                        Yes
+                                    </button>
+                                    <button type="button"
+                                            class="sd-gender-opt @(Model.Hostel.Applicable != 1 ? "female" : "")"
+                                            onclick="$('#hdnHostelApplicable').val(0);$(this).addClass('female').siblings().removeClass('male female')">
+                                        No
+                                    </button>
+                                </div>
+                                <input type="hidden" id="hdnHostelApplicable" name="Applicable" value="@Model.Hostel.Applicable" />
+                            </div>
+                        </div>
+
+                        <table class="sd-table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Room</th>
+                                    <th>Type</th>
+                                    <th>Room No.</th>
+                                    <th>Capacity</th>
+                                    <th>Occupants</th>
+                                    <th>Rate</th>
+                                    <th>Select</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sdHostelRoomsBody">
+                                @Html.Partial("_HostelRoomsPartial", Model.Hostel)
+                            </tbody>
+                        </table>
+
+                        <div class="sd-form-footer">
+                            <button type="submit" class="sd-btn sd-btn-primary" onclick="sdSaveStart(this)">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                    <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                                Save Hostel Details
+                            </button>
+                        </div>
+                    </div>
+                }
+            }
+
+            @* ══════════════════════════════════════════════════════
+                   TAB 9 — CUSTOM FEE
+                ══════════════════════════════════════════════════════ *@
+            @if (!isNew && canEditCustomFee)
+            {
+                <div id="sdTab-fee" class="sd-panel @(Model.CurrentTab == 9 ? "active" : "")">
+                    <div class="sd-grid-2" style="margin-bottom:1.4rem">
+                        <div class="sd-field">
+                            <label>Student Session</label>
+                            <select class="sd-select" id="ddlCFSessions" onchange="sdFeeSessionChange(this)">
+                                @foreach (var s in Model.Sessions)
+                                {
+                                    <option value="@s.StudentSessionUID">
+                                        @s.SessionName — @s.ClassName / @s.SectionName
+                                        (@s.FromDate.ToString("dd MMM, yyyy") to @s.ToDate.ToString("dd MMM, yyyy"))
+                                        (@(s.Status == 0 ? "Inactive" : "Active"))
+                                    </option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    @using (Html.BeginForm("SaveStudentCustomeFee", "Account", FormMethod.Post,
+                            new { role = "form", enctype = "multipart/form-data", id = "frmStudentCustomFees" }))
+                    {
+                        <div id="sdCustomFeeBody">
+                            @if (Model.Sessions.Any())
+                            {
+                                @Html.Partial("_StudentCustomFeeEditPartial", Model)
+                            }
+                            else
+                            {
+                                <div class="sd-alert sd-alert-info">
+                                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none">
+                                        <circle cx="7.5" cy="7.5" r="6" stroke="currentColor" stroke-width="1.3" />
+                                        <path d="M7.5 7v4M7.5 5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" />
+                                    </svg>
+                                    No session assigned to this student.
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+
+        </div>@* /sd-tab-body *@
+    </div>@* /sd-card *@
+</div>@* /sd-wrap *@
+
+
+@* ════════════════════════════════════════
+       MODALS
+    ════════════════════════════════════════ *@
+<div id="sdTransportModal" class="modal fade bs-example-modal-lg" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Transport Details</h4>
+            </div>
+            <div class="modal-body">
+                <div class="sd-modal-loader"></div>
+                <div class="sd-modal-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Keep id="mdlEditSession" so _SessionListPartial can still reference it *@
+<div id="mdlEditSession" class="modal fade bs-example-modal-lg" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Session Details</h4>
+            </div>
+            <div class="modal-body">
+                <div class="sd-modal-loader"></div>
+                <div class="sd-modal-content container"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+    <script src="@Url.Content("~/js/moment.min.js")"></script>
+    <script src="@Url.Content("~/js/daterangepicker.js")"></script>
+    <script src="@Url.Content("~/js/select2.full.min.js")"></script>
+    <script src="@Url.Content("~/js/student.js")"></script>
+    <script>
+        /*  Global student ID — used by AddSession / EditSession
+            which are called from _SessionListPartial          */
+        var _sdStudentId = @Model.Student.StudentID;
+    </script>
+}

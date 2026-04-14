@@ -1,0 +1,354 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@section IncludeCss
+    {
+    <title> Class and Section wise Due Fee Report </title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+}@using SMEnterprise.Models;
+@model SMEnterprise.Models.FeePaymentModel
+<div class="" style="background-color: white;">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("CollectionReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            {
+                <div class="row std-mng-head col-md-12">
+
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-2 padding">
+                                <input type="month" value="@Model.DemandMonth.ToString("yyyy-MM")" name="DemandMonth" id="dtDate" class="form-control" />
+                                @*<label class="text-right" style="padding-left: 25px;">@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("MMM, yyyy")</label>*@
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right" style="padding-right: 0px;">Class :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                        @*<option value="-1">--All Class--</option>*@
+                                        <option value="0">--Select Class--</option>
+                                        @foreach (SMEnterprise.Models.NameIDModel el in Model.Classes)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Section :</label>
+                                <div class="col-md-8">
+                                    <select name="SectionID" class="form-control" id="ddlSection">
+                                        <option value="0">--Select Section--</option>
+                                        @foreach (SMEnterprise.Models.NameIDModel el in Model.Sections)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Sessions :</label>
+                                <div class="col-md-8">
+                                    <select name="SessionID" class="form-control" id="ddlSessions">
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (SMEnterprise.Models.NameIDModel el in Model.Sessions)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 padding">
+                                <div class="row">
+
+                                    <div class="col-md-12">
+                                        <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2"></div>
+        <div class="col-md-10" style="text-align:right;">
+            <button type="button" class="export-btn btn-primary" onclick="tableToExcel('tblCategory', 'Monthly Due Fee Report');"><i class="fa fa-file-excel-o"></i> Export To Excel</button>
+        </div>
+    </div>
+
+    <div class="x_panel" style=" overflow-x: auto;">
+        <div class="x_content">
+            <table id="tblCategory" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student</th>
+                        <th>SR No</th>
+                        <th>Father</th>
+                        <th>Mother</th>
+                        <th>Amount </th>
+                        <th>Discount</th>
+                        <th>Paid</th>
+                        <th>Balance</th>
+                        @*<th></th>*@
+
+
+                    </tr>
+
+
+                </thead>
+                <tbody>
+                    @{
+                        var counter = 1;
+
+                        decimal Amount = 0;
+                        decimal PaidAmount = 0;
+                        decimal DiscAmt = 0;
+                        decimal Balance = 0;
+                    }
+                    @foreach (var student in Model.StudentList)
+                    {
+                        Amount = Amount + student.FeeAmount;
+                        DiscAmt = DiscAmt + student.Discounts;
+                        PaidAmount = PaidAmount + student.PaidAmount;                      
+                        Balance = Balance + (student.FeeAmount - student.PaidAmount);
+                        <tr>
+
+                            <td>@counter</td>
+                            <td>@student.Name</td>
+
+                            <td> @student.StudentSID ( SR: @student.SchoolUID )</td>
+                            <td>@student.FatherName</td>
+                            <td>@student.MotherName</td>
+                            <td>@student.FeeAmount </td>
+                            <td>@student.Discounts</td>
+                            <td>@student.PaidAmount</td>                           
+                            <td>@(student.FeeAmount - student.PaidAmount)</td>
+                        </tr>
+
+
+                        counter++;
+                    }
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #606d73;color: white;">
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>
+                            <b> Class wise Collection</b>
+                        </td>
+
+
+                        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @Amount.ToString("N2")</b></td>
+
+                        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @DiscAmt.ToString("N2")</b></td>
+                        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @PaidAmount.ToString("N2")</b></td>
+
+                        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @Balance.ToString("N2")</b></td>
+                    </tr>
+                </tfoot>
+
+               
+            </table>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+
+
+
+    
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+   
+
+    <script type="text/javascript">
+        var tableToExcel = (function () {
+            var uri = 'data:application/vnd.ms-excel;base64,'
+                , template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body><table>{table}</table></body></html>'
+                , base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))) }
+                , format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }) }
+            return function (table, name) {
+                if (!table.nodeType) table = document.getElementById(table)
+                var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML }
+                window.location.href = uri + base64(format(template, ctx))
+            }
+        })()
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            var monthVal = $('#dtDate').val(); // "2026-01"
+            var monthText = '';
+
+            if (monthVal) {
+                var parts = monthVal.split('-'); // [2026, 01]
+                var dateObj = new Date(parts[0], parts[1] - 1);
+                monthText = dateObj.toLocaleString('en-US', {
+                    month: 'short',
+                    year: 'numeric'
+                });
+            }
+           var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+
+
+            var rpname = ' Collection Report for ' + monthText + ' / ' + 'Class ' + $('#ddlClass option:selected').text() + '' + '/ ' + $('#ddlSection option:selected').text() + '' + ' & Session (' + $('#ddlSessions option:selected').text() + ')';
+             // var rpname = ' Collection Report for ' + 'Month ' + $('#dtDate').val() + ' / '   + 'Class ' + $('#ddlClass option:selected').text() + '' + '/ ' + $('#ddlSection option:selected').text() + '' + ' & Session (' + $('#ddlSessions option:selected').text() + ')';
+              var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+
+              var handleDataTableButtons = function () {
+                  if ($("#tblCategory").length) {
+                      $("#tblCategory").DataTable({
+                          "pageLength": 40,
+
+                          "paging": true,
+                          "pagingType": "simple_numbers",
+                          dom: "Bfrtip",
+                          buttons: [
+                              {
+                                 extend: "copy",
+                              className: "btn-sm",
+                                  footer: true,
+                                  message: printdate,
+                               messageTop: '@Model.SBranchDetails.BranchSchoolName',
+                              messageBottom: repname,
+                              title: rpname
+                              },
+                              {
+                                   extend: "csv",
+                            className: "btn-sm",
+                                  footer: true,
+                                  message: printdate,
+                              messageTop: '@Model.SBranchDetails.BranchSchoolName' + "Hi",
+                              messageBottom: repname,
+                              title: rpname
+                              },
+                              {
+                                    extend: "excel",
+                            className: "btn-sm",
+                            footer: true,
+                           messageTop: rpname,
+                            messageBottom: repname,
+                            title: '@Model.SBranchDetails.BranchSchoolName'
+                              },
+                              {
+                                  extend: "pdfHtml5",
+                            className: "btn-sm",
+                            footer: true,
+                            orientation: 'landscape',
+                            customize: function (doc) {
+
+                                doc.defaultStyle.fontSize = 7;
+                                doc.styles.tableHeader.fontSize = 10;
+
+                                doc['header'] = (function () {
+                                    return {
+                                        columns: [
+                                            {
+                                                alignment: 'left',
+                                                italics: true,
+                                                text: '@Model.SBranchDetails.BranchSchoolName',
+                                                fontSize: 14,
+                                                margin: [0, 0]
+                                            }
+                                        ],
+                                        margin: 20
+                                    }
+                                });
+                                  },
+                                  message: printdate,
+                            messageBottom: repname,
+                            title: rpname
+                              },
+                              {
+                                  extend: "print",
+                            className: "btn-sm",
+                                  footer: true,
+                                  orientation: 'landscape',
+                                  message: rpname,
+                            messageTop: rpname,
+                            messageBottom: repname,
+                            title: '@Model.SBranchDetails.BranchSchoolName'
+                              },
+                          ],
+                          responsive: true
+                      });
+                  }
+              };
+              TableManageButtons = function () {
+                  "use strict";
+                  return {
+                      init: function () {
+                          handleDataTableButtons();
+                      }
+                  };
+              }();
+              TableManageButtons.init();
+
+          });
+    </script>
+    <script>
+        //$(function () {
+        //    $("#tblCategory").DataTable();
+        //    "pageLength": 20
+        //});
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax(
+    {
+        type: "POST",
+        url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+        cache: false,
+        processData: false,
+        contentType: false,
+        success: function (html) {
+            $('#ddlSection').html('');
+            $('#ddlSection').html('<option value="0">--Select Section--</option>');
+            $('#ddlSection').append(html);
+        },
+        error: function (e) {
+            alert("errorn");
+        }
+    });
+        }
+        function PrintDemantRecipt() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" type="text/css" />');
+
+            //Append the external CSS file.
+            //Append the DIV contents.
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 1000);
+        }
+    </script>
+}
