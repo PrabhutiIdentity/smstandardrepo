@@ -1,0 +1,156 @@
+﻿@{
+    var show = (Session["ShowPaymentDue"] != null && Convert.ToBoolean(Session["ShowPaymentDue"]));
+    var branchId = Convert.ToInt32(Session["PaymentDueBranchID"] ?? 0);
+    var amount = Convert.ToDecimal(Session["PaymentDueAmount"] ?? 0m);
+    var plan = Convert.ToString(Session["PaymentDuePlanName"] ?? "");
+}
+@if (show)
+{
+    <style>
+        /* Inline styles to keep this partial self-contained and visually appealing */
+        #paymentDueModal .modal-content {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+        }
+
+        #paymentDueModal .modal-header {
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+            color: #fff;
+            border-bottom: none;
+            padding: 18px 24px;
+        }
+
+        #paymentDueModal .modal-title {
+            margin: 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 2.25rem;
+        }
+
+        #paymentDueModal .modal-body {
+            padding: 22px;
+            background-color: #fff;
+            color: #333;
+            font-size:12px;
+        }
+
+        #paymentDueModal .payment-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+        }
+
+        #paymentDueModal .amount {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #e64a19;
+            margin-top: 6px;
+        }
+
+        #paymentDueModal .meta {
+            margin-top: 8px;
+            color: #666;
+            font-size: 14px;;
+        }
+
+        #paymentDueModal .plan-badge {
+            display: inline-block;
+            background: #f1f5f9;
+            color: #333;
+            border-radius: 14px;
+            padding: 6px 10px;
+            font-size: 14px;
+            margin-left: 6px;
+        }
+
+        #paymentDueModal .modal-footer {
+            border-top: none;
+            padding: 16px;
+            background: linear-gradient(180deg, #f8fafc, #ffffff);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        #paymentDueModal .btn-pay {
+            min-width: 140px;
+            font-weight: 600;
+        }
+
+        @@media (max-width: 576px) {
+            #paymentDueModal .modal-dialog { margin: 20px; }
+            #paymentDueModal .modal-title { font-size: 1.05rem; }
+            #paymentDueModal .amount { font-size: 1.4rem; }
+        }
+    </style>
+
+    <div id="paymentDueModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="paymentDueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="paymentDueModalLabel">
+                        <span class="payment-icon"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i></span>
+                        Subscription Payment Due
+                    </h4>
+                </div>
+
+                <div class="modal-body">
+                    <div>
+                        <p style="margin:0 0 10px 0;font-size:18px;">Your ERP subscription payment is due. To avoid interruption please pay before the due date.</p>
+
+                        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;">
+                            <div>
+                                <div class="meta"><strong>Branch ID:</strong> @branchId</div>
+                                <div class="meta" style="margin-top:6px;"><strong>Plan:</strong> <span class="plan-badge">@plan</span></div>
+                            </div>
+
+                            <div style="text-align:right;margin-top:8px;">
+                                <div class="meta">Amount due</div>
+                                <div class="amount"><i class="fa fa-inr" aria-hidden="true"></i> @amount.ToString("N2")</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <a href="@Url.Action("Subscribe", "Payment", new { branchId = branchId })" class="btn btn-primary btn-pay" id="btnPayNow">
+                        <i class="fa fa-credit-card" aria-hidden="true"></i>&nbsp; Pay Now
+                    </a>
+
+
+                    @using (Html.BeginForm("logout", "Login", FormMethod.Post, new { id = "logoutForm" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <a href="@Url.Action("logout", "Login")" class="btn btn-link" style="color:#6c757d;">Logout</a>
+                    }
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function () {
+            var $modal = $('#paymentDueModal');
+            $modal.modal({ backdrop: 'static', keyboard: false, show: true });
+
+            // Set initial focus to the Pay button for quick keyboard action
+            $modal.on('shown.bs.modal', function () {
+                $('#btnPayNow').trigger('focus');
+            });
+
+            // Optional: close modal after clicking logout to ensure navigation works cleanly in some browsers
+            $('#paymentDueModal a[href*="logout"]').on('click', function () {
+                $modal.modal('hide');
+            });
+        })();
+    </script>
+}

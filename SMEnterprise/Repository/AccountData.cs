@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using static System.Web.Razor.Parser.SyntaxConstants;
 
 
 namespace SMEnterprise.Repository
@@ -5258,5 +5259,94 @@ namespace SMEnterprise.Repository
             }
         }
         #endregion
+
+
+        public BranchSubscriptionModel GetBranchSubscription(int sBranchId)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+                return con.Query<BranchSubscriptionModel>("sp_GetBranchSubscription", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        public int MarkBranchSubscriptionPaid(int sBranchId, decimal paidAmount, string paymentRef, int? paidByUserId = null)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var now = CommonUsage.GetCurrentDate();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+                parameters.Add("@PaidAmount", paidAmount);
+                parameters.Add("@PaymentRef", paymentRef);
+                parameters.Add("@PaymentDate", now);
+                parameters.Add("@CreatedBy", paidByUserId);
+
+                return con.Query<int>("sp_MarkBranchSubscriptionPaid", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        // Add this method inside the AccountData class (e.g. near other fee/report methods)
+        public bool IsBranchPaymentPending(int sBranchId)
+        {
+            try
+            {
+                var sub = GetBranchSubscription(sBranchId);
+                if (sub != null)
+                {
+                    return sub.IsDue && sub.DueAmount > 0m;
+                }
+
+                // Fallback: old student-due detection
+                var dues = GetClassWiseDueFeeDetails(sBranchId);
+                if (dues == null) return false;
+
+                foreach (var item in dues)
+                {
+                    decimal prev = 0m, app = 0m, paid = 0m, disc = 0m;
+                    try { prev = item.PreviousDues; } catch { }
+                    try { app = item.ApplicableFee; } catch { }
+                    try { paid = item.PaymentAmount; } catch { }
+                    try { disc = item.DiscAmt; } catch { }
+                    var net = prev + app - paid - disc;
+                    if (net > 0m) return true;
+                }
+            }
+            catch
+            {
+                // do not block login on exception
+            }
+            return false;
+        }
+
+        public BranchGatewayModel GetBranchGateway(int sBranchId)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+
+                return con.Query<BranchGatewayModel>("sp_GetBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        public int UpsertBranchGateway(BranchGatewayModel model)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var now = CommonUsage.GetCurrentDate();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", model.SBranchID);
+                parameters.Add("@RazorpayKeyId", model.RazorpayKeyId);
+                parameters.Add("@RazorpaySecret", model.RazorpaySecret);
+                parameters.Add("@UseForSubscription", model.UseForSubscription ? 1 : 0);
+                parameters.Add("@CreatedDate", model.CreatedDate ?? now);
+                parameters.Add("@UpdatedDate", now);
+
+                return con.Query<int>("sp_UpsertBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
     }
 }
