@@ -1,0 +1,49 @@
+@{
+    var show = (Session["ShowPaymentDue"] != null && Convert.ToBoolean(Session["ShowPaymentDue"]));
+    var branchId = Session["PaymentDueBranchID"] ?? 0;
+}
+
+@if (show)
+{
+    <div id="paymentDueModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="paymentDueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header" style="border-bottom:none;">
+                    @* intentionally no close button - non-dismissible *@
+                    <h4 class="modal-title" id="paymentDueModalLabel">Payment Due</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Your payment is due for the selected branch. You must complete payment to continue.</p>
+                    <p><strong>Branch ID:</strong> @branchId</p>
+                </div>
+                <div class="modal-footer" style="border-top:none;">
+                    @* Link to the admin/report or payment page where user can pay. Adjust action/controller as needed. *@
+                    <a href="@Url.Action("ReportDueFee", "Admin", new { SBranchID = branchId })" class="btn btn-primary" id="btnPayNow">Pay Now</a>
+                    <a href="@Url.Action("logout", "Login")" class="btn btn-default">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>(function () {
+            // non-dismissible bootstrap modal
+            $('#paymentDueModal').modal({
+                backdrop: 'static',
+                keyboard: false,
+                show: true
+            });
+
+            // optionally, if you want to force the user to open the Pay Now page in same window:
+            $('#btnPayNow').on('click', function () {
+                // session will remain; server side should still check and prevent closing until payment done.
+            });
+
+            // prevent closing via escape or backdrop clicks (extra safeguard)
+            $(document).on('keydown', function (e) {
+                if (e.keyCode === 27) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+        })();</script>
+}
