@@ -6,7 +6,14 @@ CREATE TABLE BranchSubscription
     DueDate DATETIME NULL,
     PlanName NVARCHAR(200) NULL,
     LastPaidDate DATETIME NULL,
-    LastPaymentRef NVARCHAR(200) NULL
+    LastPaymentRef NVARCHAR(200) NULL,
+    NextDueDate DATETIME NULL,
+    NextDueAmount DECIMAL(18,2) NULL,
+    PartialCycleDays INT NULL,
+    GraceDays INT NOT NULL DEFAULT(0),
+    AllowPartialPayment BIT NOT NULL DEFAULT(0),
+    MaxPartialPayments INT NOT NULL DEFAULT(2),
+    PartialPaymentCount INT NOT NULL DEFAULT(0);
 );
 go
 CREATE TABLE BranchSubscriptionPayment
@@ -30,14 +37,31 @@ CREATE TABLE BranchPaymentGateway
     UpdatedDate DATETIME NULL
 );
 go
-CREATE PROCEDURE sp_GetBranchSubscription
+CREATE OR ALTER PROCEDURE dbo.sp_GetBranchSubscription
     @SBranchID INT
 AS
 BEGIN
-    SELECT SBranchID, IsDue, ISNULL(DueAmount, 0) AS DueAmount, DueDate, PlanName, LastPaidDate, LastPaymentRef
-    FROM BranchSubscription
+    SET NOCOUNT ON;
+
+    SELECT
+        SBranchID,
+        IsDue,
+        ISNULL(DueAmount, 0) AS DueAmount,
+        DueDate,
+        PlanName,
+        LastPaidDate,
+        LastPaymentRef,
+        ISNULL(GraceDays, 0) AS GraceDays,
+        ISNULL(AllowPartialPayment, 0) AS AllowPartialPayment,
+        ISNULL(MaxPartialPayments, 2) AS MaxPartialPayments,
+        ISNULL(PartialPaymentCount, 0) AS PartialPaymentCount,
+        NextDueDate,
+        ISNULL(NextDueAmount, 0) AS NextDueAmount,
+        ISNULL(PartialCycleDays, 0) AS PartialCycleDays
+    FROM dbo.BranchSubscription
     WHERE SBranchID = @SBranchID;
 END
+GO
 
 Go
 

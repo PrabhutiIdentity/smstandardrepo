@@ -1602,7 +1602,7 @@ namespace SMEnterprise.Repository
                     }
                 }
 
-              
+
             }
         }
         public int UpdateFeeDiscountRequest(FeeDiscountRequestMaster objData)
@@ -1715,7 +1715,7 @@ namespace SMEnterprise.Repository
                 return con.Query<FeePaymentModel>("spn_SaveFeePayment", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
-        
+
         public FeePaymentRowModel SaveStudentFeePayments(FeePaymentModel objData)
         {
             FeePaymentRowModel obj = new FeePaymentRowModel();
@@ -1726,10 +1726,10 @@ namespace SMEnterprise.Repository
                 paramater.Add("@StudentID", objData.StudentID);
                 paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
                 paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-               
-                   paramater.Add("@PaymentDate", objData.PaymentDate);
-                 
-              
+
+                paramater.Add("@PaymentDate", objData.PaymentDate);
+
+
                 paramater.Add("@PaymentAmount", objData.PaymentAmount);
                 paramater.Add("@WaiverMonths", objData.WaiverMonths);
                 paramater.Add("@Remark", objData.Remark);
@@ -2880,8 +2880,8 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
-        
-         public FeePaymentModel GetCollectionReport(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
+
+        public FeePaymentModel GetCollectionReport(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
         {
             FeePaymentModel objModel = new FeePaymentModel();
             objModel.DemandMonth = QDate;
@@ -3400,7 +3400,7 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetFeeCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.PaymentModes = multi.Read<PaymentModeModel>().ToList();
-                 objModel.Sessions = multi.Read<SchoolSessionModel>().ToList(); // Read the new result set
+                    objModel.Sessions = multi.Read<SchoolSessionModel>().ToList(); // Read the new result set
                     objModel.Report = multi.Read<FeePaymentModel>().ToList();
                     try
                     {
@@ -3813,32 +3813,32 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
-        
-         public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
-          {
-              using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
-              {
-                  var paramater = new DynamicParameters();
-                  paramater.Add("@StudentSessionUID", model.StudentSessionUID);
-                  paramater.Add("@EvaluationID", model.EvaluationID);
-                  paramater.Add("@SBranchID", model.SBranchID);
-                  paramater.Add("@EvaluationMode", 0);
-                  using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                  {
-                      model.PerformanceParameters = multi.Read<PerformanceParameterModel>().ToList();
-                      model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
-                      model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
-                      model.Result = multi.Read<ExamResultDetailModel>().ToList();
-                      model.Student = multi.Read<StudentModel>().SingleOrDefault();
-                      model.CGPA = multi.Read<decimal>().SingleOrDefault();
-                      model.EvaluationName = multi.Read<string>().SingleOrDefault();
-                      model.FilledParameter = multi.Read<int>().SingleOrDefault();
-                      model.TotalParameter = multi.Read<int>().SingleOrDefault();
-                  }
-              }
-              return model;
-          }
-        
+
+        public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@StudentSessionUID", model.StudentSessionUID);
+                paramater.Add("@EvaluationID", model.EvaluationID);
+                paramater.Add("@SBranchID", model.SBranchID);
+                paramater.Add("@EvaluationMode", 0);
+                using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    model.PerformanceParameters = multi.Read<PerformanceParameterModel>().ToList();
+                    model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
+                    model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
+                    model.Result = multi.Read<ExamResultDetailModel>().ToList();
+                    model.Student = multi.Read<StudentModel>().SingleOrDefault();
+                    model.CGPA = multi.Read<decimal>().SingleOrDefault();
+                    model.EvaluationName = multi.Read<string>().SingleOrDefault();
+                    model.FilledParameter = multi.Read<int>().SingleOrDefault();
+                    model.TotalParameter = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return model;
+        }
+
 
         // ============================================================
         //Rank
@@ -4200,7 +4200,7 @@ namespace SMEnterprise.Repository
                 parameters.Add("@CreatedBy", createdBy);
 
                 // ExecuteScalar is used here because we are expecting a single value (the new ID) back
-                return con.ExecuteScalar<int>("usp_InsertStockTransactionPayment",parameters,commandType: CommandType.StoredProcedure);
+                return con.ExecuteScalar<int>("usp_InsertStockTransactionPayment", parameters, commandType: CommandType.StoredProcedure);
             }
         }
         public int CancelStockTransactionPayment(int stockPaymentID, int sBranchID, string cancelRemark, int cancelledBy)
@@ -4231,7 +4231,7 @@ namespace SMEnterprise.Repository
                 parameters.Add("@STID", STID);
                 parameters.Add("@SBranchID", SBranchID);
 
-                return con.Query<StockTransactionPaymentModel>("usp_GetStockPaymentHistory",parameters,commandType: CommandType.StoredProcedure).ToList();
+                return con.Query<StockTransactionPaymentModel>("usp_GetStockPaymentHistory", parameters, commandType: CommandType.StoredProcedure).ToList();
             }
             finally
             {
@@ -4245,14 +4245,14 @@ namespace SMEnterprise.Repository
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-               
+
                 var parameters = new DynamicParameters();
                 parameters.Add("@SBranchID", SBranchID);
 
-                return con.Query<NameIDModel>("usp_GetStockProductLookup",parameters,commandType: CommandType.StoredProcedure).ToList();
+                return con.Query<NameIDModel>("usp_GetStockProductLookup", parameters, commandType: CommandType.StoredProcedure).ToList();
             }
         }
-       
+
         public StockSaleReportPageModel GetStockSaleReport(StockSaleReportPageModel objModel, bool dueOnly = false)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -4264,16 +4264,16 @@ namespace SMEnterprise.Repository
                 parameters.Add("@EndDate", objModel.EndDate);
                 parameters.Add("@ProductID", objModel.ProductID);
                 parameters.Add("@DueOnly", dueOnly ? 1 : 0);
-                
+
                 using (var multi = con.QueryMultiple("usp_GetStockSaleReport", parameters, commandType: CommandType.StoredProcedure))
                 {
-                    
+
                     objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
-                  
+
                     objModel.Report = multi.Read<StockSaleReportItemModel>().ToList();
                 }
             }
-          return objModel;
+            return objModel;
         }
         public PrintSaleReceiptModel GetSaleTransactionPrintData(int STID, int SBranchID, int stockPaymentID = 0)
         {
@@ -5292,7 +5292,7 @@ namespace SMEnterprise.Repository
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@OrderId", OrderID);
-               
+
 
                 return con.Query<OrderModel>("GetPaymentOrder", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
@@ -5324,13 +5324,13 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_InsertOrderID", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
-        public int UpdateOrderStatus(string OrderID, string StudentID, string SessionID, string ReferanceNumber,int Status)
+        public int UpdateOrderStatus(string OrderID, string StudentID, string SessionID, string ReferanceNumber, int Status)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@OrderID", OrderID);
-                paramater.Add("@StudentID", StudentID);                
+                paramater.Add("@StudentID", StudentID);
                 paramater.Add("@SessionID", SessionID);
                 paramater.Add("@PGPaymentID", ReferanceNumber);
                 paramater.Add("@Status", Status);
@@ -5371,7 +5371,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@StudentID", objData.StudentID);
                 paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
                 paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-                
+
                 paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
                 paramater.Add("@PaymentAmount", objData.PaymentAmount);
                 paramater.Add("@WaiverMonths", objData.WaiverMonths);
@@ -5395,7 +5395,7 @@ namespace SMEnterprise.Repository
         }
         #endregion
 
-
+        #region Subscription Payment Popup 
         public BranchSubscriptionModel GetBranchSubscription(int sBranchId)
         {
             using (var con = new SqlConnection(CommonUsage.ConnectionString))
@@ -5433,20 +5433,6 @@ namespace SMEnterprise.Repository
                     return sub.IsDue && sub.DueAmount > 0m;
                 }
 
-                // Fallback: old student-due detection
-                var dues = GetClassWiseDueFeeDetails(sBranchId);
-                if (dues == null) return false;
-
-                foreach (var item in dues)
-                {
-                    decimal prev = 0m, app = 0m, paid = 0m, disc = 0m;
-                    try { prev = item.PreviousDues; } catch { }
-                    try { app = item.ApplicableFee; } catch { }
-                    try { paid = item.PaymentAmount; } catch { }
-                    try { disc = item.DiscAmt; } catch { }
-                    var net = prev + app - paid - disc;
-                    if (net > 0m) return true;
-                }
             }
             catch
             {
@@ -5483,5 +5469,9 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_UpsertBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+        
+        #endregion
     }
+
+
 }

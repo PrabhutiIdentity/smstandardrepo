@@ -14,6 +14,13 @@ namespace SMEnterprise.Models
         public string PlanName { get; set; }
         public DateTime? LastPaidDate { get; set; }
         public string LastPaymentRef { get; set; }
+        public int GraceDays { get; set; }
+        public bool AllowPartialPayment { get; set; }
+        public int MaxPartialPayments { get; set; }
+        public int PartialPaymentCount { get; set; }
+        public DateTime? NextDueDate { get; set; }
+        public decimal NextDueAmount { get; set; }
+        public int PartialCycleDays { get; set; }
     }
     public class BranchGatewayModel
     {
