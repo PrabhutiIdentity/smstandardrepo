@@ -2642,6 +2642,43 @@ namespace SMEnterprise.Controllers
             return PartialView("_PrintProductSell", model);
         }
         [PermissionFilter]
+        public ActionResult GetSaleTransactionPaymentReceiptData(string ID = null, string paymentId = null)
+        {
+            int iID = CommonUsage.ConvertToInt(ID);
+            int iPaymentID = CommonUsage.ConvertToInt(paymentId);
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            PrintSaleReceiptModel model = objAccountData.GetSaleTransactionPrintData(iID, SBranchID, iPaymentID);
+            return PartialView("_PrintProductPaymentReceipt", model);
+        }
+        [PermissionFilter]
+        [HttpPost]
+        public ActionResult CancelStockPaymentReceipt(string id = null, string paymentId = null, string remark = null)
+        {
+            int iID = CommonUsage.ConvertToInt(id);
+            int iPaymentID = CommonUsage.ConvertToInt(paymentId);
+            int sBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            int userID = PermissionManager.GetLoggedInUser().UserID;
+            string mode = "receiptcancelled";
+            bool success = false;
+            if (iID > 0 && iPaymentID > 0)
+            {
+                int result = objAccountData.CancelStockTransactionPayment(iPaymentID, sBranchID, remark, userID);
+                if (result == -2)
+                {
+                    mode = "latestreceiptonly";
+                }
+                else if (result > 0)
+                {
+                    success = true;
+                }
+            }
+            if (!success && mode == "receiptcancelled")
+            {
+                mode = "receiptcancelfailed";
+            }
+            return Redirect("/Account/StockDetails/" + iID + "?saved=1&mode=" + mode + "&paymentId=" + iPaymentID);
+        }
+        [PermissionFilter]
         public ActionResult GetStudentsForStockTransfer(string id = null)
         {
             int STID = CommonUsage.ConvertToInt(id);
@@ -2682,11 +2719,14 @@ namespace SMEnterprise.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
         [PermissionFilter]
-        public ActionResult StockDetails(string ID = null)
+        public ActionResult StockDetails(string ID = null, string saved = null, string mode = null, string paymentId = null)
         {
             int STID = CommonUsage.ConvertToInt(ID);
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             StockTransaferMasterModel objModel = objAccountData.GetStockTransferDetails(STID, SBranchID);
+            ViewBag.StockSaved = saved == "1";
+            ViewBag.StockSaveMode = mode ?? "";
+            ViewBag.LastSavedPaymentID = CommonUsage.ConvertToInt(paymentId);
             return View(objModel);
         }
         [PermissionFilter]
@@ -2694,8 +2734,193 @@ namespace SMEnterprise.Controllers
         {
             oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             oModel.CreatedDate = CommonUsage.GetCurrentDate();
+            int loggedInUserID = PermissionManager.GetLoggedInUser().UserID;
+            StockTransaferMasterModel existingModel = null;
+            decimal currentPaymentAmount = oModel.PaidAmount;
+            decimal paymentReceivedNow = 0;
+            bool isAdditionalPayment = false;
+            int paymentReceiptID = 0;
+            if (oModel.Details == null)
+            {
+                oModel.Details = new List<StockTransaferDetailModel>();
+            }
+            if (oModel.STID > 0)
+            {
+                existingModel = objAccountData.GetStockTransferDetails(oModel.STID, oModel.SBranchID);
+            }
+            if (existingModel != null
+                && existingModel.STID > 0
+                && existingModel.PaymentHistory != null
+                && existingModel.PaymentHistory.Count > 0
+                && oModel.Status == 0)
+            {
+                oModel.Status = existingModel.Status;
+                oModel.CancelRemark = existingModel.CancelRemark;
+                oModel.SelectedPaymentID = 0;
+            }
+            oModel.Amount = oModel.Details
+                .Where(x => x.OpType != -1)
+                .Sum(x => x.Cost * x.Quantity + x.Cost * x.Quantity * (x.SGST + x.CGST + x.IGST) / 100);
+            if (oModel.PaymentDate == null || oModel.PaymentDate.Value.Year <= 1)
+            {
+                oModel.PaymentDate = oModel.TrDate;
+            }
+            if (oModel.TrType == 2)
+            {
+                oModel.PaidAmount = 0;
+                oModel.DueAmount = 0;
+                oModel.PaymentMode = -1;
+                oModel.PaymentReferanceNo = "";
+                oModel.PaymentStatus = 0;
+            }
+            else
+            {
+                if (currentPaymentAmount < 0)
+                {
+                    currentPaymentAmount = 0;
+                }
+                if (existingModel != null && existingModel.STID > 0 && existingModel.IsPaymentLocked && existingModel.Status != 0 && existingModel.DueAmount > 0)
+                {
+                    isAdditionalPayment = true;
+                    oModel.PaidAmount = existingModel.PaidAmount + currentPaymentAmount;
+                }
+                else
+                {
+                    oModel.PaidAmount = currentPaymentAmount;
+                }
+                if (oModel.PaidAmount > oModel.Amount)
+                {
+                    oModel.PaidAmount = oModel.Amount;
+                }
+                oModel.DueAmount = oModel.Amount - oModel.PaidAmount;
+                if (oModel.Status == 0)
+                {
+                    oModel.PaymentStatus = 3;
+                }
+                else if (oModel.PaidAmount >= oModel.Amount && oModel.Amount > 0)
+                {
+                    oModel.PaymentStatus = 2;
+                }
+                else if (oModel.PaidAmount > 0)
+                {
+                    oModel.PaymentStatus = 1;
+                }
+                else
+                {
+                    oModel.PaymentStatus = 0;
+                }
+            }
+
+            if (existingModel != null && existingModel.STID > 0 && existingModel.IsPaymentLocked)
+            {
+                oModel.TrDate = existingModel.TrDate;
+                oModel.TrType = existingModel.TrType;
+                oModel.RefID = existingModel.RefID;
+                oModel.RefType = existingModel.RefType;
+                oModel.ClassID = existingModel.ClassID;
+                oModel.SectionID = existingModel.SectionID;
+                oModel.SessionID = existingModel.SessionID;
+                oModel.EmployeeTypeID = existingModel.EmployeeTypeID;
+                oModel.VendorID = existingModel.VendorID;
+                oModel.Remark = existingModel.Remark;
+                oModel.Details = existingModel.Details ?? new List<StockTransaferDetailModel>();
+                oModel.Amount = existingModel.Amount;
+
+                if (oModel.Status == 0)
+                {
+                    oModel.PaidAmount = existingModel.PaidAmount;
+                    oModel.DueAmount = existingModel.DueAmount;
+                    oModel.PaymentMode = existingModel.PaymentMode;
+                    oModel.PaymentReferanceNo = existingModel.PaymentReferanceNo;
+                    oModel.PaymentDate = existingModel.PaymentDate;
+                    oModel.PaymentStatus = 3;
+                }
+                else if (isAdditionalPayment)
+                {
+                    if (currentPaymentAmount <= 0)
+                    {
+                        oModel.PaymentMode = existingModel.PaymentMode;
+                        oModel.PaymentReferanceNo = existingModel.PaymentReferanceNo;
+                        oModel.PaymentDate = existingModel.PaymentDate;
+                        oModel.PaidAmount = existingModel.PaidAmount;
+                        oModel.DueAmount = existingModel.DueAmount;
+                        oModel.PaymentStatus = existingModel.PaymentStatus;
+                    }
+                }
+                else
+                {
+                    oModel.PaidAmount = existingModel.PaidAmount;
+                    oModel.DueAmount = existingModel.DueAmount;
+                    oModel.PaymentMode = existingModel.PaymentMode;
+                    oModel.PaymentReferanceNo = existingModel.PaymentReferanceNo;
+                    oModel.PaymentDate = existingModel.PaymentDate;
+                    oModel.PaymentStatus = existingModel.PaymentStatus;
+                }
+            }
+            if (existingModel != null
+                && existingModel.STID > 0
+                && existingModel.PaymentHistory != null
+                && existingModel.PaymentHistory.Count > 0
+                && existingModel.DueAmount <= 0
+                && currentPaymentAmount > 0)
+            {
+                oModel.PaidAmount = existingModel.PaidAmount;
+                oModel.DueAmount = existingModel.DueAmount;
+                oModel.PaymentStatus = existingModel.PaymentStatus;
+                paymentReceivedNow = 0;
+            }
+            if (oModel.Status != 0 && oModel.TrType != 2)
+            {
+                paymentReceivedNow = oModel.PaidAmount - (existingModel == null ? 0 : existingModel.PaidAmount);
+                if (paymentReceivedNow < 0)
+                {
+                    paymentReceivedNow = 0;
+                }
+            }
             int STID = objAccountData.UpdateStockTransaction(oModel);
-            return Redirect("/Account/StockDetails/" + STID);
+            if (oModel.Status != 0 && oModel.TrType != 2 && paymentReceivedNow > 0)
+            {
+                paymentReceiptID = objAccountData.InsertStockTransactionPayment(
+                    STID,
+                    oModel.PaymentDate ?? oModel.TrDate,
+                    oModel.PaymentMode,
+                    oModel.PaymentReferanceNo,
+                    paymentReceivedNow,
+                    oModel.PaidAmount,
+                    oModel.DueAmount,
+                    oModel.PaymentStatus,
+                    oModel.SBranchID,
+                    loggedInUserID);
+            }
+            string saveMode = oModel.Status == 0 ? "cancelled" :
+                oModel.PaymentStatus == 2 ? "paid" :
+                oModel.PaymentStatus == 1 ? "partial" : "unpaid";
+            string paymentQuery = paymentReceiptID > 0 ? "&paymentId=" + paymentReceiptID : "";
+            return Redirect("/Account/StockDetails/" + STID + "?saved=1&mode=" + saveMode + paymentQuery);
+        }
+        [PermissionFilter]
+        public ActionResult SalesDueListReport(StockSaleReportPageModel objModel)
+        {
+            if (objModel.StartDate.Year == 1)
+            {
+                objModel.EndDate = CommonUsage.GetCurrentDate();
+                objModel.StartDate = objModel.EndDate.AddMonths(-1);
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStockSaleReport(objModel, true);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult SalesReport(StockSaleReportPageModel objModel)
+        {
+            if (objModel.StartDate.Year == 1)
+            {
+                objModel.EndDate = CommonUsage.GetCurrentDate();
+                objModel.StartDate = objModel.EndDate.AddMonths(-1);
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStockSaleReport(objModel, false);
+            return View(objModel);
         }
 
         [PermissionFilter]

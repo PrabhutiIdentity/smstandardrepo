@@ -1,0 +1,107 @@
+@using SMEnterprise.Models
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model StockSaleReportPageModel
+@section IncludeCss
+{
+    <title>Sales Due List Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<section class="content-header">
+    <h1>Sales Due List Report</h1>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            @using (Html.BeginForm("SalesDueListReport", "Account", FormMethod.Post, new { id = "frmSalesDueReport" }))
+            {
+                <div class="row std-mng-head">
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-4 padding">
+                                <label class="col-md-4 text-right">From :</label>
+                                <div class="col-md-8"><input type="date" class="form-control" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" /></div>
+                            </div>
+                            <div class="col-md-4 padding">
+                                <label class="col-md-4 text-right">To :</label>
+                                <div class="col-md-8"><input type="date" class="form-control" name="EndDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" /></div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Product :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ProductID" id="ddlProductID">
+                                        <option value="0">--All Products--</option>
+                                        @foreach (var product in Model.Products ?? new List<NameIDModel>())
+                                        {
+                                            <option value="@product.ID" @(product.ID == Model.ProductID ? "selected" : "")>@product.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 padding">
+                                <a href="javascript:void(0);" onclick="$('#frmSalesDueReport').submit();"><i class="fa fa-search"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="x_panel">
+                <div class="x_content">
+                    <table id="tblSalesDue" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Products</th>
+                                <th>Amount</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                                <th>Last Payment</th>
+                                <th>Balance Payment</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Report ?? new List<StockSaleReportItemModel>())
+                            {
+                                <tr>
+                                    <td>@row.InvoiceNumber</td>
+                                    <td>@row.TrDate.ToString("dd MMM, yyyy")</td>
+                                    <td>@row.CustomerName<br />@row.ClassSection</td>
+                                    <td>@row.ProductNames</td>
+                                    <td>@row.Amount.ToString("N2")</td>
+                                    <td>@row.PaidAmount.ToString("N2")</td>
+                                    <td>@row.DueAmount.ToString("N2")</td>
+                                    <td>@(row.LastPaymentDate.HasValue ? row.LastPaymentDate.Value.ToString("dd MMM, yyyy") : "-")</td>
+                                    <td>
+                                        @if (row.DueAmount > 0)
+                                        {
+                                            <a href="/Account/StockDetails/@row.STID" class="btn btn-warning btn-xs">Receive Balance</a>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td><a href="/Account/StockDetails/@row.STID">View</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts
+{
+    <script>
+        $(function () {
+            $('#tblSalesDue').DataTable({ "aaSorting": [] });
+            $('#liStockManagement').closest('ul').closest('li').addClass('active');
+            $('#liStockManagement').addClass('active');
+        });
+    </script>
+}

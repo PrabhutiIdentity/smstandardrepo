@@ -51,6 +51,27 @@ namespace SMEnterprise.Controllers
                         try
                         {
                             Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
+                        } 
+                        catch { }
+                        try
+                        {
+                            var accountData = new AccountData();
+                            int branchId = PermissionManager.GetLoggedInUser().SBranchID;
+                            var sub = accountData.GetBranchSubscription(branchId);
+                            if (sub != null && sub.IsDue && sub.DueAmount > 0m)
+                            {
+                                Session["ShowPaymentDue"] = true;
+                                Session["PaymentDueBranchID"] = branchId;
+                                Session["PaymentDueAmount"] = sub.DueAmount;
+                                Session["PaymentDuePlanName"] = sub.PlanName ?? "";
+                            }
+                            else
+                            {
+                                Session.Remove("ShowPaymentDue");
+                                Session.Remove("PaymentDueBranchID");
+                                Session.Remove("PaymentDueAmount");
+                                Session.Remove("PaymentDuePlanName");
+                            }
                         }
                         catch { }
                         CommonData objCData = new CommonData();

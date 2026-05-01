@@ -8,6 +8,7 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using static System.Web.Razor.Parser.SyntaxConstants;
 
 
 namespace SMEnterprise.Repository
@@ -1725,17 +1726,10 @@ namespace SMEnterprise.Repository
                 paramater.Add("@StudentID", objData.StudentID);
                 paramater.Add("@QDate", new DateTime(objData.Year, objData.Month, 1));
                 paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-                // use ORion Public school (Prabh
-                if (objData.SBranchID == 4005)
-                {
-                    paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
-                }
-                else
-                {
+               
                    paramater.Add("@PaymentDate", objData.PaymentDate);
-                   //  paramater.Add("@PaymentDate", CommonUsage.GetCurrentDate());
-                }
-                //  paramater.Add("@PaymentDate", objData.PaymentDate);
+                 
+              
                 paramater.Add("@PaymentAmount", objData.PaymentAmount);
                 paramater.Add("@WaiverMonths", objData.WaiverMonths);
                 paramater.Add("@Remark", objData.Remark);
@@ -3360,6 +3354,13 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("sp_GetMonthFeeCollectionReport", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.FeePayments = multi.Read<FeePaymentModel>().ToList();
+                    try
+                    {
+
+                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                    }
+                    catch (Exception ex)
+                    { }
                 }
             }
             return objModel;
@@ -3980,22 +3981,34 @@ namespace SMEnterprise.Repository
 
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@StartDate", objModel.StartDate);
-                paramater.Add("@EndDate", objModel.EndDate);
-                paramater.Add("@TrType", objModel.TrType);
-                paramater.Add("@SBranchID", objModel.SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetStockTransactions", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                var parameters = new DynamicParameters();
+                parameters.Add("@StartDate", objModel.StartDate);
+                parameters.Add("@EndDate", objModel.EndDate);
+                parameters.Add("@TrType", objModel.TrType);
+                parameters.Add("@SBranchID", objModel.SBranchID);
+
+                using (var multi = con.QueryMultiple("sp_GetStockTransactions", parameters, commandType: CommandType.StoredProcedure))
                 {
+                    // Read 1: Transactions
                     objModel.Transactions = multi.Read<StockTransaferMasterModel>().ToList();
-                    try
-                    {
-                        objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
 
-                    }
-                    catch
-                    {
+                    // Read 2: Branch Info
+                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
 
+                    // Read 3: Latest Payments
+                    var latestPayments = multi.Read<StockTransactionPaymentModel>().ToList();
+
+                    // Mapping: Transactions mein Payment ID set karna
+                    if (objModel.Transactions != null && latestPayments != null)
+                    {
+                        foreach (var transaction in objModel.Transactions)
+                        {
+                            var lp = latestPayments.FirstOrDefault(x => x.STID == transaction.STID);
+                            if (lp != null)
+                            {
+                                transaction.LastPaymentID = lp.StockPaymentID;
+                            }
+                        }
                     }
                 }
             }
@@ -4125,6 +4138,15 @@ namespace SMEnterprise.Repository
                         }
                     }
                 }
+                objModel.PaymentHistory = GetStockPaymentHistory(STID, SBranchID, con);
+                if (objModel.PaymentHistory == null)
+                {
+                    objModel.PaymentHistory = new List<StockTransactionPaymentModel>();
+                }
+                if (objModel.PaymentHistory.Count > 0)
+                {
+                    objModel.LastPaymentID = objModel.PaymentHistory.Max(x => x.StockPaymentID);
+                }
             }
             return objModel;
         }
@@ -4145,6 +4167,13 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SessionID", oModel.SessionID);
                 paramater.Add("@CreatedDate", oModel.CreatedDate);
                 paramater.Add("@Status", oModel.Status);
+                paramater.Add("@PaymentDate", oModel.PaymentDate);
+                paramater.Add("@PaymentMode", oModel.PaymentMode);
+                paramater.Add("@PaymentReferanceNo", oModel.PaymentReferanceNo);
+                paramater.Add("@PaidAmount", oModel.PaidAmount);
+                paramater.Add("@DueAmount", oModel.DueAmount);
+                paramater.Add("@PaymentStatus", oModel.PaymentStatus);
+                paramater.Add("@CancelRemark", oModel.CancelRemark);
                 paramater.Add("@OpType", oModel.OpType);
                 paramater.Add("@SBranchID", oModel.SBranchID);
                 paramater.Add("@Details", oModel.GetDetailsDataTable());
@@ -4154,20 +4183,127 @@ namespace SMEnterprise.Repository
             }
 
         }
-        public PrintSaleReceiptModel GetSaleTransactionPrintData(int STID, int SBranchID)
+        public int InsertStockTransactionPayment(int STID, DateTime paymentDate, int paymentMode, string paymentReferanceNo, decimal paymentAmount, decimal totalPaidAmount, decimal dueAmount, int paymentStatus, int sBranchID, int createdBy)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@STID", STID);
+                parameters.Add("@PaymentDate", paymentDate);
+                parameters.Add("@PaymentMode", paymentMode);
+                parameters.Add("@PaymentReferanceNo", paymentReferanceNo);
+                parameters.Add("@PaymentAmount", paymentAmount);
+                parameters.Add("@TotalPaidAmount", totalPaidAmount);
+                parameters.Add("@DueAmount", dueAmount);
+                parameters.Add("@PaymentStatus", paymentStatus);
+                parameters.Add("@SBranchID", sBranchID);
+                parameters.Add("@CreatedBy", createdBy);
+
+                // ExecuteScalar is used here because we are expecting a single value (the new ID) back
+                return con.ExecuteScalar<int>("usp_InsertStockTransactionPayment",parameters,commandType: CommandType.StoredProcedure);
+            }
+        }
+        public int CancelStockTransactionPayment(int stockPaymentID, int sBranchID, string cancelRemark, int cancelledBy)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@StockPaymentID", stockPaymentID);
+                parameters.Add("@SBranchID", sBranchID);
+                parameters.Add("@CancelRemark", cancelRemark);
+                parameters.Add("@CancelledBy", cancelledBy);
+
+                return con.ExecuteScalar<int>("usp_CancelStockTransactionPayment", parameters, commandType: CommandType.StoredProcedure);
+            }
+        }
+        public List<StockTransactionPaymentModel> GetStockPaymentHistory(int STID, int SBranchID, SqlConnection con = null)
+        {
+            bool closeConnection = false;
+            if (con == null)
+            {
+                con = new SqlConnection(CommonUsage.ConnectionString);
+                con.Open();
+                closeConnection = true;
+            }
+            try
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@STID", STID);
+                parameters.Add("@SBranchID", SBranchID);
+
+                return con.Query<StockTransactionPaymentModel>("usp_GetStockPaymentHistory",parameters,commandType: CommandType.StoredProcedure).ToList();
+            }
+            finally
+            {
+                if (closeConnection)
+                {
+                    con.Dispose();
+                }
+            }
+        }
+        public List<NameIDModel> GetStockProductLookup(int SBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+               
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", SBranchID);
+
+                return con.Query<NameIDModel>("usp_GetStockProductLookup",parameters,commandType: CommandType.StoredProcedure).ToList();
+            }
+        }
+       
+        public StockSaleReportPageModel GetStockSaleReport(StockSaleReportPageModel objModel, bool dueOnly = false)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                objModel.Products = GetStockProductLookup(objModel.SBranchID);
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", objModel.SBranchID);
+                parameters.Add("@StartDate", objModel.StartDate);
+                parameters.Add("@EndDate", objModel.EndDate);
+                parameters.Add("@ProductID", objModel.ProductID);
+                parameters.Add("@DueOnly", dueOnly ? 1 : 0);
+                
+                using (var multi = con.QueryMultiple("usp_GetStockSaleReport", parameters, commandType: CommandType.StoredProcedure))
+                {
+                    
+                    objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                  
+                    objModel.Report = multi.Read<StockSaleReportItemModel>().ToList();
+                }
+            }
+          return objModel;
+        }
+        public PrintSaleReceiptModel GetSaleTransactionPrintData(int STID, int SBranchID, int stockPaymentID = 0)
         {
             PrintSaleReceiptModel objNew = new PrintSaleReceiptModel();
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@STID", STID);
-                paramater.Add("@SBranchID", SBranchID);
-                using (var multi = con.QueryMultiple("sp_GetStockTransactionPrintDetails", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                var parameters = new DynamicParameters();
+                parameters.Add("@STID", STID);
+                parameters.Add("@SBranchID", SBranchID);
+
+                using (var multi = con.QueryMultiple("usp_GetSaleTransactionPrintData", parameters, commandType: CommandType.StoredProcedure))
                 {
+                    // Sequential reading as per Procedure SELECT order
                     objNew.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
                     objNew.Transfer = multi.Read<StockTransaferMasterModel>().SingleOrDefault();
-                    objNew.Products = multi.Read<StockTransaferDetailModel>().AsList();
+                    objNew.Products = multi.Read<StockTransaferDetailModel>().ToList();
                     objNew.Customer = multi.Read<SaleReceiptCustomerModel>().SingleOrDefault();
+                    objNew.PaymentHistory = multi.Read<StockTransactionPaymentModel>().ToList() ?? new List<StockTransactionPaymentModel>();
+
+                    // Logic to select the specific or latest payment
+                    if (stockPaymentID > 0)
+                    {
+                        objNew.SelectedPayment = objNew.PaymentHistory.FirstOrDefault(x => x.StockPaymentID == stockPaymentID);
+                    }
+
+                    // Default: Agar specific ID nahi mila ya stockPaymentID == 0, toh latest payment pick karein
+                    if (objNew.SelectedPayment == null)
+                    {
+                        objNew.SelectedPayment = objNew.PaymentHistory.OrderByDescending(x => x.PaymentDate).ThenByDescending(x => x.StockPaymentID).FirstOrDefault();
+                    }
                 }
             }
 
@@ -5258,5 +5394,94 @@ namespace SMEnterprise.Repository
             }
         }
         #endregion
+
+
+        public BranchSubscriptionModel GetBranchSubscription(int sBranchId)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+                return con.Query<BranchSubscriptionModel>("sp_GetBranchSubscription", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        public int MarkBranchSubscriptionPaid(int sBranchId, decimal paidAmount, string paymentRef, int? paidByUserId = null)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var now = CommonUsage.GetCurrentDate();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+                parameters.Add("@PaidAmount", paidAmount);
+                parameters.Add("@PaymentRef", paymentRef);
+                parameters.Add("@PaymentDate", now);
+                parameters.Add("@CreatedBy", paidByUserId);
+
+                return con.Query<int>("sp_MarkBranchSubscriptionPaid", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+        // Add this method inside the AccountData class (e.g. near other fee/report methods)
+        public bool IsBranchPaymentPending(int sBranchId)
+        {
+            try
+            {
+                var sub = GetBranchSubscription(sBranchId);
+                if (sub != null)
+                {
+                    return sub.IsDue && sub.DueAmount > 0m;
+                }
+
+                // Fallback: old student-due detection
+                var dues = GetClassWiseDueFeeDetails(sBranchId);
+                if (dues == null) return false;
+
+                foreach (var item in dues)
+                {
+                    decimal prev = 0m, app = 0m, paid = 0m, disc = 0m;
+                    try { prev = item.PreviousDues; } catch { }
+                    try { app = item.ApplicableFee; } catch { }
+                    try { paid = item.PaymentAmount; } catch { }
+                    try { disc = item.DiscAmt; } catch { }
+                    var net = prev + app - paid - disc;
+                    if (net > 0m) return true;
+                }
+            }
+            catch
+            {
+                // do not block login on exception
+            }
+            return false;
+        }
+
+        public BranchGatewayModel GetBranchGateway(int sBranchId)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+
+                return con.Query<BranchGatewayModel>("sp_GetBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        public int UpsertBranchGateway(BranchGatewayModel model)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var now = CommonUsage.GetCurrentDate();
+
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", model.SBranchID);
+                parameters.Add("@RazorpayKeyId", model.RazorpayKeyId);
+                parameters.Add("@RazorpaySecret", model.RazorpaySecret);
+                parameters.Add("@UseForSubscription", model.UseForSubscription ? 1 : 0);
+                parameters.Add("@CreatedDate", model.CreatedDate ?? now);
+                parameters.Add("@UpdatedDate", now);
+
+                return con.Query<int>("sp_UpsertBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
     }
 }

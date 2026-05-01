@@ -57,6 +57,9 @@ namespace SMEnterprise.Models
 
         /// <summary>True when the order covers more than one month.</summary>
         public bool IsMultiMonth { get; set; }
+        // for school subscription plan
+        public bool IsSubscriptionOrder { get; set; } = false;
+
 
     }
     public class PaymentDetailModel

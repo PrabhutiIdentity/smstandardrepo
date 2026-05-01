@@ -1,0 +1,211 @@
+@using SMEnterprise.Models
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model StockSaleReportPageModel
+@section IncludeCss
+{
+    <title>Sales Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<section class="content-header">
+    <h1>Sales Report</h1>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-xs-12">
+            @using (Html.BeginForm("SalesReport", "Account", FormMethod.Post, new { id = "frmSalesReport" }))
+            {
+                <div class="row std-mng-head">
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-4 padding">
+                                <label class="col-md-4 text-right">From :</label>
+                                <div class="col-md-8"><input type="date" class="form-control" name="StartDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" /></div>
+                            </div>
+                            <div class="col-md-4 padding">
+                                <label class="col-md-4 text-right">To :</label>
+                                <div class="col-md-8"><input type="date" class="form-control" name="EndDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" /></div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Product :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ProductID">
+                                        <option value="0">--All Products--</option>
+                                        @foreach (var product in Model.Products ?? new List<NameIDModel>())
+                                        {
+                                            <option value="@product.ID" @(product.ID == Model.ProductID ? "selected" : "")>@product.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-1 padding">
+                                <a href="javascript:void(0);" onclick="$('#frmSalesReport').submit();"><i class="fa fa-search"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="x_panel">
+                <div class="x_content">
+                    <table id="tblSalesReport" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Invoice</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Products</th>
+                                <th>Qty</th>
+                                <th>Amount</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                                <th>Status</th>
+                                <th>Last Receipt No</th>
+                                <th>Invoice Print</th>
+                                <th>Receipt Print</th>
+                                <th>Balance Payment</th>
+                                <th>View</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var row in Model.Report ?? new List<StockSaleReportItemModel>())
+                            {
+                                <tr>
+                                    <td>@row.InvoiceNumber</td>
+                                    <td>@row.TrDate.ToString("dd MMM, yyyy")</td>
+                                    <td>@row.CustomerName<br />@row.ClassSection</td>
+                                    <td>@row.ProductNames</td>
+                                    <td>@row.Quantity.ToString("N2")</td>
+                                    <td>@row.Amount.ToString("N2")</td>
+                                    <td>@row.PaidAmount.ToString("N2")</td>
+                                    <td>@row.DueAmount.ToString("N2")</td>
+                                    <td>@row.PaymentStatusText</td>
+                                    <td>
+                                        @(string.IsNullOrWhiteSpace(row.LastReceiptNumber) ? "-" : row.LastReceiptNumber)
+                                        @if (row.LastPaymentStatus == 3)
+                                        {
+                                            <div style="color:#c9302c;font-weight:700;">Cancelled</div>
+                                            if (row.LastReceiptCancelledDate.HasValue)
+                                            {
+                                                <div style="color:#c9302c;">@row.LastReceiptCancelledDate.Value.ToString("dd MMM, yyyy")</div>
+                                            }
+                                        }
+                                    </td>
+                                    <td><a href="javascript:void(0);" onclick="PrintInvoicePreview(this,@row.STID);" class="btn btn-info btn-xs ClosedInvoice">Print Invoice</a></td>
+                                    <td>
+                                        @if (row.LastPaymentID > 0)
+                                        {
+                                            <a href="javascript:void(0);" onclick="PrintReceiptPreview(this,@row.STID,@row.LastPaymentID);" class="btn btn-success btn-xs ClosedReceipt">Print Last Receipt</a>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (row.DueAmount > 0)
+                                        {
+                                            <a href="/Account/StockDetails/@row.STID" class="btn btn-warning btn-xs">Receive Balance</a>
+                                        }
+                                        else
+                                        {
+                                            <span>-</span>
+                                        }
+                                    </td>
+                                    <td><a href="/Account/StockDetails/@row.STID">View</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts
+{
+    <script>
+        $(function () {
+            $('#tblSalesReport').DataTable({ "aaSorting": [] });
+            $('#liStockManagement').closest('ul').closest('li').addClass('active');
+            $('#liStockManagement').addClass('active');
+        });
+        function PrintInvoicePreview(sender, stid) {
+            if ($(sender).hasClass('ClosedInvoice')) {
+                $(sender).closest("tr").after("<tr><td colspan='999' style='background-color:white;border-left:3px solid #7b64a5;'>Loading...</td></tr>");
+                $.ajax({
+                    type: "POST",
+                    url: "/Account/GetSaleTransactionPrintData/" + stid,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        $(sender).closest("tr").after("<tr><td colspan='999' style='background-color:white;border-left:3px solid #7b64a5;'>" + html + "</td></tr>");
+                        $(sender).text('Close Invoice').removeClass('ClosedInvoice').addClass('OpenInvoice');
+                    },
+                    error: function () {
+                        $(sender).closest("tr").next().remove();
+                    }
+                });
+            }
+            else {
+                $(sender).text('Print Invoice').removeClass('OpenInvoice').addClass('ClosedInvoice');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        function PrintReceiptPreview(sender, stid, paymentId) {
+            if ($(sender).hasClass('ClosedReceipt')) {
+                $(sender).closest("tr").after("<tr><td colspan='999' style='background-color:white;border-left:3px solid #5a9e6f;'>Loading...</td></tr>");
+                $.ajax({
+                    type: "POST",
+                    url: "/Account/GetSaleTransactionPaymentReceiptData/" + stid + "?paymentId=" + (paymentId || 0),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $(sender).closest("tr").next().remove();
+                        $(sender).closest("tr").after("<tr><td colspan='999' style='background-color:white;border-left:3px solid #5a9e6f;'>" + html + "</td></tr>");
+                        $(sender).text('Close Receipt').removeClass('ClosedReceipt').addClass('OpenReceipt');
+                    },
+                    error: function () {
+                        $(sender).closest("tr").next().remove();
+                    }
+                });
+            }
+            else {
+                $(sender).text('Print Receipt').removeClass('OpenReceipt').addClass('ClosedReceipt');
+                $(sender).closest("tr").next().remove();
+            }
+        }
+        function PrintRecipt() {
+            var sender = arguments.length > 0 ? arguments[0] : null;
+            var receiptBody = sender
+                ? $(sender).closest('.receipt-print-root').find('.receipt-print-body').first()
+                : $('.receipt-print-body').first();
+            if (receiptBody.length == 0) {
+                return;
+            }
+            var receiptHtml = receiptBody.html();
+            var nDiv = '<table>';
+            nDiv = nDiv + '<tr><td>' + receiptHtml.replace('[CopyPlaceHolder]', 'School Copy') + '</td><td>' + receiptHtml.replace('[CopyPlaceHolder]', 'Office Copy') + '</td></tr>';
+            nDiv = nDiv + '</table>';
+            var printWindow = window.open('', '_blank', 'width=1100,height=800,scrollbars=yes,resizable=yes');
+            if (!printWindow) {
+                alert('Please allow popups to print the receipt.');
+                return;
+            }
+            printWindow.document.open();
+            printWindow.document.write('<html><head><title>Print Receipt</title>');
+            printWindow.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(nDiv);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(function () {
+                printWindow.focus();
+                printWindow.print();
+            }, 700);
+        }
+    </script>
+}

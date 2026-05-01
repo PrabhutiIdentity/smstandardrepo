@@ -108,6 +108,12 @@
                         </div>
                     </div>
                 }
+                <div class="row" style="margin-bottom: 12px;">
+                    <div class="col-md-12" style="text-align:right;">
+                        <a href="/Account/SalesDueListReport" class="btn btn-warning">Sales Due List Report</a>
+                        <a href="/Account/SalesReport" class="btn btn-success">Sales Report</a>
+                    </div>
+                </div>
                 <div class="x_panel">
 
                     <div class="x_content">
@@ -117,10 +123,14 @@
                                 <tr>
                                     <th style="width:30%">Transaction</th>
                                     <th>Quantity</th>
-                                    <th>Amount</th>
+                                    <th>Total Amount</th>
+                                    <th>Paid</th>
+                                    <th>Due</th>
+                                    <th>Payment</th>
                                     <th>Status</th>
                                     <th>Update</th>
-                                    <td>Print</td>
+                                    <td>Invoice</td>
+                                    <td>Payment Receipt</td>
                                 </tr>
                             </thead>
                             @{
@@ -137,6 +147,15 @@
                                         </td>
                                         <td>
                                             @c.Amount.ToString("N2")
+                                        </td>
+                                        <td>
+                                            @c.PaidAmount.ToString("N2")
+                                        </td>
+                                        <td>
+                                            @c.DueAmount.ToString("N2")
+                                        </td>
+                                        <td>
+                                            @c.PaymentStatusText
                                         </td>
                                         <td>
                                             @(c.Status == 0?"Canceled":"Approved")
@@ -156,6 +175,12 @@
                                             </div>
                                         </td>
                                         <td> <a href="javascript:void(0);" onclick="PrintTransactionReciept(this,@c.STID);" class="btn btn-link Closed">Print</a></td>
+                                        <td>
+                                            @if (c.PaidAmount > 0)
+                                            {
+                                                <a href="javascript:void(0);" onclick="PrintPaymentReciept(this,@c.STID,@c.LastPaymentID);" class="btn btn-link ClosedPayment">Print</a>
+                                            }
+                                        </td>
                                     </tr>
 
                                     count++;
@@ -193,7 +218,7 @@
         //});
            $(document).ready(function () {
                var printdate = 'Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
-             
+
                var rpname = 'Daily  ' + $('#ddlStocks option:selected').text(); + 'Report '
             var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
 
@@ -336,39 +361,78 @@
                     });
             }
             else {
-                $(sender).text('Receipt');
+                $(sender).text('Print');
                 $(sender).removeClass('Open');
                 $(sender).addClass('Closed');
                 $(sender).closest("tr").next().remove();
             }
         }
+        function PrintPaymentReciept(sender, PayID, PaymentReceiptID) {
+            if ($(sender).hasClass('ClosedPayment')) {
+                $(sender)
+                    .closest("tr")
+                    .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #5a9e6f;font-size: 30px;text-align: -webkit-center;'> Loading.... </td></tr>");
+                var ele = document.getElementsByClassName("OpenPayment");
+                if (ele.length > 0) {
+                    $(ele[0]).click();
+                }
+                $.ajax(
+                    {
+                        type: "POST",
+                        url: "/Account/GetSaleTransactionPaymentReceiptData/" + PayID + "?paymentId=" + (PaymentReceiptID || 0),
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function (html) {
+                            $(sender).closest("tr").next().remove();
+                            $(sender)
+                                .closest("tr")
+                                .after("<tr><td id='tdDetails' colspan = '999' style='border-left: 3px solid #5a9e6f;background-color: white'>" + html + "</td></tr>");
+                            $(sender).text('Close');
+                            $(sender).removeClass('ClosedPayment');
+                            $(sender).addClass('OpenPayment');
+                        },
+                        error: function (e) {
+                            alert("errorn");
+                        }
+                    });
+            }
+            else {
+                $(sender).text('Print');
+                $(sender).removeClass('OpenPayment');
+                $(sender).addClass('ClosedPayment');
+                $(sender).closest("tr").next().remove();
+            }
+        }
 
         function PrintRecipt() {
-            var nDiv='<table>';
-          //  nDiv=nDiv+'<tr><td>'+$('#divRecipt').html()+'</td><td>'+$('#divRecipt').html()+'</td></tr>';
-   nDiv = nDiv + '<tr><td>' + $('#divRecipt').html().replace('[CopyPlaceHolder]', 'School Copy') + '</td><td>' + $('#divRecipt').html().replace('[CopyPlaceHolder]', 'Student Copy') + '</td></tr>';
-            nDiv=nDiv+'</table>';
-            var contents =nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
-            var frame1 = $('<iframe />');
-            frame1[0].name = "frame1";
-            frame1.css({ "position": "absolute", "top": "-1000000px" });
-            $("body").append(frame1);
-            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
-            frameDoc.document.open();
-            //Create a new HTML document.
-            frameDoc.document.write('<html><head><title></title>');
-            frameDoc.document.write('</head><body>');
-            //Append the external CSS file.
-            frameDoc.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
-            //Append the DIV contents.
-            frameDoc.document.write(contents);
-            frameDoc.document.write('</body></html>');
-            frameDoc.document.close();
+            var sender = arguments.length > 0 ? arguments[0] : null;
+            var receiptBody = sender
+                ? $(sender).closest('.receipt-print-root').find('.receipt-print-body').first()
+                : $('.receipt-print-body').first();
+            if (receiptBody.length == 0) {
+                return;
+            }
+            var receiptHtml = receiptBody.html();
+            var nDiv = '<table>';
+            nDiv = nDiv + '<tr><td>' + receiptHtml.replace('[CopyPlaceHolder]', 'School Copy') + '</td><td>' + receiptHtml.replace('[CopyPlaceHolder]', 'Office Copy') + '</td></tr>';
+            nDiv = nDiv + '</table>';
+            var printWindow = window.open('', '_blank', 'width=1100,height=800,scrollbars=yes,resizable=yes');
+            if (!printWindow) {
+                alert('Please allow popups to print the receipt.');
+                return;
+            }
+            printWindow.document.open();
+            printWindow.document.write('<html><head><title>Print Receipt</title>');
+            printWindow.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(nDiv);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
             setTimeout(function () {
-                window.frames["frame1"].focus();
-                window.frames["frame1"].print();
-                frame1.remove();
-            }, 500);
+                printWindow.focus();
+                printWindow.print();
+            }, 700);
         }
     </script>
 }
