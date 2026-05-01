@@ -96,6 +96,7 @@ namespace SMEnterprise.Models
         public decimal Discount { get; set; }
         public decimal ApplicableFee { get; set; }
         public decimal PaymentRecieved { get; set; }
+        public string PayMonths { get; set; }
     }
     public class StudentYearMonthFeeTypeFeeDetailModel
     {
@@ -110,9 +111,12 @@ namespace SMEnterprise.Models
     public class StudentSessionFeeStatusPageModel
     {
         public int StudentID { get; set; }
+        public int SBranchID { get; set; }
+        public string name { get; set; }
         public DateTime CurDate { get; set; }
         public List<StudentYearMonthFeeSummeryModel> MonthlySummery { get; set; }
         public List<StudentYearMonthFeeTypeFeeDetailModel> FeeWiseDetails { get; set; }
+        public SBranchModel SBranch { get; set; }
     }
 public class ClassGenderCategoryCountModel
     {
@@ -173,6 +177,7 @@ public class ClassGenderCategoryCountModel
     }
     public class CollectionReportModel
     {
+
         public string UUID { get; set; }
         public SBranchModel Branch { get; set; }
         public DateTime FromDate { get; set; }
@@ -180,12 +185,16 @@ public class ClassGenderCategoryCountModel
         public int ReportType { get; set; }
         public int PaymentMode { get; set; }
         public int SBranchID { get; set; }
+        public int SessionID { get; set; }
+        public DateTime FromDateWeekly { get; set; } // Added to capture weekly start date
+        public DateTime ToDateWeekly { get; set; }   // Added to capture weekly end date
         public List<FeePaymentModel> Report { get; set; }
         public List<NameIDModel> FeeType { get; set; }
         public List<NameIDModel> ExpenceType { get; set; }
         public List<PaymentModeModel> PaymentModes { get; set; }
         public List<PaymentDetailsModel> FeeReportType { get; set; }
         public List<ExpenseDetailsModel> ExpenseReportType { get; set; }
+        public List<SchoolSessionModel> Sessions { get; set; }
         public int QuarterID { get; set; }
     }
 

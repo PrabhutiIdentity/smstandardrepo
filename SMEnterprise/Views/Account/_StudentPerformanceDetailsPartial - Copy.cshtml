@@ -1,13 +1,12 @@
 ﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    Layout = null;
     List<NameIDModel> SubjectEvaluationFinalStatus = new List<NameIDModel>();
 }
 @model SMEnterprise.Models.PerformanceParameterDetailModel
 @section IncludeCss
 {
-    <title>Performance Card | @Model.Student.Name</title>
     <style>
         #tblResult > tbody > tr > td {
             text-align: center !important;
@@ -35,28 +34,21 @@
     <div class="row">
         <div class="col-md-12 col-sm-12 col-xs-12">
             <div class="x_panel">
-                @using (Html.BeginForm("UpdateStudentPerformance", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
-                {
+                @{
                     <div class="x_content">
                         <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
                             <tr style="width:100%">
-                                <td style="width:20%;text-align:left;">
-                                    <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
-                                </td>
+                                                <td style="width:20%;text-align:left;">
+                                                    <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" class="ImageReportLogo" alt="Photo" src="/Images/cbse-logo.png">
+
+                                                    @*<img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />*@
+                                                </td>
 
                                 <td style="width:60%;text-align:center;">
                                     <table style="width:100%">
                                         <tr>
                                             <td style="text-align: left;vertical-align: middle;">
-                                                @if (Model.SBranchDetails.SBranchID == 13)
-                                                {
-                                                    <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 20px;"><b>@Model.SBranchDetails.BranchSchoolName</b></p>
-                                                }
-                                                else
-                                                {
-                                                    <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.SBranchDetails.BranchSchoolName</p>
-                                                }
-
+                                                <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.SBranchDetails.BranchSchoolName</p>
 
                                                 <p style="margin-bottom: 2px;font-size: 16px;text-align: center;">
                                                     @Html.Raw(Html.Encode(Model.SBranchDetails.Address).Replace("\n", "<br />"))
@@ -69,19 +61,8 @@
                                     </table>
                                 </td>
                                 <td style="width:20%;text-align:right;">
-                                    @if (Model.SBranchDetails.SBranchID == 17)
-                                    {
-
-                                    }
-                                    @if (Model.SBranchDetails.SBranchID == 23)
-                                    {
-                                        <img onerror="return OnImageError(this,2);" class="ImageReportLogo" alt="Photo" style="width:120px;height:120px;" src="@Url.Content("~/Images/cbse-logo.png")" />
-                                    }
-                                    else
-                                    {
-                                        <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
-                                    }
-                                </td>
+                                    <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                                                   </td>
 
                             </tr>
 
@@ -90,7 +71,7 @@
                                 <td colspan="3" style="text-align: center;border-bottom: 0px solid #ddd;">
 
                                     <p style="margin-bottom: 2px;text-align: center;">
-                                        <b style="font-size: 26px;">Report Card</b>
+                                        <b style="font-size: 26px;">Result Card</b>
                                         <br />
 
                                     </p>
@@ -107,7 +88,7 @@
                                             <td style="padding-left:10px;text-align:left; width:45%">
                                                 <div class="col-md-12">
                                                     <div class="row">
-                                                        Roll No. :<b> @Model.Student.RollNo</b>
+                                                        Roll No. :<b> @(Model.Student.RollNo??"")</b>
                                                     </div>
                                                     <div class="row">
                                                         Student : <b id="bStudentNate">@Model.Student.Name</b>
@@ -234,7 +215,7 @@
 
                                                             foreach (ExamResultDetailModel r in Model.Result)
                                                             {
-
+                                                                Grade = r.Grade;
                                                                 if (privSubID != r.SubjectID)
                                                                 {
                                                                     <tr>
@@ -256,22 +237,30 @@
                                                                                         if (err.MasterID == er.EvaluationID && esr.EvaluationType == err.EvaluationID && r.SubjectID == err.SubjectID)
                                                                                         {
                                                                                             @*<td>@(err.Grade == null ? "NA" : err.Grade)</td>*@
-                                                                                            if (Model.SBranchID == 0)
+                                                                                            if (Model.SBranchID == 9)
                                                                                             {
-                                                                                                <td>@err.wMaxMarks.ToString("N2")</td>
-                                                                                            }
-                                                                                            else
-                                                                                            {
-                                                                                                if (err.Status == -1)
+
+                                                                                                @*<td>@err.wMaxMarks.ToString("N2")</td>*@
+                                                                                                if (err.MaxMarks == 0)
                                                                                                 {
-                                                                                                    <td>M/L</td>
+                                                                                                    <td>--</td>
                                                                                                 }
                                                                                                 else
                                                                                                 {
-                                                                                                    <td>@err.wMarksScored.ToString("N2")</td>
+                                                                                                    <td>@err.wMaxMarks.ToString("N2")</td>
                                                                                                 }
-
-                                                                                                @* <td>@err.wMarksScored.ToString("N2")</td>*@
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                @*<td>@err.wMarksScored.ToString("N2")</td>*@
+                                                                                                if (err.MaxMarks == 0)
+                                                                                                {
+                                                                                                    <td>--</td>
+                                                                                                }
+                                                                                                else
+                                                                                                {
+                                                                                                    <td>@err.wMaxMarks.ToString("N2")</td>
+                                                                                                }
                                                                                             }
                                                                                             @*<td>@err.wMarksScored.ToString("N2")</td>*@
                                                                                             EvalTotalMarks = EvalTotalMarks + err.wMarksScored;
@@ -296,135 +285,71 @@
                                                                                 subEve = new NameIDModel();
                                                                                 subEve.ID = r.SubjectID;
                                                                                 subEve.Name = er.EvaluationID.ToString();
-
-                                                                                if (EvalMaxMarks > 0)
+                                                                                if (EvalMaxMarks == 0)
                                                                                 {
-
+                                                                                    subEve.Extra1 = "-";
+                                                                                }
+                                                                                else
+                                                                                {
                                                                                     subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
                                                                                 }
+                                                                                //subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
 
                                                                                 SubjectEvaluationFinalStatus.Add(subEve);
                                                                             }
                                                                             else
                                                                             {
-                                                                                subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
-                                                                                //subEve.Extra1 = (EvalMaxMarks == 0 ? 0 : EvalTotalMarks * 100 / EvalMaxMarks).ToString();
-                                                                            }
-
-                                                                            totalmarksresult = totalmarksresult + EvalMaxMarks;
-                                                                            <td>@Math.Round(EvalTotalMarks, 2)</td>
-                                                                            <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>
-                                                                        }
-                                                                        @if (Model.EvaluationID == -1)
-                                                                        {
-                                                                            <td>@r.etMarksScored.ToString("0.00")</td>
-                                                                            <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>
-                                                                        }
-                                                                    </tr>
-
-                                                                }
-                                                                privSubID = r.SubjectID;
-                                                            }
-
-                                                            //For Ranking
-                                                            foreach (ExamResultDetailModel r in Model.ResultGrade)
-                                                            {
-
-                                                                if (privSubID != r.SubjectID)
-                                                                {
-                                                    <tr>
-
-
-                                                        <td style="min-width: 110px;"><b>@r.SubjectName</b></td>
-                                                        @foreach (EvaluationModel er in Model.MainEvaluations)
-                                                        {
-                                                            string EvalMaxGrades = "0";
-                                                            string SATotalGrades = "0";
-                                                            string EvalTotalGrades = "0";
-                                                            foreach (EvaluationModel esr in Model.SubEvaluations)
-                                                            {
-                                                                if (esr.MasterID == er.EvaluationID)
-                                                                {
-                                                                    var isFound = false;
-                                                                    foreach (ExamResultDetailModel err in Model.ResultGrade)
-                                                                    {
-                                                                        if (err.MasterID == er.EvaluationID && esr.EvaluationType == err.EvaluationID && r.SubjectID == err.SubjectID)
-                                                                        {
-                                                                            @*<td>@(err.Grade == null ? "NA" : err.Grade)</td>*@
-                                                                            if (Model.SBranchID == 0)
-                                                                            {
-                                                                                <td>-</td>
-                                                                            }
-                                                                            else
-                                                                            {
-                                                                                if (err.Status == -1)
+                                                                                if (EvalMaxMarks == 0)
                                                                                 {
-                                                                                    <td>M/L</td>
+                                                                                    subEve.Extra1 = "-";
                                                                                 }
                                                                                 else
                                                                                 {
-                                                                                    @*<td>@err.wMarksScored.ToString("N2")</td>*@
-                                                                                    <td>@err.Grade</td>
+                                                                                    subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
                                                                                 }
-
+                                                                                //subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
                                                                             }
-                                                                            @*<td>@err.wMarksScored.ToString("N2")</td>*@
-                                                                EvalTotalGrades = err.Grade; ;
-                                                                isFound = true;
-                                                                EvalMaxGrades =  err.Grade;
-                                                              
-                                                            }
-                                                        }
-                                                        if (!isFound)
-                                                        {
-                                                                        <td>NA</td>
-                                                                    }
-                                                                }
 
-                                                            }
-                                                            var subEve = SubjectEvaluationFinalStatus.Where(se => se.ID == r.SubjectID && se.Name == er.EvaluationID.ToString()).SingleOrDefault();
-                                                            if (subEve == null)
-                                                            {
-                                                                subEve = new NameIDModel();
-                                                                subEve.ID = r.SubjectID;
-                                                                subEve.Name = er.EvaluationID.ToString();
-
-                                                                if (EvalMaxGrades!="0")
-                                                                {
-
-                                                                    subEve.Extra1 = EvalMaxGrades;
-                                                                }
-
-                                                                SubjectEvaluationFinalStatus.Add(subEve);
-                                                            }
-                                                            else
-                                                            {
-                                                                subEve.Extra1 = EvalMaxGrades;
-                                                                //subEve.Extra1 = (EvalMaxMarks == 0 ? 0 : EvalTotalMarks * 100 / EvalMaxMarks).ToString();
-                                                            }
-
-                                                           
-                                                            <td></td>
-                                                            <td></td>
-                                                        }
-                                                        @if (Model.EvaluationID == -1)
-                                                        {
-                                                            <td>@r.Grade</td>
-                                                            <td>@r.Grade</td>
-                                                        }
-                                                    </tr>
-
+                                                                            totalmarksresult = totalmarksresult + EvalMaxMarks;
+                                                                            @*<td>@Math.Round(EvalTotalMarks, 2)</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>*@
+                                                                            if (EvalMaxMarks == 0)
+                                                                            {
+                                                                                <td>--</td>
+                                                                                <td>@Grade</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td>@Math.Round(EvalTotalMarks, 2)</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>
+                                                                            }
+                                                                        }
+                                                                        @if (Model.EvaluationID == -1)
+                                                                        {
+                                                                            @*<td>@r.etMarksScored.ToString("0.00")</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>*@
+                                                                            if (r.MaxMarks == 0)
+                                                                            {
+                                                                                <td>--</td>
+                                                                                <td>@Grade</td>
+                                                                            }
+                                                                            else
+                                                                            {
+                                                                                <td>@r.etMarksScored.ToString("0.00")</td>
+                                                                                <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>
+                                                                            }
+                                                                        }
+                                                                    </tr>
                                                                 }
                                                                 privSubID = r.SubjectID;
                                                             }
-                                                            //Close For Ranking
                                                             <tr>
                                                                 <td></td>
                                                                 @foreach (var me in Model.MainEvaluations)
                                                                 {
                                                                     //(@totalmarksresult.ToString("0"))
                                                                     <td colspan="@(me.SubEvals)"><b>Total</b> </td>
-                                                                    <td><b>@Math.Round(me.MarksObtained, 2) </b></td>
+                                                                    <td><b>@Math.Round(me.MarksObtained, 2)</b></td>
                                                                     @*<td>@Math.Round(me.MarksObtained * 100 / me.TotalMarks, 2)%</td>*@
                                                                     @*<td>@Math.Round(me.TotalMarks == 0 ? 0 : me.MarksObtained * 100 / me.TotalMarks, 2)%</td>*@
                                                                     division = @AcadmicModel.CalculateGradeDivision(me.MarksObtained, me.TotalMarks);
@@ -454,36 +379,6 @@
 
                                                         }
                                                     </table>
-
-                                                    @*@if (Model.SBranchID == 2)
-                                                    {
-                                                <table style="width:100%;border: 1px solid #ddd;">
-
-                                                    <tr>
-                                                        <td style="width:50%;text-align:left;">Grading for co-scholastic</td>
-                                                        <td> Grade</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style="width:50%;text-align:left;">GK / Moral</td>
-                                                        <td></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style="width:50%;text-align:left;">Computer</td>
-                                                        <td></td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td style="width:50%;text-align:left;"> Drawing</td>
-                                                        <td></td>
-                                                    </tr>
-                                                   
-
-                                                </table>
-                                                    }
-                                                    else
-                                                    {
-
-                                                    }*@
-
                                                     <table style="width:100%;border: 1px solid #ddd;">
                                                         @if (Model.EvaluationID == -1)
                                                         {
@@ -555,7 +450,7 @@
                                                                     if ((s.ParamType == 6) && s.MainParamID == c.ParamID && (s.EvaluationID == eprop.EvaluationID || s.Grade == null))
                                                                     {
                                                                         <tr>
-                                                                            <td style="width:80%">
+                                                                            <td>
                                                                                 <asa class="noprint"><b> @Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></asa>
                                                                                 <span class="print"><b> @Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></span>
                                                                             </td>
@@ -586,7 +481,7 @@
                                                                     if ((s.ParamType == 7) && s.MainParamID == c.ParamID && (s.EvaluationID == eprop.EvaluationID || s.Grade == null))
                                                                     {
                                                                         <tr>
-                                                                            <td style="width:80%">
+                                                                            <td>
                                                                                 <asa class="noprint"><b>@Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></asa>
                                                                                 <span class="print"><b> @Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></span>
                                                                             </td>
@@ -665,40 +560,12 @@
                                         }
                                     }
                                     <tr>
-                                        <td colspan="@(Model.MainEvaluations.Count)"> <b>Class Teacher's Remarks </b><br /><br /><br /></td>
+                                        <td colspan="@(Model.MainEvaluations.Count)"> <b>Class Teacher's Remarks <br /></b><br /></td>
                                     </tr>
-                                    @*  @if (Model.MainEvaluations.Count > 1)
-                                        {
-                                            <tr>
-                                                <td colspan="@(Model.MainEvaluations.Count)"> <b>Promoted To Class <br /></b></td>
-                                            </tr>
-                                        }  Detained | Promoted*@
                                     @if (Model.MainEvaluations.Count > 1)
                                     {
                                         <tr>
-                                            @{
-                                                var finalStatus = 0;
-                                                foreach (var se in SubjectEvaluationFinalStatus)
-                                                {
-                                                    if (Convert.ToDecimal(se.Extra1) < 40)
-                                                    {
-                                                        var subsum = SubjectEvaluationFinalStatus.Where(s => s.ID == se.ID).Sum(c => Convert.ToDecimal(c.Extra1));
-                                                        var subsumcount = SubjectEvaluationFinalStatus.Where(s => s.ID == se.ID).Count();
-                                                        if (subsum / subsumcount < 40)
-                                                        {
-                                                            finalStatus = 1;
-                                                            break;
-                                                        }
-                                                        else if (subsum / subsumcount > 40)
-                                                        {
-                                                            finalStatus = 2;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-
-                                                <td colspan="@(Model.MainEvaluations.Count)"> Result Status : <b>@(finalStatus == 0 ? "Pass" : finalStatus == 1 ? "Pass" : "Pass") <br /></b></td>
-                                            }
+                                            <td colspan="@(Model.MainEvaluations.Count)"> <b>Promoted To Class <br /></b></td>
                                         </tr>
                                     }
                                     <tr>
@@ -714,26 +581,15 @@
                                                         Place : <br />
                                                         Date  :@Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")
                                                     </td>
-                                                    @if (Model.SBranchDetails.ClassTeacherSign == null)
-                                                    {
-                                                        <td style="width:25%">
-                                                            <br />
-                                                            <br />
-                                                            <br />
-                                                            <br />
-                                                            Signature of <br />
-                                                            Class Teacher
-                                                        </td>
-                                                    }
-                                                    else
-                                                    {
-                                                        <td style="width:25%">
-                                                            <img onerror="return OnImageError(this,2);" style="max-height: 65px;" class="reportSign" alt="Photo" src="@Url.Content("~/Images/EmployeeDocuments/")@(Model.SBranchDetails.CTeacherID)_Sign_@(Model.SBranchDetails.ClassTeacherSign)" />
-                                                            <br />@Model.SBranchDetails.ClassTeacher
-                                                            <br />(Class Teacher)
-                                                        </td>
-                                                    }
-                                                    @if (Model.SBranchDetails.SBranchID == 17)
+                                                    <td style="width:25%">
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        <br />
+                                                        Signature of <br />
+                                                        Class Teacher
+                                                    </td>
+                                                    @if (Model.SBranchDetails.SBranchID == 0)
                                                     {
                                                         <td style="width:25%">
                                                             <br />
@@ -741,38 +597,7 @@
                                                             <br />
                                                             <br />
                                                             Signature of<br />
-                                                            Parent's
-                                                        </td>
-                                                    }
-
-
-                                                    @if (Model.SBranchDetails.TeacherIncharge == null)
-                                                    {
-                                                        <td style="width:25%">
-                                                            <br />
-                                                            <br />
-                                                            <br />
-                                                            <br />
-                                                            Signature of <br />
-                                                            Teacher Incharge
-                                                        </td>
-                                                    }
-                                                    else
-                                                    {
-                                                        <td style="width:25%">
-                                                            <img onerror="return OnImageError(this,2);" style="max-height: 65px;" class="reportSign" alt="Photo" src="@Url.Content("~/Images/EmployeeDocuments/")@(Model.SBranchDetails.InchargeTeacherID)_Sign_@(Model.SBranchDetails.TeacherInchargeSign)" />
-                                                            <br />@Model.SBranchDetails.TeacherIncharge
-                                                            <br />(Teacher Incharge)
-
-                                                        </td>
-                                                    }
-                                                    @if (Model.SBranchDetails.SBranchID == 9)
-                                                    {
-                                                        <td style="width:25%">
-                                                            <img onerror="return OnImageError(this,2);" style="margin-left: 40px;" class="reportSign" alt="Photo" src="@Url.Content("~/Images/EmployeeDocuments/")24_Sign_1.png" />
-                                                            <br />
-                                                            Signature of Administrator
-
+                                                            HM
                                                         </td>
                                                     }
                                                     @if (Model.SBranchDetails.PrincipalSignature == null)
@@ -789,7 +614,6 @@
                                                             <br />&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Signature of Principal
                                                         </td>
                                                     }
-
                                                 </tr>
                                             </table>
 
@@ -844,52 +668,9 @@
                             }
                         </div>
                     </div>
-                    <div class="col-md-12">
-                        <a class="btn btn-success pull-left" href="javascript:void(0);" onclick="PrintReport();">Print</a>
-                        @if (Model.EvaluationID != -1)
-                        {
-                            <button class="btn btn-success pull-right" type="submit" onclick="$(this).css('display', 'none');" value="Save">Save</button>
-                        }
-                    </div>
                 }
             </div>
         </div>
     </div>
 </div>
 
-@section scripts
-{
-    <script type="text/javascript">
-        function DrawAttandanceChart(data) {
-            new Chart(document.getElementById("canvas000"), {
-                type: 'line',
-                data: data
-            });
-        }
-        function PrintReport() {
-            var StudentName = $('#bStudentNate').html();
-            var ClassSection = $('#bClassSection').html();
-            var contents = $(".x_content").html();
-            var frame1 = $('<iframe />');
-            frame1[0].name = "frame1";
-            frame1.css({ "position": "absolute", "top": "-1000000px" });
-            $("body").append(frame1);
-            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
-            frameDoc.document.open();
-            //Create a new HTML document.
-            frameDoc.document.write('<html><head><title>Performance Report For ' + StudentName + ' Class ' + ClassSection + '</title>');
-            frameDoc.document.write('<link href="@Url.Content("~/css/ReportCard.css")" rel="stylesheet" type="text/css" />');
-            frameDoc.document.write('</head><body>');
-            //Append the external CSS file.
-            //Append the DIV contents.
-            frameDoc.document.write(contents);
-            frameDoc.document.write('</body></html>');
-            frameDoc.document.close();
-            setTimeout(function () {
-                window.frames["frame1"].focus();
-                window.frames["frame1"].print();
-                frame1.remove();
-            }, 500);
-        }
-    </script>
-}

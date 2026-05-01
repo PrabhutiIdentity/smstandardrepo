@@ -10,6 +10,41 @@
     <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
 }
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    .reciept-box {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 24px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .reciept-box {
+        box-shadow: none;
+        border: 1px solid #000;
+        page-break-inside: avoid; /* Prevents card from splitting across pages */
+    }
+    .col-4 {
+        width: 33.3333%;
+        padding: 0 8px;
+    }
+
+    .col-6 {
+        width: 50%;
+    }
+
+    .col-12 {
+        width: 100%;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+    }
+</style>
 @model SMEnterprise.Models.AdmitCardListModel
 <div class="" style="background-color: white;">
     <div class="row">
@@ -90,20 +125,20 @@
     </div>
 
 </div>
-<div class="row" id="admitcards">
-    <div class="wrapper">
+<div class="row" id="admitcards" style="margin-top: 20px;margin-left:10px;background-color: white; padding: 20px;">
+      <div class="wrapper" style="display: flex; flex-wrap: wrap; width: 100%; margin-left: 10px; margin-right: 10px; ">
+
         @foreach (var d in Model.AdmitCards)
         {
-
-            <div class="col-6">
+            <div class="col-4">
                 <div class="listitem">
-                    <div class="reciept-box">
+                    <div class="reciept-box" style="border: 1px solid #ccc; border-radius: 8px; padding: 16px; margin-bottom: 24px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
 
 
-                        <div class="row">
-                            <div class="col-6"><h4><span>Desk Slip</span></h4></div>
-                            <div class="col-6">
-                                <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(d.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(d.StudentID)_@d.Photo" />
+                        <div class="row" style="display: flex; justify-content: space-between; align-items: center;">
+                            <div class="col-6"><h4 style="font-size: 1.125rem; font-weight: 600;"><span>Desk Slip</span></h4></div>
+                            <div class="col-6" style="width: 50%; text-align: right;">
+                                <img id="imgPhoto" style="height: 120px; width: 120px; border-radius: 8px;" onerror="return OnImageError(this,@(d.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(d.StudentID)_@d.Photo" />
                                 <br />
                             </div>
                         </div>
@@ -125,7 +160,7 @@
                             <div class="col-12" style="text-align:center">&nbsp;&nbsp;Student ID : @d.StudentSID</div>
 
                         </div>
-                       
+
                         <div>
                             <br />
                         </div>
@@ -166,83 +201,21 @@
 
                     </div>
                 </div>
-        </div>
+
+            </div>
 
 
-                @*<div class="col-md-6">
-                    <div class="wrapper">
-                        <div class="row">
-                            <div> <b> Desk Slip (@d.SessionName)</b></div>
-                            <div class="col-6"></div>
-                            <div class="col-6">
-                                <img id="imgPhoto" style="height:120px;width:120px" onerror="return OnImageError(this,@(d.Gender));" class="thumbImageGrid" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(d.StudentID)_@d.Photo" />
-                            </div>
-                            <div class="col-6"></div>
-                            <div class="col-6"></div>
-                        </div>
-                        <table style="width:100%;border:none;">
-                            <tr>
-                                <td colspan="2" style="text-align:center;">
-                                </td>
-                                <td rowspan="3" style="width:20%;border:none;">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right;">Room/Bench:</td>
-                                <td>&nbsp; </td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right;">ID/Roll No.:</td>
-                                <td class="searchable">&nbsp; @d.SchoolUID/@d.RollNo</td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right;">
-                                    Class/House:
-                                </td>
-                                <td>
-                                    &nbsp; @d.ClassName (@d.SectionName)/@d.HouseName
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right;">
-                                    Mobile No/DOB:
-                                </td>
-                                <td>
-                                    &nbsp; @d.MobileNo/@d.DOB.ToString("dd-MMM-yyyy")
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right;">
-                                    Name:
-                                </td>
-                                <td class="searchable">
-                                    &nbsp; @d.Name
-                                </td>
-                            </tr>
-                            <tr>
-                                <td style="text-align:right;border:none;">
-                                    Father's Name:
-                                </td>
-                                <td class="searchable" style="border:none;">
-                                    &nbsp; @d.FatherName
-                                </td>
-                                <td style="border-top:1px solid;border:none;text-align:center">
-                                    <img onerror="return OnImageError(this,2);" style="max-height:35px;max-width:100px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@Model.Branch.PrincipalSignature" />
-                                    <br /> Principal's Signature
-                                </td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>*@
-            }
+
+
+        }
     </div>
 
 
 
-    </div>
-    @section scripts
+</div>
+@section scripts
 {
-        <script>
+    <script>
         function Search(sender) {
             var sText = $(sender).val();
             console.log(sText);
@@ -315,5 +288,5 @@
                 frame1.remove();
             }, 1000);
         }
-        </script>
-    }
+    </script>
+}

@@ -5,6 +5,8 @@ using System.Web.Security;
 using SMEnterprise.Models;
 using SMEnterprise.Filters;
 using SMEnterprise.Repository;
+using SMEnterpriseDB.Models;
+using System.Linq;
 
 namespace SMEnterprise.Controllers
 {
@@ -54,6 +56,9 @@ namespace SMEnterprise.Controllers
                         CommonData objCData = new CommonData();
                         if (AttemptedUser.RoleID == (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle || AttemptedUser.RoleID == (int)RoleType.Director)
                         {
+                           var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
+                            Session["SBrancheList"] = branches;
+                            Session["SBranchID"] = branches.FirstOrDefault()?.SBranchID;
                             objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
                             return RedirectToAction("Dashboard", "Admin");
                         }

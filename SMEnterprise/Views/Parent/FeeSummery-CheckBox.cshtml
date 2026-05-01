@@ -1,0 +1,748 @@
+﻿@model SMEnterprise.Models.StudentSessionFeeStatusPageModel
+@{
+    ViewBag.Title = "Fee Summary";
+    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+}
+
+@section IncludeCss
+{
+    <title>P-School | Payments</title>
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+    <style>
+        /* ========== Enhanced Checkbox Styling ========== */
+        .fee-checkbox-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+        }
+
+        .fee-checkbox {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            z-index: 2;
+        }
+
+        .checkbox-custom {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 24px;
+            width: 24px;
+            background-color: #fff;
+            border: 2.5px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .fee-checkbox:hover ~ .checkbox-custom {
+            border-color: #26B99A;
+            background-color: #f0f9ff;
+        }
+
+        .fee-checkbox:checked ~ .checkbox-custom {
+            background-color: #26B99A;
+            border-color: #26B99A;
+        }
+
+        .checkbox-custom:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 11px;
+            border: solid white;
+            border-width: 0 2.5px 2.5px 0;
+            transform: rotate(45deg);
+        }
+
+        .fee-checkbox:checked ~ .checkbox-custom:after {
+            display: block;
+        }
+
+        /* ========== Row Selection Styling ========== */
+        .panel {
+            margin-bottom: 8px;
+            border: 1px solid #e3e3e3;
+            border-radius: 6px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .panel:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .selected-row {
+            background: linear-gradient(to right, #e8f5e9 0%, #f1f8f4 100%) !important;
+            border: 2px solid #26B99A !important;
+            box-shadow: 0 3px 12px rgba(38, 185, 154, 0.2) !important;
+        }
+
+        .selected-row .panel-heading {
+            background: linear-gradient(to right, #d4edda 0%, #e8f5e9 100%) !important;
+            border-bottom: 1px solid #c3e6cb !important;
+        }
+
+        .selected-row .month-name {
+            color: #155724 !important;
+            font-weight: 600 !important;
+        }
+
+        /* ========== Panel Header Styling ========== */
+        .panel-heading {
+            padding: 0 !important;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e3e3e3;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .panel-heading:hover {
+            background: #e9ecef;
+        }
+
+        .panel-heading-content {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            width: 100%;
+        }
+
+        .checkbox-cell {
+            flex: 0 0 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-right: 15px;
+        }
+
+        .month-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .month-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .fee-details-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .fee-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .fee-label {
+            color: #7f8c8d;
+            margin-right: 5px;
+        }
+
+        .fee-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .fee-value.amount-due {
+            color: #e74c3c;
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .fee-value.amount-paid {
+            color: #27ae60;
+        }
+
+        /* ========== Status Badge Styling ========== */
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-overdue {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* ========== Floating Payment Bar ========== */
+        #floating-pay-bar {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1050;
+            background: linear-gradient(135deg, #26B99A 0%, #1e9e85 100%);
+            padding: 20px 30px;
+            border-radius: 50px;
+            box-shadow: 0 8px 24px rgba(38, 185, 154, 0.4);
+            display: none;
+            animation: slideInUp 0.4s ease-out;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        @@keyframes slideInUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #floating-pay-bar .pay-info {
+            display: inline-flex;
+            align-items: center;
+            gap: 20px;
+            color: white;
+            font-size: 15px;
+        }
+
+        #floating-pay-bar .pay-stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #floating-pay-bar .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+        }
+
+        #floating-pay-bar .stat-value {
+            font-weight: 700;
+            font-size: 18px;
+            color: #fff;
+        }
+
+        #floating-pay-bar .currency-symbol {
+            font-size: 16px;
+        }
+
+        #btnPaySelected {
+            background: white;
+            color: #26B99A;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 15px;
+            margin-left: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        #btnPaySelected:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+            background: #f8f9fa;
+        }
+
+        #btnPaySelected:active {
+            transform: translateY(0);
+        }
+
+        /* ========== Summary Header ========== */
+        .x_title {
+            padding: 20px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px 8px 0 0;
+            margin: 0;
+        }
+
+        .x_title h2 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .summary-stats {
+            color: white;
+            font-size: 14px;
+        }
+
+        .summary-stats .stat-item {
+            margin-left: 20px;
+        }
+
+        .summary-stats .stat-value {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        /* ========== Info Banner ========== */
+        .selection-info-banner {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196f3;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .selection-info-banner i {
+            font-size: 24px;
+            color: #1976d2;
+        }
+
+        .selection-info-banner .info-text {
+            flex: 1;
+        }
+
+        .selection-info-banner .info-title {
+            font-weight: 600;
+            color: #1565c0;
+            margin-bottom: 3px;
+        }
+
+        .selection-info-banner .info-subtitle {
+            font-size: 13px;
+            color: #1976d2;
+        }
+
+        /* ========== Collapse Panel Body ========== */
+        .panel-body {
+            padding: 20px;
+            background: #fafafa;
+        }
+
+        .table-bordered {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-bordered thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .table-bordered thead th {
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+
+        .table-bordered tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        .table-bordered tbody tr:hover {
+            background: #e3f2fd;
+        }
+
+        .table-bordered tbody td {
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+        /* ========== Responsive Design ========== */
+        @@media (max-width: 768px) {
+            #floating-pay-bar {
+                bottom: 15px;
+                right: 15px;
+                left: 15px;
+                padding: 15px 20px;
+                border-radius: 30px;
+            }
+
+            #floating-pay-bar .pay-info {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            #btnPaySelected {
+                width: 100%;
+                margin: 10px 0 0 0;
+            }
+
+            .fee-details-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .month-name {
+                font-size: 14px;
+            }
+        }
+
+        /* ========== Loading State ========== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 30px 50px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #26B99A;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @@keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+}
+
+<div class="">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="x_panel" style="border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+                @using (Html.BeginForm("Index", "Payment", FormMethod.Post, new { id = "bulkPaymentForm" }))
+                {
+                    <input type="hidden" name="SelectedMonthsJson" id="SelectedMonthsJson" />
+                    <input type="hidden" name="StudentID" value="@Model.StudentID" />
+
+                    <div class="x_title">
+                        <h2><i class="fa fa-file-text-o"></i> Fee Summary</h2>
+                        <span class="pull-right summary-stats">
+                            <span class="stat-item">
+                                Total Fee: <span class="stat-value">₹@Model.MonthlySummery.Sum(c => c.ApplicableFee).ToString("0.00")</span>
+                            </span>
+                            <span class="stat-item">
+                                Net Due: <span class="stat-value" style="color: #ffeb3b;">₹@Model.MonthlySummery.Sum(c => c.ApplicableFee - c.Discount - c.PaymentRecieved).ToString("0.00")</span>
+                            </span>
+                        </span>
+                        <div class="clearfix"></div>
+                    </div>
+
+                    <div class="x_content" style="padding: 25px;">
+
+                        <!-- Info Banner -->
+                        <div class="selection-info-banner">
+                            <i class="fa fa-info-circle"></i>
+                            <div class="info-text">
+                                <div class="info-title">Select Multiple Months for Payment</div>
+                                <div class="info-subtitle">Check the boxes next to the months you want to pay, then click "Pay Now" button</div>
+                            </div>
+                        </div>
+
+                        <div class="accordion" id="accordion" role="tablist">
+
+                            @foreach (var mys in Model.MonthlySummery)
+                            {
+                                var currentAmountDue = mys.ApplicableFee - mys.Discount - mys.PaymentRecieved;
+                                var isPaid = currentAmountDue <= 0;
+                                var monthDate = new DateTime(mys.FeeYear, mys.FeeMonth, 1);
+                                var isOverdue = monthDate < DateTime.Now.AddMonths(-1) && currentAmountDue > 0;
+
+                                <div class="panel" data-month="@mys.FeeMonth" data-year="@mys.FeeYear">
+                                    <div class="panel-heading" role="tab">
+                                        <div class="panel-heading-content">
+                                            <!-- Checkbox Cell -->
+                                            <div class="checkbox-cell">
+                                                @if (currentAmountDue > 0)
+                                                {
+                                                    <label class="fee-checkbox-wrapper">
+                                                        <input type="checkbox"
+                                                               class="fee-checkbox"
+                                                               data-month="@mys.FeeMonth"
+                                                               data-year="@mys.FeeYear"
+                                                               data-amount="@currentAmountDue" />
+                                                        <span class="checkbox-custom"></span>
+                                                    </label>
+                                                }
+                                                else
+                                                {
+                                                    <i class="fa fa-check-circle" style="font-size: 24px; color: #27ae60;"></i>
+                                                }
+                                            </div>
+
+                                            <!-- Month Info -->
+                                            <div class="month-info"
+                                                 data-toggle="collapse"
+                                                 data-parent="#accordion"
+                                                 href="#collapse_@(mys.FeeYear)_@mys.FeeMonth"
+                                                 style="cursor: pointer;">
+
+                                                <div class="month-name">
+                                                    @monthDate.ToString("MMMM yyyy")
+                                                </div>
+
+                                                <div class="fee-details-row">
+                                                    <div class="fee-item">
+                                                        <span class="fee-label">Fee:</span>
+                                                        <span class="fee-value">₹@mys.ApplicableFee.ToString("0.00")</span>
+                                                    </div>
+
+                                                    @if (mys.Discount > 0)
+                                                    {
+                                                        <div class="fee-item">
+                                                            <span class="fee-label">Discount:</span>
+                                                            <span class="fee-value" style="color: #27ae60;">₹@mys.Discount.ToString("0.00")</span>
+                                                        </div>
+                                                    }
+
+                                                    @if (mys.PaymentRecieved > 0)
+                                                    {
+                                                        <div class="fee-item">
+                                                            <span class="fee-label">Paid:</span>
+                                                            <span class="fee-value amount-paid">₹@mys.PaymentRecieved.ToString("0.00")</span>
+                                                        </div>
+                                                    }
+
+                                                    <div class="fee-item">
+                                                        <span class="fee-label">Amount Due:</span>
+                                                        <span class="fee-value amount-due">₹@currentAmountDue.ToString("0.00")</span>
+                                                    </div>
+
+                                                    <div class="fee-item" style="margin-left: auto;">
+                                                        @if (isPaid)
+                                                        {
+                                                            <span class="status-badge status-paid">
+                                                                <i class="fa fa-check"></i> Paid
+                                                            </span>
+                                                        }
+                                                        else if (isOverdue)
+                                                        {
+                                                            <span class="status-badge status-overdue">
+                                                                <i class="fa fa-exclamation-triangle"></i> Overdue
+                                                            </span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="status-badge status-pending">
+                                                                <i class="fa fa-clock-o"></i> Pending
+                                                            </span>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="collapse_@(mys.FeeYear)_@mys.FeeMonth"
+                                         class="panel-collapse collapse"
+                                         role="tabpanel">
+                                        <div class="panel-body">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Fee Head</th>
+                                                        <th style="text-align: right;">Amount</th>
+                                                        <th style="text-align: right;">Discount</th>
+                                                        <th style="text-align: right;">Paid</th>
+                                                        <th style="text-align: right;">Net Due</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var f in Model.FeeWiseDetails.Where(c => c.FeeMonth == mys.FeeMonth && c.FeeYear == mys.FeeYear))
+                                                    {
+                                                        <tr>
+                                                            <td>
+                                                                <i class="fa fa-file-text-o" style="color: #667eea; margin-right: 8px;"></i>
+                                                                <strong>@f.FeeTypeName</strong>
+                                                            </td>
+                                                            <td style="text-align: right;">₹@f.ApplicableFee.ToString("0.00")</td>
+                                                            <td style="text-align: right; color: #27ae60;">₹@f.RDiscount.ToString("0.00")</td>
+                                                            <td style="text-align: right; color: #3498db;">₹@f.PaidAmount.ToString("0.00")</td>
+                                                            <td style="text-align: right; color: #e74c3c; font-weight: 600;">
+                                                                ₹@((f.ApplicableFee - f.RDiscount - f.PaidAmount).ToString("0.00"))
+                                                            </td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Payment Bar -->
+<div id="floating-pay-bar">
+    <div class="pay-info">
+        <div class="pay-stat">
+            <span class="stat-label">Selected:</span>
+            <span class="stat-value"><span id="selected-count">0</span> month<span id="month-plural">s</span></span>
+        </div>
+        <div style="width: 2px; height: 30px; background: rgba(255,255,255,0.3);"></div>
+        <div class="pay-stat">
+            <span class="stat-label">Total Amount:</span>
+            <span class="stat-value">
+                <span class="currency-symbol">₹</span><span id="selected-total">0.00</span>
+            </span>
+        </div>
+    </div>
+    <button type="button" id="btnPaySelected">
+        <i class="fa fa-credit-card"></i> Pay Now
+    </button>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner"></div>
+        <h4 style="margin: 0; color: #2c3e50;">Processing Payment...</h4>
+        <p style="margin: 10px 0 0; color: #7f8c8d; font-size: 14px;">Please wait</p>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        $(document).ready(function () {
+            // Prevent checkbox click from triggering collapse
+            $('.fee-checkbox-wrapper').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            // Update Totals and UI when checkboxes change
+            $('.fee-checkbox').on('change', function () {
+                updateSelectionUI();
+            });
+
+            function updateSelectionUI() {
+                var total = 0;
+                var count = 0;
+
+                $('.fee-checkbox:checked').each(function () {
+                    total += parseFloat($(this).data('amount'));
+                    count++;
+
+                    // Add selected styling to panel
+                    $(this).closest('.panel').addClass('selected-row');
+                });
+
+                $('.fee-checkbox:not(:checked)').each(function () {
+                    $(this).closest('.panel').removeClass('selected-row');
+                });
+
+                // Update floating bar
+                $('#selected-total').text(total.toFixed(2));
+                $('#selected-count').text(count);
+                $('#month-plural').text(count === 1 ? '' : 's');
+
+                // Show/hide floating bar with animation
+                if (count > 0) {
+                    $('#floating-pay-bar').fadeIn(300);
+                } else {
+                    $('#floating-pay-bar').fadeOut(300);
+                }
+            }
+
+            // Handle "Pay Now" Click
+            $('#btnPaySelected').click(function () {
+                var selectedData = [];
+                var monthNames = [];
+
+                $('.fee-checkbox:checked').each(function () {
+                    var month = $(this).data('month');
+                    var year = $(this).data('year');
+                    var amount = $(this).data('amount');
+
+                    selectedData.push({
+                        Month: month,
+                        Year: year,
+                        Amount: amount
+                    });
+
+                    // Get month name for confirmation
+                    var date = new Date(year, month - 1, 1);
+                    monthNames.push(date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }));
+                });
+
+                if (selectedData.length === 0) {
+                    alert('Please select at least one month to proceed with payment.');
+                    return;
+                }
+
+                var total = $('#selected-total').text();
+                var monthList = monthNames.join('\n• ');
+
+                // Confirmation dialog with better formatting
+                var confirmMessage = 'You are about to pay for the following months:\n\n' +
+                    '• ' + monthList + '\n\n' +
+                    'Total Amount: ₹' + total + '\n\n' +
+                    'Do you want to proceed with the payment?';
+
+                if (confirm(confirmMessage)) {
+                    // Show loading overlay
+                    $('#loadingOverlay').addClass('active');
+
+                    // Serialize selected months data to JSON
+                    $('#SelectedMonthsJson').val(JSON.stringify(selectedData));
+
+                    // Submit form
+                    $('#bulkPaymentForm').submit();
+                }
+            });
+
+            // Initialize - update UI on page load if any checkboxes are pre-checked
+            updateSelectionUI();
+        });
+    </script>
+}
