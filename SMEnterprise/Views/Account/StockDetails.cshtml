@@ -3,6 +3,21 @@
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
     var sBranchStateID = SMEnterprise.Models.PermissionManager.GetLoggedInUser().StateID;
+    var isPaymentLocked = Model.IsPaymentLocked;
+    var canReceiveMorePayment = Model.Status != 0 && Model.TrType != 2 && Model.DueAmount > 0;
+    var paymentRowLocked = Model.Status == 0 || Model.TrType == 2 || (Model.STID > 0 && Model.PaidAmount > 0 && Model.DueAmount <= 0);
+    var receiveNowAmount = Model.STID > 0 && Model.PaidAmount > 0 && Model.DueAmount > 0 ? Model.DueAmount : Model.PaidAmount;
+    var currentPaymentReference = Model.PaidAmount > 0 && Model.DueAmount > 0 ? "" : Model.PaymentReferanceNo;
+    var paymentFieldClass = Model.PaidAmount > 0 ? "col-md-2" : "col-md-3";
+    var hasPaymentHistory = Model.PaymentHistory != null && Model.PaymentHistory.Count > 0;
+    var latestActivePaymentID = hasPaymentHistory
+        ? Model.PaymentHistory.Where(x => !x.IsCancelled).OrderByDescending(x => x.PaymentDate).ThenByDescending(x => x.StockPaymentID).Select(x => x.StockPaymentID).FirstOrDefault()
+        : 0;
+    var disablePaymentInputs = paymentRowLocked;
+    var stockSaved = ViewBag.StockSaved != null && (bool)ViewBag.StockSaved;
+    var stockSaveMode = ViewBag.StockSaveMode == null ? "" : ViewBag.StockSaveMode.ToString();
+    var saveButtonText = canReceiveMorePayment ? "Pay Now" : hasPaymentHistory ? "Cancel Selected Receipt" : isPaymentLocked && !canReceiveMorePayment ? "Save Cancellation" : "Save";
+    var lastSavedPaymentID = ViewBag.LastSavedPaymentID == null ? 0 : Convert.ToInt32(ViewBag.LastSavedPaymentID);
 }
 @model SMEnterprise.Models.StockTransaferMasterModel
 @section IncludeCss
@@ -11,6 +26,7 @@
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
     <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
     <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+    <link rel="stylesheet" href="@Url.Content("~/css/RecieptStyle.css")">
 }
 <style>
     .ui-pnotify {
@@ -86,6 +102,105 @@
         margin-left: 5px;
         border-radius: 5px;
     }
+
+    .payment-locked {
+        pointer-events: none;
+        opacity: 0.75;
+    }
+
+    .payment-summary-box {
+        background-color: #f6f9fc;
+        border: 1px solid #d7e4ef;
+        border-radius: 4px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .payment-lock-note {
+        background-color: #fff7e6;
+        border: 1px solid #f0c36d;
+        color: #8a6d3b;
+        border-radius: 4px;
+        padding: 8px 12px;
+        margin-bottom: 10px;
+    }
+
+    .save-success-panel {
+        background-color: #eef9f1;
+        border: 1px solid #97d7a7;
+        color: #276738;
+        border-radius: 4px;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .save-success-panel .btn {
+        margin-right: 8px;
+        margin-top: 8px;
+    }
+
+    .receipt-preview-box {
+        background-color: #fff;
+        border: 1px solid #d9e2ea;
+        border-radius: 4px;
+        padding: 10px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 24px rgba(32, 56, 85, 0.08);
+    }
+
+    .receipt-preview-box .wrapper {
+        width: 100%;
+        max-width: 860px;
+        border: 1px solid #d8e1ea;
+        border-radius: 10px;
+        box-shadow: 0 12px 30px rgba(30, 57, 89, 0.08);
+    }
+
+    .receipt-preview-box .btn {
+        padding: 8px 14px;
+    }
+
+    .receipt-preview-box .header-1 h1 {
+        letter-spacing: 1px;
+        text-shadow: none;
+    }
+
+    .receipt-preview-box .principle {
+        text-align: right;
+        color: #35506b;
+    }
+
+    .receipt-preview-box .receipt-copy-tag {
+        display: inline-block;
+        background: #e9f3ff;
+        color: #214b78;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        padding: 4px 10px;
+        border-radius: 999px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+    }
+
+    .receipt-action-btn.active {
+        box-shadow: inset 0 0 0 2px rgba(255,255,255,.45);
+    }
+
+    .receipt-close-link {
+        float: right;
+        color: #8a6d3b;
+        font-weight: 600;
+    }
+
+    .receipt-cancelled-row {
+        background-color: #fff1f1;
+    }
+
+    .receipt-status-cancelled {
+        color: #c9302c;
+        font-weight: 700;
+    }
 </style>
 <div class="">
 
@@ -105,14 +220,43 @@
                     </div>
                 </div>
                 <div class="x_panel">
+                    <form id="frmCancelReceipt" method="post" action="/Account/CancelStockPaymentReceipt/@Model.STID" style="display:none;">
+                        <input type="hidden" name="paymentId" id="hdnCancelPaymentID" value="0" />
+                        <input type="hidden" name="remark" id="hdnCancelRemark" value="" />
+                    </form>
                     @using (Html.BeginForm("SaveStock", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
                     {
                         if (Model.STID == 0)
                         {
                             Model.Status = 1;
                             Model.TrDate = SMEnterprise.Repository.CommonUsage.GetCurrentDate();
+                            Model.PaymentDate = Model.TrDate;
+                            Model.PaymentMode = 0;
                         }
                         <div class="x_content">
+                            @if (stockSaved)
+                            {
+                                <div class="save-success-panel">
+                                    Transaction saved successfully. Current status: <strong>@(stockSaveMode == "latestreceiptonly" ? "Cancel Latest Receipt First" : stockSaveMode == "receiptcancelfailed" ? "Receipt Cancel Failed" : stockSaveMode == "receiptcancelled" ? "Receipt Cancelled" : stockSaveMode == "cancelled" ? "Cancelled" : stockSaveMode == "paid" ? "Paid" : stockSaveMode == "partial" ? "Partial Payment" : "Unpaid")</strong>
+                                    <div>
+                                        <a href="javascript:void(0);" id="btnInvoicePreview" class="btn btn-info receipt-action-btn" onclick="ToggleReceiptPreview(this, @Model.STID, 'invoice');">Open Invoice</a>
+                                        @if (Model.PaidAmount > 0 || lastSavedPaymentID > 0 || Model.LastPaymentID > 0)
+                                        {
+                                            <a href="javascript:void(0);" id="btnPaymentPreview" class="btn btn-success receipt-action-btn" onclick="ToggleReceiptPreview(this, @Model.STID, 'payment', @(lastSavedPaymentID > 0 ? lastSavedPaymentID : Model.LastPaymentID));">Open Payment Receipt</a>
+                                        }
+                                        <a href="/Account/StockManagement?TrType=@Model.TrType" class="btn btn-default">Back To Transactions</a>
+                                    </div>
+                                </div>
+                            }
+                            <div id="dvReceiptPreview" class="receipt-preview-box" style="display:none;"></div>
+                            @if (isPaymentLocked)
+                            {
+                                <div class="payment-lock-note">
+                                    Payment is already recorded for this transaction. Item edit and remove are locked.
+                                    @(canReceiveMorePayment ? " You can still receive the remaining balance amount below. Enter only the amount being paid this time, either full balance or another partial amount. You can also cancel a specific receipt from payment history." : " You can cancel a specific receipt from payment history below.")
+                                </div>
+                            }
+                            <div class="payment-protected @(isPaymentLocked ? "payment-locked" : "")">
                             <div class="row BkRow">
                                 <div class="col-md-3">
                                     <label>Transaction Type</label>
@@ -134,10 +278,11 @@
                                 <div class="col-md-3">
                                     <label>Transaction Date</label>
                                     <input type="date" class="form-control" id="txtTrDate" name="TrDate" value="@Model.TrDate.ToString("yyyy-MM-dd")" onchange="StockDateChanged(this)" />
+                                    <input type="hidden" name="SelectedPaymentID" id="hdnSelectedPaymentID" value="0" />
                                 </div>
                                 <div class="col-md-3">
                                     <label>Status</label>
-                                    <select class="form-control" name="Status">
+                                    <select class="form-control" name="Status" id="ddlStatus">
                                         <option value="1" @(1 == Model.Status ? "selected" : "")>Valid</option>
                                         <option value="0" @(0 == Model.Status ? "selected" : "")>Cancelled</option>
                                     </select>
@@ -218,6 +363,14 @@
                                     </select>
                                 </div>
                             </div>
+                            </div>
+                            <div class="row BkRow" id="dvCancelRemark" style="@(Model.Status == 0 ? "" : "display:none")">
+                                <div class="col-md-12">
+                                    <label>Cancellation Remark</label>
+                                    <input type="text" class="form-control" name="CancelRemark" id="txtCancelRemark" value="@Model.CancelRemark" />
+                                </div>
+                            </div>
+                            <div class="payment-protected @(isPaymentLocked ? "payment-locked" : "")">
                             <div class="row BkRow">
                                 <div class="col-md-12">
                                     <label>Stock Details</label>
@@ -266,7 +419,10 @@
 
                                                             </td>
                                                             <td>
-                                                                <a href="javascript:void(0);" onclick="RemoveStockDetail(this);" class="btn btn-danger">Remove</a>
+                                                                @if (!isPaymentLocked)
+                                                                {
+                                                                    <a href="javascript:void(0);" onclick="RemoveStockDetail(this);" class="btn btn-danger">Remove</a>
+                                                                }
                                                             </td>
                                                         </tr>
                                                         counter++;
@@ -276,16 +432,149 @@
                                         </table>
                                     </div>
                                     <div class="row" style="margin-left: 0px;margin-right: 0px;">
-                                        <a href="javascript:void(0);" onclick="AddNewStockDetail(this);" class="btn btn-dark pull-right">Add New Stock Item</a>
+                                        @if (!isPaymentLocked)
+                                        {
+                                            <a href="javascript:void(0);" onclick="AddNewStockDetail(this);" class="btn btn-dark pull-right" id="btnAddStockItem">Add New Stock Item</a>
+                                        }
                                     </div>
                                 </div>
                             </div>
+                            </div>
+                            <div class="row BkRow payment-row" style="@(Model.TrType==2?"display:none":"")">
+                                <div class="col-md-12">
+                                    <label>Payment Details</label>
+                                </div>
+                                @if (Model.PaidAmount > 0)
+                                {
+                                    <div class="@paymentFieldClass">
+                                        <label>Amount Already Paid</label>
+                                        <input type="text" class="form-control" value="@Model.PaidAmount.ToString("0.00")" readonly />
+                                    </div>
+                                }
+                                <div class="@paymentFieldClass">
+                                    <label>Payment Date</label>
+                                    <input type="date" class="form-control" id="txtPaymentDate" name="PaymentDate" value="@((Model.PaymentDate ?? Model.TrDate).ToString("yyyy-MM-dd"))" @(disablePaymentInputs ? "disabled" : "") />
+                                </div>
+                                <div class="@paymentFieldClass">
+                                    <label>Payment Mode</label>
+                                    <select class="form-control" name="PaymentMode" id="ddlPaymentMode" @(disablePaymentInputs ? "disabled" : "")>
+                                        <option value="0" @(0 == Model.PaymentMode ? "selected" : "")>Cash Payment</option>
+                                        <option value="1" @(1 == Model.PaymentMode ? "selected" : "")>Cheque Payment</option>
+                                        <option value="2" @(2 == Model.PaymentMode ? "selected" : "")>NEFT Payment</option>
+                                        <option value="4" @(4 == Model.PaymentMode ? "selected" : "")>Google Pay</option>
+                                        <option value="5" @(5 == Model.PaymentMode ? "selected" : "")>PayTm</option>
+                                        <option value="6" @(6 == Model.PaymentMode ? "selected" : "")>PhonePe</option>
+                                        <option value="3" @(3 == Model.PaymentMode ? "selected" : "")>Other Payment</option>
+                                    </select>
+                                </div>
+                                <div class="@paymentFieldClass">
+                                    <label>Reference No</label>
+                                    <input type="text" class="form-control" name="PaymentReferanceNo" id="txtPaymentReferenceNo" value="@currentPaymentReference" @(disablePaymentInputs ? "readonly" : "") />
+                                    <div id="paymentReferenceHelp" style="font-size:12px;color:#6f7f91;margin-top:4px;"></div>
+                                </div>
+                                <div class="@paymentFieldClass">
+                                    <label>@(Model.PaidAmount > 0 && Model.DueAmount > 0 ? "This Time Payment Amount" : "Enter Paid Amount")</label>
+                                    <input type="number" min="0" step="0.01" class="form-control" name="PaidAmount" id="txtPaidAmount" value="@receiveNowAmount.ToString("0.00")" oninput="RecalculatePaymentSummary();" @(disablePaymentInputs ? "readonly" : "") />
+                                    @if (Model.PaidAmount > 0 && Model.DueAmount > 0)
+                                    {
+                                        <div style="font-size:12px;color:#6f7f91;margin-top:4px;">
+                                            Enter only this installment amount. You can pay full balance or partial balance again.
+                                        </div>
+                                    }
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="payment-summary-box">
+                                        <div class="row">
+                                            <div class="col-md-3"><strong>Total Amount:</strong> <span id="spnTotalAmount">@Model.Amount.ToString("0.00")</span></div>
+                                            <div class="col-md-3"><strong>Total Paid:</strong> <span id="spnPaidAmount">@Model.PaidAmount.ToString("0.00")</span></div>
+                                            <div class="col-md-3"><strong>Due Amount:</strong> <span id="spnDueAmount">@Model.DueAmount.ToString("0.00")</span></div>
+                                            <div class="col-md-3"><strong>Payment Status:</strong> <span id="spnPaymentStatus">@Model.PaymentStatusText</span></div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="DueAmount" id="txtDueAmount" value="@Model.DueAmount.ToString("0.00")" />
+                                    <input type="hidden" name="PaymentStatus" id="txtPaymentStatus" value="@Model.PaymentStatus" />
+                                    <input type="hidden" id="txtExistingPaidAmount" value="@Model.PaidAmount.ToString("0.00")" />
+                                </div>
+                                @if (Model.PaymentHistory != null && Model.PaymentHistory.Count > 0)
+                                {
+                                    <div class="col-md-12">
+                                        <div class="payment-summary-box">
+                                            <div style="font-weight:600; margin-bottom:8px;">Payment History</div>
+                                            <div id="dvSelectedReceiptInfo" style="display:none; margin-bottom:8px; color:#c9302c; font-weight:600;"></div>
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered table-condensed" style="width:100%;">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Receipt No</th>
+                                                            <th>Date</th>
+                                                            <th>Mode</th>
+                                                            <th>Reference No</th>
+                                                            <th>Received</th>
+                                                            <th>Total Paid</th>
+                                                            <th>Balance</th>
+                                                            <th>Status</th>
+                                                            <th>Cancel Date</th>
+                                                            <th>Receipt</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var payment in Model.PaymentHistory.OrderByDescending(x => x.PaymentDate).ThenByDescending(x => x.StockPaymentID))
+                                                        {
+                                                            <tr class="@(payment.IsCancelled ? "receipt-cancelled-row" : "")">
+                                                                <td>@payment.ReceiptNumber</td>
+                                                                <td>@payment.PaymentDate.ToString("dd MMM, yyyy")</td>
+                                                                <td>@payment.PaymentModeText</td>
+                                                                <td>@(string.IsNullOrWhiteSpace(payment.PaymentReferanceNo) ? "-" : payment.PaymentReferanceNo)</td>
+                                                                <td>@payment.PaymentAmount.ToString("0.00")</td>
+                                                                <td>@payment.TotalPaidAmount.ToString("0.00")</td>
+                                                                <td>@payment.DueAmount.ToString("0.00")</td>
+                                                                <td>
+                                                                    @if (payment.IsCancelled)
+                                                                    {
+                                                                        <span class="receipt-status-cancelled">Cancelled</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @payment.PaymentStatusText
+                                                                    }
+                                                                </td>
+                                                                <td>@(payment.CancelledDate.HasValue ? payment.CancelledDate.Value.ToString("dd MMM, yyyy") : "-")</td>
+                                                                <td>
+                                                                    <a href="javascript:void(0);" onclick="OpenHistoryReceiptPreview(@Model.STID, @payment.StockPaymentID);">Print</a>
+                                                                </td>
+                                                                <td>
+                                                                    @if (!payment.IsCancelled && payment.StockPaymentID == latestActivePaymentID)
+                                                                    {
+                                                                        <a href="javascript:void(0);" onclick="CancelReceiptFromHistory(event, @Model.STID, @payment.StockPaymentID, '@payment.ReceiptNumber');">Cancel</a>
+                                                                    }
+                                                                    else if (!payment.IsCancelled)
+                                                                    {
+                                                                        <span style="color:#8a6d3b;">Cancel latest first</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span>-</span>
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
 
+                            @if (!hasPaymentHistory || canReceiveMorePayment)
+                            {
                             <div class="row BkRow">
                                 <div class="col-md-12">
-                                    <input type="submit" onclick="return BeforeSaveStock();" class="btn btn-block btn-info pull-right" value="Save" />
+                                    <input type="submit" id="btnSaveStock" onclick="return BeforeSaveStock();" class="btn btn-block btn-info pull-right" value="@saveButtonText" />
                                 </div>
                             </div>
+                            }
                         </div>
                     }
                 </div>
@@ -340,21 +629,29 @@
         var isEmployeeLoaded = false;
         var isStudentLoaded = false;
         var isVendorLoaded = false;
+        var isPaymentLocked = @(isPaymentLocked ? "true" : "false");
+        var canReceiveMorePayment = @(canReceiveMorePayment ? "true" : "false");
+        var hasPaymentHistory = @(hasPaymentHistory ? "true" : "false");
         function TrTypeChanged(sender) {
             if ($(sender).val() == 0) {
                 $('#dvRecieverTypes').css('display', 'none');
                 $('#dvStudentRefType').css('display', 'none');
                 $('#dvEmployeeRefType').css('display', 'none');
                 $('#dvVendorRefType').css('display', '');
+                $('.payment-row').css('display', '');
                 $('#lblPrice').html('Purchase Price');
                 $('.costfield').css('display', '');
             }
             else {
                 if ($(sender).val() == 2) {
                     $('.costfield').css('display', 'none');
+                    $('.payment-row').css('display', 'none');
+                    $('#txtPaidAmount').val('0.00');
+                    RecalculatePaymentSummary();
                 }
                 else {
                      $('.costfield').css('display', '');
+                    $('.payment-row').css('display', '');
                 }
                 $('#lblPrice').html('Selling Price');
                 $('#dvRecieverTypes').css('display', '');
@@ -370,6 +667,7 @@
                     $('#dvEmployeeRefType').css('display', '');
                 }
             }
+            RecalculatePaymentSummary();
         }
         function RefTypeChanged(sender) {
              if ($('#ddlRefTypes').val() == 0) {
@@ -388,7 +686,38 @@
             var ET = $('#ddlEmployeeTypes').val();
             LoadEmployeesForStock(ET);
         }
+        function UpdatePaymentReferenceHelp() {
+            var paymentMode = $('#ddlPaymentMode').val();
+            var placeholder = 'Enter payment reference';
+            var helpText = 'Accountant can enter the reference for this payment.';
+            if (paymentMode == '0') {
+                placeholder = 'Enter cash note / voucher / remark';
+                helpText = 'For cash payment, enter cash note, voucher no, or short remark.';
+            }
+            else if (paymentMode == '1') {
+                placeholder = 'Enter cheque number';
+                helpText = 'For cheque payment, enter cheque number.';
+            }
+            else if (paymentMode == '2') {
+                placeholder = 'Enter NEFT / bank reference';
+                helpText = 'For NEFT payment, enter bank reference number.';
+            }
+            else if (paymentMode == '4' || paymentMode == '5' || paymentMode == '6') {
+                placeholder = 'Enter UPI / online transaction reference';
+                helpText = 'For online payment, enter UPI or transaction reference number.';
+            }
+            else if (paymentMode == '3') {
+                placeholder = 'Enter payment reference';
+                helpText = 'Enter the reference details for this payment.';
+            }
+            $('#txtPaymentReferenceNo').attr('placeholder', placeholder);
+            $('#paymentReferenceHelp').html(helpText);
+        }
         function AddProduct(sender) {
+            if (isPaymentLocked) {
+                ShowNotification('Locked', "Paid transactions can only be cancelled.", "error");
+                return;
+            }
             var trtype = $('#ddlTrType').val();
             var mrp = $(sender).closest('.row').find('#txtEMRP').val();
             var sgst = $(sender).closest('.row').find('#hdnESGST').val();
@@ -456,6 +785,10 @@
             }
         }
         function RemoveStockDetail(sender) {
+            if (isPaymentLocked) {
+                ShowNotification('Locked', "Paid transactions can only be cancelled.", "error");
+                return;
+            }
             if ($(sender).hasClass('btn-danger')) {
                 $(sender).closest('tr').css('background-color', 'red');
                 $(sender).closest('tr').find('#hdnOpType').val(-1);
@@ -471,7 +804,7 @@
             }
         }
         function BeforeSaveStock() {
-            if ($('#txtStockDate').val() == '') {
+            if ($('#txtTrDate').val() == '') {
                 ShowNotification('Error', "Kindly Specify Date for Stock Transaction", "error");
                 return false;
             }
@@ -480,6 +813,23 @@
                 return false;
             }
             else {
+              RecalculatePaymentSummary();
+              ToggleCancelRemark();
+              if (hasPaymentHistory && $('#ddlStatus').val() == '0' && parseInt($('#hdnSelectedPaymentID').val() || '0') <= 0) {
+                  ShowNotification('Select Receipt', 'Kindly select the receipt you want to cancel from payment history.', 'error');
+                  return false;
+              }
+              if ($('#ddlStatus').val() == '0' && $('#txtCancelRemark').val().trim() == '') {
+                  ShowNotification('Cancel Remark', 'Kindly specify cancellation remark.', 'error');
+                  return false;
+              }
+              if ($('#ddlStatus').val() != '0' && $('#ddlTrType').val() != '2') {
+                  var paidAmount = parseFloat($('#txtPaidAmount').val() || '0');
+                  if (paidAmount < 0) {
+                      ShowNotification('Payment', 'Paid amount can not be negative.', 'error');
+                      return false;
+                  }
+              }
               if ($('#ddlTrType').val() == 0) {
                   $('#hdnRefID').val($('#ddlVendors').val());
             }
@@ -495,6 +845,209 @@
 
                 return Retvariable;
             }
+        }
+        function GetStockTotalAmount() {
+            var total = 0;
+            $('#tblExpDetails').find('tr').each(function () {
+                var opType = parseInt($(this).find('#hdnOpType').val() || '0');
+                if (opType != -1) {
+                    var qty = parseFloat($(this).find('#hdnQuantity').val() || '0');
+                    var cost = parseFloat($(this).find('#hdnCost').val() || '0');
+                    var sgst = parseFloat($(this).find('#hdnSGST').val() || '0');
+                    var cgst = parseFloat($(this).find('#hdnCGST').val() || '0');
+                    var igst = parseFloat($(this).find('#hdnIGST').val() || '0');
+                    total += cost * qty + cost * qty * (sgst + cgst + igst) / 100;
+                }
+            });
+            return total;
+        }
+        function RecalculatePaymentSummary() {
+            var total = ($('#ddlTrType').val() == '2') ? 0 : GetStockTotalAmount();
+            var existingPaid = parseFloat($('#txtExistingPaidAmount').val() || '0');
+            var receiveNow = parseFloat($('#txtPaidAmount').val() || '0');
+            if (receiveNow < 0) {
+                receiveNow = 0;
+            }
+            if (existingPaid < 0) {
+                existingPaid = 0;
+            }
+            if (existingPaid > total) {
+                existingPaid = total;
+            }
+            if (receiveNow + existingPaid > total) {
+                receiveNow = total - existingPaid;
+                $('#txtPaidAmount').val(receiveNow.toFixed(2));
+            }
+            var paid = existingPaid + receiveNow;
+            var due = total - paid;
+            var statusText = 'Unpaid';
+            var statusValue = 0;
+            if ($('#ddlStatus').val() == '0') {
+                statusText = 'Cancelled';
+                statusValue = 3;
+            }
+            else if (paid > 0 && due > 0) {
+                statusText = 'Partial';
+                statusValue = 1;
+            }
+            else if (total > 0 && due <= 0) {
+                statusText = 'Paid';
+                statusValue = 2;
+            }
+            $('#spnTotalAmount').html(total.toFixed(2));
+            $('#spnPaidAmount').html(paid.toFixed(2));
+            $('#spnDueAmount').html(due.toFixed(2));
+            $('#spnPaymentStatus').html(statusText);
+            $('#txtDueAmount').val(due.toFixed(2));
+            $('#txtPaymentStatus').val(statusValue);
+        }
+        function ToggleCancelRemark() {
+            if ($('#ddlStatus').val() == '0') {
+                $('#dvCancelRemark').show();
+            }
+            else {
+                $('#dvCancelRemark').hide();
+            }
+            UpdateSaveButtonLabel();
+        }
+        function UpdateSaveButtonLabel() {
+            var selectedPaymentID = parseInt($('#hdnSelectedPaymentID').val() || '0');
+            var label = 'Save';
+            if ($('#ddlStatus').val() == '0' && selectedPaymentID > 0) {
+                label = 'Cancel Selected Receipt';
+            }
+            else if (canReceiveMorePayment) {
+                label = 'Pay Now';
+            }
+            else if (hasPaymentHistory) {
+                label = 'Cancel Selected Receipt';
+            }
+            else if (isPaymentLocked && !canReceiveMorePayment) {
+                label = 'Save Cancellation';
+            }
+            $('#btnSaveStock').val(label);
+        }
+        function ClearReceiptCancellation() {
+            $('#hdnSelectedPaymentID').val('0');
+            $('#dvSelectedReceiptInfo').hide().html('');
+            if (hasPaymentHistory && $('#ddlStatus').val() == '0') {
+                $('#ddlStatus').val('1');
+            }
+            RecalculatePaymentSummary();
+            ToggleCancelRemark();
+        }
+        function PrepareReceiptCancellation(paymentId, receiptNo) {
+            $('#hdnSelectedPaymentID').val(paymentId);
+            $('#ddlStatus').val('0');
+            $('#txtPaidAmount').val('0.00');
+            $('#dvSelectedReceiptInfo').html('Selected receipt for cancellation: ' + receiptNo + ' <a href=\"javascript:void(0);\" onclick=\"ClearReceiptCancellation();\" style=\"margin-left:10px; color:#35506b;\">Clear</a>').show();
+            if (!$('#txtCancelRemark').val()) {
+                $('#txtCancelRemark').val('Receipt cancelled');
+            }
+            RecalculatePaymentSummary();
+            ToggleCancelRemark();
+            $('#txtCancelRemark').focus();
+        }
+        function CancelReceiptFromHistory(evt, stid, paymentId, receiptNo) {
+            if (evt) {
+                evt.preventDefault();
+                evt.stopPropagation();
+            }
+            var remark = prompt('Enter cancellation remark for receipt ' + receiptNo, 'Receipt cancelled');
+            if (remark === null) {
+                return;
+            }
+            remark = $.trim(remark);
+            if (remark == '') {
+                ShowNotification('Cancel Remark', 'Kindly specify cancellation remark.', 'error');
+                return;
+            }
+            if (!confirm('Cancel receipt ' + receiptNo + '?')) {
+                return;
+            }
+            $('#hdnCancelPaymentID').val(paymentId);
+            $('#hdnCancelRemark').val(remark);
+            $('#frmCancelReceipt').attr('action', '/Account/CancelStockPaymentReceipt/' + stid);
+            $('#frmCancelReceipt').submit();
+        }
+        function ResetReceiptButtons() {
+            $('.receipt-action-btn').removeClass('active');
+            $('#btnInvoicePreview').text('Open Invoice');
+            $('#btnPaymentPreview').text('Open Payment Receipt');
+        }
+        function OpenHistoryReceiptPreview(stid, paymentId) {
+            ResetReceiptButtons();
+            $('#btnPaymentPreview').addClass('active').text('Close Payment Receipt');
+            LoadReceiptPreview(stid, 'payment', paymentId);
+        }
+        function ToggleReceiptPreview(sender, stid, mode, paymentId) {
+            var box = $('#dvReceiptPreview');
+            if ($(sender).hasClass('active') && box.is(':visible')) {
+                box.hide().html('');
+                ResetReceiptButtons();
+                return;
+            }
+            ResetReceiptButtons();
+            $(sender).addClass('active');
+            if (mode == 'invoice') {
+                $(sender).text('Close Invoice');
+            }
+            else {
+                $(sender).text('Close Payment Receipt');
+            }
+            LoadReceiptPreview(stid, mode, paymentId);
+        }
+        function LoadReceiptPreview(stid, mode, paymentId) {
+            var url = mode == 'payment'
+                ? "/Account/GetSaleTransactionPaymentReceiptData/" + stid + "?paymentId=" + (paymentId || 0)
+                : "/Account/GetSaleTransactionPrintData/" + stid;
+            $('#dvReceiptPreview').show().html('Loading...');
+            $.ajax({
+                type: "POST",
+                url: url,
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#dvReceiptPreview').html('<div><a href="javascript:void(0);" class="receipt-close-link" onclick="CloseReceiptPreview();">Close Preview</a></div>' + html);
+                },
+                error: function () {
+                    $('#dvReceiptPreview').html('Unable to load receipt preview.');
+                }
+            });
+        }
+        function CloseReceiptPreview() {
+            $('#dvReceiptPreview').hide().html('');
+            ResetReceiptButtons();
+        }
+        function PrintRecipt() {
+            var sender = arguments.length > 0 ? arguments[0] : null;
+            var receiptBody = sender
+                ? $(sender).closest('.receipt-print-root').find('.receipt-print-body').first()
+                : $('.receipt-print-body').first();
+            if (receiptBody.length == 0) {
+                return;
+            }
+            var receiptHtml = receiptBody.html();
+            var nDiv = '<table>';
+            nDiv = nDiv + '<tr><td>' + receiptHtml.replace('[CopyPlaceHolder]', 'School Copy') + '</td><td>' + receiptHtml.replace('[CopyPlaceHolder]', 'Office Copy') + '</td></tr>';
+            nDiv = nDiv + '</table>';
+            var printWindow = window.open('', '_blank', 'width=1100,height=800,scrollbars=yes,resizable=yes');
+            if (!printWindow) {
+                alert('Please allow popups to print the receipt.');
+                return;
+            }
+            printWindow.document.open();
+            printWindow.document.write('<html><head><title>Print Receipt</title>');
+            printWindow.document.write('<link href="@Url.Content("~/css/RecieptStyle.css")" rel="stylesheet" type="text/css" />');
+            printWindow.document.write('</head><body>');
+            printWindow.document.write(nDiv);
+            printWindow.document.write('</body></html>');
+            printWindow.document.close();
+            setTimeout(function () {
+                printWindow.focus();
+                printWindow.print();
+            }, 700);
         }
         var EditSessionForm;
         function ProductChanged(sender) {
@@ -528,6 +1081,10 @@
             $(sender).closest('.add-product').find('#lblGSTDetails').html("SGST: (" + SGST + "%) CGST:(" + CGST + "%) IGST:(" + IGST + "%) Quantity:(" + Available+")");
         }
         function AddNewStockDetail(sender) {
+            if (isPaymentLocked) {
+                ShowNotification('Locked', "Paid transactions can only be cancelled.", "error");
+                return;
+            }
 
             var vendorState = @sBranchStateID;
             if ($('#ddlTrType').val() == 0) {
@@ -778,6 +1335,33 @@
                     }
                 });
         }
+        $(function () {
+            $('#ddlStatus').change(function () {
+                if ($(this).val() != '0') {
+                    ClearReceiptCancellation();
+                }
+                ToggleCancelRemark();
+                RecalculatePaymentSummary();
+            });
+            $('#ddlPaymentMode').change(function () {
+                UpdatePaymentReferenceHelp();
+            });
+            RecalculatePaymentSummary();
+            ToggleCancelRemark();
+            UpdateSaveButtonLabel();
+            UpdatePaymentReferenceHelp();
+            @if (stockSaved)
+            {
+                if ((lastSavedPaymentID > 0) || (Model.PaidAmount > 0))
+                {
+                    @:ToggleReceiptPreview(document.getElementById('btnPaymentPreview'), @Model.STID, 'payment', @(lastSavedPaymentID > 0 ? lastSavedPaymentID : Model.LastPaymentID));
+                }
+                else
+                {
+                    @:ToggleReceiptPreview(document.getElementById('btnInvoicePreview'), @Model.STID, 'invoice', 0);
+                }
+            }
+        });
     </script>
 }
 <!-- /.content -->

@@ -1,0 +1,137 @@
+@model SMEnterprise.Models.PrintSaleReceiptModel
+@{
+    var receipt = Model.SelectedPayment;
+    var paymentReceiptDate = (receipt == null ? (Model.Transfer.PaymentDate ?? Model.Transfer.TrDate) : receipt.PaymentDate).ToString("dd MMM, yyyy");
+    var paymentReference = receipt == null ? Model.Transfer.PaymentReferanceNo : receipt.PaymentReferanceNo;
+    var paymentModeText = receipt == null ? Model.Transfer.PaymentModeText : receipt.PaymentModeText;
+    var receivedAmount = receipt == null ? Model.Transfer.PaidAmount : receipt.PaymentAmount;
+    var totalPaidAmount = receipt == null ? Model.Transfer.PaidAmount : receipt.TotalPaidAmount;
+    var dueAmount = receipt == null ? Model.Transfer.DueAmount : receipt.DueAmount;
+    var receiptNumber = receipt == null ? Model.Transfer.InvoiceNumber : receipt.ReceiptNumber;
+    var isCancelled = receipt != null && receipt.IsCancelled;
+}
+
+<div class="receipt-print-root">
+    <div>
+        <button type="button" class="btn btn-info" onclick="PrintRecipt(this)">Print</button>
+    </div>
+    <div class="receipt-print-body">
+        <div class="wrapper">
+            <div class="header-1">
+                <div class="col-3" style="text-align: right; color: #35506b; font-weight: 600;">
+                    Payment Receipt No:- @receiptNumber
+                    @if (isCancelled)
+                    {
+                        <div style="margin-top:8px;">
+                            <span style="display:inline-block; background:#c9302c; color:#fff; font-weight:700; padding:4px 10px; border-radius:999px;">CANCELLED</span>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="header-1" style="border-bottom: 2px solid #d8e4ef; padding-bottom: 12px; margin-bottom: 18px;">
+                <div class="col-2">
+                    <div class="logo-img">
+                        <img src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                    </div>
+                </div>
+                <div class="col-1" style="text-align: left;">
+                    <div class="receipt-copy-tag">[CopyPlaceHolder]</div>
+                    <h1 style="margin-bottom: 6px;">@Model.SBranchDetails.BranchSchoolName</h1>
+                    <div style="font-size: 15px; color: #5b7088; line-height: 1.6;">
+                        @Html.Raw((Model.SBranchDetails.Address ?? "").Replace("\n", "<br/>"))
+                    </div>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, #eff7ff 0%, #f9fcff 100%); border: 1px solid #dbe7f2; border-radius: 10px; padding: 16px 18px; margin-bottom: 18px;">
+                <div style="font-size: 22px; font-weight: 700; color: #264c73; margin-bottom: 6px;">Payment Receipt</div>
+                <div style="font-size: 14px; color: #647b91;">Sales/Purchase transaction payment acknowledgment</div>
+            </div>
+
+            <div class="form-name" style="margin-bottom: 14px;">
+                <div class="row form-box name" style="margin-bottom: 6px;">
+                    <label class="col-sm-3" style="text-align:left;">Name :</label>
+                    <div class="col-sm-9" style="border-bottom: 1px dashed #9db0c1; min-height: 24px;">@Model.Customer.Name</div>
+                </div>
+                <div class="row form-box name" style="margin-bottom: 6px;">
+                    <label class="col-sm-3" style="text-align:left;">Class & Session :</label>
+                    <div class="col-sm-9" style="border-bottom: 1px dashed #9db0c1; min-height: 24px;">@Model.Customer.ExtraData</div>
+                </div>
+                <div class="row form-box name" style="margin-bottom: 6px;">
+                    <label class="col-sm-3" style="text-align:left;">Transaction Date :</label>
+                    <div class="col-sm-9">@Model.Transfer.TrDate.ToString("dd MMM, yyyy")</div>
+                </div>
+                <div class="row form-box name" style="margin-bottom: 6px;">
+                    <label class="col-sm-3" style="text-align:left;">Payment Date :</label>
+                    <div class="col-sm-9">@paymentReceiptDate</div>
+                </div>
+                <div class="row form-box name" style="margin-bottom: 6px;">
+                    <label class="col-sm-3" style="text-align:left;">Payment Mode :</label>
+                    <div class="col-sm-9">@paymentModeText</div>
+                </div>
+                <div class="row form-box name">
+                    <label class="col-sm-3" style="text-align:left;">Reference No :</label>
+                    <div class="col-sm-9">@(!string.IsNullOrWhiteSpace(paymentReference) ? paymentReference : "-")</div>
+                </div>
+            </div>
+
+            <div class="fee-table">
+                <table class="table table-bordered" style="margin-top: 8px;">
+                    <thead>
+                        <tr style="background-color: #edf4fa;">
+                            <th style="width: 60%;">Description</th>
+                            <th style="width: 40%; text-align: right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Invoice Amount</strong></td>
+                            <td style="text-align: right;">&#8377; @Model.Transfer.Amount.ToString("0.00")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Received In This Receipt</strong></td>
+                            <td style="text-align: right;">&#8377; @receivedAmount.ToString("0.00")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total Paid After Receipt</strong></td>
+                            <td style="text-align: right;">&#8377; @totalPaidAmount.ToString("0.00")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Balance Amount</strong></td>
+                            <td style="text-align: right;">&#8377; @dueAmount.ToString("0.00")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Payment Status</strong></td>
+                            <td style="text-align: right; color:@(isCancelled ? "#c9302c" : "inherit"); font-weight:@(isCancelled ? "700" : "400");">@(receipt == null ? Model.Transfer.PaymentStatusText : receipt.PaymentStatusText)</td>
+                        </tr>
+                        @if (isCancelled)
+                        {
+                            <tr>
+                                <td><strong>Cancelled On</strong></td>
+                                <td style="text-align: right; color:#c9302c;">@(receipt.CancelledDate.HasValue ? receipt.CancelledDate.Value.ToString("dd MMM, yyyy hh:mm tt") : "-")</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cancellation Remark</strong></td>
+                                <td style="text-align: right;">@(!string.IsNullOrWhiteSpace(receipt.CancelRemark) ? receipt.CancelRemark : "-")</td>
+                            </tr>
+                        }
+                        else if (Model.Transfer.Status == 0 && !string.IsNullOrWhiteSpace(Model.Transfer.CancelRemark))
+                        {
+                            <tr>
+                                <td><strong>Cancellation Remark</strong></td>
+                                <td style="text-align: right;">@Model.Transfer.CancelRemark</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="row bottom-sec" style="margin-top: 34px; border-top: 1px solid #dce5ed; padding-top: 18px;">
+                <div class="col-sm-8" style="font-size: 13px; color: #6c8297;">
+                    This is a system generated payment receipt.
+                </div>
+                <div class="col-sm-4 principle">Accountant</div>
+            </div>
+        </div>
+    </div>
+</div>

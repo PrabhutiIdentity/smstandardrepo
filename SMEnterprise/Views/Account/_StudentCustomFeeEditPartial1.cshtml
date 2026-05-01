@@ -46,6 +46,7 @@
                     decimal TotalOffered = 0;
                     foreach (var fee in Model.CustomeFee)
                     {
+                        var isCarryForwardFee = string.Equals((fee.FeeTypeName ?? "").Trim(), "Session-Carry-forward", StringComparison.OrdinalIgnoreCase);
 
                         TotalSalaryStructure = TotalSalaryStructure + fee.ClassFee;
                         TotalOffered = TotalOffered + fee.FeeAmount;
@@ -64,14 +65,14 @@
                                 @fee.ClassFee.ToString("N2")
                             </td>
                             <td>
-                                <input type="number" step=".01" name="CustomeFee[@ctr].FeeAmount" value="@(String.Format("{0:0}", fee.FeeAmount))" class="form-control SalaryDetail" />
+                                <input type="number" step=".01" name="CustomeFee[@ctr].FeeAmount" value="@(String.Format("{0:0}", fee.FeeAmount))" class="form-control SalaryDetail" @(isCarryForwardFee ? "readonly title=\"Session-Carry-forward amount is system controlled\"" : "") />
                             </td>
                             <td>
                                 <label class="switch switch-green col-md-6">
-                                    <input type="checkbox" class="switch-input" @(fee.SFID == 0 ? "checked" : fee.IsApplicable == 1 ? "checked" : "")>
-                                    <span class="switch-label" onclick="$(this).closest('label').find('#hdnIsFeeApplicable').val($(this).closest('label').find('#hdnIsFeeApplicable').val() == '0' ? '1' : '0');" data-on="Yes" data-off="No"></span>
+                                    <input type="checkbox" class="switch-input" @(fee.SFID == 0 ? "checked" : fee.IsApplicable == 1 ? "checked" : "") @(isCarryForwardFee ? "disabled" : "")>
+                                    <span class="switch-label" @(isCarryForwardFee ? "" : "onclick=\"$(this).closest('label').find('#hdnIsFeeApplicable').val($(this).closest('label').find('#hdnIsFeeApplicable').val() == '0' ? '1' : '0');\"") data-on="Yes" data-off="No"></span>
                                     <span class="switch-handle" id="shTranding"></span>
-                                    <input type="hidden" name="CustomeFee[@ctr].IsApplicable" id="hdnIsFeeApplicable" value="@(fee.SFID == 0 ? 1 : fee.IsApplicable )">
+                                    <input type="hidden" name="CustomeFee[@ctr].IsApplicable" id="hdnIsFeeApplicable" value="@(isCarryForwardFee ? fee.IsApplicable : (fee.SFID == 0 ? 1 : fee.IsApplicable))">
                                 </label>
                             </td>
                         </tr>
