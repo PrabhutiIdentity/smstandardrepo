@@ -234,6 +234,14 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+        public ActionResult SchoolSubscription()
+        {
+            var branches = GetBranches();
+            var sBranchId = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            var model = objAccountData.GetBranchSubscriptionAccount(sBranchId);
+            return View(model);
+        }
+        [PermissionFilter]
         public ActionResult FirstBranch()
         {
 

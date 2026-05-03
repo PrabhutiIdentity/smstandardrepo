@@ -556,22 +556,19 @@ namespace SMEnterprise.Controllers
                 return RedirectToAction("Failed");
             }
 
-            // Determine credentials to use: prefer order's saved key, then branch gateway, then controller defaults.
+            bool isSubscriptionOrder = (originalOrder != null &&
+                (originalOrder.IsSubscriptionOrder || (originalOrder.StudentID == 0 && originalOrder.SBranchID > 0)));
+
+            // Determine credentials to use. Subscription payments use the ERP/system gateway.
             string keyToUse = _razorpayKeyId;
             string secretToUse = _razorpaySecret;
 
-            // If order contains a stored razorpayKey (set when creating the order), use it.
-            if (!string.IsNullOrWhiteSpace(originalOrder.razorpayKey))
+            if (isSubscriptionOrder)
             {
-                keyToUse = originalOrder.razorpayKey;
-            }
-            else
-            {
-                // fallback to branch gateway if configured
                 try
                 {
-                    var gw = accountData.GetBranchGateway(originalOrder.SBranchID);
-                    if (gw != null && gw.UseForSubscription
+                    var gw = accountData.GetSystemPaymentGateway();
+                    if (gw != null && gw.IsActive && gw.UseForSubscription
                         && !string.IsNullOrWhiteSpace(gw.RazorpayKeyId)
                         && !string.IsNullOrWhiteSpace(gw.RazorpaySecret))
                     {
@@ -579,11 +576,12 @@ namespace SMEnterprise.Controllers
                         secretToUse = gw.RazorpaySecret;
                     }
                 }
-                catch { /* ignore */ }
+                catch { /* use configured controller defaults */ }
             }
-
-            // If running locally and original order used test keys you may have set test keys when creating the order.
-            // (No change here — using originalOrder.razorpayKey ensures the same key is used)
+            else if (!string.IsNullOrWhiteSpace(originalOrder.razorpayKey))
+            {
+                keyToUse = originalOrder.razorpayKey;
+            }
 
             // Create client with the selected credentials
             RazorpayClient client;
@@ -626,10 +624,6 @@ namespace SMEnterprise.Controllers
 
                 // Convert to rupees
                 decimal paidAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100m;
-
-                // Check if subscription order
-                bool isSubscriptionOrder = (originalOrder != null &&
-                    (originalOrder.IsSubscriptionOrder || (originalOrder.StudentID == 0 && originalOrder.SBranchID > 0)));
 
                 if (isSubscriptionOrder)
                 {
@@ -772,20 +766,28 @@ namespace SMEnterprise.Controllers
 
 
         [HttpGet]
-        public ActionResult Subscribe(int branchId)
+        public ActionResult Subscribe(int branchId, string paymentType = null)
         {
             var accountData = new AccountData();
             var sub = accountData.GetBranchSubscription(branchId);
-            if (sub == null || !sub.IsDue || sub.DueAmount <= 0m)
+            var dueAmount = sub == null ? 0m : (sub.NextDueAmount > 0m ? sub.NextDueAmount : sub.DueAmount);
+            if (sub == null || !sub.IsDue || dueAmount <= 0m)
             {
                 TempData["Message"] = "No subscription due for this branch.";
                 return RedirectToAction("Dashboard", "Admin");
             }
 
+            var canPayPartial = CanPaySubscriptionPartial(sub);
+            var minimumPartialAmount = canPayPartial ? GetMinimumSubscriptionPartialAmount(sub, dueAmount) : dueAmount;
+            var normalizedPaymentType = string.IsNullOrWhiteSpace(paymentType)
+                ? "full"
+                : paymentType.Trim().ToLowerInvariant();
+            var payableAmount = GetSubscriptionPayableAmount(sub, normalizedPaymentType);
+
             var orderModel = new OrderModel
             {
                 PGOrderID = Guid.NewGuid().ToString(),
-                Amount = Convert.ToInt32(sub.DueAmount * 100),
+                Amount = Convert.ToInt32(payableAmount * 100),
                 currency = "INR",
                 OrderID = "",
                 Name = "ERP Subscription",
@@ -795,35 +797,25 @@ namespace SMEnterprise.Controllers
                 StudentID = 0,
                 SessionID = 0,
                 SBranchID = branchId,
-                ApplicableFee = sub.DueAmount,
+                ApplicableFee = payableAmount,
                 IsSubscriptionOrder = true
             };
 
-            // choose credentials (branch gateway preferred)
-            var branchGateway = accountData.GetBranchGateway(branchId);
+            // Subscription payments use the ERP/system gateway, not a school branch gateway.
             var keyToUse = _razorpayKeyId;
             var secretToUse = _razorpaySecret;
-            if (branchGateway != null && branchGateway.UseForSubscription
-                && !string.IsNullOrWhiteSpace(branchGateway.RazorpayKeyId)
-                && !string.IsNullOrWhiteSpace(branchGateway.RazorpaySecret))
-            {
-                keyToUse = branchGateway.RazorpayKeyId;
-                secretToUse = branchGateway.RazorpaySecret;
-            }
-
-            // Force test keys when running on localhost (avoid live-key domain restrictions)
             try
             {
-                var host = (Request?.Url?.Host ?? string.Empty).ToLowerInvariant();
-                var remote = (Request?.UserHostAddress ?? string.Empty);
-                if (host.Contains("localhost") || host.StartsWith("127.") || host == "::1" || remote.StartsWith("127."))
+                var systemGateway = accountData.GetSystemPaymentGateway();
+                if (systemGateway != null && systemGateway.IsActive && systemGateway.UseForSubscription
+                    && !string.IsNullOrWhiteSpace(systemGateway.RazorpayKeyId)
+                    && !string.IsNullOrWhiteSpace(systemGateway.RazorpaySecret))
                 {
-                    // use your Razorpay test key/secret here
-                    keyToUse = "rzp_test_SVjpRhPX8rg8eE";
-                    secretToUse = "naE50maGmFhq8XFTUF3fHDzE";
+                    keyToUse = systemGateway.RazorpayKeyId;
+                    secretToUse = systemGateway.RazorpaySecret;
                 }
             }
-            catch { /* ignore */ }
+            catch { /* use configured controller defaults */ }
 
             // IMPORTANT: set the key you will send to the client so checkout uses the same key
             orderModel.razorpayKey = keyToUse;
@@ -858,12 +850,22 @@ namespace SMEnterprise.Controllers
             accountData.InsertOrderID(orderModel);
 
             ViewBag.OrderDetails = orderModel;
+            ViewBag.SubscriptionDueAmount = dueAmount;
+            ViewBag.SubscriptionCanPayPartial = canPayPartial;
+            ViewBag.SubscriptionMinimumPartialAmount = minimumPartialAmount;
+            ViewBag.SubscriptionPaymentType = payableAmount >= dueAmount ? "full" : "partial";
             return View("SubscribeCheckout", orderModel);
         }
         private ActionResult HandleSubscriptionPayment(string orderId, OrderModel originalOrder, string paymentId, decimal paidAmount)
         {
             try
             {
+                if (originalOrder.ApplicableFee > 0m && paidAmount < originalOrder.ApplicableFee)
+                {
+                    TempData["PaymentError"] = "Paid amount is less than the required subscription amount.";
+                    return RedirectToAction("Failed");
+                }
+
                 // paidAmount is in rupees (not paise)
                 accountData.MarkBranchSubscriptionPaid(originalOrder.SBranchID, paidAmount, paymentId, PermissionManager.GetLoggedInUser()?.UserID);
 
@@ -896,6 +898,36 @@ namespace SMEnterprise.Controllers
                 accountData.UpdateOrderStatus(orderId, "0", "0", "MarkSubscriptionPaidFailed", -1);
                 return RedirectToAction("Failed");
             }
+        }
+
+        private bool CanPaySubscriptionPartial(SMEnterprise.Models.BranchSubscriptionModel sub)
+        {
+            return sub.AllowPartialPayment
+                && sub.MaxPartialPayments > 0
+                && (sub.MaxPartialPayments - sub.PartialPaymentCount) > 1;
+        }
+
+        private decimal GetMinimumSubscriptionPartialAmount(SMEnterprise.Models.BranchSubscriptionModel sub, decimal dueAmount)
+        {
+            var remainingPartialPayments = sub.MaxPartialPayments - sub.PartialPaymentCount;
+            if (remainingPartialPayments <= 1)
+            {
+                return dueAmount;
+            }
+
+            return Math.Round(dueAmount / remainingPartialPayments, 2, MidpointRounding.AwayFromZero);
+        }
+
+        private decimal GetSubscriptionPayableAmount(SMEnterprise.Models.BranchSubscriptionModel sub, string paymentType)
+        {
+            var dueAmount = sub.NextDueAmount > 0m ? sub.NextDueAmount : sub.DueAmount;
+            var canPayPartial = CanPaySubscriptionPartial(sub);
+            if (!canPayPartial || paymentType == "full")
+            {
+                return dueAmount;
+            }
+
+            return GetMinimumSubscriptionPartialAmount(sub, dueAmount);
         }
     }
 }

@@ -8,6 +8,8 @@ namespace SMEnterprise.Models
     public class BranchSubscriptionModel
     {
         public int SBranchID { get; set; }
+        public string BranchName { get; set; }
+        public string BranchAddress { get; set; }
         public bool IsDue { get; set; }
         public decimal DueAmount { get; set; }
         public DateTime? DueDate { get; set; }
@@ -22,12 +24,14 @@ namespace SMEnterprise.Models
         public decimal NextDueAmount { get; set; }
         public int PartialCycleDays { get; set; }
     }
-    public class BranchGatewayModel
+    public class SystemPaymentGatewayModel
     {
-        public int SBranchID { get; set; }
+        public int GatewayID { get; set; }
+        public string GatewayName { get; set; }
         public string RazorpayKeyId { get; set; }
         public string RazorpaySecret { get; set; }
         public bool UseForSubscription { get; set; }
+        public bool IsActive { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
     }
@@ -39,5 +43,22 @@ namespace SMEnterprise.Models
         public decimal AmountPaid { get; set; }
         public string PlanName { get; set; }
         public DateTime PaidOn { get; set; }
+    }
+    public class BranchSubscriptionPaymentModel
+    {
+        public int PaymentID { get; set; }
+        public int SBranchID { get; set; }
+        public decimal PaidAmount { get; set; }
+        public string PaymentRef { get; set; }
+        public DateTime PaymentDate { get; set; }
+        public int? CreatedBy { get; set; }
+    }
+    public class BranchSubscriptionAccountModel
+    {
+        public BranchSubscriptionModel Subscription { get; set; }
+        public List<BranchSubscriptionPaymentModel> Payments { get; set; }
+        public decimal TotalPaid { get; set; }
+        public decimal CurrentDueAmount { get; set; }
+        public bool CanPayNow { get; set; }
     }
 }

@@ -81,6 +81,13 @@ namespace SMEnterprise.Controllers
             return View(objData);
         }
         [PermissionFilter]
+        public ActionResult SchoolSubscription()
+        {
+            int sBranchId = PermissionManager.GetLoggedInUser().SBranchID;
+            var model = objAccountData.GetBranchSubscriptionAccount(sBranchId);
+            return View(model);
+        }
+        [PermissionFilter]
         public ActionResult GetDashboardFeeChartData(AccountDashboardModel objData)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;

@@ -5441,32 +5441,58 @@ namespace SMEnterprise.Repository
             return false;
         }
 
-        public BranchGatewayModel GetBranchGateway(int sBranchId)
+        public BranchSubscriptionAccountModel GetBranchSubscriptionAccount(int sBranchId)
         {
             using (var con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var parameters = new DynamicParameters();
                 parameters.Add("@SBranchID", sBranchId);
 
-                return con.Query<BranchGatewayModel>("sp_GetBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                using (var multi = con.QueryMultiple("sp_GetBranchSubscriptionAccount", parameters, commandType: CommandType.StoredProcedure))
+                {
+                    var model = new BranchSubscriptionAccountModel();
+                    model.Subscription = multi.Read<BranchSubscriptionModel>().SingleOrDefault();
+                    model.Payments = multi.Read<BranchSubscriptionPaymentModel>().ToList();
+
+                    if (model.Subscription != null)
+                    {
+                        model.TotalPaid = model.Payments.Sum(x => x.PaidAmount);
+                        model.CurrentDueAmount = model.Subscription.NextDueAmount > 0m
+                            ? model.Subscription.NextDueAmount
+                            : model.Subscription.DueAmount;
+                        model.CanPayNow = model.Subscription.IsDue && model.CurrentDueAmount > 0m;
+                    }
+
+                    return model;
+                }
             }
         }
 
-        public int UpsertBranchGateway(BranchGatewayModel model)
+        public SystemPaymentGatewayModel GetSystemPaymentGateway()
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                return con.Query<SystemPaymentGatewayModel>("sp_GetSystemPaymentGateway", commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        public int UpsertSystemPaymentGateway(SystemPaymentGatewayModel model)
         {
             using (var con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var now = CommonUsage.GetCurrentDate();
 
                 var parameters = new DynamicParameters();
-                parameters.Add("@SBranchID", model.SBranchID);
+                parameters.Add("@GatewayID", model.GatewayID);
+                parameters.Add("@GatewayName", model.GatewayName);
                 parameters.Add("@RazorpayKeyId", model.RazorpayKeyId);
                 parameters.Add("@RazorpaySecret", model.RazorpaySecret);
                 parameters.Add("@UseForSubscription", model.UseForSubscription ? 1 : 0);
+                parameters.Add("@IsActive", model.IsActive ? 1 : 0);
                 parameters.Add("@CreatedDate", model.CreatedDate ?? now);
                 parameters.Add("@UpdatedDate", now);
 
-                return con.Query<int>("sp_UpsertBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                return con.Query<int>("sp_UpsertSystemPaymentGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
         
