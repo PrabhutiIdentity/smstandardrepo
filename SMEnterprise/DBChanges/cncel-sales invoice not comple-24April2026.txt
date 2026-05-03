@@ -1,0 +1,81 @@
+Question 
+1. stocks details me Recipt Print ka option hai but working nahi hai 
+2. if cancel then not whole transaction cancel  display cancel in recipt wise 
+3. if cancel then Recipt no with value display but recipt me Cancel (red color ) me display  or cancel date ani chahiye recept me ho or sales report me bhi cacel wali recipt aye. and use can pay again in previous senerio
+
+becouse this the way for sale senerio   jo muje lagta hai
+
+
+Answer
+
+I updated the receipt flow so it matches your sales scenario better.
+
+Now:
+- `StockDetails` payment-history `Print` works from the row itself, even when the page is opened normally and not only after save.
+- receipt cancel is now `receipt-wise`, not whole sale cancel.
+- cancelled receipt keeps the same receipt number.
+- cancelled receipt print shows `CANCELLED` in red and shows cancel date + cancel remark.
+- after cancelling a receipt, the sale becomes payable again based on remaining valid receipts.
+- `SalesReport` now keeps showing the latest receipt entry even if that receipt is cancelled, and `Print Receipt` stays available for cancelled receipts too.
+
+Main code changes:
+- [StockDetails.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\StockDetails.cshtml:229)
+- [AccountController.cs](F:\Projects\SMStandardNiraj\SMEnterprise\Controllers\AccountController.cs:2705)
+- [AccountData.cs](F:\Projects\SMStandardNiraj\SMEnterprise\Repository\AccountData.cs:4179)
+- [InventoryModel.cs](F:\Projects\SMStandardNiraj\SMEnterprise\Models\InventoryModel.cs:186)
+- [_PrintProductPaymentReceipt.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\_PrintProductPaymentReceipt.cshtml:14)
+- [_PrintProductSell.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\_PrintProductSell.cshtml:3)
+- [SalesReport.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\SalesReport.cshtml:83)
+- [StockManagement.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\StockManagement.cshtml:408)
+- [se-251-stock-transaction-payment-history.sql](F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-251-stock-transaction-payment-history.sql:32)
+
+Important:
+- please run the updated SQL script again, because I added receipt-cancel columns and a new procedure `usp_CancelStockTransactionPayment`
+- I could not run full compile/build here because `msbuild` is not available in this shell
+
+Recommended test:
+1. make one sale with 2 receipts
+2. open `StockDetails`
+3. print each receipt from payment history
+4. cancel one receipt from payment history
+5. print that cancelled receipt and check red `CANCELLED` + cancel date
+6. open `SalesReport` and check cancelled receipt still prints
+7. pay again on same sale and verify due/payment recalculation
+
+
+Result
+
+
+I updated the receipt flow so it matches your sales scenario better.
+
+Now:
+- `StockDetails` payment-history `Print` works from the row itself, even when the page is opened normally and not only after save.
+- receipt cancel is now `receipt-wise`, not whole sale cancel.
+- cancelled receipt keeps the same receipt number.
+- cancelled receipt print shows `CANCELLED` in red and shows cancel date + cancel remark.
+- after cancelling a receipt, the sale becomes payable again based on remaining valid receipts.
+- `SalesReport` now keeps showing the latest receipt entry even if that receipt is cancelled, and `Print Receipt` stays available for cancelled receipts too.
+
+Main code changes:
+- [StockDetails.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\StockDetails.cshtml:229)
+- [AccountController.cs](F:\Projects\SMStandardNiraj\SMEnterprise\Controllers\AccountController.cs:2705)
+- [AccountData.cs](F:\Projects\SMStandardNiraj\SMEnterprise\Repository\AccountData.cs:4179)
+- [InventoryModel.cs](F:\Projects\SMStandardNiraj\SMEnterprise\Models\InventoryModel.cs:186)
+- [_PrintProductPaymentReceipt.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\_PrintProductPaymentReceipt.cshtml:14)
+- [_PrintProductSell.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\_PrintProductSell.cshtml:3)
+- [SalesReport.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\SalesReport.cshtml:83)
+- [StockManagement.cshtml](F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\StockManagement.cshtml:408)
+- [se-251-stock-transaction-payment-history.sql](F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-251-stock-transaction-payment-history.sql:32)
+
+Important:
+- please run the updated SQL script again, because I added receipt-cancel columns and a new procedure `usp_CancelStockTransactionPayment`
+- I could not run full compile/build here because `msbuild` is not available in this shell
+
+Recommended test:
+1. make one sale with 2 receipts
+2. open `StockDetails`
+3. print each receipt from payment history
+4. cancel one receipt from payment history
+5. print that cancelled receipt and check red `CANCELLED` + cancel date
+6. open `SalesReport` and check cancelled receipt still prints
+7. pay again on same sale and verify due/payment recalculation

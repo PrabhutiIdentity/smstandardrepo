@@ -1,0 +1,255 @@
+
+For Login Block
+
+---/Account/Students
+
+ <td>
+                                             
+                                            <label class="switch switch-green col-md-6">
+                                                <input type="checkbox" class="switch-input" @(c.IsBlock == 1 ? "checked" : "")>
+                                                <span class="switch-label IsBlock" id="mdlIsBlock" onclick="$(this).closest('label').find('#hdnIsBlock').val($(this).closest('label').find('#hdnIsBlock').val() == '0' ? '1' : '0');" data-on="Block" data-off="UnBlock"></span>
+                                                <span class="switch-handle" id="shTranding"></span>
+                                                <input type="hidden" name="StudentID" id="hdnStudentID" value="@c.StudentID" />
+                                                <input type="hidden" name="IsBlock" id="hdnIsBlock" value="@c.IsBlock">
+                                            </label>
+                                        </td>
+										
+
+---javascript function
+
+$('.IsBlock').click(function () {
+            debugger;
+            var isblock = $(this).closest('label').find('#hdnIsBlock').val();
+            var studentID = $(this).closest('label').find('#hdnStudentID').val();
+            $.ajax
+                ({
+                    type: 'post',
+                    url: '/Account/UpdateIsBlock/' + isblock + "/" +  studentID ,
+                    success: function (result) {
+                        alert("IsBlock Status Updated");
+                        window.location.reload();
+                    }
+                });
+        })
+		
+		
+		
+		
+---AccountController
+
+
+public ActionResult UpdateIsBlock(string ID = null, string ID2 = null)
+        {
+            int isBlock = CommonUsage.ConvertToInt(ID);
+            int studentID = CommonUsage.ConvertToInt(ID2);
+            objAccountData.UpdateIsBlock(isBlock, studentID);
+            return Json(JsonRequestBehavior.AllowGet);
+        }
+
+
+
+--AccountData
+
+
+ public int UpdateIsBlock(int isBlock, int studentID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@isBlock", isBlock);
+                paramater.Add("@studentID", studentID);
+                return con.Query<int>("SP_UpdateIsBlock", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+
+            }
+
+        }
+
+
+---Datatbase Procedure
+
+
+Alter Procedure SP_UpdateIsBlock
+(
+@isBlock int,
+@studentID int
+)
+As
+BEGIN
+
+Update Student_Session set Isblock=@isBlock where studentID=@studentID and Status=1
+
+END		
+
+go
+
+
+alter PROCEDURE [dbo].[sp_GetUserByLoginName]      
+(    
+@LoginName nvarchar(50)    
+)    
+AS BEGIN      
+ declare @UType int    
+ declare @UID int    
+ select @UType=UserType,@UID=UserID from LoginDetails where (CONVERT(nvarchar(50),UserID)= @LoginName or EmailID=@LoginName or UserName=@LoginName)     
+    
+ if(@UType=2)    
+ --Accountant Login    
+ begin    
+  SELECT UserID,UserName, [Password],isnull(UserType,2) as RoleID,1 as IsApproved,'Account' as FullName,UD.SBranchID,    
+  BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID where UserType=@UType and UserID=@UID    
+ end    
+ else if(@UType=3)    
+ --Employee Login    
+ begin    
+  SELECT UserID,UserName, [Password],isnull(UserType,3) as RoleID,1 as IsApproved,EM.EmployeeName as FullName,EM.Photo as UserImage,UD.SBranchID,    
+  BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join EMployeeMaster EM on EM.EmployeeID=UD.UserID    
+  left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID    
+    where UD.UserType=@UType and UD.UserID=@UID  and EM.Status=1  
+ end    
+ else if(@UType=4)    
+ --Parent Login    
+ begin    
+ declare @studentid int, @isblock int,@status int
+
+  select @studentid=studentid from studentmaster where parentid=@UID
+ select @isblock=isnull(isblock,0),@status=status from student_session where studentid=@studentid
+  SELECT UserID,UserName, [Password],isnull(UserType,4) as RoleID,1 as IsApproved,EM.FatherName as FullName,EM.FatherImage as UserImage,UD.SBranchID,    
+  BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join ParentMaster EM on EM.ParentID=UD.UserID    
+  left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID    
+    where UD.UserType=@UType and UD.UserID=@UID and ( @isblock!=1 or @status!=1)   
+ end    
+ else if(@UType=5)    
+ --Library Login    
+ begin    
+  SELECT UserID,UserName, [Password],isnull(UserType,5) as RoleID,1 as IsApproved,isnull(EM.EmployeeName,'Library') as FullName,EM.Photo as UserImage,UD.SBranchID,    
+  BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join EMployeeMaster EM on EM.EmployeeID=UD.UserID    
+  left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID    
+    where UD.UserType=@UType and UD.UserID=@UID    
+ end    
+ else if(@UType=6)    
+ --Student Login    
+ begin    
+  SELECT UserID,UserName, [Password],isnull(UserType,6) as RoleID,1 as IsApproved,EM.Name as FullName,EM.Photo as UserImage,UD.SBranchID,    
+  BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join StudentMaster EM on EM.StudentID=UD.UserID    
+  left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID    
+    where UD.UserType=@UType and UD.UserID=@UID    
+ end    
+ else if(@UType=8)    
+ --Principal Login    
+ begin    
+  SELECT UserID,UserName, [Password],isnull(UserType,6) as RoleID,1 as IsApproved,'Principal' as FullName,UD.SBranchID,    
+ BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join EMployeeMaster EM on EM.EmployeeID=UD.UserID    
+  left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID    
+    where UD.UserType=@UType and UD.UserID=@UID    
+ end    
+ else if(@UType=10)    
+ --Reception Login    
+ begin    
+  SELECT UserID,UserName, [Password],isnull(UserType,10) as RoleID,1 as IsApproved,isnull(EM.EmployeeName,'Reception') as FullName,EM.Photo as UserImage,UD.SBranchID,    
+  BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join EMployeeMaster EM on EM.EmployeeID=UD.UserID    
+  left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID    
+    where UD.UserType=@UType and UD.UserID=@UID    
+ end    
+ else    
+ begin    
+ declare @SBranchID int    
+ select @SBranchID=Min(SBranchID) from SBranchMaster    
+  SELECT UserID,UserName, [Password],isnull(UserType,2) as RoleID,1 as IsApproved,    
+  (isnull(UD.SBranchID,@SBranchID)) as SBranchID,BM.Logo as BranchLogo,BM.StateID,BM.BranchName,BM.BranchSchoolName,BM.NotificationServerKey    
+  FROM LoginDetails UD left outer join EMployeeMaster EM on EM.EmployeeID=UD.UserID    
+  left outer join SBranchMaster BM on BM.SBranchID=UD.SBranchID    
+   where (CONVERT(nvarchar(50),UserID)= @LoginName or UD.EmailID=@LoginName or UserName=@LoginName)     
+  end    
+END 
+go
+
+
+alter  procedure [dbo].[spn_GetStudentsByClassSection]            
+(            
+@ClassID int,            
+@SectionID int,            
+@SBranchID int,            
+@SessionID int=0            
+)            
+as             
+begin             
+ Declare @Status int            
+ if(@SessionID=0)            
+ begin            
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID            
+ end            
+ select @Status=SessionStatus from SessionMaster where SessionID=@SessionID            
+ if(@SectionID<>0)            
+ begin            
+  --Select SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, SM.Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,SS.RollNo,SM.AccessCardNo,SM.AadharCardNo            
+  -- ,'PAR'+RIGHT(REPLICATE('0',6)+CAST(SM.ParentID AS VARCHAR(6)),6) as [SParentID]       
+  --,PM.FatherMobileNo,PM.MotherMobileNo,AadharCardNo ,PM.ParentID,PM.FatherName,PM.MotherName,SM.SSSID,SM.FamilyID,            
+  --SS.FromDate as SessionStartDate, SS.ToDate as SessionEndDate,            
+  --SM.HostelRoomID,SM.StopID,SM.Gender,SM.SchoolUID,MiniAddress,HM.Name as HouseName           
+  --from StudentMaster SM left outer join Student_Session SS on SS.StudentID=SM.StudentID            
+  --left outer join HouseMaster HM on HM.ID=SS.HouseID            
+  --left outer join Parentmaster PM on PM.ParentID=SM.ParentID            
+  --where (SS.ClassID=@ClassID and SS.SectionID=@SectionID and SS.SessionID=@SessionID) and             
+  --SS.SBranchID=@SBranchID order by Gender desc,Name  
+  if(@Status=1)    
+ begin    
+ Select SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, SM.Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,SS.RollNo,SM.AccessCardNo,SM.AadharCardNo        
+  ,'PAR'+RIGHT(REPLICATE('0',6)+CAST(SM.ParentID AS VARCHAR(6)),6) as [SParentID]  
+  ,PM.FatherMobileNo,PM.MotherMobileNo,AadharCardNo ,PM.ParentID,PM.FatherName,PM.MotherName,SM.SSSID,SM.FamilyID,        
+  SS.FromDate as SessionStartDate, SS.ToDate as SessionEndDate,isnull(SS.IsBlock,0)as IsBlock,        
+  SM.HostelRoomID,SM.StopID,SM.Gender,SM.SchoolUID,MiniAddress,HM.Name as HouseName        
+  from StudentMaster SM left outer join Student_Session SS on SS.StudentID=SM.StudentID        
+  left outer join HouseMaster HM on HM.ID=SS.HouseID        
+  left outer join Parentmaster PM on PM.ParentID=SM.ParentID        
+  where (SS.ClassID=@ClassID and SS.SectionID=@SectionID and SS.SessionID=@SessionID) and SS.Status=1   and     
+  SS.SBranchID=@SBranchID order by Name     
+ end    
+ else    
+ begin    
+  Select SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, SM.Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,SS.RollNo,SM.AccessCardNo,SM.AadharCardNo        
+  ,'PAR'+RIGHT(REPLICATE('0',6)+CAST(SM.ParentID AS VARCHAR(6)),6) as [SParentID],PM.FatherMobileNo,PM.MotherMobileNo,AadharCardNo ,PM.ParentID,PM.FatherName,PM.MotherName,SM.SSSID,SM.FamilyID,        
+  SS.FromDate as SessionStartDate, SS.ToDate as SessionEndDate,isnull(SS.IsBlock,0)as IsBlock,       
+  SM.HostelRoomID,SM.StopID,SM.Gender,SM.SchoolUID,MiniAddress,HM.Name as HouseName        
+  from StudentMaster SM left outer join Student_Session SS on SS.StudentID=SM.StudentID        
+  left outer join HouseMaster HM on HM.ID=SS.HouseID        
+  left outer join Parentmaster PM on PM.ParentID=SM.ParentID        
+  where (SS.ClassID=@ClassID and SS.SectionID=@SectionID and SS.SessionID=@SessionID) and         
+  SS.SBranchID=@SBranchID order by Name   
+  end    
+ end      
+           
+ else            
+ begin              
+ set @ClassID=0            
+   Select SM.StudentID,'STUD'+RIGHT(REPLICATE('0',6)+CAST(SM.StudentID AS VARCHAR(6)),6) as StudentSID, SM.Name,DOB, EmailID, BloodGroup, GuardianName, GuardianMobileNo, Photo,'' as RollNo,SM.AccessCardNo,SM.AadharCardNo,            
+  SM.HostelRoomID,SM.StopID,SM.Gender,AadharCardNo,      
+   'PAR'+RIGHT(REPLICATE('0',6)+CAST(SM.ParentID AS VARCHAR(6)),6) as [SParentID],        
+  PM.FatherMobileNo,PM.MotherMobileNo,PM.ParentID,PM.FatherName,SM.SchoolUID,PM.MotherName,SM.SSSID,SM.FamilyID,            
+  MiniAddress            
+  from StudentMaster SM   left outer join Parentmaster PM on PM.ParentID=SM.ParentID            
+   where  SM.SBranchID=@SBranchID and StudentID not in (select StudentID from Student_Session SS where  SS.StudentID=SM.StudentID ) order by Name           
+ end            
+             
+ select ClassID,ClassName from ClassMaster where SBranchID=@SBranchID            
+            
+ select ID,Name from Class_Sections where ClassID=@ClassID            
+            
+ select @ClassID            
+ select @SectionID            
+            
+ Select SessionName as Name,SessionID as ID,SessionStatus as Extra1 from SessionMaster where SBranchID=@SBranchID            
+             
+ select @SessionID            
+            
+ select * from SBranchMaster where SBranchID=@SBranchID            
+end   
+
+go
+

@@ -1,0 +1,66 @@
+
+alter table TCDetails
+add CreatedBy nvarchar(100),TCSlNo nvarchar (50),SBranchID int
+go
+
+   alter table Student_Session
+add DateOfPromotion datetime,DateOfRemoval datetime,CauseOfRemoval nvarchar(500),ConductWork nvarchar (500)
+go
+ 
+  
+alter procedure [dbo].[sp_InsertUpdateTCDetails]    
+(    
+@TCID int,    
+@StudentID int,    
+@SessionID int,    
+@IsSCBLastExamPassed int,    
+@SCBLastExamName nvarchar(50),    
+@SCBLastExamResult nvarchar(50),    
+@FailedCount int,    
+@PromotedToClass int,    
+@WorkingDays int,    
+@PresentDays int,    
+@IsNCC int,    
+@NCCDetails nvarchar(50),    
+@Games nvarchar(500),    
+@GeneralConduct nvarchar(50),    
+@DateOfApplication date,    
+@DateOfIssue date,    
+@ReasonForLeaving nvarchar(500),    
+@Remarks nvarchar(MAX),    
+@DuePaidMonth nvarchar(20),    
+@Concession nvarchar(20),    
+@OpType int,
+@TCSLNo nvarchar(50),   
+@SBranchID int, 
+@CreatedBy int       
+
+)    
+as     
+begin     
+ if(@Optype=-1)    
+ begin    
+  Delete from TCDetails where TCID=@TCID    
+ end    
+ else    
+ begin    
+  if(@TCID=0)    
+  begin    
+   Insert into TCDetails (StudentID,SessionID,IsSCBLastExamPassed,SCBLastExamName,SCBLastExamResult,FailedCount,PromotedToClass,WorkingDays,PresentDays,IsNCC,NCCDetails,Games,GeneralConduct,DateOfApplication,DateOfIssue,ReasonForLeaving,Remarks,DuePaidMonth,Concession,CreatedBy,TCSLNo,SBranchID)    
+   Values(@StudentID,@SessionID,@IsSCBLastExamPassed,@SCBLastExamName,@SCBLastExamResult,@FailedCount,@PromotedToClass,@WorkingDays,@PresentDays,@IsNCC,@NCCDetails,@Games,@GeneralConduct,@DateOfApplication,@DateOfIssue,@ReasonForLeaving,@Remarks,@DuePaidMonth,@Concession,@CreatedBy,@TCSLNo,@SBranchID)    
+   select @TCID=Cast(Scope_Identity() as int)    
+  end    
+  else    
+  begin    
+   Update TCDetails set StudentID=@StudentID,SessionID=@SessionID,IsSCBLastExamPassed=@IsSCBLastExamPassed,SCBLastExamName=@SCBLastExamName,SCBLastExamResult=@SCBLastExamResult,FailedCount=@FailedCount,PromotedToClass=@PromotedToClass,WorkingDays=@WorkingDays,PresentDays=@PresentDays,IsNCC=@IsNCC,NCCDetails=@NCCDetails,Games=@Games,    
+   GeneralConduct=@GeneralConduct,DateOfApplication=@DateOfApplication,DateOfIssue=@DateOfIssue,ReasonForLeaving=@ReasonForLeaving,Remarks=@Remarks,DuePaidMonth=@DuePaidMonth,Concession=@Concession,TCSLNo=@TCSLNo    
+   where  TCID=@TCID    
+  end    
+ end    
+ if(@StudentID!=0)  
+ begin  
+  Update Student_Session set Isleft=1 where StudentID=@StudentID  
+ end  
+  
+ select @TCID    
+end 

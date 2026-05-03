@@ -27,6 +27,11 @@ namespace SMEnterprise.Models
         public int Status { get; set; }
         public DateTime Date { get; set; }
         public string razorpayKey { get; set; }
+<<<<<<< HEAD
+=======
+        public string razorpaySecret { get; set; }
+        
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         public string currency { get; set; }
         public string Description { get; set; }
         public int StudentID { get; set; }
@@ -43,7 +48,26 @@ namespace SMEnterprise.Models
         public decimal ApplicableFee { get; set; }
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
+<<<<<<< HEAD
         public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
+=======
+        public string Hash { get; set; }
+        public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
+
+        // ── NEW: multi-month support ──────────────────────────────
+        /// <summary>
+        /// JSON string of selected months, e.g.
+        /// [{"Month":4,"Year":2025,"Amount":81.00},{"Month":5,"Year":2025,"Amount":80.00}]
+        /// </summary>
+        public string SelectedMonthsJson { get; set; }
+
+        /// <summary>True when the order covers more than one month.</summary>
+        public bool IsMultiMonth { get; set; }
+        // for school subscription plan
+        public bool IsSubscriptionOrder { get; set; } = false;
+
+
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
     }
     public class PaymentDetailModel
     {

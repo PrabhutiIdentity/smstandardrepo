@@ -1,0 +1,123 @@
+alter proc [dbo].[sp_GetClassGroupWiseExamResultsMini]        
+(        
+@EvaluationID int,        
+@ClassID int,        
+@SectionID int,        
+@SubjectID int,        
+@SBranchID int,        
+@EvaluationMode int,        
+@SessionID int=0        
+)        
+AS        
+BEGIN        
+         
+        
+  declare @IsOptionalSubject int        
+  declare @MainSubID int        
+  Declare @LookupSubjectID int        
+        
+  if(@SessionID=0)        
+  begin        
+   Select @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID and SessionStatus=1        
+  end         
+        
+  declare @EvaluationsTable  table (ID int,Name nvarchar(100))        
+  if(@SectionID=0)        
+  begin        
+   select @ClassID =min(ClassID) from ClassMaster where SBranchID=@SBranchID            
+   select @SectionID=min(ID) from Class_Sections where ClassID=@ClassID        
+  end        
+  select ClassID as ID,ClassName as Name from ClassMaster where SBranchID=@SBranchID         
+  select ID,Name from Class_Sections where ClassID=@ClassID        
+          
+  declare @GroupID int        
+         
+  Select @GroupID=GroupID from Class_Sections where ID=@SectionID        
+        
+  insert into @EvaluationsTable(ID,Name) exec sp_GetEvaluationList @SBranchID,@EvaluationMode,@ClassID,@SessionID        
+  if(@EvaluationID=0)        
+  begin        
+   select @EvaluationID=min(ID) from @EvaluationsTable        
+  end        
+          
+   Select SubjectID as ID, SubjectName  as Name from SubjectMasterAll where GroupID = @GroupID        
+    and SubjectID in (Select SubjectID from ExamMaster where IsApplicable=1 and EvaluationID=@EvaluationID and ClassID=@ClassID)        
+  if(@SubjectID=0)        
+  begin        
+   select @SubjectID=min(SubjectID) from SubjectMasterAll where GroupID = @GroupID        
+    and SubjectID in (Select SubjectID from ExamMaster where IsApplicable=1 and EvaluationID=@EvaluationID and ClassID=@ClassID)        
+  end        
+        
+  select @MainSubID=isnull(MainSubID,0) from SubjectMasterT where SubjectID=@SubjectID        
+  if(@MainSubID=0)        
+  begin        
+   Select @IsOptionalSubject=IsOptionalSubject from SubjectMasterT where SubjectID=@SubjectID        
+   set @LookupSubjectID=@SubjectID        
+  end        
+  else        
+  begin        
+   Select @IsOptionalSubject=IsOptionalSubject from SubjectMasterT where SubjectID=@MainSubID        
+   set @LookupSubjectID=@MainSubID        
+  end        
+          
+  Select ID,Name from @EvaluationsTable        
+        
+  declare @MaxMarks int         
+  declare @PassMarks int         
+  declare @ExamID int        
+  select @MaxMarks=MaxMarks,@PassMarks=PassMarks,@ExamID=ExamID from [dbo].[ExamMaster] where SubjectID=@SubjectID and ClassID=@ClassID and         
+  EvaluationID=@EvaluationID and GroupID=@GroupID and SBranchID=@SBranchID        
+        
+  if(@ExamID<>0)        
+  begin        
+        
+   if(@IsOptionalSubject=0)        
+   begin        
+    Select isnull(ERM.ResultID,0) as ResultID, @ExamID as ExamID,SS.StudentID,        
+    'STUD'+RIGHT(REPLICATE('0',6)+CAST(SS.[StudentID] AS VARCHAR(6)),6) as [StudentSID]        
+    ,SS.RollNo,
+	(Select SM.SchoolUID from StudentMaster SM where SM.StudentID=SS.StudentID) as SchoolUID, 
+	(Select SM.Name from StudentMaster SM where SM.StudentID=SS.StudentID) as StudentName,        
+    (Select SM.Photo from StudentMaster SM where SM.StudentID=SS.StudentID) as Photo,        
+    (Select SM.Gender from StudentMaster SM where SM.StudentID=SS.StudentID) as Gender,
+	--(select PM.FatherName from Parentmaster PM where parentid in (select parentid from studentmaster sm where pm.Parentid=sm.studentid and sm.studentid=ss.studentid)) as FatherName,
+   @MaxMarks as MaxMarks,@PassMarks as PassMarks, ERM.MarksScored,ERM.Grade,ERM.GradePoints,isnull(ERM.[Status],0) as [Status]        
+    from Student_Session SS left outer join ExamResultMaster ERM on SS.StudentID=ERM.StudentID and ERM.ExamID=@ExamID  
+	  
+    where SS.ClassID=@ClassID and SS.SectionID=@SectionID and SS.SessionID=@SessionID-- and SS.[Status]=1        
+    order by StudentName --CAST(SS.RollNo AS int)         
+   end        
+   else        
+   begin        
+    Select isnull(ERM.ResultID,0) as ResultID, @ExamID as ExamID,SS.StudentID,        
+    'STUD'+RIGHT(REPLICATE('0',6)+CAST(SS.[StudentID] AS VARCHAR(6)),6) as [StudentSID]        
+    ,SS.RollNo,
+	(Select SM.SchoolUID from StudentMaster SM where SM.StudentID=SS.StudentID) as SchoolUID,    
+	(Select SM.Name from StudentMaster SM where SM.StudentID=SS.StudentID) as StudentName,        
+    (Select SM.Photo from StudentMaster SM where SM.StudentID=SS.StudentID) as Photo,        
+    (Select SM.Gender from StudentMaster SM where SM.StudentID=SS.StudentID) as Gender,        
+	--(select PM.FatherName from Parentmaster PM where parentid in (select parentid from studentmaster sm where pm.Parentid=sm.studentid and sm.studentid=ss.studentid)) as FatherName,
+   @MaxMarks as MaxMarks,@PassMarks as PassMarks, ERM.MarksScored,ERM.Grade,ERM.GradePoints,isnull(ERM.[Status],0) as [Status]        
+    from Student_Session SS left outer join ExamResultMaster ERM on SS.StudentID=ERM.StudentID and ERM.ExamID=@ExamID        
+    where SS.ClassID=@ClassID and SS.SectionID=@SectionID and SS.SessionID=@SessionID-- and SS.[Status]=1        
+    and (SS.StudentSessionUID in (Select StudentSessionID from [Student_Session_OptionalSubjects] where OpSubjectID=@LookupSubjectID)        
+    or not exists(select OpSubjectID from [Student_Session_OptionalSubjects] where StudentSessionID=SS.StudentSessionUID))        
+    order by  StudentName --CAST(SS.RollNo AS int)         
+   end        
+    end        
+    else        
+    begin        
+   select 0 as ResultID,0 as ExamID, 0 as StudentID,'' as StudentSID from ExamResultMaster where 1=2        
+    end        
+    select SessionID,SessionName,SessionStatus from SessionMaster where SBranchID=@SBranchID        
+   select isnull(@ClassID,0)        
+  select isnull(@SectionID,0)        
+  select isnull(@SubjectID,0)        
+  select isnull(@EvaluationID,0)        
+        
+ select isnull(IsLocked,0) from ExamMaster where ExamID= @ExamID        
+ select isnull(@SessionID,0)        
+END 
+
+
+go

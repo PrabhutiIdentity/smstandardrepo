@@ -21,6 +21,7 @@ namespace SMEnterprise.Controllers
 {
     public class TeacherApiController : ApiController
     {
+<<<<<<< HEAD
         private readonly BigBlueButtonAPIClient client;
         public TeacherApiController()
         {
@@ -39,6 +40,26 @@ namespace SMEnterprise.Controllers
                 return false;
             }
         }
+=======
+        //private readonly BigBlueButtonAPIClient client;
+        public TeacherApiController()
+        {
+            //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+        }
+        //private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
+        //{
+        //    try
+        //    {
+        //        var res = await client.IsMeetingRunningAsync(new IsMeetingRunningRequest { meetingID = Guid.NewGuid().ToString() });
+        //        if (res.returncode == Returncode.FAILED) return false;
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return false;
+        //    }
+        //}
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         private UserModel VerifyUser(string UUID)
         {
             UserModel objUserModel = new UserModel();
@@ -65,6 +86,7 @@ namespace SMEnterprise.Controllers
             }
             return objUserModel;
         }
+<<<<<<< HEAD
         public async Task<CommonApiWraperModel> JoinClassNew(string ID = null)
         {
             CommonApiWraperModel response = new CommonApiWraperModel();
@@ -137,6 +159,80 @@ namespace SMEnterprise.Controllers
             response.Data = url;
             return response;
         }
+=======
+        //public async Task<CommonApiWraperModel> JoinClassNew(string ID = null)
+        //{
+        //    CommonApiWraperModel response = new CommonApiWraperModel();
+        //    var user = new UserModel
+        //    {
+        //        FullName = "Sourabh Sharma",
+        //        UserID = 1,
+        //        SBranchID = 1,
+        //        BranchLogo = "/images/SBranchLogo/1.jpg",
+        //        UserImage = "/images/SBranchLogo/1.jpg"
+        //    };
+        //    int OCID = CommonUsage.ConvertToInt(ID);
+        //    BBBOnlineClassModel cModel = (new BBBOnlineClassData()).GetOnlineClassDetailsByOCID(OCID);
+
+        //    string basepath = $"{this.Request.RequestUri.Scheme}://{this.Request.RequestUri.Host}";
+        //    string logo = basepath + "/Images/SBranchLogo/" + user.SBranchID + "_" + user.BranchLogo;
+        //    string avatar = basepath + "/Images/EmployeeImage/" + user.UserID + "_" + user.UserImage;
+        //    var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
+        //    if (meetingStatus.returncode == Returncode.FAILED)
+        //    {
+        //        MetaData meta = new MetaData();
+        //        meta.Add("BranchID", "1");
+        //        string meu = basepath + "/Home/EndOnlineClasses/";
+        //        meta.Add("endCallbackUrl", meu);
+
+        //        string reccbu = basepath + "/home/bbbrecordingready/";
+        //        meta.Add("bbb-recording-ready-url", reccbu);
+        //        var result = await client.CreateMeetingAsync(new CreateMeetingRequest
+        //        {
+        //            name = cModel.SubjectName + " (" + cModel.ClassSection + "), by " + cModel.TeacherName + " on " + cModel.ClassDate.ToString("dd MMM, yyyy"),
+        //            meetingID = cModel.MeetingID,
+        //            record = true,
+        //            //logoutURL = basepath + "/Home/LogoutOnlineClasses/" + cModel.MeetingID,
+        //            meta = meta,
+        //            guestPolicy = "ALWAYS_ACCEPT",
+        //            logo = logo,
+        //            lockSettingsDisablePrivateChat = true,
+        //            lockSettingsDisableNote = false,
+        //            muteOnStart = true,
+        //            allowModsToUnmuteUsers = true,
+        //            //autoStartRecording = true,
+        //            //bannerText = "Online Class for Subject:" + cModel.SubjectName + " Class:" + cModel.ClassSection + " By :" + cModel.TeacherName
+        //        });
+        //        if (result.returncode == Returncode.FAILED) return response;
+        //        if (result.returncode != Returncode.FAILED)
+        //        {
+        //            cModel.InternalMeetingID = result.internalMeetingID;
+        //            cModel.Status = 1;
+        //            cModel.StartedOn = CommonUsage.GetCurrentDate();
+        //            cModel.AttPassword = result.attendeePW;
+        //            cModel.ModPassword = result.moderatorPW;
+        //            (new BBBOnlineClassData()).UpdateBBBOnlineClassDetails(cModel);
+        //        }
+        //    }
+
+        //    var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
+        //    requestJoin.userID = user.UserID.ToString();
+        //    requestJoin.fullName = user.FullName;
+        //    requestJoin.password = cModel.ModPassword;
+        //    var setConfigRequest = new SetConfigXMLRequest
+        //    {
+        //        meetingID = cModel.MeetingID,
+        //        configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+        //    };
+        //    var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+        //    if (setConfigResult.returncode == Returncode.FAILED) return response;
+        //    requestJoin.configToken = setConfigResult.configToken;
+        //    requestJoin.avatarURL = avatar;
+        //    var url = client.GetJoinMeetingUrl(requestJoin);
+        //    response.Data = url;
+        //    return response;
+        //}
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         [HttpPost]
         public CommonApiWraperModel GetVehicleLocation(TransportGeoModel data)
         {
@@ -1452,6 +1548,7 @@ namespace SMEnterprise.Controllers
             return objWraper;
         }
         #endregion
+<<<<<<< HEAD
         #region Online Class Related
         [HttpPost]
         public CommonApiWraperModel GetTeacherOnlineClassesSections(ParentApiParamModel data)
@@ -2077,13 +2174,533 @@ namespace SMEnterprise.Controllers
         }
         //[HttpPost]
         //public CommonApiWraperModel GetOnlineClassAttendees(ParentApiParamModel data)
+=======
+        //#region Online Class Related
+        //[HttpPost]
+        //public CommonApiWraperModel GetTeacherOnlineClassesSections(ParentApiParamModel data)
         //{
         //    UserModel user = VerifyUser(data.UUID);
         //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
         //    if (user != null)
         //    {
+        //        TeacherData objTeacherData = new TeacherData();
+        //        List<object> List = objTeacherData.GetTeacherTeachingClassSections(user.UserID).ToList<object>();
+        //        if (List.Count > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel GetTeacherSubjectsOnlineClassSection(TeacherAttandanceParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        TeacherData objTeacherData = new TeacherData();
+        //        List<object> List = objTeacherData.GetTeacherTeachingSubjectsOnClassSections(user.UserID, data.ClassID, data.SectionID).ToList<object>();
+        //        if (List.Count > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel GetBBBOnlineClassSchedules(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        data.SBranchID = user.SBranchID;
+        //        if (data.RDate.Year == 1)
+        //        {
+        //            data.RDate = CommonUsage.GetCurrentDate();
+        //        }
+        //        //OnlineClassData OnlineClassData = new OnlineClassData();
+        //        //objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //        var Data = (new BBBOnlineClassData()).GetOnlineClassesList(user.UserID, data.RDate, data.SBranchID);
+        //        if (Data.Count > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = Data.ToList<object>();
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel GetOnlineClassSchedules(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        data.SBranchID = user.SBranchID;
+        //        if(data.RDate.Year==1)
+        //        {
+        //            data.RDate = CommonUsage.GetCurrentDate();
+        //        }
+        //        OnlineClassData objTeacherData = new OnlineClassData();
+        //        objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //        List<OnlineClassModel> Data = objTeacherData.GetOnlineClassesSchedules(user.UserID, data.RDate);
+        //        if (Data.Count > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = Data.ToList<object>();
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel GetOnlineMeetings(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        data.SBranchID = user.SBranchID;
+        //        var CurDate = CommonUsage.GetCurrentDate();
+        //        OnlineClassData objTeacherData = new OnlineClassData();
+        //        objWraper.Data = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //        List<OnlineStaffMeetingModel> Data = objTeacherData.GetOnlineStaffMeetings(user.SBranchID, CurDate);
+        //        if (Data.Count > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = Data.ToList<object>();
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel GetBBBOnlineMeetings(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        data.SBranchID = user.SBranchID;
+        //        var CurDate = CommonUsage.GetCurrentDate();
+        //        BBBOnlineStaffMeetingData objTeacherData = new BBBOnlineStaffMeetingData();
+        //        List<OnlineStaffMeetingModel> Data = objTeacherData.GetOnlineStaffMeetings(CurDate, user.SBranchID);
+        //        if (Data.Count > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = Data.ToList<object>();
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel ScheduleBBBOnlineClass(BBBOnlineClassModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        data.TeacherID = user.UserID;
+        //        data.SBranchID = user.SBranchID;
+        //        data.CreatedDate = CommonUsage.GetCurrentDate();
+        //        data.MeetingID = Guid.NewGuid().ToString();
+        //        int res = (new BBBOnlineClassData()).ScheduleOnlineClass(data);
+        //        NameIDModel List = new NameIDModel
+        //        {
+        //            ID = res,
+        //            Name = data.MeetingID
+        //        };
+        //        if (List.ID != 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.Data = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel ScheduleOnlineClass(OnlineClassModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        data.TeacherID = user.UserID;
+        //        data.CreatedDate = CommonUsage.GetCurrentDate();
+        //        OnlineClassData objTeacherData = new OnlineClassData();
+        //        NameIDModel List = objTeacherData.ScheduleOnlineClass(data);
+        //        if (List != null)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.Data = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> StartBBBOnlineClass(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        string basep = $"{ this.Request.RequestUri.Scheme}://{this.Request.RequestUri.Host}";
+        //        if(basep.Contains("localhost"))
+        //        {
+        //            basep = "https://node1.pschoolonline.com";
+        //        }
+        //        var onlineClassData = (new BBBOnlineClassData());
+        //        EmployeeModel teacher = await onlineClassData.GetTeacherForOnlineClassByID(user.UserID);
+        //        BBBOnlineClassModel cModel = onlineClassData.GetOnlineClassDetailsByOCID(data.ID);
+        //        string basepath = basep;// $"{ this.Request.RequestUri.Scheme}://{this.Request.RequestUri.Host}";
+        //        string logo = HttpUtility.UrlEncode(basepath + "/Images/SBranchLogo/" + user.SBranchID + "_" + user.BranchLogo);
+        //        var setupOk = await isBigBlueButtonAPISettingsOKAsync();
+        //        var meetingStatus = await this.client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
+        //        DateTime startdatetime = DateTime.Parse("2021-02-01 "+ cModel.StartTime);
+        //        DateTime enddatetime = DateTime.Parse("2021-02-01 " + cModel.EndTime);
+        //        int duration = (enddatetime - startdatetime).Minutes; 
+                
+        //        if (duration <= 0)
+        //        {
+        //            duration = 30;
+        //        }
+        //        else if (duration > 60)
+        //        {
+        //            duration = 60;
+        //        }
+        //        if (meetingStatus.returncode == Returncode.FAILED)
+        //        {
+        //            MetaData meta = new MetaData();
+        //            meta.Add("BranchID", "1");
+        //            string meu = basepath+ "/Home/EndOnlineClasses";
+        //            meta.Add("endCallbackUrl", meu);
+
+        //            string reccbu = basepath + "/home/bbbrecordingready/";
+        //            meta.Add("bbb-recording-ready-url", reccbu);
+        //            meta.Add("bbb_skip_check_audio", "true");
+        //            meta.Add("bbb_client_title", "P-School");
+        //            meta.Add("bbb_enable_screen_sharing", "false");
+        //            meta.Add("bbb_show_public_chat_on_login", "false");
+        //            var result = await client.CreateMeetingAsync(new CreateMeetingRequest
+        //            {
+        //                name = cModel.SubjectName + " (" + cModel.ClassSection + "), by " + cModel.TeacherName + " on " + cModel.ClassDate.ToString("dd MMM, yyyy"),
+        //                meetingID = cModel.MeetingID,
+        //                record = true,
+        //                logoutURL = basepath + "/Home/ClassEnded/" + cModel.MeetingID,
+        //                //logoutURL = basepath + "/Home/LogoutOnlineClasses/" + cModel.MeetingID,
+        //                meta = meta,
+        //                guestPolicy = "ALWAYS_ACCEPT",
+        //                logo = logo,
+        //                lockSettingsDisablePrivateChat = true,
+        //                lockSettingsDisableNote = false,
+        //                muteOnStart = true,
+        //                allowModsToUnmuteUsers = true,
+        //                autoStartRecording = true,
+        //                duration = duration + 5
+        //                //welcome="Welcome to class"
+        //                //autoStartRecording = true,
+        //                //bannerText = "Online Class for Subject:" + cModel.SubjectName + " Class:" + cModel.ClassSection + " By :" + cModel.TeacherName
+        //            }); ;
+        //            if (result.returncode == Returncode.FAILED) objWraper.Data = "BB01";
+        //            if (result.returncode != Returncode.FAILED)
+        //            {
+        //                cModel.InternalMeetingID = result.internalMeetingID;
+        //                cModel.Status = 1;
+        //                cModel.StartedOn = CommonUsage.GetCurrentDate();
+        //                cModel.AttPassword = result.attendeePW;
+        //                cModel.ModPassword = result.moderatorPW;
+        //                (new BBBOnlineClassData()).UpdateBBBOnlineClassDetails(cModel);
+        //            }
+        //        }
+
+        //        var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
+        //        requestJoin.userID = teacher.EmployeeID.ToString();
+        //        requestJoin.fullName = teacher.EmployeeName;
+        //        requestJoin.password = cModel.ModPassword;
+        //        var setConfigRequest = new SetConfigXMLRequest
+        //        {
+        //            meetingID = cModel.MeetingID,
+        //            configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+        //        };
+        //        var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+        //        if (setConfigResult.returncode == Returncode.FAILED)
+        //        {
+        //            objWraper.Data = setConfigResult;
+        //        }
+        //        else
+        //        {
+        //            requestJoin.configToken = setConfigResult.configToken;
+        //            //requestJoin.avatarURL = avatar;
+        //            var url = client.GetJoinMeetingUrl(requestJoin);
+
+        //            List<SMSRecieverModel> recievers = (new BBBOnlineClassData()).GetRecieverListOnOnlineClass(data.ID);
+        //            OnlineClassNotificationModel message = new OnlineClassNotificationModel();
+        //            //message.base_url = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //            message.message = "Online Class Started.";
+        //            message.type = 1;
+        //            message.typeid = data.ID;
+        //            string jmessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+        //            NotificationModel objModel = new NotificationModel();
+        //            objModel.RecieverID = -1;
+        //            objModel.NotificationType = 10;
+        //            objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
+        //            objModel.Recievers = new List<NotificationRecieverModel>();
+
+        //            StringBuilder sb = new StringBuilder();
+        //            foreach (SMSRecieverModel r in recievers)
+        //            {
+        //                if (!String.IsNullOrEmpty(r.deviceToken))
+        //                {
+        //                    if (r.deviceToken.Contains("\\n"))
+        //                    {
+        //                        r.deviceToken.Replace("\\n", "#");
+        //                    }
+        //                    if (sb != null && sb.ToString() != "")
+        //                    {
+        //                        sb.Append("#");
+        //                    }
+        //                    sb.Append(r.deviceToken);
+        //                }
+        //            }
+        //            string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
+        //            string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+        //            CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
+
+        //            objWraper.Code = 200;
+        //            objWraper.Data = url;
+        //        }
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 404;
+        //    }
+        //    objWraper.Message = "Success";
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> EndBBBOnlineClass(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+
+        //        BBBOnlineClassModel cModel = (new BBBOnlineClassData()).GetOnlineClassDetailsByOCID(data.ID);
+        //        var result = await client.EndMeetingAsync(new EndMeetingRequest
+        //        {
+        //            meetingID = cModel.MeetingID,
+        //            password = cModel.ModPassword
+        //        });
+        //        int List = (new BBBOnlineClassData()).EndOnlineClass(cModel);
+        //        if (List > 0)
+        //        {
+        //            List<SMSRecieverModel> recievers = (new BBBOnlineClassData()).GetRecieverListOnOnlineClass(data.ID);
+        //            OnlineClassNotificationModel message = new OnlineClassNotificationModel();
+        //            message.message = "Online Class Ended.";
+        //            message.type = 2;
+        //            message.typeid = data.ID;
+        //            string jmessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+        //            NotificationModel objModel = new NotificationModel();
+        //            objModel.RecieverID = -1;
+        //            objModel.NotificationType = 10;
+        //            objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
+        //            objModel.Recievers = new List<NotificationRecieverModel>();
+
+        //            StringBuilder sb = new StringBuilder();
+        //            foreach (SMSRecieverModel r in recievers)
+        //            {
+        //                if (!String.IsNullOrEmpty(r.deviceToken))
+        //                {
+        //                    if (r.deviceToken.Contains("\\n"))
+        //                    {
+        //                        r.deviceToken.Replace("\\n", "#");
+        //                    }
+        //                    if (sb != null && sb.ToString() != "")
+        //                    {
+        //                        sb.Append("#");
+        //                    }
+        //                    sb.Append(r.deviceToken);
+        //                }
+        //            }
+        //            string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
+        //            string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+        //            CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
+
+        //            objWraper.Code = 200;
+        //            objWraper.Data = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel StartOnlineClass(OnlineClassModel data)
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+<<<<<<< HEAD
         //        OnlineClassData objTeacherData = new OnlineClassData();
         //        List<OnlineClassAttendeeModel> List = objTeacherData.GetOnlineClassAttendees(data.OCID);
+=======
+        //        data.TeacherID = user.UserID;
+        //        data.StartedOn = CommonUsage.GetCurrentDate();
+        //        OnlineClassData objTeacherData = new OnlineClassData();
+        //        int List = objTeacherData.StartOnlineClass(data);
+        //        if (List > 0)
+        //        {
+        //            List<SMSRecieverModel> recievers = objTeacherData.GetRecieverListOnOnlineClass(data.OCID);
+        //            OnlineClassNotificationModel message = new OnlineClassNotificationModel();
+        //            message.base_url = OnlineClassData.SBranchesOnlineClassURLs.Where(x => x.ID == user.SBranchID).FirstOrDefault().Name;
+        //            message.message = "Online Class Started.";
+        //            message.type = 1;
+        //            message.typeid = data.OCID;
+        //            string jmessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+        //            NotificationModel objModel = new NotificationModel();
+        //            objModel.RecieverID = -1;
+        //            objModel.NotificationType = 10;
+        //            objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
+        //            objModel.Recievers = new List<NotificationRecieverModel>();
+
+        //            StringBuilder sb = new StringBuilder();
+        //            foreach (SMSRecieverModel r in recievers)
+        //            {
+        //                if (!String.IsNullOrEmpty(r.deviceToken))
+        //                {
+        //                    if (r.deviceToken.Contains("\\n"))
+        //                    {
+        //                        r.deviceToken.Replace("\\n", "#");
+        //                    }
+        //                    if (sb != null && sb.ToString() != "")
+        //                    {
+        //                        sb.Append("#");
+        //                    }
+        //                    sb.Append(r.deviceToken);
+        //                }
+        //            }
+        //            string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
+        //            string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+        //            CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
+
+        //            objWraper.Code = 200;
+        //            objWraper.Data = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel GetOnlineClassAttendees(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        BBBOnlineClassData objTeacherData = new BBBOnlineClassData();
+        //        var List = objTeacherData.GetOnlineClassAttendees(data.OCID);
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         //        if (List.Count() > 0)
         //        {
         //            objWraper.Code = 200;
@@ -2102,6 +2719,7 @@ namespace SMEnterprise.Controllers
         //    }
         //    return objWraper;
         //}
+<<<<<<< HEAD
         [HttpPost]
         public CommonApiWraperModel EndOnlineClass(OnlineClassModel data)
         {
@@ -2175,6 +2793,193 @@ namespace SMEnterprise.Controllers
             return objWraper;
         }
         #endregion
+=======
+        //[HttpPost]
+        //public CommonApiWraperModel GetBBBOnlineClassAttendees(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        BBBOnlineClassData objTeacherData = new BBBOnlineClassData();
+        //       var List = objTeacherData.GetOnlineClassAttendees(data.OCID);
+        //        if (List.Count() > 0)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.List = List.ToList<object>();
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public async Task<CommonApiWraperModel> JoinBBBOnlineMeeting(ParentApiParamModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        BBBOnlineStaffMeetingData onlineClassData = new BBBOnlineStaffMeetingData();
+        //        //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
+        //        var cModel = (onlineClassData).GetOnlineStaffMeetingDetails(data.OCID,user.SBranchID);
+
+        //        var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.BBBMeetingID });
+        //        if (meetingStatus.returncode != Returncode.FAILED)
+        //        {
+
+        //            var joinDate = CommonUsage.GetCurrentDate();
+        //            NameIDModel student = await onlineClassData.JoinOnlineStaffMeetingGetDetail(user.UserID, joinDate, data.OCID, 1);
+        //            var requestJoin = new JoinMeetingRequest { meetingID = cModel.BBBMeetingID };
+        //            requestJoin.userID = student.ID.ToString();
+        //            requestJoin.fullName = student.Name;
+        //            requestJoin.password = cModel.AttPassword;
+        //            var setConfigRequest = new SetConfigXMLRequest
+        //            {
+        //                meetingID = cModel.BBBMeetingID,
+        //                configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+        //            };
+        //            var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+        //            if (setConfigResult.returncode == Returncode.FAILED)
+        //            {
+        //                objWraper.Code = -1;
+        //            }
+        //            else
+        //            {
+        //                requestJoin.configToken = setConfigResult.configToken;
+        //                // requestJoin.avatarURL = avatar;
+        //                var url = client.GetJoinMeetingUrl(requestJoin);
+        //                objWraper.Data = url;
+        //            }
+        //        }
+
+        //        if (objWraper.Data != null)
+        //        {
+        //            objWraper.Code = 200;
+        //            objWraper.Message = "Preparing to join class";
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //            objWraper.Message = "Class is not running now";
+        //        }
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        ////[HttpPost]
+        ////public CommonApiWraperModel GetOnlineClassAttendees(ParentApiParamModel data)
+        ////{
+        ////    UserModel user = VerifyUser(data.UUID);
+        ////    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        ////    if (user != null)
+        ////    {
+        ////        OnlineClassData objTeacherData = new OnlineClassData();
+        ////        List<OnlineClassAttendeeModel> List = objTeacherData.GetOnlineClassAttendees(data.OCID);
+        ////        if (List.Count() > 0)
+        ////        {
+        ////            objWraper.Code = 200;
+        ////            objWraper.List = List.ToList<object>();
+        ////        }
+        ////        else
+        ////        {
+        ////            objWraper.Code = 404;
+        ////        }
+        ////        objWraper.Message = "Success";
+        ////    }
+        ////    else
+        ////    {
+        ////        objWraper.Code = 101;
+        ////        objWraper.Message = "Unauthorized";
+        ////    }
+        ////    return objWraper;
+        ////}
+        //[HttpPost]
+        //public CommonApiWraperModel EndOnlineClass(OnlineClassModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+        //    if (user != null)
+        //    {
+        //        data.TeacherID = user.UserID;
+        //        data.EndedOn = CommonUsage.GetCurrentDate();
+        //        OnlineClassData objTeacherData = new OnlineClassData();
+        //        int List = objTeacherData.EndOnlineClass(data);
+        //        if (List > 0)
+        //        {
+        //            List<SMSRecieverModel> recievers = objTeacherData.GetRecieverListOnOnlineClass(data.OCID);
+        //            OnlineClassNotificationModel message = new OnlineClassNotificationModel();
+        //            message.message = "Online Class Ended.";
+        //            message.type = 2;
+        //            message.typeid = data.OCID;
+        //            string jmessage = Newtonsoft.Json.JsonConvert.SerializeObject(message);
+        //            NotificationModel objModel = new NotificationModel();
+        //            objModel.RecieverID = -1;
+        //            objModel.NotificationType = 10;
+        //            objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
+        //            objModel.Recievers = new List<NotificationRecieverModel>();
+
+        //            StringBuilder sb = new StringBuilder();
+        //            foreach (SMSRecieverModel r in recievers)
+        //            {
+        //                if (!String.IsNullOrEmpty(r.deviceToken))
+        //                {
+        //                    if (r.deviceToken.Contains("\\n"))
+        //                    {
+        //                        r.deviceToken.Replace("\\n", "#");
+        //                    }
+        //                    if (sb != null && sb.ToString() != "")
+        //                    {
+        //                        sb.Append("#");
+        //                    }
+        //                    sb.Append(r.deviceToken);
+        //                }
+        //            }
+        //            string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
+        //            string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
+        //            CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
+
+        //            objWraper.Code = 200;
+        //            objWraper.Data = List;
+        //        }
+        //        else
+        //        {
+        //            objWraper.Code = 404;
+        //        }
+        //        objWraper.Message = "Success";
+        //    }
+        //    else
+        //    {
+        //        objWraper.Code = 101;
+        //        objWraper.Message = "Unauthorized";
+        //    }
+        //    return objWraper;
+        //}
+        //[HttpPost]
+        //public CommonApiWraperModel JoinOnlineClass(YouTubeVideoModel data)
+        //{
+        //    UserModel user = VerifyUser(data.UUID);
+        //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
+
+        //    objWraper.Code = 200;
+        //    objWraper.Data = 1;
+
+        //    return objWraper;
+        //}
+        //#endregion
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         //[HttpPost]
         //public CommonApiWraperModel GetGoogleAccessToken(ParentApiParamModel data)
         //{

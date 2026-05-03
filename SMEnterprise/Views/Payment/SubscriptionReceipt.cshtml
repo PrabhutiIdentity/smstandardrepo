@@ -1,0 +1,26 @@
+﻿@model SMEnterprise.Models.SubscriptionReceiptModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var amount = Model.AmountPaid.ToString("N2");
+}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">Payment Receipt</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>Order ID:</strong> @Model.OrderID</p>
+                <p><strong>Payment ID:</strong> @Model.PaymentID</p>
+                <p><strong>Branch ID:</strong> @Model.SBranchID</p>
+                <p><strong>Plan:</strong> @(Model.PlanName ?? "Subscription")</p>
+                <p><strong>Amount Paid:</strong> &#8377; @amount</p>
+                <p><strong>Paid On:</strong> @Model.PaidOn.ToString("dd MMM yyyy HH:mm")</p>
+            </div>
+            <div class="card-footer text-right">
+                <a class="btn btn-primary" href="@Url.Action("Dashboard","Admin")">Go to Dashboard</a>
+                <a class="btn btn-outline-secondary" href="@Url.Action("Success","Payment", new { ID = Model.PaymentID })">View Payment Details</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,5 +1,6 @@
 ﻿@model SMEnterprise.Models.PrintSaleReceiptModel
 
+<<<<<<< HEAD
 <div>
     <button class="btn btn-info" onclick="PrintRecipt()">Print</button>
 </div>
@@ -130,3 +131,203 @@
         </div>
     </div>
 </div>
+=======
+<div class="receipt-print-root">
+    <div>
+    <button type="button" class="btn btn-info" onclick="PrintRecipt(this)">Print</button>
+    </div>
+    <div id="divRecipt">
+        <div class="receipt-print-body">
+            <div class="wrapper">
+                <div class="header-1">
+                    <div class="col-3" style="text-align: right;">
+                        @(Model.Transfer.TrType==0?"Purchase": Model.Transfer.TrType == 1 ?"Sale":"Allocate")   Receipt No:-  @Model.Transfer.InvoiceNumber
+                    </div>
+                </div>
+                <div class="header-1">
+                    <div class="col-2">
+                        <div class="logo-img">
+                            <img src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                        </div>
+                    </div>
+                    <div class="col-1">
+                        [CopyPlaceHolder]
+                        <h1>
+                            @Model.SBranchDetails.BranchSchoolName <br /> <ad style="font-size:16px!important;">
+                                @Html.Raw(Model.SBranchDetails.Address == null ? "" : Model.SBranchDetails.Address.Replace("\n", "<br/>"))
+                            </ad>
+                        </h1>
+                    </div>
+                </div>
+                <div class="form-name">
+                    <div class="row form-box name">
+                        <label class="col-sm-3" style="text-align:left;">Name : </label>
+                        <div class="col-sm-9" style="border-bottom: 1px dashed #888;min-height: 14px;">@Model.Customer.Name</div>
+                    </div>
+                    <div class="row form-box name">
+                        <label class="col-sm-3" style="text-align:left;">Class & Session : </label>
+                        <div class="col-sm-9" style="border-bottom: 1px dashed #888;min-height: 14px;">@Model.Customer.ExtraData</div>
+                    </div>
+                    <div class="row form-box name">
+                        <label class="col-sm-3" style="text-align:left;">Address : </label>
+                        <div class="col-sm-9">@Model.Customer.Address</div>
+                    </div>
+                    <div class="row form-box name">
+                        <label class="col-sm-3" style="text-align:left;">Invoice Date : </label>
+                        <div class="col-sm-9">@Model.Transfer.TrDate.ToString("dd MMM, yyyy")</div>
+                    </div>
+                    <div class="row form-box name">
+                        <label class="col-sm-3" style="text-align:left;">Payment Status : </label>
+                        <div class="col-sm-9">@Model.Transfer.PaymentStatusText</div>
+                    </div>
+                    <div class="row form-box name">
+                        <label class="col-sm-3" style="text-align:left;">Total Paid : </label>
+                        <div class="col-sm-9">&#8377; @Model.Transfer.PaidAmount.ToString("0.00")</div>
+                    </div>
+                    <div class="row form-box name">
+                        <label class="col-sm-3" style="text-align:left;">Balance Amount : </label>
+                        <div class="col-sm-9">&#8377; @Model.Transfer.DueAmount.ToString("0.00")</div>
+                    </div>
+                </div>
+                <div class="fee-table">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>S No.</th>
+                                <th>Product</th>
+                                <th>Price</th>
+                                <th>Sale Price</th>
+                                <th>Discount</th>
+                                <th>Quantity</th>
+                                <th>Net Amount</th>
+                            </tr>
+                        </thead>
+                        @{
+                            var counter = 1;
+                            decimal TotalAmount = 0;
+                            decimal Totalsgst = 0;
+                            decimal Totalcgst = 0;
+                            decimal Totaligst = 0;
+                            <tbody>
+
+
+
+                                @foreach (SMEnterprise.Models.StockTransaferDetailModel f in Model.Products)
+                                {
+
+                                    <tr>
+                                        <td>@(counter).</td>
+                                        <td>@f.ProductName</td>
+                                        <td>₹ @f.MRP</td>
+                                        <td>₹ @f.Cost</td>
+                                        <td>₹ @((f.MRP - f.Cost).ToString("0"))</td>
+                                        <td>₹ @f.Quantity</td>
+                                        <td>₹ @((f.Quantity* f.Cost).ToString("0.00"))</td>
+                                    </tr>
+                                    TotalAmount = TotalAmount + f.Quantity * f.Cost;
+                                    Totalsgst = Totalsgst + f.Quantity * f.Cost * f.SGST / 100;
+                                    Totalcgst = Totalcgst + f.Quantity * f.Cost * f.CGST / 100;
+                                    Totaligst = Totaligst + f.Quantity * f.Cost * f.IGST / 100;
+                                    counter++;
+                                }
+
+
+                            </tbody>
+                            <tbody>
+                                <tr>
+                                    <td colspan="6" align="right"><strong>Taxable Amount</strong></td>
+                                    <td>₹ @TotalAmount.ToString("0.00")</td>
+                                </tr>
+                                @if (Totalsgst != 0)
+                                {
+                                    <tr>
+                                        <td colspan="6" align="right"><strong>SGST</strong></td>
+                                        <td>₹ @Totalsgst.ToString("0.00")</td>
+                                    </tr>
+                                }
+
+                                @if (Totalcgst != 0)
+                                {
+                                    <tr>
+                                        <td colspan="6" align="right"><strong>CGST</strong></td>
+                                        <td>₹ @Totalcgst.ToString("0.00")</td>
+                                    </tr>
+                                }
+                                @if (Totaligst != 0)
+                                {
+                                    <tr>
+                                        <td colspan="6" align="right"><strong>IGST</strong></td>
+                                        <td>₹ @Totaligst.ToString("0.00")</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td colspan="6" align="right"><strong>Net Amount</strong></td>
+                                    <td>₹ @((TotalAmount + Totalsgst + Totalcgst + Totaligst).ToString("0.00"))</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" align="right"><strong>Total Paid</strong></td>
+                                    <td>₹ @Model.Transfer.PaidAmount.ToString("0.00")</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" align="right"><strong>Balance Due</strong></td>
+                                    <td>₹ @Model.Transfer.DueAmount.ToString("0.00")</td>
+                                </tr>
+                            </tbody>
+                        }
+                    </table>
+                </div>
+                @if (Model.PaymentHistory != null && Model.PaymentHistory.Count > 0)
+                {
+                    <div class="fee-table" style="margin-top:18px;">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Receipt No.</th>
+                                    <th>Date</th>
+                                    <th>Mode</th>
+                                    <th>Reference No.</th>
+                                    <th>Received</th>
+                                    <th>Total Paid</th>
+                                    <th>Balance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var payment in Model.PaymentHistory.OrderBy(x => x.PaymentDate).ThenBy(x => x.StockPaymentID))
+                                {
+                                    <tr>
+                                        <td>
+                                            @payment.ReceiptNumber
+                                            @if (payment.IsCancelled)
+                                            {
+                                                <div style="color:#c9302c;font-weight:700;">Cancelled</div>
+                                            }
+                                        </td>
+                                        <td>@payment.PaymentDate.ToString("dd MMM, yyyy")</td>
+                                        <td>@payment.PaymentModeText</td>
+                                        <td>@(string.IsNullOrWhiteSpace(payment.PaymentReferanceNo) ? "-" : payment.PaymentReferanceNo)</td>
+                                        <td>₹ @payment.PaymentAmount.ToString("0.00")</td>
+                                        <td>₹ @payment.TotalPaidAmount.ToString("0.00")</td>
+                                        <td>
+                                            ₹ @payment.DueAmount.ToString("0.00")
+                                            @if (payment.IsCancelled && payment.CancelledDate.HasValue)
+                                            {
+                                                <div style="color:#c9302c;">@payment.CancelledDate.Value.ToString("dd MMM, yyyy")</div>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                <div class="row bottom-sec">
+                    <div class="col-sm-8">
+
+                    </div>
+                    <div class="col-sm-4 principle">Accountant</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f

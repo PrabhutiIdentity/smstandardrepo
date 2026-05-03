@@ -1,0 +1,857 @@
+﻿﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    List<NameIDModel> SubjectEvaluationFinalStatus = new List<NameIDModel>();
+}
+@model SMEnterprise.Models.PerformanceParameterDetailModel
+@section IncludeCss
+{
+    <title>Performance Card | @Model.Student.Name</title>
+    
+    <style>
+    :root {
+        --primary: #1a365d;
+        --secondary: #2d3748;
+        --accent: #4a5568;
+        --border: #cbd5e0;
+        --light-bg: #f8fafc;
+    }
+
+    /* A4 Preparation */
+    .report-card-container {
+        width: 210mm; /* Standard A4 Width */
+        margin: 0 auto;
+        padding: 10mm;
+        background: white;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: var(--secondary);
+    }
+
+    /* Header Design */
+    .report-header {
+        display: flex;
+        align-items: center;
+        border-bottom: 2px solid var(--primary);
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    .school-logo {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+    }
+
+    .school-details {
+        flex: 1;
+        text-align: center;
+    }
+
+    .school-name {
+        font-size: 22px;
+        font-weight: 800;
+        color: var(--primary);
+        text-transform: uppercase;
+        margin: 0;
+    }
+
+    .school-address {
+        font-size: 11px;
+        margin: 3px 0;
+    }
+
+    /* Student Info Grid */
+    .student-info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 100px;
+        gap: 15px;
+        margin-bottom: 15px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        padding: 10px;
+        border-radius: 4px;
+    }
+
+    .info-item { margin-bottom: 4px; }
+    .info-label { font-weight: 600; width: 100px; display: inline-block; color: var(--accent); }
+    .info-value { font-weight: 700; border-bottom: 1px dotted #ccc; }
+
+    /* Academic Table */
+    .section-title {
+        background: var(--primary);
+        color: white;
+        padding: 5px 10px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-top: 15px;
+    }
+
+    .marks-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11px;
+        margin-bottom: 10px;
+    }
+
+    .marks-table th, .marks-table td {
+        border: 1px solid #a0aec0;
+        padding: 6px 4px;
+        text-align: center;
+    }
+
+    .marks-table th {
+        background: var(--light-bg);
+        font-weight: 700;
+    }
+
+    .subject-name { text-align: left !important; padding-left: 10px !important; font-weight: 700; background: #f1f5f9; }
+
+    /* Summary & Result */
+    .summary-box {
+        display: flex;
+        justify-content: space-around;
+        background: var(--light-bg);
+        border: 1px solid var(--primary);
+        padding: 10px;
+        margin: 10px 0;
+    }
+
+    .summary-item { text-align: center; }
+    .summary-label { font-size: 10px; text-transform: uppercase; display: block; }
+    .summary-val { font-size: 16px; font-weight: 800; color: var(--primary); }
+
+    /* Signatures */
+    .footer-sig {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 40px;
+        padding: 0 20px;
+    }
+
+    .sig-line {
+        border-top: 1px solid var(--secondary);
+        width: 150px;
+        text-align: center;
+        font-size: 11px;
+        padding-top: 5px;
+        font-weight: 600;
+    }
+
+    /* PRINT OPTIMIZATION */
+    @@media print {
+        body { margin: 0; padding: 0; background: none; }
+        .report-card-container { margin: 0; border: none; width: 100%; }
+        .no-print { display: none; }
+        .marks-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; }
+        .section-title { background-color: #1a365d !important; -webkit-print-color-adjust: exact; }
+    }
+    </style>
+}
+
+
+    <div class="clearfix"></div>
+    <div class="report-card-container">
+        @using (Html.BeginForm("UpdateStudentPerformance", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "ClassUpdate" }))
+        {
+            <div class="report-header">
+                <header class="report-header">
+                    <img src="@Url.Content("~/Images/SBranchLogo/" + Model.SBranchDetails.SBranchID + "_" + Model.SBranchDetails.Logo)" class="school-logo" onerror="this.src='/Images/default-logo.png'" />
+
+                    <div class="school-details">
+                        <h1 class="school-name">@Model.SBranchDetails.BranchSchoolName</h1>
+                        <p class="school-address">@Model.SBranchDetails.Address</p>
+                        <p class="school-address">Ph: @Model.SBranchDetails.ContactNo | Email: @Model.SBranchDetails.EmailID</p>
+                        <div style="font-weight:bold; font-size: 16px; margin-top:5px; border-top:1px solid #eee; display:inline-block; padding: 2px 20px;">
+                            REPORT CARD (@Model.SessionName)
+                        </div>
+                    </div>
+                    @if (Model.SBranchDetails.SBranchID == 17)
+                    {
+
+                    }
+                    @if (Model.SBranchDetails.SBranchID == 23)
+                    {
+                        <img src="/Images/cbse-logo.png" class="school-logo" />
+                    }
+                    else
+                    {
+                        <div style="width:80px"></div>}
+                </header>
+
+                <div class="report-title-section">
+                    <div class="report-title">REPORT CARD</div>
+                    <div class="academic-session">Academic Session : @Model.SessionName</div>
+                </div>
+
+                <!-- Student Information -->
+                <div class="student-info-grid">
+                    <div class="info-col">
+                        <div class="info-item"><span class="info-label">Student Name:</span><span class="info-value">@Model.Student.Name</span></div>
+                        <div class="info-item"><span class="info-label">Father's Name:</span><span class="info-value">@Model.Student.FatherName</span></div>
+                        <div class="info-item"><span class="info-label">Mother's Name:</span><span class="info-value">@Model.Student.MotherName</span></div>
+                    </div>
+                    <div class="info-col">
+                        <div class="info-item"><span class="info-label">Class & Sec:</span><span class="info-value">@Model.Student.ClassName</span></div>
+                        <div class="info-item"><span class="info-label">Roll No:</span><span class="info-value">@Model.Student.RollNo</span></div>
+                        <div class="info-item"><span class="info-label">DOB:</span><span class="info-value">@Model.Student.DOB.ToString("dd-MMM-yyyy")</span></div>
+                    </div>
+
+                    <div class="info-photo">
+                        <img src="@Url.Content("~/Images/StudentImage/" + Model.Student.StudentID + "_" + Model.Student.Photo)"
+                             style="width:90px; height:100px; border:1px solid #ddd; padding:2px;"
+                             onerror="this.src='/Images/default-user.png'" />
+                    </div>
+                
+                @if (Model.Student.Photo == null)
+                {
+
+                }
+                else
+                {
+                    <div class="info-photo">
+                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.Student.Gender));" class="student-photo" style="width:90px; height:100px; border:1px solid #ddd; padding:2px;" src="@Url.Content("~/Images/StudentImage/")@(Model.Student.StudentID)_@Model.Student.Photo" />
+                    </div>
+                }
+             </div>
+
+
+
+                    <input type="hidden" name="StudentSessionUID" value="@Model.StudentSessionUID" />
+                    <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
+
+
+
+                    @{
+                        var mainCounter = 0;
+
+                        foreach (PerformanceParameterModel c in Model.PerformanceParameters)
+                        {
+                            if (c.ParamType == 0)
+                            {
+
+                                <div class="section-header">
+                                    @c.ParamName
+                                    @if (!string.IsNullOrEmpty(c.ParamDesc))
+                                    {
+                                        <div class="section-subtitle">@c.ParamDesc</div>
+                                    }
+                                </div>
+
+
+                                var sublevels = 1;
+                                <table class="marks-table">
+                                    <thead>
+                                        <tr>
+                                            <th @(Model.SubEvaluations.Count > 0 ? "rowspan=2" : "") style="min-width: 120px; text-align: left; padding-left: 15px; ">
+                                                Subject
+                                            </th>
+
+                                            @foreach (EvaluationModel me in Model.MainEvaluations)
+                                            {
+                                                if (sublevels < me.SubEvals)
+                                                {
+                                                    sublevels = me.SubEvals;
+                                                }
+                                                <th colspan="@(me.SubEvals + 2)"><b>@me.EvaluationName</b> (@me.Weightage.ToString("0") marks)</th>
+                                            }
+                                            @if (Model.EvaluationID == -1)
+                                            {
+                                                <th colspan="2">Sub Total</th>
+                                            }
+                                        </tr>
+                                        @if (Model.SubEvaluations.Count > 0)
+                                        {
+                                            <tr>
+                                                @foreach (EvaluationModel tme in Model.MainEvaluations)
+                                                {
+                                                    foreach (EvaluationModel se in Model.SubEvaluations)
+                                                    {
+                                                        if (se.MasterID == tme.EvaluationID)
+                                                        {
+                                                            <th>@se.EvaluationName (@se.Weightage)</th>
+                                                        }
+                                                    }
+                                                    <th><b>Marks Obtained (@tme.Weightage)</th>
+                                                    <th><b>Grade</th>
+                                                }
+                                                @if (Model.EvaluationID == -1)
+                                                {
+                                                    <th>Marks Obtained  <br /> (@Model.MainEvaluations.Sum(x => x.Weightage)) </th>
+                                                    <th>Grade</th>
+                                                }
+                                            </tr>
+                                        }
+                                    </thead>
+                                    <tbody>
+                                        @{ var privSubID = 0;
+                                            decimal totalmarksresult = 0;
+                                            var division = "First";
+                                            var Grade = "A";
+                                            var GradeAll = "A";
+                                            decimal TotalMarksT = 0;
+                                            decimal TotalObtMarksT = 0;
+                                            var divisionAll = "First";
+                                            decimal totaltotal = 0;
+                                            decimal totalscored = 0;
+                                        }
+
+                                        @foreach (ExamResultDetailModel r in Model.Result)
+                                        {
+
+                                            if (privSubID != r.SubjectID)
+                                            {
+                                                <tr>
+
+
+                                                    <td class="subject-name">@r.SubjectName</td>
+                                                    @foreach (EvaluationModel er in Model.MainEvaluations)
+                                                    {
+                                                        decimal EvalMaxMarks = 0;
+                                                        decimal SATotalMarks = 0;
+                                                        decimal EvalTotalMarks = 0;
+                                                        foreach (EvaluationModel esr in Model.SubEvaluations)
+                                                        {
+                                                            if (esr.MasterID == er.EvaluationID)
+                                                            {
+                                                                var isFound = false;
+                                                                foreach (ExamResultDetailModel err in Model.Result)
+                                                                {
+                                                                    if (err.MasterID == er.EvaluationID && esr.EvaluationType == err.EvaluationID && r.SubjectID == err.SubjectID)
+                                                                    {
+                                                                        @*<td>@(err.Grade == null ? "NA" : err.Grade)</td>*@
+                                                    if (Model.SBranchID == 0)
+                                                    {
+                                                                            <td>@err.wMaxMarks.ToString("N2")</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        if (err.Status == -1)
+                                                        {
+                                                                                <td>M/L</td>
+                                                        }
+                                                        else
+                                                        {
+                                                                                <td style="text-decoration: @(err.wMarksScored < err.PassMarks ? "underline" : "none")">@err.wMarksScored.ToString("0")</td>
+                                                        }
+
+                                                                            @* <td>@err.wMarksScored.ToString("N2")</td>*@
+                                                    }
+                                                                        @*<td>@err.wMarksScored.ToString("N2")</td>*@
+                                                            EvalTotalMarks = EvalTotalMarks + err.wMarksScored;
+                                                            isFound = true;
+                                                            EvalMaxMarks = EvalMaxMarks + err.wMaxMarks;
+                                                            er.TotalMarks = er.TotalMarks + err.wMaxMarks;
+                                                            er.MarksObtained = er.MarksObtained + err.wMarksScored;
+                                                            r.etMarksScored = r.etMarksScored + err.wMarksScored;
+                                                            r.etMaxMarks = r.etMaxMarks + err.wMaxMarks;
+                                                        }
+                                                    }
+                                                    if (!isFound)
+                                                    {
+                                                                    <td>NA</td>
+                                                                }
+                                                            }
+
+                                                        }
+                                                        var subEve = SubjectEvaluationFinalStatus.Where(se => se.ID == r.SubjectID && se.Name == er.EvaluationID.ToString()).SingleOrDefault();
+                                                        if (subEve == null)
+                                                        {
+                                                            subEve = new NameIDModel();
+                                                            subEve.ID = r.SubjectID;
+                                                            subEve.Name = er.EvaluationID.ToString();
+                                                            if (EvalMaxMarks > 0)
+                                                            {
+
+                                                                subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                            }
+                                                            @* subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();*@
+                                                        SubjectEvaluationFinalStatus.Add(subEve);
+                                                    }
+                                                    else
+                                                    {
+                                                        subEve.Extra1 = (EvalTotalMarks * 100 / EvalMaxMarks).ToString();
+                                                    }
+
+                                                    totalmarksresult = totalmarksresult + EvalMaxMarks;
+                                                        <td>@Math.Round(EvalTotalMarks, 2)</td>
+                                                        <td>@AcadmicModel.CalculateGrade(EvalTotalMarks, EvalMaxMarks)</td>
+                                                    }
+                                                    @if (Model.EvaluationID == -1)
+                                                    {
+                                                        <td>@r.etMarksScored.ToString("0.00")</td>
+                                                        <td>@AcadmicModel.CalculateGrade(r.etMarksScored, r.etMaxMarks)</td>
+                                                    }
+                                                </tr>
+                                            }
+                                            privSubID = r.SubjectID;
+                                        }
+                                        <tr class="total-row">
+                                            <td style="text-align: left; padding-left: 15px;">TOTAL</td>
+                                            @foreach (var me in Model.MainEvaluations)
+                                            {
+                                                //(@totalmarksresult.ToString("0"))
+                                                <td colspan="@(me.SubEvals)"><b>Total</b> </td>
+                                                <td><b>@Math.Round(me.MarksObtained, 2) </b></td>
+                                                @*<td>@Math.Round(me.MarksObtained * 100 / me.TotalMarks, 2)%</td>*@
+                                                @*<td>@Math.Round(me.TotalMarks == 0 ? 0 : me.MarksObtained * 100 / me.TotalMarks, 2)%</td>*@
+                                            division = @AcadmicModel.CalculateGradeDivision(me.MarksObtained, me.TotalMarks);
+                                            TotalMarksT = @Math.Round(me.TotalMarks, 2);
+                                            TotalObtMarksT = @Math.Round(me.MarksObtained, 2);
+                                            Grade = @AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks);
+                                                <td><b>@Math.Round(me.TotalMarks == 0 ? 0 : me.MarksObtained * 100 / me.TotalMarks, 2)% (@AcadmicModel.CalculateGrade(me.MarksObtained, me.TotalMarks))</b></td>
+                                            }
+                                            @if (Model.EvaluationID == -1)
+                                            {
+                                                <td>@Model.Result.Sum(x => x.etMarksScored).ToString("0.00")</td>
+                                                totaltotal = Model.Result.Sum(x => x.etMaxMarks);
+                                                totalscored = Model.Result.Sum(x => x.etMarksScored);
+                                                divisionAll = @AcadmicModel.CalculateGradeDivision(totalscored, totaltotal);
+                                                GradeAll = @AcadmicModel.CalculateGrade(totalscored, totaltotal);
+                                                <td>
+                                                    @Math.Round(totaltotal == 0 ? 0 : totalscored * 100 / totaltotal, 2)% <br /> ( @AcadmicModel.CalculateGrade(totalscored, totaltotal))
+
+                                                </td>
+
+                                            }
+
+                                    </tbody>
+                                </table>
+
+
+                                <!-- Summary Section -->
+                                <div class="summary-section">
+                                    <div class="summary-item">
+                                        <div class="summary-label">Overall Marks</div>
+                                        @if (Model.EvaluationID == -1)
+                                        {
+                                            <div class="summary-value">@totalscored.ToString("0") / @totaltotal.ToString("0")</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="summary-value">@TotalObtMarksT.ToString("0") / @TotalMarksT.ToString("0")</div>
+                                        }
+                                    </div>
+                                    <div class="summary-item">
+                                        <div class="summary-label">Percentage</div>
+                                        @if (Model.EvaluationID == -1)
+                                        {
+                                            <div class="summary-value">@Math.Round(totaltotal == 0 ? 0 : totalscored * 100 / totaltotal, 2)%</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="summary-value">@Math.Round(TotalMarksT == 0 ? 0 : TotalObtMarksT * 100 / TotalMarksT, 2)%</div>
+                                        }
+                                    </div>
+                                    <div class="summary-item">
+                                        <div class="summary-label">Grade</div>
+                                        @if (Model.EvaluationID == -1)
+                                        {
+                                            <div class="summary-value summary-grade">@GradeAll</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="summary-value summary-grade">@Grade</div>
+                                        }
+                                    </div>
+                                    <div class="summary-item">
+                                        <div class="summary-label">Division</div>
+                                        @if (Model.EvaluationID == -1)
+                                        {
+                                            <div class="summary-value">@divisionAll</div>
+                                        }
+                                        else
+                                        {
+                                            <div class="summary-value">@division</div>
+                                        }
+                                    </div>
+                                </div>
+                                <br />
+
+                            }
+                            if (c.ParamType == 1)
+                            {
+                                <div class="section-header">Co-Scholastic Areas</div>
+                                <div class="co-scholastic-grid">
+                                    @foreach (EvaluationModel eprop in Model.MainEvaluations)
+                                    {
+                                        <td style="width:@(100 / Model.MainEvaluations.Count)%">
+                                            <table class="table table-bordered">
+                                                <tr @(c.ParamName == "" ? "style=display:none" : "")>
+                                                    <td colspan="2">
+                                                        <b> @Html.Raw(c.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b> <br />
+                                                    </td>
+                                                    <td>Grade</td>
+                                                </tr>
+                                                @if (c.Subs != 0)
+                                                {
+                                                    var oldParamID = 0;
+                                                    foreach (PerformanceParameterModel s in Model.PerformanceParameters)
+                                                    {
+                                                        if ((s.ParamType == 5) && s.MainParamID == c.ParamID && (s.EvaluationID == eprop.EvaluationID || s.EvaluationID == -1))
+                                                        {
+                                                            <tr>
+                                                                <td colspan="2">
+                                                                    <asa class="noprint">@Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</asa>
+                                                                    <span class="print"> @Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</span>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamKey" value="@s.ParamKey" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamID" value="@s.ParamID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamValID" value="@s.ParamValID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].EvaluationID" value="@eprop.EvaluationID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].StudentSessionID" value="@Model.StudentSessionUID" />
+                                                                    @if (Model.EvaluationID != -1)
+                                                                    {
+                                                                        <input type="text" class="form-control" name="PerformanceParameters[@mainCounter].Grade" value="@s.Grade" />
+                                                                        <span class="print"> @s.Grade</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @s.Grade
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                            mainCounter++;
+                                                        }
+                                                        if ((s.ParamType == 6) && s.MainParamID == c.ParamID && (s.EvaluationID == eprop.EvaluationID || s.Grade == null))
+                                                        {
+                                                            <tr>
+                                                                <td style="width:80%">
+                                                                    <asa class="noprint"><b> @Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></asa>
+                                                                    <span class="print"><b> @Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></span>
+                                                                </td>
+                                                                <td>
+                                                                    Marks : <input type="text" class="form-control" name="PerformanceParameters[@mainCounter].ParamValue" value="@s.ParamValue" />
+                                                                    <aa class="print"> @s.ParamValue</aa>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamKey" value="@s.ParamKey" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamID" value="@s.ParamID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamValID" value="@s.ParamValID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].EvaluationID" value="@eprop.EvaluationID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].StudentSessionID" value="@Model.StudentSessionUID" />
+                                                                    Grade :
+                                                                    @if (Model.EvaluationID != -1)
+                                                                    {<input type="text" class="form-control" name="PerformanceParameters[@mainCounter].Grade" value="@s.Grade" />
+
+                                                                        <aa class="print"> @s.Grade</aa>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        @s.Grade
+                                                                    }
+                                                                </td>
+                                                            </tr>
+                                                            mainCounter++;
+                                                        }
+                                                        if ((s.ParamType == 7) && s.MainParamID == c.ParamID && (s.EvaluationID == eprop.EvaluationID || s.Grade == null))
+                                                        {
+                                                            <tr>
+                                                                <td style="width:80%">
+                                                                    <asa class="noprint"><b>@Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></asa>
+                                                                    <span class="print"><b> @Html.Raw(s.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b></span>
+                                                                </td>
+                                                                <td>
+                                                                    Attendance : <input type="text" class="form-control" name="PerformanceParameters[@mainCounter].ParamValue" value="@s.ParamValue" />
+                                                                    <aa class="print"> @s.ParamValue</aa>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamKey" value="@s.ParamKey" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamID" value="@s.ParamID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamValID" value="@s.ParamValID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].EvaluationID" value="@eprop.EvaluationID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].StudentSessionID" value="@Model.StudentSessionUID" />
+                                                                    Working Days : <input type="text" class="form-control" name="PerformanceParameters[@mainCounter].Grade" value="@s.Grade" />
+                                                                    <aa class="print"> @s.Grade</aa>
+                                                                </td>
+                                                            </tr>
+                                                            mainCounter++;
+                                                        }
+                                                    }
+                                                }
+                                            </table>
+                                        </td>
+                                    }
+
+                                </div>
+
+                            }
+                            if (c.ParamType == 2)
+                            {
+                                <div class="section-header">@c.ParamName</div>
+                                <div class="co-scholastic-grid">
+                                    @foreach (EvaluationModel eprop in Model.MainEvaluations)
+                                    {
+                                        <td style="width:@(100 / Model.MainEvaluations.Count)%">
+                                            <table class="table table-bordered">
+                                                <tr @(c.ParamName == "" ? "style=display:none" : "")>
+                                                    <td colspan="3">
+                                                        <b> @Html.Raw(c.ParamName.Replace("[EvaluationName]", "<b>" + eprop.EvaluationName + "</b>"))</b> <br />
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td><b> Subject</b></td>
+                                                    <td><b> Theory</b></td>
+                                                    <td><b> Practical</b></td>
+                                                </tr>
+                                                @{
+                                                    var oldParamID = 0;
+                                                    foreach (PerformanceParameterModel s in Model.PerformanceParameters)
+                                                    {
+                                                        if ((s.ParamType == 8) && s.MainParamID == c.ParamID && (s.EvaluationID == eprop.EvaluationID || s.EvaluationID == -1))
+                                                        {
+                                                            <tr>
+                                                                <td><b>@s.ParamName</b></td>
+                                                                <td>
+                                                                    <input type="text" class="form-control" name="PerformanceParameters[@mainCounter].ParamValue" value="@s.ParamValue" />
+                                                                    <aa class="print"> @s.ParamValue</aa>
+                                                                </td>
+                                                                <td>
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamKey" value="@s.ParamKey" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamID" value="@s.ParamID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].ParamValID" value="@s.ParamValID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].EvaluationID" value="@eprop.EvaluationID" />
+                                                                    <input type="hidden" name="PerformanceParameters[@mainCounter].StudentSessionID" value="@Model.StudentSessionUID" />
+                                                                    <input type="text" class="form-control" name="PerformanceParameters[@mainCounter].Grade" value="@s.Grade" />
+                                                                    <aa class="print"> @s.Grade</aa>
+                                                                </td>
+                                                            </tr>
+                                                            mainCounter++;
+                                                        }
+                                                    }
+                                                }
+                                            </table>
+                                        </td>
+                                                    }
+                                </div>
+                            }
+                        }
+
+                        <div class="remarks-section">
+                            <div class="remarks-label">Class Teacher's Remarks</div>
+                            <div class="remarks-box"></div>
+                        </div>
+
+
+                        if (Model.MainEvaluations.Count > 1)
+                        {
+
+                            var finalStatus = 0;
+                            foreach (var se in SubjectEvaluationFinalStatus)
+                            {
+                                if (Convert.ToDecimal(se.Extra1) < 40)
+                                {
+                                    var subsum = SubjectEvaluationFinalStatus.Where(s => s.ID == se.ID).Sum(c => Convert.ToDecimal(c.Extra1));
+                                    var subsumcount = SubjectEvaluationFinalStatus.Where(s => s.ID == se.ID).Count();
+                                    if (subsum / subsumcount < 40)
+                                    {
+                                        finalStatus = 1;
+                                        break;
+                                    }
+                                    else if (subsum / subsumcount > 40)
+                                    {
+                                        finalStatus = 2;
+                                        break;
+                                    }
+                                }
+                            }
+                            <div class="result-status pass">
+
+                                @if (Model.SBranchDetails.SBranchID == 9)
+                                {
+                                }
+                                else
+                                {
+                                    <span class="result-status-text">
+                                        Result Status: @(finalStatus == 0 ? "PASS" : finalStatus == 1 ? "PASS" : "PASS")
+                                    </span>
+                                }
+
+                            </div>
+
+                        }
+
+                        <div class="signatures-section">
+                            <div class="signature-box place-date">
+                                <div><strong>Place:</strong> _____________</div>
+                                <div><strong>Date:</strong> @Model.MainEvaluations[Model.MainEvaluations.Count - 1].ResultDate.ToString("dd MMM, yyyy")</div>
+                            </div>
+
+                            @if (Model.SBranchDetails.ClassTeacherSign == null)
+                            {
+                                <div class="signature-box">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-label">Signature of Class Teacher</div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="signature-box">
+                                    <img onerror="return OnImageError(this,2);" class="signature-image" alt="Class Teacher Sign"
+                                         src="@Url.Content("~/Images/EmployeeDocuments/")@(Model.SBranchDetails.CTeacherID)_Sign_@(Model.SBranchDetails.ClassTeacherSign)" />
+                                    <div class="signature-name">@Model.SBranchDetails.ClassTeacher</div>
+                                    <div class="signature-label">Class Teacher</div>
+                                </div>
+                            }
+
+                            @if (Model.SBranchDetails.SBranchID == 0)
+                            {
+                                <td style="width:25%">
+                                    <br />
+                                    <br />
+                                    <br />
+                                    <br />
+                                    Signature of<br />
+                                    Parent's
+                                </td>
+                            }
+
+
+                            @if (Model.SBranchDetails.TeacherIncharge != null)
+                            {
+                                <div class="signature-box">
+                                    <img onerror="return OnImageError(this,2);" class="signature-image" alt="Teacher Incharge Sign"
+                                         src="@Url.Content("~/Images/EmployeeDocuments/")@(Model.SBranchDetails.InchargeTeacherID)_Sign_@(Model.SBranchDetails.TeacherInchargeSign)" />
+                                    <div class="signature-name">@Model.SBranchDetails.TeacherIncharge</div>
+                                    <div class="signature-label">Teacher Incharge</div>
+                                </div>
+                            }
+
+                            @if (Model.SBranchDetails.PrincipalSignature == null)
+                            {
+                                <div class="signature-box">
+                                    <div class="signature-line"></div>
+                                    <div class="signature-label">Signature of Principal</div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="signature-box">
+                                    <img onerror="return OnImageError(this,2);" class="signature-image" alt="Principal Sign"
+                                         src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_P_@(Model.SBranchDetails.PrincipalSignature)" />
+                                    <div class="signature-line" style="margin-top: 10px;"></div>
+                                    <div class="signature-label">Signature of Principal</div>
+                                </div>
+                            }
+                        </div>
+                        <!-- Grading Scale -->
+                        <div class="grading-scale-section">
+                            <div class="grading-scale-card">
+                                <div class="grading-scale-title">Grading Scale for Scholastic Areas</div>
+                                <div class="grading-scale-content">
+                                    <span class="grade-badge grade-badge-a1">A1</span> 91%-100% &nbsp;
+                                    <span class="grade-badge grade-badge-a2">A2</span> 81%-90% &nbsp;
+                                    <span class="grade-badge grade-badge-b1">B1</span> 71%-80% &nbsp;
+                                    <span class="grade-badge grade-badge-b2">B2</span> 61%-70% &nbsp;
+                                    <span class="grade-badge grade-badge-c1">C1</span> 51%-60% &nbsp;
+                                    <span class="grade-badge grade-badge-c2">C2</span> 41%-50% &nbsp;
+                                    <span class="grade-badge grade-badge-d">D</span> 33%-40% &nbsp;
+                                    <span class="grade-badge grade-badge-e">E</span> Below 33%
+                                </div>
+                            </div>
+                            <div class="grading-scale-card">
+                                <div class="grading-scale-title">Grading Scale for Co-Scholastic Areas</div>
+                                <div class="grading-scale-content">
+                                    <span class="grade-badge grade-badge-a1">A</span> Outstanding &nbsp;
+                                    <span class="grade-badge grade-badge-b1">B</span> Very Good &nbsp;
+                                    <span class="grade-badge grade-badge-c1">C</span> Fair &nbsp;
+                                    <span class="grade-badge grade-badge-d">D</span> Needs Improvement
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" id="hdnCounterCount" value="@mainCounter" />
+                    }
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons noprint">
+                        <button type="button" class="btn-print" onclick="PrintReport();">
+                            <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z" />
+                                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5z" />
+                            </svg>
+                            Print Report
+                        </button>
+                        @if (Model.EvaluationID != -1)
+                        {
+                            <button type="submit" class="btn-save" onclick="$(this).css('display', 'none');">
+                                Save
+                            </button>
+                        }
+                    </div>
+
+                }
+            </div>
+
+                                                    }
+        @section scripts
+{
+            <script type="text/javascript">function PrintReport() {
+        var StudentName = $('#bStudentName').html();
+        var ClassSection = $('#bClassSection').html();
+        var contents = $(".report-card-container").html();
+        var frame1 = $('<iframe />');
+        frame1[0].name = "frame1";
+        frame1.css({ "position": "absolute", "top": "-1000000px" });
+        $("body").append(frame1);
+        var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title>Performance Report For ' + StudentName + ' - Class ' + ClassSection + '</title>');
+        frameDoc.document.write('<style>');
+        frameDoc.document.write(`
+            body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; }
+            .report-card-container { max-width: 100%; }
+            .report-header { background: #1e3a5f !important; color: white; padding: 20px; }
+            .school-info-section { display: flex; align-items: center; justify-content: space-between; }
+            .school-logo { width: 80px; height: 80px; border-radius: 50%; }
+            .school-details { flex: 1; text-align: center; }
+            .school-name { font-size: 24px; font-weight: bold; }
+            .report-title-section { text-align: center; padding: 15px; background: #f7fafc; }
+            .report-title { font-size: 22px; color: #1e3a5f; font-weight: bold; }
+            .student-info-section { display: grid; grid-template-columns: 1fr 1fr auto; gap: 20px; padding: 20px; }
+            .info-row { display: flex; gap: 10px; margin-bottom: 8px; }
+            .info-label { color: #718096; font-size: 12px; min-width: 110px; }
+            .info-value { color: #2d3748; font-weight: 600; font-size: 13px; }
+            .student-photo { width: 100px; height: 120px; border-radius: 8px; border: 2px solid #e2e8f0; }
+            .section-header { background: #1e3a5f !important; color: white; padding: 10px 15px; font-weight: bold; }
+            .marks-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+            .marks-table th, .marks-table td { border: 1px solid #e2e8f0; padding: 6px; text-align: center; }
+            .marks-table th { background: #edf2f7; }
+            .subject-name { text-align: left !important; font-weight: 600; color: #1e3a5f; }
+            .total-row { background: #edf2f7 !important; font-weight: bold; }
+            .summary-section { display: grid; grid-template-columns: repeat(4, 1fr); background: #f7fafc; border-top: 2px solid #1e3a5f; }
+            .summary-item { padding: 15px; text-align: center; border-right: 1px solid #e2e8f0; }
+            .summary-label { font-size: 10px; color: #718096; text-transform: uppercase; }
+            .summary-value { font-size: 16px; font-weight: bold; color: #1e3a5f; }
+            .co-scholastic-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; padding: 15px; }
+            .co-scholastic-card { border: 1px solid #e2e8f0; border-radius: 6px; }
+            .co-scholastic-header { background: #edf2f7; padding: 8px 12px; font-weight: 600; color: #1e3a5f; }
+            .co-scholastic-table { width: 100%; font-size: 11px; }
+            .co-scholastic-table td { padding: 6px 10px; border-bottom: 1px solid #e2e8f0; }
+            .remarks-section { padding: 15px 20px; }
+            .remarks-box { border: 1px solid #e2e8f0; min-height: 60px; border-radius: 6px; background: #f7fafc; }
+            .result-status { text-align: center; padding: 12px; background: #c6f6d5 !important; margin: 0 20px 15px; border-radius: 6px; }
+            .result-status-text { font-size: 18px; font-weight: bold; color: #22543d; }
+            .signatures-section { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 20px; border-top: 2px solid #e2e8f0; }
+            .signature-box { text-align: center; }
+            .signature-line { border-top: 1px solid #718096; margin: 40px auto 8px; width: 80%; }
+            .signature-label { font-size: 11px; color: #718096; }
+            .grading-scale-section { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px 20px; background: #f7fafc; }
+            .grading-scale-card { background: white; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; }
+            .grading-scale-title { font-size: 11px; font-weight: bold; color: #1e3a5f; margin-bottom: 8px; }
+            .grading-scale-content { font-size: 10px; }
+            .noprint, .action-buttons { display: none !important; }
+        `);
+        frameDoc.document.write('</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            frame1.remove();
+        }, 500);
+    }</script>
+        }

@@ -143,12 +143,21 @@ namespace SMEnterprise.Models
     }
     public class StudentModel
     {
+<<<<<<< HEAD
+=======
+        public long PenNo { get; set; }
+        public long ApaarID { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         public string PSchoolName { get; set; }
         public string PSchoolMedium { get; set; }
         public string PClassName { get; set; }
         public string PSResult { get; set; }
         public string PSchoolCity { get; set; }
         public string PSchoolState { get; set; }
+<<<<<<< HEAD
+=======
+        public int SessionID { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         public string SParentID { get; set; }
         public int IsCustomFee { get; set; }
         public int IsBlock { get; set; }
@@ -256,6 +265,19 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase CategoryCertificateUploader { get; set; }
         public HttpPostedFileBase TransferCertificateUploader { get; set; }
         public string EducationLevel { get; set; }
+<<<<<<< HEAD
+=======
+
+
+        public decimal FeeAmount { get; set; }
+        public decimal Discounts { get; set; }
+        public decimal PaidAmount { get; set; }
+        public decimal UnpaidAmount { get; set; }
+        
+            
+        
+
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
     }
     public class StudentEditModel
     {
@@ -572,4 +594,14 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Quota { get; set; }
         public int SBranchID { get; set; }
     }
+<<<<<<< HEAD
    }
+=======
+    public class FeeSelectionViewModel
+    {
+        public int Month { get; set; }
+        public int Year { get; set; }
+        public decimal Amount { get; set; }
+    }
+}
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f

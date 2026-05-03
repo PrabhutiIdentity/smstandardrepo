@@ -1,0 +1,134 @@
+Session Carry Forward Live Deployment Checklist
+==============================================
+
+Scope
+-----
+- Branch-wise carry-forward rollout
+- Current live pilot branch: 34
+- Includes system fee identification, carry-forward generation, payment lock, and UI save protections
+
+Execution Order
+---------------
+1. Run:
+   F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-246-session-carry-forward-system-fee-package.sql
+
+2. Run:
+   F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-247-branch34-session-carry-forward-system-fee-implementation.sql
+
+3. Run:
+   F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-240-session-carry-forward-procedures.sql
+
+4. Run:
+   F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-244-sp_ApplySessionCarryForward-no-nested-insert-exec.sql
+
+5. Run:
+   F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-243-sp_GetClassGroupFeeListOnly-branch34-carry-forward-final.sql
+
+6. Run:
+   F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-242-sp_GetStudentFeeDetailsNew-branch34-carry-forward.sql
+
+7. Run:
+   F:\Projects\SMStandardNiraj\SMEnterprise\DBChanges\se-245-spn_SaveFeePaymentV2-carry-forward-lock.sql
+
+8. Deploy application code changes:
+   F:\Projects\SMStandardNiraj\SMEnterprise\Repository\AccountData.cs
+   F:\Projects\SMStandardNiraj\SMEnterprise\Controllers\AccountController.cs
+   F:\Projects\SMStandardNiraj\SMEnterprise\Controllers\AdminController.cs
+   F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\_StudentCustomFeeEditPartial.cshtml
+   F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\StudentsFee.cshtml
+   F:\Projects\SMStandardNiraj\SMEnterprise\Views\Account\StudentsFee-Main.cshtml
+   F:\Projects\SMStandardNiraj\SMEnterprise\Views\Admin\FeeCategoryManagement.cshtml
+
+What se-246 Should Do
+---------------------
+- Add SBranchMaster.IsCarryForwardApplicable with default 0
+- Add FeeTypeMaster.SystemFeeCode
+- Add FeeTypeMaster.IsSystemFee
+- Backfill existing Session-Carry-forward rows as system fees
+- Create helper procs:
+  - dbo.sp_GetSessionCarryForwardFeeTypeID
+  - dbo.sp_EnsureSessionCarryForwardFeeType
+- Create protection triggers to block rename/delete of system carry-forward fee
+
+What se-247 Should Do for Branch 34
+-----------------------------------
+- Enable branch 34:
+  IsCarryForwardApplicable = 1
+- Mark or create branch 34 carry-forward fee type as system fee
+- Attach carry-forward fee type to all class/group combinations in target session with FeeAmount = 0
+
+Pre-Go-Live Review
+------------------
+1. Confirm branch 34 current target session id in se-247
+2. Confirm branch 34 carry-forward fee head exists or will be created
+3. Confirm no duplicate SystemFeeCode rows for branch 34
+4. Confirm carry-forward fee type is attached to target session class/group rows
+
+Pilot Verification Steps
+------------------------
+1. Preview one promoted student:
+   EXEC dbo.sp_PreviewSessionCarryForward ...
+
+2. Apply one promoted student:
+   EXEC dbo.sp_ApplySessionCarryForward ...
+
+3. Verify StudentFeeDetails row:
+   - SessionID = Target StudentSessionUID
+   - FeeTypeID = carry-forward fee type
+   - FeeAmount = expected previous due
+   - IsApplicable = 1
+
+4. Verify fee summary/detail procedures are updated:
+   - dbo.sp_GetClassGroupFeeListOnly
+   - dbo.sp_GetStudentFeeDetailsNew
+
+5. Verify SessionCarryForwardMap row
+
+6. Open current session fee screen
+   - summary should be correct
+   - detail grid should be correct
+   - receipt should be correct
+
+7. Open custom fee tab
+   - Session-Carry-forward should be readonly
+   - IsApplicable should not be editable
+   - save should not change carry-forward amount
+
+8. Try old-session payment for same migrated student
+   - payment must be blocked
+   - readable validation message must be shown
+
+9. Try current-session payment
+   - payment should save successfully
+
+10. Try editing Session-Carry-forward from Admin > Fee Category Management
+    - rename/type change/delete should remain blocked
+    - page should show readable message
+    - raw ASP.NET error page should not appear
+
+Business Rule Confirmation
+--------------------------
+- Old session balance may still display
+- Old session collection must be blocked once carry-forward is mapped
+- Recovery should happen only from current session carry-forward
+
+Operational Rule
+----------------
+- Already manually-adjusted old branches/students: keep manual
+- Newly promoted students: use auto carry-forward
+- Branches where school does not want carry-forward:
+  keep SBranchMaster.IsCarryForwardApplicable = 0
+
+Rollback Caution
+----------------
+- Do not delete system carry-forward fee type
+- Do not rename system carry-forward fee type manually
+- Do not run auto carry-forward blindly on branches already using manual custom due rows
+
+Post-Deployment Monitoring
+--------------------------
+1. Check one quota student
+2. Check one custom-fee student
+3. Check one partial payment case
+4. Check one blocked old-session payment case
+5. Check one not-promoted student case

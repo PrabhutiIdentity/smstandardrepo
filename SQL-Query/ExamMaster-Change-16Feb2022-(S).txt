@@ -1,0 +1,371 @@
+
+alter table [SubjectMasterT]
+add SeqNo int, IsAdditionalSubject	int,IsGradeType bit,IsGradeMarking bit,	EVSectionID int,GSubjectID int,MarkingScheme int
+go
+
+
+alter table ExamMaster
+Add MarkingScheme int
+go
+drop proc [sp_UpdateExamDetails]
+go 
+drop type ExamDetails
+go
+CREATE TYPE [dbo].[ExamDetails] AS TABLE(
+	[ExamID] [int] NULL,
+	[EvaluationID] [int] NULL,
+	[ClassID] [int] NULL,
+	[GroupID] [int] NULL,
+	[SubjectID] [int] NULL,
+	[ExamDate] [date] NULL,
+	[StartTime] [time](7) NULL,
+	[EndTime] [time](7) NULL,
+	[SBranchID] [int] NULL,
+	[UserID] [int] NULL,
+	[CreatedDate] [datetime] NULL,
+	[ModifiedDate] [datetime] NULL,
+	[IsApplicable] [bit] NULL,
+	[MaxMarks] [numeric](10, 2) NULL,
+	[PassMarks] [numeric](10, 2) NULL,
+	[IsLocked] [int] NULL,
+	[MarkingScheme] [int] NULL
+)
+GO
+
+create proc [dbo].[sp_UpdateExamDetails]      
+(      
+@ExamDetails ExamDetails READONLY      
+)      
+AS      
+BEGIN       
+   UPDATE e SET e.EvaluationID=d.EvaluationID, e.ClassID=d.ClassID, e.GroupID=d.GroupID, e.SubjectID=d.SubjectID,e.IsLocked=d.IsLocked      
+   , e.ExamDate=d.ExamDate, e.StartTime=d.StartTime, e.EndTime=d.EndTime, e.IsApplicable=d.IsApplicable,      
+   e.ModifiedDate=d.ModifiedDate,e.UserID=d.UserID,e.MaxMarks=d.MaxMarks,e.PassMarks=d.PassMarks,e.MarkingScheme=d.MarkingScheme    
+    FROM  ExamMaster e, @ExamDetails d       
+    WHERE d.ExamID=e.ExamID and d.ExamID<>0      
+      
+   INSERT INTO ExamMaster(EvaluationID, ClassID, GroupID,SubjectID,ExamDate,StartTime,EndTime,SBranchID      
+   ,UserID,CreatedDate ,IsApplicable,MaxMarks,PassMarks,IsLocked,MarkingScheme)      
+    SELECT EvaluationID, ClassID, GroupID,SubjectID,ExamDate,StartTime,EndTime,SBranchID      
+   ,UserID,CreatedDate ,IsApplicable,MaxMarks,PassMarks,IsLocked,MarkingScheme FROM @ExamDetails PD where PD.ExamID=0      
+END 
+go
+
+alter table SubjectMasterT
+Add [IsAdditionalSubject] int,
+[IsGradeType] bit,
+[IsGradeMarking] int,
+[EVSectionID] int,
+[GSubjectID] int,
+[MarkingScheme] int
+go
+
+CREATE view [dbo].[SubjectMaster]    
+  as     
+  Select SubjectID,SubjectName,IsOptionalSubject,Status,GroupID,SubjectCode,MainSubID,SubjectType,IsAdditionalSubject,IsGradeType,IsGradeMarking,EVSectionID,GSubjectID,isnull(MarkingScheme,0) as MarkingScheme,    
+  (Select Count(*) from SubjectMasterT SS where SS.MainSubID=SM.SubjectID) as SubSubjectCount    
+   from SubjectMasterT SM where isnull(MainSubID,0)=0    
+go
+
+  
+   alter view [dbo].[SubjectMasterAll]  
+  as   
+
+    Select SubjectID,  
+	--(Case when isnull(IsGradeType,0)=1 then isnull((Select SectionTitle from [dbo].[EducationLSections] ELS where ELS.ELSectionID=SM.EVSectionID),'')+'->'+SubjectName else  
+
+  (case when isnull(MainSubID,0)=0 then SubjectName else isnull((Select SubjectName from SubjectMasterT SS where SS.SubjectID=SM.MainSubID),'')+'->'+SubjectName end) as SubjectName  
+  ,IsOptionalSubject,Status,GroupID,SubjectCode,MainSubID,SubjectType,EVSectionID,IsGradeType   
+   from SubjectMasterT SM where  isnull(SM.IsAdditionalSubject,0)=0 or isnull(IsGradeType,0)=1 --and SubjectID not in (Select isnull(MainSubID,0) from SubjectMasterT )   
+     go
+
+
+alter view [dbo].[SubjectMaster]    
+  as     
+  Select SubjectID,SubjectName,IsOptionalSubject,Status,GroupID,SubjectCode,MainSubID,SubjectType,IsAdditionalSubject,IsGradeType,IsGradeMarking,EVSectionID,GSubjectID,isnull(MarkingScheme,0) as MarkingScheme,    
+  (Select Count(*) from SubjectMasterT SS where SS.MainSubID=SM.SubjectID) as SubSubjectCount    
+   from SubjectMasterT SM where isnull(MainSubID,0)=0    
+
+go
+ alter proc [dbo].[spn_GetGroupSubjectDetails]    
+(    
+@GroupID int    
+)    
+AS    
+BEGIN    
+ Select SubjectID,SubjectName,IsOptionalsubject,Status,GroupID,SubjectCode,          
+ MainSubID,SubSubjectCount,(select Count(*) from Teacher_Subject ST where ST.SubjectID=SM.SubjectID) as TAssigned, isnull(MarkingScheme  ,0) as MarkingScheme  
+ from SubjectMaster SM  where  GroupID=@GroupID    
+END   
+
+go
+	alter procedure [dbo].[spn_InsertUpdateGroupSubject]    
+(    
+@SubjectID int,    
+@GroupID int,    
+@SubjectName varchar(20),    
+@IsOptionalSubject int,    
+@Status int,    
+@OpType int,    
+@SubjectCode nvarchar(20)='',    
+@MainSubID int=0,    
+@SubjectType int=0,  
+@MarkingScheme int=0      
+)    
+as     
+begin     
+ if(@MainSubID<>0)    
+ begin    
+  Select @GroupID=GroupID from SubjectMaster where SubjectID=@MainSubID    
+ end    
+ if(@OpType=-1)    
+ begin    
+  Delete from SubjectMasterT where SubjectID=@SubjectID    
+ end    
+ else if(@SubjectID=0)    
+ begin    
+  Insert into SubjectMasterT(SubjectName,IsOptionalsubject,Status,GroupID,SubjectCode,MainSubID,SubjectType,MarkingScheme)    
+  values(@SubjectName,@IsOptionalSubject,@Status,@GroupID,@SubjectCode,@MainSubID,@SubjectType,@MarkingScheme)    
+ end    
+ else    
+ begin    
+  Update SubjectMasterT set SubjectName=@SubjectName,IsOptionalsubject=@IsOptionalSubject,GroupID=@GroupID,Status=@Status,SubjectCode=@SubjectCode,SubjectType=@SubjectType,MarkingScheme=@MarkingScheme    
+  where SubjectID=@SubjectID    
+ end    
+ if(@MainSubID=0)    
+ begin    
+  exec spn_GetGroupSubjectDetails @GroupID     
+ end    
+ else    
+ begin    
+  exec sp_GetSubSubjects @MainSubID    
+ end    
+end    
+    
+	go
+
+	  
+ alter proc [dbo].[spn_GetGroupSubjectDetails]    
+(    
+@GroupID int    
+)    
+AS    
+BEGIN    
+ Select SubjectID,SubjectName,IsOptionalsubject,Status,GroupID,SubjectCode,          
+ MainSubID,SubSubjectCount,(select Count(*) from Teacher_Subject ST where ST.SubjectID=SM.SubjectID) as TAssigned, isnull(MarkingScheme  ,0) as MarkingScheme  
+ from SubjectMaster SM  where  GroupID=@GroupID    
+END   
+go
+
+
+alter FUNCTION [dbo].[GetEvaluationSchemeClassList]      
+(      
+@SchemeID int  ,    
+@SessionID int    
+)      
+RETURNS nvarchar(max)      
+as      
+begin      
+declare @Classes nvarchar(Max)      
+Set @Classes= ''      
+declare @ClassID int      
+declare @ClassName nvarchar(max)      
+declare FirstCursor cursor  for select HC.ClassID, CM.ClassName    
+from [ClassSessionDetails] HC left Outer Join ClassMaster CM on HC.ClassID=CM.ClassID where HC.SchemeID=@SchemeID   and HC.SessionID=@SessionID    
+OPEN FirstCursor      
+ FETCH NEXT FROM FirstCursor INTO @ClassID, @ClassName        
+ WHILE @@FETCH_STATUS = 0      
+ Begin      
+ if(@ClassName is not null)      
+ begin      
+   set @Classes=@Classes+','+@ClassName      
+   end      
+   FETCH NEXT FROM FirstCursor INTO @ClassID, @ClassName      
+ end      
+close FirstCursor      
+deallocate FirstCursor      
+if(@Classes!='')      
+begin      
+ set @Classes= substring(@Classes,2,len(@Classes)-1)      
+end      
+return @Classes      
+end 
+go
+
+alter FUNCTION [dbo].[GetSchemeClassListIDs]        
+(        
+@SchemeID int    ,    
+@SessionID int    
+)        
+RETURNS nvarchar(max)        
+as        
+begin        
+declare @Classes nvarchar(Max)        
+Set @Classes= ''        
+declare @ClassID int        
+declare FirstCursor cursor  for select HC.ClassID from [ClassSessionDetails] HC where HC.SchemeID=@SchemeID    and HC.SessionID=@SessionID    
+OPEN FirstCursor        
+ FETCH NEXT FROM FirstCursor INTO @ClassID          
+ WHILE @@FETCH_STATUS = 0        
+ Begin        
+   set @Classes=@Classes+','+convert(nvarchar(10), @ClassID)        
+   FETCH NEXT FROM FirstCursor INTO @ClassID        
+ end        
+close FirstCursor        
+deallocate FirstCursor        
+       
+if(@Classes!='')        
+begin        
+ set @Classes= substring(@Classes,2,len(@Classes)-1)        
+end        
+return @Classes        
+end 
+go
+alter proc [dbo].[sp_GetEvaluationSchemes]    
+(      
+@SBranchID int,      
+@SessionID int=0      
+)      
+AS      
+BEGIN      
+ if(@SessionID=0)      
+ begin      
+  Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID      
+ end      
+ Select EvaluationSchemeID,EvaluationSchemeName,[dbo].[GetEvaluationSchemeClassList](EvaluationSchemeID,@SessionID) as Classes,    
+ [dbo].[GetSchemeClassListIDs](EvaluationSchemeID,@SessionID) as ClassIDs      
+ from EvaluationSchemeMaster where SBranchID=@SBranchID and SessionID=@SessionID      
+ select @SessionID      
+ Select SessionID,SessionName,SessionStatus,SessionStartDate,SessionEndDate from SessionMaster where SBranchID=@SBranchID order by SessionStartDate      
+       
+ select CM.ClassID,CM.ClassName,ESM.EvaluationSchemeName as EducationLevelName, ESM.EvaluationSchemeID      
+ from ClassMaster CM left outer join [ClassSessionDetails] CSD on CSD.SessionID=@SessionID and CSD.ClassID=CM.ClassID      
+ left outer join EvaluationSchemeMaster ESM on ESM.EvaluationSchemeID=CSD.SchemeID  and ESM.SessionID=@SessionID    
+ where CM.SBranchID=@SBranchID and CM.Status=1      
+END    
+go
+
+      
+alter proc [dbo].[spn_GetExamPageModel]          
+(          
+@EvaluationID int,          
+@ClassID int,          
+@GroupID int,          
+@SBranchID int,          
+@EvaluationMode int,          
+@SessionID int          
+)          
+AS          
+BEGIN          
+  declare @SchemeID1 int          
+declare @SchemeID int          
+if(@SessionID=0)          
+Begin          
+Select @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID and SessionStatus=1          
+End          
+declare @ELID int          
+if(@EvaluationID=0)          
+begin          
+          
+Select @ClassID=min(ClassID) from ClassMaster where Status=1 and SBranchID=@SBranchID     
+ select @SchemeID1=isnull(EvaluationSchemeID,0) from [dbo].[EvaluationSchemeMaster] where sessionid=@SessionID   
+ if(@SchemeID1>0)  
+ begin       
+select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@SessionID   
+end  
+        
+Select @EvaluationID=EvaluationID from EvaluationMaster EM where SBranchID=@SBranchID and          
+EvaluationSchemeID=@SchemeID and EvaluationID not in (Select isnull(MasterID,0) from EvaluationMaster)        
+--and isnull(MasterID,0)>0        
+Select @ELID =EducationLevelID from ClassMaster where ClassID=@ClassID          
+Select @GroupID=GroupID from GroupMaster where EducationLevelID=@ELID          
+Select @SessionID=SessionID from SessionMaster where SessionStatus=1 and SBranchID=@SBranchID          
+end          
+else          
+begin          
+Select @ELID =EducationLevelID from ClassMaster where ClassID=@ClassID          
+select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@SessionID          
+end          
+          
+declare @EvaMonth nvarchar(2)          
+declare @EvaYear nvarchar(4)          
+          
+select @EvaMonth=[EvaluationMonth] from [dbo].[EvaluationMaster] where EvaluationID=@EvaluationID          
+          
+select @EvaYear= YEAR(getdate())          
+          
+Select EvaluationID,          
+(case when isnull(MasterID,0)=0 then EvaluationName else          
+(Select EvaluationName from EvaluationMaster ED where ED.EvaluationID=EM.MasterID)+'->'+EvaluationName end) as EvaluationName          
+from EvaluationMaster EM where SBranchID=@SBranchID and EvaluationSchemeID=@SchemeID and EvaluationID not in (Select isnull(MasterID,0) from EvaluationMaster)        
+--and isnull(MasterID,0)>0        
+          
+Select ClassID,ClassName from ClassMaster where Status=1 and SBranchID=@SBranchID          
+Select GroupID,GroupName from GroupMaster where EducationLevelID=isnull(@ELID,0)          
+          
+Select EM.ExamID,SM.SubjectID,SM.SubjectName,SM.[Status] as Sstatus,isnull(EM.ExamDate,cast(@EvaMonth+'/01'+'/'+@EvaYear as date)) as ExamDate,EM.IsLocked          
+,cast(isnull(EM.StartTime,'09:00:00') as nvarchar(8)) as StartTime , cast(isnull(EM.EndTime,'10:30:00') as nvarchar(8)) as EndTime,          
+isnull(EM.IsApplicable,1) as IsApplicable,isnull(MaxMarks,100) as MaxMarks,isnull(PassMarks,35) as PassMarks from SubjectMasterAll SM          
+left outer join ExamMaster EM on EM.SubjectID=SM.SubjectID and  EM.ClassID=@ClassID and          
+EM.GroupID=@GroupID and EM.SBranchID=@SBranchID and EM.EvaluationID=@EvaluationID          
+where SM.GroupID =@GroupID --and EM.EvaluationID<>0          
+order by isnull(EM.ExamDate,cast(@EvaMonth+'/01'+'/'+@EvaYear as date)) asc          
+          
+          
+Select isnull(@EvaluationID,0)          
+Select isnull(@ClassID,0)          
+select isnull(@GroupID,0)          
+select isnull(@SessionID,0)          
+          
+Select SessionID,SessionName,SessionStatus from SessionMaster where SBranchID=@SBranchID          
+          
+END 
+go
+
+
+
+
+ alter proc [dbo].[sp_GetEvaluationList]  --1,-1,8,5               
+(                
+@SBranchID int,                
+@EvaluationMode int=null,                
+@ClassID int=0,                
+@SessionID int=0                
+)                
+AS                
+BEGIN                 
+declare @SchemeID int     
+ declare @SchemeID1 int       
+select @SchemeID1=isnull(EvaluationSchemeID,0) from [dbo].[EvaluationSchemeMaster] where sessionid=@SessionID          
+ if(@SchemeID1>0)          
+ begin               
+select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@SessionID           
+end     
+    
+--select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@SessionID                
+--if(@SchemeID is null)                
+--begin                
+--declare @TSessionID int                
+--Select top 1 @TSessionID=SessionID from SessionMaster where SessionID<>@SessionID and SBranchID=@SBranchID order by SessionStartDate desc                
+--select @SchemeID=SchemeID from [dbo].[ClassSessionDetails] where ClassID=@ClassID and SessionID=@TSessionID                
+--insert into [dbo].[ClassSessionDetails] (ClassID,SessionID,SchemeID) values(@ClassID,@SessionID,@SchemeID)                
+--end                
+if(@EvaluationMode<>-1)                
+begin                
+Select EvaluationID,                
+(case when isnull(MasterID,0)=0 then EvaluationName else                 
+(Select EvaluationName from EvaluationMaster ED where ED.EvaluationID=EM.MasterID)+'->'+EvaluationName end) as EvaluationName                
+from EvaluationMaster EM where SBranchID=@SBranchID and EvaluationSchemeID=@SchemeID and EvaluationID not in (Select isnull(MasterID,0) from EvaluationMaster)                
+end                
+else if(@EvaluationMode=-1)                
+begin                
+print @EvaluationMode       
+Select EvaluationID, EvaluationName        
+from EvaluationMaster EM where SBranchID=@SBranchID and EvaluationSchemeID=@SchemeID and isnull(MasterID,0)=0               
+--Select EvaluationID,             
+--(case when isnull(MasterID,0)=0 then EvaluationName else                 
+--(Select EvaluationName from EvaluationMaster ED where ED.EvaluationID=EM.MasterID)+'->'+EvaluationName end) as EvaluationName      
+--from EvaluationMaster EM where SBranchID=@SBranchID and EvaluationSchemeID=@SchemeID and EvaluationID not in (Select isnull(MasterID,0) from EvaluationMaster)                     
+end                
+END 
+go

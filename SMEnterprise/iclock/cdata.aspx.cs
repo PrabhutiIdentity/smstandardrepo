@@ -21,6 +21,10 @@ namespace ESSL
         {
             string str = "\n";
             string SerialNumber = this.Request.QueryString["SN"];
+<<<<<<< HEAD
+=======
+            objEsslData.InsertTestData("Entry CDAta : " + this.Request.QueryString.ToString());
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
             if (!IsPostBack)
             {
                 bool isProcessed = false;
@@ -354,6 +358,15 @@ namespace ESSL
             }
             try
             {
+<<<<<<< HEAD
+=======
+                var strBulkData = "";
+                foreach(var att in objModel.Logs)
+                {
+                    strBulkData += att.DeviceEmpCode + ":" + att.LogDate + "\n";
+                }
+                objEsslData.InsertTestData("Update Bulk: " + strBulkData);
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                 objEsslData.UpdateBulkAttandance(objModel);
                 finalResult = true;
             }

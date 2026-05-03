@@ -1,0 +1,337 @@
+﻿@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model DemandReciptListModel
+@section IncludeCss
+{
+    <title>Due Fee Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+}
+<style>
+    .btn {
+        padding: 3px 6px;
+    }
+</style>
+<!-- Content Header (Page header) -->
+<section class="content-header">
+    <h1>
+        Due Fee Report
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Account/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Due Fee Report</li>
+    </ol>
+</section>
+
+<!-- Main content -->
+<section class="content">
+    <!-- Small boxes (Stat box) -->
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="">
+                <div class="box-header">
+                    @using (Html.BeginForm("ReportDueFee", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+                    {
+                        <div class="row std-mng-head">
+                            <div class="col-md-12 class-section">
+                                <div class="row">
+                                    <div class="col-md-2 padding">
+                                        <input type="month" value="@Model.DemandMonth.ToString("yyyy-MM")" name="DemandMonth" id="dtDate" class="form-control" />
+                                        @*<label class="text-right" style="padding-left: 25px;">@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("MMM, yyyy")</label>*@
+                                    </div>
+                                    <div class="col-md-3 padding">
+                                        <label class="col-md-4 text-right" style="padding-right: 0px;">Class</label>
+                                        <div class="col-md-8">
+                                            <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript: ClassMainChanged(this);">
+                                                <option value="-1">--All Class--</option>
+                                                <option value="0">--Select Class--</option>
+                                                @foreach (SMEnterprise.Models.NameIDModel el in Model.Classes)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.ClassID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 padding">
+                                        <label class="col-md-4 text-right">Section</label>
+                                        <div class="col-md-8">
+                                            <select name="SectionID" class="form-control" id="ddlSection">
+                                                <option value="0">--Select Section--</option>
+                                                @foreach (SMEnterprise.Models.NameIDModel el in Model.Sections)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 padding">
+                                        <label class="col-md-4 text-right">Sessions</label>
+                                        <div class="col-md-8">
+                                            <select name="SessionID" class="form-control" id="ddlSessions">
+                                                <option value="0">--Select Session--</option>
+                                                @foreach (SMEnterprise.Models.NameIDModel el in Model.Sessions)
+                                                {
+                                                    <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name</option>
+                                                }
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-1 padding">
+                                        <div class="row">
+
+                                            <div class="col-md-12">
+                                                <a href="javascript:void(0);" onclick="$('#frmGetStudents').submit();"><i class="fa fa-search"></i></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="box-body">
+                    <table id="PaymentsTable" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+
+                                <th>#</th>
+                                <th>Student</th>
+                                <th>Class/Section</th>
+                                <th>Father</th>
+                                <th>Amount</th>
+                                <th>Discount</th>
+                                <th>Payment</th>
+                                <th>Net Due</th>
+
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 1;
+                            decimal TotalDue = 0;
+                            decimal PaymentAmount = 0;
+                            decimal CurrentAmount = 0;
+                            decimal DiscAmt = 0;
+                            decimal PreviousDues = 0;
+                            foreach (var item in Model.Recipts)
+                            {
+                                // Calculate Net Due for the row
+                                decimal netDue = (item.FeeAmount + item.LateFee) - (item.Discounts + item.Paid);
+                                <tr>
+                                    <td>@item.RollNo</td>
+                                    <td>@item.Name (@item.StudentSID)</td>
+                                    <td>@item.ClassName </td>
+                                    <td>@item.FatherName</td>
+                                    <td>@item.FeeAmount</td>
+                                    <td>@item.Discounts</td>
+                                    <td>@item.Paid</td>
+                                    <td>@netDue</td>
+                                </tr>
+                            }
+                            @*foreach (DemandReciptModel c in Model.Recipts)
+            {
+                TotalDue = TotalDue + (c.PreviousDues + c.ApplicableFee + c.LateFee - c.PaymentAmount - c.DiscAmt);
+                DiscAmt = DiscAmt + c.DiscAmt;
+                PreviousDues = PreviousDues + c.PreviousDues;
+                PaymentAmount = PaymentAmount + c.PaymentAmount;
+                CurrentAmount = CurrentAmount + c.ApplicableFee;
+                <tr>
+                    <td>@count</td>
+                    <td>
+                        Name: @c.Name<br />
+                        SID : @c.StudentSID<br />
+                        Roll No. : @c.RollNo
+                    </td>
+                    <td>@c.ClassName</td>
+                    <td>
+                        @c.FatherName<br />
+                        M: @c.MobileNo
+                    </td>
+                    <td>
+                        <i class="fa fa-inr" aria-hidden="true"></i>  @c.PreviousDues.ToString("0.00")
+                    </td>
+                    <td>
+                        <i class="fa fa-inr" aria-hidden="true"></i> @((c.ApplicableFee + c.LateFee).ToString("0.00")) <br />(@c.MonthName)
+                    </td>
+                    <td>
+                        <i class="fa fa-inr" aria-hidden="true"></i> @c.DiscAmt.ToString("0.00")
+                    </td>
+                    <td>
+                        <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("0.00")
+                    </td>
+                    <td>
+                        <i class="fa fa-inr" aria-hidden="true"></i> @((c.PreviousDues + c.ApplicableFee + c.LateFee - c.PaymentAmount-c.DiscAmt).ToString("0.00"))
+                    </td>
+                </tr>
+
+                count++;
+            }*@
+
+                        }
+                        <tfoot>
+                            <tr style="background-color: #606d73;color: white;">
+                                <td>
+                                </td>
+                                <td>
+                                    <b> Class</b>
+                                </td>
+                                <td>
+                                    <b> Month Due</b>
+                                </td>
+
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @PreviousDues.ToString("N2")</b></td>
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @CurrentAmount.ToString("N2")</b></td>
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @DiscAmt.ToString("N2")</b></td>
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @PaymentAmount.ToString("N2")</b></td>
+
+                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalDue.ToString("N2")</b></td>
+                            </tr>
+                        </tfoot>
+
+
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
+@section scripts
+{
+
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                 var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+
+                var rpname = ' Due Report for ' + 'Class ' + $('#ddlClass option:selected').text() + '' + '/ ' + $('#ddlSection option:selected').text() + '' + ' & Session (' + $('#ddlSessions option:selected').text() + ')';
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")'
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+                        "paging": true,
+                        "pagingType": "simple_numbers",
+                        "pageLength": 100,
+                        bSort: true,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                               extend: "copy",
+                            className: "btn-sm",
+                                footer: true,
+                                message: printdate,
+                             messageTop: '@Model.Branch.BranchSchoolName',
+                            messageBottom: repname,
+                            title: rpname
+                            },
+                            {
+                                 extend: "csv",
+                          className: "btn-sm",
+                                footer: true,
+                                message: printdate,
+                            messageTop: '@Model.Branch.BranchSchoolName' + "Hi",
+                            messageBottom: repname,
+                            title: rpname
+                            },
+                            {
+                                  extend: "excel",
+                          className: "btn-sm",
+                          footer: true,
+                         messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+                            },
+                            {
+                                extend: "pdfHtml5",
+                          className: "btn-sm",
+                          footer: true,
+                          orientation: 'landscape',
+                          customize: function (doc) {
+
+                              doc.defaultStyle.fontSize = 7;
+                              doc.styles.tableHeader.fontSize = 10;
+
+                              doc['header'] = (function () {
+                                  return {
+                                      columns: [
+                                          {
+                                              alignment: 'left',
+                                              italics: true,
+                                              text: '@Model.Branch.BranchSchoolName',
+                                              fontSize: 14,
+                                              margin: [0, 0]
+                                          }
+                                      ],
+                                      margin: 20
+                                  }
+                              });
+                                },
+                                message: printdate,
+                          messageBottom: repname,
+                          title: rpname
+                            },
+                            {
+                                extend: "print",
+                          className: "btn-sm",
+                                footer: true,
+                                orientation: 'landscape',
+                                message: rpname,
+                          messageTop: rpname,
+                          messageBottom: repname,
+                          title: '@Model.Branch.BranchSchoolName'
+                            },
+                        ],
+                        responsive: true
+                    });
+                }
+            };
+
+
+            TableManageButtons = function () {
+                "use strict";
+                return {
+                    init: function () {
+                        handleDataTableButtons();
+                    }
+                };
+            }();
+
+            TableManageButtons.init();
+        });
+        $(function () {
+
+            $('#liReportDueFee').closest('ul').closest('li').addClass('active');
+            $('#liReportDueFee').addClass('active');
+        });
+
+        function ClassMainChanged(sender) {
+            $('#ddlSection').html('<option value="-1">Loading....</option>');
+            $.ajax(
+                {
+                    type: "POST",
+                    url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function (html) {
+                        $('#ddlSection').html('');
+                        $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                        $('#ddlSection').append(html);
+                    },
+                    error: function (e) {
+                        alert("errorn");
+                    }
+                });
+        }
+    </script>
+}
+<!-- /.content -->

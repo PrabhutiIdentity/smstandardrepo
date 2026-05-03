@@ -1,0 +1,35 @@
+
+-- Create the link to the remote IP
+EXEC sp_addlinkedserver 
+   @server = 'RemoteIdentityServer', 
+   @srvproduct = '',
+   @provider = 'SQLNCLI', 
+   @datasrc = 'db2.smapp.in,14334'; -- The destination IP and Port
+
+-- Map the login credentials
+EXEC sp_addlinkedsrvlogin 
+   @rmtsrvname = 'RemoteIdentityServer', 
+   @useself = 'FALSE', 
+   @rmtuser = 'sa', 
+   @rmtpassword = 'Identity@1040'; -- Replace with the actual password for the remote server
+
+
+-- delete existing
+--  EXEC sp_dropserver 'RemoteIdentityServer', 'droplogins';
+
+-- Check Server id and details for RemoteIdentityServer
+SELECT 
+    s.name AS LinkedServer,
+    l.remote_name AS RemoteLoginName,
+    l.modify_date
+FROM sys.linked_logins l
+JOIN sys.servers s ON s.server_id = l.server_id
+WHERE s.name = 'RemoteIdentityServer';
+
+SELECT 
+    name AS LinkedServerName, 
+    data_source AS Remote_IP_and_Port,
+    provider,
+    modify_date
+FROM sys.servers 
+WHERE name = 'RemoteIdentityServer';

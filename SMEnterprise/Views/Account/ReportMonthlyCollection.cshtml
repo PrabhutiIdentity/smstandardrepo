@@ -1,8 +1,13 @@
+<<<<<<< HEAD
 ﻿@using SMEnterprise.Models;
+=======
+﻿﻿@using SMEnterprise.Models;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
+<<<<<<< HEAD
 @model  SMEnterprise.Models.CollectionReportModel
 @section IncludeCss
 {
@@ -10,6 +15,12 @@
         Monthly Collection Report
 
     </title>
+=======
+@model CollectionReportModel
+@section IncludeCss
+{
+    <title>Monthly Collection Report @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/mm/yyyy")</title>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
 }
 <style>
@@ -21,11 +32,19 @@
 <section class="content-header">
     <h1>
         Monthly Collection Report
+<<<<<<< HEAD
 
     </h1>
     <ol class="breadcrumb">
         <li><a href="/Account/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
         <li class="active">Monthly Collection Report</li>
+=======
+        <small>Control panel</small>
+    </h1>
+    <ol class="breadcrumb">
+        <li><a href="/Account/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Monthly Fee Wise Collection Report</li>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
     </ol>
 </section>
 
@@ -36,7 +55,11 @@
         <div class="col-xs-12">
             <div class="">
                 <div class="box-header">
+<<<<<<< HEAD
                     @using (Html.BeginForm("ReportMonthlyCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+=======
+                    @using (Html.BeginForm("ReportMonthlyFeeCollection", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetExams" }))
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                     {
                         <div class="row std-mng-head">
 
@@ -81,6 +104,7 @@
                     }
                 </div>
                 <div class="box-body">
+<<<<<<< HEAD
                     <table id="PaymentsTable" class="table table-striped payments">
                         <thead>
                             <tr>
@@ -89,10 +113,19 @@
                                 <th>Student ID</th>
                                 <th>SR No</th>
                                 <th>Payee</th>
+=======
+                    <table id="PaymentsTable" class="table table-bordered table-hover display nowrap" style="overflow-x: scroll;width: 100%;display: inline-block;">
+                        <thead>
+                            <tr>
+
+                                <th>Payee</th>
+                                <th>Father Name</th>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                                 <th>Class</th>
                                 <th>Session</th>
                                 <th>Details</th>
                                 <th>Date</th>
+<<<<<<< HEAD
                                 <th>Collected By</th>
                                 <th>Amount</th>
 
@@ -100,14 +133,33 @@
                         </thead>
                         @{
                             int count = 1;
+=======
+                                <th>collection</th>
+                                @foreach (var com in Model.FeeType)
+                                {
+                                    <th>@com.Name</th>
+                                }
+
+                                <th style="width:10%">Amount</th>
+                            </tr>
+                        </thead>
+                        @{
+                            int count = 0;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                             decimal TotalPayment = 0;
                             foreach (FeePaymentModel c in Model.Report)
                             {
                                 var PayMode = "";
                                 TotalPayment = TotalPayment + c.PaymentAmount;
+<<<<<<< HEAD
 
 
                                 @*<td>
+=======
+                                <tr>
+
+                                    <td>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                                         <b>Reciept No:</b> @c.PaymentRecieptNo<br />
                                         <b>Name:</b> @c.Name <br />
                                         @if (!string.IsNullOrEmpty(c.SchoolUID))
@@ -116,6 +168,7 @@
                                         }
 
 
+<<<<<<< HEAD
                                     </td>*@
                                 <tr>
 
@@ -135,6 +188,17 @@
                                     </td>
 
                                     <td style="width:20%">
+=======
+                                    </td>
+                                    <td>@c.FatherName</td>
+                                    <td>
+                                        @c.ClassName / @c.SectionName
+                                    </td>
+                                    <td>
+                                        @c.SessionName
+                                    </td>
+                                    <td>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                                         @if (c.PaymentMode == 0)
                                         {
                                             PayMode = "Cash Payment";
@@ -154,6 +218,7 @@
                                         @PayMode<br />
                                         @c.PayMonths
                                     </td>
+<<<<<<< HEAD
 
 
                                     <td style="width:10%">
@@ -163,6 +228,24 @@
                                         @c.CollectedBy
                                     </td>
                                     <td style="width:10%">
+=======
+                                    <td>
+                                        @c.PaymentDate.ToString("dd MMM, yyyy")
+                                    </td>
+                                    <td>
+                                        @c.CollectedBy
+                                    </td>
+                                    @foreach (var FeeT in Model.FeeType)
+                                    {
+                                        var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentID == c.PaymentID).Sum(x => x.PaymentRecieved);
+
+                                        FeeT.Sum = FeeT.Sum + rep;
+
+                                        <td>@rep</td>
+
+                                    }
+                                    <td>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                                         <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
                                     </td>
                                 </tr>
@@ -173,6 +256,7 @@
                         }
                         <tfoot>
                             <tr style="background-color: #606d73;color: white;">
+<<<<<<< HEAD
                                 <td>
                                     <b> Total</b>
                                 </td>
@@ -180,6 +264,15 @@
                                     <b>  Month Collection</b>
                                 </td>
                                 <td colspan="8"></td>
+=======
+                                <td colspan="6">
+                                    <b> Total Collection</b>
+                                </td>
+                                @foreach (var com in Model.FeeType)
+                                {
+                                    <td>@com.Sum</td>
+                                }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                                 <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
                             </tr>
                         </tfoot>
@@ -193,6 +286,7 @@
 </section>
 @section scripts
 {
+<<<<<<< HEAD
     <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
     <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
     <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
@@ -276,6 +370,49 @@
                           messageTop: rpname,
                           messageBottom: repname,
                           title: '@Model.Branch.BranchSchoolName'
+=======
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.flash.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var handleDataTableButtons = function () {
+                if ($("#PaymentsTable").length) {
+                    $("#PaymentsTable").DataTable({
+                        "paging": true,
+                        "pageLength": 30,
+                        dom: "Bfrtip",
+                        buttons: [
+                            {
+                                extend: "copy",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "csv",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "excel",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "pdfHtml5",
+                                className: "btn-sm",
+                                footer: true
+                            },
+                            {
+                                extend: "print",
+                                className: "btn-sm",
+                                footer: true
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                             },
                         ],
                         responsive: true
@@ -296,8 +433,13 @@
             TableManageButtons.init();
         });
         $(function () {
+<<<<<<< HEAD
             $('#liReportMonthlyCollection').closest('ul').closest('li').addClass('active');
             $('#liReportMonthlyCollection').addClass('active');
+=======
+            $('#liReportMonthlyFeeCollection').closest('ul').closest('li').addClass('active');
+            $('#liReportMonthlyFeeCollection').addClass('active');
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
 
         });
     </script>

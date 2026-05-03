@@ -549,6 +549,10 @@ namespace SMEnterprise.Models
 
     public class FeePaymentModel
     {
+<<<<<<< HEAD
+=======
+        public decimal RefundAmount { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         public int IsCustomFee { get; set; }
         public string MotherName { get; set; }
         public int UserID { get; set; }
@@ -649,7 +653,12 @@ namespace SMEnterprise.Models
                 try
                 {
                     char[] splitter = { '\\' };
+<<<<<<< HEAD
                     if (ClassSection.Split(splitter).Length > 1)
+=======
+                    
+                        if (ClassSection.Split(splitter).Length > 1)
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                     {
                         return ClassSection.Split(splitter)[1];
                     }
@@ -902,11 +911,20 @@ namespace SMEnterprise.Models
         public string FeeTypeName { get; set; }
         public string PaymentNoRange { get; set; }
         public int PayeeID { get; set; }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         public decimal Amount { get; set; }
         public decimal DiscPer { get; set; }
         public decimal DiscAmt { get; set; }
         public decimal NetApplicablePayment { get; set; }
         public decimal PaymentRecieved { get; set; }
+<<<<<<< HEAD
+=======
+        
+              public decimal RefundAmount { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         public string Year { get; set; }
         public int Month { get; set; }
         public DateTime PaymentDate { get; set; }
@@ -995,6 +1013,14 @@ namespace SMEnterprise.Models
         public decimal PaymentAmount { get; set; }
 
         public int ExistCount { get; set; }
+<<<<<<< HEAD
+=======
+
+       // Add this if missing
+        public decimal FeeAmount { get; set; }
+        public decimal Discounts { get; set; }
+        public decimal Paid { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
     }
     public class DemandReciptListModel
     {

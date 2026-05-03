@@ -390,7 +390,56 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
+<<<<<<< HEAD
         public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
+=======
+    
+        public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
+         {
+             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+             {
+                 StartupModel objStartupModel = (StartupModel)HttpContext.Current.Session["StartupModel"];
+                 var paramater = new DynamicParameters();
+                 paramater.Add("@StudentSessionUID", model.StudentSessionUID);
+                 paramater.Add("@EvaluationID", model.EvaluationID);
+                 paramater.Add("@SBranchID", model.SBranchID);
+                 paramater.Add("@EvaluationMode", objStartupModel.EvaluationMode);
+                 using (var multi = con.QueryMultiple("sp_GetStudentEvaluationPerformanceDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                 {
+                     model.PerformanceParameters = multi.Read<PerformanceParameterModel>().ToList();
+                     model.MainEvaluations = multi.Read<EvaluationModel>().ToList();
+                     model.SubEvaluations = multi.Read<EvaluationModel>().ToList();
+                     model.Result = multi.Read<ExamResultDetailModel>().ToList();
+                     //try
+                     //{
+
+                     //    model.ResultGrade = multi.Read<ExamResultDetailModel>().ToList();
+                     //}
+                     //catch { }
+
+
+                     model.Student = multi.Read<StudentModel>().SingleOrDefault();
+                     model.CGPA = multi.Read<decimal>().SingleOrDefault();
+                     model.EvaluationName = multi.Read<string>().SingleOrDefault();
+                     model.FilledParameter = multi.Read<int>().SingleOrDefault();
+                     model.TotalParameter = multi.Read<int>().SingleOrDefault();
+                     model.EvaluationTypes = multi.Read<EvaluationTypeModel>().ToList();
+                     model.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                     try
+                     {
+                         model.SessionName = multi.Read<string>().SingleOrDefault();
+
+                     }
+                     catch { }
+                 }
+             }
+             return model;
+         }
+       
+        // for rank
+       
+      /*  public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -408,7 +457,11 @@ namespace SMEnterprise.Repository
                     model.Result = multi.Read<ExamResultDetailModel>().ToList();
                     //try
                     //{
+<<<<<<< HEAD
                        
+=======
+
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                     //    model.ResultGrade = multi.Read<ExamResultDetailModel>().ToList();
                     //}
                     //catch { }
@@ -424,6 +477,7 @@ namespace SMEnterprise.Repository
                     try
                     {
                         model.SessionName = multi.Read<string>().SingleOrDefault();
+<<<<<<< HEAD
                        
                     }
                     catch { }
@@ -431,6 +485,31 @@ namespace SMEnterprise.Repository
             }
             return model;
         }
+=======
+
+                    }
+                    catch { }
+                }
+                    // ── new: rank SP call ────────────────────────────────
+                    // SessionID comes from the existing SP result via Student,
+                    // but Student.SessionID may be 0 — use model.SessionID directly
+                    var rankParams = new DynamicParameters();
+                rankParams.Add("@StudentSessionUID", model.StudentSessionUID);
+                // rankParams.Add("@EvaluationID", model.EvaluationID == 0 ? -1 : model.EvaluationID);
+                rankParams.Add("@EvaluationID", -1);   // always load ALL terms
+                rankParams.Add("@SBranchID", model.SBranchID);
+                rankParams.Add("@SessionID", model.SessionID);
+
+                using (var rankMulti = con.QueryMultiple("sp_GetStudentRankInSection_test",rankParams,commandType: CommandType.StoredProcedure))
+                {
+                    model.TermRanks = rankMulti.Read<StudentTermRankModel>().ToList();
+                    model.OverallRank = rankMulti.Read<StudentOverallRankModel>().SingleOrDefault();
+                }
+            }
+            return model;
+        }
+        */
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         // for shine
         public StudentPerformanceResultModel GetStudentPerformanceResult(StudentPerformanceResultModel model)
         {
