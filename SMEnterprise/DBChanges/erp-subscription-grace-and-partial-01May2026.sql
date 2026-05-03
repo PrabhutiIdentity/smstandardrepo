@@ -1,51 +1,21 @@
-IF COL_LENGTH('dbo.BranchSubscription', 'GraceDays') IS NULL
-BEGIN
-    ALTER TABLE dbo.BranchSubscription
-    ADD GraceDays INT NOT NULL CONSTRAINT DF_BranchSubscription_GraceDays DEFAULT (0);
-END
-GO
-
-IF COL_LENGTH('dbo.BranchSubscription', 'AllowPartialPayment') IS NULL
-BEGIN
-    ALTER TABLE dbo.BranchSubscription
-    ADD AllowPartialPayment BIT NOT NULL CONSTRAINT DF_BranchSubscription_AllowPartialPayment DEFAULT (0);
-END
-GO
-
-IF COL_LENGTH('dbo.BranchSubscription', 'MaxPartialPayments') IS NULL
-BEGIN
-    ALTER TABLE dbo.BranchSubscription
-    ADD MaxPartialPayments INT NOT NULL CONSTRAINT DF_BranchSubscription_MaxPartialPayments DEFAULT (2);
-END
-GO
-
-IF COL_LENGTH('dbo.BranchSubscription', 'PartialPaymentCount') IS NULL
-BEGIN
-    ALTER TABLE dbo.BranchSubscription
-    ADD PartialPaymentCount INT NOT NULL CONSTRAINT DF_BranchSubscription_PartialPaymentCount DEFAULT (0);
-END
-GO
-
-IF COL_LENGTH('dbo.BranchSubscription', 'NextDueDate') IS NULL
-BEGIN
-    ALTER TABLE dbo.BranchSubscription
-    ADD NextDueDate DATETIME NULL;
-END
-GO
-
-IF COL_LENGTH('dbo.BranchSubscription', 'NextDueAmount') IS NULL
-BEGIN
-    ALTER TABLE dbo.BranchSubscription
-    ADD NextDueAmount DECIMAL(18,2) NULL;
-END
-GO
-
-IF COL_LENGTH('dbo.BranchSubscription', 'PartialCycleDays') IS NULL
-BEGIN
-    ALTER TABLE dbo.BranchSubscription
-    ADD PartialCycleDays INT NULL;
-END
-GO
+CREATE TABLE BranchSubscription
+(
+    SBranchID INT PRIMARY KEY,
+    IsDue BIT NOT NULL DEFAULT(0),
+    DueAmount DECIMAL(18,2) NULL,
+    DueDate DATETIME NULL,
+    PlanName NVARCHAR(200) NULL,
+    LastPaidDate DATETIME NULL,
+    LastPaymentRef NVARCHAR(200) NULL,
+    NextDueDate DATETIME NULL,
+    NextDueAmount DECIMAL(18,2) NULL,
+    PartialCycleDays INT NULL,
+    GraceDays INT NOT NULL DEFAULT(0),
+    AllowPartialPayment BIT NOT NULL DEFAULT(0),
+    MaxPartialPayments INT NOT NULL DEFAULT(2),
+    PartialPaymentCount INT NOT NULL DEFAULT(0);
+);
+go
 
 CREATE OR ALTER PROCEDURE dbo.sp_GetBranchSubscription
     @SBranchID INT
