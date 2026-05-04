@@ -1,0 +1,32 @@
+CREATE proc [dbo].[sp_GetFeeForTransport]        
+(        
+@RouteID int,      
+@SBranchID int,        
+@SessionID int=0        
+)        
+AS        
+BEGIN        
+ if(@RouteID=0)        
+ begin        
+ select @SessionID=SessionID from SessionMaster where SBranchID=@SBranchID and SessionStatus=1        
+  select @RouteID=min(RouteID) from TransportRoutemaster where isapproved=1 and SBranchID=@SBranchID        
+        
+ end        
+        
+ Select TFM.StopID,TFM.RouteID,(Select RouteName from TransportRoutemaster TRM Where TRM.RouteID=TFM.RouteID) as RouteName,      
+ TFM.CityID,(Select CityName from CityMaster CM Where CM.CityID=TFM.CityID) as CityName,      
+ TFM.AreaID, (Select [AreaName] from AreaMaster AM Where AM.AreaID=TRD.AreaID) as AreaName,      
+ Amount,SbranchID,SessionID      
+  from TransportRouteDetails TRD inner join TransportFeeMaster TFM on TRD.Stopid=TFM.StopID       
+where TFM.RouteID=@RouteID  and TFM.SbranchID=@SbranchID and TFM.SessionID=@SessionID      
+   --   where TFM.RouteID=11  and TFM.SbranchID=3 and TFM.SessionID=4      
+ order by TRD.SequenceNo         
+      
+  select isnull(@SessionID,0)         
+       
+      
+ Select SessionID,SessionName,SessionStatus from SessionMaster where SBranchID=@SBranchID       
+ Select RouteID,RouteName from TransportRoutemaster where isapproved=1 and SBranchID=@SBranchID       
+ select isnull(@RouteID,0)       
+       
+END     
