@@ -350,7 +350,10 @@ BEGIN
             FTM.FeeTypeName,
             @CarryForwardAmount,
             0,
-            0,
+            CASE
+                WHEN ISNULL(PD.DiscAmt,0) >= ISNULL(DA.ApprovedAmount,0) THEN ISNULL(PD.DiscAmt,0)
+                ELSE ISNULL(DA.ApprovedAmount,0)
+            END,
             ISNULL(PD.NetApplicablePayment, @CarryForwardAmount),
             0,
             ISNULL(PD.PaymentRecieved, 0),
@@ -362,6 +365,7 @@ BEGIN
             SELECT
                 MIN(PaymentID) AS PaymentID,
                 SUM(ISNULL(NetApplicablePayment,0)) AS NetApplicablePayment,
+                SUM(ISNULL(DiscAmt,0)) AS DiscAmt,
                 SUM(ISNULL(PaymentRecieved,0)) AS PaymentRecieved
             FROM v_PaymentDetails
             WHERE PayeeID = @StudentID
@@ -369,6 +373,14 @@ BEGIN
               AND Month = MONTH(@SessionStartDate)
               AND Year = YEAR(@SessionStartDate)
         ) PD
+        OUTER APPLY
+        (
+            SELECT SUM(ISNULL(ApprovedAmount,0)) AS ApprovedAmount
+            FROM @DiscountApproved
+            WHERE FeeTypeID = FTM.FeeTypeID
+              AND FeeMonth = MONTH(@SessionStartDate)
+              AND FeeYear = YEAR(@SessionStartDate)
+        ) DA
         WHERE FTM.FeeTypeID = @CarryForwardFeeTypeID
     END
 

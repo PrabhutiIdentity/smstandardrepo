@@ -292,6 +292,7 @@ BEGIN
     DECLARE @CurrentSequence int = 1
     DECLARE @MaxSequence int
     DECLARE @pDiscount numeric(10,2)
+    DECLARE @TotalApprovedDiscount numeric(10,2)
 
     SELECT @MaxSequence = MAX(SequenceNo) FROM @Students
 
@@ -315,6 +316,7 @@ BEGIN
         DECLARE @StudentSessionUID int
         SET @Discounts = 0
         SET @pDiscount = 0
+        SET @TotalApprovedDiscount = 0
 
         SELECT TOP 1
             @StudentSessionUID = StudentSessionUID,
@@ -514,6 +516,8 @@ BEGIN
                   AND DA.FeeMonth = @LMonth
                   AND DA.FeeYear = @LYear
 
+                SET @TotalApprovedDiscount = ISNULL(@TotalApprovedDiscount,0) + ISNULL(@pDiscount,0)
+
                 IF ((SELECT COUNT(*) FROM @FeeStructureTable FTS
                      WHERE FeeTypeApplicable = 5
                        AND (FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FTS.FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth)
@@ -553,7 +557,7 @@ BEGIN
                   AND ISNULL(FTS.Status,0) = 1
                   AND (FTS.FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FTS.FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth))
 
-                SET @PreviousDue = (ISNULL(@PreviousDue,0) - ISNULL(@pDiscount,0))
+                SET @PreviousDue = ISNULL(@PreviousDue,0)
                                  + (ISNULL(@CLateFee,0) - ISNULL(@CPaid,0))
                                  + (ISNULL(@PPD,0) - ISNULL(@PPR,0))
             END
@@ -627,11 +631,7 @@ BEGIN
 
                     IF (@DiscountPT < @DiscountApr)
                     BEGIN
-                        SELECT @Discounts = SUM(ISNULL(ApprovedAmount,0))
-                        FROM @DiscountApproved
-                        WHERE StudentID = @StudentID
-                          AND FeeMonth = @LMonth
-                          AND FeeYear = @LYear
+                        SET @Discounts = ISNULL(@Discounts,0) + (ISNULL(@DiscountApr,0) - ISNULL(@DiscountPT,0))
                     END
                 END
 
@@ -696,14 +696,35 @@ BEGIN
         -- Carry-forward stays in PreviousDue, but its paid portion must be included in summary paid amount.
         IF (@IsCarryForwardApplicable = 1 AND ISNULL(@CarryForwardAmount,0) > 0 AND ISNULL(@CarryForwardFeeTypeID,0) > 0)
         BEGIN
-            SELECT @CarryForwardPaid = ISNULL(SUM(PD.PaymentRecieved), 0)
+            DECLARE @CarryForwardPaidDiscount numeric(10,2) = 0
+            DECLARE @CarryForwardApprovedDiscount numeric(10,2) = 0
+            DECLARE @CarryForwardDiscount numeric(10,2) = 0
+
+            SELECT
+                @CarryForwardPaid = ISNULL(SUM(PD.PaymentRecieved), 0),
+                @CarryForwardPaidDiscount = ISNULL(SUM(PD.DiscAmt), 0)
             FROM v_PaymentDetails PD
             WHERE PD.PayeeID = @StudentID
               AND PD.FeeTypeID = @CarryForwardFeeTypeID
               AND PD.Month = MONTH(@SessionStartDate)
               AND PD.Year = YEAR(@SessionStartDate)
 
+            SELECT @CarryForwardApprovedDiscount = ISNULL(SUM(ApprovedAmount), 0)
+            FROM @DiscountApproved
+            WHERE StudentID = @StudentID
+              AND FeeTypeID = @CarryForwardFeeTypeID
+              AND FeeMonth = MONTH(@SessionStartDate)
+              AND FeeYear = YEAR(@SessionStartDate)
+
+            SET @CarryForwardDiscount =
+                CASE
+                    WHEN ISNULL(@CarryForwardPaidDiscount,0) >= ISNULL(@CarryForwardApprovedDiscount,0)
+                        THEN ISNULL(@CarryForwardPaidDiscount,0)
+                    ELSE ISNULL(@CarryForwardApprovedDiscount,0)
+                END
+
             SET @PreviousDue = ISNULL(@PreviousDue,0) + ISNULL(@CarryForwardAmount,0)
+            SET @Discounts = ISNULL(@Discounts,0) + ISNULL(@CarryForwardDiscount,0)
             SET @Paid = ISNULL(@Paid,0) + ISNULL(@CarryForwardPaid,0)
         END
 
@@ -716,7 +737,7 @@ BEGIN
         SET
             FeeAmount = @FeeAmount,
             PreviousDue = @PreviousDue,
-            Discounts = ISNULL(NULLIF(@Discounts,0), @pDiscount),
+            Discounts = ISNULL(@Discounts,0) + ISNULL(@TotalApprovedDiscount,0),
             Paid = @Paid,
             LateFee = @LateFee
         WHERE SequenceNo = @CurrentSequence
