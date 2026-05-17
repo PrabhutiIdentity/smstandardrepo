@@ -587,6 +587,7 @@ namespace SMEnterprise.Models
         public string RollNo { get; set; }
         public string QuotaName { get; set; }
         public int PaymentMode { get; set; }
+        public string PaymentModeName { get; set; }
         public string Remark { get; set; }
         public int PaymentID { get; set; }
         public string ReferanceNumber { get; set; }

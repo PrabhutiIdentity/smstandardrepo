@@ -118,21 +118,10 @@
                                                         @c.SessionName
                                                     </td>
                                                     <td>
-                                                        @if (c.PaymentMode == 0)
-                                                        {
-                                                            PayMode = "Cash Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 1)
-                                                        {
-                                                            PayMode = "Cheque Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 2)
-                                                        {
-                                                            PayMode = "NEFT Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 2)
-                                                        {
-                                                            PayMode = "Other Payment";
+                                                        @{
+                                                            PayMode = string.IsNullOrWhiteSpace(c.PaymentModeName)
+                                                                ? (c.RefundAmount > 0 ? "Refund" : "")
+                                                                : c.PaymentModeName;
                                                         }
                                                         @PayMode<br />
                                                         @c.PayMonths

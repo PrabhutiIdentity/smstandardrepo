@@ -57,7 +57,6 @@
                                             <div class="col-md-8 padding-L" style="padding-left: 10px;">
 
                                                 <input type="date" class="form-control" name="FromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
-                                                <input type="hidden" name="PaymentMode" value="-1" />
 
                                             </div>
                                         </div>
@@ -68,7 +67,6 @@
                                             <div class="col-md-7 padding-L" style="padding-left: 10px;">
                                                 <input type="date" class="form-control" name="ToDate" value="@Model.ToDate.ToString("yyyy-MM-dd")" />
                                                 <input type="hidden" name="ReportType" value="3" />
-                                                <input type="hidden" name="PaymentMode" value="-1" />
 
                                             </div>
                                             <div class="col-md-2">
@@ -118,21 +116,10 @@
                                                         @c.SessionName
                                                     </td>
                                                     <td>
-                                                        @if (c.PaymentMode == 0)
-                                                        {
-                                                            PayMode = "Cash Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 1)
-                                                        {
-                                                            PayMode = "Cheque Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 2)
-                                                        {
-                                                            PayMode = "NEFT Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 2)
-                                                        {
-                                                            PayMode = "Other Payment";
+                                                        @{
+                                                            PayMode = string.IsNullOrWhiteSpace(c.PaymentModeName)
+                                                                ? (c.RefundAmount > 0 ? "Refund" : "")
+                                                                : c.PaymentModeName;
                                                         }
                                                         @PayMode<br />
                                                         @c.PayMonths

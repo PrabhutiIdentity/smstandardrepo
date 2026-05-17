@@ -115,8 +115,8 @@ BEGIN
 		
 		PM.ReferanceNumber,PM.Remark,
 		[dbo].[GetPaymentMonthNames](PM.PaymentID) AS PayMonths,
-        --PM.PaymentMode,
-		 ISNULL(PMM.PaymentModeName, '') AS PaymentMode,
+        PM.PaymentMode,
+		 ISNULL(PMM.PaymentModeName, '') AS PaymentModeName,
 		PM.PaymentRecieptNo,'STUD' + RIGHT(REPLICATE('0', 6) + CAST(SS.StudentID AS varchar(6)), 6) AS StudentSID,
         SM.Name,SM.SchoolUID,SS.RollNo,ISNULL(VCS.ClassName, '') + '\' + ISNULL(VCS.SectionName, '') AS ClassSection,
         (SELECT SMS.SessionName FROM SessionMaster SMS WHERE SMS.SessionID = PM.SessionID) AS SessionName,
@@ -139,7 +139,7 @@ BEGIN
     SELECT
         RM.RefundID AS PaymentID, 0 AS PaymentAmount,RM.RefundAmount,
         RM.RefundDate AS PaymentDate,CAST(RM.RefundBy AS nvarchar(50)) AS CollectedBy,
-        RM.Reason AS ReferanceNumber,NULL AS Remark,NULL AS PayMonths,NULL AS PaymentMode,
+        RM.Reason AS ReferanceNumber,NULL AS Remark,NULL AS PayMonths,NULL AS PaymentMode,NULL AS PaymentModeName,
         CAST(RM.RefundID AS nvarchar(50)) AS PaymentRecieptNo,
         'STUD' + RIGHT(REPLICATE('0', 6) + CAST(SS.StudentID AS varchar(6)), 6) AS StudentSID,
         SM.Name,SM.SchoolUID,SS.RollNo,

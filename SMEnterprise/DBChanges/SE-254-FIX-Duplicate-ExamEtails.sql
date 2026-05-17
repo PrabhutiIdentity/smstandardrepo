@@ -205,3 +205,121 @@ BEGIN
     END CATCH
 END
 GO
+
+ALTER PROC [dbo].[sp_UpdateStudentPerformanceDetails]
+(
+    @PerformanceDetails ut_PerformanceParameterValues READONLY
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        UPDATE e
+           SET e.ParamValue = d.ParamValue,
+               e.ParamKey = d.ParamKey,
+               e.Grade = d.Grade
+        FROM dbo.PerformanceParameterValues e
+        INNER JOIN @PerformanceDetails d
+            ON d.ParamValID = e.ParamValID
+        WHERE d.ParamValID <> 0;
+
+        DECLARE @FinalRows TABLE
+        (
+            ParamValID int,
+            EvaluationID int,
+            StudentSessionID int,
+            ParamID int,
+            ParamKey nvarchar(200),
+            ParamValue nvarchar(max),
+            Grade nvarchar(100)
+        );
+
+        ;WITH IncomingData AS
+        (
+            SELECT
+                d.ParamValID,
+                d.EvaluationID,
+                d.StudentSessionID,
+                d.ParamID,
+                d.ParamKey,
+                d.ParamValue,
+                d.Grade,
+                ROW_NUMBER() OVER
+                (
+                    PARTITION BY d.EvaluationID, d.StudentSessionID, d.ParamID
+                    ORDER BY d.ParamValID DESC
+                ) AS RowNum
+            FROM @PerformanceDetails d
+        )
+        INSERT INTO @FinalRows
+        (
+            ParamValID,
+            EvaluationID,
+            StudentSessionID,
+            ParamID,
+            ParamKey,
+            ParamValue,
+            Grade
+        )
+        SELECT
+            ParamValID,
+            EvaluationID,
+            StudentSessionID,
+            ParamID,
+            ParamKey,
+            ParamValue,
+            Grade
+        FROM IncomingData
+        WHERE RowNum = 1;
+
+        UPDATE T
+           SET T.ParamKey = S.ParamKey,
+               T.ParamValue = S.ParamValue,
+               T.Grade = S.Grade
+        FROM dbo.PerformanceParameterValues T
+        INNER JOIN @FinalRows S
+            ON T.EvaluationID = S.EvaluationID
+           AND T.StudentSessionID = S.StudentSessionID
+           AND T.ParamID = S.ParamID
+        WHERE S.ParamValID = 0;
+
+        INSERT INTO dbo.PerformanceParameterValues
+        (
+            EvaluationID,
+            StudentSessionID,
+            ParamID,
+            ParamKey,
+            ParamValue,
+            Grade
+        )
+        SELECT
+            S.EvaluationID,
+            S.StudentSessionID,
+            S.ParamID,
+            S.ParamKey,
+            S.ParamValue,
+            S.Grade
+        FROM @FinalRows S
+        WHERE S.ParamValID = 0
+          AND NOT EXISTS
+          (
+              SELECT 1
+              FROM dbo.PerformanceParameterValues T
+              WHERE T.EvaluationID = S.EvaluationID
+                AND T.StudentSessionID = S.StudentSessionID
+                AND T.ParamID = S.ParamID
+          );
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH
+END
+GO

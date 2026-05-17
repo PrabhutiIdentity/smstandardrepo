@@ -62,7 +62,6 @@
 
                                                 <input type="date" class="form-control" name="FromDate" value="@Model.FromDate.ToString("yyyy-MM-dd")" />
                                                 <input type="hidden" name="ReportType" value="1" />
-                                                <input type="hidden" name="PaymentMode" value="-1" />
 
                                             </div>
                                             <div class="col-md-2">
@@ -118,21 +117,10 @@
                                                         @c.SessionName
                                                     </td>
                                                     <td>
-                                                        @if (c.PaymentMode == 0)
-                                                        {
-                                                            PayMode = "Cash Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 1)
-                                                        {
-                                                            PayMode = "Cheque Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 2)
-                                                        {
-                                                            PayMode = "NEFT Payment";
-                                                        }
-                                                        else if (c.PaymentMode == 2)
-                                                        {
-                                                            PayMode = "Other Payment";
+                                                        @{
+                                                            PayMode = string.IsNullOrWhiteSpace(c.PaymentModeName)
+                                                                ? (c.RefundAmount > 0 ? "Refund" : "")
+                                                                : c.PaymentModeName;
                                                         }
                                                         @PayMode<br />
                                                         @c.PayMonths
@@ -163,7 +151,7 @@
                                                         @using (Html.BeginForm("DeletePayment", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
                                                         {
                                                             <input type="hidden" name="PaymentID" value="@c.PaymentID" />
-                                                            <input type="hidden" name="PaymentMode" value="@c.PaymentMode" />
+                                                            <input type="hidden" name="PaymentMode" value="@Model.PaymentMode" />
                                                             <input type="hidden" name="PaymentDate" value="@c.PaymentDate.ToString("yyyy-MM-dd")" />
                                                             if (c.PaymentAmount == 0)
                                                             {
@@ -269,6 +257,7 @@
               },
               {
                   extend: "pdfHtml5",
+
                   className: "btn-sm",
                   footer: true,
                   orientation: 'landscape',
