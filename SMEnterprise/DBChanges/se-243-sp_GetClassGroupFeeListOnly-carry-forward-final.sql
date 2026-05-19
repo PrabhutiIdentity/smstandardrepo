@@ -518,12 +518,31 @@ BEGIN
 
                 SET @TotalApprovedDiscount = ISNULL(@TotalApprovedDiscount,0) + ISNULL(@pDiscount,0)
 
+                DECLARE @TransportDueForMonth numeric(10,2) = 0
+                DECLARE @HostelDueForMonth numeric(10,2) = 0
+
                 IF ((SELECT COUNT(*) FROM @FeeStructureTable FTS
                      WHERE FeeTypeApplicable = 5
                        AND (FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FTS.FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth)
                             OR (SELECT COUNT(*) FROM @NoFeeMonths) = 0)) > 0)
                 BEGIN
-                    SELECT @PreviousDue = ISNULL(@PreviousDue,0) + ISNULL(dbo.fn_GetStudentTransportFeeAmount(@LMonth,@LYear,@StudentID,@TransportFeeMode,@ClassID,@GroupID,@SBranchID,@SessionID),0)
+                    SELECT @TransportDueForMonth =
+                        CASE
+                            WHEN COUNT(PD.PaymentID) > 0
+                                THEN ISNULL(SUM(ISNULL(PD.NetApplicablePayment,0) - ISNULL(PD.DiscAmt,0) - ISNULL(PD.PaymentRecieved,0)),0)
+                            ELSE ISNULL(dbo.fn_GetStudentTransportFeeAmount(@LMonth,@LYear,@StudentID,@TransportFeeMode,@ClassID,@GroupID,@SBranchID,@SessionID),0)
+                        END
+                    FROM @FeeStructureTable FTS
+                    LEFT JOIN v_PaymentDetails PD
+                        ON PD.FeeTypeID = FTS.FeeTypeID
+                       AND PD.PayeeID = @StudentID
+                       AND PD.Month = @LMonth
+                       AND PD.Year = @LYear
+                    WHERE FTS.FeeTypeApplicable = 5
+                      AND (FTS.FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FTS.FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth)
+                           OR (SELECT COUNT(*) FROM @NoFeeMonths) = 0)
+
+                    SELECT @PreviousDue = ISNULL(@PreviousDue,0) + CASE WHEN ISNULL(@TransportDueForMonth,0) < 0 THEN 0 ELSE ISNULL(@TransportDueForMonth,0) END
                 END
 
                 IF ((SELECT COUNT(*) FROM @FeeStructureTable
@@ -531,18 +550,24 @@ BEGIN
                        AND (FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth)
                             OR (SELECT COUNT(*) FROM @NoFeeMonths) = 0)) > 0)
                 BEGIN
-                    SELECT @PreviousDue = ISNULL(@PreviousDue,0) + ISNULL(dbo.fn_GetStudentHostalFeeAmount(@LMonth,@LYear,@StudentID,@HostelFeeMode,@ClassID,@GroupID,@SBranchID,@SessionID),0)
-                END
+                    SELECT @HostelDueForMonth =
+                        CASE
+                            WHEN COUNT(PD.PaymentID) > 0
+                                THEN ISNULL(SUM(ISNULL(PD.NetApplicablePayment,0) - ISNULL(PD.DiscAmt,0) - ISNULL(PD.PaymentRecieved,0)),0)
+                            ELSE ISNULL(dbo.fn_GetStudentHostalFeeAmount(@LMonth,@LYear,@StudentID,@HostelFeeMode,@ClassID,@GroupID,@SBranchID,@SessionID),0)
+                        END
+                    FROM @FeeStructureTable FTS
+                    LEFT JOIN v_PaymentDetails PD
+                        ON PD.FeeTypeID = FTS.FeeTypeID
+                       AND PD.PayeeID = @StudentID
+                       AND PD.Month = @LMonth
+                       AND PD.Year = @LYear
+                    WHERE FTS.FeeTypeApplicable = 6
+                      AND (FTS.FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FTS.FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth)
+                           OR (SELECT COUNT(*) FROM @NoFeeMonths) = 0)
 
-                SELECT @PreviousDue = ISNULL(@PreviousDue,0) - ISNULL(SUM(ISNULL(PD.PaymentRecieved,0) + ISNULL(PD.DiscAmt,0)),0)
-                FROM @FeeStructureTable FTS
-                LEFT JOIN v_PaymentDetails PD
-                    ON PD.FeeTypeID = FTS.FeeTypeID
-                   AND PD.PayeeID = @StudentID
-                   AND PD.Month = @LMonth
-                   AND PD.Year = @LYear
-                WHERE FTS.FeeTypeApplicable IN (5,6)
-                  AND (FTS.FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FTS.FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth))
+                    SELECT @PreviousDue = ISNULL(@PreviousDue,0) + CASE WHEN ISNULL(@HostelDueForMonth,0) < 0 THEN 0 ELSE ISNULL(@HostelDueForMonth,0) END
+                END
 
                 SELECT
                     @CLateFee = SUM(CASE WHEN ISNULL(PD.PaymentID,0) != 0 THEN PD.NetApplicablePayment - ISNULL(PD.DiscAmt,0) ELSE FTS.FeeAmount END),
@@ -667,7 +692,7 @@ BEGIN
                   AND (FTS.FeeTypeID NOT IN (SELECT ISNULL(NFM.FeeTypeID,FTS.FeeTypeID) FROM @NoFeeMonths NFM WHERE NFM.Month = @LMonth))
 
                 SELECT
-                    @CLateFee = SUM(CASE WHEN ISNULL(PD.PaymentID,0) != 0 THEN PD.NetApplicablePayment ELSE FTS.FeeAmount END),
+                    @CLateFee = SUM(CASE WHEN ISNULL(PD.PaymentID,0) != 0 THEN PD.NetApplicablePayment - ISNULL(PD.DiscAmt,0) ELSE FTS.FeeAmount END),
                     @CPaid = SUM(ISNULL(PD.PaymentRecieved,0))
                 FROM @FeeStructureTable FTS
                 LEFT JOIN v_PaymentDetails PD

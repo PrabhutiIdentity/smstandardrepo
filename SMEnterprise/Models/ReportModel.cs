@@ -253,4 +253,52 @@ public class ClassGenderCategoryCountModel
         public decimal PreviousDues { get; set; }
     }
 
+    public class ClassWiseCollectionSummaryPageModel
+    {
+        public int SBranchID { get; set; }
+        public int SessionID { get; set; }
+        public int ClassID { get; set; }
+        public int SectionID { get; set; }
+        public DateTime SessionStartDate { get; set; }
+        public DateTime SessionEndDate { get; set; }
+        public SBranchModel Branch { get; set; }
+        public List<NameIDModel> Classes { get; set; }
+        public List<NameIDModel> Sections { get; set; }
+        public List<SchoolSessionModel> Sessions { get; set; }
+        public List<ClassWiseCollectionSummaryRowModel> Rows { get; set; }
+    }
+
+    public class ClassWiseCollectionSummaryRowModel
+    {
+        public int ClassID { get; set; }
+        public string ClassName { get; set; }
+        public int SectionID { get; set; }
+        public string SectionName { get; set; }
+        public List<ClassWiseCollectionSummaryMonthModel> Months { get; set; }
+    }
+
+    public class ClassWiseCollectionSummaryMonthModel
+    {
+        public int FeeMonth { get; set; }
+        public int FeeYear { get; set; }
+        public decimal Amount { get; set; }
+        public decimal Discount { get; set; }
+        public decimal Paid { get; set; }
+        public decimal Balance { get; set; }
+    }
+
+    public class ClassWiseCollectionSummaryResultRowModel
+    {
+        public int ClassID { get; set; }
+        public string ClassName { get; set; }
+        public int SectionID { get; set; }
+        public string SectionName { get; set; }
+        public int FeeMonth { get; set; }
+        public int FeeYear { get; set; }
+        public decimal Amount { get; set; }
+        public decimal Discount { get; set; }
+        public decimal Paid { get; set; }
+        public decimal Balance { get; set; }
+    }
+
 }

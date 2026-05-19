@@ -1854,7 +1854,8 @@ namespace SMEnterprise.Controllers
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             if (objModel.TCType == 0)
             {
-                objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
+                objModel = objAccountData.SearchStudentsForTC(objModel.SearchText, SBranchID, objModel.SessionID);
+                objAccountData.PopulateTCGeneratedStatus(objModel, SBranchID);
                 return View(objModel);
             }
             else
@@ -1889,22 +1890,33 @@ namespace SMEnterprise.Controllers
         public ActionResult GenerateTC(TCDetailsModel objModel)
         {
             // objModel.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            var loggedInUser = PermissionManager.GetLoggedInUser();
+            objModel.SBranchID = loggedInUser.SBranchID;
             if (objModel.TCDetails == null)
             {
                 objAccountData.GetTCDetails(objModel);
                 return View(objModel);
             }
             
-          else
-    {
-        objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
-        objAccountData.GetTCDetails(objModel);
-        //ViewBag.Message = "Success";
-        //return View(objModel);
-        return RedirectToAction("GetTCForStudent", objModel);
-        //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
-    }
+            else
+            {
+                objModel.TCDetails.StudentID = objModel.TCDetails.StudentID == 0 ? objModel.StudentID : objModel.TCDetails.StudentID;
+                objModel.TCDetails.SessionID = objModel.TCDetails.SessionID == 0 ? objModel.SessionID : objModel.TCDetails.SessionID;
+                objModel.TCDetails.SBranchID = objModel.SBranchID;
+                objModel.TCDetails.CreatedBy = loggedInUser.UserID;
+
+                if (objModel.TCDetails.TCID <= 0)
+                {
+                    objModel.TCDetails.TCID = objAccountData.GetExistingTCID(objModel.TCDetails.StudentID, objModel.TCDetails.SessionID, objModel.SBranchID);
+                }
+
+                objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
+                objAccountData.GetTCDetails(objModel);
+                //ViewBag.Message = "Success";
+                //return View(objModel);
+                return RedirectToAction("GetTCForStudent", objModel);
+                //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
+            }
         }
         [PermissionFilter]
         public ActionResult GetTCForStudent(TCDetailsModel oModel)
@@ -3376,6 +3388,22 @@ namespace SMEnterprise.Controllers
             }
          
             FeePaymentModel objModel = objAccountData.GetCollectionReport(SBranchID, objData.DemandMonth, objData.ClassID, objData.SectionID, objData.SessionID);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult ClassWiseCollectionSummary(ClassWiseCollectionSummaryPageModel objData = null)
+        {
+            if (objData == null)
+            {
+                objData = new ClassWiseCollectionSummaryPageModel();
+            }
+
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            if (objData.SessionID == 0)
+            {
+                objData.SessionID = -1;
+            }
+            ClassWiseCollectionSummaryPageModel objModel = objAccountData.GetClassWiseCollectionSummaryReport(SBranchID, objData.SessionID, objData.ClassID, objData.SectionID);
             return View(objModel);
         }
         [PermissionFilter]

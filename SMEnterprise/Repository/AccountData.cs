@@ -239,6 +239,112 @@ namespace SMEnterprise.Repository
             }
         }
 
+        public StudentSearchListModel SearchStudentsForTC(string searchText, int sBranchID, int sessionID)
+        {
+            var objModel = SearchStudents(searchText, sBranchID, sessionID);
+            var tcStudents = GetTCStudentList(sBranchID, sessionID);
+
+            var mergedStudents = new List<StudentSearchModel>();
+
+            if (objModel.Students != null)
+            {
+                mergedStudents.AddRange(objModel.Students);
+            }
+
+            if (tcStudents != null && tcStudents.Students != null)
+            {
+                IEnumerable<StudentModel> issuedTcStudents = tcStudents.Students;
+
+                if (!string.IsNullOrWhiteSpace(searchText))
+                {
+                    string term = searchText.Trim();
+                    issuedTcStudents = issuedTcStudents.Where(x =>
+                        (!string.IsNullOrWhiteSpace(x.Name) && x.Name.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (!string.IsNullOrWhiteSpace(x.StudentSID) && x.StudentSID.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (!string.IsNullOrWhiteSpace(x.RollNo) && x.RollNo.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (!string.IsNullOrWhiteSpace(x.SchoolUID) && x.SchoolUID.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (!string.IsNullOrWhiteSpace(x.FamilyID) && x.FamilyID.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (!string.IsNullOrWhiteSpace(x.AadharCardNo) && x.AadharCardNo.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0) ||
+                        (!string.IsNullOrWhiteSpace(x.FatherName) && x.FatherName.IndexOf(term, StringComparison.OrdinalIgnoreCase) >= 0));
+                }
+
+                mergedStudents.AddRange(issuedTcStudents.Select(x => new StudentSearchModel
+                {
+                    StudentID = x.StudentID,
+                    StudentSID = x.StudentSID,
+                    Name = x.Name,
+                    DOB = x.DOB,
+                    Gender = x.Gender,
+                    ClassID = x.ClassID,
+                    SectionID = x.SectionID,
+                    Photo = x.Photo,
+                    RollNo = x.RollNo,
+                    AadharCardNo = x.AadharCardNo,
+                    GuardianMobileNo = x.GuardianMobileNo,
+                    FatherMobileNo = x.FatherMobileNo,
+                    MotherMobileNo = x.MotherMobileNo,
+                    ClassName = x.ClassName,
+                    SectionName = x.SectionName,
+                    SSSID = x.SSSID,
+                    FamilyID = x.FamilyID,
+                    MotherName = x.MotherName,
+                    GuardianName = x.GuardianName,
+                    MiniAddress = x.MiniAddress,
+                    FatherName = x.FatherName,
+                    SchoolUID = x.SchoolUID,
+                    TCGenerated = 1
+                }));
+            }
+
+            objModel.Students = mergedStudents
+                .GroupBy(x => x.StudentID)
+                .Select(g => g.OrderByDescending(x => x.TCGenerated).First())
+                .OrderByDescending(x => x.TCGenerated)
+                .ThenBy(x => x.Name)
+                .ToList();
+
+            return objModel;
+        }
+
+        public void PopulateTCGeneratedStatus(StudentSearchListModel objModel, int sBranchID)
+        {
+            if (objModel == null || objModel.Students == null || objModel.Students.Count == 0)
+            {
+                return;
+            }
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                con.Open();
+
+                foreach (var student in objModel.Students)
+                {
+                    var paramater = new DynamicParameters();
+                    paramater.Add("@SBranchID", sBranchID);
+                    paramater.Add("@SessionID", objModel.SessionID);
+                    paramater.Add("@StudentID", student.StudentID);
+
+                    using (var multi = con.QueryMultiple("sp_GetTCDetailsAdmin", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                    {
+                        multi.Read<StudentModel>().SingleOrDefault();
+                        multi.Read<ClassModel>().ToList();
+
+                        var tcDetails = multi.Read<TCModel>().SingleOrDefault();
+                        student.TCGenerated = (tcDetails != null && tcDetails.TCID > 0) ? 1 : 0;
+
+                        multi.Read<string>().ToList();
+                        multi.Read<SBranchModel>().SingleOrDefault();
+                        multi.Read<SessionModel>().ToList();
+                    }
+                }
+
+                objModel.Students = objModel.Students
+                    .OrderByDescending(x => x.TCGenerated)
+                    .ThenBy(x => x.Name)
+                    .ToList();
+            }
+        }
+
         public StudentSearchListModel SuspendedStudents(int SBranchID, int SessionID)
         {
 
@@ -2850,72 +2956,285 @@ namespace SMEnterprise.Repository
                 }
             }
         }
-        public FeePaymentModel GetDuefeeReportMonthlyNew(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
+        private FeePaymentModel GetDuefeeReportMonthlyNew(SqlConnection con, int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
         {
             FeePaymentModel objModel = new FeePaymentModel();
             objModel.DemandMonth = QDate;
 
+            var paramater = new DynamicParameters();
+            paramater.Add("@ClassID", ClassID);
+            paramater.Add("@SectionID", SectionID);
+            paramater.Add("@SBranchID", SBranchID);
+            paramater.Add("@SessionID", SessionID);
+            paramater.Add("@QDate", QDate);
+            paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+            using (var multi = con.QueryMultiple("sp_GetStudentFeeDetailsNewTemp", paramater, null, 0, commandType: CommandType.StoredProcedure))
+            {
+                objModel.Classes = multi.Read<NameIDModel>().ToList();
+                objModel.Sections = multi.Read<NameIDModel>().ToList();
+                objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                objModel.StudentList = multi.Read<StudentModel>().ToList();
+                objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
+                objModel.FeeListDetail = multi.Read<FeeDetailsModel>().ToList();
+            }
+            return objModel;
+        }
+
+        public FeePaymentModel GetDuefeeReportMonthlyNew(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
+        {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", ClassID);
-                paramater.Add("@SectionID", SectionID);
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@SessionID", SessionID);
-                paramater.Add("@QDate", QDate);
-                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-                using (var multi = con.QueryMultiple("sp_GetStudentFeeDetailsNewTemp", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.StudentList = multi.Read<StudentModel>().ToList();
-                    objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
-                    objModel.FeeListDetail = multi.Read<FeeDetailsModel>().ToList();
+                return GetDuefeeReportMonthlyNew(con, SBranchID, QDate, ClassID, SectionID, SessionID);
+            }
+        }
 
+        public ClassWiseCollectionSummaryPageModel GetClassWiseCollectionSummaryReport(int SBranchID, int SessionID, int ClassID, int SectionID)
+        {
+            ClassWiseCollectionSummaryPageModel model = new ClassWiseCollectionSummaryPageModel
+            {
+                SBranchID = SBranchID,
+                SessionID = SessionID,
+                ClassID = ClassID,
+                SectionID = SectionID,
+                Classes = new List<NameIDModel>(),
+                Sections = new List<NameIDModel>(),
+                Sessions = new List<SchoolSessionModel>(),
+                Rows = new List<ClassWiseCollectionSummaryRowModel>()
+            };
+
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var setupParameter = new DynamicParameters();
+                setupParameter.Add("@SBranchID", SBranchID);
+                setupParameter.Add("@ClassID", ClassID);
+                using (var multi = con.QueryMultiple(@"
+SELECT ClassID AS ID, ClassName AS Name
+FROM ClassMaster
+WHERE SBranchID = @SBranchID
+  AND Status = 1
+ORDER BY ClassID;
+
+SELECT CS.ID, CS.Name
+FROM Class_Sections CS
+INNER JOIN ClassMaster CM ON CM.ClassID = CS.ClassID
+WHERE CM.SBranchID = @SBranchID
+  AND CM.Status = 1
+  AND CS.Status = 1
+  AND (@ClassID = 0 OR CS.ClassID = @ClassID)
+ORDER BY CM.ClassID, CS.ID;
+
+SELECT SessionID, SessionStartDate, SessionEndDate, SessionStatus, SessionName, SBranchID
+FROM SessionMaster
+WHERE SBranchID = @SBranchID
+ORDER BY SessionStartDate;
+
+SELECT *
+FROM SBranchMaster
+WHERE SBranchID = @SBranchID;", setupParameter))
+                {
+                    model.Classes = multi.Read<NameIDModel>().ToList();
+                    model.Sections = multi.Read<NameIDModel>().ToList();
+                    model.Sessions = multi.Read<SchoolSessionModel>().ToList();
+                    model.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+                }
+
+                SchoolSessionModel selectedSession = model.Sessions.FirstOrDefault(x => x.SessionID == SessionID);
+                if (selectedSession == null)
+                {
+                    selectedSession = model.Sessions.FirstOrDefault(x => x.SessionStatus == 1) ?? model.Sessions.OrderByDescending(x => x.SessionStartDate).FirstOrDefault();
+                }
+
+                if (selectedSession == null)
+                {
+                    return model;
+                }
+
+                model.SessionID = selectedSession.SessionID;
+                model.SessionStartDate = selectedSession.SessionStartDate;
+                model.SessionEndDate = selectedSession.SessionEndDate;
+                model.Rows = GetClassWiseCollectionSummaryRows(con, SBranchID, selectedSession.SessionID, ClassID, SectionID, selectedSession.SessionStartDate, selectedSession.SessionEndDate);
+            }
+
+            return model;
+        }
+
+        private List<ClassWiseCollectionSummaryRowModel> GetClassWiseCollectionSummaryRows(SqlConnection con, int sBranchID, int sessionID, int classID, int sectionID, DateTime sessionStartDate, DateTime sessionEndDate)
+        {
+            try
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchID);
+                parameters.Add("@SessionID", sessionID);
+                parameters.Add("@ClassID", classID);
+                parameters.Add("@SectionID", sectionID);
+
+                List<ClassWiseCollectionSummaryResultRowModel> summaryRows = con.Query<ClassWiseCollectionSummaryResultRowModel>(
+                    "sp_GetClassWiseCollectionSummary",
+                    parameters,
+                    null,
+                    true,
+                    0,
+                    CommandType.StoredProcedure).ToList();
+
+                if (summaryRows.Count > 0)
+                {
+                    return MapClassWiseCollectionSummaryRows(summaryRows, sessionStartDate, sessionEndDate);
                 }
             }
+            catch (SqlException ex) when (ex.Message.IndexOf("Could not find stored procedure", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                // Fallback only when the optimized proc is not available.
+            }
+
+            return BuildClassWiseCollectionSummaryRowsFallback(con, sBranchID, sessionID, classID, sectionID, sessionStartDate, sessionEndDate);
+        }
+
+        private List<ClassWiseCollectionSummaryRowModel> MapClassWiseCollectionSummaryRows(List<ClassWiseCollectionSummaryResultRowModel> summaryRows, DateTime sessionStartDate, DateTime sessionEndDate)
+        {
+            DateTime monthCursorStart = new DateTime(sessionStartDate.Year, sessionStartDate.Month, 1);
+            DateTime lastMonth = new DateTime(sessionEndDate.Year, sessionEndDate.Month, 1);
+
+            return summaryRows
+                .GroupBy(x => new { x.ClassID, x.ClassName, x.SectionID, x.SectionName })
+                .Select(group => new ClassWiseCollectionSummaryRowModel
+                {
+                    ClassID = group.Key.ClassID,
+                    ClassName = group.Key.ClassName,
+                    SectionID = group.Key.SectionID,
+                    SectionName = group.Key.SectionName,
+                    Months = BuildMappedMonths(group.ToList(), monthCursorStart, lastMonth)
+                })
+                .OrderBy(x => x.ClassID)
+                .ThenBy(x => x.SectionID)
+                .ToList();
+        }
+
+        private List<ClassWiseCollectionSummaryMonthModel> BuildMappedMonths(List<ClassWiseCollectionSummaryResultRowModel> summaryRows, DateTime monthCursorStart, DateTime lastMonth)
+        {
+            List<ClassWiseCollectionSummaryMonthModel> months = new List<ClassWiseCollectionSummaryMonthModel>();
+            DateTime monthCursor = monthCursorStart;
+
+            while (monthCursor <= lastMonth)
+            {
+                ClassWiseCollectionSummaryResultRowModel summary = summaryRows
+                    .FirstOrDefault(x => x.FeeMonth == monthCursor.Month && x.FeeYear == monthCursor.Year);
+
+                months.Add(new ClassWiseCollectionSummaryMonthModel
+                {
+                    FeeMonth = monthCursor.Month,
+                    FeeYear = monthCursor.Year,
+                    Amount = summary == null ? 0 : summary.Amount,
+                    Discount = summary == null ? 0 : summary.Discount,
+                    Paid = summary == null ? 0 : summary.Paid,
+                    Balance = summary == null ? 0 : summary.Balance
+                });
+
+                monthCursor = monthCursor.AddMonths(1);
+            }
+
+            return months;
+        }
+
+        private List<ClassWiseCollectionSummaryRowModel> BuildClassWiseCollectionSummaryRowsFallback(SqlConnection con, int sBranchID, int sessionID, int classID, int sectionID, DateTime sessionStartDate, DateTime sessionEndDate)
+        {
+            var classSectionParameter = new DynamicParameters();
+            classSectionParameter.Add("@SBranchID", sBranchID);
+            classSectionParameter.Add("@ClassID", classID);
+            classSectionParameter.Add("@SectionID", sectionID);
+
+            List<ClassWiseCollectionSummaryRowModel> rows = con.Query<ClassWiseCollectionSummaryRowModel>(@"
+SELECT
+    CM.ClassID,
+    CM.ClassName,
+    CS.ID AS SectionID,
+    CS.Name AS SectionName
+FROM ClassMaster CM
+INNER JOIN Class_Sections CS ON CS.ClassID = CM.ClassID
+WHERE CM.SBranchID = @SBranchID
+  AND CM.Status = 1
+  AND CS.Status = 1
+  AND (@ClassID = 0 OR CM.ClassID = @ClassID)
+  AND (@SectionID = 0 OR CS.ID = @SectionID)
+ORDER BY CM.ClassID, CS.ID;", classSectionParameter).ToList();
+
+            foreach (ClassWiseCollectionSummaryRowModel row in rows)
+            {
+                row.Months = BuildClassWiseCollectionSummaryMonthsExact(con, sBranchID, row.ClassID, row.SectionID, sessionID, sessionStartDate, sessionEndDate);
+            }
+
+            return rows;
+        }
+
+        private List<ClassWiseCollectionSummaryMonthModel> BuildClassWiseCollectionSummaryMonthsExact(SqlConnection con, int sBranchID, int classID, int sectionID, int sessionID, DateTime sessionStartDate, DateTime sessionEndDate)
+        {
+            List<ClassWiseCollectionSummaryMonthModel> months = new List<ClassWiseCollectionSummaryMonthModel>();
+            DateTime monthCursor = new DateTime(sessionStartDate.Year, sessionStartDate.Month, 1);
+            DateTime lastMonth = new DateTime(sessionEndDate.Year, sessionEndDate.Month, 1);
+
+            while (monthCursor <= lastMonth)
+            {
+                FeePaymentModel collectionData = GetCollectionReportInternal(con, sBranchID, monthCursor, classID, sectionID, sessionID);
+                List<StudentModel> students = collectionData != null && collectionData.StudentList != null
+                    ? collectionData.StudentList
+                    : new List<StudentModel>();
+
+                months.Add(new ClassWiseCollectionSummaryMonthModel
+                {
+                    FeeMonth = monthCursor.Month,
+                    FeeYear = monthCursor.Year,
+                    Amount = students.Sum(x => x.FeeAmount),
+                    Discount = students.Sum(x => x.Discounts),
+                    Paid = students.Sum(x => x.PaidAmount),
+                    Balance = students.Sum(x => x.UnpaidAmount)
+                });
+
+                monthCursor = monthCursor.AddMonths(1);
+            }
+
+            return months;
+        }
+
+        private FeePaymentModel GetCollectionReportInternal(SqlConnection con, int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
+        {
+            FeePaymentModel objModel = new FeePaymentModel();
+            objModel.DemandMonth = QDate;
+
+            var paramater = new DynamicParameters();
+            paramater.Add("@ClassID", ClassID);
+            paramater.Add("@SectionID", SectionID);
+            paramater.Add("@SBranchID", SBranchID);
+            paramater.Add("@SessionID", SessionID);
+            paramater.Add("@QDate", QDate);
+            paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
+            using (var multi = con.QueryMultiple("[sp_GetSessionCollection]", paramater, null, 0, commandType: CommandType.StoredProcedure))
+            {
+                objModel.Classes = multi.Read<NameIDModel>().ToList();
+                objModel.Sections = multi.Read<NameIDModel>().ToList();
+                objModel.ClassID = multi.Read<int>().SingleOrDefault();
+                objModel.SectionID = multi.Read<int>().SingleOrDefault();
+                objModel.Sessions = multi.Read<NameIDModel>().ToList();
+                objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                objModel.StudentList = multi.Read<StudentModel>().ToList();
+                try
+                {
+                    objModel.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
+                }
+                catch
+                { }
+            }
+
             return objModel;
         }
 
         public FeePaymentModel GetCollectionReport(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
         {
-            FeePaymentModel objModel = new FeePaymentModel();
-            objModel.DemandMonth = QDate;
-
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@ClassID", ClassID);
-                paramater.Add("@SectionID", SectionID);
-                paramater.Add("@SBranchID", SBranchID);
-                paramater.Add("@SessionID", SessionID);
-                paramater.Add("@QDate", QDate);
-                paramater.Add("@CurDate", CommonUsage.GetCurrentDate());
-                using (var multi = con.QueryMultiple("[sp_GetSessionCollection]", paramater, null, 0, commandType: CommandType.StoredProcedure))
-                {
-                    objModel.Classes = multi.Read<NameIDModel>().ToList();
-                    objModel.Sections = multi.Read<NameIDModel>().ToList();
-                    objModel.ClassID = multi.Read<int>().SingleOrDefault();
-                    objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.Sessions = multi.Read<NameIDModel>().ToList();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
-                    objModel.StudentList = multi.Read<StudentModel>().ToList();
-                    //objModel.FeeTypeSummery = multi.Read<PayDetailFeeTypesModel>().ToList();
-                    //objModel.FeeListDetail = multi.Read<FeeDetailsModel>().ToList();
-                    try
-                    {
-                        objModel.SBranchDetails = multi.Read<SBranchModel>().SingleOrDefault();
-                    }
-                    catch
-                    { }
-
-                }
+                return GetCollectionReportInternal(con, SBranchID, QDate, ClassID, SectionID, SessionID);
             }
-            return objModel;
         }
 
         public DemandReciptListModel GetDemandReciptDataNew(int SBranchID, DateTime QDate, int ClassID, int SectionID, int SessionID)
@@ -4610,6 +4929,26 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_InsertUpdateTCDetails", paramater, null, true, 0, CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+
+        public int GetExistingTCID(int studentID, int sessionID, int sBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", sBranchID);
+                paramater.Add("@SessionID", sessionID);
+                paramater.Add("@StudentID", studentID);
+
+                using (var multi = con.QueryMultiple("sp_GetTCDetailsAdmin", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    multi.Read<StudentModel>().SingleOrDefault();
+                    multi.Read<ClassModel>().ToList();
+
+                    var tcDetails = multi.Read<TCModel>().SingleOrDefault();
+                    return tcDetails == null ? 0 : tcDetails.TCID;
+                }
+            }
+        }
         public SLCCertificateDetails GetStudentSLCDetails(int StudentID, int SessionID)
         {
             SLCCertificateDetails objModel = new SLCCertificateDetails();
@@ -5109,6 +5448,29 @@ namespace SMEnterprise.Repository
         }
         #endregion
 
+        public SBranchModel GetBranchPaymentProfile(int sBranchId)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+
+                const string sql = @"
+SELECT TOP 1
+    SBranchID,
+    BranchName,
+    Logo,
+    ContactNo,
+    EmailID,
+    Address,
+    BranchSchoolName
+FROM dbo.SBranchMaster
+WHERE SBranchID = @SBranchID";
+
+                return con.Query<SBranchModel>(sql, parameters).SingleOrDefault();
+            }
+        }
+
         public async Task<AdmissionEnquiryMasterModel> GetBranchDetails(int BranchID)
         {
             AdmissionEnquiryMasterModel objNew = new AdmissionEnquiryMasterModel();
@@ -5403,6 +5765,60 @@ namespace SMEnterprise.Repository
                 var parameters = new DynamicParameters();
                 parameters.Add("@SBranchID", sBranchId);
                 return con.Query<BranchSubscriptionModel>("sp_GetBranchSubscription", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        public BranchPaymentGatewayModel GetBranchGateway(int sBranchId)
+        {
+            using (var con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@SBranchID", sBranchId);
+                try
+                {
+                    var gateway = con.Query<BranchPaymentGatewayModel>("sp_GetBranchGateway", parameters, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                    if (gateway != null)
+                    {
+                        return gateway;
+                    }
+                }
+                catch
+                {
+                    // Fallback to direct table query for environments where proc/table shape is older or partially updated.
+                }
+
+                const string sqlNew = @"
+SELECT TOP 1
+    SBranchID,
+    KeyId,
+    Secret,
+    PaymentGatewayName,
+    ISNULL(IsActive, 1) AS IsActive,
+    CreatedDate,
+    UpdatedDate
+FROM dbo.BranchPaymentGateway
+WHERE SBranchID = @SBranchID";
+
+                try
+                {
+                    return con.Query<BranchPaymentGatewayModel>(sqlNew, parameters).SingleOrDefault();
+                }
+                catch
+                {
+                    const string sqlOld = @"
+SELECT TOP 1
+    SBranchID,
+    RazorpayKeyId AS KeyId,
+    RazorpaySecret AS Secret,
+    CAST(NULL AS NVARCHAR(100)) AS PaymentGatewayName,
+    CAST(1 AS BIT) AS IsActive,
+    CreatedDate,
+    UpdatedDate
+FROM dbo.BranchPaymentGateway
+WHERE SBranchID = @SBranchID";
+
+                    return con.Query<BranchPaymentGatewayModel>(sqlOld, parameters).SingleOrDefault();
+                }
             }
         }
 

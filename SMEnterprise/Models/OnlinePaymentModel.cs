@@ -11,6 +11,7 @@ namespace SMEnterprise.Models
         public string EmailID { get; set; }
         public string ContactNumber { get; set; }
         public string Address { get; set; }
+        public string ImageUrl { get; set; }
         public int Amount { get; set; }
         public string OrderID { get; set; }
     }
@@ -20,6 +21,7 @@ namespace SMEnterprise.Models
         public string EmailID { get; set; }
         public string ContactNumber { get; set; }
         public string Address { get; set; }
+        public string ImageUrl { get; set; }
         public int Amount { get; set; }
         public string PGOrderID { get; set; }
         public string PGPaymentID { get; set; }
