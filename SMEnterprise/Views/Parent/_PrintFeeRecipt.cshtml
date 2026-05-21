@@ -4,6 +4,199 @@
     <button type="button" onclick="ClosePrintRecipt(this,@Model.StudentID)" class="btn btn-round btn-success RClosebtn">Close</button>*@
 </div>
 <div id="divRecipt">
+<<<<<<< HEAD
+    <div class="wrapper">
+        <div class="header-1">
+            <div class="col-3" style="text-align: right;">
+                Receipt No:-  @(Model.PaymentRecieptNo != null ? Model.PaymentRecieptNo : "PAY" + Model.PaymentID.ToString().PadLeft(6, '0'))
+=======
+<<<<<<< HEAD
+<div class="wrapper"> 
+    <div class="header-1">
+        <div class="col-2">
+            <div class="logo-img">
+                <img src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+>>>>>>> master
+            </div>
+        </div>
+        <div class="header-1">
+            <div class="col-2">
+                <div class="logo-img">
+                    <img src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails.SBranchID)_@(Model.SBranchDetails.Logo)" />
+                </div>
+            </div>
+            <div class="col-1">
+                [CopyPlaceHolder]
+                <h1>
+                    @Model.SBranchDetails.BranchSchoolName <br /><ad style="font-size:21px!important;"> @Html.Raw(Model.SBranchDetails.Address == null ? "" : Model.SBranchDetails.Address.Replace("\n", "<br/>"))</ad>
+                </h1>
+
+            </div>
+            <div class="col-3" style="text-align: right;    width: 95px;">
+                <img src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" />
+            </div>
+        </div>
+        <div class="header-1">
+            <div class="col-3">
+                <b>Contact:</b>    @Model.SBranchDetails.ContactNo &nbsp;&nbsp;&nbsp;   <b>Email:</b>  @Model.SBranchDetails.EmailID
+                <hr />
+            </div>
+        </div>
+        <div class="header-1">
+            <div class="col-3">
+                Session:- @Model.SessionName
+            </div>
+        </div>
+        <div class="form-name">
+            <div class="row form-box name">
+                <label class="col-sm-2">Name : </label>
+                <div class="col-sm-6" style="border-bottom: 1px dashed #888;min-height: 20px;">@Model.Name</div>
+                <label class="col-sm-2">Roll No : </label>
+                <div class="col-sm-2" style="border-bottom: 1px dashed #888;min-height: 20px;">@Model.RollNo</div>
+            </div>
+            <div class="row form-box name">
+                <label class="col-sm-2">Father : </label>
+                <div class="col-sm-10">@Model.FatherName</div>
+            </div>
+            <div class="row form-box class">
+                <div class="col-sm-4">
+                    <div class="row f-sec">
+                        <label class="col-sm-6">Class : </label>
+                        <div class="col-sm-6">@(Model.ClassName)</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="row f-sec">
+                        <label class="col-sm-6">Section : </label>
+                        <div class="col-sm-6">@(Model.SectionName)</div>
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="row f-sec">
+
+                        <label class="col-sm-6">SR. No : </label>
+                        <div class="col-sm-6">@Model.SchoolUID</div>
+                    </div>
+                </div>
+            </div>
+            <div class="row form-box roll">
+                <div class="col-sm-6">
+                    <div class="row f-sec">
+                        <label class="col-sm-4">Reg.No : </label>
+                        <div class="col-sm-8">@Model.StudentSID</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="row f-sec">
+                        <label class="col-sm-4">Date : </label>
+                        <div class="col-sm-8">@Model.PaymentDate.ToString("dd MMM, yyyy")</div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row form-box name">
+                <label class="col-sm-2">Months : </label>
+                <div class="col-sm-10">@Model.PayMonths</div>
+            </div>
+            <div class="row form-box roll">
+                <div class="col-sm-6">
+                    <div class="row f-sec">
+                        <label class="col-sm-4">Ref.No : </label>
+                        <div class="col-sm-8">@Model.ReferanceNumber</div>
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="row f-sec">
+                        <label class="col-sm-6">Payment Mode </label>
+                        <div class="col-sm-6">@Model.FeePayMode</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="fee-table">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>S No.</th>
+                        <th>Particulars</th>
+                        <th>Fee Amount</th>
+                        <th>Discount</th>
+                        <th>Paid Amount</th>
+                    </tr>
+                </thead>
+                @{
+                    var counter = 1;
+                    decimal TotalAmount = 0;
+                    decimal TotalPayable = 0;
+                    decimal Discount = 0;
+                    <tbody>
+
+
+
+                        @foreach (SMEnterprise.Models.FeeDetailsModel f in Model.PaymentDetails)
+                        {
+
+                            <tr>
+                                <td>@(counter).</td>
+                                <td>@f.FeeTypeName</td>
+                                <td>₹ @f.NetApplicablePayment</td>
+                                <td>₹ @f.DiscAmt</td>
+                                <td>₹ @f.PaymentRecieved</td>
+                            </tr>
+                            counter++;
+
+                            // Feature selected Month Fee Calculaion
+
+                            TotalAmount = TotalAmount + f.PaymentRecieved;
+                            TotalPayable = TotalPayable + f.NetApplicablePayment;
+
+                            // Current Month Fee Calculaion
+
+                            //   TotalAmount = f.PaymentRecieved;
+                            // TotalPayable = f.NetApplicablePayment;
+
+                            Discount = Discount + f.DiscAmt;
+                        }
+
+
+                    </tbody>
+                    <tbody class="total">
+                        <tr>
+                            <td align="left" colspan="2">Total</td>
+                            <td>₹ @TotalPayable.ToString("0.00")</td>
+                            <td>₹ @Discount.ToString("0.00")</td>
+                            <td>₹ @TotalAmount.ToString("0.00")</td>
+                        </tr>
+                        <tr>
+                            <td colspan="5" style="text-align:left;">
+
+                                <b>Payment received:</b> @SMEnterprise.Repository.CommonUsage.SpellDecimal(TotalAmount) Only
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" align="right"><strong>Due Amount</strong></td>
+                            <td>₹ @((TotalPayable-TotalAmount-Discount).ToString("0.00"))</td>
+                        </tr>
+                    </tbody>
+                }
+            </table>
+        </div>
+        <div>
+            Remark: @Model.Remark
+        </div>
+        <div class="row bottom-sec">
+            <div class="col-sm-8">
+                Note : - Fee must be paid up to @(Model.LastPayDay)th date of every month otherwise student will have to pay fine Rs. @Model.LateFee/-.
+            </div>
+            <div class="col-sm-4 principle">Principal</div>
+        </div>
+    </div>
+<<<<<<< HEAD
+=======
+</div>
+=======
     <div class="wrapper">
         <div class="header-1">
             <div class="col-3" style="text-align: right;">
@@ -184,4 +377,6 @@
             <div class="col-sm-4 principle">Principal</div>
         </div>
     </div>
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 </div>

@@ -96,7 +96,14 @@ namespace SMEnterprise.Models
         public decimal Discount { get; set; }
         public decimal ApplicableFee { get; set; }
         public decimal PaymentRecieved { get; set; }
+<<<<<<< HEAD
         public string PayMonths { get; set; }
+=======
+<<<<<<< HEAD
+=======
+        public string PayMonths { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
     }
     public class StudentYearMonthFeeTypeFeeDetailModel
     {
@@ -111,12 +118,27 @@ namespace SMEnterprise.Models
     public class StudentSessionFeeStatusPageModel
     {
         public int StudentID { get; set; }
+<<<<<<< HEAD
         public int SBranchID { get; set; }
         public string name { get; set; }
         public DateTime CurDate { get; set; }
         public List<StudentYearMonthFeeSummeryModel> MonthlySummery { get; set; }
         public List<StudentYearMonthFeeTypeFeeDetailModel> FeeWiseDetails { get; set; }
         public SBranchModel SBranch { get; set; }
+=======
+<<<<<<< HEAD
+        public DateTime CurDate { get; set; }
+        public List<StudentYearMonthFeeSummeryModel> MonthlySummery { get; set; }
+        public List<StudentYearMonthFeeTypeFeeDetailModel> FeeWiseDetails { get; set; }
+=======
+        public int SBranchID { get; set; }
+        public string name { get; set; }
+        public DateTime CurDate { get; set; }
+        public List<StudentYearMonthFeeSummeryModel> MonthlySummery { get; set; }
+        public List<StudentYearMonthFeeTypeFeeDetailModel> FeeWiseDetails { get; set; }
+        public SBranchModel SBranch { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
     }
 public class ClassGenderCategoryCountModel
     {
@@ -177,7 +199,14 @@ public class ClassGenderCategoryCountModel
     }
     public class CollectionReportModel
     {
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public string UUID { get; set; }
         public SBranchModel Branch { get; set; }
         public DateTime FromDate { get; set; }
@@ -185,16 +214,32 @@ public class ClassGenderCategoryCountModel
         public int ReportType { get; set; }
         public int PaymentMode { get; set; }
         public int SBranchID { get; set; }
+<<<<<<< HEAD
         public int SessionID { get; set; }
         public DateTime FromDateWeekly { get; set; } // Added to capture weekly start date
         public DateTime ToDateWeekly { get; set; }   // Added to capture weekly end date
+=======
+<<<<<<< HEAD
+=======
+        public int SessionID { get; set; }
+        public DateTime FromDateWeekly { get; set; } // Added to capture weekly start date
+        public DateTime ToDateWeekly { get; set; }   // Added to capture weekly end date
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public List<FeePaymentModel> Report { get; set; }
         public List<NameIDModel> FeeType { get; set; }
         public List<NameIDModel> ExpenceType { get; set; }
         public List<PaymentModeModel> PaymentModes { get; set; }
         public List<PaymentDetailsModel> FeeReportType { get; set; }
         public List<ExpenseDetailsModel> ExpenseReportType { get; set; }
+<<<<<<< HEAD
         public List<SchoolSessionModel> Sessions { get; set; }
+=======
+<<<<<<< HEAD
+=======
+        public List<SchoolSessionModel> Sessions { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public int QuarterID { get; set; }
     }
 

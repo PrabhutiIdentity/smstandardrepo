@@ -29,8 +29,16 @@ namespace SMEnterprise.Models
         public int Status { get; set; }
         public DateTime Date { get; set; }
         public string razorpayKey { get; set; }
+<<<<<<< HEAD
         public string razorpaySecret { get; set; }
         
+=======
+<<<<<<< HEAD
+=======
+        public string razorpaySecret { get; set; }
+        
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public string currency { get; set; }
         public string Description { get; set; }
         public int StudentID { get; set; }
@@ -47,8 +55,16 @@ namespace SMEnterprise.Models
         public decimal ApplicableFee { get; set; }
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
+<<<<<<< HEAD
         public string Hash { get; set; }
         public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
+=======
+<<<<<<< HEAD
+        public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
+=======
+        public string Hash { get; set; }
+        public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
+>>>>>>> master
 
         // ── NEW: multi-month support ──────────────────────────────
         /// <summary>
@@ -63,6 +79,10 @@ namespace SMEnterprise.Models
         public bool IsSubscriptionOrder { get; set; } = false;
 
 
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
     }
     public class PaymentDetailModel
     {

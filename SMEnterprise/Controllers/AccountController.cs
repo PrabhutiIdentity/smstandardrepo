@@ -492,6 +492,11 @@ namespace SMEnterprise.Controllers
             objModel.CurrentTab = 1;
             return PartialView("_StudentViewPartial", objModel);
         }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> master
         public ActionResult TCRequest(string id = null)
         {
             int StudentID = CommonUsage.ConvertToInt(id);
@@ -500,6 +505,10 @@ namespace SMEnterprise.Controllers
             objModel.CurrentTab = 1;
             return PartialView("_StudentTCPartial", objModel);
         }
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 
         [PermissionFilter]
         public ActionResult GetSectionOptionalSubjects(string id = null)
@@ -866,6 +875,7 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult SaveFeePayment(FeePaymentModel objModel)
         {
+<<<<<<< HEAD
             try
             {
                 objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -887,6 +897,51 @@ namespace SMEnterprise.Controllers
                 objModel.Day = objModel.QDate.Day;
                 FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
 
+=======
+<<<<<<< HEAD
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            //  objModel.QDate = CommonUsage.GetCurrentDate();
+            //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+
+
+            //string FeeDate= objModel.FeeDate.ToShortDateString();
+            //if (FeeDate.Length>0)
+            //{
+            //    objModel.FeeDate = objModel.FeeDate;
+            //}
+            //else
+            //{
+            //    objModel.FeeDate = CommonUsage.GetCurrentDate();
+            //}
+            objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.Day = objModel.QDate.Day;
+            FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
+
+            return PartialView("_StudentFeeRowPartial", objData);
+=======
+            try
+            {
+                objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                //  objModel.QDate = CommonUsage.GetCurrentDate();
+                //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+
+
+                //string FeeDate= objModel.FeeDate.ToShortDateString();
+                //if (FeeDate.Length>0)
+                //{
+                //    objModel.FeeDate = objModel.FeeDate;
+                //}
+                //else
+                //{
+                //    objModel.FeeDate = CommonUsage.GetCurrentDate();
+                //}
+                objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
+                objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                objModel.Day = objModel.QDate.Day;
+                FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
+
+>>>>>>> master
                 return PartialView("_StudentFeeRowPartial", objData);
             }
             catch (Exception ex)
@@ -894,6 +949,10 @@ namespace SMEnterprise.Controllers
                 Response.StatusCode = 400;
                 return Content(ex.Message);
             }
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         }
         [PermissionFilter]
         public JsonResult SendFeeCollectionSMS(string ID)
@@ -1963,7 +2022,11 @@ namespace SMEnterprise.Controllers
                 objAccountData.GetTCDetails(objModel);
                 return View(objModel);
             }
+<<<<<<< HEAD
             
+=======
+<<<<<<< HEAD
+>>>>>>> master
             else
             {
                 objModel.TCDetails.StudentID = objModel.TCDetails.StudentID == 0 ? objModel.StudentID : objModel.TCDetails.StudentID;
@@ -1983,6 +2046,18 @@ namespace SMEnterprise.Controllers
                 return RedirectToAction("GetTCForStudent", objModel);
                 //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
             }
+=======
+            
+          else
+    {
+        objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
+        objAccountData.GetTCDetails(objModel);
+        //ViewBag.Message = "Success";
+        //return View(objModel);
+        return RedirectToAction("GetTCForStudent", objModel);
+        //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
+    }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
         }
         [PermissionFilter]
         public ActionResult GetTCForStudent(TCDetailsModel oModel)
@@ -2736,6 +2811,11 @@ namespace SMEnterprise.Controllers
             return PartialView("_PrintProductSell", model);
         }
         [PermissionFilter]
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> master
         public ActionResult GetSaleTransactionPaymentReceiptData(string ID = null, string paymentId = null)
         {
             int iID = CommonUsage.ConvertToInt(ID);
@@ -2773,6 +2853,10 @@ namespace SMEnterprise.Controllers
             return Redirect("/Account/StockDetails/" + iID + "?saved=1&mode=" + mode + "&paymentId=" + iPaymentID);
         }
         [PermissionFilter]
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public ActionResult GetStudentsForStockTransfer(string id = null)
         {
             int STID = CommonUsage.ConvertToInt(id);
@@ -2813,14 +2897,31 @@ namespace SMEnterprise.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
         [PermissionFilter]
+<<<<<<< HEAD
         public ActionResult StockDetails(string ID = null, string saved = null, string mode = null, string paymentId = null)
+=======
+<<<<<<< HEAD
+        public ActionResult StockDetails(string ID = null)
+=======
+        public ActionResult StockDetails(string ID = null, string saved = null, string mode = null, string paymentId = null)
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         {
             int STID = CommonUsage.ConvertToInt(ID);
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             StockTransaferMasterModel objModel = objAccountData.GetStockTransferDetails(STID, SBranchID);
+<<<<<<< HEAD
             ViewBag.StockSaved = saved == "1";
             ViewBag.StockSaveMode = mode ?? "";
             ViewBag.LastSavedPaymentID = CommonUsage.ConvertToInt(paymentId);
+=======
+<<<<<<< HEAD
+=======
+            ViewBag.StockSaved = saved == "1";
+            ViewBag.StockSaveMode = mode ?? "";
+            ViewBag.LastSavedPaymentID = CommonUsage.ConvertToInt(paymentId);
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
             return View(objModel);
         }
         [PermissionFilter]
@@ -2828,6 +2929,7 @@ namespace SMEnterprise.Controllers
         {
             oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             oModel.CreatedDate = CommonUsage.GetCurrentDate();
+<<<<<<< HEAD
             int loggedInUserID = PermissionManager.GetLoggedInUser().UserID;
             StockTransaferMasterModel existingModel = null;
             decimal currentPaymentAmount = oModel.PaidAmount;
@@ -2972,6 +3074,156 @@ namespace SMEnterprise.Controllers
                 }
             }
             int STID = objAccountData.UpdateStockTransaction(oModel);
+=======
+<<<<<<< HEAD
+            int STID = objAccountData.UpdateStockTransaction(oModel);
+            return Redirect("/Account/StockDetails/" + STID);
+=======
+            int loggedInUserID = PermissionManager.GetLoggedInUser().UserID;
+            StockTransaferMasterModel existingModel = null;
+            decimal currentPaymentAmount = oModel.PaidAmount;
+            decimal paymentReceivedNow = 0;
+            bool isAdditionalPayment = false;
+            int paymentReceiptID = 0;
+            if (oModel.Details == null)
+            {
+                oModel.Details = new List<StockTransaferDetailModel>();
+            }
+            if (oModel.STID > 0)
+            {
+                existingModel = objAccountData.GetStockTransferDetails(oModel.STID, oModel.SBranchID);
+            }
+            if (existingModel != null
+                && existingModel.STID > 0
+                && existingModel.PaymentHistory != null
+                && existingModel.PaymentHistory.Count > 0
+                && oModel.Status == 0)
+            {
+                oModel.Status = existingModel.Status;
+                oModel.CancelRemark = existingModel.CancelRemark;
+                oModel.SelectedPaymentID = 0;
+            }
+            oModel.Amount = oModel.Details
+                .Where(x => x.OpType != -1)
+                .Sum(x => x.Cost * x.Quantity + x.Cost * x.Quantity * (x.SGST + x.CGST + x.IGST) / 100);
+            if (oModel.PaymentDate == null || oModel.PaymentDate.Value.Year <= 1)
+            {
+                oModel.PaymentDate = oModel.TrDate;
+            }
+            if (oModel.TrType == 2)
+            {
+                oModel.PaidAmount = 0;
+                oModel.DueAmount = 0;
+                oModel.PaymentMode = -1;
+                oModel.PaymentReferanceNo = "";
+                oModel.PaymentStatus = 0;
+            }
+            else
+            {
+                if (currentPaymentAmount < 0)
+                {
+                    currentPaymentAmount = 0;
+                }
+                if (existingModel != null && existingModel.STID > 0 && existingModel.IsPaymentLocked && existingModel.Status != 0 && existingModel.DueAmount > 0)
+                {
+                    isAdditionalPayment = true;
+                    oModel.PaidAmount = existingModel.PaidAmount + currentPaymentAmount;
+                }
+                else
+                {
+                    oModel.PaidAmount = currentPaymentAmount;
+                }
+                if (oModel.PaidAmount > oModel.Amount)
+                {
+                    oModel.PaidAmount = oModel.Amount;
+                }
+                oModel.DueAmount = oModel.Amount - oModel.PaidAmount;
+                if (oModel.Status == 0)
+                {
+                    oModel.PaymentStatus = 3;
+                }
+                else if (oModel.PaidAmount >= oModel.Amount && oModel.Amount > 0)
+                {
+                    oModel.PaymentStatus = 2;
+                }
+                else if (oModel.PaidAmount > 0)
+                {
+                    oModel.PaymentStatus = 1;
+                }
+                else
+                {
+                    oModel.PaymentStatus = 0;
+                }
+            }
+
+            if (existingModel != null && existingModel.STID > 0 && existingModel.IsPaymentLocked)
+            {
+                oModel.TrDate = existingModel.TrDate;
+                oModel.TrType = existingModel.TrType;
+                oModel.RefID = existingModel.RefID;
+                oModel.RefType = existingModel.RefType;
+                oModel.ClassID = existingModel.ClassID;
+                oModel.SectionID = existingModel.SectionID;
+                oModel.SessionID = existingModel.SessionID;
+                oModel.EmployeeTypeID = existingModel.EmployeeTypeID;
+                oModel.VendorID = existingModel.VendorID;
+                oModel.Remark = existingModel.Remark;
+                oModel.Details = existingModel.Details ?? new List<StockTransaferDetailModel>();
+                oModel.Amount = existingModel.Amount;
+
+                if (oModel.Status == 0)
+                {
+                    oModel.PaidAmount = existingModel.PaidAmount;
+                    oModel.DueAmount = existingModel.DueAmount;
+                    oModel.PaymentMode = existingModel.PaymentMode;
+                    oModel.PaymentReferanceNo = existingModel.PaymentReferanceNo;
+                    oModel.PaymentDate = existingModel.PaymentDate;
+                    oModel.PaymentStatus = 3;
+                }
+                else if (isAdditionalPayment)
+                {
+                    if (currentPaymentAmount <= 0)
+                    {
+                        oModel.PaymentMode = existingModel.PaymentMode;
+                        oModel.PaymentReferanceNo = existingModel.PaymentReferanceNo;
+                        oModel.PaymentDate = existingModel.PaymentDate;
+                        oModel.PaidAmount = existingModel.PaidAmount;
+                        oModel.DueAmount = existingModel.DueAmount;
+                        oModel.PaymentStatus = existingModel.PaymentStatus;
+                    }
+                }
+                else
+                {
+                    oModel.PaidAmount = existingModel.PaidAmount;
+                    oModel.DueAmount = existingModel.DueAmount;
+                    oModel.PaymentMode = existingModel.PaymentMode;
+                    oModel.PaymentReferanceNo = existingModel.PaymentReferanceNo;
+                    oModel.PaymentDate = existingModel.PaymentDate;
+                    oModel.PaymentStatus = existingModel.PaymentStatus;
+                }
+            }
+            if (existingModel != null
+                && existingModel.STID > 0
+                && existingModel.PaymentHistory != null
+                && existingModel.PaymentHistory.Count > 0
+                && existingModel.DueAmount <= 0
+                && currentPaymentAmount > 0)
+            {
+                oModel.PaidAmount = existingModel.PaidAmount;
+                oModel.DueAmount = existingModel.DueAmount;
+                oModel.PaymentStatus = existingModel.PaymentStatus;
+                paymentReceivedNow = 0;
+            }
+            if (oModel.Status != 0 && oModel.TrType != 2)
+            {
+                paymentReceivedNow = oModel.PaidAmount - (existingModel == null ? 0 : existingModel.PaidAmount);
+                if (paymentReceivedNow < 0)
+                {
+                    paymentReceivedNow = 0;
+                }
+            }
+            int STID = objAccountData.UpdateStockTransaction(oModel);
+>>>>>>> master
             if (oModel.Status != 0 && oModel.TrType != 2 && paymentReceivedNow > 0)
             {
                 paymentReceiptID = objAccountData.InsertStockTransactionPayment(
@@ -3015,6 +3267,10 @@ namespace SMEnterprise.Controllers
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetStockSaleReport(objModel, false);
             return View(objModel);
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         }
 
         [PermissionFilter]
@@ -3453,6 +3709,11 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> master
         public ActionResult CollectionReport(FeePaymentModel objData = null)
         {
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -3466,6 +3727,7 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+<<<<<<< HEAD
         public ActionResult ClassWiseCollectionSummary(ClassWiseCollectionSummaryPageModel objData = null)
         {
             if (objData == null)
@@ -3482,6 +3744,9 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public ActionResult ReportDailyFeeCollection(CollectionReportModel objModel)
         {
             objModel.ReportType = 1;
@@ -3507,7 +3772,14 @@ namespace SMEnterprise.Controllers
             {
                 objModel.FromDate = CommonUsage.GetCurrentDate().AddDays(-7);
                 objModel.PaymentMode = -1;
+<<<<<<< HEAD
                 objModel.SessionID = 0;
+=======
+<<<<<<< HEAD
+=======
+                objModel.SessionID = 0;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
             }
             if (objModel.ToDate.Year == 1)
             {
@@ -3583,8 +3855,17 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult ReportMonthlyCollection(CollectionReportModel objModel)
         {
+<<<<<<< HEAD
            
            objModel.ReportType = 2;
+=======
+<<<<<<< HEAD
+            objModel.ReportType = 2;
+=======
+           
+           objModel.ReportType = 2;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 
             if (objModel.FromDate.Year == 1)
             {
@@ -3595,7 +3876,14 @@ namespace SMEnterprise.Controllers
             {
                 objModel.ToDate = CommonUsage.GetCurrentDate();
             }
+<<<<<<< HEAD
            
+=======
+<<<<<<< HEAD
+=======
+           
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetCollectionReport(objModel);
@@ -3796,6 +4084,41 @@ namespace SMEnterprise.Controllers
                         ViewBag.Data = dt;
                     }
                     //Connection String to Excel Workbook  
+<<<<<<< HEAD
+                    /* else if (extension.Trim() == ".xls")
+                     {
+                         connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + path1 + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
+                         dt = Utility.ConvertXSLXtoDataTable(path1, connString);
+                         ViewBag.Data = dt;
+                     }
+                     else if (extension.Trim() == ".xlsx")
+                     {
+
+                         connString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + path1 + ";Extended Properties=\"Excel 12.0;HDR=Yes;IMEX=2\"";
+                         dt = Utility.ConvertXSLXtoDataTable(path1, connString);
+                         ViewBag.Data = dt;
+                     }
+                    */
+                    else if (extension == ".xls" || extension == ".xlsx")
+=======
+<<<<<<< HEAD
+                    else if (extension.Trim() == ".xls")
+                    {
+                        connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + path1 + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
+                        dt = Utility.ConvertXSLXtoDataTable(path1, connString);
+                        ViewBag.Data = dt;
+                    }
+                    else if (extension.Trim() == ".xlsx")
+>>>>>>> master
+                    {
+                        // NO MORE OLEDB PROVIDERS NEEDED!
+                        // Just pass the file path to your new Utility method
+                        dt = Utility.ConvertXSLXtoDataTable(path1);
+                    }
+<<<<<<< HEAD
+                    ViewBag.Data = dt;
+=======
+=======
                     /* else if (extension.Trim() == ".xls")
                      {
                          connString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=" + path1 + ";Extended Properties=\"Excel 8.0;HDR=Yes;IMEX=2\"";
@@ -3817,6 +4140,8 @@ namespace SMEnterprise.Controllers
                         dt = Utility.ConvertXSLXtoDataTable(path1);
                     }
                     ViewBag.Data = dt;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
                     objModel.Students = CommonUsage.ConvertDataTable<StudentBulkUploadModel>(dt);
                 }
                 else
@@ -3974,4 +4299,12 @@ namespace SMEnterprise.Controllers
         #endregion
 
     }
+<<<<<<< HEAD
 }
+=======
+<<<<<<< HEAD
+}
+=======
+}
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master

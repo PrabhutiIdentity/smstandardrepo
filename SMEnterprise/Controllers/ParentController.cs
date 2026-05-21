@@ -14,9 +14,35 @@ namespace SMEnterprise.Controllers
 {
     public class ParentController : Controller
     {
+<<<<<<< HEAD
         //private readonly BigBlueButtonAPIClient client;
         public ParentController()
         {
+=======
+<<<<<<< HEAD
+        private readonly BigBlueButtonAPIClient client;
+        public ParentController()
+        {
+            this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+        }
+        private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
+        {
+            try
+            {
+                var res = await client.IsMeetingRunningAsync(new IsMeetingRunningRequest { meetingID = Guid.NewGuid().ToString() });
+                if (res.returncode == Returncode.FAILED) return false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
+=======
+        //private readonly BigBlueButtonAPIClient client;
+        public ParentController()
+        {
+>>>>>>> master
             //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
         }
         //private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
@@ -32,6 +58,10 @@ namespace SMEnterprise.Controllers
         //        return false;
         //    }
         //}
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         [PermissionFilter]
         public ActionResult LandingPage()
         {
@@ -357,6 +387,95 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         #endregion
+<<<<<<< HEAD
+        //#region OnlineClasses
+        //[HttpPost]
+        //[PermissionFilter]
+        //public ActionResult PlayRecording(string url)
+        //{
+        //    if (url == null)
+        //    {
+        //        return RedirectToAction("OnlineClasses");
+        //    }
+        //    ViewBag.URL = url;
+        //    return View();
+        //}
+        //[PermissionFilter]
+        //public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
+        //{
+=======
+<<<<<<< HEAD
+        #region OnlineClasses
+        [HttpPost]
+        [PermissionFilter]
+        public ActionResult PlayRecording(string url)
+        {
+            if (url == null)
+            {
+                return RedirectToAction("OnlineClasses");
+            }
+            ViewBag.URL = url;
+            return View();
+        }
+        [PermissionFilter]
+        public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
+        {
+>>>>>>> master
+
+        //    int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
+        //    if (oModel.ClassDate.Year == 1)
+        //    {
+        //        oModel.ClassDate = CommonUsage.GetCurrentDate();
+        //    }
+        //    int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+        //    oModel.Classes = await (new BBBOnlineClassData()).GetStudentOnlineClassesSchedules(StudentID, oModel.ClassDate);
+        //    return View(oModel);
+
+        //}
+        //[PermissionFilter]
+        //public async Task<ActionResult> JoinClass(string ID = null)
+        //{
+        //    var onlienClassData = new BBBOnlineClassData();
+        //    var user = PermissionManager.GetLoggedInUser(); 
+        //    int ParentID = PermissionManager.GetLoggedInUser().UserID;
+        //    int OCID = CommonUsage.ConvertToInt(ID);
+        //    int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
+        //    BBBOnlineClassModel cModel = onlienClassData.GetOnlineClassDetailsByOCID(OCID);
+
+<<<<<<< HEAD
+=======
+            string basepath = $"{this.Request.Url.Scheme}://{this.Request.Url.Host}";
+            var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
+            if (meetingStatus.returncode != Returncode.FAILED)
+            {
+                var joinDate = CommonUsage.GetCurrentDate();
+                NameIDModel student = await onlienClassData.StudentJoinOnlineClass(StudentID, joinDate, OCID, ParentID, 0);
+               // StudentModel Student = objStudents.Where(x => x.StudentID == StudentID).FirstOrDefault();
+                string avatar = basepath + student.Extra1;
+                var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
+                requestJoin.userID = student.ID.ToString();
+                requestJoin.fullName = student.Name;
+                requestJoin.password = cModel.AttPassword;
+                var setConfigRequest = new SetConfigXMLRequest
+                {
+                    meetingID = cModel.MeetingID,
+                    configXML = "<config><modules><localeversion supressWarning=\"false\">0.9.0</localeversion></modules></config>"
+                };
+                var setConfigResult = await client.SetConfigXMLAsync(setConfigRequest);
+                if (setConfigResult.returncode == Returncode.FAILED) return Json(0);
+                requestJoin.configToken = setConfigResult.configToken;
+                requestJoin.avatarURL = avatar;
+                var url = client.GetJoinMeetingUrl(requestJoin);
+                ViewBag.URL = url;
+                return View();
+            }
+            else
+            {
+                return View(-1);
+            }
+        }
+        #endregion
+=======
         //#region OnlineClasses
         //[HttpPost]
         //[PermissionFilter]
@@ -393,6 +512,7 @@ namespace SMEnterprise.Controllers
         //    int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
         //    BBBOnlineClassModel cModel = onlienClassData.GetOnlineClassDetailsByOCID(OCID);
 
+>>>>>>> master
         //    string basepath = $"{this.Request.Url.Scheme}://{this.Request.Url.Host}";
         //    var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
         //    if (meetingStatus.returncode != Returncode.FAILED)
@@ -424,5 +544,9 @@ namespace SMEnterprise.Controllers
         //    }
         //}
         //#endregion
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
     }
 }

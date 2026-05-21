@@ -5,8 +5,16 @@ using System.Data;
 using System.Linq;
 using System.Web;
 
+<<<<<<< HEAD
 
 
+=======
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 namespace SMEnterprise.Models
 {
     public class SOCertificateDetails
@@ -1033,12 +1041,22 @@ namespace SMEnterprise.Models
         public int TotalParameter { get; set; }
         public int FilledParameter { get; set; }
         public List<EvaluationTypeModel> EvaluationTypes { get; set; }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> master
         // use for Rank
         public List<StudentTermRankModel> TermRanks { get; set; }
         public StudentOverallRankModel OverallRank { get; set; }
 
 
         //
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public DataTable GetPerformanceValuesDatatable()
         {
 

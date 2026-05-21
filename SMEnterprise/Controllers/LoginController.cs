@@ -5,8 +5,16 @@ using System.Web.Security;
 using SMEnterprise.Models;
 using SMEnterprise.Filters;
 using SMEnterprise.Repository;
+<<<<<<< HEAD
 using SMEnterpriseDB.Models;
 using System.Linq;
+=======
+<<<<<<< HEAD
+=======
+using SMEnterpriseDB.Models;
+using System.Linq;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 
 namespace SMEnterprise.Controllers
 {
@@ -112,18 +120,56 @@ namespace SMEnterprise.Controllers
                         try
                         {
                             Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
+<<<<<<< HEAD
                         } 
+=======
+<<<<<<< HEAD
+=======
+                        } 
+                        catch { }
+                        try
+                        {
+                            var accountData = new AccountData();
+                            int branchId = PermissionManager.GetLoggedInUser().SBranchID;
+                            var sub = accountData.GetBranchSubscription(branchId);
+                            if (sub != null && sub.IsDue && sub.DueAmount > 0m)
+                            {
+                                Session["ShowPaymentDue"] = true;
+                                Session["PaymentDueBranchID"] = branchId;
+                                Session["PaymentDueAmount"] = sub.DueAmount;
+                                Session["PaymentDuePlanName"] = sub.PlanName ?? "";
+                            }
+                            else
+                            {
+                                Session.Remove("ShowPaymentDue");
+                                Session.Remove("PaymentDueBranchID");
+                                Session.Remove("PaymentDueAmount");
+                                Session.Remove("PaymentDuePlanName");
+                            }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+                        }
+>>>>>>> master
                         catch { }
                         CommonData objCData = new CommonData();
                         int activeBranchId = AttemptedUser.SBranchID;
                         if (AttemptedUser.RoleID == (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle || AttemptedUser.RoleID == (int)RoleType.Director)
                         {
+<<<<<<< HEAD
                            var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
                             Session["SBrancheList"] = branches;
                             activeBranchId = branches.FirstOrDefault()?.SBranchID ?? AttemptedUser.SBranchID;
                             Session["SBranchID"] = activeBranchId;
                             try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
                             objCData.InitializeStartupSettings(activeBranchId);
+=======
+<<<<<<< HEAD
+=======
+                           var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
+                            Session["SBrancheList"] = branches;
+                            Session["SBranchID"] = branches.FirstOrDefault()?.SBranchID;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+                            objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
+>>>>>>> master
                             return RedirectToAction("Dashboard", "Admin");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Technical)

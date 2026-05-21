@@ -7,14 +7,27 @@
 {
     <title>Demand Recipt</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+<<<<<<< HEAD
     @*  <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />*@
     <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+=======
+<<<<<<< HEAD
+    <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+=======
+    @*  <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />*@
+    <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+>>>>>>> master
 
 
     <link href="@Url.Content("~/css/DemandRecipt.css")" rel="stylesheet" />
     <link href="@Url.Content("~/css/DemandRecipt.print.css")" media="print" rel="stylesheet" />
 
 
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 }
 @model SMEnterprise.Models.DemandReciptListModel
 <div class="" style="background-color: white;">
@@ -88,6 +101,169 @@
         </div>
     </div>
     <div id="divList">
+<<<<<<< HEAD
+        <div class="dr-wrapper">
+            @{
+                var receipts = Model.Recipts.ToList();
+                int total = receipts.Count;
+=======
+<<<<<<< HEAD
+        <div class="wrapper">
+>>>>>>> master
+
+                for (int r = 0; r < total; r += 2)
+                {
+                    // Cut line before each row (except first)
+                    if (r > 0)
+                    {
+                        <div class="dr-cut-line">
+                            <span class="scissors">&#9986;</span>
+                            <div class="dash"></div>
+                            <span class="scissors">&#9986;</span>
+                        </div>
+                    }
+
+                    bool isLastRow = (r + 2 >= total);
+                    bool hasSecond = (r + 1 < total);
+
+                    <div class="dr-row @(isLastRow && r % 8 == 0 ? "" : "")">
+                        @{
+                            // Left card
+                            var d1 = receipts[r];
+                            var due1 = d1.PreviousDues + d1.ApplicableFee + d1.LateFee - d1.DiscAmt - d1.PaymentAmount;
+                        }
+                        <div class="dr-col">
+                            <div class="dr-card">
+                                <div class="dr-header">
+                                    <div class="dr-tag">Demand Receipt</div>
+                                    <div class="dr-school">@Model.Branch.BranchName</div>
+                                    <div class="dr-addr">@Model.Branch.Address</div>
+                                    <div class="dr-month-badge">@d1.MonthName</div>
+                                </div>
+                                <div class="dr-student">
+                                    <table>
+                                        <tr><td class="lbl">Student Name</td><td class="val">@d1.Name</td></tr>
+                                        <tr><td class="lbl">Father's Name</td><td class="val">@Html.Raw(Html.Encode(d1.FatherName).Replace(",", "<br/>"))</td></tr>
+                                        <tr><td class="lbl">Class / Section</td><td class="val">@d1.ClassName</td></tr>
+                                        <tr><td class="lbl">Roll No.</td><td class="val">@(string.IsNullOrEmpty(d1.RollNo) ? "-" : d1.RollNo)</td></tr>
+                                        <tr><td class="lbl">Reg. No.</td><td class="val" style="font-family:'Courier New',monospace;font-size:10.5px;">@d1.StudentSID</td></tr>
+                                    </table>
+                                </div>
+                                <div class="dr-fees">
+                                    <table>
+                                        @if (d1.PreviousDues > 0)
+                                        {
+                                            <tr><td class="lbl">Previous Dues</td><td class="amt red">&#8377; @d1.PreviousDues.ToString("N2")</td></tr>
+                                        }
+                                        <tr class="cur-fee-row">
+                                            <td class="lbl">Current Fee <span style="font-weight:400;color:#6b7f99;font-size:10px;">(@d1.MonthName)</span></td>
+                                            <td class="amt">&#8377; @d1.ApplicableFee.ToString("N2")</td>
+                                        </tr>
+                                        @if (d1.LateFee > 0)
+                                        {
+                                            <tr><td class="lbl">Late Fee</td><td class="amt red">&#8377; @d1.LateFee.ToString("N2")</td></tr>
+                                        }
+                                        @if (d1.DiscAmt > 0)
+                                        {
+                                            <tr><td class="lbl">Concession</td><td class="amt grn">- &#8377; @d1.DiscAmt.ToString("N2")</td></tr>
+                                        }
+                                        @if (d1.PaymentAmount > 0)
+                                        {
+                                            <tr><td class="lbl">Payment Received</td><td class="amt grn">- &#8377; @d1.PaymentAmount.ToString("N2")</td></tr>
+                                        }
+                                        <tr><td colspan="2"><hr class="dr-dashed" /></td></tr>
+                                    </table>
+                                </div>
+                                <div class="dr-total">
+                                    <span class="dr-total-lbl">Net Amount Due</span>
+                                    <span class="dr-total-amt">&#8377; @due1.ToString("N2")</span>
+                                </div>
+                                <div class="dr-footer">
+                                    <span class="reg">@d1.StudentSID</span>
+                                    <span class="copy">PSchool &copy;</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (hasSecond)
+                        {
+                            var d2 = receipts[r + 1];
+                            var due2 = d2.PreviousDues + d2.ApplicableFee + d2.LateFee - d2.DiscAmt - d2.PaymentAmount;
+                            <div class="dr-col">
+                                <div class="dr-card">
+                                    <div class="dr-header">
+                                        <div class="dr-tag">Demand Receipt</div>
+                                        <div class="dr-school">@Model.Branch.BranchName</div>
+                                        <div class="dr-addr">@Model.Branch.Address</div>
+                                        <div class="dr-month-badge">@d2.MonthName</div>
+                                    </div>
+                                    <div class="dr-student">
+                                        <table>
+                                            <tr><td class="lbl">Student Name</td><td class="val">@d2.Name</td></tr>
+                                            <tr><td class="lbl">Father's Name</td><td class="val">@Html.Raw(Html.Encode(d2.FatherName).Replace(",", "<br/>"))</td></tr>
+                                            <tr><td class="lbl">Class / Section</td><td class="val">@d2.ClassName</td></tr>
+                                            <tr><td class="lbl">Roll No.</td><td class="val">@(string.IsNullOrEmpty(d2.RollNo) ? "-" : d2.RollNo)</td></tr>
+                                            <tr><td class="lbl">Reg. No.</td><td class="val" style="font-family:'Courier New',monospace;font-size:10.5px;">@d2.StudentSID</td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="dr-fees">
+                                        <table>
+                                            @if (d2.PreviousDues > 0)
+                                            {
+                                                <tr><td class="lbl">Previous Dues</td><td class="amt red">&#8377; @d2.PreviousDues.ToString("N2")</td></tr>
+                                            }
+                                            <tr class="cur-fee-row">
+                                                <td class="lbl">Current Fee <span style="font-weight:400;color:#6b7f99;font-size:10px;">(@d2.MonthName)</span></td>
+                                                <td class="amt">&#8377; @d2.ApplicableFee.ToString("N2")</td>
+                                            </tr>
+                                            @if (d2.LateFee > 0)
+                                            {
+                                                <tr><td class="lbl">Late Fee</td><td class="amt red">&#8377; @d2.LateFee.ToString("N2")</td></tr>
+                                            }
+                                            @if (d2.DiscAmt > 0)
+                                            {
+                                                <tr><td class="lbl">Concession</td><td class="amt grn">- &#8377; @d2.DiscAmt.ToString("N2")</td></tr>
+                                            }
+                                            @if (d2.PaymentAmount > 0)
+                                            {
+                                                <tr><td class="lbl">Payment Received</td><td class="amt grn">- &#8377; @d2.PaymentAmount.ToString("N2")</td></tr>
+                                            }
+                                            <tr><td colspan="2"><hr class="dr-dashed" /></td></tr>
+                                        </table>
+                                    </div>
+                                    <div class="dr-total">
+                                        <span class="dr-total-lbl">Net Amount Due</span>
+                                        <span class="dr-total-amt">&#8377; @due2.ToString("N2")</span>
+                                    </div>
+                                    <div class="dr-footer">
+                                        <span class="reg">@d2.StudentSID</span>
+                                        <span class="copy">PSchool &copy;</span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Empty placeholder to keep grid balanced -->
+                            <div class="dr-col dr-empty"></div>
+                        }
+                    </div>
+
+                    @* Print page break after every 4 cards (2 rows) *@
+                    if ((r + 2) % 8 == 0)
+                    {
+                        <div class="dr-page-break"></div>
+                    }
+                }
+            }
+        </div>
+    </div>
+<<<<<<< HEAD
+
+
+
+=======
+=======
         <div class="dr-wrapper">
             @{
                 var receipts = Model.Recipts.ToList();
@@ -243,6 +419,8 @@
 
 
 
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 </div>
 @section scripts
 {
@@ -278,8 +456,17 @@
             frameDoc.document.write('<html><head><title></title>');
             frameDoc.document.write('</head><body>');
             frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
+<<<<<<< HEAD
             frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.css")" rel="stylesheet" type="text/css" />');
             frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.print.css")" media="print" rel="stylesheet" type="text/css" />');
+=======
+<<<<<<< HEAD
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" type="text/css" />');
+=======
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.print.css")" media="print" rel="stylesheet" type="text/css" />');
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 
             //Append the external CSS file.
             //Append the DIV contents.
