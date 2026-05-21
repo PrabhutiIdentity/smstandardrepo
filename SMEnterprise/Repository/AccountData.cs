@@ -1035,8 +1035,13 @@ namespace SMEnterprise.Repository
                     catch (Exception ex)
                     { throw ex; }
                 }
+                if (objModel.Session == null)
+                {
+                    objModel.Session = new SessionModel();
+                }
                 if (StudentSessionUID == 0)
                 {
+                    objModel.Session.StudentSessionUID = 0;
                     objModel.Session.FromDate = objModel.SessionStartDate;
                     objModel.Session.ToDate = objModel.SessionEndDate;
                 }
@@ -1065,6 +1070,7 @@ namespace SMEnterprise.Repository
                 paramater.Add("@OptedSubjects", objData.GetSubjectOptedDataTable());
                 paramater.Add("@IsAdmissionFeeApplicable", objData.IsAdmissionFeeApplicable);
                 paramater.Add("@ReasonforInactive", objData.ReasonforInactive);
+                paramater.Add("@IsNewSessionRequest", objData.IsNewSessionRequest);
 
                 return con.Query<int>("spn_InsertUpdateStudentSessionDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
@@ -1925,6 +1931,13 @@ namespace SMEnterprise.Repository
                     try
                     {
                         objModel.EmployeeType = multi.Read<int>().SingleOrDefault();
+                    }
+                    catch
+                    { }
+                    try
+                    {
+                        var activeSession = multi.Read<SchoolSessionModel>().FirstOrDefault();
+                        objModel.CurrentSessionName = activeSession != null ? activeSession.SessionName : "";
                     }
                     catch
                     { }

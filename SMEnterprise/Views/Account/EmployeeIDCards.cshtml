@@ -1,0 +1,190 @@
+@using SMEnterprise.Models;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeListPageModel
+@section IncludeCss
+{
+    <title>Employee ID Cards</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/employeecards.css?v=20260521-1")">
+}
+
+<div class="">
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("EmployeeIDCards", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @id = "frmEmployeeCards" }))
+            {
+                <div class="eid-toolbar">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <a href="javascript:void(0);" onclick="printCards();" class="btn btn-link eid-print-link">
+                                <i class="fa fa-print"></i> Print
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="col-md-4 text-right">Employee Type :</label>
+                            <div class="col-md-8">
+                                <select class="form-control" name="EmployeeType" id="ddlEmployeeType" onchange="$('#frmEmployeeCards').submit();">
+                                    <option value="0" @(Model.EmployeeType == 0 ? "selected" : "")>All</option>
+                                    @foreach (EmployeeTypeModel el in Model.EmployeeTypes ?? new List<EmployeeTypeModel>())
+                                    {
+                                        <option value="@el.EmployeeTypeID" @(el.EmployeeTypeID == Model.EmployeeType ? "selected" : "")>@el.EmployeeTypeName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="col-md-3 text-right">Search :</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="txtEmployeeCardSearch" placeholder="Search by name, ID, mobile, designation" onkeyup="searchEmployeeCards(this);" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="x_panel">
+                <div class="x_content">
+                    <div class="eid-sheet">
+                        @foreach (var emp in Model.Employees ?? new List<EmployeeModel>())
+                        {
+                            var employeeTypeName = string.IsNullOrWhiteSpace(emp.EmployeeTypeName) ? "Employee" : emp.EmployeeTypeName;
+                            var contact = string.IsNullOrWhiteSpace(emp.MobileNumber) ? "-" : emp.MobileNumber;
+                            var schoolAddress = Model.SBranchDetails != null ? Model.SBranchDetails.Address : "";
+                            var branchContact = Model.SBranchDetails != null ? Model.SBranchDetails.ContactNo : "";
+                            var branchEmail = Model.SBranchDetails != null ? Model.SBranchDetails.EmailID : "";
+                            var schoolName = Model.SBranchDetails != null ? Model.SBranchDetails.BranchSchoolName : "School Name";
+                            var role = string.IsNullOrWhiteSpace(emp.Role) ? employeeTypeName : emp.Role;
+                            var prefix = emp.Gender == 0 ? "Mr." : (emp.MaritalStatus == 1 ? "Mrs." : "Miss");
+                            var displayName = prefix + " " + emp.EmployeeName;
+                            var logoFile = Model.SBranchDetails != null ? Model.SBranchDetails.Logo : "";
+                            var signFile = Model.SBranchDetails != null ? Model.SBranchDetails.PrincipalSignature : "";
+                            var qrPayload = "EMP ID: " + emp.EmployeeSID + "\nName: " + displayName + "\nRole: " + role + "\nContact: " + contact + "\nSchool: " + schoolName;
+                            var qrUrl = "https://quickchart.io/qr?size=160&text=" + HttpUtility.UrlEncode(qrPayload);
+                            <div class="eid-pair eid-searchable" data-search="@((emp.EmployeeName + " " + emp.EmployeeSID + " " + employeeTypeName + " " + contact + " " + (emp.Role ?? "")).ToLowerInvariant())">
+                                <div class="eid-card eid-front">
+                                    <div class="eid-front-header">
+                                        <svg class="eid-header-print-svg" viewBox="0 0 856 120" preserveAspectRatio="none" aria-hidden="true">
+                                            <defs>
+                                                <linearGradient id="eidFrontHeader-@emp.EmployeeID" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stop-color="#2f9e9c"></stop>
+                                                    <stop offset="100%" stop-color="#47aea0"></stop>
+                                                </linearGradient>
+                                            </defs>
+                                            <polygon points="0,0 856,0 788,120 0,120" fill="url(#eidFrontHeader-@emp.EmployeeID)"></polygon>
+                                        </svg>
+                                        <div class="eid-front-header-content">
+                                            <div class="eid-brand">
+                                                @if (!string.IsNullOrWhiteSpace(logoFile))
+                                                {
+                                                    <img class="eid-logo" alt="School Logo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails != null ? Model.SBranchDetails.SBranchID : 0)_@logoFile" />
+                                                }
+                                                <div>
+                                                    <p class="eid-school">@schoolName</p>
+                                                    <div class="eid-sub">Official Employee Identity Card</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="eid-body">
+                                        <div class="eid-photo-wrap">
+                                            <img class="eid-photo" onerror="return OnImageError(this,@(emp.Gender));" alt="Employee Photo" src="@Url.Content("~/Images/EmployeeImage/")@(emp.EmployeeID)_@emp.Photo" />
+                                        </div>
+                                        <div class="eid-meta">
+                                            <div class="eid-name">@displayName</div>
+                                            <span class="eid-type">@employeeTypeName</span>
+                                            <div class="eid-row"><strong>Session</strong><span>@(!string.IsNullOrWhiteSpace(ViewBag.CurrentSessionName as string) ? (string)ViewBag.CurrentSessionName : "-")</span></div>
+                                            <div class="eid-row"><strong>Reg No</strong><span>@emp.EmployeeSID</span></div>
+                                            <div class="eid-row"><strong>Role</strong><span>@role</span></div>
+                                            <div class="eid-row"><strong>Contact</strong><span>@contact</span></div>
+                                            <div class="eid-row"><strong>Join Date</strong><span>@emp.DOJ.ToString("dd MMM, yyyy")</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="eid-school-strip">
+                                        <svg class="eid-strip-print-svg" viewBox="0 0 856 48" preserveAspectRatio="none" aria-hidden="true">
+                                            <rect width="856" height="48" fill="#47aea0"></rect>
+                                        </svg>
+                                        <div class="eid-school-strip-content">
+                                            <strong>School Address:</strong> @(string.IsNullOrWhiteSpace(schoolAddress) ? "-" : schoolAddress)
+                                        </div>
+                                    </div>
+                                    <div class="eid-foot">
+                                        <div class="eid-sign-box">
+                                            @if (!string.IsNullOrWhiteSpace(signFile))
+                                            {
+                                                <img class="eid-sign" alt="Principal Signature" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails != null ? Model.SBranchDetails.SBranchID : 0)_P_@signFile" />
+                                            }
+                                            <div class="eid-sign-line"></div>
+                                            <div class="eid-sign-label">Authorized Signatory</div>
+                                            <div class="eid-sign-address">@(string.IsNullOrWhiteSpace(schoolAddress) ? "-" : schoolAddress)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="eid-card eid-back">
+                                    <div class="eid-back-top">
+                                        <svg class="eid-header-print-svg" viewBox="0 0 856 120" preserveAspectRatio="none" aria-hidden="true">
+                                            <defs>
+                                                <linearGradient id="eidBackHeader-@emp.EmployeeID" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                    <stop offset="0%" stop-color="#2f9e9c"></stop>
+                                                    <stop offset="100%" stop-color="#47aea0"></stop>
+                                                </linearGradient>
+                                            </defs>
+                                            <polygon points="0,0 856,0 788,120 0,120" fill="url(#eidBackHeader-@emp.EmployeeID)"></polygon>
+                                        </svg>
+                                        <div class="eid-back-top-content">
+                                            <h4>Terms And Conditions</h4>
+                                        </div>
+                                    </div>
+                                    <div class="eid-back-body">
+                                        <div class="eid-note">
+                                            <div>- This card must be carried during school duty hours.</div>
+                                            <div>- Loss of this card should be reported to the administration immediately.</div>
+                                            <div>- This card remains the property of the school management.</div>
+                                        </div>
+                                        <div class="eid-back-grid">
+                                            <div class="eid-back-meta">
+                                                <div class="eid-row"><strong>Phone</strong><span>@(string.IsNullOrWhiteSpace(branchContact) ? "-" : branchContact)</span></div>
+                                                <div class="eid-row"><strong>Email</strong><span>@(string.IsNullOrWhiteSpace(branchEmail) ? "-" : branchEmail)</span></div>
+                                                <div class="eid-row"><strong>Website</strong><span>pschool.identityinfo.in</span></div>
+                                            </div>
+                                            <div class="eid-back-side">
+                                                @if (!string.IsNullOrWhiteSpace(logoFile))
+                                                {
+                                                    <img class="eid-back-logo" alt="School Logo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails != null ? Model.SBranchDetails.SBranchID : 0)_@logoFile" />
+                                                }
+                                                <img class="eid-qr" alt="QR Code" src="@qrUrl" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="eid-back-footer">
+                                        <svg class="eid-strip-print-svg" viewBox="0 0 856 48" preserveAspectRatio="none" aria-hidden="true">
+                                            <rect width="856" height="48" fill="#47aea0"></rect>
+                                        </svg>
+                                        <div class="eid-school-strip-content">
+                                            <strong>School Address:</strong> @(string.IsNullOrWhiteSpace(schoolAddress) ? "-" : schoolAddress)
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function printCards() {
+        window.print();
+    }
+
+    function searchEmployeeCards(sender) {
+        var term = ($(sender).val() || '').toLowerCase();
+        $('.eid-searchable').each(function () {
+            var hay = $(this).attr('data-search') || '';
+            $(this).toggle(hay.indexOf(term) >= 0);
+        });
+    }
+</script>

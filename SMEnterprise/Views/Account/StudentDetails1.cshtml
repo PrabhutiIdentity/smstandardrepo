@@ -1554,6 +1554,10 @@
          } else {
              var sessionId = $('#mdlEditSession').find('#ddlSchoolSessions').val();
              var studentSessionUID = $('#mdlEditSession').find('#hdnStudentSessionUID').val();
+             var isNewSessionRequest = $('#mdlEditSession').find('#hdnIsNewSessionRequest').val();
+             if (isNewSessionRequest != '1') {
+                 return true;
+             }
              if (studentSessionUID == 0) {
                  if ($('#divSessionsList').find(".sestr_" + sessionId).length == 0) {
                      return true;
@@ -1974,6 +1978,14 @@
              alert("errorn");
          }
      });
- }
+    }
     </script>
+    @if (ViewBag.SessionSaveMessage != null)
+    {
+        <script>
+            $(function () {
+                ShowNotification('Session', '@HttpUtility.JavaScriptStringEncode(ViewBag.SessionSaveMessage.ToString())', 'info');
+            });
+        </script>
+    }
 }

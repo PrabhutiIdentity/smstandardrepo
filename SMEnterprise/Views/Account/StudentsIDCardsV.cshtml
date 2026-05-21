@@ -1,4 +1,5 @@
 ﻿@using SMEnterprise.Models;
+@using System.Web;
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
@@ -8,41 +9,10 @@
 {
     <title>Students Management</title>
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link rel="stylesheet" href="@Url.Content("~/css/employeecards.css?v=20260521-2")">
     <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
     <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
 }
-<style>
-
-    .btn {
-        padding: 3px 6px;
-    }
-
-    .thumbImageGrid {
-        max-width: 75px;
-        max-height: 75px;
-    }
-
-
-    *html1 .thumbImageGrid {
-        width: expression((this.width/this.height)>=1?75:'auto');
-        height: expression((this.width/this.height)<1?100:'auto');
-    }
-
-    .thumbImageMain {
-        max-width: 125px;
-        max-height: 125px;
-    }
-
-
-    *html .thumbImageMain {
-        width: expression((this.width/this.height)>=1?125:'auto');
-        height: expression((this.width/this.height)<1?125:'auto');
-    }
-
-    #tblCategory > tbody > tr > td {
-        vertical-align: middle;
-    }
-</style>
 <div class="">
 
     <div class="clearfix"></div>
@@ -117,110 +87,112 @@
                 <div class="x_panel">
 
                     <div class="x_content">
-                        <div style="width:100%" id="">
-                            @foreach (var stu in Model.Students)
+                        <div id="divCards" class="eiv-sheet">
+                            @foreach (var stu in Model.Students ?? new List<StudentModel>())
                             {
-                                <div style="width:100%" class="listitem">
-                                    <div class="frontdiv" style="height: 85.60mm;width:53.98mm;float:left;border: 1px solid black;border-radius: 5px;margin: 5px;">
-                                        <table style="width:100%;height:100%">
-                                            <thead class="redbk" style="background-color: #5aba9a;">
+                                var schoolName = Model.BranchDetails != null ? Model.BranchDetails.BranchSchoolName : "School Name";
+                                var logoFile = Model.BranchDetails != null ? Model.BranchDetails.Logo : "";
+                                var signFile = Model.BranchDetails != null ? Model.BranchDetails.PrincipalSignature : "";
+                                var branchAddress = Model.BranchDetails != null ? Model.BranchDetails.Address : "";
+                                var branchContact = Model.BranchDetails != null ? Model.BranchDetails.ContactNo : "";
+                                var branchEmail = Model.BranchDetails != null ? Model.BranchDetails.EmailID : "";
+                                var classSection = (Model.ClassName + " / " + Model.SectionName).Trim(' ', '/');
+                                var studentIdText = !string.IsNullOrWhiteSpace(stu.SchoolUID)
+                                    ? ("SR No. " + stu.SchoolUID + " | Reg No. " + stu.StudentSID)
+                                    : ("Reg No. " + stu.StudentSID);
+                                var searchText = (stu.Name + " " + stu.StudentSID + " " + stu.SchoolUID + " " + stu.FatherName + " " + stu.FatherMobileNo + " " + stu.MiniAddress + " " + classSection).ToLowerInvariant();
+                                <div class="eiv-searchable listitem" data-search="@searchText">
+                                    <div class="eiv-card sidv-print-card">
+                                        <table class="eiv-card-table">
+                                            <thead>
                                                 <tr>
-                                                    <td style="text-align:left;width:35%;">
-                                                        <img style="max-height:10mm;max-width:10mm" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails.SBranchID)_@(Model.BranchDetails.Logo)" />
-                                                    </td>
-                                                    <td style="text-align:left;vertical-align:middle; width:65%; color: white;">
-                                                        <h2 style="font-size: 3mm;margin: 0mm;">@Model.BranchDetails.BranchSchoolName</h2>
-
+                                                    <td colspan="2" class="eiv-head-cell sidv-head-cell">
+                                                        <div class="eiv-school">@schoolName</div>
                                                     </td>
                                                 </tr>
-                                               
                                             </thead>
-                                            <tbody>
+                                            <tbody class="sidv-body">
                                                 <tr>
-                                                    <td colspan="3" style="text-align:center">
-                                                        <h4 style="font-size: 3mm;">  @Model.SessionName</h4>
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="3" style="text-align:center;">
-                                                        <img id="imgPhoto" onerror="return OnImageError(this,0);" style="max-height:18mm;max-width:20mm" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(stu.StudentID)_@stu.Photo" />
-                                                    </td>
-                                                </tr>
-                                                <tr>
-                                                    <td colspan="3" style="text-align:center;">
-                                                        <h2 style="font-size: 4mm;" class="searchable">
-                                                            @stu.Name <br /><strong style="font-size: 2.1mm;">
-
-                                                            @if (!string.IsNullOrEmpty(@stu.SchoolUID))
+                                                    <td colspan="2" class="eiv-photo-cell">
+                                                        <div class="sidv-photo-wrap">
+                                                            <img class="eiv-photo" id="imgPhoto" onerror="return OnImageError(this,0);" alt="Student Photo" src="@Url.Content("~/Images/StudentImage/")@(stu.StudentID)_@stu.Photo" />
+                                                            @if (!string.IsNullOrWhiteSpace(logoFile))
                                                             {
-                                                                <text>SR No. : @stu.SchoolUID | </text>
+                                                                <img class="sidv-photo-logo" alt="School Logo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.BranchDetails != null ? Model.BranchDetails.SBranchID : 0)_@logoFile" />
                                                             }
-                                                            Reg No : @stu.StudentSID
-                                                        </strong>
-                                                    </h2>
-                                                </td>
-                                            </tr>
-
-                                            <tr style="font-size: 2.1mm;">
-                                                <td style="padding-left: 11px;">
-                                                    Class
-                                                </td>
-                                                <td colspan="2">
-                                                    : <b>@Model.ClassName / @Model.SectionName</b>
-                                                </td>
-                                            </tr>
-
-                                            <tr style="font-size: 2.1mm;">
-                                                <td style="padding-left: 11px;">
-                                                    DOB
-                                                </td>
-                                                <td>
-                                                    : @stu.DOB.ToString("dd MMM, yyyy")
-                                                </td>
-                                            </tr>
-                                            <tr style="font-size: 2.1mm;">
-                                                <td style="padding-left: 11px;">
-                                                    Father Name
-                                                </td>
-                                                <td>:  @stu.FatherName</td>
-                                            </tr>
-                                            <tr style="font-size: 2.1mm;">
-                                                <td style="padding-left: 11px;">
-                                                    Contact No
-                                                </td>
-                                                <td class="searchable">: @stu.FatherMobileNo </td>
-                                            </tr>
-                                            <tr style="font-size: 2.1mm;">
-                                                <td style="padding-left: 11px;">
-                                                    Address
-                                                </td>
-                                                <td class="searchable">:   @stu.MiniAddress </td>
-                                            </tr>
-
-
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2" class="eiv-wave-row">
+                                                        <svg class="eiv-wave-print-svg" viewBox="0 0 540 70" preserveAspectRatio="none" aria-hidden="true">
+                                                            <path fill="#47aea0" d="M0,15 C90,55 220,55 540,15 L540,70 L0,70 Z"></path>
+                                                        </svg>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2" class="eiv-sub-cell sidv-session-cell">@Model.SessionName</td>
+                                                </tr>
+                                                <tr>
+                                                    <td colspan="2" class="eiv-name-cell">
+                                                        <div class="eiv-name searchable">@stu.Name</div>
+                                                        <div class="eiv-pill">@studentIdText</div>
+                                                    </td>
+                                                </tr>
+                                                <tr class="eiv-detail-row">
+                                                    <td class="eiv-label-cell">Class</td>
+                                                    <td class="eiv-value-cell searchable">@classSection</td>
+                                                </tr>
+                                                <tr class="eiv-detail-row">
+                                                    <td class="eiv-label-cell">DOB</td>
+                                                    <td class="eiv-value-cell">@stu.DOB.ToString("dd MMM, yyyy")</td>
+                                                </tr>
+                                                <tr class="eiv-detail-row">
+                                                    <td class="eiv-label-cell">Father Name</td>
+                                                    <td class="eiv-value-cell searchable">@stu.FatherName</td>
+                                                </tr>
+                                                <tr class="eiv-detail-row">
+                                                    <td class="eiv-label-cell">Contact No</td>
+                                                    <td class="eiv-value-cell searchable">@stu.FatherMobileNo</td>
+                                                </tr>
+                                                <tr class="eiv-detail-row">
+                                                    <td class="eiv-label-cell">Address</td>
+                                                    <td class="eiv-value-cell searchable">@stu.MiniAddress</td>
+                                                </tr>
+                                                @if (!string.IsNullOrWhiteSpace(branchContact))
+                                                {
+                                                    <tr class="sidv-side-strip-row">
+                                                        <td colspan="2" class="sidv-side-strip-host">
+                                                            <div class="sidv-side-strip">
+                                                                <div class="sidv-side-strip-text">
+                                                                    <span>@branchContact</span>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
                                             </tbody>
                                             <tfoot>
-                                                <tr style="background-color: #5aba9a;">
-                                                    <td colspan="3" style="text-align:center;color:white;">
-                                                        
-                                                        @if (Model.BranchDetails.Address != null)
-                                                        {
-                                                            <p style="margin:0px;font-size: 2mm;">
-                                                                @Html.Raw(Model.BranchDetails.Address)
-                                                            </p>
-                                                        }
-                                                        @*<p style="font-size: 2.4mm;">
-                                                            Email ID :@Model.BranchDetails.EmailID 
-                                                        </p>*@
-                                                        <p style="font-size: 2.4mm;">
-                                                            Contact Number : @Model.BranchDetails.ContactNo
-                                                        </p>
+                                                <tr>
+                                                    <td colspan="2" class="eiv-foot-meta">
+                                                        <svg class="eiv-foot-meta-print-svg" viewBox="0 0 540 100" preserveAspectRatio="none" aria-hidden="true">
+                                                            <rect width="540" height="100" rx="18" ry="18" fill="#47aea0"></rect>
+                                                        </svg>
+                                                        <div class="eiv-foot-meta-text">
+                                                            <div class="sidv-foot-meta-layout">
+                                                                <div class="sidv-foot-meta-address">
+                                                                    @if (!string.IsNullOrWhiteSpace(branchAddress))
+                                                                    {
+                                                                        <div>@Html.Raw(branchAddress)</div>
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             </tfoot>
                                         </table>
                                     </div>
-                                  
                                 </div>
                             }
                         </div>
@@ -237,32 +209,23 @@
     <script src="@Url.Content("~/js/dataTables.bootstrap.min.js")"></script>
     <script>
         function Search(sender) {
-            var sText = $(sender).val().split(',');
-            console.log(sText);
-            if (sText[0] == "") {
-                $('.listitem').css('display', '');
+            var terms = ($(sender).val() || '').toLowerCase().split(',');
+            if (!terms[0]) {
+                $('.listitem').show();
+                return;
             }
-            else {
-                $(".listitem").each(function () {
-                    var isExist = false;
-
-                    $(this).find(".searchable").each(function () {
-                        $srch = $(this);
-                        $.each(sText, function(index, value) {
-                             if ($srch.html().toLowerCase().includes(value.toLowerCase()) == true) {
-                                 isExist = true;
-                             }
-                        });
-
-                    });
-                    if (isExist == true) {
-                        $(this).css('display', '');
+            $('.listitem').each(function () {
+                var hay = ($(this).attr('data-search') || '').toLowerCase();
+                var isExist = false;
+                $.each(terms, function (index, value) {
+                    var trimmed = $.trim(value);
+                    if (trimmed && hay.indexOf(trimmed) >= 0) {
+                        isExist = true;
+                        return false;
                     }
-                    else {
-                         $(this).css('display', 'none');
-                    }
-                  });
-            }
+                });
+                $(this).toggle(isExist);
+            });
         }
         $(function () {
             $("#tblCategory").DataTable();
@@ -299,7 +262,10 @@
             frameDoc.document.open();
             //Create a new HTML document.
             frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/studentStyle.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/employeecards.css?v=20260521-2")" rel="stylesheet" type="text/css" />');
             frameDoc.document.write('<link href="@Url.Content("~/css/ResultScrutiny.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<style>body{-webkit-print-color-adjust:exact;print-color-adjust:exact;} .sidv-print-card{display:inline-block!important;} .eiv-sheet{display:block!important;}</style>');
             frameDoc.document.write('</head><body>');
             //Append the external CSS file.
             //Append the DIV contents.

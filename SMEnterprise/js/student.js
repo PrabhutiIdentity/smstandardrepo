@@ -330,6 +330,11 @@ function CheckSessionEditForm(sender) {
 
     var sessionId        = $('#ddlSchoolSessions').val();
     var studentSessionUID = $('#hdnStudentSessionUID').val();
+    var isNewSessionRequest = $('#hdnIsNewSessionRequest').val();
+
+    if (isNewSessionRequest != '1') {
+        return true;
+    }
 
     if (studentSessionUID == 0 || studentSessionUID == '') {
         /* Adding new — check duplicate */

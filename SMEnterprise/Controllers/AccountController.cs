@@ -17,6 +17,17 @@ namespace SMEnterprise.Controllers
 {
     public class AccountController : Controller
     {
+        private bool HasOverlappingStudentSession(SessionModel objData, int sBranchID)
+        {
+            var studentDetails = objAccountData.GetStudentDetailsNew(objData.StudentID, sBranchID);
+            var existingSessions = studentDetails.Sessions ?? new List<SessionModel>();
+
+            return existingSessions.Any(x =>
+                x.SessionID == objData.SessionID &&
+                x.StudentSessionUID != objData.StudentSessionUID &&
+                objData.FromDate <= x.ToDate &&
+                objData.ToDate >= x.FromDate);
+        }
 
         [PermissionFilter]
         public ActionResult ParentAppDetail(StudentsPageModel objModel)
@@ -227,6 +238,7 @@ namespace SMEnterprise.Controllers
             StudentEditModel objModel = objAccountData.GetStudentDetailsNew(StudentID, SBranchID);
             int cTab = CommonUsage.ConvertToInt(id2);
             objModel.CurrentTab = cTab == 0 ? 1 : cTab;
+            ViewBag.SessionSaveMessage = TempData["SessionSaveMessage"];
             return View(objModel);
         }
         [PermissionFilter]
@@ -504,15 +516,25 @@ namespace SMEnterprise.Controllers
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             SessionEditModel objModel = objAccountData.GetSessionDetails(StudentSessionUID, SBranchID);
             objModel.StudentID = StudentID;
+            ViewBag.IsNewSessionRequest = StudentSessionUID == 0 ? 1 : 0;
             return PartialView("_SessionEditPartial", objModel);
         }
         [PermissionFilter]
-        public ActionResult SaveStudentSession(SessionModel objData)
+        public ActionResult SaveStudentSession(SessionModel objData, int IsNewSessionRequest = 0)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objData.IsNewSessionRequest = IsNewSessionRequest;
+            if (IsNewSessionRequest == 1 && HasOverlappingStudentSession(objData, objData.SBranchID))
+            {
+                TempData["SessionSaveMessage"] = "Same session/date range already exists for this student. New session was not added.";
+                return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
+            }
 
-            objAccountData.UpdateStudentSession(objData);
-
+            int result = objAccountData.UpdateStudentSession(objData);
+            if (result <= 0)
+            {
+                TempData["SessionSaveMessage"] = "Same session/date range already exists for this student. New session was not added.";
+            }
             return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
         }
         [PermissionFilter]
@@ -967,6 +989,50 @@ namespace SMEnterprise.Controllers
             //}
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult EmployeeIDCards(EmployeeListPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new EmployeeListPageModel();
+            }
+
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
+            objModel.SBranchDetails = objAccountData.GetBranchPaymentProfile(SBranchID);
+            if (string.IsNullOrWhiteSpace(objModel.CurrentSessionName))
+            {
+                objModel.CurrentSessionName = objAdminData.GetSessions(-1, SBranchID)
+                    .OrderByDescending(x => x.SessionStatus)
+                    .ThenByDescending(x => x.SessionStartDate)
+                    .Select(x => x.SessionName)
+                    .FirstOrDefault();
+            }
+            ViewBag.CurrentSessionName = objModel.CurrentSessionName;
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult EmployeeIDCardsV(EmployeeListPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new EmployeeListPageModel();
+            }
+
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
+            objModel.SBranchDetails = objAccountData.GetBranchPaymentProfile(SBranchID);
+            if (string.IsNullOrWhiteSpace(objModel.CurrentSessionName))
+            {
+                objModel.CurrentSessionName = objAdminData.GetSessions(-1, SBranchID)
+                    .OrderByDescending(x => x.SessionStatus)
+                    .ThenByDescending(x => x.SessionStartDate)
+                    .Select(x => x.SessionName)
+                    .FirstOrDefault();
+            }
+            ViewBag.CurrentSessionName = objModel.CurrentSessionName;
             return View(objModel);
         }
         [PermissionFilter]
@@ -2047,6 +2113,15 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
 
         public ActionResult AdmitCard(AdmitCardListModel objData = null)
+        {
+            objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+            objAccountData.GetAdmitCards(objData);
+
+            return View(objData);
+        }
+        [PermissionFilter]
+        public ActionResult AdmitCardCompact(AdmitCardListModel objData = null)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
 

@@ -1841,12 +1841,16 @@
              ShowNotification('Class', 'Please Select Class...', 'info');
              return false;
          }
-         if ($('#ddlSections').val() == 0) {
+        if ($('#ddlSections').val() == 0) {
              ShowNotification('Section', 'Please Select Section...', 'info');
              return false;
          } else {
              var sessionId = $('#mdlEditSession').find('#ddlSchoolSessions').val();
              var studentSessionUID = $('#mdlEditSession').find('#hdnStudentSessionUID').val();
+             var isNewSessionRequest = $('#mdlEditSession').find('#hdnIsNewSessionRequest').val();
+             if (isNewSessionRequest != '1') {
+                 return true;
+             }
              if (studentSessionUID == 0) {
                  if ($('#divSessionsList').find(".sestr_" + sessionId).length == 0) {
                      return true;
@@ -2269,5 +2273,14 @@
      });
  }
     </script>
+
+    @if (ViewBag.SessionSaveMessage != null)
+    {
+        <script>
+            $(function () {
+                ShowNotification('Session', '@HttpUtility.JavaScriptStringEncode(ViewBag.SessionSaveMessage.ToString())', 'info');
+            });
+        </script>
+    }
 
 }
