@@ -254,8 +254,10 @@ namespace SMEnterprise.Models
         public int SBranchID { get; set; }
         public int EmployeeType { get; set; }
         public int EmployeeID { get; set; }
+        public string CurrentSessionName { get; set; }
         public List<EmployeeModel> Employees { get; set; }
         public List<EmployeeTypeModel> EmployeeTypes { get; set; }
+        public SBranchModel SBranchDetails { get; set; }
     }
     public class EmployeeAttandancePageModel
     {

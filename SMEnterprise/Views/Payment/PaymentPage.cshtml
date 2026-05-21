@@ -1,3 +1,75 @@
+<<<<<<< HEAD
+﻿@*@model SMEnterprise.Models.OnlinePaymentModel*@
+@* Add any essential CSS if Layout is null or minimal *@
+=======
+<<<<<<< HEAD
+﻿@model SMEnterprise.Models.OrderModel
+<!-- // Click this button automatically when this page load using javascript -->
+<!-- You can hide this button -->
+<button id="rzp-button1" hidden>Pay</button>
+>>>>>>> master
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<button id="rzp-button1" style="display: none;">Pay</button>
+
+<script>
+
+            var options = {
+                "key": "@ViewBag.OrderDetails.razorpayKey", // Enter the Key ID generated from the Dashboard
+                "amount": "@ViewBag.OrderDetails.Amount", // Amount is in currency subunits (paise)
+                "currency": "@ViewBag.OrderDetails.currency",
+                "name": "@ViewBag.OrderDetails.Name",
+                "description": "@ViewBag.OrderDetails.Description",
+                "image": "@ViewBag.OrderDetails.ImageUrl",
+                "order_id": "@ViewBag.OrderDetails.PGOrderID", // Use PGOrderID for Razorpay's order_id
+                "handler": function (response) {
+                    // After payment successfully made, response will come here
+                    // Set the data in hidden form
+                    document.getElementById('rzp_paymentid').value = response.razorpay_payment_id;
+                    document.getElementById('rzp_orderid').value = response.razorpay_order_id;
+
+
+                    // Let's submit the form automatically
+                    document.getElementById('rzp-paymentresponse').click();
+                },
+                "prefill": {
+                    "name": "@ViewBag.OrderDetails.Name",
+                    "email": "@ViewBag.OrderDetails.EmailID",
+                    "contact": "@ViewBag.OrderDetails.ContactNumber"
+                },
+                "notes": {
+                    "address": "@ViewBag.OrderDetails.Address",
+                    "student_id": "@ViewBag.OrderDetails.StudentID", // Pass your internal IDs as notes
+                    "fee_month": "@ViewBag.OrderDetails.FeeMonth",
+                    "fee_year": "@ViewBag.OrderDetails.FeeYear"
+                },
+                "theme": {
+                    "color": "#F37254"
+                }
+            };
+
+            var rzp1 = new Razorpay(options);
+    console.log("Razorpay Options (Index Page):", options);
+            window.onload = function () {
+                document.getElementById('rzp-button1').click();
+            };
+
+            document.getElementById('rzp-button1').onclick = function (e) {
+                rzp1.open();
+                e.preventDefault();
+            }
+</script>
+
+@using (Html.BeginForm("Complete", "Payment", FormMethod.Post, new { id = "paymentResponseForm" }))
+{
+    @Html.AntiForgeryToken()
+<<<<<<< HEAD
+=======
+    <input type="hidden" name="FeeMonth" value="@Model.FeeMonth">
+    <input type="hidden" name="FeeYear" value="@Model.FeeYear">
+    <input type="hidden" name="ApplicableFee" value="@Model.ApplicableFee">
+    <input type="hidden" name="StudentID" value="@Model.StudentID">
+
+=======
 ﻿@*@model SMEnterprise.Models.OnlinePaymentModel*@
 @* Add any essential CSS if Layout is null or minimal *@
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -54,7 +126,22 @@
 @using (Html.BeginForm("Complete", "Payment", FormMethod.Post, new { id = "paymentResponseForm" }))
 {
     @Html.AntiForgeryToken()
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
     @Html.Hidden("rzp_paymentid")
     @Html.Hidden("rzp_orderid")
     <button type="submit" id="rzp-paymentresponse" class="btn btn-primary" hidden>Submit</button>
 }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+@*<form action="/Payment/Complete">
+        <input type="hidden" name="PaymentID" id="rzp_paymentid" />
+        <input type="hidden" name="OrderID" id="rzp_orderid" />
+        <button type="submit" id="rzp-paymentresponse" class="btn btn-primary" hidden>Submit</button>
+
+    </form>*@
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master

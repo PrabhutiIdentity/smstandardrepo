@@ -1,0 +1,184 @@
+@using SMEnterprise.Models;
+@using System.Web;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.EmployeeListPageModel
+@section IncludeCss
+{
+    <title>Employee ID Cards Vertical</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/employeecards.css?v=20260521-3")">
+}
+
+<div class="">
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("EmployeeIDCardsV", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @id = "frmEmployeeCardsV" }))
+            {
+                <div class="eiv-toolbar">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <a href="javascript:void(0);" onclick="window.print();" class="btn btn-link eiv-print-link">
+                                <i class="fa fa-print"></i> Print
+                            </a>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="col-md-4 text-right">Employee Type :</label>
+                            <div class="col-md-8">
+                                <select class="form-control" name="EmployeeType" onchange="$('#frmEmployeeCardsV').submit();">
+                                    <option value="0" @(Model.EmployeeType == 0 ? "selected" : "")>All</option>
+                                    @foreach (EmployeeTypeModel el in Model.EmployeeTypes ?? new List<EmployeeTypeModel>())
+                                    {
+                                        <option value="@el.EmployeeTypeID" @(el.EmployeeTypeID == Model.EmployeeType ? "selected" : "")>@el.EmployeeTypeName</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="col-md-3 text-right">Search :</label>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" id="txtEmployeeCardVSearch" placeholder="Search by name, ID, mobile, designation" onkeyup="searchEmployeeCardVertical(this);" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="x_panel">
+                <div class="x_content">
+                    <div class="eiv-sheet">
+                        @foreach (var emp in Model.Employees ?? new List<EmployeeModel>())
+                        {
+                            var employeeTypeName = string.IsNullOrWhiteSpace(emp.EmployeeTypeName) ? "Employee" : emp.EmployeeTypeName;
+                            var contact = string.IsNullOrWhiteSpace(emp.MobileNumber) ? "-" : emp.MobileNumber;
+                            var role = string.IsNullOrWhiteSpace(emp.Role) ? employeeTypeName : emp.Role;
+                            var prefix = emp.Gender == 0 ? "Mr." : (emp.MaritalStatus == 1 ? "Mrs." : "Miss");
+                            var displayName = prefix + " " + emp.EmployeeName;
+                            var qrPayload = "EMP ID: " + emp.EmployeeSID + "\nName: " + displayName + "\nRole: " + role + "\nContact: " + contact + "\nSchool: " + (Model.SBranchDetails != null ? Model.SBranchDetails.BranchSchoolName : "");
+                            var qrUrl = "https://quickchart.io/qr?size=160&text=" + HttpUtility.UrlEncode(qrPayload);
+                            var schoolName = Model.SBranchDetails != null ? Model.SBranchDetails.BranchSchoolName : "School Name";
+                            var logoFile = Model.SBranchDetails != null ? Model.SBranchDetails.Logo : "";
+                            var signFile = Model.SBranchDetails != null ? Model.SBranchDetails.PrincipalSignature : "";
+                            var branchAddress = Model.SBranchDetails != null ? Model.SBranchDetails.Address : "";
+                            var branchContact = Model.SBranchDetails != null ? Model.SBranchDetails.ContactNo : "";
+                            var branchEmail = Model.SBranchDetails != null ? Model.SBranchDetails.EmailID : "";
+                            <div class="eiv-searchable" data-search="@((emp.EmployeeName + " " + emp.EmployeeSID + " " + employeeTypeName + " " + role + " " + contact).ToLowerInvariant())">
+                                <div class="eiv-card">
+                                        <table class="eiv-card-table">
+                                            <thead>
+                                                <tr>
+                                                    <td colspan="2" class="eiv-head-cell sidv-head-cell">
+                                                        <div class="eiv-school">@schoolName</div>
+                                                    </td>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td colspan="2" class="eiv-photo-cell">
+                                                        <div class="sidv-photo-wrap">
+                                                            <img class="eiv-photo" onerror="return OnImageError(this,@(emp.Gender));" alt="Employee Photo" src="@Url.Content("~/Images/EmployeeImage/")@(emp.EmployeeID)_@emp.Photo" />
+                                                            @if (!string.IsNullOrWhiteSpace(logoFile))
+                                                            {
+                                                                <img class="sidv-photo-logo" alt="School Logo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails != null ? Model.SBranchDetails.SBranchID : 0)_@logoFile" />
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <tr>
+                                                <td colspan="2" class="eiv-wave-row">
+                                                    <svg class="eiv-wave-print-svg" viewBox="0 0 540 70" preserveAspectRatio="none" aria-hidden="true">
+                                                        <path fill="#47aea0" d="M0,15 C90,55 220,55 540,15 L540,70 L0,70 Z"></path>
+                                                    </svg>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="eiv-sub-cell">Employee Identity Card</td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="eiv-name-cell">
+                                                    <div class="eiv-name">@displayName</div>
+                                                    <div class="eiv-session-inline">@(!string.IsNullOrWhiteSpace(ViewBag.CurrentSessionName as string) ? (string)ViewBag.CurrentSessionName : "-")</div>
+                                                    <div class="eiv-pill">@employeeTypeName</div>
+                                                </td>
+                                            </tr>
+                                            <tr class="eiv-detail-row">
+                                                <td class="eiv-label-cell">Employee ID</td>
+                                                <td class="eiv-value-cell">@emp.EmployeeSID</td>
+                                            </tr>
+                                            <tr class="eiv-detail-row">
+                                                <td class="eiv-label-cell">Contact No</td>
+                                                <td class="eiv-value-cell">@contact</td>
+                                            </tr>
+                                            <tr class="eiv-detail-row">
+                                                <td class="eiv-label-cell">Blood Group</td>
+                                                <td class="eiv-value-cell">@(string.IsNullOrWhiteSpace(emp.BloodGroup) ? "-" : emp.BloodGroup)</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="eiv-qr-cell">
+                                                    <img class="eiv-qr" alt="QR Code" src="@qrUrl" />
+                                                </td>
+                                                <td class="eiv-sign-cell">
+                                                    <div class="eiv-sign-box">
+                                                        @if (!string.IsNullOrWhiteSpace(signFile))
+                                                        {
+                                                            <img class="eiv-sign" alt="Authorized Signature" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails != null ? Model.SBranchDetails.SBranchID : 0)_P_@signFile" />
+                                                        }
+                                                        <div class="eiv-sign-line"></div>
+                                                        <div class="eiv-sign-label">Authorized Signatory</div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="2" class="eiv-foot-meta">
+                                                    <svg class="eiv-foot-meta-print-svg" viewBox="0 0 540 100" preserveAspectRatio="none" aria-hidden="true">
+                                                        <rect width="540" height="100" rx="18" ry="18" fill="#47aea0"></rect>
+                                                    </svg>
+                                                    <div class="eiv-foot-meta-text">
+                                                        @if (!string.IsNullOrWhiteSpace(branchAddress))
+                                                        {
+                                                            <div>@branchAddress</div>
+                                                        }
+                                                        @if (!string.IsNullOrWhiteSpace(branchEmail) || !string.IsNullOrWhiteSpace(branchContact))
+                                                        {
+                                                            <div class="eiv-foot-contact-line">
+                                                                @if (!string.IsNullOrWhiteSpace(branchEmail))
+                                                                {
+                                                                    <span>@branchEmail</span>
+                                                                }
+                                                                @if (!string.IsNullOrWhiteSpace(branchEmail) && !string.IsNullOrWhiteSpace(branchContact))
+                                                                {
+                                                                    <span> | </span>
+                                                                }
+                                                                @if (!string.IsNullOrWhiteSpace(branchContact))
+                                                                {
+                                                                    <span>@branchContact</span>
+                                                                }
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function searchEmployeeCardVertical(sender) {
+        var term = ($(sender).val() || '').toLowerCase();
+        $('.eiv-searchable').each(function () {
+            var hay = $(this).attr('data-search') || '';
+            $(this).toggle(hay.indexOf(term) >= 0);
+        });
+    }
+</script>

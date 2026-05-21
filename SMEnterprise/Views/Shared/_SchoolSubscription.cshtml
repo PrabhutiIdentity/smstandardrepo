@@ -1,0 +1,258 @@
+@model SMEnterprise.Models.BranchSubscriptionAccountModel
+@{
+    var sub = Model == null ? null : Model.Subscription;
+    var payments = Model == null || Model.Payments == null
+        ? new System.Collections.Generic.List<SMEnterprise.Models.BranchSubscriptionPaymentModel>()
+        : Model.Payments;
+    var currentDue = Model == null ? 0m : Model.CurrentDueAmount;
+    var totalPaid = Model == null ? 0m : Model.TotalPaid;
+    var subscriptionAmount = totalPaid + currentDue;
+    var schoolName = sub == null || string.IsNullOrWhiteSpace(sub.BranchName) ? "-" : sub.BranchName;
+    var schoolAddress = sub == null || string.IsNullOrWhiteSpace(sub.BranchAddress) ? "-" : sub.BranchAddress;
+    var companyName = "Identity Infotech LLP";
+    var companyAddress = "101, SG Alpha Tower I, Ghaziabad, Uttar Pradesh";
+}
+
+<style>
+    .school-subscription-summary {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(150px, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .school-subscription-metric {
+        border: 1px solid #e3e6f0;
+        border-radius: 4px;
+        padding: 14px;
+        background: #fff;
+    }
+
+    .school-subscription-metric span {
+        display: block;
+        color: #6c757d;
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+
+    .school-subscription-metric strong {
+        display: block;
+        color: #2a3f54;
+        font-size: 20px;
+    }
+
+    .school-subscription-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        margin-bottom: 12px;
+    }
+
+    .subscription-receipt-print {
+        display: none;
+    }
+
+    @@media (max-width: 900px) {
+        .school-subscription-summary {
+            grid-template-columns: repeat(2, minmax(160px, 1fr));
+        }
+    }
+</style>
+
+@if (sub == null)
+{
+    <div class="alert alert-info">No subscription record found for this branch.</div>
+}
+else
+{
+    <div class="school-subscription-summary">
+        <div class="school-subscription-metric">
+            <span>School</span>
+            <strong>@schoolName</strong>
+        </div>
+        <div class="school-subscription-metric">
+            <span>Subscription Year / Plan</span>
+            <strong>@(string.IsNullOrWhiteSpace(sub.PlanName) ? "-" : sub.PlanName)</strong>
+        </div>
+        <div class="school-subscription-metric">
+            <span>Subscription Amount</span>
+            <strong>&#8377; @subscriptionAmount.ToString("N2")</strong>
+        </div>
+        <div class="school-subscription-metric">
+            <span>Total Paid</span>
+            <strong>&#8377; @totalPaid.ToString("N2")</strong>
+        </div>
+        <div class="school-subscription-metric">
+            <span>Rest Due Amount</span>
+            <strong>&#8377; @currentDue.ToString("N2")</strong>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom: 14px;">
+        <div class="col-md-6">
+            <p><strong>Status:</strong> @(sub.IsDue && currentDue > 0m ? "Due" : "Paid")</p>
+            <p><strong>School Address:</strong> @schoolAddress</p>
+            <p><strong>Due Date:</strong> @(sub.DueDate.HasValue ? sub.DueDate.Value.ToString("dd-MMM-yyyy") : "-")</p>
+            <p><strong>Next Due Date:</strong> @(sub.NextDueDate.HasValue ? sub.NextDueDate.Value.ToString("dd-MMM-yyyy") : "-")</p>
+        </div>
+        <div class="col-md-6 school-subscription-actions">
+            @if (Model.CanPayNow)
+            {
+                <a class="btn btn-success" href="@Url.Action("Subscribe", "Payment", new { branchId = sub.SBranchID, paymentType = "full" })">
+                    Pay Rest Due
+                </a>
+                if (sub.AllowPartialPayment && (sub.MaxPartialPayments - sub.PartialPaymentCount) > 1)
+                {
+                    <a class="btn btn-primary" href="@Url.Action("Subscribe", "Payment", new { branchId = sub.SBranchID, paymentType = "partial" })">
+                        Pay Partial
+                    </a>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Receipt No.</th>
+                    <th>Payment Date</th>
+                    <th>Amount Paid</th>
+                    <th>Payment Reference</th>
+                    <th>Receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (!payments.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-center">No subscription payment received yet.</td>
+                    </tr>
+                }
+                else
+                {
+                    foreach (var item in payments)
+                    {
+                        var receiptNo = "SS-" + item.SBranchID + "-" + item.PaymentDate.ToString("yyyy") + "-" + item.PaymentID.ToString("000000");
+                        <tr>
+                            <td>@receiptNo</td>
+                            <td>@item.PaymentDate.ToString("dd-MMM-yyyy hh:mm tt")</td>
+                            <td>&#8377; @item.PaidAmount.ToString("N2")</td>
+                            <td>@item.PaymentRef</td>
+                            <td>
+                                <button type="button" class="btn btn-xs btn-info" onclick="printSchoolSubscriptionReceipt(@item.PaymentID)">
+                                    Print Receipt
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+
+    foreach (var item in payments)
+    {
+        var receiptNo = "PI-" + item.SBranchID + "-" + item.PaymentDate.ToString("yyyy") + "-" + item.PaymentID.ToString("000");
+        var paidTillReceipt = payments
+            .Where(x => x.PaymentDate < item.PaymentDate || (x.PaymentDate == item.PaymentDate && x.PaymentID <= item.PaymentID))
+            .Sum(x => x.PaidAmount);
+        var balanceAfterReceipt = subscriptionAmount - paidTillReceipt;
+        if (balanceAfterReceipt < 0m)
+        {
+            balanceAfterReceipt = 0m;
+        }
+        var amountInWords = SMEnterprise.Repository.CommonUsage.ConvertNumbertoWords((long)Math.Round(item.PaidAmount, 0)) + " Rupees Only";
+        <div id="schoolSubscriptionReceipt_@item.PaymentID" class="subscription-receipt-print">
+            <div class="receipt-page">
+                <div class="receipt-brand">
+                    <div>
+                        <h1>PSchool</h1>
+                        <div><a href="https://www.pschoolonline.in/" target="_blank">https://www.pschoolonline.in</a></div>
+                    </div>
+                    <div><strong>Receipt No:</strong> @receiptNo</div>
+                </div>
+                <div class="receipt-title">PAYMENT RECEIPT</div>
+                <div class="receipt-box">
+                    <div>
+                        <p><strong>Receipt No:</strong> @receiptNo</p>
+                        <p><strong>Date:</strong> @item.PaymentDate.ToString("dd MMM yyyy")</p>
+                        <p><strong>Payment Ref:</strong> @item.PaymentRef</p>
+                    </div>
+                    <div>
+                        <p><strong>Name:</strong> @schoolName</p>
+                        <p><strong>Address:</strong> @schoolAddress</p>
+                    </div>
+                    <div>
+                        <p><strong>Company Details</strong></p>
+                        <p>@companyName</p>
+                        <p>@companyAddress</p>
+                    </div>
+                </div>
+                <table class="receipt-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px;">S.No</th>
+                            <th>Description of Work</th>
+                            <th style="width:150px;">Subscription Year / Plan</th>
+                            <th style="width:130px;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1.</td>
+                            <td>School Management Software Subscription Payment</td>
+                            <td>@(string.IsNullOrWhiteSpace(sub.PlanName) ? "-" : sub.PlanName)</td>
+                            <td>&#8377; @subscriptionAmount.ToString("N2")</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="receipt-table receipt-summary-table">
+                    <tbody>
+                        <tr>
+                            <td><strong>Total Amount Paid</strong></td>
+                            <td style="width:160px;">&#8377; @paidTillReceipt.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Balance Amount</strong></td>
+                            <td>&#8377; @balanceAfterReceipt.ToString("N2")</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="receipt-amount-words">
+                    <p><strong>Total Paid Amount in words</strong></p>
+                    <p>@amountInWords</p>
+                </div>
+                <div class="receipt-footer">
+                    <div>
+                        <p><strong>Payment Mode:</strong> Online</p>
+                        <p><strong>Generated On:</strong> @DateTime.Now.ToString("dd MMM yyyy hh:mm tt")</p>
+                    </div>
+                    <div class="receipt-sign"><strong>@companyName</strong></div>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+<script>
+    function printSchoolSubscriptionReceipt(paymentId) {
+        var receipt = document.getElementById('schoolSubscriptionReceipt_' + paymentId);
+        if (!receipt) {
+            alert('Receipt not found.');
+            return;
+        }
+
+        var printWindow = window.open('', '_blank', 'width=900,height=700');
+        printWindow.document.open();
+        printWindow.document.write('<html><head><title>Subscription Receipt</title>');
+        printWindow.document.write('<style>body{margin:0;background:#fff}.receipt-page{width:760px;margin:0 auto;padding:34px;color:#111;font-family:Arial,Helvetica,sans-serif;background:#fff}.receipt-brand{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:5px solid #008fe8;padding-bottom:14px;margin-bottom:18px}.receipt-brand h1{margin:0;font-size:20px;font-weight:700}.receipt-title{text-align:center;font-size:26px;font-weight:700;color:#777;margin:10px 0 16px;letter-spacing:0}.receipt-box{border:1px solid #b8cce4;display:grid;grid-template-columns:1fr 1.45fr 1.1fr;margin-bottom:14px}.receipt-box>div{padding:12px;border-right:1px solid #b8cce4}.receipt-box>div:last-child{border-right:0;background:#e7f1fb}.receipt-table{width:100%;border-collapse:collapse;margin-top:12px}.receipt-table th,.receipt-table td{border:1px solid #ddd;padding:9px;vertical-align:top}.receipt-table th{background:#e5e5e5;color:#666;font-weight:700}.receipt-summary-table{width:360px;margin-left:auto}.receipt-summary-table td:first-child{background:#f3f3f3}.receipt-amount-words{margin-top:18px}.receipt-amount-words p{margin:0 0 8px}.receipt-footer{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px;min-height:120px}.receipt-sign{text-align:center;padding-top:58px}</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(receipt.innerHTML);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+    }
+</script>

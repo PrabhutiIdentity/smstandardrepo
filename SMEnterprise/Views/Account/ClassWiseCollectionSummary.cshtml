@@ -1,0 +1,252 @@
+@using System.Collections.Generic
+@using System.Linq
+@using SMEnterprise.Models
+@model SMEnterprise.Models.ClassWiseCollectionSummaryPageModel
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var reportMonths = new List<DateTime>();
+    if (Model.SessionStartDate.Year > 1 && Model.SessionEndDate.Year > 1)
+    {
+        var monthCursor = new DateTime(Model.SessionStartDate.Year, Model.SessionStartDate.Month, 1);
+        var lastMonth = new DateTime(Model.SessionEndDate.Year, Model.SessionEndDate.Month, 1);
+        while (monthCursor <= lastMonth)
+        {
+            reportMonths.Add(monthCursor);
+            monthCursor = monthCursor.AddMonths(1);
+        }
+    }
+}
+@section IncludeCss
+{
+    <title>Class Wise Collection Summary</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+}
+<div style="background-color: white;">
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("ClassWiseCollectionSummary", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", id = "frmClassWiseCollectionSummary" }))
+            {
+                <div class="row std-mng-head col-md-12">
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-4 padding">
+                                <label class="col-md-4 text-right">Sessions :</label>
+                                <div class="col-md-8">
+                                    <select name="SessionID" class="form-control" id="ddlSessions">
+                                        <option value="0">--Select Session--</option>
+                                        @foreach (var session in Model.Sessions ?? new List<SchoolSessionModel>())
+                                        {
+                                            <option value="@session.SessionID" @(session.SessionID == Model.SessionID ? "selected" : "")>@session.SessionName @(session.SessionStatus == 1 ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right" style="padding-right: 0;">Class :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ClassID" id="ddlClass" onchange="ClassChanged(this);">
+                                        <option value="0">--All Classes--</option>
+                                        @foreach (var item in Model.Classes ?? new List<NameIDModel>())
+                                        {
+                                            <option value="@item.ID" @(item.ID == Model.ClassID ? "selected" : "")>@item.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Section :</label>
+                                <div class="col-md-8">
+                                    <select name="SectionID" class="form-control" id="ddlSection">
+                                        <option value="0">--All Sections--</option>
+                                        @foreach (var item in Model.Sections ?? new List<NameIDModel>())
+                                        {
+                                            <option value="@item.ID" @(item.ID == Model.SectionID ? "selected" : "")>@item.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2 padding">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <a href="javascript:void(0);" onclick="$('#frmClassWiseCollectionSummary').submit();"><i class="fa fa-search"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" style="text-align: right; margin-bottom: 10px;">
+            <button type="button" class="export-btn btn-primary" onclick="tableToExcel('tblClassWiseCollectionSummary', 'Class Wise Collection Summary');">
+                <i class="fa fa-file-excel-o"></i> Export To Excel
+            </button>
+        </div>
+    </div>
+
+    @if (Model.SessionStartDate.Year > 1 && Model.SessionEndDate.Year > 1)
+    {
+        <div class="row">
+            <div class="col-md-12" style="margin-bottom: 10px;">
+                <strong>Session:</strong> @Model.SessionStartDate.ToString("dd MMM yyyy") to @Model.SessionEndDate.ToString("dd MMM yyyy")
+            </div>
+        </div>
+    }
+
+    <div class="x_panel" style="overflow-x: auto;">
+        <div class="x_content">
+            <table id="tblClassWiseCollectionSummary" class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th rowspan="2">#</th>
+                        <th rowspan="2">Class</th>
+                        <th rowspan="2">Section</th>
+                        @foreach (var month in reportMonths)
+                        {
+                            <th colspan="4">@month.ToString("MMMM yyyy")</th>
+                        }
+                    </tr>
+                    <tr>
+                        @foreach (var month in reportMonths)
+                        {
+                            <th>Amount</th>
+                            <th>Discount</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var counter = 1;
+                    }
+                    @foreach (var row in Model.Rows ?? new List<ClassWiseCollectionSummaryRowModel>())
+                    {
+                        <tr>
+                            <td>@counter</td>
+                            <td>@row.ClassName</td>
+                            <td>@row.SectionName</td>
+                            @foreach (var month in reportMonths)
+                            {
+                                var monthData = (row.Months ?? new List<ClassWiseCollectionSummaryMonthModel>())
+                                    .FirstOrDefault(x => x.FeeMonth == month.Month && x.FeeYear == month.Year);
+                                <td>@((monthData != null ? monthData.Amount : 0).ToString("N2"))</td>
+                                <td>@((monthData != null ? monthData.Discount : 0).ToString("N2"))</td>
+                                <td>@((monthData != null ? monthData.Paid : 0).ToString("N2"))</td>
+                                <td>@((monthData != null ? monthData.Balance : 0).ToString("N2"))</td>
+                            }
+                        </tr>
+                        counter++;
+                    }
+                </tbody>
+                <tfoot>
+                    <tr style="background-color: #606d73; color: white;">
+                        <td></td>
+                        <td colspan="2"><b>Grand Total</b></td>
+                        @foreach (var month in reportMonths)
+                        {
+                            var monthRows = (Model.Rows ?? new List<ClassWiseCollectionSummaryRowModel>())
+                                .SelectMany(x => x.Months ?? new List<ClassWiseCollectionSummaryMonthModel>())
+                                .Where(x => x.FeeMonth == month.Month && x.FeeYear == month.Year)
+                                .ToList();
+                            <td><b>@monthRows.Sum(x => x.Amount).ToString("N2")</b></td>
+                            <td><b>@monthRows.Sum(x => x.Discount).ToString("N2")</b></td>
+                            <td><b>@monthRows.Sum(x => x.Paid).ToString("N2")</b></td>
+                            <td><b>@monthRows.Sum(x => x.Balance).ToString("N2")</b></td>
+                        }
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script src="@Url.Content("~/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("~/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("~/js/jszip.min.js")"></script>
+    <script src="@Url.Content("~/js/pdfmake.min.js")"></script>
+    <script src="@Url.Content("~/js/vfs_fonts.js")"></script>
+
+    <script type="text/javascript">
+        var tableToExcel = (function () {
+            var uri = 'data:application/vnd.ms-excel;base64,',
+                template = '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40"><head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>{worksheet}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--><meta http-equiv="content-type" content="text/plain; charset=UTF-8"/></head><body><table>{table}</table></body></html>',
+                base64 = function (s) { return window.btoa(unescape(encodeURIComponent(s))); },
+                format = function (s, c) { return s.replace(/{(\w+)}/g, function (m, p) { return c[p]; }); };
+            return function (table, name) {
+                if (!table.nodeType) table = document.getElementById(table);
+                var ctx = { worksheet: name || 'Worksheet', table: table.innerHTML };
+                window.location.href = uri + base64(format(template, ctx));
+            };
+        })();
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            var printdate = 'Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy hh:mm:ss tt")';
+            var title = 'Class Wise Collection Summary (@(Model.SessionStartDate.Year > 1 ? Model.SessionStartDate.ToString("MMM yyyy") : "") - @(Model.SessionEndDate.Year > 1 ? Model.SessionEndDate.ToString("MMM yyyy") : ""))';
+            var footerNote = 'Report Generate on: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyyy hh:mm:ss tt")';
+
+            if ($("#tblClassWiseCollectionSummary").length) {
+                $("#tblClassWiseCollectionSummary").DataTable({
+                    pageLength: 50,
+                    paging: true,
+                    pagingType: "simple_numbers",
+                    scrollX: true,
+                    dom: "Bfrtip",
+                    buttons: [
+                        { extend: "copy", className: "btn-sm", footer: true, message: printdate, title: title },
+                        { extend: "csv", className: "btn-sm", footer: true, message: printdate, title: title },
+                        { extend: "excel", className: "btn-sm", footer: true, title: '@(Model.Branch != null ? Model.Branch.BranchSchoolName : "School")', messageTop: title, messageBottom: footerNote },
+                        {
+                            extend: "pdfHtml5",
+                            className: "btn-sm",
+                            footer: true,
+                            orientation: "landscape",
+                            customize: function (doc) {
+                                doc.defaultStyle.fontSize = 6;
+                                doc.styles.tableHeader.fontSize = 8;
+                            },
+                            title: title,
+                            messageTop: '@(Model.Branch != null ? Model.Branch.BranchSchoolName : "School")',
+                            messageBottom: footerNote
+                        },
+                        { extend: "print", className: "btn-sm", footer: true, title: title, message: printdate, messageBottom: footerNote }
+                    ]
+                });
+            }
+        });
+
+        function ClassChanged(sender) {
+            if ($(sender).val() === "0") {
+                $('#ddlSection').html('<option value="0">--All Sections--</option>');
+                return;
+            }
+
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax({
+                type: "POST",
+                url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlSection').html('<option value="0">--All Sections--</option>');
+                    $('#ddlSection').append(html);
+                },
+                error: function () {
+                    alert("Unable to load sections.");
+                }
+            });
+        }
+    </script>
+}

@@ -5,8 +5,16 @@ using System.Web.Security;
 using SMEnterprise.Models;
 using SMEnterprise.Filters;
 using SMEnterprise.Repository;
+<<<<<<< HEAD
 using SMEnterpriseDB.Models;
 using System.Linq;
+=======
+<<<<<<< HEAD
+=======
+using SMEnterpriseDB.Models;
+using System.Linq;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
 
 namespace SMEnterprise.Controllers
 {
@@ -20,6 +28,67 @@ namespace SMEnterprise.Controllers
             objILoginData = new LoginData();
             service = new Service();
         }
+        #region Subscription Payment  
+        private void ClearBranchPaymentDueSession()
+        {
+            Session.Remove("ShowPaymentDue");
+            Session.Remove("PaymentDueBranchID");
+            Session.Remove("PaymentDueAmount");
+            Session.Remove("PaymentDuePlanName");
+            Session.Remove("PaymentDueDate");
+            Session.Remove("PaymentDueGraceDays");
+            Session.Remove("PaymentDueGraceEndDate");
+            Session.Remove("PaymentDueCanClose");
+        }
+
+        private void SetBranchPaymentDueSession(int branchId)
+        {
+            var accountData = new AccountData();
+            var sub = accountData.GetBranchSubscription(branchId);
+            if (sub == null || !sub.IsDue)
+            {
+                ClearBranchPaymentDueSession();
+                return;
+            }
+
+            var dueAmount = sub.NextDueAmount > 0m ? sub.NextDueAmount : sub.DueAmount;
+            if (dueAmount <= 0m)
+            {
+                ClearBranchPaymentDueSession();
+                return;
+            }
+
+            var dueDate = (sub.PartialPaymentCount > 0 && sub.NextDueDate.HasValue)
+                ? sub.NextDueDate.Value.Date
+                : (sub.DueDate.HasValue ? sub.DueDate.Value.Date : CommonUsage.GetCurrentDate().Date);
+
+            var now = CommonUsage.GetCurrentDate().Date;
+            var isPastDue = dueDate <= now;
+            if (!isPastDue)
+            {
+                ClearBranchPaymentDueSession();
+                return;
+            }
+
+            var graceDays = sub.GraceDays < 0 ? 0 : sub.GraceDays;
+            // Ensure we are comparing dates only
+            var graceEndDate = dueDate.AddDays(graceDays).Date;
+            var currentDate = now.Date;
+
+            // The popup can be closed if we are still within the grace period
+            var canClosePopup = graceDays > 0 && currentDate <= graceEndDate;
+
+            Session["ShowPaymentDue"] = true;
+            Session["PaymentDueBranchID"] = branchId;
+            Session["PaymentDueAmount"] = dueAmount;
+            Session["PaymentDuePlanName"] = sub.PlanName ?? "";
+            Session["PaymentDueDate"] = dueDate;
+            Session["PaymentDueGraceDays"] = graceDays;
+            Session["PaymentDueGraceEndDate"] = graceEndDate;
+            Session["PaymentDueCanClose"] = canClosePopup;
+        }
+        #endregion
+
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -51,6 +120,11 @@ namespace SMEnterprise.Controllers
                         try
                         {
                             Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
+<<<<<<< HEAD
+                        } 
+=======
+<<<<<<< HEAD
+=======
                         } 
                         catch { }
                         try
@@ -72,47 +146,69 @@ namespace SMEnterprise.Controllers
                                 Session.Remove("PaymentDueAmount");
                                 Session.Remove("PaymentDuePlanName");
                             }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                         }
+>>>>>>> master
                         catch { }
                         CommonData objCData = new CommonData();
+                        int activeBranchId = AttemptedUser.SBranchID;
                         if (AttemptedUser.RoleID == (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle || AttemptedUser.RoleID == (int)RoleType.Director)
                         {
+<<<<<<< HEAD
+                           var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
+                            Session["SBrancheList"] = branches;
+                            activeBranchId = branches.FirstOrDefault()?.SBranchID ?? AttemptedUser.SBranchID;
+                            Session["SBranchID"] = activeBranchId;
+                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
+                            objCData.InitializeStartupSettings(activeBranchId);
+=======
+<<<<<<< HEAD
+=======
                            var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
                             Session["SBrancheList"] = branches;
                             Session["SBranchID"] = branches.FirstOrDefault()?.SBranchID;
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
                             objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
+>>>>>>> master
                             return RedirectToAction("Dashboard", "Admin");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Technical)
                         {
+                            ClearBranchPaymentDueSession();
                             //objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
                             return RedirectToAction("FirstBranch", "Admin");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Parent)
                         {
-                            objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
+                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
+                            objCData.InitializeStartupSettings(activeBranchId);
                             return RedirectToAction("LandingPage", "Parent");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Account)
                         {
-                            objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
+                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
+                            objCData.InitializeStartupSettings(activeBranchId);
                             return RedirectToAction("Dashboard", "Account");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Teacher)
                         {
-                            objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
+                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
+                            objCData.InitializeStartupSettings(activeBranchId);
                             return RedirectToAction("Dashboard", "Teacher");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Library)
                         {
+                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
                             return RedirectToAction("Dashboard", "Library");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Reception || AttemptedUser.RoleID == (int)RoleType.Receptionist)
                         {
+                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
                             return RedirectToAction("Dashboard", "Reception");
                         }
                         else
                         {
+                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
                             return RedirectToAction("Index", "Home");
                         }
 

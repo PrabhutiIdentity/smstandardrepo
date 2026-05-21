@@ -106,14 +106,29 @@ namespace SMEnterprise.Repository
                 CommonUsage.SMSConfigurations.Clear();
             }
         }
+<<<<<<< HEAD
         public IEnumerable<SBranchModel> GetBranches(int UserID, int SBranchID,int userType)
+=======
+<<<<<<< HEAD
+        public IEnumerable<SBranchModel> GetBranches(int UserID, int SBranchID)
+=======
+        public IEnumerable<SBranchModel> GetBranches(int UserID, int SBranchID,int userType)
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@UserID", UserID);
                 paramater.Add("@SBranchID", SBranchID);
+<<<<<<< HEAD
                 paramater.Add("@UserType", userType);
+=======
+<<<<<<< HEAD
+=======
+                paramater.Add("@UserType", userType);
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
                 return con.Query<SBranchModel>("sp_GetSBranches", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
             }
         }
@@ -3128,14 +3143,32 @@ namespace SMEnterprise.Repository
         }
         #endregion
         #region News Management
+<<<<<<< HEAD
         public IEnumerable<NewsModel> GetNews( int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
+=======
+<<<<<<< HEAD
+        public IEnumerable<NewsModel> GetNews()
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                return con.Query<NewsModel>("sp_GetNewsList", null, null, true, 0, CommandType.StoredProcedure).ToList();
+=======
+        public IEnumerable<NewsModel> GetNews( int SBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+>>>>>>> master
                 var paramater = new DynamicParameters();
 
                 paramater.Add("@SBranchID", SBranchID);
                 return con.Query<NewsModel>("sp_GetNewsList", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
             }
         }
         public int InsertUpdateNews(NewsModel objData)
@@ -3156,14 +3189,32 @@ namespace SMEnterprise.Repository
                 return con.Query<int>("sp_InsertUpdateNews", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
             }
         }
+<<<<<<< HEAD
         public IEnumerable<GalleryModel> GetGallery(int SBranchID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
+=======
+<<<<<<< HEAD
+        public IEnumerable<GalleryModel> GetGallery()
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                return con.Query<GalleryModel>("sp_GetGalleryList", null, null, true, 0, CommandType.StoredProcedure).ToList();
+=======
+        public IEnumerable<GalleryModel> GetGallery(int SBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+>>>>>>> master
                 var paramater = new DynamicParameters();
 
                 paramater.Add("@SBranchID", SBranchID);
                 return con.Query<GalleryModel>("sp_GetGalleryList", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
             }
         }
         public List<GalleryModel> GetAppGalleryList(int SBranchID)

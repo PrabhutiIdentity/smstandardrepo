@@ -4,6 +4,13 @@
     var amountRupees = (Model.Amount / 100m).ToString("N2");
     var branchId = Model.SBranchID;
     var description = Model.Description ?? "ERP Subscription";
+<<<<<<< HEAD
+    var dueAmount = ViewBag.SubscriptionDueAmount == null ? (Model.Amount / 100m) : (decimal)ViewBag.SubscriptionDueAmount;
+    var minimumPartialAmount = ViewBag.SubscriptionMinimumPartialAmount == null ? (Model.Amount / 100m) : (decimal)ViewBag.SubscriptionMinimumPartialAmount;
+    var canPayPartial = ViewBag.SubscriptionCanPayPartial != null && (bool)ViewBag.SubscriptionCanPayPartial;
+    var paymentType = (ViewBag.SubscriptionPaymentType as string) ?? "full";
+=======
+>>>>>>> master
 }
 @section styles {
     <style>
@@ -38,6 +45,32 @@
                 background: #ff7f2a;
                 border-color: #ff7f2a;
             }
+<<<<<<< HEAD
+
+        .payment-choice {
+            max-width: 420px;
+            margin: 18px auto 0;
+            padding: 14px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            background: #fff;
+            text-align: left;
+        }
+
+        .payment-choice-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .payment-choice-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+=======
+>>>>>>> master
     </style>
 }
 
@@ -48,6 +81,36 @@
         <p class="text-muted">Branch ID: <strong>@branchId</strong></p>
         <p class="subscribe-amount">&#8377; @amountRupees</p>
         <p class="subscribe-meta">@description</p>
+<<<<<<< HEAD
+        @if (canPayPartial)
+        {
+            <div class="payment-choice">
+                <div class="payment-choice-row">
+                    <span>Total due</span>
+                    <strong>&#8377; @dueAmount.ToString("N2")</strong>
+                </div>
+                <div class="payment-choice-row">
+                    <span>Minimum partial payment</span>
+                    <strong>&#8377; @minimumPartialAmount.ToString("N2")</strong>
+                </div>
+                <div class="payment-choice-row">
+                    <span>Selected payment</span>
+                    <strong>@(paymentType == "full" ? "Full" : "Partial")</strong>
+                </div>
+                <div class="payment-choice-actions">
+                    <a class="btn btn-sm @(paymentType == "partial" ? "btn-primary" : "btn-outline-primary")"
+                       href="@Url.Action("Subscribe", "Payment", new { branchId = branchId, paymentType = "partial" })">
+                        Pay Partial
+                    </a>
+                    <a class="btn btn-sm @(paymentType == "full" ? "btn-primary" : "btn-outline-primary")"
+                       href="@Url.Action("Subscribe", "Payment", new { branchId = branchId, paymentType = "full" })">
+                        Pay Full
+                    </a>
+                </div>
+            </div>
+        }
+=======
+>>>>>>> master
         <button id="openSubscribeModal" class="btn btn-primary mt-3">Proceed to Payment</button>
     </div>
 </div>
@@ -63,6 +126,15 @@
                 <p class="mb-1">You are paying for:</p>
                 <p class="font-weight-bold">@description</p>
                 <p class="subscribe-amount mb-1">&#8377; @amountRupees</p>
+<<<<<<< HEAD
+                @if (canPayPartial)
+                {
+                    <p class="subscribe-meta mb-1">Total due: <strong>&#8377; @dueAmount.ToString("N2")</strong></p>
+                    <p class="subscribe-meta mb-1">Minimum partial: <strong>&#8377; @minimumPartialAmount.ToString("N2")</strong></p>
+                    <p class="subscribe-meta mb-2">Selected: <strong>@(paymentType == "full" ? "Full Payment" : "Partial Payment")</strong></p>
+                }
+=======
+>>>>>>> master
                 <p class="subscribe-meta mb-3">Branch: <strong>@branchId</strong></p>
 
                 @using (Html.BeginForm("Complete", "Payment", FormMethod.Post, new { id = "paymentResponseForm" }))
@@ -71,6 +143,120 @@
                     @Html.Hidden("rzp_paymentid", "")
                     @Html.Hidden("rzp_orderid", "")
             <div class="d-flex justify-content-center">
+<<<<<<< HEAD
+                <button type="button" id="btnPayNow" class="btn btn-pay-now mr-2">Pay Now</button>
+                @*<a href="https://rzp.io/rzp/RT7KSrH" class="btn btn-pay-now mr-2">Pay Now</a>*@
+
+                <a href="@Url.Action("Dashboard","Account")" class="btn btn-secondary">Cancel</a>
+            </div>
+                        }
+
+                        <div id="processing" class="mt-3" style="display:none;">
+                            <div class="spinner-border text-primary" role="status"><span class="sr-only">Processing...</span></div>
+                            <p class="mt-2">Processing payment, please wait...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @section scripts {
+            <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+            <script>
+                (function () {
+                    var key = "@Model.razorpayKey";
+                    var orderId = "@Model.OrderID";
+                    var amount = "@Model.Amount"; // paise
+                    var canPayPartial = "@(canPayPartial ? "1" : "0")" === "1";
+
+                 console.log("Razorpay debug -> key:", key, "orderId:", orderId, "amount(paise):", amount, "SBranchID:", "@Model.SBranchID", "IsSubscription:", "@(Model.IsSubscriptionOrder ? "1":"0")");
+
+         // quick sanity checks
+         if (!key || key.trim() === "") {
+             alert("Payment key is missing. Use Razorpay test keys for localhost or configure branch gateway credentials.");
+             return;
+         }
+         if (!orderId || orderId.trim() === "") {
+             alert("Order id is missing. Server must create Razorpay order and set OrderID before opening checkout.");
+             return;
+         }
+         if (!amount || parseInt(amount) <= 0) {
+             alert("Payment amount is zero or invalid. Check order creation logic.");
+             return;
+         }
+                    var currency = "@Model.currency";
+                    var name = "@(Model.Name ?? "ERP Subscription")";
+                    var description = "@(Model.Description ?? "Subscription")";
+                    var prefillName = "@(Model.Name ?? "")";
+                    var prefillEmail = "@(Model.EmailID ?? "")";
+                    var prefillContact = "@(Model.ContactNumber ?? "")";
+
+                    var options = {
+                        key: key,
+                        amount: amount,
+                        currency: currency,
+                        name: name,
+                        description: description,
+                        order_id: orderId,
+                        prefill: {
+                            name: prefillName,
+                            email: prefillEmail,
+                            contact: prefillContact
+                        },
+                        notes: {
+                            SBranchID: "@Model.SBranchID",
+                            IsSubscription: "@(Model.IsSubscriptionOrder ? "1" : "0")"
+                        },
+                        image: "@(Model.ImageUrl ?? "")",
+                        theme: { color: "#007bff" },
+                        modal: {
+                            escape: false
+                        },
+                        handler: function (response) {
+                            // populate hidden fields and submit
+                            document.querySelector('input[name="rzp_paymentid"]').value = response.razorpay_payment_id;
+                            document.querySelector('input[name="rzp_orderid"]').value = response.razorpay_order_id;
+                            document.getElementById('processing').style.display = 'block';
+                            document.getElementById('paymentResponseForm').submit();
+                        }
+                    };
+
+                    var rzp = new Razorpay(options);
+
+                    // log failure details if Razorpay reports failure
+                    rzp.on('payment.failed', function (response) {
+                        console.error('Razorpay payment.failed', response);
+                        var msg = "Payment failed: " + (response.error && response.error.description ? response.error.description : JSON.stringify(response));
+                        alert(msg);
+                    });
+
+                    // show modal when page button clicked or open automatically
+                    var openModalBtn = document.getElementById('openSubscribeModal');
+                    openModalBtn.addEventListener('click', function () {
+                        $('#subscribeModal').modal({ backdrop: 'static', keyboard: false });
+                    });
+
+                    // pay button opens Razorpay checkout
+                    document.getElementById('btnPayNow').addEventListener('click', function (e) {
+                        e.preventDefault();
+                        try {
+                            rzp.open();
+                        } catch (err) {
+                            console.error(err);
+                            alert('Unable to open payment window. Try again.');
+                        }
+                    });
+
+                    // Optionally open modal automatically
+                    $(document).ready(function () {
+                        if (!canPayPartial) {
+                            $('#subscribeModal').modal({ backdrop: 'static', keyboard: false, show: true });
+                        }
+                    });
+                })();
+            </script>
+        }
+=======
                 @*<button type="button" id="btnPayNow" class="btn btn-pay-now mr-2">Pay Now</button>*@
                 <a href="https://rzp.io/rzp/RT7KSrH" class="btn btn-pay-now mr-2">Pay Now</a>
                 
@@ -180,3 +366,4 @@
         })();
     </script>
 }
+>>>>>>> master

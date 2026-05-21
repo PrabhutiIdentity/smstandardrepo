@@ -183,6 +183,11 @@ namespace SMEnterprise.Models
         public List<StockTransaferMasterModel> Transactions { get; set; }
         public SBranchModel Branch { get; set; }
     }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> master
     public class StockTransactionPaymentModel
     {
         public int StockPaymentID { get; set; }
@@ -279,16 +284,29 @@ namespace SMEnterprise.Models
         public List<StockSaleReportItemModel> Report { get; set; }
         public SBranchModel Branch { get; set; }
     }
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
     public class StockTransaferMasterModel
     {
         public string InvoiceNumber { get; set; }
         public int PaymentMode { get; set; }
         public string PaymentReferanceNo { get; set; }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> master
         public DateTime? PaymentDate { get; set; }
         public decimal PaidAmount { get; set; }
         public decimal DueAmount { get; set; }
         public int PaymentStatus { get; set; }
         public string CancelRemark { get; set; }
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public string ReferanceNo { get; set; }
         public int STID { get; set; }
         public int VendorID { get; set; }
@@ -304,12 +322,25 @@ namespace SMEnterprise.Models
         public DateTime CreatedDate { get; set; }
         public decimal Quantity { get; set; }
         public decimal Amount { get; set; }
+<<<<<<< HEAD
         public int LastPaymentID { get; set; }
         public int SelectedPaymentID { get; set; }
+=======
+<<<<<<< HEAD
+=======
+        public int LastPaymentID { get; set; }
+        public int SelectedPaymentID { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public int Status { get; set; }
         public int EmployeeTypeID { get; set; }
         public int SBranchID { get; set; }
         public int OpType { get; set; }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+=======
+>>>>>>> master
         public bool IsPaymentLocked
         {
             get
@@ -361,6 +392,10 @@ namespace SMEnterprise.Models
                 }
             }
         }
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public List<NameIDModel> EmployeeTypes { get; set; }
         public List<VendorModel> Vendors { get; set; }
         public List<NameIDModel> Employees { get; set; }
@@ -370,7 +405,14 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Students { get; set; }
         public List<ProductModel> Products { get; set; }
         public List<StockTransaferDetailModel> Details { get; set; }
+<<<<<<< HEAD
         public List<StockTransactionPaymentModel> PaymentHistory { get; set; }
+=======
+<<<<<<< HEAD
+=======
+        public List<StockTransactionPaymentModel> PaymentHistory { get; set; }
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
         public DataTable GetDetailsDataTable()
         {
 
@@ -446,7 +488,18 @@ namespace SMEnterprise.Models
         public List<StockTransaferDetailModel> Products { get; set; }
         public StockTransaferMasterModel Transfer { get; set; }
         public SaleReceiptCustomerModel Customer { get; set; }
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    }
+}
+=======
+>>>>>>> master
         public List<StockTransactionPaymentModel> PaymentHistory { get; set; }
         public StockTransactionPaymentModel SelectedPayment { get; set; }
     }
 }
+<<<<<<< HEAD
+=======
+>>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+>>>>>>> master
