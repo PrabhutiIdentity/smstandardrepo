@@ -21,9 +21,9 @@ namespace SMEnterprise.Controllers
         {
            // this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
         }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+
+
+
         private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
         {
             try
@@ -38,8 +38,8 @@ namespace SMEnterprise.Controllers
                 return false;
             }
         }
-=======
->>>>>>> master
+
+
         //private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
         //{
         //    try
@@ -54,10 +54,10 @@ namespace SMEnterprise.Controllers
         //        return false;
         //    }
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         TeacherData objTeacherData = new TeacherData();
         // GET: Home
         [PermissionFilter]
@@ -564,9 +564,9 @@ namespace SMEnterprise.Controllers
         {
             return View();
         }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+
+
+
         [PermissionFilter]
         [HttpPost]
         public ActionResult PlayRecording(string url)
@@ -793,8 +793,8 @@ namespace SMEnterprise.Controllers
             BBBOnlineClassModel cModel = (new BBBOnlineClassData()).GetOnlineClassDetailsByOCID(OCID);
             return PartialView("_OnlineClassDetailsPartial", cModel);
         }
-=======
->>>>>>> master
+
+
         //[PermissionFilter]
         //[HttpPost]
         //public ActionResult PlayRecording(string url)
@@ -1021,9 +1021,9 @@ namespace SMEnterprise.Controllers
         //    BBBOnlineClassModel cModel = (new BBBOnlineClassData()).GetOnlineClassDetailsByOCID(OCID);
         //    return PartialView("_OnlineClassDetailsPartial", cModel);
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
     }
 }

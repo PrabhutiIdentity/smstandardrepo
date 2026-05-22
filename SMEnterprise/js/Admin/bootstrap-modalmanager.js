@@ -1,6 +1,6 @@
-/* ===========================================================
+/* ===
  * bootstrap-modalmanager.js v2.2.5
- * ===========================================================
+ * ===
  * Copyright 2012 Jordan Schroter.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,14 +14,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * ========================================================== */
+ * == */
 
 !function ($) {
 
 	"use strict"; // jshint ;_;
 
 	/* MODAL MANAGER CLASS DEFINITION
-	* ====================== */
+	* = */
 
 	var ModalManager = function (element, options) {
 		this.init(element, options);
@@ -353,7 +353,7 @@
 	};
 
 	/* PRIVATE METHODS
-	* ======================= */
+	* == */
 
 	// computes and caches the zindexes
 	var getzIndex = (function () {
@@ -393,7 +393,7 @@
 
 
 	/* MODAL MANAGER PLUGIN DEFINITION
-	* ======================= */
+	* == */
 
 	$.fn.modalmanager = function (option, args) {
 		return this.each(function () {

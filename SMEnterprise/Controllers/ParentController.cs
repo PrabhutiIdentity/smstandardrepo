@@ -14,16 +14,14 @@ namespace SMEnterprise.Controllers
 {
     public class ParentController : Controller
     {
-<<<<<<< HEAD
+
         //private readonly BigBlueButtonAPIClient client;
-        public ParentController()
-        {
-=======
-<<<<<<< HEAD
+       
+
         private readonly BigBlueButtonAPIClient client;
         public ParentController()
         {
-            this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
+           // this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
         }
         private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
         {
@@ -38,13 +36,7 @@ namespace SMEnterprise.Controllers
                 return false;
             }
         }
-=======
-        //private readonly BigBlueButtonAPIClient client;
-        public ParentController()
-        {
->>>>>>> master
-            //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
-        }
+
         //private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
         //{
         //    try
@@ -58,10 +50,10 @@ namespace SMEnterprise.Controllers
         //        return false;
         //    }
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         [PermissionFilter]
         public ActionResult LandingPage()
         {
@@ -387,7 +379,7 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         #endregion
-<<<<<<< HEAD
+
         //#region OnlineClasses
         //[HttpPost]
         //[PermissionFilter]
@@ -403,8 +395,8 @@ namespace SMEnterprise.Controllers
         //[PermissionFilter]
         //public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
         //{
-=======
-<<<<<<< HEAD
+
+
         #region OnlineClasses
         [HttpPost]
         [PermissionFilter]
@@ -420,7 +412,7 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
         {
->>>>>>> master
+
 
         //    int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
         //    if (oModel.ClassDate.Year == 1)
@@ -442,8 +434,8 @@ namespace SMEnterprise.Controllers
         //    int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
         //    BBBOnlineClassModel cModel = onlienClassData.GetOnlineClassDetailsByOCID(OCID);
 
-<<<<<<< HEAD
-=======
+
+
             string basepath = $"{this.Request.Url.Scheme}://{this.Request.Url.Host}";
             var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
             if (meetingStatus.returncode != Returncode.FAILED)
@@ -475,7 +467,7 @@ namespace SMEnterprise.Controllers
             }
         }
         #endregion
-=======
+
         //#region OnlineClasses
         //[HttpPost]
         //[PermissionFilter]
@@ -512,7 +504,7 @@ namespace SMEnterprise.Controllers
         //    int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
         //    BBBOnlineClassModel cModel = onlienClassData.GetOnlineClassDetailsByOCID(OCID);
 
->>>>>>> master
+
         //    string basepath = $"{this.Request.Url.Scheme}://{this.Request.Url.Host}";
         //    var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
         //    if (meetingStatus.returncode != Returncode.FAILED)
@@ -544,9 +536,9 @@ namespace SMEnterprise.Controllers
         //    }
         //}
         //#endregion
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
     }
 }

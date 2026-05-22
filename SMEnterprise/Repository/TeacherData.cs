@@ -390,16 +390,11 @@ namespace SMEnterprise.Repository
             }
             return objModel;
         }
-<<<<<<< HEAD
+
     
+         
         public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
-=======
-<<<<<<< HEAD
-        public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
-=======
-    
-        public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
->>>>>>> master
+
          {
              using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
              {
@@ -444,10 +439,10 @@ namespace SMEnterprise.Repository
         // for rank
        
       /*  public PerformanceParameterDetailModel GetStudentPerformanceDetails(PerformanceParameterDetailModel model)
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
@@ -465,15 +460,15 @@ namespace SMEnterprise.Repository
                     model.Result = multi.Read<ExamResultDetailModel>().ToList();
                     //try
                     //{
-<<<<<<< HEAD
 
-=======
-<<<<<<< HEAD
+
+
+
                        
-=======
 
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
                     //    model.ResultGrade = multi.Read<ExamResultDetailModel>().ToList();
                     //}
                     //catch { }
@@ -489,37 +484,11 @@ namespace SMEnterprise.Repository
                     try
                     {
                         model.SessionName = multi.Read<string>().SingleOrDefault();
-<<<<<<< HEAD
 
-=======
-<<<<<<< HEAD
+
+
+
                        
->>>>>>> master
-                    }
-                    catch { }
-                }
-                    // ── new: rank SP call ────────────────────────────────
-                    // SessionID comes from the existing SP result via Student,
-                    // but Student.SessionID may be 0 — use model.SessionID directly
-                    var rankParams = new DynamicParameters();
-                rankParams.Add("@StudentSessionUID", model.StudentSessionUID);
-                // rankParams.Add("@EvaluationID", model.EvaluationID == 0 ? -1 : model.EvaluationID);
-                rankParams.Add("@EvaluationID", -1);   // always load ALL terms
-                rankParams.Add("@SBranchID", model.SBranchID);
-                rankParams.Add("@SessionID", model.SessionID);
-
-                using (var rankMulti = con.QueryMultiple("sp_GetStudentRankInSection_test",rankParams,commandType: CommandType.StoredProcedure))
-                {
-                    model.TermRanks = rankMulti.Read<StudentTermRankModel>().ToList();
-                    model.OverallRank = rankMulti.Read<StudentOverallRankModel>().SingleOrDefault();
-                }
-            }
-            return model;
-        }
-<<<<<<< HEAD
-        */
-=======
-=======
 
                     }
                     catch { }
@@ -542,9 +511,32 @@ namespace SMEnterprise.Repository
             }
             return model;
         }
+
+      
+
+
+
+                    // ── new: rank SP call ────────────────────────────────
+                    // SessionID comes from the existing SP result via Student,
+                    // but Student.SessionID may be 0 — use model.SessionID directly
+                    var rankParams = new DynamicParameters();
+                rankParams.Add("@StudentSessionUID", model.StudentSessionUID);
+                // rankParams.Add("@EvaluationID", model.EvaluationID == 0 ? -1 : model.EvaluationID);
+                rankParams.Add("@EvaluationID", -1);   // always load ALL terms
+                rankParams.Add("@SBranchID", model.SBranchID);
+                rankParams.Add("@SessionID", model.SessionID);
+
+                using (var rankMulti = con.QueryMultiple("sp_GetStudentRankInSection_test",rankParams,commandType: CommandType.StoredProcedure))
+                {
+                    model.TermRanks = rankMulti.Read<StudentTermRankModel>().ToList();
+                    model.OverallRank = rankMulti.Read<StudentOverallRankModel>().SingleOrDefault();
+                }
+            }
+            return model;
+        }
         */
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
         // for shine
         public StudentPerformanceResultModel GetStudentPerformanceResult(StudentPerformanceResultModel model)
         {

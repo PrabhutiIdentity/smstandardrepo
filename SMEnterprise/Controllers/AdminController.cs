@@ -22,20 +22,20 @@ namespace SMEnterprise.Controllers
         AdminData objAdminData = new AdminData();
         AccountData objAccountData = new AccountData();
 
-<<<<<<< HEAD
+
         //private readonly BigBlueButtonAPIClient client;
-=======
-<<<<<<< HEAD
+
+
         private readonly BigBlueButtonAPIClient client;
->>>>>>> master
+
         public AdminController()
         {
             //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
         }
         private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
         {
-<<<<<<< HEAD
-=======
+
+
             try
             {
                 var res = await client.IsMeetingRunningAsync(new IsMeetingRunningRequest { meetingID = Guid.NewGuid().ToString() });
@@ -46,7 +46,7 @@ namespace SMEnterprise.Controllers
             {
                 return false;
             }
-=======
+
         //private readonly BigBlueButtonAPIClient client;
         public AdminController()
         {
@@ -54,7 +54,7 @@ namespace SMEnterprise.Controllers
         }
         private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
         {
->>>>>>> master
+
             //try
             //{
             //    var res = await client.IsMeetingRunningAsync(new IsMeetingRunningRequest { meetingID = Guid.NewGuid().ToString() });
@@ -66,10 +66,10 @@ namespace SMEnterprise.Controllers
             //    return false;
             //}
             return true;
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         }
         [PermissionFilter]
         public ActionResult ParentAppInstalSMS(string ID = null)
@@ -123,48 +123,15 @@ namespace SMEnterprise.Controllers
         [ChildActionOnly]
         public ActionResult SBranches()
         {
-<<<<<<< HEAD
+
             var objModel = GetBranches();
             return PartialView("~/Views/Shared/_BranchListPartial.cshtml", objModel);
         }
         public List<SBranchModel> GetBranches()
         {
 
-=======
-<<<<<<< HEAD
->>>>>>> master
-            int UserID = -1;
-            int SBranchID = 0;
-            //if (PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Admin || PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Director)
-            //{
-            //    UserID = -1;
-            //}
-            //else
-            //{
-            var user = PermissionManager.GetLoggedInUser();
-            UserID = user.UserID;
-            SBranchID = user.SBranchID;
-            var userType = user.RoleID;
-            //}
-            if (Session["SBrancheList"] == null)
-            {
-                Session["SBrancheList"] = objAdminData.GetBranches(UserID, SBranchID, userType).ToList();
-            }
-            List<SBranchModel> objModel = (List<SBranchModel>)Session["SBrancheList"];
-            if (CommonUsage.ConvertToInt(Session["SBranchID"].ToString()) == 0)
-            {
-                Session["SBranchID"] = objModel.ElementAt(0).SBranchID;
-            }
-<<<<<<< HEAD
-            return objModel;
-=======
-            return PartialView("~/Views/Shared/_BranchListPartial.cshtml", objModel);
-=======
-            var objModel = GetBranches();
-            return PartialView("~/Views/Shared/_BranchListPartial.cshtml", objModel);
-        }
-        public List<SBranchModel> GetBranches()
-        {
+
+
 
             int UserID = -1;
             int SBranchID = 0;
@@ -188,25 +155,58 @@ namespace SMEnterprise.Controllers
             {
                 Session["SBranchID"] = objModel.ElementAt(0).SBranchID;
             }
+
             return objModel;
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+            return PartialView("~/Views/Shared/_BranchListPartial.cshtml", objModel);
+
+            var objModel = GetBranches();
+            return PartialView("~/Views/Shared/_BranchListPartial.cshtml", objModel);
+        }
+        public List<SBranchModel> GetBranches()
+        {
+
+            int UserID = -1;
+            int SBranchID = 0;
+            //if (PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Admin || PermissionManager.GetLoggedInUser().RoleID == (int)RoleType.Director)
+            //{
+            //    UserID = -1;
+            //}
+            //else
+            //{
+            var user = PermissionManager.GetLoggedInUser();
+            UserID = user.UserID;
+            SBranchID = user.SBranchID;
+            var userType = user.RoleID;
+            //}
+            if (Session["SBrancheList"] == null)
+            {
+                Session["SBrancheList"] = objAdminData.GetBranches(UserID, SBranchID, userType).ToList();
+            }
+            List<SBranchModel> objModel = (List<SBranchModel>)Session["SBrancheList"];
+            if (CommonUsage.ConvertToInt(Session["SBranchID"].ToString()) == 0)
+            {
+                Session["SBranchID"] = objModel.ElementAt(0).SBranchID;
+            }
+            return objModel;
+
+
         }
         [ChildActionOnly]
         public ActionResult Header()
         {
-<<<<<<< HEAD
+
             var objModel = GetBranches();
-=======
-<<<<<<< HEAD
+
+
             if (Session["SBranchID"] == null)
             {
                 Session["SBranchID"] = 1;
             }
-=======
+
             var objModel = GetBranches();
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
             return PartialView("~/Views/Shared/_AdminLayoutHeader.cshtml");
         }
         [PermissionFilter]
@@ -307,11 +307,11 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult Dashboard()
         {
-<<<<<<< HEAD
+
             var branches = GetBranches();
             var SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-=======
-<<<<<<< HEAD
+
+
             int UserID = -1;
             int SBranchID = 0;
 
@@ -329,12 +329,12 @@ namespace SMEnterprise.Controllers
             {
                 Session["SBranchID"] = objBranches.ElementAt(0).SBranchID;
             }
-             SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-=======
+            SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+
             var branches = GetBranches();
             var SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
             DateTime CurrentDate = CommonUsage.GetCurrentDate();
             AdminDashboardModel objModel = objAdminData.GetDashBoardData(SBranchID, CurrentDate);
             return View(objModel);
@@ -907,27 +907,14 @@ namespace SMEnterprise.Controllers
 
             return PartialView("_SectionOptionsPartial", objModel);
         }
-<<<<<<< HEAD
+
         public ActionResult GetEmployeelist(string id = null, string id2 = null)
         {
             int ID = CommonUsage.ConvertToInt(id);
             int ID2 = CommonUsage.ConvertToInt(id2);
             IEnumerable<NameIDModel> objModel = objAdminData.GetEmployeeList(ID, ID2);
-=======
-<<<<<<< HEAD
-        public ActionResult GetEmployeelist(string id = null,string id2 =  null)
-        {
-            int ID = CommonUsage.ConvertToInt(id);
-            int ID2 = CommonUsage.ConvertToInt(id2);
-            IEnumerable<NameIDModel> objModel = objAdminData.GetEmployeeList(ID,ID2);
-=======
-        public ActionResult GetEmployeelist(string id = null, string id2 = null)
-        {
-            int ID = CommonUsage.ConvertToInt(id);
-            int ID2 = CommonUsage.ConvertToInt(id2);
-            IEnumerable<NameIDModel> objModel = objAdminData.GetEmployeeList(ID, ID2);
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
 
             return PartialView("_EmployeeListPartial", objModel);
         }
@@ -1606,24 +1593,24 @@ namespace SMEnterprise.Controllers
         {
             int ID = CommonUsage.ConvertToInt(id);
             int ID2 = CommonUsage.ConvertToInt(id2);
-<<<<<<< HEAD
+
 
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             EditEvaluationModel objModel = objAdminData.GetEditEvaluationSchemes(ID, ID2);
             return PartialView("_EditEvaluationScheme", objModel);
-=======
-<<<<<<< HEAD
-            
-            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            EditEvaluationModel objModel = objAdminData.GetEditEvaluationSchemes(ID,ID2);
-            return PartialView("_EditEvaluationScheme",objModel);
-=======
+
+
 
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             EditEvaluationModel objModel = objAdminData.GetEditEvaluationSchemes(ID, ID2);
             return PartialView("_EditEvaluationScheme", objModel);
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+            int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            EditEvaluationModel objModel = objAdminData.GetEditEvaluationSchemes(ID, ID2);
+            return PartialView("_EditEvaluationScheme", objModel);
+
+
         }
         [PermissionFilter]
         public ActionResult EmployeeAssign(string ID = null)
@@ -1942,15 +1929,15 @@ namespace SMEnterprise.Controllers
             var noFeeMonths = await objAdminData.GetClassesNoFeeMonthNew(objModel.SBranchID, objModel.SessionID);
             return View(noFeeMonths);
         }
-<<<<<<< HEAD
 
-=======
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
+
+
+
         [PermissionFilter]
         public async Task<ActionResult> UpdateClassNoFeeMonths(ClassPageModel noFeeMonth)
         {
@@ -2000,34 +1987,35 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateFeeType(FeeCategoryModel objData)
         {
-<<<<<<< HEAD
+
             try
-=======
-<<<<<<< HEAD
-            if (Session["SBranchID"] == null)
->>>>>>> master
             {
+
                 if (Session["SBranchID"] == null)
+
                 {
-                    Session["SBranchID"] = 1;
+                    if (Session["SBranchID"] == null)
+                    {
+                        Session["SBranchID"] = 1;
+                    }
+                    objData.UserID = PermissionManager.GetLoggedInUser().UserID;
+                    objData.OperationDate = CommonUsage.GetCurrentDate();
+                    objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+                    objAdminData.InsertUpdateFeeType(objData);
+                    TempData["SuccessMessage"] = "Fee category updated successfully.";
                 }
-                objData.UserID = PermissionManager.GetLoggedInUser().UserID;
-                objData.OperationDate = CommonUsage.GetCurrentDate();
-                objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-                objAdminData.InsertUpdateFeeType(objData);
-                TempData["SuccessMessage"] = "Fee category updated successfully.";
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
             }
-<<<<<<< HEAD
-=======
+
+
             objData.UserID = PermissionManager.GetLoggedInUser().UserID;
             objData.OperationDate = CommonUsage.GetCurrentDate();
             objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             objAdminData.InsertUpdateFeeType(objData);
-=======
+
             try
             {
                 if (Session["SBranchID"] == null)
@@ -2044,8 +2032,8 @@ namespace SMEnterprise.Controllers
             {
                 TempData["ErrorMessage"] = ex.Message;
             }
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
             return RedirectToAction("FeeCategoryManagement", "Admin");
         }
         [PermissionFilter]
@@ -2570,18 +2558,18 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult NewsManagement()
         {
-<<<<<<< HEAD
+
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             IEnumerable<NewsModel> objModel = objAdminData.GetNews(SBranchID);
-=======
-<<<<<<< HEAD
-		
-			IEnumerable<NewsModel> objModel = objAdminData.GetNews();
-=======
+
+
+
+            IEnumerable<NewsModel> objModel = objAdminData.GetNews();
+
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             IEnumerable<NewsModel> objModel = objAdminData.GetNews(SBranchID);
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
             return View(objModel);
         }
         [PermissionFilter]
@@ -2589,24 +2577,24 @@ namespace SMEnterprise.Controllers
         {
 
             objData.ActiveDate = CommonUsage.GetCurrentDate();
-<<<<<<< HEAD
+
             objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
 
             if (objData.AttachmentFile != null)
-=======
-<<<<<<< HEAD
-			objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
 
-			if (objData.AttachmentFile != null)
-=======
-            objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+                objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
 
 
             if (objData.AttachmentFile != null)
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+                objData.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+
+
+            if (objData.AttachmentFile != null)
+
+
             {
                 if (objData.Attachment != null && objData.NewsID != 0)
                 {
@@ -2625,17 +2613,17 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult Gallery()
         {
-<<<<<<< HEAD
+
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             IEnumerable<GalleryModel> objModel = objAdminData.GetGallery(SBranchID);
-=======
-<<<<<<< HEAD
+
+
             IEnumerable<GalleryModel> objModel = objAdminData.GetGallery();
-=======
+
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             IEnumerable<GalleryModel> objModel = objAdminData.GetGallery(SBranchID);
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
             return View(objModel);
         }
         [PermissionFilter]
@@ -2649,20 +2637,20 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateGallery(GalleryModel Data)
         {
-<<<<<<< HEAD
+
             Data.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
-            
-=======
-<<<<<<< HEAD
+
+
+
             Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
             Data.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-=======
+
             Data.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             Data.GalleryID = objAdminData.InsertUpdateGallery(Data);
-            
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
 
             if (Data.OpType == -1)
             {
@@ -3148,15 +3136,15 @@ namespace SMEnterprise.Controllers
 
             objAdminData.DeleteProduct(ProductID);
             return RedirectToAction("Products", "Admin");
-<<<<<<< HEAD
 
-=======
-<<<<<<< HEAD
-            
-=======
 
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
+
+
+
         }
 
         [PermissionFilter]
@@ -3793,7 +3781,7 @@ namespace SMEnterprise.Controllers
         #endregion
 
         #region OnlineClasses
-<<<<<<< HEAD
+
         //[HttpPost]
         //[PermissionFilter]
         //public ActionResult PlayRecording(string url)
@@ -3808,8 +3796,8 @@ namespace SMEnterprise.Controllers
         //[PermissionFilter]
         //public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
         //{
-=======
-<<<<<<< HEAD
+
+
         [HttpPost]
         [PermissionFilter]
         public ActionResult PlayRecording(string url)
@@ -3825,29 +3813,29 @@ namespace SMEnterprise.Controllers
         public async Task<ActionResult> OnlineClasses(BBBOnlineClassStudentPageModel oModel)
         {
 
->>>>>>> master
 
 
-        //    if (oModel.ClassDate.Year == 1)
-        //    {
-        //        oModel.ClassDate = CommonUsage.GetCurrentDate();
-        //    }
-        //    int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-        //    oModel.Classes = await (new BBBOnlineClassData()).GetPrincipalBBBOnlineClassesSchedules(SBranchID, oModel.ClassDate);
-        //    return View(oModel);
 
-<<<<<<< HEAD
-=======
-                var url = client.GetJoinMeetingUrl(requestJoin);
-                ViewBag.URL = url;
-                return View();
-            }
+            //    if (oModel.ClassDate.Year == 1)
+            //    {
+            //        oModel.ClassDate = CommonUsage.GetCurrentDate();
+            //    }
+            //    int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            //    oModel.Classes = await (new BBBOnlineClassData()).GetPrincipalBBBOnlineClassesSchedules(SBranchID, oModel.ClassDate);
+            //    return View(oModel);
+
+
+
+            var url = client.GetJoinMeetingUrl(requestJoin);
+            ViewBag.URL = url;
+            return View();
+        }
             else
             {
                 return View(-1);
-            }
-        }
-=======
+    }
+}
+
         //[HttpPost]
         //[PermissionFilter]
         //public ActionResult PlayRecording(string url)
@@ -3872,7 +3860,7 @@ namespace SMEnterprise.Controllers
         //    oModel.Classes = await (new BBBOnlineClassData()).GetPrincipalBBBOnlineClassesSchedules(SBranchID, oModel.ClassDate);
         //    return View(oModel);
 
->>>>>>> master
+
         //}
         //[PermissionFilter]
         //public async Task<ActionResult> JoinClass(string ID = null)
@@ -3913,20 +3901,20 @@ namespace SMEnterprise.Controllers
         //        return View(-1);
         //    }
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         #endregion
 
     }
 
-<<<<<<< HEAD
+
 }
-=======
-<<<<<<< HEAD
+
+
 }
-=======
+
 }
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+

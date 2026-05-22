@@ -15,42 +15,42 @@ namespace SMEnterprise
 {
     public class MvcApplication : System.Web.HttpApplication
     {
-<<<<<<< HEAD
+
         //public static System.Net.Http.HttpClient HttpClient = new System.Net.Http.HttpClient();
         //public static BigBlueButtonAPISettings BigBlueButtonAPISettings;
-=======
-<<<<<<< HEAD
+
+
         public static System.Net.Http.HttpClient HttpClient = new System.Net.Http.HttpClient();
         public static BigBlueButtonAPISettings BigBlueButtonAPISettings;
-=======
+
         //public static System.Net.Http.HttpClient HttpClient = new System.Net.Http.HttpClient();
         //public static BigBlueButtonAPISettings BigBlueButtonAPISettings;
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
         protected void Application_Start()
         {
             try
             {
                 ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+
+
+
                 BigBlueButtonAPISettings = new BigBlueButtonAPISettings
                 {
                     ServerAPIUrl = ConfigurationManager.AppSettings["BigBlueButtonAPISettings:ServerAPIUrl"],
                     SharedSecret = ConfigurationManager.AppSettings["BigBlueButtonAPISettings:SharedSecret"]
                 };
-=======
->>>>>>> master
+
+
                 //BigBlueButtonAPISettings = new BigBlueButtonAPISettings
                 //{
                 //    ServerAPIUrl = ConfigurationManager.AppSettings["BigBlueButtonAPISettings:ServerAPIUrl"],
                 //    SharedSecret = ConfigurationManager.AppSettings["BigBlueButtonAPISettings:SharedSecret"]
                 //};
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
                 AreaRegistration.RegisterAllAreas();
                 GlobalConfiguration.Configure(WebApiConfig.Register);
                 RouteConfig.RegisterRoutes(RouteTable.Routes);
@@ -71,14 +71,14 @@ namespace SMEnterprise
             //
         }
 
-<<<<<<< HEAD
+
         //protected void Application_Error(object sender, EventArgs e)
         //{
-=======
-<<<<<<< HEAD
+
+
         protected void Application_Error(object sender, EventArgs e)
         {
->>>>>>> master
+
 
         //    HttpContext con = HttpContext.Current;
         //    con.Request.Url.ToString();
@@ -139,8 +139,8 @@ namespace SMEnterprise
         // //   HttpContext context = HttpContext.Current;
         //  //  context.Session["UserID"] = "100";
 
-<<<<<<< HEAD
-=======
+
+
         }
         protected void Application_PreRequestHandlerExecute(object sender, EventArgs e)
         {
@@ -173,7 +173,7 @@ namespace SMEnterprise
                 }
             }
         }
-=======
+
         //protected void Application_Error(object sender, EventArgs e)
         //{
 
@@ -236,7 +236,7 @@ namespace SMEnterprise
         // //   HttpContext context = HttpContext.Current;
         //  //  context.Session["UserID"] = "100";
 
->>>>>>> master
+
         //}
         //protected void Application_PreRequestHandlerExecute(object sender, EventArgs e)
         //{
@@ -269,10 +269,10 @@ namespace SMEnterprise
         //    //    }
         //    //}
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         protected void Application_PostAuthorizeRequest()
         {
             if (IsWebApiRequest())

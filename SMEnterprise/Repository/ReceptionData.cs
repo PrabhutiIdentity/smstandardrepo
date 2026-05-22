@@ -33,14 +33,14 @@ namespace SMEnterprise.Repository
                     objData.Sessions = multi.Read<NameIDModel>().ToList();
                     objData.Enquiries = multi.Read<AdmissionEnquiryMasterModel>().ToList();
                     objData.Receptionists = multi.Read<NameIDModel>().ToList();
-<<<<<<< HEAD
+
                     objData.SessionID = multi.Read<int>().SingleOrDefault();
-=======
-<<<<<<< HEAD
-=======
+
+
+
                     objData.SessionID = multi.Read<int>().SingleOrDefault();
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
                 }
             }
             return objData;
@@ -65,14 +65,14 @@ namespace SMEnterprise.Repository
             {
                 objData.Enquiry = new AdmissionEnquiryMasterModel();
                 objData.Enquiry.EDate = CommonUsage.GetCurrentDate();
-<<<<<<< HEAD
+
                 objData.Enquiry.StudentDOB = CommonUsage.GetCurrentDate().AddYears(-3); 
-=======
-<<<<<<< HEAD
-=======
+
+
+
                 objData.Enquiry.StudentDOB = CommonUsage.GetCurrentDate().AddYears(-3); 
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
                 objData.Enquiry.NextFollowUpDate = CommonUsage.GetCurrentDate().AddDays(1);
             }
             return objData;

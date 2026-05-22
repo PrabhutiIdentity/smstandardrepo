@@ -102,16 +102,16 @@ namespace SMEnterprise.Models
             dtStudentDetails.Columns.Add("MotherName");
             dtStudentDetails.Columns.Add("MotherMobileNo");
             dtStudentDetails.Columns.Add("AadharCardNo");
-<<<<<<< HEAD
+
             dtStudentDetails.Columns.Add("PenNo");
             dtStudentDetails.Columns.Add("ApaarID");
-=======
-<<<<<<< HEAD
-=======
+
+
+
             dtStudentDetails.Columns.Add("PenNo");
             dtStudentDetails.Columns.Add("ApaarID");
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
 
             foreach (StudentModel e in Students)
             {
@@ -129,16 +129,16 @@ namespace SMEnterprise.Models
                 dr["MotherName"] = e.MotherName;
                 dr["MotherMobileNo"] = e.MotherMobileNo;
                 dr["AadharCardNo"] = e.AadharCardNo;
-<<<<<<< HEAD
+
                 dr["PenNo"] = e.PenNo;
                 dr["ApaarID"] = e.ApaarID;
-=======
-<<<<<<< HEAD
-=======
+
+
+
                 dr["PenNo"] = e.PenNo;
                 dr["ApaarID"] = e.ApaarID;
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
                 dtStudentDetails.Rows.Add(dr);
             }
 

@@ -1,4 +1,4 @@
-/* =============================================================
+/* =====
    student.js  —  Student Details  |  All tab interactions
    Drop into ~/Scripts/student.js
    Requires: jQuery, daterangepicker (loaded by layout)
@@ -9,7 +9,7 @@
      · Session modal (open, close, reload, all partial callbacks)
      · Transport modal (open, route/vehicle/stop cascade)
      · Hostel, Custom Fee helpers
-   ============================================================= */
+   ===== */
 
 
 /* ── TAB SWITCHING ─────────────────────────────────────────── */
@@ -148,7 +148,7 @@ function sdLookupParent() {
 }
 
 
-/* =============================================================
+/* =====
    SESSION MODAL
    Route : /Account/EditSessionDetails/{StudentSessionUID}/{StudentID}
    Modal : #mdlEditSession  (partial uses this id directly)
@@ -157,7 +157,7 @@ function sdLookupParent() {
      AddSession(sender)      → sender.id is not used; opens new (uid=0)
      EditSession(sender)     → sender is the <a> tag, closest <tr>
                                has a hidden input with StudentSessionUID
-   ============================================================= */
+   ===== */
 function sdOpenSession(studentSessionUID, studentId) {
     var $modal   = $('#mdlEditSession');
     var $loader  = $modal.find('.sd-modal-loader');
@@ -330,14 +330,14 @@ function CheckSessionEditForm(sender) {
 
     var sessionId        = $('#ddlSchoolSessions').val();
     var studentSessionUID = $('#hdnStudentSessionUID').val();
-<<<<<<< HEAD
+
     var isNewSessionRequest = $('#hdnIsNewSessionRequest').val();
 
     if (isNewSessionRequest != '1') {
         return true;
     }
-=======
->>>>>>> master
+
+
 
     if (studentSessionUID == 0 || studentSessionUID == '') {
         /* Adding new — check duplicate */
@@ -356,7 +356,7 @@ function CheckSessionEditForm(sender) {
 }
 
 
-/* =============================================================
+/* =====
    TRANSPORT MODAL
    Route : /Account/EditTransportDetails/{StudentID}/{THChangeID}
    Modal : #sdTransportModal
@@ -365,7 +365,7 @@ function CheckSessionEditForm(sender) {
      TransportRouteChanged(this)        → route → vehicles
      TransportRouteVehicleChanged(this) → vehicle → stops
      TransportStatusChanged(this)       → continue toggle
-   ============================================================= */
+   ===== */
 function sdOpenTransport(studentId, thChangeId) {
     var $modal   = $('#sdTransportModal');
     var $loader  = $modal.find('.sd-modal-loader');
@@ -468,9 +468,9 @@ function TransportStatusChanged(sender) {
 }
 
 
-/* =============================================================
+/* =====
    CUSTOM FEE
-   ============================================================= */
+   ===== */
 function sdFeeSessionChange(select) {
     $('.se-pre-con').show();
     $.ajax({
@@ -490,9 +490,9 @@ function CustomFeeStatusChanged(sender) {
 }
 
 
-/* =============================================================
+/* =====
    HOSTEL
-   ============================================================= */
+   ===== */
 function sdHostelChanged(select) {
     $.ajax({
         type: 'POST',
@@ -514,10 +514,10 @@ function HostalStatusChanged(sender) {
 }
 
 
-/* =============================================================
+/* =====
    STUDENT PERSONAL — validation helpers
    (called from @section scripts in the view)
-   ============================================================= */
+   ===== */
 function CheckStudentDetails() {
     var name = $('#txtName').val().replace(/ /g, '').replace(/\./g, '');
     if (name.length < 2) {
@@ -536,9 +536,9 @@ function CheckParentForm() {
 }
 
 
-/* =============================================================
+/* =====
    INIT
-   ============================================================= */
+   ===== */
 $(function () {
     /* Datepickers on the main page (not inside modals — those
        are re-inited after AJAX loads the partial) */

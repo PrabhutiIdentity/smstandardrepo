@@ -8,18 +8,18 @@ namespace SMEnterprise.Models
     public class BranchSubscriptionModel
     {
         public int SBranchID { get; set; }
-<<<<<<< HEAD
+
         public string BranchName { get; set; }
         public string BranchAddress { get; set; }
-=======
->>>>>>> master
+
+
         public bool IsDue { get; set; }
         public decimal DueAmount { get; set; }
         public DateTime? DueDate { get; set; }
         public string PlanName { get; set; }
         public DateTime? LastPaidDate { get; set; }
         public string LastPaymentRef { get; set; }
-<<<<<<< HEAD
+
         public int GraceDays { get; set; }
         public bool AllowPartialPayment { get; set; }
         public int MaxPartialPayments { get; set; }
@@ -36,7 +36,7 @@ namespace SMEnterprise.Models
         public string RazorpaySecret { get; set; }
         public bool UseForSubscription { get; set; }
         public bool IsActive { get; set; }
-=======
+
     }
     public class BranchGatewayModel
     {
@@ -44,7 +44,7 @@ namespace SMEnterprise.Models
         public string RazorpayKeyId { get; set; }
         public string RazorpaySecret { get; set; }
         public bool UseForSubscription { get; set; }
->>>>>>> master
+
         public DateTime? CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
     }
@@ -57,7 +57,7 @@ namespace SMEnterprise.Models
         public string PlanName { get; set; }
         public DateTime PaidOn { get; set; }
     }
-<<<<<<< HEAD
+
     public class BranchSubscriptionPaymentModel
     {
         public int PaymentID { get; set; }
@@ -76,6 +76,6 @@ namespace SMEnterprise.Models
         public bool CanPayNow { get; set; }
     }
 }
-=======
-}
->>>>>>> master
+
+
+

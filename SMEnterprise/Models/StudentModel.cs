@@ -143,30 +143,17 @@ namespace SMEnterprise.Models
     }
     public class StudentModel
     {
-<<<<<<< HEAD
+
         public long PenNo { get; set; }
         public long ApaarID { get; set; }
-=======
-<<<<<<< HEAD
-=======
-        public long PenNo { get; set; }
-        public long ApaarID { get; set; }
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
         public string PSchoolName { get; set; }
         public string PSchoolMedium { get; set; }
         public string PClassName { get; set; }
         public string PSResult { get; set; }
         public string PSchoolCity { get; set; }
         public string PSchoolState { get; set; }
-<<<<<<< HEAD
+
         public int SessionID { get; set; }
-=======
-<<<<<<< HEAD
-=======
-        public int SessionID { get; set; }
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
         public string SParentID { get; set; }
         public int IsCustomFee { get; set; }
         public int IsBlock { get; set; }
@@ -274,11 +261,11 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase CategoryCertificateUploader { get; set; }
         public HttpPostedFileBase TransferCertificateUploader { get; set; }
         public string EducationLevel { get; set; }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
->>>>>>> master
+
+
+
+
+
 
 
         public decimal FeeAmount { get; set; }
@@ -289,10 +276,10 @@ namespace SMEnterprise.Models
             
         
 
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
     }
     public class StudentEditModel
     {
@@ -610,12 +597,10 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Quota { get; set; }
         public int SBranchID { get; set; }
     }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-   }
-=======
->>>>>>> master
+
+
+
+
     public class FeeSelectionViewModel
     {
         public int Month { get; set; }
@@ -623,7 +608,7 @@ namespace SMEnterprise.Models
         public decimal Amount { get; set; }
     }
 }
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+

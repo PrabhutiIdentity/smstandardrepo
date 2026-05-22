@@ -16,24 +16,13 @@ namespace SMEnterprise.Controllers
 {
     public class ParentApiController : ApiController
     {
-<<<<<<< HEAD
+
         //private readonly BigBlueButtonAPIClient client;
         public ParentApiController() : base()
         {
             //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
-=======
-<<<<<<< HEAD
-        private readonly BigBlueButtonAPIClient client;
-        public ParentApiController() : base()
-        {
-            this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
-=======
-        //private readonly BigBlueButtonAPIClient client;
-        public ParentApiController() : base()
-        {
-            //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
         }
         [HttpGet]
         public CommonApiWraperModel ClearVehicleLocation()
@@ -715,12 +704,12 @@ namespace SMEnterprise.Controllers
             {
                 int SBranchID = objModel.UserID == data.ID ? objModel.SBranchID : -1;
                 CommonData objCommonData = new CommonData();
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+
+
+
                 Object Data = await objCommonData.GetEventCalander(data.Month, data.Year, SBranchID, 1, data.ID);
-=======
->>>>>>> master
+
+
                 int Year = CommonUsage.GetCurrentDate().Year;
                 int Month = CommonUsage.GetCurrentDate().Month;
              
@@ -731,10 +720,10 @@ namespace SMEnterprise.Controllers
 
 
              
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
                 if (Data != null)
                 {
                     objWraper.Code = 200;
@@ -1219,7 +1208,7 @@ namespace SMEnterprise.Controllers
         }
         #endregion
         #region Online Classes Related
-<<<<<<< HEAD
+
         //[HttpPost]
         //public async Task<CommonApiWraperModel> GetBBBOnlineClassList(ParentApiParamModel data)
         //{
@@ -1343,8 +1332,8 @@ namespace SMEnterprise.Controllers
         //        BBBOnlineClassData onlineClassData = new BBBOnlineClassData();
         //        //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
         //        BBBOnlineClassModel cModel = (onlineClassData).GetOnlineClassDetailsByOCID(data.OCID);
-=======
-<<<<<<< HEAD
+
+
         [HttpPost]
         public async Task<CommonApiWraperModel> GetBBBOnlineClassList(ParentApiParamModel data)
         {
@@ -1468,7 +1457,7 @@ namespace SMEnterprise.Controllers
                 BBBOnlineClassData onlineClassData = new BBBOnlineClassData();
                 //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
                 BBBOnlineClassModel cModel = (onlineClassData).GetOnlineClassDetailsByOCID(data.OCID);
->>>>>>> master
+
 
         //        var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.MeetingID });
         //        if (meetingStatus.returncode != Returncode.FAILED)
@@ -1547,8 +1536,8 @@ namespace SMEnterprise.Controllers
         //    return objWraper;
         //}
 
-<<<<<<< HEAD
-=======
+
+
         [HttpPost]
         public async Task<CommonApiWraperModel> LeaveOnlineClass(ParentApiParamModel data)
         {
@@ -1577,7 +1566,7 @@ namespace SMEnterprise.Controllers
             }
             return objWraper;
         }
-=======
+
         //[HttpPost]
         //public async Task<CommonApiWraperModel> GetBBBOnlineClassList(ParentApiParamModel data)
         //{
@@ -1779,7 +1768,7 @@ namespace SMEnterprise.Controllers
         //    return objWraper;
         //}
 
->>>>>>> master
+
         //[HttpPost]
         //public async Task<CommonApiWraperModel> LeaveOnlineClass(ParentApiParamModel data)
         //{
@@ -1808,10 +1797,10 @@ namespace SMEnterprise.Controllers
         //    }
         //    return objWraper;
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         #endregion
     }
 }

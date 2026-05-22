@@ -21,25 +21,25 @@ namespace SMEnterprise.Controllers
 {
     public class TeacherApiController : ApiController
     {
-<<<<<<< HEAD
+
         //private readonly BigBlueButtonAPIClient client;
-=======
-<<<<<<< HEAD
+
+
         private readonly BigBlueButtonAPIClient client;
->>>>>>> master
+
         public TeacherApiController()
         {
             //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
         }
-<<<<<<< HEAD
-=======
-=======
+
+
+
         //private readonly BigBlueButtonAPIClient client;
         public TeacherApiController()
         {
             //this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
         }
->>>>>>> master
+
         //private async Task<bool> isBigBlueButtonAPISettingsOKAsync()
         //{
         //    try
@@ -53,10 +53,10 @@ namespace SMEnterprise.Controllers
         //        return false;
         //    }
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         private UserModel VerifyUser(string UUID)
         {
             UserModel objUserModel = new UserModel();
@@ -83,9 +83,9 @@ namespace SMEnterprise.Controllers
             }
             return objUserModel;
         }
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
+
+
+
         public async Task<CommonApiWraperModel> JoinClassNew(string ID = null)
         {
             CommonApiWraperModel response = new CommonApiWraperModel();
@@ -158,8 +158,8 @@ namespace SMEnterprise.Controllers
             response.Data = url;
             return response;
         }
-=======
->>>>>>> master
+
+
         //public async Task<CommonApiWraperModel> JoinClassNew(string ID = null)
         //{
         //    CommonApiWraperModel response = new CommonApiWraperModel();
@@ -232,10 +232,10 @@ namespace SMEnterprise.Controllers
         //    response.Data = url;
         //    return response;
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         [HttpPost]
         public CommonApiWraperModel GetVehicleLocation(TransportGeoModel data)
         {
@@ -1551,7 +1551,7 @@ namespace SMEnterprise.Controllers
             return objWraper;
         }
         #endregion
-<<<<<<< HEAD
+
         //#region Online Class Related
         //[HttpPost]
         //public CommonApiWraperModel GetTeacherOnlineClassesSections(ParentApiParamModel data)
@@ -1871,8 +1871,8 @@ namespace SMEnterprise.Controllers
         //                (new BBBOnlineClassData()).UpdateBBBOnlineClassDetails(cModel);
         //            }
         //        }
-=======
-<<<<<<< HEAD
+
+
         #region Online Class Related
         [HttpPost]
         public CommonApiWraperModel GetTeacherOnlineClassesSections(ParentApiParamModel data)
@@ -2448,7 +2448,7 @@ namespace SMEnterprise.Controllers
                 BBBOnlineStaffMeetingData onlineClassData = new BBBOnlineStaffMeetingData();
                 //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
                 var cModel = (onlineClassData).GetOnlineStaffMeetingDetails(data.OCID,user.SBranchID);
->>>>>>> master
+
 
         //        var requestJoin = new JoinMeetingRequest { meetingID = cModel.MeetingID };
         //        requestJoin.userID = teacher.EmployeeID.ToString();
@@ -2580,25 +2580,25 @@ namespace SMEnterprise.Controllers
         //    return objWraper;
         //}
         //[HttpPost]
-<<<<<<< HEAD
+
         //public CommonApiWraperModel StartOnlineClass(OnlineClassModel data)
-=======
+
         //public CommonApiWraperModel GetOnlineClassAttendees(ParentApiParamModel data)
-=======
+
         //#region Online Class Related
         //[HttpPost]
         //public CommonApiWraperModel GetTeacherOnlineClassesSections(ParentApiParamModel data)
->>>>>>> master
+
         //{
         //    UserModel user = VerifyUser(data.UUID);
         //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
         //    if (user != null)
         //    {
-<<<<<<< HEAD
+
         //        data.TeacherID = user.UserID;
         //        data.StartedOn = CommonUsage.GetCurrentDate();
         //        OnlineClassData objTeacherData = new OnlineClassData();
-=======
+
         //        TeacherData objTeacherData = new TeacherData();
         //        List<object> List = objTeacherData.GetTeacherTeachingClassSections(user.UserID).ToList<object>();
         //        if (List.Count > 0)
@@ -3042,20 +3042,20 @@ namespace SMEnterprise.Controllers
         //}
         //[HttpPost]
         //public CommonApiWraperModel StartOnlineClass(OnlineClassModel data)
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
+
         //{
         //    UserModel user = VerifyUser(data.UUID);
         //    CommonApiWraperModel objWraper = new CommonApiWraperModel();
         //    if (user != null)
         //    {
-<<<<<<< HEAD
+
         //        OnlineClassData objTeacherData = new OnlineClassData();
         //        List<OnlineClassAttendeeModel> List = objTeacherData.GetOnlineClassAttendees(data.OCID);
-=======
+
         //        data.TeacherID = user.UserID;
         //        data.StartedOn = CommonUsage.GetCurrentDate();
         //        OnlineClassData objTeacherData = new OnlineClassData();
->>>>>>> master
+
         //        int List = objTeacherData.StartOnlineClass(data);
         //        if (List > 0)
         //        {
@@ -3117,10 +3117,10 @@ namespace SMEnterprise.Controllers
         //    {
         //        BBBOnlineClassData objTeacherData = new BBBOnlineClassData();
         //        var List = objTeacherData.GetOnlineClassAttendees(data.OCID);
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         //        if (List.Count() > 0)
         //        {
         //            objWraper.Code = 200;
@@ -3139,7 +3139,7 @@ namespace SMEnterprise.Controllers
         //    }
         //    return objWraper;
         //}
-<<<<<<< HEAD
+
         //[HttpPost]
         //public CommonApiWraperModel GetBBBOnlineClassAttendees(ParentApiParamModel data)
         //{
@@ -3177,8 +3177,8 @@ namespace SMEnterprise.Controllers
         //        BBBOnlineStaffMeetingData onlineClassData = new BBBOnlineStaffMeetingData();
         //        //var Student = await onlineClassData.GetStudentForOnlineClassByMeetinID(data.OCID,user.UserID);
         //        var cModel = (onlineClassData).GetOnlineStaffMeetingDetails(data.OCID,user.SBranchID);
-=======
-<<<<<<< HEAD
+
+
         [HttpPost]
         public CommonApiWraperModel EndOnlineClass(OnlineClassModel data)
         {
@@ -3223,7 +3223,7 @@ namespace SMEnterprise.Controllers
                     string NotificationServerKey = "AAAAFoTO4zQ:APA91bEUshyzwyxd00uGjDfvaugyo57JfKun7-QaQJkPm7XO70-x31w3BnFKAOtwHkuQnj3eTdKmeSwk2UjkzzXHyJOqUrhV0PpkQuT7_lQUBKElQ5_kv_L2LFKR004CgCOsqtoLuIFZ";
                     string[] Recievers = sb.ToString().Trim().Split("#".ToCharArray());
                     CommonUsage.SendNotificationFCM(Recievers, jmessage, "10", NotificationServerKey);
->>>>>>> master
+
 
         //        var meetingStatus = await client.GetMeetingInfoAsync(new GetMeetingInfoRequest { meetingID = cModel.BBBMeetingID });
         //        if (meetingStatus.returncode != Returncode.FAILED)
@@ -3254,12 +3254,12 @@ namespace SMEnterprise.Controllers
         //            }
         //        }
 
-<<<<<<< HEAD
-=======
+
+
             return objWraper;
         }
         #endregion
-=======
+
         //[HttpPost]
         //public CommonApiWraperModel GetBBBOnlineClassAttendees(ParentApiParamModel data)
         //{
@@ -3327,7 +3327,7 @@ namespace SMEnterprise.Controllers
         //            }
         //        }
 
->>>>>>> master
+
         //        if (objWraper.Data != null)
         //        {
         //            objWraper.Code = 200;
@@ -3446,10 +3446,10 @@ namespace SMEnterprise.Controllers
         //    return objWraper;
         //}
         //#endregion
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         //[HttpPost]
         //public CommonApiWraperModel GetGoogleAccessToken(ParentApiParamModel data)
         //{

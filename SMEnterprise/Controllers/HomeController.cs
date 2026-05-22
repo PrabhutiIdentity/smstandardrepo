@@ -33,13 +33,13 @@ namespace SMEnterprise.Controllers
         }
         public HomeController()
         {
-<<<<<<< HEAD
+
             //CommonData objcd = new CommonData();
             //try
             //{
 
-=======
-<<<<<<< HEAD
+
+
             CommonData objcd = new CommonData();
             try
             {
@@ -55,12 +55,12 @@ namespace SMEnterprise.Controllers
                 string Data = "";
                 objcd.InsertLog(0, "Home Page Error", ex.Message);
             }
-=======
+
             //CommonData objcd = new CommonData();
             //try
             //{
 
->>>>>>> master
+
             //    objcd.InsertLog(0, "Home Page", "Before BBB Client");
             //    objcd.InsertLog(0, "BBBConfig", JsonConvert.SerializeObject(MvcApplication.BigBlueButtonAPISettings));
             //    // this.client = new BigBlueButtonAPIClient(MvcApplication.BigBlueButtonAPISettings, MvcApplication.HttpClient);
@@ -72,10 +72,10 @@ namespace SMEnterprise.Controllers
             //    string Data = "";
             //    objcd.InsertLog(0, "Home Page Error", ex.Message);
             //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
         }
         // GET: Home
         public ActionResult Index()
@@ -177,7 +177,7 @@ namespace SMEnterprise.Controllers
                 return View(objModel);
             }
         }
-<<<<<<< HEAD
+
         //public async Task<ActionResult> bbbrecordingready()
         //{
         //    try
@@ -197,8 +197,8 @@ namespace SMEnterprise.Controllers
         //                RecordingID = token.Payload[key].ToString();
         //            }
         //        }
-=======
-<<<<<<< HEAD
+
+
         public async Task<ActionResult> bbbrecordingready()
         {
             try
@@ -218,7 +218,7 @@ namespace SMEnterprise.Controllers
                         RecordingID = token.Payload[key].ToString();
                     }
                 }
->>>>>>> master
+
 
         //        var request = new GetRecordingsRequest
         //        {
@@ -419,8 +419,8 @@ namespace SMEnterprise.Controllers
         //        objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
         //        objModel.Recievers = new List<NotificationRecieverModel>();
 
-<<<<<<< HEAD
-=======
+
+
                 StringBuilder sb = new StringBuilder();
                 foreach (SMSRecieverModel r in recievers)
                 {
@@ -443,7 +443,7 @@ namespace SMEnterprise.Controllers
             }
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
-=======
+
         //public async Task<ActionResult> bbbrecordingready()
         //{
         //    try
@@ -663,7 +663,7 @@ namespace SMEnterprise.Controllers
         //        objModel.NotificationDateTime = CommonUsage.GetCurrentDate();
         //        objModel.Recievers = new List<NotificationRecieverModel>();
 
->>>>>>> master
+
         //        StringBuilder sb = new StringBuilder();
         //        foreach (SMSRecieverModel r in recievers)
         //        {
@@ -686,10 +686,10 @@ namespace SMEnterprise.Controllers
         //    }
         //    return new HttpStatusCodeResult(HttpStatusCode.OK);
         //}
-<<<<<<< HEAD
-=======
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
+
+
     }
     
     public class StudentResultGetModel

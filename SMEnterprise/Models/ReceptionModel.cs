@@ -63,15 +63,10 @@ namespace SMEnterprise.Models
         public string Address { get; set; }
         public string StudentName { get; set; }
         public int AppliedForSession { get; set; }
-<<<<<<< HEAD
+
                public int AppliedForClass { get; set; }
-=======
-<<<<<<< HEAD
-        public int AppliedForClass { get; set; }
-=======
-               public int AppliedForClass { get; set; }
->>>>>>> 7581125fe6277471213b8ad80ba631259c98eb8f
->>>>>>> master
+
+
         public int CurrentClass { get; set; }
         public int ESource { get; set; }
         public string CurrentSchool { get; set; }
