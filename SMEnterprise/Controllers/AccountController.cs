@@ -17,17 +17,6 @@ namespace SMEnterprise.Controllers
 {
     public class AccountController : Controller
     {
-        private bool HasOverlappingStudentSession(SessionModel objData, int sBranchID)
-        {
-            var studentDetails = objAccountData.GetStudentDetailsNew(objData.StudentID, sBranchID);
-            var existingSessions = studentDetails.Sessions ?? new List<SessionModel>();
-
-            return existingSessions.Any(x =>
-                x.SessionID == objData.SessionID &&
-                x.StudentSessionUID != objData.StudentSessionUID &&
-                objData.FromDate <= x.ToDate &&
-                objData.ToDate >= x.FromDate);
-        }
 
         [PermissionFilter]
         public ActionResult ParentAppDetail(StudentsPageModel objModel)
@@ -238,7 +227,6 @@ namespace SMEnterprise.Controllers
             StudentEditModel objModel = objAccountData.GetStudentDetailsNew(StudentID, SBranchID);
             int cTab = CommonUsage.ConvertToInt(id2);
             objModel.CurrentTab = cTab == 0 ? 1 : cTab;
-            ViewBag.SessionSaveMessage = TempData["SessionSaveMessage"];
             return View(objModel);
         }
         [PermissionFilter]
@@ -492,11 +480,6 @@ namespace SMEnterprise.Controllers
             objModel.CurrentTab = 1;
             return PartialView("_StudentViewPartial", objModel);
         }
-
-
-
-
-
         public ActionResult TCRequest(string id = null)
         {
             int StudentID = CommonUsage.ConvertToInt(id);
@@ -505,10 +488,6 @@ namespace SMEnterprise.Controllers
             objModel.CurrentTab = 1;
             return PartialView("_StudentTCPartial", objModel);
         }
-
-
-
-
 
         [PermissionFilter]
         public ActionResult GetSectionOptionalSubjects(string id = null)
@@ -525,10 +504,29 @@ namespace SMEnterprise.Controllers
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             SessionEditModel objModel = objAccountData.GetSessionDetails(StudentSessionUID, SBranchID);
             objModel.StudentID = StudentID;
-            ViewBag.IsNewSessionRequest = StudentSessionUID == 0 ? 1 : 0;
             return PartialView("_SessionEditPartial", objModel);
         }
         [PermissionFilter]
+        /*  public ActionResult SaveStudentSession(SessionModel objData)
+          {
+              objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+              objAccountData.UpdateStudentSession(objData);
+
+              return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
+          }
+        */
+        private bool HasOverlappingStudentSession(SessionModel objData, int sBranchID)
+        {
+            var studentDetails = objAccountData.GetStudentDetailsNew(objData.StudentID, sBranchID);
+            var existingSessions = studentDetails.Sessions ?? new List<SessionModel>();
+
+            return existingSessions.Any(x =>
+                x.SessionID == objData.SessionID &&
+                x.StudentSessionUID != objData.StudentSessionUID &&
+                objData.FromDate <= x.ToDate &&
+                objData.ToDate >= x.FromDate);
+        }
         public ActionResult SaveStudentSession(SessionModel objData, int IsNewSessionRequest = 0)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -875,19 +873,34 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult SaveFeePayment(FeePaymentModel objModel)
         {
-
-          
+            try
+            {
                 objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-               
+                //  objModel.QDate = CommonUsage.GetCurrentDate();
+                //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+
+
+                //string FeeDate= objModel.FeeDate.ToShortDateString();
+                //if (FeeDate.Length>0)
+                //{
+                //    objModel.FeeDate = objModel.FeeDate;
+                //}
+                //else
+                //{
+                //    objModel.FeeDate = CommonUsage.GetCurrentDate();
+                //}
                 objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
                 objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
                 objModel.Day = objModel.QDate.Day;
                 FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
 
-
-            return PartialView("_StudentFeeRowPartial", objData);
-
-
+                return PartialView("_StudentFeeRowPartial", objData);
+            }
+            catch (Exception ex)
+            {
+                Response.StatusCode = 400;
+                return Content(ex.Message);
+            }
         }
         [PermissionFilter]
         public JsonResult SendFeeCollectionSMS(string ID)
@@ -983,50 +996,6 @@ namespace SMEnterprise.Controllers
             //}
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
-            return View(objModel);
-        }
-        [PermissionFilter]
-        public ActionResult EmployeeIDCards(EmployeeListPageModel objModel)
-        {
-            if (objModel == null)
-            {
-                objModel = new EmployeeListPageModel();
-            }
-
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
-            objModel.SBranchDetails = objAccountData.GetBranchPaymentProfile(SBranchID);
-            if (string.IsNullOrWhiteSpace(objModel.CurrentSessionName))
-            {
-                objModel.CurrentSessionName = objAdminData.GetSessions(-1, SBranchID)
-                    .OrderByDescending(x => x.SessionStatus)
-                    .ThenByDescending(x => x.SessionStartDate)
-                    .Select(x => x.SessionName)
-                    .FirstOrDefault();
-            }
-            ViewBag.CurrentSessionName = objModel.CurrentSessionName;
-            return View(objModel);
-        }
-        [PermissionFilter]
-        public ActionResult EmployeeIDCardsV(EmployeeListPageModel objModel)
-        {
-            if (objModel == null)
-            {
-                objModel = new EmployeeListPageModel();
-            }
-
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
-            objModel.SBranchDetails = objAccountData.GetBranchPaymentProfile(SBranchID);
-            if (string.IsNullOrWhiteSpace(objModel.CurrentSessionName))
-            {
-                objModel.CurrentSessionName = objAdminData.GetSessions(-1, SBranchID)
-                    .OrderByDescending(x => x.SessionStatus)
-                    .ThenByDescending(x => x.SessionStartDate)
-                    .Select(x => x.SessionName)
-                    .FirstOrDefault();
-            }
-            ViewBag.CurrentSessionName = objModel.CurrentSessionName;
             return View(objModel);
         }
         [PermissionFilter]
@@ -1362,6 +1331,51 @@ namespace SMEnterprise.Controllers
 
             objAccountData.InsertUpdateTeacherSubject(objData);
             return Redirect("~/Account/EmployeeDetails/" + objData.EmployeeID + "/" + 10);
+        }
+
+        [PermissionFilter]
+        public ActionResult EmployeeIDCards(EmployeeListPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new EmployeeListPageModel();
+            }
+
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
+            objModel.SBranchDetails = objAccountData.GetBranchPaymentProfile(SBranchID);
+            if (string.IsNullOrWhiteSpace(objModel.CurrentSessionName))
+            {
+                objModel.CurrentSessionName = objAdminData.GetSessions(-1, SBranchID)
+                    .OrderByDescending(x => x.SessionStatus)
+                    .ThenByDescending(x => x.SessionStartDate)
+                    .Select(x => x.SessionName)
+                    .FirstOrDefault();
+            }
+            ViewBag.CurrentSessionName = objModel.CurrentSessionName;
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult EmployeeIDCardsV(EmployeeListPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new EmployeeListPageModel();
+            }
+
+            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetEmployees(objModel.EmployeeType, SBranchID);
+            objModel.SBranchDetails = objAccountData.GetBranchPaymentProfile(SBranchID);
+            if (string.IsNullOrWhiteSpace(objModel.CurrentSessionName))
+            {
+                objModel.CurrentSessionName = objAdminData.GetSessions(-1, SBranchID)
+                    .OrderByDescending(x => x.SessionStatus)
+                    .ThenByDescending(x => x.SessionStartDate)
+                    .Select(x => x.SessionName)
+                    .FirstOrDefault();
+            }
+            ViewBag.CurrentSessionName = objModel.CurrentSessionName;
+            return View(objModel);
         }
         #endregion
         #region Employee Attandance
@@ -1914,8 +1928,7 @@ namespace SMEnterprise.Controllers
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             if (objModel.TCType == 0)
             {
-                objModel = objAccountData.SearchStudentsForTC(objModel.SearchText, SBranchID, objModel.SessionID);
-                objAccountData.PopulateTCGeneratedStatus(objModel, SBranchID);
+                objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
                 return View(objModel);
             }
             else
@@ -1950,38 +1963,22 @@ namespace SMEnterprise.Controllers
         public ActionResult GenerateTC(TCDetailsModel objModel)
         {
             // objModel.SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
-            var loggedInUser = PermissionManager.GetLoggedInUser();
-            objModel.SBranchID = loggedInUser.SBranchID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             if (objModel.TCDetails == null)
             {
                 objAccountData.GetTCDetails(objModel);
                 return View(objModel);
             }
-
             
-
-            else
-            {
-                objModel.TCDetails.StudentID = objModel.TCDetails.StudentID == 0 ? objModel.StudentID : objModel.TCDetails.StudentID;
-                objModel.TCDetails.SessionID = objModel.TCDetails.SessionID == 0 ? objModel.SessionID : objModel.TCDetails.SessionID;
-                objModel.TCDetails.SBranchID = objModel.SBranchID;
-                objModel.TCDetails.CreatedBy = loggedInUser.UserID;
-
-                if (objModel.TCDetails.TCID <= 0)
-                {
-                    objModel.TCDetails.TCID = objAccountData.GetExistingTCID(objModel.TCDetails.StudentID, objModel.TCDetails.SessionID, objModel.SBranchID);
-                }
-
-                objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
-                objAccountData.GetTCDetails(objModel);
-                //ViewBag.Message = "Success";
-                //return View(objModel);
-                return RedirectToAction("GetTCForStudent", objModel);
-                //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
-            }
-
-            
-   
+          else
+    {
+        objModel.TCDetails.TCID = objAccountData.InsertUpdateTC(objModel.TCDetails);
+        objAccountData.GetTCDetails(objModel);
+        //ViewBag.Message = "Success";
+        //return View(objModel);
+        return RedirectToAction("GetTCForStudent", objModel);
+        //return Json(new { newUrl = Url.Action("GetTCForStudent","Account" ) });
+    }
         }
         [PermissionFilter]
         public ActionResult GetTCForStudent(TCDetailsModel oModel)
@@ -2735,11 +2732,6 @@ namespace SMEnterprise.Controllers
             return PartialView("_PrintProductSell", model);
         }
         [PermissionFilter]
-
-
-
-
-
         public ActionResult GetSaleTransactionPaymentReceiptData(string ID = null, string paymentId = null)
         {
             int iID = CommonUsage.ConvertToInt(ID);
@@ -2777,10 +2769,6 @@ namespace SMEnterprise.Controllers
             return Redirect("/Account/StockDetails/" + iID + "?saved=1&mode=" + mode + "&paymentId=" + iPaymentID);
         }
         [PermissionFilter]
-
-
-
-
         public ActionResult GetStudentsForStockTransfer(string id = null)
         {
             int STID = CommonUsage.ConvertToInt(id);
@@ -2821,21 +2809,14 @@ namespace SMEnterprise.Controllers
             return Json(model, JsonRequestBehavior.AllowGet);
         }
         [PermissionFilter]
-
-             public ActionResult StockDetails(string ID = null, string saved = null, string mode = null, string paymentId = null)
-
-
+        public ActionResult StockDetails(string ID = null, string saved = null, string mode = null, string paymentId = null)
         {
             int STID = CommonUsage.ConvertToInt(ID);
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             StockTransaferMasterModel objModel = objAccountData.GetStockTransferDetails(STID, SBranchID);
-
             ViewBag.StockSaved = saved == "1";
             ViewBag.StockSaveMode = mode ?? "";
             ViewBag.LastSavedPaymentID = CommonUsage.ConvertToInt(paymentId);
-
-
-
             return View(objModel);
         }
         [PermissionFilter]
@@ -2843,7 +2824,7 @@ namespace SMEnterprise.Controllers
         {
             oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             oModel.CreatedDate = CommonUsage.GetCurrentDate();
-                        int loggedInUserID = PermissionManager.GetLoggedInUser().UserID;
+            int loggedInUserID = PermissionManager.GetLoggedInUser().UserID;
             StockTransaferMasterModel existingModel = null;
             decimal currentPaymentAmount = oModel.PaidAmount;
             decimal paymentReceivedNow = 0;
@@ -2987,7 +2968,6 @@ namespace SMEnterprise.Controllers
                 }
             }
             int STID = objAccountData.UpdateStockTransaction(oModel);
-
             if (oModel.Status != 0 && oModel.TrType != 2 && paymentReceivedNow > 0)
             {
                 paymentReceiptID = objAccountData.InsertStockTransactionPayment(
@@ -3031,10 +3011,6 @@ namespace SMEnterprise.Controllers
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetStockSaleReport(objModel, false);
             return View(objModel);
-
-
-
-
         }
 
         [PermissionFilter]
@@ -3473,11 +3449,6 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
-
-
-
-
-
         public ActionResult CollectionReport(FeePaymentModel objData = null)
         {
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -3490,6 +3461,7 @@ namespace SMEnterprise.Controllers
             FeePaymentModel objModel = objAccountData.GetCollectionReport(SBranchID, objData.DemandMonth, objData.ClassID, objData.SectionID, objData.SessionID);
             return View(objModel);
         }
+
         [PermissionFilter]
 
         public ActionResult ClassWiseCollectionSummary(ClassWiseCollectionSummaryPageModel objData = null)
@@ -3508,9 +3480,6 @@ namespace SMEnterprise.Controllers
             return View(objModel);
         }
         [PermissionFilter]
-
-
-
         public ActionResult ReportDailyFeeCollection(CollectionReportModel objModel)
         {
             objModel.ReportType = 1;
@@ -3537,8 +3506,6 @@ namespace SMEnterprise.Controllers
                 objModel.FromDate = CommonUsage.GetCurrentDate().AddDays(-7);
                 objModel.PaymentMode = -1;
                 objModel.SessionID = 0;
-
-
             }
             if (objModel.ToDate.Year == 1)
             {
@@ -3614,17 +3581,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult ReportMonthlyCollection(CollectionReportModel objModel)
         {
-
            
            objModel.ReportType = 2;
-
-
-            objModel.ReportType = 2;
-
-           
-           objModel.ReportType = 2;
-
-
 
             if (objModel.FromDate.Year == 1)
             {
@@ -3635,14 +3593,7 @@ namespace SMEnterprise.Controllers
             {
                 objModel.ToDate = CommonUsage.GetCurrentDate();
             }
-
            
-
-
-
-           
-
-
 
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetCollectionReport(objModel);
@@ -3810,7 +3761,6 @@ namespace SMEnterprise.Controllers
 
         #region Bulk Student Data Upload
         [PermissionFilter]
-
         public ActionResult BulkStudentUploadEnt(BulkStudentUploadModel objModel)
         {
             HttpPostedFileBase fileupload = objModel.ExcelFile;
@@ -4022,9 +3972,4 @@ namespace SMEnterprise.Controllers
         #endregion
 
     }
-
 }
-
-
-
-

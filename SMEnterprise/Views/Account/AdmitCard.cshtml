@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 @{
     ViewBag.Title = "Admint Card";
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
@@ -22,7 +22,9 @@
                         <div class="row">
 
                             <div class="col-md-2 padding">
+                                @*<label class="col-md-5 text-right padding-R" style="padding-left: 150px;">Month  </label>*@
                                 <label class="text-right" style="padding-left: 25px;">@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("MMM, yyyy")</label>
+                                @*<input type="month" value="@Model.DemandMonth.ToString("yyyy-MM")" name="DemandMonth" id="dtDate" class="form-control" />*@
                             </div>
                             <div class="col-md-3 padding">
                                 <label class="col-md-4 text-right">Sessions :</label>
@@ -108,11 +110,17 @@
                             <td colspan="2">
                                 <h2>@Model.Branch.BranchSchoolName</h2>
                                 <p>@Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))</p>
+                                @*<h4>@Model.Branch.Address</h4>*@
                                 <p style="margin-top: 2px;text-align: center;"> <b>Ph.</b> @Model.Branch.ContactNo,  <b> Email :</b> @Model.Branch.EmailID</p>
                                 <br />
                             </td>
                             <td> <img id="imgPhoto" class="thumbImageGrid" style="height:120px;width:120px" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@Model.Branch.Logo" /></td>
                         </tr>
+                        @*<tr style="border-bottom:1px solid black;">
+                    <td colspan="2" style="white-space:pre-line"><h4>@Model.Branch.Address</h4>
+
+                    </td>
+                </tr>*@
                         <tr style="border-bottom:1px solid black;">
                             <td colspan="2" style="white-space:pre-line"><b>Admit Card</b></td>
                         </tr>
@@ -142,6 +150,10 @@
                             <td>Mother's Name</td>
                             <td class="searchable">@d.MotherName</td>
                         </tr>
+                        @*<tr style="border-bottom:1px solid black;">
+                    <td>Mother's Name</td>
+                    <td>@d.MotherName</td>
+                </tr>*@
                         <tr style="border-bottom:1px solid black;">
                             <td colspan="4">
                             </td>
@@ -179,6 +191,9 @@
 
 
                         </tbody>
+
+
+
                     </table>
                     <div class="row">
                         <table style="width:100%">
@@ -224,6 +239,9 @@
             }
 
         </table>
+
+
+
     </div>
 </div>
 @section scripts
@@ -301,6 +319,7 @@
             $("body").append(frame1);
             var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
             frameDoc.document.open();
+            //Create a new HTML document.
             frameDoc.document.write('<html><head><title></title><style type = "text/css" > ' +
                     'table th, table td {' +
                 'border-bottom:1px solid #000;' +
@@ -309,6 +328,9 @@
             frameDoc.document.write('</head><body>');
             frameDoc.document.write('<link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" type="text/css" />');
             frameDoc.document.write('<link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" type="text/css" />');
+
+            //Append the external CSS file.
+            //Append the DIV contents.
             frameDoc.document.write(contents);
             frameDoc.document.write('</body></html>');
             frameDoc.document.close();

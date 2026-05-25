@@ -18,14 +18,7 @@ using System.Reflection;
 using System.Xml.Xsl;
 using System.Xml;
 using System.Xml.Serialization;
-
 using ExcelDataReader;
-
-
-
-using ExcelDataReader;
-
-
 
 namespace SMEnterprise.Repository
 {
@@ -475,15 +468,7 @@ namespace SMEnterprise.Repository
         public static string StopIndexBasePath = "StopIndex";
         public static string DatabasebackupDirecotry = "~/Backup/Database";
         public static string ParentAppSMSTemplate = "Hello [Reciever],%0a Please download our app from [PlayStoreLink] to stay updated with school activities, your Username is [UserName] and Password is [Password]";
-
         //public static string ParentAppSMSTemplate = "Hello [Reciever],%0  your Username is [UserName] and Password is [Password]";
-
-
-        //  public static string ParentAppSMSTemplate = "Hello [Reciever],%0  your Username is [UserName] and Password is [Password]";
-
-        //public static string ParentAppSMSTemplate = "Hello [Reciever],%0  your Username is [UserName] and Password is [Password]";
-
-
         public static string[] MonthNames = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
         public static DateTime SessionStart;
         public static DateTime SessionEnd;
@@ -1202,34 +1187,6 @@ namespace SMEnterprise.Repository
                 return dt;
             }
 
-
-            
-            public static DataTable ConvertXSLXtoDataTable(string strFilePath, string connString)
-
-            {
-                // We don't need the connection string anymore, just the file path
-                using (var stream = File.Open(strFilePath, FileMode.Open, FileAccess.Read))
-                {
-                    // Auto-detects if it's .xls or .xlsx
-                    using (var reader = ExcelReaderFactory.CreateReader(stream))
-                    {
-                        // Configuration to treat the first row as the header
-                        var result = reader.AsDataSet(new ExcelDataSetConfiguration()
-                        {
-                            ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
-                            {
-                                UseHeaderRow = true
-                            }
-                        });
-
-                        // result.Tables[0] is your first worksheet, just like ds.Tables[0]
-                        return result.Tables.Count > 0 ? result.Tables[0] : new DataTable();
-                    }
-                }
-            }
-
-
-
             public static DataTable ConvertXSLXtoDataTable(string strFilePath)
             {
                 // We don't need the connection string anymore, just the file path
@@ -1252,7 +1209,6 @@ namespace SMEnterprise.Repository
                     }
                 }
             }
-
             /*  public static DataTable ConvertXSLXtoDataTable(string strFilePath, string connString)
               {
                   OleDbConnection oledbConn = new OleDbConnection(connString);
@@ -1284,10 +1240,6 @@ namespace SMEnterprise.Repository
 
               }
             */
-
-
-
-
 
         }
         #endregion 

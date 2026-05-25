@@ -8,7 +8,6 @@ using SMEnterprise.Repository;
 using SMEnterpriseDB.Models;
 using System.Linq;
 
-
 namespace SMEnterprise.Controllers
 {
     public class LoginController : Controller
@@ -113,52 +112,18 @@ namespace SMEnterprise.Controllers
                         try
                         {
                             Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
-
                         } 
-
-
-                        catch { }
-                        try
-                        {
-                            var accountData = new AccountData();
-                            int branchId = PermissionManager.GetLoggedInUser().SBranchID;
-                            var sub = accountData.GetBranchSubscription(branchId);
-                            if (sub != null && sub.IsDue && sub.DueAmount > 0m)
-                            {
-                                Session["ShowPaymentDue"] = true;
-                                Session["PaymentDueBranchID"] = branchId;
-                                Session["PaymentDueAmount"] = sub.DueAmount;
-                                Session["PaymentDuePlanName"] = sub.PlanName ?? "";
-                            }
-                            else
-                            {
-                                Session.Remove("ShowPaymentDue");
-                                Session.Remove("PaymentDueBranchID");
-                                Session.Remove("PaymentDueAmount");
-                                Session.Remove("PaymentDuePlanName");
-                            }
-
-                        }
-
                         catch { }
                         CommonData objCData = new CommonData();
                         int activeBranchId = AttemptedUser.SBranchID;
                         if (AttemptedUser.RoleID == (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle || AttemptedUser.RoleID == (int)RoleType.Director)
                         {
-
                            var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
                             Session["SBrancheList"] = branches;
                             activeBranchId = branches.FirstOrDefault()?.SBranchID ?? AttemptedUser.SBranchID;
                             Session["SBranchID"] = activeBranchId;
                             try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
                             objCData.InitializeStartupSettings(activeBranchId);
-
-
-
-                                   Session["SBranchID"] = branches.FirstOrDefault()?.SBranchID;
-
-                            objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
-
                             return RedirectToAction("Dashboard", "Admin");
                         }
                         else if (AttemptedUser.RoleID == (int)RoleType.Technical)

@@ -1193,7 +1193,7 @@ namespace SMEnterprise.Controllers
             if (SBranchID != 0)
             {
                 AdminData objAdminData = new AdminData();
-                List<object> List = (await objAdminData.GetImportantContact(SBranchID)).ToList<object>();
+                List<object> List =(await objAdminData.GetImportantContact(SBranchID)).ToList<object>();
                 if (List.Count > 0)
                 {
                     objWraper.Code = 200;

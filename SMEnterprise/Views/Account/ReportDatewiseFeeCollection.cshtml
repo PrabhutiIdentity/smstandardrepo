@@ -88,65 +88,14 @@
                                 {
                                     <th>@com.Name</th>
                                 }
-
                             <th style="width:10%">Recieved Amount</th>
                                 <th style="width:10%">Refund Amount</th>
                                 <th style="width:10%"> Amount</th>
-
-
-                                <th style="width:10%">Amount</th>
-
-                            <th style="width:10%">Recieved Amount</th>
-                                <th style="width:10%">Refund Amount</th>
-                                <th style="width:10%"> Amount</th>
-
-
                             </tr>
                         </thead>
                         @{
                             int count = 0;
                             decimal TotalPayment = 0;
-
-                            decimal TotalRefund = 0;
-                            decimal TotalAmount = 0;
-                            decimal dTotalRefund = 0;
-
-
-
-
-                            for (var ld = Model.FromDate; ld <= Model.ToDate; ld = ld.AddDays(1))
-                            {
-                                decimal dTotalPayment = 0;
-
-
-                                <tr>
-                                    <td>@ld.ToString("dd MMM,yyyy")</td>
-                                    @{
-                                        var td = Model.FeeReportType.Where(d => d.PaymentDate == ld).FirstOrDefault();
-                                        if (td != null)
-                                        {
-                                            <td>@td.PaymentNoRange</td>
-                                        }
-                                        else
-                                        {
-                                            <td>-</td>
-                                        }
-                                    }
-                                    @foreach (var FeeT in Model.FeeType)
-                                    {
-                                        var rep = Model.FeeReportType.Where(d => d.FeeTypeID == FeeT.ID && d.PaymentDate == ld).Sum(x => x.PaymentRecieved);
-
-                                        FeeT.Sum = FeeT.Sum + rep;
-                                        dTotalPayment = dTotalPayment + rep;
-                                        TotalPayment = TotalPayment + dTotalPayment;
-                                        <td> <i class="fa fa-inr" aria-hidden="true"></i> @rep</td>
-
-                                    }
-                                    <td>
-                                        <i class="fa fa-inr" aria-hidden="true"></i> @dTotalPayment.ToString("N2")
-                                    </td>
-                                </tr>
-
                             decimal TotalRefund = 0;
                             decimal TotalAmount = 0;
                             decimal dTotalRefund = 0;
@@ -154,7 +103,6 @@
                             for (var ld = Model.FromDate; ld <= Model.ToDate; ld = ld.AddDays(1))
                             {
                                 decimal dTotalPayment = 0;
-
                                 TotalRefund = TotalRefund + dTotalRefund;
 
 
@@ -200,10 +148,6 @@
                                                         @Amount.ToString("N2")
                                                     </td>
                                                 </tr>
-
-
-
-
                                 count++;
                             }
 
@@ -218,16 +162,8 @@
                                     <td>@com.Sum</td>
                                 }
                                 <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @((Model.FeeType.Sum(x => x.Sum)).ToString("N2"))</b></td>
-
                                 <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalRefund.ToString("N2")</b></td>
                                 <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @(((Model.FeeType.Sum(x => x.Sum)) - TotalRefund).ToString("N2"))</b></td>
-
-
-
-                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalRefund.ToString("N2")</b></td>
-                                <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @(((Model.FeeType.Sum(x => x.Sum)) - TotalRefund).ToString("N2"))</b></td>
-
-
                             </tr>
                         </tfoot>
                     </table>

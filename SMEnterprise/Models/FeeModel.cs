@@ -549,14 +549,7 @@ namespace SMEnterprise.Models
 
     public class FeePaymentModel
     {
-
         public decimal RefundAmount { get; set; }
-
-
-
-        public decimal RefundAmount { get; set; }
-
-
         public int IsCustomFee { get; set; }
         public string MotherName { get; set; }
         public int UserID { get; set; }
@@ -658,17 +651,8 @@ namespace SMEnterprise.Models
                 try
                 {
                     char[] splitter = { '\\' };
-
                     
                         if (ClassSection.Split(splitter).Length > 1)
-
-
-                    if (ClassSection.Split(splitter).Length > 1)
-
-                    
-                        if (ClassSection.Split(splitter).Length > 1)
-
-
                     {
                         return ClassSection.Split(splitter)[1];
                     }
@@ -922,28 +906,13 @@ namespace SMEnterprise.Models
         public string PaymentNoRange { get; set; }
         public int PayeeID { get; set; }
 
-
-
-
-
-
-
-
         public decimal Amount { get; set; }
         public decimal DiscPer { get; set; }
         public decimal DiscAmt { get; set; }
         public decimal NetApplicablePayment { get; set; }
         public decimal PaymentRecieved { get; set; }
-
         
               public decimal RefundAmount { get; set; }
-
-
-
-        
-              public decimal RefundAmount { get; set; }
-
-
         public string Year { get; set; }
         public int Month { get; set; }
         public DateTime PaymentDate { get; set; }
@@ -1033,19 +1002,10 @@ namespace SMEnterprise.Models
 
         public int ExistCount { get; set; }
 
-
-
-
-
-
        // Add this if missing
         public decimal FeeAmount { get; set; }
         public decimal Discounts { get; set; }
         public decimal Paid { get; set; }
-
-
-
-
     }
     public class DemandReciptListModel
     {

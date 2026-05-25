@@ -183,11 +183,6 @@ namespace SMEnterprise.Models
         public List<StockTransaferMasterModel> Transactions { get; set; }
         public SBranchModel Branch { get; set; }
     }
-
-
-
-
-
     public class StockTransactionPaymentModel
     {
         public int StockPaymentID { get; set; }
@@ -284,29 +279,16 @@ namespace SMEnterprise.Models
         public List<StockSaleReportItemModel> Report { get; set; }
         public SBranchModel Branch { get; set; }
     }
-
-
-
-
     public class StockTransaferMasterModel
     {
         public string InvoiceNumber { get; set; }
         public int PaymentMode { get; set; }
         public string PaymentReferanceNo { get; set; }
-
-
-
-
-
         public DateTime? PaymentDate { get; set; }
         public decimal PaidAmount { get; set; }
         public decimal DueAmount { get; set; }
         public int PaymentStatus { get; set; }
         public string CancelRemark { get; set; }
-
-
-
-
         public string ReferanceNo { get; set; }
         public int STID { get; set; }
         public int VendorID { get; set; }
@@ -322,18 +304,12 @@ namespace SMEnterprise.Models
         public DateTime CreatedDate { get; set; }
         public decimal Quantity { get; set; }
         public decimal Amount { get; set; }
-
         public int LastPaymentID { get; set; }
         public int SelectedPaymentID { get; set; }
         public int Status { get; set; }
         public int EmployeeTypeID { get; set; }
         public int SBranchID { get; set; }
         public int OpType { get; set; }
-
-
-
-
-
         public bool IsPaymentLocked
         {
             get
@@ -385,10 +361,6 @@ namespace SMEnterprise.Models
                 }
             }
         }
-
-
-
-
         public List<NameIDModel> EmployeeTypes { get; set; }
         public List<VendorModel> Vendors { get; set; }
         public List<NameIDModel> Employees { get; set; }
@@ -398,9 +370,7 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Students { get; set; }
         public List<ProductModel> Products { get; set; }
         public List<StockTransaferDetailModel> Details { get; set; }
-
         public List<StockTransactionPaymentModel> PaymentHistory { get; set; }
-
         public DataTable GetDetailsDataTable()
         {
 
@@ -476,13 +446,7 @@ namespace SMEnterprise.Models
         public List<StockTransaferDetailModel> Products { get; set; }
         public StockTransaferMasterModel Transfer { get; set; }
         public SaleReceiptCustomerModel Customer { get; set; }
-
-
         public List<StockTransactionPaymentModel> PaymentHistory { get; set; }
         public StockTransactionPaymentModel SelectedPayment { get; set; }
     }
 }
-
-
-
-

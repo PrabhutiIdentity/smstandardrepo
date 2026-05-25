@@ -143,7 +143,6 @@ namespace SMEnterprise.Models
     }
     public class StudentModel
     {
-
         public long PenNo { get; set; }
         public long ApaarID { get; set; }
         public string PSchoolName { get; set; }
@@ -152,7 +151,6 @@ namespace SMEnterprise.Models
         public string PSResult { get; set; }
         public string PSchoolCity { get; set; }
         public string PSchoolState { get; set; }
-
         public int SessionID { get; set; }
         public string SParentID { get; set; }
         public int IsCustomFee { get; set; }
@@ -263,11 +261,6 @@ namespace SMEnterprise.Models
         public string EducationLevel { get; set; }
 
 
-
-
-
-
-
         public decimal FeeAmount { get; set; }
         public decimal Discounts { get; set; }
         public decimal PaidAmount { get; set; }
@@ -275,10 +268,6 @@ namespace SMEnterprise.Models
         
             
         
-
-
-
-
 
     }
     public class StudentEditModel
@@ -597,10 +586,6 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Quota { get; set; }
         public int SBranchID { get; set; }
     }
-
-
-
-
     public class FeeSelectionViewModel
     {
         public int Month { get; set; }
@@ -608,7 +593,3 @@ namespace SMEnterprise.Models
         public decimal Amount { get; set; }
     }
 }
-
-
-
-

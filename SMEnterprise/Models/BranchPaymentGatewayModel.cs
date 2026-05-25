@@ -17,5 +17,6 @@ namespace SMEnterprise.Models
         public string ContactNo { get; set; }
         public string Address { get; set; }
         public string Logo { get; set; }
+        public string ImageUrl { get; set; }
     }
 }

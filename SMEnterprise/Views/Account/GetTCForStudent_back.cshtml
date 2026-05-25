@@ -1,0 +1,516 @@
+﻿
+
+@{
+    ViewBag.Title = "Admission";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.TCDetailsModel
+<style>
+    .form-control[readonly] {
+        background-color: #fefefe !important;
+    }
+
+
+
+    #tcdiv .summerfield-form {
+        position: relative;
+        bottom: -15px !important;
+    }
+
+    #tcdiv .admi-form {
+        text-align: center;
+        margin: 25px 0 0 0;
+    }
+
+
+        #tcdiv .admi-form a {
+            width: 100%;
+            border-radius: 0;
+            font-size: 20px;
+            padding: 10px 0;
+            width: 250px;
+        }
+</style>
+<link href="@Url.Content("~/Content/TC.css")" rel="stylesheet" />
+@*<div class="innerBanner">
+        <div class="container">
+            @using (Html.BeginForm("GetTC", "Home", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmTC" }))
+            {
+                <div class="row">
+                    <div class="col-md-12">
+                        <h2>Transfer Certificate</h2>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Session</label>
+                        <select class="form-control" name="SessionID" id="ddlSessions">
+                            @foreach (var b in Model.Sessions)
+                            {
+                                <option branchid="@b.Extra2" value="@b.ID" @(Model.SessionID == b.ID ? "selected" : "") @(b.Extra2 == Model.SBranchID.ToString() ? "" : "style=display:none")>@b.Name @(b.Extra1 == "1" ? "(Active)" : "")</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label>Birth Date <small>(MM//yyyy)</small> </label>
+                        <input type="date" name="DOB" class="form-control" value="@Model.DOB.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="col-md-2">
+                        <label>SR NO </label>
+                        <input type="date" name="SchoolUID" class="form-control" value="@Model.StudentDetails.SchoolUID" />
+                    </div>
+                    <div class="col-md-3">
+                        <label>Student Name*</label>
+                        <input type="text" name="StudentName" required class="form-control" value="@Model.StudentName" />
+                    </div>
+                    <div class="col-md-2" style="padding-top: 23px;">
+                        <a class="btn btn-warning" href="javascript:void(0);" onclick="$('#frmTC').submit();">Search TC</a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>*@
+@if (Model.TCDetails != null)
+{
+    <div id="tcdiv">
+        <div id="tcwrapper">
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="chm-head" style="margin:0 auto;">
+                            <div class="row" style="text-align:center; margin:0 0 35px 0;">
+                                <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
+                                    <tr style="width:100%">
+                                        <td style="width:20%;text-align:left;">
+                                            <img onerror="return OnImageError(this,2);" style="width:120px;height:120px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                                        </td>
+
+                                        <td style="width:60%;text-align:center;">
+                                            <table style="width:100%">
+                                                <tr>
+                                                    <td style="text-align: left;vertical-align: middle;">
+
+                                                        <p style="margin-top: 2px;margin-bottom: 5px;text-align: center;font-size: 26px;">@Model.Branch.BranchSchoolName</p>
+
+
+                                                        <p style="margin-bottom: 2px;font-size: 16px;text-align: center;">
+                                                            @Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))
+                                                            @*@Model.Branch.Address*@
+                                                        </p>
+                                                        <p style="margin-bottom: 2px;text-align: center;"> <b>Ph.</b> @Model.Branch.ContactNo,  <b> Email :</b> @Model.Branch.EmailID</p>
+
+                                                    </td>
+                                                </tr>
+                                            </table>
+                                        </td>
+                                        <td style="width:20%;text-align:right;">
+                                        </td>
+
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" style="text-align: center;border-bottom: 0px solid #ddd;">
+
+                                            <p style="margin-bottom: 2px;text-align: center;">
+                                                <b style="font-size: 26px;">स्थानांतरण प्रमाण पत्र / Transfer Certificate</b>
+                                                <br />
+
+                                            </p>
+
+
+                                        </td>
+                                    </tr>
+                                </table>
+                                @*<div class="col-md-3 tcdisplay">
+                                        <div class="tc-img">
+                                            <img onerror="return OnImageError(this,2);" style="height:100px;width:100px" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 tcdisplay">
+                                        <div class="summerfield-form">
+                                            <h1>@Model.Branch.BranchSchoolName</h1>
+                                            <p>@Model.Branch.Address</p>
+                                            <p style="text-transform:capitalize; font-size:13px;">स्थानांतरण प्रमाण पत्र / Transfer Certificate</p>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 tcdisplay" style="padding-left: 150px;">
+                                        <div class="tc-img">
+                                            <img onerror="return OnImageError(this,2);" style="height:100px;width:100px" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetails.StudentID)_@Model.StudentDetails.Photo" style="max-height:100px" />
+                                        </div>
+                                    </div>*@
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-12" style="padding:0 10px;">
+                                    <div class="chm-form01">
+                                        <form class="form-inline">
+
+                                            <div class="row" style="margin:0;">
+                                                <!--col-md-3 start--->
+                                                <div class="col-md-4 tcdisplay form-group">
+                                                    <label for="name"><b>प्रवेश सं./</b>Admission No.</label>
+                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.StudentDetails.SchoolUID">
+                                                </div>
+
+                                                <div class="col-md-4 tcdisplay form-group">
+                                                    <label for="name"><b>विद्यार्थी क्र.सं./</b>Student ID</label>
+                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.StudentDetails.StudentSID">
+                                                </div>
+                                                <div class="col-md-4 tcdisplay form-group">
+                                                    <label for="name"><b>प्रमाण पत्र क्र.सं./</b> T.C. N0.</label>
+                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.TCDetails.TCSLNo">
+                                                </div>
+                                                <!--col-md-3 end--->
+                                            </div>
+                                            <!--col-md-4 start-->
+                                            <div class="row" style="margin: 0;">
+                                                <div class="col-md-4 tcdisplay form-group">
+                                                    <label for="name"><b>विद्यालय सं./</b>School No.</label>
+                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.Branch.SchoolCode">
+                                                </div>
+                                                <div class="col-md-4 tcdisplay form-group" style="margin-left:-60px">
+                                                    <label for="name">Affiliation No.</label>
+                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.Branch.AffiliationNo">
+                                                </div>
+                                                <div class="col-md-4 tcdisplay form-group" style="margin-left:-25px">
+                                                    <label for="name">Renewed upto</label>
+                                                    <input type="text" class="form-control chm-input13" id="name" readonly value="@Model.Branch.RenewedUpto">
+                                                </div>
+                                               
+                                            <div class="col-md-12 form-group">
+                                                <label for="name"><b>विद्यार्थी का नाम/</b>Student Name</label>
+                                                <input type="text" class="form-control chm-input03" id="name" readonly value="@Model.StudentDetails.Name">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="wopd"><b>माता का नाम/</b>Mother's Name</label>
+                                                <input type="text" class="form-control chm-input03" id="wopd" readonly value="@Model.StudentDetails.MotherName">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="con"><b>पिता का नाम/</b>Father's Name</label>
+                                                <input type="text" class="form-control chm-input03" id="con" readonly value="@Model.StudentDetails.FatherName">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="email"><b>राष्ट्रीयता/</b>Nationality</label>
+                                                <input type="email" class="form-control chm-input03" id="name" readonly value="@Model.StudentDetails.NationalityText">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या अनु.जाति/ज.जा./पिछङा वर्ग से संबन्धित है</b></p>
+
+
+                                                <label for="add">Whether the pupil belongs to SC/ST/OBC Category</label>
+                                                <input type="text" class="form-control chm-input11" id="add" readonly value="@Model.StudentDetails.CategoryName">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>प्रवेश पुस्तिका के अनुसार जन्मतिथि/</b>Date of birth according to the Admission Register</label>
+                                                <input type="text" class="form-control chm-input03" id="pstcode" readonly value="@Model.StudentDetails.DOB.ToString("dd/MM/yyyy")">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode">(<b>शब्दों में/</b>in words)</label>
+                                                <input type="text" class="form-control chm-input15" id="pstcode" readonly value="@SMEnterprise.Repository.CommonUsage.DateToText(Model.StudentDetails.DOB, false, true)">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>विद्यालय में प्रथम प्रवेश की तिथि/</b>Date of first admission in the school</label>
+                                                <input type="text" class="form-control chm-input03" id="pstcode" readonly value="@Model.StudentDetails.DOJ.ToString("dd/MM/yyyy")">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <!--<p><b></b></p>-->
+                                                <label for="pstcode"><b>क्या विद्यार्थी का परीक्षा परिणाम अनुत्तीर्ण है?/</b>Whether the student is failed:</label>
+                                                <input type="text" class="form-control chm-input16" id="pstcode" value="@(Model.TCDetails.FailedCount==0 ? "NO" : "")">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>प्रस्तावित विषय/</b>Subjects offered</label>
+                                                @{
+                                                    string Title;
+                                                    var sCounter = 1;
+                                                    foreach (var s in Model.Subjects)
+                                                    {
+                                                        Title = s.Split(',')[0];
+                                                        <input type="text" value="@Title" id="pstcode" />
+
+                                                        
+                                                        //sCounter++;
+                                                    }
+                                                }
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <!--<p> </p>-->
+                                                <label for="pstcode"><b>पिछली कक्षा जिसमे विद्यार्थी अध्ययनरत था: (अंको में)/</b>Class in which the pupil last studied (in words)</label>
+                                                <input type="text" class="form-control chm-input23" id="pstcode" readonly value="@Model.StudentDetails.ClassName">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>पिछले विद्यालय /बोर्ड परीक्षा एवं परिणाम/</b>School/Board Annual examination last taken with result</label>
+                                                <input type="text" class="form-control chm-input25" id="pstcode" readonly value="@Model.TCDetails.SCBLastExamName @Model.TCDetails.SCBLastExamResult">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <!--<p></p>-->
+                                                <label for="pstcode"><b>क्या उच्च कक्षा में पदोन्नति का अधिकारी है :/</b>Whether qualified for promotion to the next higher class:</label>
+                                                <input type="text" class="form-control chm-input26" id="pstcode" readonly value="@(Model.TCDetails.IsSCBLastExamPassed==0?"No":"Yes"+ "    " +Model.TCDetails.ClassName)">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यार्थी ने विद्यालय की सभी देय राशि का भुगतान कर दिया है :</b></p>
+                                                <label for="pstcode">Whether the pupil has paid all dues to the Vidyalaya</label>
+                                                <input type="text" class="form-control chm-input27" id="pstcode" readonly value="@Model.TCDetails.DuePaidMonth">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यार्थी का कोई शुल्क रियायत प्रदान की गई थी यदि हाँ, तो उसकी प्रकृति:</b></p>
+                                                <label for="pstcode">Whether the pupil was in receipt of any fee concession if so the nature of such concession:</label>
+                                                <input type="text" class="form-control chm-input03" id="pstcode" readonly value="@Model.TCDetails.Concession">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यार्थी ऐन.सी.सी. कैडेट/स्काउट है ? विवरण दे</b></p>
+                                                <label for="pstcode">Whether the pupil is NCC Cadet/Boy Scout/Girl Guide(give details)</label>
+                                                <input type="text" class="form-control chm-input29" id="pstcode" readonly value="@(Model.TCDetails.IsNCC==0?"No":"Yes "+ "    " +Model.TCDetails.NCCDetails)">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>विद्यालय से विद्यार्थी के नाम काटे जाने की तिथि :</b></p>
+                                                <label for="pstcode">Date on which pupils' name was struck off the rolls of the Vidyalaya</label>
+                                                <input type="text" class="form-control chm-input30" id="pstcode" value="@Model.TCDetails.DateOfIssue.ToString("dd MMM yyyy")">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>विद्यालय छोड़ने का कारण/</b>Reason for leaving the School</label>
+                                                <input type="text" class="form-control chm-input31" id="pstcode" value="@Model.TCDetails.ReasonForLeaving">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>अंतिम तिथि तक उपस्थितियों की कुल संख्या/</b>No.of meetings upto date</label>
+                                                <input type="text" class="form-control chm-input32" id="pstcode" value="@Model.TCDetails.WorkingDays">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>विद्यार्थी की विद्यालय दिवसों की कुल उपस्थितियाँ /</b>No.of school days the pupil attended</label>
+                                                <input type="text" class="form-control chm-input33" id="pstcode" value="@Model.TCDetails.PresentDays">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>सामान्य आचरण /</b>General Conduct</label>
+                                                <input type="text" class="form-control chm-input34" id="pstcode" value="@Model.TCDetails.GeneralConduct">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <p><b>क्या विद्यालय सरकारी /अल्प संख्यक /स्वतंत्र श्रेणी में आता है :</b></p>
+                                                <label for="pstcode">Whether school is under Govt./Minority/independent category:</label>
+                                                <input type="text" class="form-control chm-input35" id="schoolcategory">
+                                            </div>
+
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>कोई अन्य टिप्पणी/</b>Any other remarks:</label>
+                                                <input type="text" class="form-control chm-input36" id="remarks" value="@Model.TCDetails.Remarks">
+                                            </div>
+                                            <div class="col-md-12 form-group">
+                                                <label for="pstcode"><b>प्रमाण-पत्र जारी करने की तिथि/</b>Date of issue of certificate</label>
+                                                <input type="text" class="form-control chm-input03" id="issuedate" value="@Model.TCDetails.DateOfIssue.ToString("dd MMM yyyy")">
+                                            </div>
+
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row" style="margin:0">
+                                <div class="col-md-3 tcdisplay">
+                                    Prepared By________________
+                                </div>
+                                <div class="col-md-3 tcdisplay">
+                                    Checked By________________
+                                </div>
+                                <div class="col-md-3 tcdisplay">
+                                    @if (Model.Branch.PrincipalSignature == null)
+                                    {
+
+                                        <p> Principal________________</p>
+
+                                    }
+                                    else
+                                    {
+                                        <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                        <br /><p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal</p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="admi-form">
+                <button type="button" id="print" class="btn btn-info" onclick="PrintTC(0);">Print</button>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+
+    <div id="tcwrapper">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="chm-head">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <h2>Transfer Certificate Is Not generated, kindly contact office.</h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+<br />
+<br />
+<br />
+<br />
+<br />
+<div class="x_panel">
+    <div class="x_title">
+        <h2>Character Certificate</h2>
+        <button type="button" class="btn btn-primary pull-right" onclick="PrintTC(1);"><i class="fa fa-print"></i> Print</button>
+        <div class="clearfix"></div>
+    </div>
+    <div class="x_content charactercontainer">
+        <table style="width: 100%;padding:10px;">
+            <thead>
+                <tr>
+                    <td style="text-align:center;width:20%;">
+                        <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                    </td>
+                    <td style="text-align:center;width:60%;">
+                        <h3> @Model.Branch.BranchSchoolName</h3>
+                        <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
+                        <p>Affiliated To C.B.S.E.Board</p>
+                    </td>
+                    <td style="text-align:center;width:20%;">
+                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.StudentDetails.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetails.StudentID)_@Model.StudentDetails.Photo" />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="text-align:center">
+                        <h1 style="padding: 20px;margin-bottom: 10px;">
+                            * Character Certificate *
+                        </h1>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <table style="width:100%;padding:10px;">
+                            <tr>
+                                <td></td>
+                                <td style="text-align:right">Dated @Model.TCDetails.DateOfIssue.ToString("dd MMM, yyyy")</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+                <tr>
+                    @{
+                        var finalSession = Model.Sessions.LastOrDefault();
+                        var firstSession = Model.Sessions.FirstOrDefault();
+                    }
+                    <td colspan="3">
+                        <br />
+                        <p style="font-size: 15px;">
+                            This is to certify that <b>@Model.StudentDetails.Name</b> @(Model.StudentDetails.Gender == 0 ? "son" : "daughter") of @Model.StudentDetails.FatherName
+                            has been / was a student of this school during the session from @firstSession.SessionName @(Model.StudentDetails.Gender == 0 ? "he" : "she") has appeared in the class @finalSession.ClassName examination of the year
+                            @finalSession.SessionName .
+                        </p>
+                        <p style="font-size: 15px;">
+                            As far as I know @(Model.StudentDetails.Gender == 0 ? "he" : "she") bears a @Model.TCDetails.GeneralConduct Character.
+                        </p>
+                        <p style="font-size: 15px;">
+                            I wish @(Model.StudentDetails.Gender == 0 ? "him" : "her") all success in life
+                        </p><br />
+                        <br />
+                        <br />
+                        <br />
+
+                        <label>
+                            <br /><br /><br /><br />
+                            <b>HEAD CLERK</b>
+                        </label>
+
+
+                        @if (Model.Branch.PrincipalSignature == null)
+                        {
+
+                            <br /><br /><br />
+                            <label style="float:right">  Principal </label>
+
+
+                        }
+                        else
+                        {
+                            <label style="float:right">
+                                <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                <br />&nbsp; &nbsp; &nbsp; &nbsp;  Principal
+                            </label>
+                        }
+                        <div style="border-bottom:2px dotted"></div>
+                    </td>
+                </tr>
+            </thead>
+        </table>
+    </div>
+</div>
+@section scripts{
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.8.0/js/bootstrap-datepicker.min.js"></script>
+    <script>
+        function BranchChanged(sender) {
+            var BranchID = $(sender).val();
+            var isset = 0;
+            $("#ddlSessions > option").each(function (index) {
+                if ($(this).attr('branchid') != BranchID) {
+                    $(this).css('display', 'none');
+                    $(this).removeAttr('selected');
+                }
+                else {
+                    $(this).css('display', '');
+                    if (isset == 0) {
+                        $(this).attr('selected', 'selected');
+                        isset = 1;
+                    }
+                }
+            });
+        }
+        $(document).ready(function () {
+            $('.datepicker').datepicker({
+                daysOfWeekDisabled: [0, 6]
+            });
+        });
+
+
+        function PrintTC(type) {
+            var contents = '';
+            if (type == 0) {
+                contents = $("#tcdiv").html();
+            }
+
+            else {
+                contents = $(".charactercontainer").html();
+            }
+            //var nDiv = $('#tcdiv').html();
+            //var contents = nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            //Create a new HTML document.
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<link href="/Content/TC.css" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            //Append the external CSS file.
+            //Append the DIV contents.
+
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+
+}
+
+

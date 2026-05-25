@@ -1,6 +1,6 @@
-/* ===
+/* ===========================================================
  * bootstrap-modal.js v2.2.5
- * ===
+ * ===========================================================
  * Copyright 2012 Jordan Schroter
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * == */
+ * ========================================================== */
 
 
 !function ($) {
@@ -22,7 +22,7 @@
 	"use strict"; // jshint ;_;
 
 	/* MODAL CLASS DEFINITION
-	* = */
+	* ====================== */
 
 	var Modal = function (element, options) {
 		this.init(element, options);
@@ -320,7 +320,7 @@
 
 
 	/* MODAL PLUGIN DEFINITION
-	* == */
+	* ======================= */
 
 	$.fn.modal = function (option, args) {
 		return this.each(function () {
@@ -357,7 +357,7 @@
 
 
 	/* MODAL DATA-API
-	*  */
+	* ============== */
 
 	$(function () {
 		$(document).off('click.modal').on('click.modal.data-api', '[data-toggle="modal"]', function ( e ) {

@@ -93,20 +93,10 @@
                         <th>Details</th>
                         <th>Date</th>
                         <th>Collected By</th>
-
-
-
-                        <th>Amount</th>
-
-
                         <th>Amount Recieved</th>
                         <th>Refund Amount</th>
                         <th>Actual Amount</th>
                         A
-
-
-
-
                         @*<th style="width:15%">Delete</th>*@
 
                     </tr>
@@ -114,21 +104,12 @@
                 @{
                     int count = 1;
                     decimal TotalPayment = 0;
-
                     decimal TotalRefund = 0;
                     decimal TotalAmount = 0;
-
-
-
-                    decimal TotalRefund = 0;
-                    decimal TotalAmount = 0;
-
-
                     foreach (FeePaymentModel c in Model.Report)
                     {
                         var PayMode = "";
                         TotalPayment = TotalPayment + c.PaymentAmount;
-
                         TotalRefund = TotalRefund + c.RefundAmount;
                         TotalAmount = TotalPayment - TotalRefund;
 
@@ -195,147 +176,6 @@
                         count++;
                                           }
 
-
-                        <tr>
-                            <td>@count</td>
-                            <td style="width:10%">@c.PaymentRecieptNo</td>
-                            <td style="width:10%">@c.StudentSID</td>
-                            <td>@c.SchoolUID</td>
-                            <td style="width:15%"> @c.Name</td>
-
-
-                            <td style="width:10%">
-
-                                @c.ClassName / @c.SectionName
-                            </td>
-                            <td style="width:7%">
-                                @c.SessionName
-                            </td>
-
-                            <td style="width:20%">
-                                @if (c.PaymentMode == 0)
-                                {
-                                    PayMode = "Cash Payment";
-                                }
-                                else if (c.PaymentMode == 1)
-                                {
-                                    PayMode = "Cheque Payment";
-                                }
-                                else if (c.PaymentMode == 2)
-                                {
-                                    PayMode = "NEFT Payment";
-                                }
-                                else if (c.PaymentMode == 2)
-                                {
-                                    PayMode = "Other Payment";
-                                }
-                                @PayMode<br />
-                                @c.PayMonths
-                            </td>
-
-
-                            <td style="width:10%">
-                                @c.PaymentDate.ToString("dd MMM, yyyy")
-                            </td>
-                            <td style="width:7%">
-                                @c.CollectedBy
-                            </td>
-                            <td style="width:10%">
-                                <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
-                            </td>
-                            @*<td>
-                                    @using (Html.BeginForm("DeletePayment", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
-                                    {
-                                        <input type="hidden" name="PaymentID" value="@c.PaymentID" />
-                                        <input type="hidden" name="PaymentMode" value="@c.PaymentMode" />
-                                        <input type="hidden" name="PaymentDate" value="@c.PaymentDate.ToString("yyyy-MM-dd")" />
-                                        <button type="submit" style="display:none;" value="Delete" class="btn btn-danger" onclick="return DeletePayment(this);">Delete</button>
-                                    }
-                                </td>*@
-                        </tr>
-
-                        count++;
-                    }
-
-                        TotalRefund = TotalRefund + c.RefundAmount;
-                        TotalAmount = TotalPayment - TotalRefund;
-
-                                <tr>
-                                    <td>@count</td>
-                                    <td style="width:10%">@c.PaymentRecieptNo</td>
-                                    <td style="width:10%">@c.StudentSID</td>
-                                    <td>@c.SchoolUID</td>
-                                    <td style="width:15%"> @c.Name</td>
-
-
-                                    <td style="width:10%">
-
-                                        @c.ClassName / @c.SectionName
-                                    </td>
-                                    <td style="width:7%">
-                                        @c.SessionName
-                                    </td>
-
-                                    <td style="width:20%">
-                                        @if (c.PaymentMode == 0)
-                                        {
-                                            PayMode = "Cash Payment";
-                                        }
-                                        else if (c.PaymentMode == 1)
-                                        {
-                                            PayMode = "Cheque Payment";
-                                        }
-                                        else if (c.PaymentMode == 2)
-                                        {
-                                            PayMode = "NEFT Payment";
-                                        }
-                                        else if (c.PaymentMode == 2)
-                                        {
-                                            PayMode = "Other Payment";
-                                        }
-                                        @PayMode<br />
-                                        @c.PayMonths
-                                    </td>
-
-
-                                    <td style="width:10%">
-                                        @c.PaymentDate.ToString("dd MMM, yyyy")
-                                    </td>
-                                    <td style="width:7%">
-                                        @c.CollectedBy
-                                    </td>
-                                    <td style="width:10%">
-                                        <i class="fa fa-inr" aria-hidden="true"></i> @c.PaymentAmount.ToString("N2")
-                                    </td>
-                                    <td style="width:10%">
-                                        <i class="fa fa-inr" aria-hidden="true"></i> @c.RefundAmount.ToString("N2")
-                                    </td>
-                                    <td style="width:10%">
-                                        <i class="fa fa-inr" aria-hidden="true"></i>
-                                      @{ 
-                                          decimal payAmount = c.PaymentAmount;
-                                          decimal refAmount = c.RefundAmount;
-
-                                          var Amount = payAmount - refAmount;
-                                      }
-                                        @Amount.ToString("N2");
-                                    </td>
-                                    @*<td>
-            @using (Html.BeginForm("DeletePayment", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "UpdatePassword", @class = "form-horizontal" }))
-            {
-                <input type="hidden" name="PaymentID" value="@c.PaymentID" />
-                <input type="hidden" name="PaymentMode" value="@c.PaymentMode" />
-                <input type="hidden" name="PaymentDate" value="@c.PaymentDate.ToString("yyyy-MM-dd")" />
-                <button type="submit" style="display:none;" value="Delete" class="btn btn-danger" onclick="return DeletePayment(this);">Delete</button>
-            }
-        </td>*@
-                                </tr>
-
-                        count++;
-                                          }
-
-
-
                 }
                 <tfoot>
                     <tr style="background-color: #606d73;color: white;">
@@ -347,16 +187,8 @@
                         </td>
                         <td colspan="8"></td>
                         <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalPayment.ToString("N2")</b></td>
-
                         <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalRefund.ToString("N2")</b></td>
                         <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalAmount.ToString("N2")</b></td>
-
-
-
-                        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalRefund.ToString("N2")</b></td>
-                        <td><b> <i class="fa fa-inr" aria-hidden="true"></i> @TotalAmount.ToString("N2")</b></td>
-
-
                     </tr>
                 </tfoot>
             </table>

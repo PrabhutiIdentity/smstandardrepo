@@ -29,16 +29,8 @@ namespace SMEnterprise.Models
         public int Status { get; set; }
         public DateTime Date { get; set; }
         public string razorpayKey { get; set; }
-
         public string razorpaySecret { get; set; }
         
-
-
-
-        public string razorpaySecret { get; set; }
-        
-
-
         public string currency { get; set; }
         public string Description { get; set; }
         public int StudentID { get; set; }
@@ -55,16 +47,8 @@ namespace SMEnterprise.Models
         public decimal ApplicableFee { get; set; }
         public int SessionID { get; set; }
         public int SBranchID { get; set; }
-
         public string Hash { get; set; }
         public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
-
-
-        public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
-
-        public string Hash { get; set; }
-        public List<StudentOnlineFeeDetailModel> FeeDetail { get; set; }
-
 
         // ── NEW: multi-month support ──────────────────────────────
         /// <summary>
@@ -77,10 +61,6 @@ namespace SMEnterprise.Models
         public bool IsMultiMonth { get; set; }
         // for school subscription plan
         public bool IsSubscriptionOrder { get; set; } = false;
-
-
-
-
 
 
     }

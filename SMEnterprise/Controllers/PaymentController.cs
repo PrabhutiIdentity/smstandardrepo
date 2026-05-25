@@ -1,35 +1,30 @@
 ﻿using Razorpay.Api;
+using SMEnterprise.Filters;
 using SMEnterprise.Models;
 using SMEnterprise.Repository;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
 using System.Net.Http;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-
-
-
 using System.Web;
 using System.Web.Helpers;
 using System.Web.Mvc;
-
 using System.Web.UI.WebControls;
 using static Lucene.Net.Index.CheckIndex;
 using static System.Web.Razor.Parser.SyntaxConstants;
-
-
-
 
 namespace SMEnterprise.Controllers
 {
     public class PaymentController : Controller
     {
-
         AccountData accountData = new AccountData();
+
+     //  private readonly string _razorpayKeyId = "rzp_live_RSpysm7E9l1iVG";
+      //  private readonly string _razorpaySecret = "BU5GhnJ4xZfN2IOny0FeRbKL";
 
         private SMEnterprise.Models.SBranchModel GetBranchPaymentProfile(int branchId)
         {
@@ -67,7 +62,6 @@ namespace SMEnterprise.Controllers
                 return null;
             }
         }
-
         private BranchPaymentGatewayModel GetRequiredBranchGateway(int branchId)
         {
             var gateway = accountData.GetBranchGateway(branchId);
@@ -91,7 +85,11 @@ namespace SMEnterprise.Controllers
                 {
                     gateway.EmailID = user.EmailID;
                 }
-                if (string.IsNullOrWhiteSpace(gateway.Logo))
+                if (string.IsNullOrWhiteSpace(gateway.ImageUrl))
+                {
+                    gateway.ImageUrl = user.BranchLogo;
+                }
+                if (string.IsNullOrWhiteSpace(gateway.Address))
                 {
                     gateway.Logo = user.BranchLogo;
                 }
@@ -99,121 +97,12 @@ namespace SMEnterprise.Controllers
 
             return gateway;
         }
-
-        private SystemPaymentGatewayModel GetRequiredSystemGateway()
-        {
-            var gateway = accountData.GetSystemPaymentGateway();
-            if (gateway == null || !gateway.IsActive || !gateway.UseForSubscription
-                || string.IsNullOrWhiteSpace(gateway.RazorpayKeyId)
-                || string.IsNullOrWhiteSpace(gateway.RazorpaySecret))
-            {
-                throw new InvalidOperationException("System subscription payment gateway is not configured.");
-            }
-
-            return gateway;
-        }
-
-        private string GetBranchDisplayName(BranchPaymentGatewayModel branch, int branchId)
-        {
-            if (!string.IsNullOrWhiteSpace(branch?.BranchSchoolName))
-            {
-                return branch.BranchSchoolName;
-            }
-
-            if (!string.IsNullOrWhiteSpace(branch?.BranchName))
-            {
-                return branch.BranchName;
-            }
-
-            return "Branch " + branchId;
-        }
-
-        private string GetBranchDisplayName(SMEnterprise.Models.SBranchModel branch, int branchId)
-        {
-            if (!string.IsNullOrWhiteSpace(branch?.BranchSchoolName))
-            {
-                return branch.BranchSchoolName;
-            }
-
-            if (!string.IsNullOrWhiteSpace(branch?.BranchName))
-            {
-                return branch.BranchName;
-            }
-
-            return "Branch " + branchId;
-        }
-
-        private string GetPaymentEmail(StudentModel student, BranchPaymentGatewayModel branch)
-        {
-            if (!string.IsNullOrWhiteSpace(student?.EmailID))
-            {
-                return student.EmailID;
-            }
-
-            if (!string.IsNullOrWhiteSpace(branch?.EmailID))
-            {
-                return branch.EmailID;
-            }
-
-            return "";
-        }
-
-        private string GetContactNumber(StudentModel student, BranchPaymentGatewayModel branch)
-
-
-        // GET: Payment
-        // GET: Payment
-        public ActionResult Index(OrderModel oModel)
-
-        {
-            if (!string.IsNullOrWhiteSpace(student?.FatherMobileNo))
-            {
-                return student.FatherMobileNo;
-            }
-
-            if (!string.IsNullOrWhiteSpace(branch?.ContactNo))
-            {
-                return branch.ContactNo;
-            }
-
-            return "";
-        }
-
-        private string GetBranchLogoUrl(BranchPaymentGatewayModel branch)
-        {
-            if (branch == null || string.IsNullOrWhiteSpace(branch.Logo))
-            {
-                return "";
-            }
-
-            var relativeUrl = Url.Content("~/Images/SBranchLogo/" + branch.SBranchID + "_" + branch.Logo);
-            if (Request?.Url == null)
-            {
-                return relativeUrl;
-            }
-
-            return Request.Url.GetLeftPart(UriPartial.Authority) + relativeUrl;
-        }
-
-        private string GetBranchLogoUrl(SMEnterprise.Models.SBranchModel branch)
-        {
-            if (branch == null || string.IsNullOrWhiteSpace(branch.Logo))
-            {
-                return "";
-            }
-
-            var relativeUrl = Url.Content("~/Images/SBranchLogo/" + branch.SBranchID + "_" + branch.Logo);
-            if (Request?.Url == null)
-            {
-                return relativeUrl;
-            }
-
-            return Request.Url.GetLeftPart(UriPartial.Authority) + relativeUrl;
-        }
-
-       
+      
         public ActionResult Index(OrderModel oModel, string SelectedMonthsJson)
         {
+            
+            
+
             string transactionId = Guid.NewGuid().ToString();
             //int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
@@ -221,9 +110,7 @@ namespace SMEnterprise.Controllers
 
             // 1. Get Student Details
             StudentModel studentmodel = accountData.GetStudentDetailsForPayment(StudentID, SBranchID);
-
             var gateway = GetRequiredBranchGateway(SBranchID);
-
 
             // 2. Get All Fee Details
             StudentSessionFeeStatusPageModel oFeeModel = new StudentSessionFeeStatusPageModel();
@@ -250,9 +137,6 @@ namespace SMEnterprise.Controllers
                     totalApplicableFee += monthDue;
                 }
 
-
-               
-
                 // Anchor FeeMonth/FeeYear to the earliest selected month
                 /*  var first = selectedMonthsList.OrderBy(x => x.Year).ThenBy(x => x.Month).First();
                   oModel.FeeMonth = first.Month;                                   // ← CHANGED
@@ -260,18 +144,12 @@ namespace SMEnterprise.Controllers
                 */
                 // *** FIX: anchor to LATEST month, not first ***
                 // Callback will use this as @QDate
-
                 var latest = selectedMonthsList
                     .OrderByDescending(x => x.Year)
                     .ThenByDescending(x => x.Month)
                     .First();
-
-                oModel.FeeMonth = latest.Month;  
-                oModel.FeeYear = latest.Year;   
-
                 oModel.FeeMonth = latest.Month;   // 8 (August)  ← was 7 (July)
                 oModel.FeeYear = latest.Year;    // 2025
-
 
                 isMultiMonth = selectedMonthsList.Count > 1;
             }
@@ -282,11 +160,7 @@ namespace SMEnterprise.Controllers
                     .Where(c => c.FeeMonth == oModel.FeeMonth && c.FeeYear == oModel.FeeYear)
                     .Sum(x => x.ApplicableFee - x.RDiscount - x.PaidAmount);
 
-
-              
-
                 // Build a single-item list so the view can use the same path   ← NEW
-
                 selectedMonthsList = new List<FeeSelectionViewModel>
         {
             new FeeSelectionViewModel
@@ -303,33 +177,19 @@ namespace SMEnterprise.Controllers
             OnlinePaymentModel _Payment = new OnlinePaymentModel();
 
             _Payment.Amount = Convert.ToInt32(oModel.ApplicableFee * 100);// Converted to paise
-
-            _Payment.ContactNumber = GetContactNumber(studentmodel, gateway);
-            _Payment.Name = studentmodel.Name;
-            _Payment.EmailID = GetPaymentEmail(studentmodel, gateway);
-            _Payment.Address = gateway?.Address;
-            _Payment.ImageUrl = GetBranchLogoUrl(gateway);
-
-
-            RazorpayClient client = new RazorpayClient(gateway.KeyId, gateway.Secret);
-
             _Payment.ContactNumber = studentmodel.FatherMobileNo;
             _Payment.Name = studentmodel.Name;
-            _Payment.EmailID = string.IsNullOrEmpty(studentmodel.EmailID) ? "cmps2016@gmail.com" : studentmodel.EmailID;
+            _Payment.EmailID = string.IsNullOrEmpty(studentmodel.EmailID) ? gateway.EmailID : studentmodel.EmailID;
 
 
-            RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
-
+           // RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
+                RazorpayClient client = new RazorpayClient(gateway.KeyId, gateway.Secret);
             Dictionary<string, object> options = new Dictionary<string, object>();
             options.Add("amount", _Payment.Amount);  // Amount will in paise         
             options.Add("receipt", transactionId);
             options.Add("currency", "INR");
             options.Add("payment_capture", "0"); // 1 - automatic  , 2 - manual
-
-                                                 
-
                                                  //options.Add("notes", "-- You can put any notes here --");
-
 
             Order order = client.Order.Create(options);
             Order orderResponse = client.Order.Create(options);
@@ -345,13 +205,10 @@ namespace SMEnterprise.Controllers
             OrderModel orderModel = new OrderModel
             {
                 PGOrderID = transactionId.ToString(),
-
+                //razorpaySecret = _razorpaySecret,
+                //razorpayKey = _razorpayKeyId,
                 razorpaySecret = gateway.Secret,
                 razorpayKey = gateway.KeyId,
-
-                razorpaySecret = _razorpaySecret,
-                razorpayKey = _razorpayKeyId,
-
                 Amount = _Payment.Amount,
                 currency = "INR",
                 OrderID = RazorpayOrderID,
@@ -359,18 +216,15 @@ namespace SMEnterprise.Controllers
                 EmailID = _Payment.EmailID,
                 ContactNumber = _Payment.ContactNumber,
                 Address = _Payment.Address,
-
-                ImageUrl = _Payment.ImageUrl,
-                Description = GetBranchDisplayName(gateway, SBranchID),
-
-                Description = "Chamba School Name",
-
+               // Description = "Chamba School Name",
+                Description = gateway.BranchSchoolName,
                 FeeMonth = oModel.FeeMonth,
                 FeeYear = oModel.FeeYear,
                 ApplicableFee = oModel.ApplicableFee,
                 StudentID = oModel.StudentID,
                 SessionID = studentmodel.SessionID,
                 SBranchID = SBranchID,
+                ImageUrl= gateway.ImageUrl,
                 // ── NEW ──────────────────────────────────────────────
                 IsMultiMonth = isMultiMonth,
                 SelectedMonthsJson = validatedMonthsJson
@@ -399,36 +253,20 @@ namespace SMEnterprise.Controllers
                 return hex;
             }
         }
-
-
-
-
         public ActionResult CreatePayment(Models.OnlinePaymentModel _Payment)
         {
-            // Generate random receipt number for order
-            Random randomObj = new Random();
-            string transactionId = Guid.NewGuid().ToString();
-
             int sBranchId = PermissionManager.GetLoggedInUser().SBranchID;
             var branch = GetBranchPaymentProfile(sBranchId);
             var gateway = GetRequiredBranchGateway(sBranchId);
+
+            // Generate random receipt number for order
+            Random randomObj = new Random();
+            string transactionId = Guid.NewGuid().ToString();
+           
+           // RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
             RazorpayClient client = new RazorpayClient(gateway.KeyId, gateway.Secret);
             Dictionary<string, object> options = new Dictionary<string, object>();
             options.Add("amount", _Payment.Amount);  // Amount will in paise
-
-
-            //Razorpay.Api.RazorpayClient client = new Razorpay.Api.RazorpayClient("rzp_live_FBGoyHexVX5cYl", "HGaoC579R4jHOdinBRwRJoVK");
-            Razorpay.Api.RazorpayClient client = new Razorpay.Api.RazorpayClient("rzp_test_TQjMHwtFMijJsT", "Untl4scpcYUcEysNp6S7BCoD");
-
-            Dictionary<string, object> options = new Dictionary<string, object>();
-            options.Add("amount", _Payment.Amount * 100);  // Amount will in paise
-
-            // Razorpay.Api.RazorpayClient client = new Razorpay.Api.RazorpayClient("rzp_test_xsUBcEJ9m0np5p", "aCtoOu3y7WibjJ4j3ckwV04V");
-            RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
-            Dictionary<string, object> options = new Dictionary<string, object>();
-            options.Add("amount", _Payment.Amount);  // Amount will in paise
-
-
             options.Add("receipt", transactionId);
             options.Add("currency", "INR");
             options.Add("payment_capture", "0"); // 1 - automatic  , 2 - manual
@@ -440,16 +278,8 @@ namespace SMEnterprise.Controllers
             OrderModel orderModel = new OrderModel
             {
                 PGOrderID = orderResponse.Attributes["id"],
-
+              //  razorpayKey = _razorpayKeyId,
                 razorpayKey = gateway.KeyId,
-
-
-                //razorpayKey = "rzp_live_FBGoyHexVX5cYl",
-                razorpayKey = "rzp_test_TQjMHwtFMijJsT",
-
-                razorpayKey = _razorpayKeyId,
-
-
                 Amount = _Payment.Amount * 100,
                 currency = "INR",
                 OrderID = _Payment.OrderID,
@@ -457,17 +287,9 @@ namespace SMEnterprise.Controllers
                 EmailID = _Payment.EmailID,
                 ContactNumber = _Payment.ContactNumber,
                 Address = _Payment.Address,
-
-                ImageUrl = _Payment.ImageUrl ?? GetBranchLogoUrl(branch),
-                Description = GetBranchDisplayName(branch, sBranchId),
-
-
-
-                Description = "School Name"
-
-                Description = "Chamba School Name",
-
-
+               // Description = "Chamba School Name",
+                Description = gateway.BranchSchoolName,
+               ImageUrl = gateway.ImageUrl
 
             };
             orderModel.Date = CommonUsage.GetCurrentDate();
@@ -476,13 +298,19 @@ namespace SMEnterprise.Controllers
             // Return on PaymentPage with Order data
             return View("PaymentPage", orderModel);
         }
-
         [HttpPost]
+       
         public ActionResult PaymentCallback(OrderModel objModel)
         {
+           
+
             string paymentId = Request.Form["razorpay_payment_id"];
             string OrderID = Request.Form["razorpay_order_id"];
             OrderModel originalOrder = accountData.GetOrderForPayment(OrderID);
+
+            int sBranchId = originalOrder.SBranchID;
+            var branch = GetBranchPaymentProfile(sBranchId);
+            var gateway = GetRequiredBranchGateway(sBranchId);
 
             // If the order doesn't exist, handle the error.
             if (originalOrder == null)
@@ -491,8 +319,8 @@ namespace SMEnterprise.Controllers
                 return RedirectToAction("Failed");
             }
             // 2. Verify the payment signature. This is a crucial security step.
-            RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
-
+          //  RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
+                RazorpayClient client = new RazorpayClient(gateway.KeyId, gateway.Secret);
             Razorpay.Api.Payment payment = client.Payment.Fetch(paymentId);
 
 
@@ -530,13 +358,9 @@ namespace SMEnterprise.Controllers
 
             decimal paidAmount = paidAmountInPaise / 100m;
             #region use for School Subscription Payment
-
-            // Subscription orders must exit here before student fee payment logic starts.
-
             // Detect subscription order (explicit flag or fallback StudentID==0)
             bool isSubscriptionOrder = (originalOrder != null &&
                 (originalOrder.IsSubscriptionOrder || (originalOrder.StudentID == 0 && originalOrder.SBranchID > 0)));
-
 
             if (isSubscriptionOrder)
             {
@@ -590,11 +414,8 @@ namespace SMEnterprise.Controllers
 
             FeePaymentRowModel result = accountData.SaveStudentFeePaymentOnline(feeModel);
 
-
-
             //hashSequence = _razorpayKeyId + "|" + OrderID + "|" + paidAmountInPaise + "|" + originalOrder.Name + "|" + originalOrder.EmailID + "|" + originalOrder.Description + "|" + om.StudentID + "|" + om.FeeMonth + "|" + om.FeeYear + "|" + om.PGPaymentID + "|" + _razorpaySecret;
             // string generatedHash = GenerateSha256(hashSequence);
-
 
 
             // ── 7. Mark order as successful in OrderMaster ───────────
@@ -609,8 +430,11 @@ namespace SMEnterprise.Controllers
         }
 
         [HttpPost]
+
         public ActionResult Complete(OrderModel objModel)
         {
+           
+
             // Payment data comes in url so we have to get it from url
             if (TempData["OrderDetails"] != null)
             {
@@ -622,15 +446,6 @@ namespace SMEnterprise.Controllers
 
             // This is orderId
             string orderId = Request.Form["rzp_orderid"];
-
-
-
-
-            //Razorpay.Api.RazorpayClient client = new Razorpay.Api.RazorpayClient("rzp_live_CCauQAKB8bFLSZ", "DiQ1NJl5XEDBXDUwzdW2kDsa");
-            //Razorpay.Api.RazorpayClient client = new Razorpay.Api.RazorpayClient("rzp_live_FBGoyHexVX5cYl", "HGaoC579R4jHOdinBRwRJoVK");
-            Razorpay.Api.RazorpayClient client = new Razorpay.Api.RazorpayClient("rzp_test_TQjMHwtFMijJsT", "Untl4scpcYUcEysNp6S7BCoD");
-
-
 
             // Fetch original order record (must exist)
             var originalOrder = accountData.GetOrderForPayment(orderId);
@@ -640,36 +455,25 @@ namespace SMEnterprise.Controllers
                 TempData["PaymentError"] = "Order not found.";
                 return RedirectToAction("Failed");
             }
+            int sBranchId = originalOrder.SBranchID;
+            var branch = GetBranchPaymentProfile(sBranchId);
+            var gateway = GetRequiredBranchGateway(sBranchId);
 
+            bool isSubscriptionOrder = (originalOrder != null &&
+                (originalOrder.IsSubscriptionOrder || (originalOrder.StudentID == 0 && originalOrder.SBranchID > 0)));
 
-            // Explicit subscription flag decides whether this payment must go to ERP subscription handling.
-            bool isSubscriptionOrder = originalOrder != null && originalOrder.IsSubscriptionOrder;
+            // Determine credentials to use. Subscription payments use the ERP/system gateway.
+          //  string keyToUse = _razorpayKeyId;
+           // string secretToUse = _razorpaySecret;
+            string keyToUse = gateway.KeyId;
+            string secretToUse = gateway.Secret;
 
-            string keyToUse;
-            string secretToUse;
             if (isSubscriptionOrder)
             {
-                var gw = GetRequiredSystemGateway();
-                keyToUse = gw.RazorpayKeyId;
-                secretToUse = gw.RazorpaySecret;
-
-
-            // Determine credentials to use: prefer order's saved key, then branch gateway, then controller defaults.
-            string keyToUse = _razorpayKeyId;
-            string secretToUse = _razorpaySecret;
-
-            // If order contains a stored razorpayKey (set when creating the order), use it.
-            if (!string.IsNullOrWhiteSpace(originalOrder.razorpayKey))
-            {
-                keyToUse = originalOrder.razorpayKey;
-            }
-            else
-            {
-                // fallback to branch gateway if configured
                 try
                 {
-                    var gw = accountData.GetBranchGateway(originalOrder.SBranchID);
-                    if (gw != null && gw.UseForSubscription
+                    var gw = accountData.GetSystemPaymentGateway();
+                    if (gw != null && gw.IsActive && gw.UseForSubscription
                         && !string.IsNullOrWhiteSpace(gw.RazorpayKeyId)
                         && !string.IsNullOrWhiteSpace(gw.RazorpaySecret))
                     {
@@ -677,11 +481,12 @@ namespace SMEnterprise.Controllers
                         secretToUse = gw.RazorpaySecret;
                     }
                 }
-                catch { /* ignore */ }
+                catch { /* use configured controller defaults */ }
             }
-
-            // If running locally and original order used test keys you may have set test keys when creating the order.
-            // (No change here — using originalOrder.razorpayKey ensures the same key is used)
+            else if (!string.IsNullOrWhiteSpace(originalOrder.razorpayKey))
+            {
+                keyToUse = originalOrder.razorpayKey;
+            }
 
             // Create client with the selected credentials
             RazorpayClient client;
@@ -725,192 +530,6 @@ namespace SMEnterprise.Controllers
                 // Convert to rupees
                 decimal paidAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100m;
 
-                // Check if subscription order
-                bool isSubscriptionOrder = (originalOrder != null &&
-                    (originalOrder.IsSubscriptionOrder || (originalOrder.StudentID == 0 && originalOrder.SBranchID > 0)));
-
-                if (isSubscriptionOrder)
-                {
-                    // handle subscription: mark branch paid, update order, clear session
-                    return HandleSubscriptionPayment(orderId, originalOrder, paymentId, paidAmount);
-                }
-
-                // existing student payment flow (unchanged)
-                if (paymentCaptured.Attributes["status"] == "captured")
-                {
-                    // Build FeeModel using originalOrder (secure)
-                    FeePaymentModel FeeModel = new FeePaymentModel();
-                    FeeModel.SBranchID = originalOrder.SBranchID;
-                    FeeModel.StudentID = originalOrder.StudentID;
-                    FeeModel.SessionID = originalOrder.SessionID;
-                    FeeModel.FeeAmount = originalOrder.Amount;
-                    FeeModel.FeePaymentMode = 3;
-                    FeeModel.PaymentAmount = paidAmount;
-                    FeeModel.ReferanceNumber = paymentId;
-                    FeeModel.Remark = "Paid by PaymentGateway";
-                    FeeModel.Month = originalOrder.FeeMonth;
-                    FeeModel.Year = originalOrder.FeeYear;
-
-                    accountData.UpdateOrderStatus(paymentId, originalOrder.StudentID.ToString(), originalOrder.SessionID.ToString(), FeeModel.ReferanceNumber, 1);
-                    FeePaymentRowModel objData = accountData.SaveStudentFeePaymentOnline(FeeModel);
-
-                    return RedirectToAction("Success", new { ID = orderId });
-                }
-                else
-                {
-                    accountData.UpdateOrderStatus(paymentId, originalOrder.StudentID.ToString(), originalOrder.SessionID.ToString(), "Failed", -1);
-                    return RedirectToAction("Failed");
-                }
-            }
-            catch (Razorpay.Api.Errors.BadRequestError bre)
-            {
-                System.Diagnostics.Debug.WriteLine("Razorpay capture error: " + bre);
-                TempData["PaymentError"] = "Payment capture failed: " + bre.Message;
-                return RedirectToAction("Failed");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Razorpay capture unexpected error: " + ex);
-                TempData["PaymentError"] = "Payment capture failed.";
-                return RedirectToAction("Failed");
-            }
-
-            /*
-            // Payment data comes in url so we have to get it from url
-            if (TempData["OrderDetails"] != null)
-            {
-                objModel = (OrderModel)TempData["OrderDetails"];
-            }
-
-            // This id is razorpay unique payment id which can be use to get the payment details from razorpay server
-            string paymentId = Request.Form["rzp_paymentid"];
-
-            // This is orderId
-            string orderId = Request.Form["rzp_orderid"];
-
-            //  Razorpay.Api.RazorpayClient client = new Razorpay.Api.RazorpayClient("rzp_test_xsUBcEJ9m0np5p", "aCtoOu3y7WibjJ4j3ckwV04V");
-            RazorpayClient client = new RazorpayClient(_razorpayKeyId, _razorpaySecret);
-
-            Razorpay.Api.Payment payment = client.Payment.Fetch(paymentId);
-
-            // This code is for capture the payment
-            Dictionary<string, object> options = new Dictionary<string, object>();
-            options.Add("amount", payment.Attributes["amount"]);
-            Razorpay.Api.Payment paymentCaptured = payment.Capture(options);
-            string amt = paymentCaptured.Attributes["amount"];
-            int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            //// Check payment made successfully
-
-
-            ///
-            var originalOrder = accountData.GetOrderForPayment(orderId); // fetch persisted order
-            decimal paidAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100m;
-            
-
-
-            if (paymentCaptured.Attributes["status"] == "captured")
-            {
-                OrderModel om = new OrderModel();
-
-
-                FeePaymentModel FeeModel = new FeePaymentModel();
-
-                om.PGOrderID = orderId;
-                om.PGPaymentID = paymentId;
-                om.Status = 1;
-                om.FeeMonth = objModel.FeeMonth;
-                om.FeeYear = objModel.FeeYear;
-                //om.ApplicableFee = objModel.ApplicableFee;
-
-                om.PaymentAmount = objModel.ApplicableFee;
-
-                om.PaymentAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100;
-
-                om.StudentID = objModel.StudentID;
-                om.SBranchID = SBranchID;
-                om.PaymentMode = 3;
-                om.QDate = CommonUsage.GetCurrentDate();
-                om.CurDate = CommonUsage.GetCurrentDate();
-                om.PaymentDate = CommonUsage.GetCurrentDate();
-
-
-                AccountData accountData = new AccountData();
-                accountData.UpdateStudentFeePaymentStatus(om);
-                return RedirectToAction("Success", new { ID = orderId });
-
-
-                FeeModel.SBranchID = SBranchID;
-                FeeModel.StudentID = objModel.StudentID;
-                FeeModel.SessionID = objModel.SessionID;
-                FeeModel.FeeAmount = objModel.ApplicableFee;
-                FeeModel.FeePaymentMode = 3;
-                FeeModel.PaymentAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100;
-                FeeModel.ReferanceNumber = paymentId;
-                FeeModel.Remark = "Paid by PaymentGateway";
-                FeeModel.Month = objModel.FeeMonth;
-                FeeModel.Year = objModel.FeeYear;
-                int Status = 1;
-
-
-                accountData.UpdateOrderStatus(paymentId, objModel.StudentID.ToString(), objModel.SessionID.ToString(), FeeModel.ReferanceNumber, Status);
-                FeePaymentRowModel objData = accountData.SaveStudentFeePaymentOnline(FeeModel);
-                // accountData.UpdateStudentFeePaymentStatus(om);
-                return RedirectToAction("Success", new { ID = orderId });
-                // return View("Parent/FeeSummery");
-
-
-            }
-            else
-            {
-                var gw = GetRequiredBranchGateway(originalOrder.SBranchID);
-                keyToUse = gw.KeyId;
-                secretToUse = gw.Secret;
-            }
-
-            // Create client with the selected credentials
-            RazorpayClient client;
-            try
-            {
-                client = new RazorpayClient(keyToUse, secretToUse);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Razorpay client init failed: " + ex);
-                TempData["PaymentError"] = "Payment gateway initialization failed.";
-                return RedirectToAction("Failed");
-            }
-
-            // Fetch payment from Razorpay using the same merchant account used to create the order
-            Razorpay.Api.Payment payment;
-            try
-            {
-                payment = client.Payment.Fetch(paymentId);
-            }
-            catch (Razorpay.Api.Errors.BadRequestError bre)
-            {
-                System.Diagnostics.Debug.WriteLine("Razorpay fetch error: " + bre);
-                TempData["PaymentError"] = "Payment retrieval failed: " + bre.Message;
-                return RedirectToAction("Failed");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine("Razorpay fetch unexpected error: " + ex);
-                TempData["PaymentError"] = "Payment retrieval failed.";
-                return RedirectToAction("Failed");
-            }
-
-
-            // Capture the payment
-            try
-            {
-                Dictionary<string, object> options = new Dictionary<string, object>();
-                options.Add("amount", payment.Attributes["amount"]);
-                Razorpay.Api.Payment paymentCaptured = payment.Capture(options);
-
-                // Convert to rupees
-                decimal paidAmount = Convert.ToDecimal(paymentCaptured.Attributes["amount"]) / 100m;
-
-                // Subscription orders must exit here before student fee payment save/capture logic starts.
                 if (isSubscriptionOrder)
                 {
                     // handle subscription: mark branch paid, update order, clear session
@@ -960,25 +579,11 @@ namespace SMEnterprise.Controllers
            
         }
 
-
-
-        }
-
-            */
-        }
-
-
-
         public ActionResult Success(string ID = null)
         {
             ViewBag.orderID = ID;
             return View();
         }
-
-
-
-
-
 
         [HttpPost]
         public ActionResult ProcessPayment()
@@ -996,18 +601,22 @@ namespace SMEnterprise.Controllers
 
 
         [HttpGet]
-
-        public ActionResult Subscribe(int branchId)
+        public ActionResult Subscribe(int branchId, string paymentType = null)
         {
-            var accountData = new AccountData();
-            var sub = accountData.GetBranchSubscription(branchId);
-            if (sub == null || !sub.IsDue || sub.DueAmount <= 0m)
 
+            string keyToUse;
+            string secretToUse;
+
+            var accountData = new AccountData();
+            var systemGateway = accountData.GetSystemPaymentGateway();
+
+            var sub = accountData.GetBranchSubscription(branchId);
+            var dueAmount = sub == null ? 0m : (sub.NextDueAmount > 0m ? sub.NextDueAmount : sub.DueAmount);
+            if (sub == null || !sub.IsDue || dueAmount <= 0m)
             {
                 TempData["Message"] = "No subscription due for this branch.";
                 return RedirectToAction("Dashboard", "Admin");
             }
-
 
             var canPayPartial = CanPaySubscriptionPartial(sub);
             var minimumPartialAmount = canPayPartial ? GetMinimumSubscriptionPartialAmount(sub, dueAmount) : dueAmount;
@@ -1022,29 +631,6 @@ namespace SMEnterprise.Controllers
                 Amount = Convert.ToInt32(payableAmount * 100),
                 currency = "INR",
                 OrderID = "",
-                Name = GetBranchDisplayName(branch, branchId),
-                EmailID = !string.IsNullOrWhiteSpace(branch?.EmailID) ? branch.EmailID : (PermissionManager.GetLoggedInUser()?.EmailID ?? ""),
-                ContactNumber = branch?.ContactNo ?? "",
-                Address = branch?.Address,
-                ImageUrl = GetBranchLogoUrl(branch),
-                Description = "Subscription Payment - " + GetBranchDisplayName(branch, branchId),
-                StudentID = 0,
-                SessionID = 0,
-                SBranchID = branchId,
-                ApplicableFee = payableAmount,
-                IsSubscriptionOrder = true
-            };
-
-            var systemGateway = GetRequiredSystemGateway();
-            var keyToUse = systemGateway.RazorpayKeyId;
-            var secretToUse = systemGateway.RazorpaySecret;
-
-            var orderModel = new OrderModel
-            {
-                PGOrderID = Guid.NewGuid().ToString(),
-                Amount = Convert.ToInt32(sub.DueAmount * 100),
-                currency = "INR",
-                OrderID = "",
                 Name = "ERP Subscription",
                 EmailID = PermissionManager.GetLoggedInUser()?.EmailID ?? "info@prabhutisystems.com",
                 ContactNumber = "",
@@ -1052,43 +638,32 @@ namespace SMEnterprise.Controllers
                 StudentID = 0,
                 SessionID = 0,
                 SBranchID = branchId,
-                ApplicableFee = sub.DueAmount,
+                ApplicableFee = payableAmount,
                 IsSubscriptionOrder = true
             };
 
-            // choose credentials (branch gateway preferred)
-            var branchGateway = accountData.GetBranchGateway(branchId);
-            var keyToUse = _razorpayKeyId;
-            var secretToUse = _razorpaySecret;
-            if (branchGateway != null && branchGateway.UseForSubscription
-                && !string.IsNullOrWhiteSpace(branchGateway.RazorpayKeyId)
-                && !string.IsNullOrWhiteSpace(branchGateway.RazorpaySecret))
-            {
-                keyToUse = branchGateway.RazorpayKeyId;
-                secretToUse = branchGateway.RazorpaySecret;
-            }
-
-            // Force test keys when running on localhost (avoid live-key domain restrictions)
+            // Subscription payments use the ERP/system gateway, not a school branch gateway.
+            
             try
             {
-                var host = (Request?.Url?.Host ?? string.Empty).ToLowerInvariant();
-                var remote = (Request?.UserHostAddress ?? string.Empty);
-                if (host.Contains("localhost") || host.StartsWith("127.") || host == "::1" || remote.StartsWith("127."))
+               
+                if (systemGateway != null && systemGateway.IsActive && systemGateway.UseForSubscription
+                    && !string.IsNullOrWhiteSpace(systemGateway.RazorpayKeyId)
+                    && !string.IsNullOrWhiteSpace(systemGateway.RazorpaySecret))
                 {
-                    // use your Razorpay test key/secret here
-                    keyToUse = "rzp_test_SVjpRhPX8rg8eE";
-                    secretToUse = "naE50maGmFhq8XFTUF3fHDzE";
+                    keyToUse = systemGateway.RazorpayKeyId;
+                    secretToUse = systemGateway.RazorpaySecret;
                 }
             }
-            catch { /* ignore */ }
-
+            catch { /* use configured controller defaults */ }
 
             // IMPORTANT: set the key you will send to the client so checkout uses the same key
-            orderModel.razorpayKey = keyToUse;
+            orderModel.razorpayKey = systemGateway.RazorpayKeyId;
             // Do NOT include secret in the view; we only use it server-side.
             orderModel.razorpaySecret = null;
 
-            var client = new RazorpayClient(keyToUse, secretToUse);
+          //  var client = new RazorpayClient(keyToUse, secretToUse);
+                var client = new RazorpayClient(systemGateway.RazorpayKeyId, systemGateway.RazorpaySecret);
             var options = new Dictionary<string, object>
     {
         { "amount", orderModel.Amount },
@@ -1116,27 +691,21 @@ namespace SMEnterprise.Controllers
             accountData.InsertOrderID(orderModel);
 
             ViewBag.OrderDetails = orderModel;
-
             ViewBag.SubscriptionDueAmount = dueAmount;
             ViewBag.SubscriptionCanPayPartial = canPayPartial;
             ViewBag.SubscriptionMinimumPartialAmount = minimumPartialAmount;
             ViewBag.SubscriptionPaymentType = payableAmount >= dueAmount ? "full" : "partial";
-
-
             return View("SubscribeCheckout", orderModel);
         }
         private ActionResult HandleSubscriptionPayment(string orderId, OrderModel originalOrder, string paymentId, decimal paidAmount)
         {
             try
             {
-
                 if (originalOrder.ApplicableFee > 0m && paidAmount < originalOrder.ApplicableFee)
                 {
                     TempData["PaymentError"] = "Paid amount is less than the required subscription amount.";
                     return RedirectToAction("Failed");
                 }
-
-
 
                 // paidAmount is in rupees (not paise)
                 accountData.MarkBranchSubscriptionPaid(originalOrder.SBranchID, paidAmount, paymentId, PermissionManager.GetLoggedInUser()?.UserID);
@@ -1172,7 +741,6 @@ namespace SMEnterprise.Controllers
             }
         }
 
-
         private bool CanPaySubscriptionPartial(SMEnterprise.Models.BranchSubscriptionModel sub)
         {
             return sub.AllowPartialPayment
@@ -1202,8 +770,5 @@ namespace SMEnterprise.Controllers
 
             return GetMinimumSubscriptionPartialAmount(sub, dueAmount);
         }
-
-
-
     }
 }
