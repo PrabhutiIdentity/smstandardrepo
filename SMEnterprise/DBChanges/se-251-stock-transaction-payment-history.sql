@@ -245,13 +245,17 @@ BEGIN
     ORDER BY PaymentDate DESC, StockPaymentID DESC;
 
     UPDATE dbo.StockTransactionMaster
-    SET Status = 1,
+    SET Status = CASE WHEN @ActivePaidAmount <= 0 THEN 0 ELSE 1 END,
         PaidAmount = @ActivePaidAmount,
         DueAmount = @DueAmount,
         PaymentStatus = @PaymentStatus,
         PaymentMode = ISNULL(@PaymentMode, PaymentMode),
         PaymentReferanceNo = ISNULL(@PaymentReferanceNo, ''),
-        PaymentDate = ISNULL(@PaymentDate, PaymentDate)
+        PaymentDate = ISNULL(@PaymentDate, PaymentDate),
+        CancelRemark = CASE
+            WHEN @ActivePaidAmount <= 0 THEN ISNULL(@CancelRemark, '')
+            ELSE ISNULL(CancelRemark, '')
+        END
     WHERE STID = @STID
       AND SBranchID = @SBranchID;
 

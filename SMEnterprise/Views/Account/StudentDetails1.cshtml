@@ -1953,15 +1953,20 @@
  function SchoolSessionChanged(sender) {
      $('#txtStartDate').val($('#ddlSchoolSessions option:selected').attr('startDate'));
      $('#txtEndDate').val($('#ddlSchoolSessions option:selected').attr('endDate'));
+     var classId = $('#ddlSessionEditClass').val();
+     if (classId && classId !== '0') {
+         SessionClassChanged($('#ddlSessionEditClass')[0]);
+     }
  }
 
  function SessionClassChanged(sender) {
      $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>')
 
      $('#ddlSections').html('<option value="-1">Loading....</option>');
+     var sessionId = $('#ddlSchoolSessions').val();
      $.ajax({
          type: "POST",
-         url: "/Account/GetSectionOnClass/" + $(sender).val(),
+         url: "/Account/GetSessionSectionsOnClass/" + $(sender).val() + "/" + sessionId,
          cache: false,
          processData: false,
          contentType: false,

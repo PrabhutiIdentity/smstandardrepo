@@ -1,3 +1,5 @@
+-- Duplicate session Restricated 
+
 ALTER PROCEDURE [dbo].[spn_InsertUpdateStudentSessionDetails]
 (
     @StudentSessionUID int,
@@ -103,4 +105,114 @@ BEGIN
     SELECT @StudentSessionUID, ID
     FROM @OptedSubjects
     WHERE Extra2 = 1;
+END
+
+-- Optional Subject regarding
+-- Promotion ke baad selected students ke newly created target StudentSessionUID me optional subjects auto-copy honge.
+-- Add New Session me bhi auto-copy hoga, lekin sirf jab user ne optional subject manually select/unselect nahi kiya ho. 
+go
+CREATE OR ALTER PROCEDURE usp_GetLatestStudentSessionUID
+    @StudentID INT,
+    @SBranchID INT,
+    @SessionID INT,
+    @ClassID INT,
+    @SectionID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT TOP 1 StudentSessionUID
+    FROM dbo.Student_Session
+    WHERE StudentID = @StudentID
+      AND SBranchID = @SBranchID
+      AND SessionID = @SessionID
+      AND ClassID = @ClassID
+      AND SectionID = @SectionID
+    ORDER BY StudentSessionUID DESC;
+END
+
+go
+
+CREATE OR ALTER PROCEDURE usp_CopyOptionalSubjectsFromPreviousMatchingSession
+    @TargetStudentSessionUID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- 1. Check if targets already exist to prevent duplicate copies
+    IF EXISTS
+    (
+        SELECT 1
+        FROM dbo.Student_Session_OptionalSubjects
+        WHERE StudentSessionID = @TargetStudentSessionUID
+    )
+    BEGIN
+        RETURN;
+    END;
+
+    DECLARE @StudentID INT,
+            @SBranchID INT,
+            @ClassID INT,
+            @SectionID INT,
+            @FromDate DATE,
+            @EducationLevelID INT,
+            @GroupID INT,
+            @SourceStudentSessionUID INT;
+
+    -- 2. Fetch basic session tracking details
+    SELECT
+        @StudentID = SS.StudentID,
+        @SBranchID = SS.SBranchID,
+        @ClassID = SS.ClassID,
+        @SectionID = SS.SectionID,
+        @FromDate = SS.FromDate
+    FROM dbo.Student_Session SS
+    WHERE SS.StudentSessionUID = @TargetStudentSessionUID;
+
+    -- 3. Extract Meta filters for mapping comparison
+    SELECT @EducationLevelID = CM.EducationLevelID
+    FROM dbo.ClassMaster CM
+    WHERE CM.ClassID = @ClassID;
+
+    SELECT @GroupID = CS.GroupID
+    FROM dbo.Class_Sections CS
+    WHERE CS.ID = @SectionID;
+
+    -- 4. Find the most appropriate source timeline session
+    SELECT TOP 1 @SourceStudentSessionUID = PSS.StudentSessionUID
+    FROM dbo.Student_Session PSS
+    INNER JOIN dbo.ClassMaster PCM ON PCM.ClassID = PSS.ClassID
+    INNER JOIN dbo.Class_Sections PCS ON PCS.ID = PSS.SectionID
+    INNER JOIN dbo.Student_Session_OptionalSubjects PSOS ON PSOS.StudentSessionID = PSS.StudentSessionUID
+    WHERE PSS.StudentID = @StudentID
+      AND PSS.SBranchID = @SBranchID
+      AND PSS.StudentSessionUID <> @TargetStudentSessionUID
+      AND ISNULL(PCM.EducationLevelID, 0) = ISNULL(@EducationLevelID, 0)
+      AND ISNULL(PCS.GroupID, 0) = ISNULL(@GroupID, 0)
+      AND PSS.FromDate <= @FromDate
+    ORDER BY PSS.ToDate DESC, PSS.StudentSessionUID DESC;
+
+    -- 5. Terminate process safely if no match history found
+    IF ISNULL(@SourceStudentSessionUID, 0) = 0
+    BEGIN
+        RETURN;
+    END;
+
+    -- 6. Direct bulk migration for optional mapped structures
+    INSERT INTO dbo.Student_Session_OptionalSubjects (StudentSessionID, OpSubjectID)
+    SELECT DISTINCT @TargetStudentSessionUID, PSOS.OpSubjectID
+    FROM dbo.Student_Session_OptionalSubjects PSOS
+    INNER JOIN dbo.SubjectMasterT SMT
+        ON SMT.SubjectID = PSOS.OpSubjectID
+       AND ISNULL(SMT.GroupID, 0) = ISNULL(@GroupID, 0)
+       AND ISNULL(SMT.IsOptionalsubject, 0) = 1
+       AND ISNULL(SMT.Status, 1) = 1
+    WHERE PSOS.StudentSessionID = @SourceStudentSessionUID
+      AND NOT EXISTS
+      (
+          SELECT 1
+          FROM dbo.Student_Session_OptionalSubjects TSOS
+          WHERE TSOS.StudentSessionID = @TargetStudentSessionUID
+            AND TSOS.OpSubjectID = PSOS.OpSubjectID
+      );
 END

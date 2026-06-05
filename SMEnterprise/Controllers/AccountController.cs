@@ -507,15 +507,7 @@ namespace SMEnterprise.Controllers
             return PartialView("_SessionEditPartial", objModel);
         }
         [PermissionFilter]
-        /*  public ActionResult SaveStudentSession(SessionModel objData)
-          {
-              objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
 
-              objAccountData.UpdateStudentSession(objData);
-
-              return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
-          }
-        */
         private bool HasOverlappingStudentSession(SessionModel objData, int sBranchID)
         {
             var studentDetails = objAccountData.GetStudentDetailsNew(objData.StudentID, sBranchID);
@@ -530,8 +522,24 @@ namespace SMEnterprise.Controllers
         public ActionResult SaveStudentSession(SessionModel objData, int IsNewSessionRequest = 0)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objData.IsNewSessionRequest = IsNewSessionRequest;
-            if (IsNewSessionRequest == 1 && HasOverlappingStudentSession(objData, objData.SBranchID))
+            if (objData.Status == 0)
+            {
+                if (string.IsNullOrWhiteSpace(objData.ReasonforInactive))
+                {
+                    TempData["SessionSaveMessage"] = "Please enter inactive reason.";
+                    return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
+                }
+
+                DateTime currentDate = CommonUsage.GetCurrentDate().Date;
+                if (objData.ToDate.Year == 1 || objData.ToDate.Date > currentDate)
+                {
+                    objData.ToDate = currentDate;
+                }
+            }
+
+            bool isNewSessionRequest = objData.StudentSessionUID == 0;
+            objData.IsNewSessionRequest = isNewSessionRequest ? 1 : 0;
+            if (isNewSessionRequest && HasOverlappingStudentSession(objData, objData.SBranchID))
             {
                 TempData["SessionSaveMessage"] = "Same session/date range already exists for this student. New session was not added.";
                 return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
@@ -605,6 +613,12 @@ namespace SMEnterprise.Controllers
             //}
             if (objData.OpType == -1)
             {
+                if (objAccountData.HasPaidTransportFeeForAllocation(objData.UserID, objData.THChangeID, objData.SBranchID))
+                {
+                    TempData["TransportSaveMessage"] = "Transport fee payment exists for this allocation. Please stop transport instead of removing it.";
+                    return Redirect("~/Account/StudentDetails/" + objData.UserID + "/" + 7);
+                }
+
                 objData.StartDate = CommonUsage.GetCurrentDate();
                 objData.EndDate = CommonUsage.GetCurrentDate();
             }
@@ -891,6 +905,9 @@ namespace SMEnterprise.Controllers
                 //}
                 objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
                 objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                objModel.PaymentDate = CommonUsage.GetCurrentDate();
+                objModel.FeeDate = objModel.PaymentDate;
+                objModel.QDate = objModel.PaymentDate;
                 objModel.Day = objModel.QDate.Day;
                 FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
 
@@ -1716,6 +1733,17 @@ namespace SMEnterprise.Controllers
         {
             int ID = CommonUsage.ConvertToInt(id);
             IEnumerable<SectionModel> objModel = objAdminData.GetSectionsOnClass(ID);
+
+            return PartialView("_SectionOptionsPartial", objModel);
+        }
+        [PermissionFilter]
+        public ActionResult GetSessionSectionsOnClass(string id = null, string id2 = null)
+        {
+            int classID = CommonUsage.ConvertToInt(id);
+            int sessionID = CommonUsage.ConvertToInt(id2);
+            IEnumerable<SectionModel> objModel = sessionID > 0
+                ? objAdminData.GetClassSections(classID, -1, sessionID)
+                : objAdminData.GetSectionsOnClass(classID);
 
             return PartialView("_SectionOptionsPartial", objModel);
         }
