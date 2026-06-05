@@ -3,28 +3,9 @@
     <div class="row">
         @using (Html.BeginForm("SaveStudentSession", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents", @class = "form-horizontal form-label-left" }))
         {
-
-            @*<div class="col-md-12">
-
-
-                <div class="col-md-12">
-
-                    <label class="control-label col-md-12 col-sm-3 col-xs-12" style="text-align: center;font-size: 22px;padding-bottom: 8px;">Session Details</label>
-                </div>*@
-            <input type="hidden" name="StudentID" value="@Model.StudentID" />
-
-            <input type="hidden" id="hdnStudentSessionUID" name="StudentSessionUID" value="@Model.Session.StudentSessionUID" />
-            <input type="hidden" id="hdnIsNewSessionRequest" name="IsNewSessionRequest" value="@(ViewBag.IsNewSessionRequest ?? 0)" />
-
-            <input type="hidden" name="StudentSessionUID" value="@Model.Session.StudentSessionUID" />
-
-            @*<div class="col-md-12">
-                    <label class="control-label col-md-12 col-sm-3 col-xs-12" style="text-align: center;font-size: 22px;padding-bottom: 8px;">Session Details</label>
-                </div>*@
             <input type="hidden" name="StudentID" value="@Model.StudentID" />
             <input type="hidden" id="hdnStudentSessionUID" name="StudentSessionUID" value="@Model.Session.StudentSessionUID" />
-
-
+            <input type="hidden" id="hdnIsNewSessionRequest" name="IsNewSessionRequest" value="@(Model.Session.StudentSessionUID == 0 ? 1 : 0)" />
 
             <div class="row">
                 <div class="col-md-6">
@@ -55,9 +36,10 @@
                     <label class="control-label col-md-4 col-sm-3 col-xs-12">Class : </label>
                     <div class="col-md-8 col-sm-9 col-xs-12 input-group">
                         <select class="form-control" id="ddlSessionEditClass" name="ClassID" onchange="SessionClassChanged(this);">
+                            <option value="0" @(Model.Session.StudentSessionUID == 0 || Model.Session.ClassID == 0 ? "selected" : "")>--Select Class--</option>
                             @foreach (var q in Model.Classes)
                             {
-                                <option value="@q.ID" @(Model.Session.ClassID == q.ID ? "selected" : "")>@q.Name</option>
+                                <option value="@q.ID" @(Model.Session.StudentSessionUID != 0 && Model.Session.ClassID == q.ID ? "selected" : "")>@q.Name</option>
                             }
                         </select>
                     </div>
@@ -66,9 +48,10 @@
                     <label class="control-label col-md-4 col-sm-3 col-xs-12">Section : </label>
                     <div class="col-md-8 col-sm-9 col-xs-12 input-group">
                         <select class="form-control" name="SectionID" id="ddlSections" onchange="SessionSectionChanged(this);">
+                            <option value="0" @(Model.Session.StudentSessionUID == 0 || Model.Session.SectionID == 0 ? "selected" : "")>--Select--</option>
                             @foreach (var q in Model.Sections)
                             {
-                                <option value="@q.ID" @(Model.Session.SectionID == q.ID ? "selected" : "")>@q.Name</option>
+                                <option value="@q.ID" @(Model.Session.StudentSessionUID != 0 && Model.Session.SectionID == q.ID ? "selected" : "")>@q.Name</option>
                             }
                         </select>
                     </div>
@@ -124,16 +107,8 @@
                     </div>
                 </div>
                 <div class="form-group col-md-6">
-                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Approved : </label>
+                    <label class="control-label col-md-4 col-sm-3 col-xs-12">Admission Fee : </label>
                     <div class="col-md-8 col-sm-9 col-xs-12 input-group">
-                        <label class="switch switch-green">
-                            <input type="checkbox" class="switch-input" @(Model.Session.Status == 1 ? "checked" : "" )>
-                            @*<span class="switch-label" onclick="$(this).closest('div').find('#hdnSessionStatus').val($(this).closest('label').find('#hdnSessionStatus').val() == '0' ? '1' : '0');" data-on="Active" data-off="Inactive"></span>*@
-                            <span class="switch-label" onclick="StatusChanged(this);" data-on="Active" data-off="Inactive"></span>
-                            <span class="switch-handle" id="shTranding"></span>
-                            <input type="hidden" name="Status" id="hdnSessionStatus" value="@Model.Session.Status">
-                        </label>
-                        Admission Fee :
                         <label class="switch switch-green" style="width: 115px;padding:0px">
                             <input type="checkbox" class="switch-input" @(Model.Session.IsAdmissionFeeApplicable == 1 ? "checked" : "" )>
                             <span class="switch-label" onclick="$(this).closest('label').find('#hdnAdmissionFee').val($(this).closest('label').find('#hdnAdmissionFee').val() == '0' ? '1' : '0');" data-on="Applicable" data-off="Not Applicable"></span>
@@ -152,26 +127,27 @@
                             <div class="col-md-12" style="padding-top: 5px;" id="divOptionalSubjects">
                                 @{
                                     var cnt = 0;
-                                    var atlest = ((List<SMEnterprise.Models.NameIDModel>)Model.OptionalSubjects).Where(x => x.Extra1 != "0").Count();
                                     foreach (var subs in Model.OptionalSubjects)
                                     {
-                                        if ("0" != subs.Extra1 || atlest == 0)
+                                        if ("0" != subs.Extra1)
                                         {
                                             <label class='badge bg-green OptedSubjects' onclick="OptionalSubjectClicked(this);" title="Student Opted for this subject">
                                                 <input type="hidden" id="hdnSSOSID" name="SubjectsOpted[@cnt].Extra1" value="@subs.Extra1" />
                                                 <input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[@cnt].ID" value="@subs.ID" />
                                                 <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[@cnt].Name" value="@Model.Session.StudentSessionUID" />
                                                 <input type="hidden" id="hdnOpType" name="SubjectsOpted[@cnt].Extra2" value="1" />
+                                                <input type="hidden" id="hdnOpManual" name="SubjectsOpted[@cnt].Extra3" value="0" />
                                                 @subs.Name
                                             </label>
                                         }
                                         else
                                         {
-                                            <label class='badge bg-red OptedSubjects' onclick="OptionalSubjectClicked(this);" title="This subject is not opted">
+                                            <label class='badge bg-orange OptedSubjects' onclick="OptionalSubjectClicked(this);" title="No selection made for this subject">
                                                 <input type="hidden" id="hdnSSOSID" name="SubjectsOpted[@cnt].Extra1" value="0" />
                                                 <input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[@cnt].ID" value="@subs.ID" />
                                                 <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[@cnt].Name" value="@Model.Session.StudentSessionUID" />
                                                 <input type="hidden" id="hdnOpType" name="SubjectsOpted[@cnt].Extra2" value="0" />
+                                                <input type="hidden" id="hdnOpManual" name="SubjectsOpted[@cnt].Extra3" value="0" />
                                                 @subs.Name
                                             </label>
                                         }
@@ -183,6 +159,18 @@
                     </div>
                 </div>
                 <div class="form-group col-md-6">
+                    <div class="col-md-12" style="padding-bottom: 10px;">
+                        <label class="control-label col-md-4 col-sm-3 col-xs-12">Status : </label>
+                        <div class="col-md-8 col-sm-9 col-xs-12 input-group">
+                            <label class="switch switch-green">
+                                <input type="checkbox" class="switch-input" @(Model.Session.Status == 1 ? "checked" : "" )>
+                                @*<span class="switch-label" onclick="$(this).closest('div').find('#hdnSessionStatus').val($(this).closest('label').find('#hdnSessionStatus').val() == '0' ? '1' : '0');" data-on="Active" data-off="Inactive"></span>*@
+                                <span class="switch-label" onclick="StatusChanged(this);" data-on="Active" data-off="Inactive"></span>
+                                <span class="switch-handle" id="shTranding"></span>
+                                <input type="hidden" name="Status" id="hdnSessionStatus" value="@Model.Session.Status">
+                            </label>
+                        </div>
+                    </div>
 
                     <div class="col-md-12" id="dvSessionStatus" @(Model.Session.Status == 1 ? "style=display:none" : "")>
                         <label id="lblInactiveChange"> In-Active Reason </label>

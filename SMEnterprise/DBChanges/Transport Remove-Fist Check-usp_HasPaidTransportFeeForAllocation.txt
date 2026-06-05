@@ -1,0 +1,89 @@
+CREATE PROCEDURE usp_GetActiveTransportFlags
+    @StudentIDsString NVARCHAR(MAX), -- Comma-separated string jaise '1,2,3'
+    @CurrentDate DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT 
+        UserID AS StudentID, 
+        MAX(ISNULL(KeyID, 0)) AS StopID
+    FROM dbo.TransportHostalAllocationDelocation
+    WHERE UserType = 0
+      AND ISNULL(ChangeType, 0) = 0
+      -- STRING_SPLIT string ko rows me tod deta hai
+      AND UserID IN (SELECT CAST(value AS INT) FROM STRING_SPLIT(@StudentIDsString, ','))
+      AND ISNULL(KeyID, 0) <> 0
+      AND CAST(StartDate AS DATE) <= @CurrentDate
+      AND (
+          EndDate IS NULL
+          OR YEAR(EndDate) = 1
+          OR CAST(EndDate AS DATE) >= @CurrentDate
+      )
+    GROUP BY UserID;
+END
+
+go
+
+CREATE PROCEDURE usp_HasPaidTransportFeeForAllocation
+    @StudentID INT,
+    @THChangeID INT,
+    @SBranchID INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @AllocationStart DATE,
+            @AllocationEnd DATE,
+            @SessionID INT;
+
+    -- 1. Get Allocation/Delocation details
+    SELECT
+        @AllocationStart = CAST(THAD.StartDate AS DATE),
+        @AllocationEnd = CASE
+            WHEN THAD.EndDate IS NULL OR YEAR(THAD.EndDate) = 1 THEN CONVERT(DATE, '99991231', 112)
+            ELSE CAST(THAD.EndDate AS DATE)
+        END,
+        @SessionID = ISNULL(THAD.SessionID, 0)
+    FROM dbo.TransportHostalAllocationDelocation THAD
+    WHERE THAD.THChangeID = @THChangeID
+      AND ISNULL(THAD.UserType, 0) = 0
+      AND ISNULL(THAD.ChangeType, 0) = 0
+      AND THAD.UserID = @StudentID;
+
+    -- 2. Fallback to active session if not assigned
+    IF ISNULL(@SessionID, 0) = 0
+    BEGIN
+        SELECT TOP 1 @SessionID = SM.SessionID
+        FROM dbo.SessionMaster SM
+        WHERE SM.SBranchID = @SBranchID
+          AND SM.SessionStatus = 1
+        ORDER BY SM.SessionStartDate DESC;
+    END
+
+    -- 3. Check if fee payment exists in the range
+    SELECT TOP 1 1
+    FROM dbo.PaymentDetails PD
+    INNER JOIN dbo.FeeTypeMaster FTM ON FTM.FeeTypeID = PD.FeeTypeID
+    INNER JOIN dbo.PaymentMaster PM ON PM.PaymentID = PD.PaymentID
+    INNER JOIN dbo.SessionMaster SM ON SM.SessionID = @SessionID
+    WHERE @AllocationStart IS NOT NULL
+      AND PD.PayeeID = @StudentID
+      AND ISNULL(PD.SBranchID, 0) = @SBranchID
+      AND ISNULL(FTM.SBranchID, @SBranchID) = @SBranchID
+      AND FTM.FeeTypeApplicable = 5 -- Transport Fee Type Flag
+      AND ISNULL(PD.PaymentRecieved, 0) > 0
+      AND ISNULL(PD.PaymentStatus, 0) = 0
+      AND ISNULL(PM.PaymentStatus, 0) = 0
+      AND ISNULL(PM.SessionID, @SessionID) = @SessionID
+      -- Year/Month conversion check for Session Window
+      AND ((CONVERT(INT, PD.Year) * 100) + ISNULL(PD.Month, 0))
+          BETWEEN ((YEAR(SM.SessionStartDate) * 100) + MONTH(SM.SessionStartDate))
+              AND ((YEAR(SM.SessionEndDate) * 100) + MONTH(SM.SessionEndDate))
+      -- Year/Month conversion check for Allocation Window
+      AND ((CONVERT(INT, PD.Year) * 100) + ISNULL(PD.Month, 0))
+          BETWEEN ((YEAR(@AllocationStart) * 100) + MONTH(@AllocationStart))
+              AND ((YEAR(@AllocationEnd) * 100) + MONTH(@AllocationEnd));
+END
+
+go

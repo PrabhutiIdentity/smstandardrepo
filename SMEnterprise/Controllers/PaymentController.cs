@@ -403,9 +403,9 @@ namespace SMEnterprise.Controllers
             feeModel.SBranchID = originalOrder.SBranchID;
             feeModel.StudentID = originalOrder.StudentID;
             feeModel.SessionID = originalOrder.SessionID;
-            feeModel.FeePaymentMode = 3;                        // 3 = Online
+            feeModel.PaymentMode = 3;                        // 3 = Online
             feeModel.ReferanceNumber = paymentId;                // Razorpay payment ID
-            feeModel.Remark = "Paid by Payment Gateway";
+            feeModel.CollectedBy = "Paid by Payment Gateway";
             feeModel.FeeAmount = paidAmount;
 
 

@@ -15,8 +15,10 @@
             {
                 canEditCustomFee = false;
             }
-        }*@
+    }*@
     var isNew = (Model.Student.StudentID == 0);
+    var sessionSaveMessage = Convert.ToString(TempData["SessionSaveMessage"]);
+    var transportSaveMessage = Convert.ToString(TempData["TransportSaveMessage"]);
 }
 @model SMEnterprise.Models.StudentEditModel
 @section IncludeCss
@@ -1451,6 +1453,14 @@
     <!-- Select2 -->
     <script src="@Url.Content("~/js/select2.full.min.js")"></script>
     <script>
+    @if (!string.IsNullOrWhiteSpace(sessionSaveMessage))
+    {
+        <text>$(function () { ShowNotification('Session', '@System.Web.HttpUtility.JavaScriptStringEncode(sessionSaveMessage)', 'info'); });</text>
+    }
+    @if (!string.IsNullOrWhiteSpace(transportSaveMessage))
+    {
+        <text>$(function () { ShowNotification('Transport', '@System.Web.HttpUtility.JavaScriptStringEncode(transportSaveMessage)', 'info'); });</text>
+    }
 
     function DeleteTransportChange(sender) {
      if (confirm("Do you Really want to remove this entry, this might result in Fee Mismatch....")) {
@@ -1485,14 +1495,18 @@
  function OptionalSubjectClicked(sender) {
      if ($(sender).hasClass('bg-green')) {
          $(sender).removeClass('bg-green');
+         $(sender).removeClass('bg-orange');
          $(sender).attr('title', 'This subject is not opted');
          $(sender).addClass('bg-red');
          $(sender).find('#hdnOpType').val(0);
+         $(sender).find('#hdnOpManual').val(1);
      } else {
          $(sender).attr('title', 'Student Opted for this subject');
          $(sender).addClass('bg-green');
          $(sender).removeClass('bg-red');
+         $(sender).removeClass('bg-orange');
          $(sender).find('#hdnOpType').val(1);
+         $(sender).find('#hdnOpManual').val(1);
      }
  }
 
@@ -1516,6 +1530,10 @@
  }
 
  function SessionSectionChanged(sender) {
+     if ($(sender).val() == '0' || $(sender).val() == '') {
+         $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>');
+         return;
+     }
      $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Loading Optional Subjects....</label>')
      $.ajax({
          type: "POST",
@@ -1526,11 +1544,12 @@
          success: function(data) {
              var OSubject = '';
              for (var i = 0; i < data.length; i++) {
-                 OSubject = OSubject + '<label class="badge bg-red OptedSubjects" onclick="OptionalSubjectClicked(this);" title="This subject is not opted">' +
+                 OSubject = OSubject + '<label class="badge bg-orange OptedSubjects" onclick="OptionalSubjectClicked(this);" title="No selection made for this subject">' +
                      '<input type="hidden" id="hdnSSOSID" name="SubjectsOpted[' + i + '].Extra1" value="0">' +
                      '<input type="hidden" id="hdnOpSubjectID" name="SubjectsOpted[' + i + '].ID" value="' + data[i].ID + '">' +
                      ' <input type="hidden" id="hdnStudentSessionID" name="SubjectsOpted[' + i + '].Name" value="0">' +
                      '<input type="hidden" id="hdnOpType" name="SubjectsOpted[' + i + '].Extra2" value="0">' +
+                     '<input type="hidden" id="hdnOpManual" name="SubjectsOpted[' + i + '].Extra3" value="0">' +
                      data[i].Name +
                      '</label>';
              }
@@ -1573,12 +1592,21 @@
      var curStatus = $(sender).closest('label').find('#hdnSessionStatus').val();
      if (curStatus == 1) {
          $('#dvSessionStatus').css('display', '');
+         ApplyInactiveDefaultEndDate();
      } else {
          $('#dvSessionStatus').css('display', 'none');
      }
      $(sender).closest('label').find('#hdnSessionStatus').val(curStatus == '0' ? '1' : '0');
 
 
+ }
+
+ function ApplyInactiveDefaultEndDate() {
+     var today = moment();
+     var endDate = moment($('#txtEndDate').val(), ['M/D/YYYY', 'MM/DD/YYYY'], true);
+     if (!endDate.isValid() || endDate.isAfter(today, 'day')) {
+         $('#txtEndDate').val(today.format('M/D/YYYY'));
+     }
  }
 
  function HostalStatusChanged(sender) {
@@ -1789,39 +1817,23 @@
         //For checking details filled during Session save
         function CheckSessionEditForm(sender) {
 
-            if ($('#ddlSessionEditClass').val() == 0) {
+            if ($('#ddlSessionEditClass').val() == '0' || $('#ddlSessionEditClass').val() == '') {
                 ShowNotification('Class', 'Please Select Class...', 'info');
                 return false;
             }
-            if ($('#ddlSections').val() == 0) {
+            if ($('#ddlSections').val() == '0' || $('#ddlSections').val() == '') {
                 ShowNotification('Section', 'Please Select Section...', 'info');
                 return false;
-            } else {
-                var sessionId = $('#mdlEditSession').find('#ddlSchoolSessions').val();
-                var studentSessionUID = $('#mdlEditSession').find('#hdnStudentSessionUID').val();
-                var isNewSessionRequest = $('#mdlEditSession').find('#hdnIsNewSessionRequest').val();
-                if (isNewSessionRequest != '1') {
-                    return true;
-                }
-                if (studentSessionUID == 0) {
-                    if ($('#divSessionsList').find(".sestr_" + sessionId).length == 0) {
-                        return true;
-                    }
-                    else {
-                        ShowNotification('Session', 'Session already exists for this student, please change session.', 'info');
-                        return false;
-                    }
-                }
-                else {
-                    if ($('#divSessionsList').find(".sestr_" + studentSessionUID + "-" + sessionId).length == 0) {
-                        ShowNotification('Session', 'Session already exists for this student, please change session.', 'info');
-                        return false;
-                    }
-                    else {
-                        return true;
-                    }
+            }
+            if ($('#hdnSessionStatus').val() == '0') {
+                ApplyInactiveDefaultEndDate();
+                if ($.trim($('#txtInReason').val()) == '') {
+                    ShowNotification('Inactive Reason', 'Please enter inactive reason...', 'info');
+                    $('#txtInReason').focus();
+                    return false;
                 }
             }
+            return true;
  }
 
  function CancelSessionEdit() {
@@ -2202,15 +2214,24 @@
  function SchoolSessionChanged(sender) {
      $('#txtStartDate').val($('#ddlSchoolSessions option:selected').attr('startDate'));
      $('#txtEndDate').val($('#ddlSchoolSessions option:selected').attr('endDate'));
+     var classId = $('#ddlSessionEditClass').val();
+     if (classId && classId !== '0') {
+         SessionClassChanged($('#ddlSessionEditClass')[0]);
+     }
  }
 
  function SessionClassChanged(sender) {
      $(sender).closest('.x_content').find('#divOptionalSubjects').html('<label class="badge bg-green OptedSubjects">Please Select Section to load Optional Subjects....</label>')
 
+     if ($(sender).val() == '0' || $(sender).val() == '') {
+         $('#ddlSections').html('<option value="0">--Select--</option>');
+         return;
+     }
      $('#ddlSections').html('<option value="-1">Loading....</option>');
+     var sessionId = $('#ddlSchoolSessions').val();
      $.ajax({
          type: "POST",
-         url: "/Account/GetSectionOnClass/" + $(sender).val(),
+         url: "/Account/GetSessionSectionsOnClass/" + $(sender).val() + "/" + sessionId,
          cache: false,
          processData: false,
          contentType: false,
