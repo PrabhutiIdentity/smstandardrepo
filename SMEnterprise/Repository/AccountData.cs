@@ -271,6 +271,85 @@ namespace SMEnterprise.Repository
                 return objModel;
             }
         }
+        public List<StudentSearchModel> SearchStudentsForFeePayment(string searchText, int sBranchId, int sessionId)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                const string sql = @"
+DECLARE @EffectiveSessionID INT = @SessionID;
+
+IF ISNULL(@EffectiveSessionID, 0) = 0
+BEGIN
+    SELECT TOP 1 @EffectiveSessionID = SessionID
+    FROM SessionMaster
+    WHERE SBranchID = @SBranchID
+      AND SessionStatus = 1
+    ORDER BY SessionStartDate DESC, SessionID DESC;
+END
+
+SELECT
+    PM.FatherName,
+    0 AS SLCGenerated,
+    0 AS CSGenerated,
+    0 AS DOBCGenerated,
+    0 AS NDCGenerated,
+    0 AS TFCGenerated,
+    ISNULL(SM.SchoolUID, '') AS SchoolUID,
+    SM.StudentID,
+    ISNULL(SM.StudentSID, '') AS StudentSID,
+    SM.DOB,
+    ISNULL(SM.Gender, 0) AS Gender,
+    ISNULL(SS.ClassID, 0) AS ClassID,
+    ISNULL(SS.SectionID, 0) AS SectionID,
+    ISNULL(SM.Photo, '') AS Photo,
+    ISNULL(SM.Photo1, '') AS Photo1,
+    ISNULL(SM.Name, '') AS Name,
+    ISNULL(SS.RollNo, '') AS RollNo,
+    ISNULL(SM.BloodGroup, '') AS BloodGroup,
+    ISNULL(SM.AccessCardNo, '') AS AccessCardNo,
+    ISNULL(SM.AadharCardNo, '') AS AadharCardNo,
+    ISNULL(SM.GuardianMobileNo, '') AS GuardianMobileNo,
+    ISNULL(PM.FatherMobileNo, '') AS FatherMobileNo,
+    ISNULL(PM.MotherMobileNo, '') AS MotherMobileNo,
+    ISNULL(CM.ClassName, '') AS ClassName,
+    ISNULL(CS.Name, '') AS SectionName,
+    ISNULL(SM.SSSID, '') AS SSSID,
+    ISNULL(SM.FamilyID, '') AS FamilyID,
+    ISNULL(PM.MotherName, '') AS MotherName,
+    ISNULL(SM.GuardianName, '') AS GuardianName,
+    ISNULL(SM.MiniAddress, '') AS MiniAddress,
+    0 AS TCGenerated
+FROM StudentMaster SM
+INNER JOIN Student_Session SS
+    ON SS.StudentID = SM.StudentID
+LEFT JOIN ParentMaster PM
+    ON PM.ParentID = SM.ParentID
+LEFT JOIN ClassMaster CM
+    ON CM.ClassID = SS.ClassID
+LEFT JOIN Class_Sections CS
+    ON CS.ID = SS.SectionID
+WHERE SS.SBranchID = @SBranchID
+  AND SS.SessionID = @EffectiveSessionID
+  AND (
+        ISNULL(PM.FatherMobileNo, '') = @SearchText
+        OR ISNULL(PM.MotherMobileNo, '') = @SearchText
+        OR ISNULL(SM.GuardianMobileNo, '') = @SearchText
+        OR CAST(ISNULL(PM.ParentID, 0) AS varchar(30)) = @SearchText
+        OR ISNULL(SM.SParentID, '') = @SearchText
+      )
+ORDER BY
+    TRY_CONVERT(INT, SS.RollNo),
+    SS.RollNo,
+    SM.Name;";
+
+                return con.Query<StudentSearchModel>(sql, new
+                {
+                    SearchText = searchText,
+                    SBranchID = sBranchId,
+                    SessionID = sessionId
+                }, commandType: CommandType.Text).ToList();
+            }
+        }
 
         public StudentSearchListModel SuspendedStudents(int SBranchID, int SessionID)
         {

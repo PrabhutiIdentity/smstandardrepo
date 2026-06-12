@@ -315,6 +315,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateTeacherResults(TeacherResultPageModel objModel)
         {
+            objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             int id = objTeacherData.UpdateStudentResults(objModel);
             objModel.ExamResults = null;
             return RedirectToAction("ExamResults", "Teacher", objModel);

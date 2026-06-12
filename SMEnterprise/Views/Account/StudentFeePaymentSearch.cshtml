@@ -1,0 +1,1358 @@
+@using SMEnterprise.Models
+@model SMEnterprise.Models.StudentFeePaymentSearchPageModel
+@{
+    ViewBag.Title = "Student Fee Payment Search";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+@section IncludeCss
+{
+    <title>P-School | Student Fee Payment Search</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <style>
+        .search-shell {
+            padding: 8px 0 18px;
+        }
+
+        .search-card,
+        .summary-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e6ebf1;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .search-card-head {
+            background: linear-gradient(135deg, #445866, #2f4250);
+            color: #fff;
+            padding: 16px 22px;
+        }
+
+        .search-card-head h3 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .search-card-head p {
+            margin: 6px 0 0;
+            opacity: 0.86;
+        }
+
+        .search-card-body {
+            padding: 22px 22px 16px;
+        }
+
+        .search-tools {
+            display: flex;
+            gap: 14px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .search-tools .form-group {
+            margin-bottom: 0;
+            flex: 1 1 320px;
+        }
+
+        .search-tools .btn {
+            padding: 10px 22px;
+            border-radius: 8px;
+            font-weight: 700;
+        }
+
+        .hint-box {
+            margin-top: 14px;
+            background: #f5f9fc;
+            border-left: 4px solid #3c8dbc;
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: #4a5568;
+            font-size: 13px;
+        }
+
+        .empty-state {
+            padding: 18px 22px;
+            color: #6b7280;
+            background: #f9fbfd;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .result-summary {
+            margin-top: 14px;
+            padding: 14px 16px;
+            border-radius: 10px;
+            background: #f8fbff;
+            border: 1px solid #dbe8f4;
+            color: #52606d;
+            font-size: 13px;
+        }
+
+        .student-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            padding: 0 22px 22px;
+        }
+
+        .student-picker-card {
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+            padding: 16px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            text-decoration: none;
+            color: inherit;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .student-picker-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.10);
+            border-color: #60a5fa;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .student-picker-card.active {
+            border-color: #2563eb;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+            background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+        }
+
+        .student-picker-photo {
+            width: 62px;
+            height: 62px;
+            border-radius: 14px;
+            background: #eef2ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            font-size: 22px;
+            font-weight: 700;
+            color: #3152c9;
+        }
+
+        .student-picker-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-picker-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .student-picker-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .student-picker-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .student-picker-sub {
+            color: #2563eb;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .student-picker-badge {
+            background: #e0f2fe;
+            color: #075985;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .student-picker-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px 12px;
+            font-size: 12px;
+            color: #475569;
+        }
+
+        .student-picker-meta strong {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .student-summary {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+            margin-bottom: 24px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+
+        .student-summary-banner {
+            padding: 24px 26px;
+            background: linear-gradient(135deg, #f8fbff 0%, #ffffff 55%, #f4f8fc 100%);
+        }
+
+        .student-summary-head {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .student-summary-photo {
+            width: 96px;
+            height: 96px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #4f46e5, #2563eb);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: 700;
+            overflow: hidden;
+            flex-shrink: 0;
+            box-shadow: 0 10px 24px rgba(37, 99, 235, 0.20);
+        }
+
+        .student-summary-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .student-summary-body {
+            flex: 1;
+            min-width: 320px;
+        }
+
+        .student-summary-name-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .student-summary-name {
+            font-size: 30px;
+            font-weight: 700;
+            color: #1a202c;
+            margin: 0;
+        }
+
+        .student-summary-id {
+            color: #4e73df;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+        }
+
+        .student-summary-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .student-summary-badge-green {
+            background: #e6fffa;
+            color: #234e52;
+        }
+
+        .student-summary-badge-class {
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .student-summary-dot {
+            width: 6px;
+            height: 6px;
+            background: #38b2ac;
+            border-radius: 50%;
+        }
+
+        .student-summary-subline {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: -2px;
+        }
+
+        .student-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+        }
+
+        .info-tile {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px 14px;
+            min-height: 72px;
+        }
+
+        .info-tile-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        .info-tile-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.35;
+        }
+
+        .child-strip {
+            margin: 0 0 18px;
+            padding: 14px 16px;
+            background: #f8fbff;
+            border: 1px solid #dbe8f4;
+            border-radius: 12px;
+        }
+
+        .child-strip-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 10px;
+        }
+
+        .child-strip-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .child-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #334155;
+            text-decoration: none;
+            transition: all 0.18s ease;
+        }
+
+        .child-pill:hover {
+            text-decoration: none;
+            color: #1d4ed8;
+            border-color: #93c5fd;
+        }
+
+        .child-pill.active {
+            background: #1d4ed8;
+            color: #fff;
+            border-color: #1d4ed8;
+        }
+
+        .child-pill-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(37, 99, 235, 0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+
+        .child-pill.active .child-pill-avatar {
+            background: rgba(255,255,255,0.18);
+        }
+
+        .fee-summary-title {
+            padding: 18px 24px;
+            background: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color: white;
+            margin: 0;
+        }
+
+        .fee-summary-title h2 {
+            color: white;
+            margin: 0;
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .summary-stats {
+            color: white;
+            font-size: 13px;
+        }
+
+        .summary-stats .stat-item {
+            margin-left: 18px;
+        }
+
+        .summary-stats .stat-value {
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .summary-stats .stat-due {
+            color: #ffeb3b;
+        }
+
+        .selection-info-banner {
+            background: linear-gradient(135deg,#e3f2fd,#bbdefb);
+            padding: 13px 18px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            border-left: 4px solid #2196f3;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .selection-info-banner i {
+            font-size: 22px;
+            color: #1976d2;
+        }
+
+        .info-title {
+            font-weight: 700;
+            color: #1565c0;
+            margin-bottom: 2px;
+            font-size: 14px;
+        }
+
+        .info-subtitle {
+            font-size: 12px;
+            color: #1976d2;
+        }
+
+        .fee-checkbox-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+        }
+
+        .fee-checkbox {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            z-index: 2;
+        }
+
+        .checkbox-custom {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 24px;
+            width: 24px;
+            background-color: #fff;
+            border: 2.5px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .fee-checkbox:hover ~ .checkbox-custom {
+            border-color: #26B99A;
+            background-color: #f0fff9;
+        }
+
+        .fee-checkbox:checked ~ .checkbox-custom {
+            background-color: #26B99A;
+            border-color: #26B99A;
+        }
+
+        .checkbox-custom:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 6px;
+            height: 11px;
+            border: solid white;
+            border-width: 0 2.5px 2.5px 0;
+            transform: rotate(45deg);
+        }
+
+        .fee-checkbox:checked ~ .checkbox-custom:after {
+            display: block;
+        }
+
+        .fee-month-panel {
+            margin-bottom: 8px;
+            border: 1.5px solid #e3e3e3;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .fee-month-panel:hover {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.09);
+        }
+
+        .selected-row {
+            background: linear-gradient(to right,#e8f5e9,#f1f8f4) !important;
+            border: 2px solid #26B99A !important;
+            box-shadow: 0 3px 12px rgba(38,185,154,0.18) !important;
+        }
+
+        .selected-row .panel-heading {
+            background: linear-gradient(to right,#d4edda,#e8f5e9) !important;
+            border-bottom: 1px solid #c3e6cb !important;
+        }
+
+        .selected-row .month-name {
+            color: #155724 !important;
+            font-weight: 600 !important;
+        }
+
+        .auto-added-row {
+            border: 2px solid #ffc107 !important;
+            box-shadow: 0 3px 12px rgba(255,193,7,0.22) !important;
+        }
+
+        .auto-added-row .panel-heading {
+            background: linear-gradient(to right,#fff3cd,#fffbe6) !important;
+            border-bottom: 1px solid #ffc107 !important;
+        }
+
+        .auto-added-row .month-name {
+            color: #856404 !important;
+        }
+
+        .panel-heading {
+            padding: 0 !important;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e3e3e3;
+            transition: background 0.2s ease;
+        }
+
+        .panel-heading:hover {
+            background: #e9ecef;
+        }
+
+        .panel-heading-content {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            width: 100%;
+        }
+
+        .checkbox-cell {
+            flex: 0 0 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .month-info {
+            flex: 1;
+            min-width: 0;
+            cursor: pointer;
+        }
+
+        .month-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .fee-details-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .fee-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .fee-status-item {
+            margin-left: auto;
+        }
+
+        .fee-label {
+            color: #7f8c8d;
+            margin-right: 4px;
+        }
+
+        .fee-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .amount-due {
+            color: #e74c3c;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .amount-paid {
+            color: #27ae60;
+        }
+
+        .status-badge {
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .status-overdue {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .panel-body {
+            padding: 18px;
+            background: #fafafa;
+        }
+
+        .table-fee {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .table-fee thead tr {
+            background: linear-gradient(135deg,#667eea,#764ba2);
+        }
+
+        .table-fee thead th {
+            padding: 10px 14px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            border: none;
+        }
+
+        .table-fee tbody td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #2c3e50;
+            vertical-align: middle;
+        }
+
+        .table-fee tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-fee tbody tr:nth-child(even) {
+            background: #f9f9ff;
+        }
+
+        .table-fee tbody tr:hover,
+        .table-fee tbody tr:nth-child(even):hover {
+            background: #e3f2fd;
+        }
+
+        .fee-head-icon,
+        .paid-icon {
+            color: #667eea;
+            margin-right: 7px;
+        }
+
+        .paid-icon {
+            font-size: 24px;
+            color: #27ae60;
+            margin-right: 0;
+        }
+
+        #floating-pay-bar {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 1050;
+            background: linear-gradient(135deg,#26B99A,#1e9e85);
+            padding: 16px 26px;
+            border-radius: 50px;
+            box-shadow: 0 8px 28px rgba(38,185,154,0.38);
+            display: none;
+            border: 3px solid rgba(255,255,255,0.28);
+        }
+
+        .pay-bar-inner {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .pay-stat {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .pay-stat .stat-label {
+            color: rgba(255,255,255,0.88);
+            font-size: 13px;
+        }
+
+        .pay-stat .stat-value {
+            font-weight: 700;
+            font-size: 17px;
+            color: #fff;
+        }
+
+        .pay-divider {
+            width: 2px;
+            height: 28px;
+            background: rgba(255,255,255,0.28);
+        }
+
+        #btnPaySelected {
+            background: #fff;
+            color: #1e9e85;
+            border: none;
+            padding: 10px 26px;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.14);
+            transition: all 0.25s ease;
+        }
+
+        #btnPaySelected:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.68);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 32px 52px;
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.28);
+        }
+
+        .spinner {
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #26B99A;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 0.9s linear infinite;
+            margin: 0 auto 14px;
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        #toast-msg {
+            position: fixed;
+            top: 22px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            z-index: 9998;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+            min-width: 340px;
+            max-width: 500px;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #toast-msg.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .toast-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 16px 18px;
+            border-left: 5px solid #f39c12;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+            color: #f39c12;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .toast-body {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #2c3e50;
+            margin-bottom: 4px;
+        }
+
+        .toast-detail {
+            font-size: 13px;
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .toast-months {
+            margin-top: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .toast-month-chip {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .toast-month-chip.auto-added {
+            background: #d4edda;
+            border-color: #26B99A;
+            color: #155724;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 17px;
+            color: #aaa;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        @@keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .shake {
+            animation: shake 0.38s ease;
+        }
+
+        @@media (max-width: 768px) {
+            .search-tools {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .student-picker {
+                grid-template-columns: 1fr;
+            }
+
+            .student-summary-banner {
+                padding: 18px;
+            }
+
+            .student-summary-name {
+                font-size: 24px;
+            }
+
+            .student-summary-head {
+                align-items: flex-start;
+            }
+
+            .student-summary-body {
+                min-width: 0;
+            }
+
+            .fee-details-row {
+                flex-direction: column;
+                gap: 6px;
+                align-items: flex-start;
+            }
+
+            .fee-status-item {
+                margin-left: 0;
+            }
+
+            #floating-pay-bar {
+                bottom: 14px;
+                right: 14px;
+                left: 14px;
+                border-radius: 28px;
+                padding: 14px 18px;
+            }
+
+            .pay-bar-inner {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+
+            #btnPaySelected {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+}
+
+<div class="search-shell">
+    <div class="search-card">
+        <div class="search-card-head">
+            <h3>Student Fee Payment Search</h3>
+            <p>Search by Student ID, Mobile No, Parent ID, student name, roll number or family ID.</p>
+        </div>
+        <div class="search-card-body">
+            @using (Html.BeginForm("StudentFeePaymentSearch", "Account", FormMethod.Get, new { id = "frmStudentFeePaymentSearch" }))
+            {
+                <div class="search-tools">
+                    <div class="form-group">
+                        <label for="SearchText">Search Student</label>
+                        <input type="text"
+                               id="SearchText"
+                               name="SearchText"
+                               class="form-control"
+                               value="@Model.SearchText"
+                               placeholder="Enter Student ID / Mobile No / Parent ID" />
+                    </div>
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fa fa-search"></i> Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            <div class="hint-box">
+                A single matching student opens fee details directly below. If a parent search returns multiple children, you can switch students from the selector cards below.
+            </div>
+            @if (!string.IsNullOrWhiteSpace(Model.SearchText) && Model.SearchResults != null && Model.SearchResults.Count > 0)
+            {
+                <div class="result-summary">
+                    <strong>@Model.SearchResults.Count</strong> student@(Model.SearchResults.Count > 1 ? "s" : "") found for
+                    <strong>@Model.SearchText</strong>.
+                    @if (Model.SearchResults.Count > 1)
+                    {
+                        <span>Select the correct student card below to open fee details directly.</span>
+                    }
+                </div>
+
+                <div class="student-picker">
+                    @foreach (var student in Model.SearchResults)
+                    {
+                        var cardInitial = !string.IsNullOrWhiteSpace(student.Name) ? student.Name.Substring(0, 1).ToUpper() : "S";
+                        var cardUrl = Url.Action("StudentFeePaymentSearch", "Account", new { SearchText = Model.SearchText, SessionID = Model.SessionID, StudentID = student.StudentID });
+                        var isActive = Model.StudentID == student.StudentID || (Model.StudentID == 0 && Model.SearchResults.Count == 1);
+
+                        <a href="@cardUrl" class="student-picker-card @(isActive ? "active" : "")">
+                            <div class="student-picker-photo">
+                                @if (!string.IsNullOrWhiteSpace(student.Photo))
+                                {
+                                    <img onerror="return OnImageError(this,@(student.Gender));"
+                                         alt="@student.Name"
+                                         src="@Url.Content("~/Images/StudentImage/")@(student.StudentID)_@student.Photo" />
+                                }
+                                else
+                                {
+                                    @cardInitial
+                                }
+                            </div>
+                            <div class="student-picker-body">
+                                <div class="student-picker-top">
+                                    <div>
+                                        <div class="student-picker-name">@student.Name</div>
+                                        <div class="student-picker-sub">@student.StudentSID</div>
+                                    </div>
+                                    <span class="student-picker-badge">@student.ClassName / @student.SectionName</span>
+                                </div>
+                                <div class="student-picker-meta">
+                                    <div><strong>Parent</strong><br />@student.FatherName</div>
+                                    <div><strong>Contact</strong><br />@student.FatherMobileNo</div>
+                                    <div><strong>Roll</strong><br />@(string.IsNullOrWhiteSpace(student.RollNo) ? "-" : student.RollNo)</div>
+                                    <div><strong>Family ID</strong><br />@(string.IsNullOrWhiteSpace(student.FamilyID) ? "-" : student.FamilyID)</div>
+                                </div>
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+            else if (!string.IsNullOrWhiteSpace(Model.SearchText))
+            {
+                <div class="empty-state">
+                    No student found for <strong>@Model.SearchText</strong>.
+                </div>
+            }
+        }
+    </div>
+
+    @if (Model.SelectedStudent != null && Model.SelectedStudent.Student != null)
+    {
+        var student = Model.SelectedStudent.Student;
+        var parent = Model.SelectedStudent.ParantDetails;
+        var initial = !string.IsNullOrWhiteSpace(student.Name) ? student.Name.Substring(0, 1).ToUpper() : "S";
+
+        <div class="summary-card">
+            <div class="student-summary">
+                <div class="student-summary-banner">
+                    @if (Model.SearchResults != null && Model.SearchResults.Count > 1)
+                    {
+                        <div class="child-strip">
+                            <div class="child-strip-title">Students found for this search</div>
+                            <div class="child-strip-list">
+                                @foreach (var child in Model.SearchResults)
+                                {
+                                    var childInitial = !string.IsNullOrWhiteSpace(child.Name) ? child.Name.Substring(0, 1).ToUpper() : "S";
+                                    var childUrl = Url.Action("StudentFeePaymentSearch", "Account", new { SearchText = Model.SearchText, SessionID = Model.SessionID, StudentID = child.StudentID });
+                                    <a href="@childUrl" class="child-pill @(child.StudentID == student.StudentID ? "active" : "")">
+                                        <span class="child-pill-avatar">@childInitial</span>
+                                        <span>@child.Name</span>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <div class="student-summary-head">
+                        <div class="student-summary-photo">
+                            @if (!string.IsNullOrWhiteSpace(student.Photo))
+                            {
+                                <img src="@Url.Content("~/Images/StudentImage/")@(student.StudentID)_@student.Photo"
+                                     alt="@student.Name"
+                                     onerror="return OnImageError(this,@(student.Gender));" />
+                            }
+                            else
+                            {
+                                @initial
+                            }
+                        </div>
+
+                        <div class="student-summary-body">
+                            <div class="student-summary-name-row">
+                                <h2 class="student-summary-name">@student.Name</h2>
+                                <span class="student-summary-id">ID: @student.StudentSID</span>
+                                <span class="student-summary-badge student-summary-badge-green">
+                                    <span class="student-summary-dot"></span> Active
+                                </span>
+                                <span class="student-summary-badge student-summary-badge-class">
+                                    @student.ClassName / @student.SectionName
+                                </span>
+                            </div>
+
+                            <div class="student-summary-subline">
+                                Fee payment details are open below for this student.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="student-info-grid">
+                        <div class="info-tile">
+                            <div class="info-tile-label">Student SR No.</div>
+                            <div class="info-tile-value">@student.SchoolUID</div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Father Name</div>
+                            <div class="info-tile-value">@(parent != null ? parent.FatherName : student.FatherName)</div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Contact Number</div>
+                            <div class="info-tile-value">@(parent != null ? parent.FatherMobileNo : student.FatherMobileNo)</div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Date of Birth</div>
+                            <div class="info-tile-value">@student.DOB.ToString("dd MMM yyyy")</div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Joined On</div>
+                            <div class="info-tile-value">@student.DOJ.ToString("dd MMM yyyy")</div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Parent ID</div>
+                            <div class="info-tile-value">@(parent != null ? parent.ParentID.ToString() : "-")</div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Roll Number</div>
+                            <div class="info-tile-value">@(string.IsNullOrWhiteSpace(student.RollNo) ? "-" : student.RollNo)</div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Address</div>
+                            <div class="info-tile-value">@(string.IsNullOrWhiteSpace(student.MiniAddress) ? "-" : student.MiniAddress)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 0 16px 16px;">
+                @Html.Partial("_StudentFeePaymentSummarySearchPartial", Model.FeeSummary)
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts
+{
+    <script>
+        $(function () {
+            if (!$('#bulkPaymentForm').length) {
+                return;
+            }
+
+            function getPendingMonths() {
+                var list = [];
+                $('.fee-checkbox').each(function () {
+                    list.push({
+                        month: parseInt($(this).data('month')),
+                        year: parseInt($(this).data('year')),
+                        amount: parseFloat($(this).data('amount')),
+                        el: this
+                    });
+                });
+
+                list.sort(function (a, b) {
+                    return (a.year * 12 + a.month) - (b.year * 12 + b.month);
+                });
+
+                return list;
+            }
+
+            function getUncheckedPriorMonths(month, year) {
+                var seq = year * 12 + month;
+                return getPendingMonths().filter(function (m) {
+                    return (m.year * 12 + m.month) < seq && !$(m.el).is(':checked');
+                });
+            }
+
+            function getCheckedLaterMonths(month, year) {
+                var seq = year * 12 + month;
+                return getPendingMonths().filter(function (m) {
+                    return (m.year * 12 + m.month) > seq && $(m.el).is(':checked');
+                });
+            }
+
+            function monthLabel(m, y) {
+                return new Date(y, m - 1, 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+            }
+
+            var toastTimer;
+
+            function showToast(title, detail, missingChips, autoChips) {
+                clearTimeout(toastTimer);
+
+                var chipsHtml = '';
+                (missingChips || []).forEach(function (m) {
+                    chipsHtml += '<span class="toast-month-chip">' + monthLabel(m.month, m.year) + '</span>';
+                });
+                (autoChips || []).forEach(function (m) {
+                    chipsHtml += '<span class="toast-month-chip auto-added"><i class="fa fa-plus-circle"></i> ' + monthLabel(m.month, m.year) + '</span>';
+                });
+
+                $('#toast-msg .toast-title').text(title);
+                $('#toast-msg .toast-detail').html(detail);
+                $('#toast-msg .toast-months').html(chipsHtml);
+                $('#toast-msg').addClass('show');
+
+                toastTimer = setTimeout(function () {
+                    $('#toast-msg').removeClass('show');
+                }, 5500);
+            }
+
+            function updateFloatingBar() {
+                var total = 0;
+                var count = 0;
+
+                $('.fee-checkbox:checked').each(function () {
+                    total += parseFloat($(this).data('amount'));
+                    count++;
+                    $(this).closest('.fee-month-panel').addClass('selected-row');
+                });
+
+                $('.fee-checkbox:not(:checked)').each(function () {
+                    var panel = $(this).closest('.fee-month-panel');
+                    if (!panel.hasClass('auto-added-row')) {
+                        panel.removeClass('selected-row');
+                    }
+                });
+
+                $('#selected-total').text(total.toFixed(2));
+                $('#selected-count').text(count);
+                $('#month-plural').text(count === 1 ? '' : 's');
+
+                if (count > 0) {
+                    $('#floating-pay-bar').fadeIn(300);
+                } else {
+                    $('#floating-pay-bar').fadeOut(300);
+                }
+            }
+
+            $('.fee-checkbox-wrapper').on('click', function (e) {
+                e.stopPropagation();
+            });
+
+            $('.fee-checkbox').on('change', function () {
+                var cb = $(this);
+                var month = parseInt(cb.data('month'));
+                var year = parseInt(cb.data('year'));
+
+                if (cb.is(':checked')) {
+                    var prior = getUncheckedPriorMonths(month, year);
+
+                    if (prior.length > 0) {
+                        prior.forEach(function (m) {
+                            $(m.el).prop('checked', true);
+                            $(m.el).closest('.fee-month-panel').addClass('selected-row auto-added-row');
+                        });
+
+                        showToast(
+                            'Previous Months Added Automatically',
+                            'These overdue months were <b>automatically selected</b> because they must be paid first:',
+                            null,
+                            prior
+                        );
+                    }
+
+                    cb.closest('.fee-month-panel').addClass('selected-row').removeClass('auto-added-row');
+                } else {
+                    var later = getCheckedLaterMonths(month, year);
+
+                    if (later.length > 0) {
+                        cb.prop('checked', true);
+                        cb.closest('.fee-month-panel').addClass('selected-row');
+
+                        var wrapper = cb.closest('.fee-checkbox-wrapper');
+                        wrapper.addClass('shake');
+                        setTimeout(function () {
+                            wrapper.removeClass('shake');
+                        }, 450);
+
+                        showToast(
+                            'Cannot Deselect This Month',
+                            'Deselect the later months first before removing this one:',
+                            later,
+                            null
+                        );
+                        return;
+                    }
+
+                    cb.closest('.fee-month-panel').removeClass('selected-row auto-added-row');
+                }
+
+                updateFloatingBar();
+            });
+
+            $('#btnPaySelected').on('click', function () {
+                var selectedData = [];
+                var names = [];
+
+                $('.fee-checkbox:checked').each(function () {
+                    var month = parseInt($(this).data('month'));
+                    var year = parseInt($(this).data('year'));
+                    var amount = parseFloat($(this).data('amount'));
+                    selectedData.push({ Month: month, Year: year, Amount: amount });
+                    names.push(monthLabel(month, year));
+                });
+
+                if (selectedData.length === 0) {
+                    alert('Please select at least one month to proceed with payment.');
+                    return;
+                }
+
+                selectedData.sort(function (a, b) {
+                    return (a.Year * 12 + a.Month) - (b.Year * 12 + b.Month);
+                });
+
+                var total = $('#selected-total').text();
+                var msg = 'You are about to pay for:\n\n- ' + names.join('\n- ') + '\n\nTotal Amount: Rs. ' + total + '\n\nProceed with payment?';
+
+                if (confirm(msg)) {
+                    $('#loadingOverlay').addClass('active');
+                    $('#SelectedMonthsJson').val(JSON.stringify(selectedData));
+                    $('#bulkPaymentForm').submit();
+                }
+            });
+
+            updateFloatingBar();
+        });
+    </script>
+}

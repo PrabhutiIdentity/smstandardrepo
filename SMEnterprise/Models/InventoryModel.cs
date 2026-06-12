@@ -295,6 +295,7 @@ namespace SMEnterprise.Models
         public DateTime TrDate { get; set; }
         public int TrType { get; set; }
         public string RefName { get; set; }
+        public string ProductNames { get; set; }
         public int ClassID { get; set; }
         public int SectionID { get; set; }
         public int SessionID { get; set; }

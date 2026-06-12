@@ -99,6 +99,16 @@ namespace SMEnterprise.Models
         public List<NameIDModel> Sessions { get; set; }
         public int TCType { get; set; }
     }
+    public class StudentFeePaymentSearchPageModel
+    {
+        public string SearchText { get; set; }
+        public int SessionID { get; set; }
+        public int StudentID { get; set; }
+        public List<StudentSearchModel> SearchResults { get; set; }
+        public List<NameIDModel> Sessions { get; set; }
+        public StudentEditModel SelectedStudent { get; set; }
+        public StudentSessionFeeStatusPageModel FeeSummary { get; set; }
+    }
     public class ActiveInactiveStudentModel
     {
         public string TypeName { get; set; }
