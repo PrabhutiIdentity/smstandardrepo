@@ -216,11 +216,26 @@ BEGIN
     SELECT STDID,STID,STType,ProductID,Quantity,SBranchID,Cost,MRP,SGST,CGST,IGST,
     (SELECT Name FROM ProductMaster PM WHERE STD.ProductID=PM.ProductID) AS ProductName FROM StockTransactionDetails STD WHERE STID=@STID
 
+    ;WITH ActiveStock AS
+    (
+        SELECT
+            STD.ProductID,
+            SUM(CASE
+                    WHEN STM.TrType=0 THEN ISNULL(STD.Quantity,0)
+                    WHEN STM.TrType=1 THEN -ISNULL(STD.Quantity,0)
+                    ELSE 0
+                END) AS AvailableQty
+        FROM StockTransactionDetails STD
+        INNER JOIN StockTransactionMaster STM ON STM.STID=STD.STID
+        WHERE STM.SBranchID=@SBranchID
+          AND ISNULL(STM.Status,1)<>0
+        GROUP BY STD.ProductID
+    )
     SELECT PM.ProductID,PM.Name,PM.MRP,PM.Price,PM.Quantity,PM.MinQty,PC.Name AS CategoryName,PC.HSNCode,PC.SGST,PC.IGST,PC.CGST,
-    PM.Quantity+STC.AvailableQty AS Available
+    ISNULL(PM.Quantity,0)+ISNULL(ASQ.AvailableQty,0) AS Available
     FROM ProductMaster PM
     LEFT OUTER JOIN ProductCategories PC ON PM.ProductCategoryID=PC.ID
-    LEFT OUTER JOIN v_StockProductAvailability STC ON STC.ProductID=PM.ProductID AND PM.Status=1
+    LEFT OUTER JOIN ActiveStock ASQ ON ASQ.ProductID=PM.ProductID
     WHERE PM.SBranchID=@SBranchID
 
     IF(@TrType=0)

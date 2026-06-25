@@ -160,6 +160,9 @@ namespace SMEnterprise.Models
         public string ProductCategoryName { get; set; }
         public decimal Quantity { get; set; }
         public decimal Available { get; set; }
+        public decimal OpeningQuantity { get; set; }
+        public decimal PurchaseQuantity { get; set; }
+        public decimal SaleQuantity { get; set; }
         public decimal MinQty { get; set; }
         public int Status { get; set; }
         public string Name { get; set; }

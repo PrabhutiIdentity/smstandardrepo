@@ -4563,6 +4563,48 @@ ORDER BY
                         }
                     }
                 }
+                var productParameters = new DynamicParameters();
+                productParameters.Add("@SBranchID", SBranchID);
+                objModel.Products = con.Query<ProductModel>(@"
+                    ;WITH ActiveStock AS
+                    (
+                        SELECT
+                            STD.ProductID,
+                            SUM(CASE
+                                    WHEN STM.TrType = 0 THEN ISNULL(STD.Quantity, 0)
+                                    WHEN STM.TrType = 1 THEN -ISNULL(STD.Quantity, 0)
+                                    ELSE 0
+                                END) AS AvailableQty
+                        FROM dbo.StockTransactionDetails STD
+                        INNER JOIN dbo.StockTransactionMaster STM ON STM.STID = STD.STID
+                        WHERE STM.SBranchID = @SBranchID
+                          AND ISNULL(STM.Status, 1) <> 0
+                        GROUP BY STD.ProductID
+                    )
+                    SELECT
+                        PM.ProductID,
+                        PM.ProductCategoryID,
+                        PM.Name,
+                        PM.Photo,
+                        PM.MRP,
+                        PM.Price,
+                        ISNULL(PM.Quantity, 0) AS Quantity,
+                        ISNULL(PM.MinQty, 0) AS MinQty,
+                        PM.Status,
+                        PM.SBranchID,
+                        ISNULL(PC.SGST, 0) AS SGST,
+                        ISNULL(PC.CGST, 0) AS CGST,
+                        ISNULL(PC.IGST, 0) AS IGST,
+                        ISNULL(PM.Quantity, 0) + ISNULL(ASQ.AvailableQty, 0) AS Available
+                    FROM dbo.ProductMaster PM
+                    LEFT JOIN dbo.ProductCategories PC ON PC.ID = PM.ProductCategoryID
+                    LEFT JOIN ActiveStock ASQ ON ASQ.ProductID = PM.ProductID
+                    WHERE PM.SBranchID = @SBranchID
+                      AND ISNULL(PM.Status, 1) = 1
+                    ORDER BY PM.Name;",
+                    productParameters,
+                    commandType: CommandType.Text).ToList();
+
                 objModel.PaymentHistory = GetStockPaymentHistory(STID, SBranchID, con);
                 if (objModel.PaymentHistory == null)
                 {
