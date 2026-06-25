@@ -171,6 +171,64 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
             return View(objModel);
         }
+        [PermissionFilter]
+        public ActionResult StudentFeePaymentSearch(StudentFeePaymentSearchPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentFeePaymentSearchPageModel();
+            }
+
+            objModel.SearchText = objModel.SearchText == null ? null : objModel.SearchText.Trim();
+
+            int sBranchId = PermissionManager.GetLoggedInUser().SBranchID;
+
+            if (!string.IsNullOrWhiteSpace(objModel.SearchText))
+            {
+                StudentSearchListModel searchData = objAccountData.SearchStudents(objModel.SearchText, sBranchId, objModel.SessionID);
+                objModel.SearchResults = searchData.Students;
+                objModel.Sessions = searchData.Sessions;
+                if (objModel.SessionID == 0)
+                {
+                    objModel.SessionID = searchData.SessionID;
+                }
+                if (objModel.StudentID == 0 && searchData.Students != null && searchData.Students.Count == 1)
+                {
+                    objModel.StudentID = searchData.Students[0].StudentID;
+                }
+                if ((objModel.SearchResults == null || objModel.SearchResults.Count == 0) && objModel.SearchText.Any(char.IsDigit))
+                {
+                    objModel.SearchResults = objAccountData.SearchStudentsForFeePayment(objModel.SearchText, sBranchId, objModel.SessionID);
+                    if (objModel.StudentID == 0 && objModel.SearchResults != null && objModel.SearchResults.Count == 1)
+                    {
+                        objModel.StudentID = objModel.SearchResults[0].StudentID;
+                    }
+                }
+            }
+
+            if (objModel.StudentID > 0)
+            {
+                objModel.SelectedStudent = objAccountData.GetStudentDetailsNew(objModel.StudentID, sBranchId);
+                objModel.FeeSummary = new StudentSessionFeeStatusPageModel
+                {
+                    StudentID = objModel.StudentID,
+                    SBranchID = sBranchId
+                };
+                objAccountData.GetStudentMonthWiseSessionFeeDetails(objModel.FeeSummary);
+            }
+
+            if (objModel.SearchResults == null)
+            {
+                objModel.SearchResults = new List<StudentSearchModel>();
+            }
+
+            if (objModel.Sessions == null)
+            {
+                objModel.Sessions = new List<NameIDModel>();
+            }
+
+            return View(objModel);
+        }
 
 
         [PermissionFilter]
@@ -2495,6 +2553,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateTeacherResults(TeacherResultPageModel objModel)
         {
+            objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             int id = objTeacherData.UpdateStudentResults(objModel);
             objModel.ExamResults = null;
             return RedirectToAction("ExamResults", "Account", objModel);
@@ -2746,6 +2806,19 @@ namespace SMEnterprise.Controllers
             {
                 objModel.EndDate = CommonUsage.GetCurrentDate();
                 objModel.StartDate = objModel.EndDate.AddDays(-7);
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStockTransfers(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult SalesPurchaseReport(StockManagementModel objModel)
+        {
+            if (objModel.StartDate.Year == 1)
+            {
+                objModel.EndDate = CommonUsage.GetCurrentDate();
+                objModel.StartDate = objModel.EndDate.AddDays(-6);
+                objModel.TrType = -1;
             }
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetStockTransfers(objModel);
