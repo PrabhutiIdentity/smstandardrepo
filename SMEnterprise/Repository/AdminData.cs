@@ -3695,7 +3695,42 @@ namespace SMEnterprise.Repository
             {
                 var paramater = new DynamicParameters();
                 paramater.Add("@SBranchID", SBranchID);
-                return con.Query<ProductModel>("sp_GetAvailableStockProducts", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
+                return con.Query<ProductModel>(@"
+                    ;WITH StockMovement AS
+                    (
+                        SELECT
+                            STD.ProductID,
+                            SUM(CASE WHEN STM.TrType = 0 THEN ISNULL(STD.Quantity, 0) ELSE 0 END) AS PurchaseQuantity,
+                            SUM(CASE WHEN STM.TrType = 1 THEN ISNULL(STD.Quantity, 0) ELSE 0 END) AS SaleQuantity
+                        FROM dbo.StockTransactionDetails STD
+                        INNER JOIN dbo.StockTransactionMaster STM ON STM.STID = STD.STID
+                        WHERE STM.SBranchID = @SBranchID
+                          AND ISNULL(STM.Status, 1) <> 0
+                        GROUP BY STD.ProductID
+                    )
+                    SELECT
+                        PM.ProductID,
+                        PM.ProductCategoryID,
+                        PM.Name,
+                        PM.Photo,
+                        PM.MRP,
+                        PM.Price,
+                        PM.SBranchID,
+                        PM.Status,
+                        ISNULL(PM.Quantity, 0) AS OpeningQuantity,
+                        ISNULL(SM.PurchaseQuantity, 0) AS PurchaseQuantity,
+                        ISNULL(SM.SaleQuantity, 0) AS SaleQuantity,
+                        ISNULL(PM.Quantity, 0) + ISNULL(SM.PurchaseQuantity, 0) - ISNULL(SM.SaleQuantity, 0) AS Quantity,
+                        ISNULL(PM.Quantity, 0) + ISNULL(SM.PurchaseQuantity, 0) - ISNULL(SM.SaleQuantity, 0) AS Available,
+                        ISNULL(PM.MinQty, 0) AS MinQty
+                    FROM dbo.ProductMaster PM
+                    LEFT JOIN StockMovement SM ON SM.ProductID = PM.ProductID
+                    WHERE PM.SBranchID = @SBranchID
+                      AND ISNULL(PM.Status, 1) = 1
+                      AND ISNULL(PM.Quantity, 0) + ISNULL(SM.PurchaseQuantity, 0) - ISNULL(SM.SaleQuantity, 0) > 0
+                    ORDER BY PM.Name;",
+                    paramater,
+                    commandType: CommandType.Text).ToList();
             }
         }
         #endregion

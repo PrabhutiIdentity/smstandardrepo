@@ -328,9 +328,9 @@ namespace SMEnterprise.Repository
                     {
                         objModel.ClassID = multi.Read<int>().SingleOrDefault();
                         objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                        objModel.SubjectID = multi.Read<int>().SingleOrDefault();
-                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                        //objModel.IsLocked = multi.Read<int>().SingleOrDefault();
+                    objModel.SubjectID = multi.Read<int>().SingleOrDefault();
+                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+                        objModel.IsLocked = multi.Read<int>().SingleOrDefault();
                     }
                     try
                     {

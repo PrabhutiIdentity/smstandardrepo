@@ -107,183 +107,115 @@
 </head>
 
 <body class="login-bgone">
-    <div class="container-fluid">
-        <div class="row justify-content-center login-page-row">
-            <div class="login-shell">
-                <div class="login-card">
+    <main class="login-page">
+        <section class="login-card" aria-label="P-School login">
+            <div class="login-form-panel">
+                <div class="user-mark">
+                    <img src="@Url.Content("~/images/logo.png")" alt="P-School" />
+                </div>
 
-                    <!-- ═══ LEFT: INFO PANEL ═══ -->
-                    <div class="login-info-panel">
-                        <span class="platform-badge">Smart School Platform</span>
+                @using (Html.BeginForm("Login", "Login", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "LoginForm" }))
+                {
+                    @Html.AntiForgeryToken()
 
-                        <div class="info-header">
-                            <div class="info-logo">
-                                <img src="@Url.Content("~/images/pschool-logo.png")" alt="P-School Logo" />
-                            </div>
-                            <h1 class="info-heading">Solution at a <span>Glance</span></h1>
-
+                    if (ViewBag.LoginError != null)
+                    {
+                        <div class="login-error-box">
+                            <i class="fa fa-exclamation-circle"></i>
+                            @ViewBag.LoginError
                         </div>
-                        <p class="info-desc">
-                            P-School is a comprehensive, web-based school management platform — designed to streamline day-to-day operations, reduce paperwork, and keep every stakeholder connected in real time.
-                        </p>
+                    }
 
-                        <!-- Feature list -->
-                        <ul class="feature-list">
-                            <li>
-                                <span class="feature-icon"><i class="fa fa-bell"></i></span>
-                                <span>Real-time SMS notifications for teachers and parents, instantly.</span>
-                            </li>
-                            <li class="feature-li-block">
-                                <div class="feature-block-header">
-                                    <span class="feature-icon feature-icon-lg"><i class="fa fa-graduation-cap"></i></span>
-                                    <span class="feature-block-title">Exam Management</span>
-                                </div>
-                                <ul class="feature-sub-list">
-                                    <li><i class="fa fa-check-circle"></i> Schedule &amp; manage exams — unit tests, mid-term, annual</li>
-
-                                    <li><i class="fa fa-check-circle"></i> Automatic Report Card generation </li>
-                                    <li><i class="fa fa-check-circle"></i> Co-curricular &amp; activity marks support</li>
-                                    <li><i class="fa fa-check-circle"></i> Parent-accessible result portal</li>
-
-                                </ul>
-                            </li>
-                            <li class="feature-li-block">
-                                <div class="feature-block-header">
-                                    <span class="feature-icon feature-icon-lg"><i class="fa fa-inr"></i></span>
-                                    <span class="feature-block-title">Fee Management</span>
-                                </div>
-                                <ul class="feature-sub-list">
-                                    <li><i class="fa fa-check-circle"></i> Flexible fee structure — tuition, transport,  &amp; misc</li>
-                                    <li><i class="fa fa-check-circle"></i> Online &amp; offline fee collection with receipts</li>
-                                    <li><i class="fa fa-check-circle"></i> Automatic late fee &amp; discount/concession management</li>
-                                    <li><i class="fa fa-check-circle"></i> Defaulter list &amp; pending dues reports</li>
-
-                                </ul>
-                            </li>
-                            <li>
-                                <span class="feature-icon"><i class="fa fa-mobile"></i></span>
-                                <span>Android app with dedicated logins for parents, teachers</span>
-                            </li>
-                        </ul>
-
-                        <div>
-                            <a class="read-more-link" href="https://www.pschoolonline.in/" target="_blank" rel="noopener">
-                                Explore P-School &nbsp;<i class="fa fa-arrow-right"></i>
-                            </a>
-                        </div>
+                    <div class="line-field">
+                        <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                        <label class="sr-only" for="txtUserName">Email ID or username</label>
+                        <input type="text" id="txtUserName" placeholder="Email ID"
+                               required name="username" autocomplete="username" />
                     </div>
 
-                    <!-- ═══ RIGHT: LOGIN PANEL ═══ -->
-                    <div class="login-form-panel">
-                        <div class="stats-row">
-                            <div class="stat-box">
-                                <div class="stat-num">500+</div>
-                                <div class="stat-label">Schools</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-num">15+</div>
-                                <div class="stat-label">Modules</div>
-                            </div>
-                            <div class="stat-box">
-                                <div class="stat-num">99%</div>
-                                <div class="stat-label">Uptime</div>
-                            </div>
-                        </div>
+                    <div class="line-field">
+                        <i class="fa fa-lock" aria-hidden="true"></i>
+                        <label class="sr-only" for="txtpassword">Password</label>
+                        <input type="password" id="txtpassword" name="Password"
+                               placeholder="Password" required autocomplete="current-password" />
+                    </div>
 
-                        <div class="form-logo">
-                            <img src="@Url.Content("~/images/logo.png")" alt="P-School" />
-                        </div>
+                    <input type="hidden" name="salt" value="@ViewBag.Salt" />
 
-                        <div class="panel-divider">
-                            <span class="panel-divider-text">Secure Sign In</span>
-                        </div>
+                    <button type="submit" class="btn-login" onclick="return EncLogin();">LOGIN</button>
 
-                        @using (Html.BeginForm("Login", "Login", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "LoginForm" }))
-                        {
-                            @Html.AntiForgeryToken()
-
-                            <h2 class="welcome-heading">Welcome back</h2>
-                            <p class="welcome-sub">Sign in to access your school dashboard and daily operations.</p>
-
-                            if (ViewBag.LoginError != null)
+                    <div class="debug-links-hidden">
+                        <a href="/Home/StartSchedule">Send SMS?</a>
+                        <a href="javascript:void(0);" onclick="GenerateJSON();">Generate JSON</a>
+                        <a href="javascript:void(0);" onclick="GetListForAttandance('asas');">GetStudentList</a>
+                        <a href="javascript:void(0);" onclick="ApiLogin();">Login</a>
+                        <a href="javascript:void(0);" onclick="ApiParentLogin();">PLogin</a>
+                        <a href="javascript:void(0);" onclick="GetDynamicSalt();">DynamicSalt</a>
+                        <a href="javascript:void(0);" onclick="ClearIndex();">ClearIndex</a>
+                        <a href="javascript:void(0);" onclick="EncLogin2();">GetAllIndexed</a>
+                        <ul>
+                            @foreach (var d in SMEnterprise.Repository.CommonUsage.ConnectionStrings)
                             {
-                                <div class="login-error-box">
-                                    <i class="fa fa-exclamation-circle"></i>
-                                    @ViewBag.LoginError
-                                </div>
+                                <li>@d.Key -> @d.Value</li>
                             }
-
-                            <div class="form-field">
-                                <label for="txtUserName">
-                                    <i class="fa fa-user-circle-o"></i> Username
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="text" id="txtUserName" class="form-control"
-                                           placeholder="Enter your username"
-                                           required name="username" autocomplete="username" />
-                                    <span class="input-icon-right"><i class="fa fa-user"></i></span>
-                                </div>
-                            </div>
-
-                            <div class="form-field">
-                                <label for="txtpassword">
-                                    <i class="fa fa-lock"></i> Password
-                                </label>
-                                <div class="input-wrapper">
-                                    <input type="password" id="txtpassword" class="form-control"
-                                           name="Password" placeholder="Enter your password"
-                                           required autocomplete="current-password" />
-                                    <span class="input-icon-right"><i class="fa fa-eye-slash"></i></span>
-                                </div>
-                            </div>
-
-                            <input type="hidden" name="salt" value="@ViewBag.Salt" />
-
-                            <button type="submit" class="btn-login" onclick="return EncLogin();">
-                                <span class="btn-shine"></span>
-                                <i class="fa fa-sign-in"></i> Sign In to Dashboard
-                            </button>
-
-                            <!-- Hidden debug links (preserved) -->
-                            <div class="debug-links-hidden">
-                                <a href="/Home/StartSchedule">Send SMS?</a>
-                                <a href="javascript:void(0);" onclick="GenerateJSON();">Generate JSON</a>
-                                <a href="javascript:void(0);" onclick="GetListForAttandance('asas');">GetStudentList</a>
-                                <a href="javascript:void(0);" onclick="ApiLogin();">Login</a>
-                                <a href="javascript:void(0);" onclick="ApiParentLogin();">PLogin</a>
-                                <a href="javascript:void(0);" onclick="GetDynamicSalt();">DynamicSalt</a>
-                                <a href="javascript:void(0);" onclick="ClearIndex();">ClearIndex</a>
-                                <a href="javascript:void(0);" onclick="EncLogin2();">GetAllIndexed</a>
-                                <ul>
-                                    @foreach (var d in SMEnterprise.Repository.CommonUsage.ConnectionStrings)
-                                    {
-                                        <li>@d.Key -> @d.Value</li>
-                                    }
-                                </ul>
-                            </div>
-
-                            <div class="form-footer">
-                                <div>
-                                    <img src="~/images/footerlogo.png" alt="P-School Pro" />
-                                    <span class="pro-tag"></span>
-                                </div>
-                                <p>
-                                    ©2016 All Rights Reserved &mdash;
-                                    <a href="http://www.prabhutisystems.com" target="_blank" rel="noopener">Prabhuti Systems Pvt. Ltd.</a>
-                                </p>
-                                <div class="trust-row">
-                                    <span class="trust-badge"><i class="fa fa-shield"></i> Secure Login</span>
-                                    <span class="trust-badge"><i class="fa fa-lock"></i> Encrypted</span>
-                                    <span class="trust-badge"><i class="fa fa-check-circle"></i> Trusted</span>
-                                </div>
-                            </div>
-                        }
+                        </ul>
                     </div>
+                }
+            </div>
 
-                </div><!-- /.login-card -->
-            </div><!-- /.login-shell -->
-        </div>
-    </div>
+            <div class="login-info-panel">
+                <div class="brand-row">
+                    <span class="brand-mark">P</span>
+                    <strong>P-School</strong>
+                </div>
+
+                <span class="platform-badge">Smart school platform</span>
+                <h1>Solution at a glance</h1>
+                <p class="info-desc">
+                    A web-based school management platform that streamlines operations and keeps every stakeholder connected in real time.
+                </p>
+
+                <div class="feature-block">
+                    <div class="feature-heading">
+                        <i class="fa fa-file-text-o" aria-hidden="true"></i>
+                        <strong>Exam management</strong>
+                    </div>
+                    <ul>
+                        <li>Schedule and grade exams</li>
+                        <li>Automatic report cards</li>
+                        <li>Parent-accessible result portal</li>
+                    </ul>
+                </div>
+
+                <div class="feature-block">
+                    <div class="feature-heading">
+                        <i class="fa fa-money" aria-hidden="true"></i>
+                        <strong>Fee management</strong>
+                    </div>
+                    <ul>
+                        <li>Online and offline collection</li>
+                        <li>Late fee and discount handling</li>
+                        <li>Defaulter and dues reports</li>
+                    </ul>
+                </div>
+
+                <div class="alert-feature">
+                    <i class="fa fa-bell-o" aria-hidden="true"></i>
+                    <span>Real-time SMS alerts for teachers and parents</span>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-box"><strong>500+</strong><span>Schools</span></div>
+                    <div class="stat-box"><strong>15+</strong><span>Modules</span></div>
+                    <div class="stat-box"><strong>99%</strong><span>Uptime</span></div>
+                </div>
+
+                <a class="website-link" href="https://pschoolonline.in/" target="_blank" rel="noopener noreferrer">
+                    Visit P-School Website <i class="fa fa-external-link" aria-hidden="true"></i>
+                </a>
+            </div>
+        </section>
+    </main>
 
     <script src="@Url.Content("~/js/local.js")"></script>
 </body>

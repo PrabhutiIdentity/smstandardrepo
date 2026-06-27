@@ -7,6 +7,7 @@ using SMEnterprise.Filters;
 using SMEnterprise.Repository;
 using SMEnterpriseDB.Models;
 using System.Linq;
+using System.Diagnostics;
 
 namespace SMEnterprise.Controllers
 {
@@ -86,154 +87,99 @@ namespace SMEnterprise.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Login(Login login)
         {
-            string a = Request.ServerVariables["REMOTE_ADDR"];
-            string b = Request.ServerVariables["REMOTE_HOST"];
-            string c = Request.ServerVariables["REMOTE_USER"];
-            if (ModelState.IsValid)
+            try
             {
-                //  bool success = true;
-                // bool rememberme = login.rememberMe;
-                //  bool success = WebSecurity.Login(login.username, login.password, rememberme);
-                UserModel AttemptedUser = objILoginData.GetUserByUserName(login.username);
-
-
-                if (AttemptedUser != null && (AttemptedUser.Password != null || AttemptedUser.Password != ""))
+                if (!ModelState.IsValid)
                 {
-
-                    string svalue = login.salt;
-
-                    string NewHash = CommonUsage.EncryptPassword(AttemptedUser.Password + svalue);
-                    if (login.password == NewHash)
-                    {
-                        PermissionManager.setPermissions(AttemptedUser);
-                        Session["UserID"] = PermissionManager.GetLoggedInUser().UserID;
-                        Session["SBranchID"] = PermissionManager.GetLoggedInUser().SBranchID;
-                        //Session["SchoolID"] = PermissionManager.GetLoggedInUser().SchoolID;
-                        try
-                        {
-                            Session["Permissions"] = objILoginData.GetUserPermissions(PermissionManager.GetLoggedInUser().UserID, PermissionManager.GetLoggedInUser().SBranchID);
-                        } 
-                        catch { }
-                        CommonData objCData = new CommonData();
-                        int activeBranchId = AttemptedUser.SBranchID;
-                        if (AttemptedUser.RoleID == (int)RoleType.Admin || AttemptedUser.RoleID == (int)RoleType.Principle || AttemptedUser.RoleID == (int)RoleType.Director)
-                        {
-                           var branches= (new AdminData()).GetBranches(AttemptedUser.UserID, AttemptedUser.SBranchID,AttemptedUser.RoleID).ToList();
-                            Session["SBrancheList"] = branches;
-                            activeBranchId = branches.FirstOrDefault()?.SBranchID ?? AttemptedUser.SBranchID;
-                            Session["SBranchID"] = activeBranchId;
-                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
-                            objCData.InitializeStartupSettings(activeBranchId);
-                            return RedirectToAction("Dashboard", "Admin");
-                        }
-                        else if (AttemptedUser.RoleID == (int)RoleType.Technical)
-                        {
-                            ClearBranchPaymentDueSession();
-                            //objCData.InitializeStartupSettings(AttemptedUser.SBranchID);
-                            return RedirectToAction("FirstBranch", "Admin");
-                        }
-                        else if (AttemptedUser.RoleID == (int)RoleType.Parent)
-                        {
-                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
-                            objCData.InitializeStartupSettings(activeBranchId);
-                            return RedirectToAction("LandingPage", "Parent");
-                        }
-                        else if (AttemptedUser.RoleID == (int)RoleType.Account)
-                        {
-                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
-                            objCData.InitializeStartupSettings(activeBranchId);
-                            return RedirectToAction("Dashboard", "Account");
-                        }
-                        else if (AttemptedUser.RoleID == (int)RoleType.Teacher)
-                        {
-                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
-                            objCData.InitializeStartupSettings(activeBranchId);
-                            return RedirectToAction("Dashboard", "Teacher");
-                        }
-                        else if (AttemptedUser.RoleID == (int)RoleType.Library)
-                        {
-                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
-                            return RedirectToAction("Dashboard", "Library");
-                        }
-                        else if (AttemptedUser.RoleID == (int)RoleType.Reception || AttemptedUser.RoleID == (int)RoleType.Receptionist)
-                        {
-                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
-                            return RedirectToAction("Dashboard", "Reception");
-                        }
-                        else
-                        {
-                            try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
-                            return RedirectToAction("Index", "Home");
-                        }
-
-                    }
-                }
-                else
-                {
-                    ViewBag.LoginError = "Username or Password is incorrect !!!!";
+                    TempData["LoginError"] = "Please enter Username and Password.";
                     return RedirectToAction("Index", "Home");
                 }
 
-                //FormsAuthentication.SetAuthCookie("Admin", false);
+                UserModel attemptedUser = objILoginData.GetUserByUserName(login.username);
+                if (attemptedUser == null || string.IsNullOrEmpty(attemptedUser.Password))
+                {
+                    TempData["LoginError"] = "Username or Password is incorrect.";
+                    return RedirectToAction("Index", "Home");
+                }
 
-                //if (success == true)
-                //{
-                //    if (string.IsNullOrEmpty(Convert.ToString(LoginType)))
-                //    {
-                //        ModelState.AddModelError("Error", "Rights to User are not Provide Contact to Admin");
-                //        return View(login);
-                //    }
-                //    else
-                //    {
-                //        ViewBag.UserName = login.username;
-                //        Session["Name"] = login.username;
-                //        Session["UserID"] = UserID;
-                //        Session["LoginType"] = LoginType;
+                string newHash = CommonUsage.EncryptPassword(attemptedUser.Password + login.salt);
+                if (login.password != newHash)
+                {
+                    TempData["LoginError"] = "Username or Password is incorrect.";
+                    return RedirectToAction("Index", "Home");
+                }
 
-                //        if (Roles.IsUserInRole(login.username, "Admin"))
-                //        {
-                //            return RedirectToAction("Blogs", "Admin");
-                //        }
-                //        else
-                //        {
-                //            string decodedUrl = "";
-                //            if (!string.IsNullOrEmpty(Request.Params["ReturnUrl"]))
-                //                decodedUrl = Server.UrlDecode(Request.Params["ReturnUrl"]);
+                PermissionManager.setPermissions(attemptedUser);
+                Session["UserID"] = PermissionManager.GetLoggedInUser().UserID;
+                Session["SBranchID"] = PermissionManager.GetLoggedInUser().SBranchID;
+                try
+                {
+                    Session["Permissions"] = objILoginData.GetUserPermissions(
+                        PermissionManager.GetLoggedInUser().UserID,
+                        PermissionManager.GetLoggedInUser().SBranchID);
+                }
+                catch { }
 
-                //            //Login logic...
+                CommonData commonData = new CommonData();
+                int activeBranchId = attemptedUser.SBranchID;
 
-                //            if (Url.IsLocalUrl(decodedUrl))
-                //            {
-                //                return Redirect(decodedUrl);
-                //            }
-                //            else
-                //            {
-                //                return RedirectToAction("Index", "Home");
-                //            }
-                //            //if (Request.FilePath == "Login/Login")
-                //            //{
-                //            //    return RedirectToAction("Home", "Index");
-                //            //}
-                //            //else
-                //            //{
-                //            //    return Redirect(Request.UrlReferrer.ToString());
-                //            //}
+                if (attemptedUser.RoleID == (int)RoleType.Admin ||
+                    attemptedUser.RoleID == (int)RoleType.Principle ||
+                    attemptedUser.RoleID == (int)RoleType.Director)
+                {
+                    var branches = (new AdminData()).GetBranches(
+                        attemptedUser.UserID,
+                        attemptedUser.SBranchID,
+                        attemptedUser.RoleID).ToList();
+                    Session["SBrancheList"] = branches;
+                    activeBranchId = branches.FirstOrDefault()?.SBranchID ?? attemptedUser.SBranchID;
+                    Session["SBranchID"] = activeBranchId;
+                    try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
+                    commonData.InitializeStartupSettings(activeBranchId);
+                    return RedirectToAction("Dashboard", "Admin");
+                }
 
-                //        }
-                //    }
-                //}
-                //else
-                //{
-                //    ModelState.AddModelError("Error", "Please enter valid Username and Password");
-                //    return View(login);
-                //}
+                if (attemptedUser.RoleID == (int)RoleType.Technical)
+                {
+                    ClearBranchPaymentDueSession();
+                    return RedirectToAction("FirstBranch", "Admin");
+                }
+
+                try { SetBranchPaymentDueSession(activeBranchId); } catch { ClearBranchPaymentDueSession(); }
+
+                if (attemptedUser.RoleID == (int)RoleType.Parent)
+                {
+                    commonData.InitializeStartupSettings(activeBranchId);
+                    return RedirectToAction("LandingPage", "Parent");
+                }
+                if (attemptedUser.RoleID == (int)RoleType.Account)
+                {
+                    commonData.InitializeStartupSettings(activeBranchId);
+                    return RedirectToAction("Dashboard", "Account");
+                }
+                if (attemptedUser.RoleID == (int)RoleType.Teacher)
+                {
+                    commonData.InitializeStartupSettings(activeBranchId);
+                    return RedirectToAction("Dashboard", "Teacher");
+                }
+                if (attemptedUser.RoleID == (int)RoleType.Library)
+                {
+                    return RedirectToAction("Dashboard", "Library");
+                }
+                if (attemptedUser.RoleID == (int)RoleType.Reception ||
+                    attemptedUser.RoleID == (int)RoleType.Receptionist)
+                {
+                    return RedirectToAction("Dashboard", "Reception");
+                }
+
+                return RedirectToAction("Index", "Home");
             }
-            else
+            catch (Exception ex)
             {
-                ModelState.AddModelError("Error", "Please enter Username and Password");
+                Trace.TraceError("Login failed due to an internal error: {0}", ex);
+                TempData["LoginError"] = "Server is temporarily unavailable. Please try again in a moment.";
+                return RedirectToAction("Index", "Home");
             }
-            return RedirectToAction("Index", "Home");
-
         }
         public ActionResult LoginPartial(Login login)
         {

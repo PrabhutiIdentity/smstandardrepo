@@ -2,12 +2,18 @@
 @{
     ViewBag.Title = "Index";
 
-    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+    var paymentOrigin = Convert.ToString(ViewBag.PaymentOrigin);
+    Layout = string.Equals(paymentOrigin, "Account", StringComparison.OrdinalIgnoreCase)
+        ? "~/Views/Shared/_AccountLayout.cshtml"
+        : "~/Views/Shared/_ParentLayout.cshtml";
+    var backUrl = string.Equals(paymentOrigin, "Account", StringComparison.OrdinalIgnoreCase)
+        ? Url.Action("StudentFeePaymentSearch", "Account")
+        : Url.Action("FeeSummery", "Parent");
 }
 <div class="row" style="align-content:center;">
     <h2>Your Payment was sucessfully done.</h2>
     <h4>You can collect fee Reciept from Payment page.</h4><br />
     <h4> Your online Payment order ID - @ViewBag.orderID</h4>
 
-    <a href="/Parent/FeeSummery" class="btn btn-primary">Back to Fee Summary Page</a>
+    <a href="@backUrl" class="btn btn-primary">Back to Fee Summary Page</a>
 </div>

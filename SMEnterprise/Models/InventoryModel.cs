@@ -160,6 +160,9 @@ namespace SMEnterprise.Models
         public string ProductCategoryName { get; set; }
         public decimal Quantity { get; set; }
         public decimal Available { get; set; }
+        public decimal OpeningQuantity { get; set; }
+        public decimal PurchaseQuantity { get; set; }
+        public decimal SaleQuantity { get; set; }
         public decimal MinQty { get; set; }
         public int Status { get; set; }
         public string Name { get; set; }
@@ -295,6 +298,7 @@ namespace SMEnterprise.Models
         public DateTime TrDate { get; set; }
         public int TrType { get; set; }
         public string RefName { get; set; }
+        public string ProductNames { get; set; }
         public int ClassID { get; set; }
         public int SectionID { get; set; }
         public int SessionID { get; set; }

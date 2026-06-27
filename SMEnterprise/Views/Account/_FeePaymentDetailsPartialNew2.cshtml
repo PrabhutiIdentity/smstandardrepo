@@ -291,7 +291,7 @@
 
                 @*@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy")*@
                 Fee Date
-                <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" />
+                <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" disabled="disabled" />
          
             </div>
                     <div class="col-md-3">
@@ -317,43 +317,15 @@
             </div>
         </div>
 <script>
-    (function () {
-        var branchId = @Model.SBranchID;
-        var restrictedBranches = [17, 25];
-
+    (
+        function () {
         var dt = document.getElementById("dtDate");
         if (!dt) return;
 
-        var today = new Date().toISOString().split('T')[0];
-
-        // 🔒 ALL branches → future date not allowed
+        var today = "@Model.FeeDate.ToString("yyyy-MM-dd")";
+        dt.value = today;
+        dt.setAttribute("min", today);
         dt.setAttribute("max", today);
-
-        if (restrictedBranches.indexOf(branchId) !== -1) {
-
-            // 🔒 restricted → only today
-            dt.setAttribute("min", today);
-
-            dt.addEventListener("change", function () {
-                if (dt.value !== today) {
-                    dt.value = today;
-                }
-            });
-
-        } else {
-
-            // 🔒 other branches → no future, but past allowed
-            dt.addEventListener("change", function () {
-                if (dt.value > today) {
-                    dt.value = today;
-                }
-            });
-        }
-
-        // ❌ block manual typing for all
-        dt.addEventListener("keydown", function (e) {
-            e.preventDefault();
-        });
-
+        dt.setAttribute("disabled", "disabled");
     })();
 </script>

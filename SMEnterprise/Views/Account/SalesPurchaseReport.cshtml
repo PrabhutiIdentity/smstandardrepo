@@ -1,0 +1,132 @@
+@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StockManagementModel
+@section IncludeCss
+{
+    <title>Sales Purchase Report</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet">
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet">
+}
+<div class="">
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("SalesPurchaseReport", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", id = "frmSalesPurchaseReport" }))
+            {
+                <div class="row std-mng-head">
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-5 padding">
+                                <label class="col-md-5 text-right">Report Type :</label>
+                                <div class="col-md-7">
+                                    <select class="form-control" name="TrType" id="ddlStocks">
+                                        <option value="-1" @(-1 == Model.TrType ? "selected" : "")>Sales & Purchase</option>
+                                        <option value="0" @(0 == Model.TrType ? "selected" : "")>Purchase</option>
+                                        <option value="1" @(1 == Model.TrType ? "selected" : "")>Sale</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <div class="row">
+                                    <label class="col-md-3 text-right padding-R">Start Date :</label>
+                                    <div class="col-md-7 padding-L" style="padding-left:10px;">
+                                        <input type="date" value="@Model.StartDate.ToString("yyyy-MM-dd")" name="StartDate" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <div class="row">
+                                    <label class="col-md-3 text-right padding-R">End Date :</label>
+                                    <div class="col-md-7 padding-L" style="padding-left:10px;">
+                                        <input type="date" value="@Model.EndDate.ToString("yyyy-MM-dd")" name="EndDate" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <a href="javascript:void(0);" onclick="$('#frmSalesPurchaseReport').submit();"><i class="fa fa-search"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="x_panel">
+                <div class="x_content">
+                    <table id="tblSalesPurchaseReport" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Party</th>
+                                <th>Products</th>
+                                <th>Quantity</th>
+                                <th>Total Amount</th>
+                                <th>Paid</th>
+                                <th>Due</th>
+                                <th>Payment</th>
+                                <th>Status</th>
+                                <th>Remark</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (StockTransaferMasterModel row in Model.Transactions ?? new List<StockTransaferMasterModel>())
+                            {
+                                <tr>
+                                    <td>@row.TrDate.ToString("dd MMM, yyyy")</td>
+                                    <td>@(row.TrType == 0 ? "Purchase" : "Sale")</td>
+                                    <td>@row.RefName</td>
+                                    <td>@row.ProductNames</td>
+                                    <td>@row.Quantity.ToString("N2")</td>
+                                    <td>@row.Amount.ToString("N2")</td>
+                                    <td>@row.PaidAmount.ToString("N2")</td>
+                                    <td>@row.DueAmount.ToString("N2")</td>
+                                    <td>@row.PaymentStatusText</td>
+                                    <td>@(row.Status == 0 ? "Canceled" : "Approved")</td>
+                                    <td>@row.Remark</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts
+{
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    <script src="@Url.Content("~/js/buttons.bootstrap.min.js")"></script>
+    <script>
+        $(document).ready(function () {
+            var printdate = 'Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy  hh:mm:ss tt")';
+            var rpname = 'Date Range ' + $('#ddlStocks option:selected').text() + ' Report';
+            var repname = 'Report Generate on: ' + '@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd-MM-yyy hh:mm:ss tt")';
+
+            $('#tblSalesPurchaseReport').DataTable({
+                dom: "Bfrtip",
+                paging: true,
+                pageLength: 31,
+                aaSorting: [],
+                buttons: [
+                    { extend: "copy", className: "btn-sm", footer: true, message: printdate, messageTop: '@Model.Branch.BranchSchoolName', messageBottom: repname, title: rpname },
+                    { extend: "csv", className: "btn-sm", footer: true, message: printdate, messageTop: '@Model.Branch.BranchSchoolName', messageBottom: repname, title: rpname },
+                    { extend: "excel", className: "btn-sm", footer: true, messageTop: rpname, messageBottom: repname, title: '@Model.Branch.BranchSchoolName' },
+                    { extend: "pdfHtml5", className: "btn-sm", footer: true, orientation: 'landscape', message: printdate, messageBottom: repname, title: rpname },
+                    { extend: "print", className: "btn-sm", footer: true, message: printdate, messageTop: rpname, messageBottom: repname, title: '@Model.Branch.BranchSchoolName' }
+                ],
+                responsive: true
+            });
+
+            $('#liStockManagement').closest('ul').closest('li').addClass('active');
+            $('#liStockManagement').addClass('active');
+        });
+    </script>
+}

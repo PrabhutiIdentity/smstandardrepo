@@ -26,6 +26,12 @@ namespace SMEnterprise.Repository
             public string FeeTypeName { get; set; }
         }
 
+        private sealed class ActiveTransportFlag
+        {
+            public int StudentID { get; set; }
+            public int StopID { get; set; }
+        }
+
         public StudentsPageModel GetParentAppDetail(int ClassID, int SectionID, int SBranchID)
         {
             StudentsPageModel objModel = new StudentsPageModel();
@@ -124,6 +130,7 @@ namespace SMEnterprise.Repository
                 using (var multi = con.QueryMultiple("spn_GetStudentsByClassSection", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
                     objModel.Students = multi.Read<StudentModel>().ToList();
+                    SetActiveTransportFlags(con, objModel.Students);
                     objModel.Classes = multi.Read<ClassModel>().ToList();
                     objModel.Sections = multi.Read<SectionModel>().ToList();
                     objModel.ClassID = multi.Read<int>().SingleOrDefault();
@@ -143,6 +150,32 @@ namespace SMEnterprise.Repository
                 }
             }
             return objModel;
+        }
+
+        private void SetActiveTransportFlags(SqlConnection con, List<StudentModel> students)
+        {
+            if (students == null || !students.Any()) return;
+
+            var studentIDs = students.Select(x => x.StudentID).Distinct().ToList();
+
+            // IDs ko comma-separated string banana: "1,2,3,4"
+            string joinedIDs = string.Join(",", studentIDs);
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@StudentIDsString", joinedIDs);
+            parameters.Add("@CurrentDate", CommonUsage.GetCurrentDate().Date);
+
+            Dictionary<int, int> activeStops;
+            using (SqlConnection lookupCon = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                activeStops = lookupCon.Query<ActiveTransportFlag>("usp_GetActiveTransportFlags",
+                    parameters, commandType: CommandType.StoredProcedure).ToDictionary(x => x.StudentID, x => x.StopID);
+            }
+
+            foreach (var student in students)
+            {
+                student.StopID = activeStops.TryGetValue(student.StudentID, out int stopId) ? stopId : 0;
+            }
         }
 
         public StudentsPageModel GetStudentInactive(int ClassID, int SectionID, int SBranchID, int SessionID)
@@ -236,6 +269,85 @@ namespace SMEnterprise.Repository
                 }
                 objModel.SearchText = SearchText;
                 return objModel;
+            }
+        }
+        public List<StudentSearchModel> SearchStudentsForFeePayment(string searchText, int sBranchId, int sessionId)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                const string sql = @"
+DECLARE @EffectiveSessionID INT = @SessionID;
+
+IF ISNULL(@EffectiveSessionID, 0) = 0
+BEGIN
+    SELECT TOP 1 @EffectiveSessionID = SessionID
+    FROM SessionMaster
+    WHERE SBranchID = @SBranchID
+      AND SessionStatus = 1
+    ORDER BY SessionStartDate DESC, SessionID DESC;
+END
+
+SELECT
+    PM.FatherName,
+    0 AS SLCGenerated,
+    0 AS CSGenerated,
+    0 AS DOBCGenerated,
+    0 AS NDCGenerated,
+    0 AS TFCGenerated,
+    ISNULL(SM.SchoolUID, '') AS SchoolUID,
+    SM.StudentID,
+    ISNULL(SM.StudentSID, '') AS StudentSID,
+    SM.DOB,
+    ISNULL(SM.Gender, 0) AS Gender,
+    ISNULL(SS.ClassID, 0) AS ClassID,
+    ISNULL(SS.SectionID, 0) AS SectionID,
+    ISNULL(SM.Photo, '') AS Photo,
+    ISNULL(SM.Photo1, '') AS Photo1,
+    ISNULL(SM.Name, '') AS Name,
+    ISNULL(SS.RollNo, '') AS RollNo,
+    ISNULL(SM.BloodGroup, '') AS BloodGroup,
+    ISNULL(SM.AccessCardNo, '') AS AccessCardNo,
+    ISNULL(SM.AadharCardNo, '') AS AadharCardNo,
+    ISNULL(SM.GuardianMobileNo, '') AS GuardianMobileNo,
+    ISNULL(PM.FatherMobileNo, '') AS FatherMobileNo,
+    ISNULL(PM.MotherMobileNo, '') AS MotherMobileNo,
+    ISNULL(CM.ClassName, '') AS ClassName,
+    ISNULL(CS.Name, '') AS SectionName,
+    ISNULL(SM.SSSID, '') AS SSSID,
+    ISNULL(SM.FamilyID, '') AS FamilyID,
+    ISNULL(PM.MotherName, '') AS MotherName,
+    ISNULL(SM.GuardianName, '') AS GuardianName,
+    ISNULL(SM.MiniAddress, '') AS MiniAddress,
+    0 AS TCGenerated
+FROM StudentMaster SM
+INNER JOIN Student_Session SS
+    ON SS.StudentID = SM.StudentID
+LEFT JOIN ParentMaster PM
+    ON PM.ParentID = SM.ParentID
+LEFT JOIN ClassMaster CM
+    ON CM.ClassID = SS.ClassID
+LEFT JOIN Class_Sections CS
+    ON CS.ID = SS.SectionID
+WHERE SS.SBranchID = @SBranchID
+  AND SS.SessionID = @EffectiveSessionID
+  AND (
+        ISNULL(PM.FatherMobileNo, '') = @SearchText
+        OR ISNULL(PM.MotherMobileNo, '') = @SearchText
+        OR ISNULL(SM.GuardianMobileNo, '') = @SearchText
+        OR CAST(ISNULL(PM.ParentID, 0) AS varchar(30)) = @SearchText
+        OR ISNULL(SM.SParentID, '') = @SearchText
+      )
+ORDER BY
+    TRY_CONVERT(INT, SS.RollNo),
+    SS.RollNo,
+    SM.Name;";
+
+                return con.Query<StudentSearchModel>(sql, new
+                {
+                    SearchText = searchText,
+                    SBranchID = sBranchId,
+                    SessionID = sessionId
+                }, commandType: CommandType.Text).ToList();
             }
         }
 
@@ -459,9 +571,52 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ClassID", model.ClassID);
                 paramater.Add("@SectionID", model.SectionID);
                 paramater.Add("@Students", model.GetPromotedStudentsDataTable());
-                return con.Query<int>("sp_PromoteStudents", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                int result = con.Query<int>("sp_PromoteStudents", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                CopyOptionalSubjectsForPromotedStudents(con, model);
+                return result;
 
             }
+        }
+        private void CopyOptionalSubjectsForPromotedStudents(SqlConnection con, StudentPromotionModel model)
+        {
+            if (model.Students == null)
+            {
+                return;
+            }
+
+            foreach (var student in model.Students.Where(x => x.IsSelected == 1))
+            {
+                int targetStudentSessionUID = GetLatestStudentSessionUID(con, student.StudentID, model.SBranchID, model.SessionID, model.ClassID, model.SectionID);
+                CopyOptionalSubjectsFromPreviousMatchingSession(con, targetStudentSessionUID);
+            }
+        }
+
+        private int GetLatestStudentSessionUID(SqlConnection con, int studentID, int sBranchID, int sessionID, int classID, int sectionID)
+        {
+            var parameters = new DynamicParameters();
+            parameters.Add("@StudentID", studentID);
+            parameters.Add("@SBranchID", sBranchID);
+            parameters.Add("@SessionID", sessionID);
+            parameters.Add("@ClassID", classID);
+            parameters.Add("@SectionID", sectionID);
+
+            // Single integer return value ke liye ExecuteScalar sabse fast aur clean hai
+            return con.ExecuteScalar<int>("usp_GetLatestStudentSessionUID",parameters,commandType: CommandType.StoredProcedure);
+        }
+
+        private void CopyOptionalSubjectsFromPreviousMatchingSession(SqlConnection con, int targetStudentSessionUID)
+        {
+            // Guard clause to avoid unnecessary database trips
+            if (targetStudentSessionUID <= 0)
+            {
+                return;
+            }
+
+            var parameters = new DynamicParameters();
+            parameters.Add("@TargetStudentSessionUID", targetStudentSessionUID);
+
+            // Stored procedure execute karke execution wahi wrap ho jayega
+            con.Execute("usp_CopyOptionalSubjectsFromPreviousMatchingSession",parameters,commandType: CommandType.StoredProcedure);
         }
         public StudentEditModel GetStudentDetailsNew(int StudentID, int SBranchID)
         {
@@ -511,6 +666,7 @@ namespace SMEnterprise.Repository
 
                     }
                 }
+                SetActiveTransportFlags(con, new List<StudentModel> { objModel.Student });
                 if (objModel.ParantDetails == null)
                 {
                     objModel.ParantDetails = new ParentModel();
@@ -588,6 +744,22 @@ namespace SMEnterprise.Repository
                 paramater.Add("@SBranchID", objData.SBranchID);
 
                 return con.Query<int>("sp_UpdateTransportAllocationDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
+
+        public bool HasPaidTransportFeeForAllocation(int studentID, int thChangeID, int sBranchID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameters = new DynamicParameters();
+                parameters.Add("@StudentID", studentID);
+                parameters.Add("@THChangeID", thChangeID);
+                parameters.Add("@SBranchID", sBranchID);
+
+                // ExecuteScalar se direct 1 ya null milega, jo Any() ya null comparison se check ho jayega
+                var result = con.ExecuteScalar<int?>("usp_HasPaidTransportFeeForAllocation",parameters,commandType: CommandType.StoredProcedure);
+
+                return result.HasValue && result.Value == 1;
             }
         }
         public VendorPageModel GetVendors(int SBranchID)
@@ -698,6 +870,7 @@ namespace SMEnterprise.Repository
                     objModel.Student.DOB = CommonUsage.GetCurrentDate();
                     objModel.Student.DOJ = CommonUsage.GetCurrentDate();
                 }
+                SetActiveTransportFlags(con, new List<StudentModel> { objModel.Student });
                 if (objModel.ParantDetails == null)
                 {
                     objModel.ParantDetails = new ParentModel();
@@ -961,8 +1134,24 @@ namespace SMEnterprise.Repository
                 paramater.Add("@ReasonforInactive", objData.ReasonforInactive);
                 paramater.Add("@IsNewSessionRequest", objData.IsNewSessionRequest);
 
-                return con.Query<int>("spn_InsertUpdateStudentSessionDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                int result = con.Query<int>("spn_InsertUpdateStudentSessionDetails", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                if (result > 0 && objData.StudentSessionUID == 0 && !HasSelectedOptionalSubjects(objData) && !HasManualOptionalSubjectChanges(objData))
+                {
+                    int targetStudentSessionUID = GetLatestStudentSessionUID(con, objData.StudentID, objData.SBranchID, objData.SessionID, objData.ClassID, objData.SectionID);
+                    CopyOptionalSubjectsFromPreviousMatchingSession(con, targetStudentSessionUID);
+                }
+                return result;
             }
+        }
+
+        private bool HasSelectedOptionalSubjects(SessionModel objData)
+        {
+            return objData.SubjectsOpted != null && objData.SubjectsOpted.Any(x => Convert.ToString(x.Extra2) == "1");
+        }
+
+        private bool HasManualOptionalSubjectChanges(SessionModel objData)
+        {
+            return objData.SubjectsOpted != null && objData.SubjectsOpted.Any(x => Convert.ToString(x.Extra3) == "1");
         }
         public StudentEditModel GetStudentDetailsMini(int StudentID, int SBranchID)
         {
@@ -986,6 +1175,7 @@ namespace SMEnterprise.Repository
                     objModel.Student.DOB = CommonUsage.GetCurrentDate();
                     objModel.Student.DOJ = CommonUsage.GetCurrentDate();
                 }
+                SetActiveTransportFlags(con, new List<StudentModel> { objModel.Student });
                 if (objModel.ParantDetails == null)
                 {
                     objModel.ParantDetails = new ParentModel();
@@ -1020,6 +1210,7 @@ namespace SMEnterprise.Repository
                     objModel.Student.DOB = CommonUsage.GetCurrentDate();
                     objModel.Student.DOJ = CommonUsage.GetCurrentDate();
                 }
+                SetActiveTransportFlags(con, new List<StudentModel> { objModel.Student });
                 if (objModel.ParantDetails == null)
                 {
                     objModel.ParantDetails = new ParentModel();
@@ -3313,6 +3504,7 @@ namespace SMEnterprise.Repository
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
                 StartupModel objStartupModel = (StartupModel)HttpContext.Current.Session["StartupModel"];
+                var requestedSessionID = objModel.SessionID;
                 var paramater = new DynamicParameters();
                 paramater.Add("@ClassID", objModel.ClassID);
                 paramater.Add("@SectionID", objModel.SectionID);
@@ -3329,9 +3521,18 @@ namespace SMEnterprise.Repository
                     objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
                     objModel.ClassID = multi.Read<int>().SingleOrDefault();
                     objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.SessionID = multi.Read<int>().SingleOrDefault();
+                    var resolvedSessionID = multi.Read<int>().SingleOrDefault();
+                    objModel.SessionID = requestedSessionID > 0 ? requestedSessionID : resolvedSessionID;
                     objModel.AdmitCards = multi.Read<AdmitCardModel>().ToList();
                     objModel.Branch = multi.Read<SBranchModel>().SingleOrDefault();
+
+                    var selectedSession = objModel.Sessions != null
+                        ? objModel.Sessions.FirstOrDefault(c => c.SessionID == objModel.SessionID)
+                        : null;
+                    if (selectedSession != null && objModel.AdmitCards != null)
+                    {
+                        objModel.AdmitCards.ForEach(c => c.SessionName = selectedSession.SessionName);
+                    }
                 }
             }
         }
@@ -4362,6 +4563,48 @@ namespace SMEnterprise.Repository
                         }
                     }
                 }
+                var productParameters = new DynamicParameters();
+                productParameters.Add("@SBranchID", SBranchID);
+                objModel.Products = con.Query<ProductModel>(@"
+                    ;WITH ActiveStock AS
+                    (
+                        SELECT
+                            STD.ProductID,
+                            SUM(CASE
+                                    WHEN STM.TrType = 0 THEN ISNULL(STD.Quantity, 0)
+                                    WHEN STM.TrType = 1 THEN -ISNULL(STD.Quantity, 0)
+                                    ELSE 0
+                                END) AS AvailableQty
+                        FROM dbo.StockTransactionDetails STD
+                        INNER JOIN dbo.StockTransactionMaster STM ON STM.STID = STD.STID
+                        WHERE STM.SBranchID = @SBranchID
+                          AND ISNULL(STM.Status, 1) <> 0
+                        GROUP BY STD.ProductID
+                    )
+                    SELECT
+                        PM.ProductID,
+                        PM.ProductCategoryID,
+                        PM.Name,
+                        PM.Photo,
+                        PM.MRP,
+                        PM.Price,
+                        ISNULL(PM.Quantity, 0) AS Quantity,
+                        ISNULL(PM.MinQty, 0) AS MinQty,
+                        PM.Status,
+                        PM.SBranchID,
+                        ISNULL(PC.SGST, 0) AS SGST,
+                        ISNULL(PC.CGST, 0) AS CGST,
+                        ISNULL(PC.IGST, 0) AS IGST,
+                        ISNULL(PM.Quantity, 0) + ISNULL(ASQ.AvailableQty, 0) AS Available
+                    FROM dbo.ProductMaster PM
+                    LEFT JOIN dbo.ProductCategories PC ON PC.ID = PM.ProductCategoryID
+                    LEFT JOIN ActiveStock ASQ ON ASQ.ProductID = PM.ProductID
+                    WHERE PM.SBranchID = @SBranchID
+                      AND ISNULL(PM.Status, 1) = 1
+                    ORDER BY PM.Name;",
+                    productParameters,
+                    commandType: CommandType.Text).ToList();
+
                 objModel.PaymentHistory = GetStockPaymentHistory(STID, SBranchID, con);
                 if (objModel.PaymentHistory == null)
                 {
@@ -5612,8 +5855,8 @@ namespace SMEnterprise.Repository
                 paramater.Add("@WaiverMonths", objData.WaiverMonths);
                 paramater.Add("@Remark", objData.Remark);
                 paramater.Add("@ReferanceNumber", objData.ReferanceNumber);
-                paramater.Add("@PaymentMode", 3);
-                paramater.Add("@CollectedBy", "Payment Gateway");
+                paramater.Add("@PaymentMode", objData.PaymentMode);
+                paramater.Add("@CollectedBy", objData.CollectedBy);
                 paramater.Add("@SessionID", objData.SessionID);
                 paramater.Add("@ExcludedFees", objData.ExcludedFees);
                 paramater.Add("@UserID", objData.UserID);

@@ -53,8 +53,15 @@ namespace SMEnterprise.Controllers
         public ActionResult Index()
         {
             ViewBag.Salt = CommonUsage.RandomString(10, false);
+            ViewBag.LoginError = TempData["LoginError"];
             //  SMSSender.SendSMS("Test Message", "8860573641", 1);
             return View();
+        }
+        [AllowAnonymous]
+        public ActionResult Error()
+        {
+            Response.StatusCode = 500;
+            return View("~/Views/Shared/Error.cshtml");
         }
         public ActionResult SendBirthdayWishes()
         {

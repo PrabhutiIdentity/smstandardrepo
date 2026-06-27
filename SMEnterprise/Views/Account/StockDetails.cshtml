@@ -594,7 +594,7 @@
             <select class="form-control" name="ProductID" id="ddlProductID" onchange="ProductChanged(this);">
                 @foreach (var p in Model.Products)
                 {
-                    <option value="@p.ProductID" available="@p.Available" mrp="@p.MRP" sgst="@p.SGST" cgst="@p.CGST" igst="@p.IGST" qty="@p.Quantity" cost="@p.Price">@p.Name (@p.Price)</option>
+                    <option value="@p.ProductID" available="@p.Available" mrp="@p.MRP" sgst="@p.SGST" cgst="@p.CGST" igst="@p.IGST" qty="@p.Quantity" cost="@p.Price" @(Model.TrType == 1 && p.Available <= 0 ? "disabled" : "")>@p.Name (@p.Price)</option>
                 }
             </select>
         </div>
@@ -686,6 +686,10 @@
             var ET = $('#ddlEmployeeTypes').val();
             LoadEmployeesForStock(ET);
         }
+        function IsPurchaseVendorSelected() {
+            var vendorId = $('#ddlVendors').val();
+            return $('#ddlTrType').val() != '0' || (vendorId != null && vendorId != '' && vendorId != '0');
+        }
         function UpdatePaymentReferenceHelp() {
             var paymentMode = $('#ddlPaymentMode').val();
             var placeholder = 'Enter payment reference';
@@ -725,8 +729,9 @@
             var igst = $(sender).closest('.row').find('#hdnEIGST').val();
             var ctr = $('#tblExpDetails').find('tr').length;
             var stdid = $(sender).closest('.row').find('#hdnSTDID').val();
-            var Qty = parseInt($(sender).closest('.row').find('#txtQuantity').val());
+            var Qty = parseFloat($(sender).closest('.row').find('#txtQuantity').val());
             var PID = $(sender).closest('.row').find('#ddlProductID').val();
+            var available = parseFloat($(sender).closest('.row').find('#ddlProductID option:selected').attr('available') || '0');
             var price = parseFloat($(sender).closest('.row').find('#txtEPrice').val());
             var cost = price;
             var netamount = cost * Qty + cost * Qty * (parseFloat(sgst) + parseFloat(cgst) + parseFloat(igst)) / 100;
@@ -734,6 +739,9 @@
             var PName = $(sender).closest('.row').find('#ddlProductID option:selected').html().trim();
             if (Qty <= 0) {
                 ShowNotification('Error', "Kindly Specify Quantity", "error");
+            }
+            else if (trtype == '1' && (available <= 0 || Qty > available)) {
+                ShowNotification('Stock not available', "Sale quantity cannot be greater than available quantity (" + available + ").", "error");
             }
             else {
                 var tr = '<tr class="trStockItem">';
@@ -829,6 +837,11 @@
                       ShowNotification('Payment', 'Paid amount can not be negative.', 'error');
                       return false;
                   }
+              }
+              if ($('#ddlTrType').val() == '0' && !IsPurchaseVendorSelected()) {
+                  ShowNotification('Vendor', 'Kindly select vendor for purchase.', 'error');
+                  $('#ddlVendors').focus();
+                  return false;
               }
               if ($('#ddlTrType').val() == 0) {
                   $('#hdnRefID').val($('#ddlVendors').val());
@@ -1050,7 +1063,41 @@
             }, 700);
         }
         var EditSessionForm;
+        function GetAddedSaleQuantity(productId) {
+            var usedQty = 0;
+            $('#tblExpDetails').find('tr').each(function () {
+                var opType = parseInt($(this).find('#hdnOpType').val() || '0');
+                if (opType != -1 && $(this).find('#hdnProductID').val() == productId) {
+                    usedQty += parseFloat($(this).find('#hdnQuantity').val() || '0');
+                }
+            });
+            return usedQty;
+        }
+        function RemoveUnavailableProductsFromPopup(container) {
+            var dropdown = $(container).find('#ddlProductID');
+            if ($('#ddlTrType').val() == '1') {
+                dropdown.find('option').each(function () {
+                    var available = parseFloat($(this).attr('available') || '0');
+                    var remaining = available - GetAddedSaleQuantity($(this).val());
+                    if (remaining <= 0) {
+                        $(this).remove();
+                    }
+                    else {
+                        $(this).attr('available', remaining);
+                    }
+                });
+            }
+            if (dropdown.find('option').length == 0) {
+                return false;
+            }
+            dropdown.val(dropdown.find('option:first').val());
+            ProductChanged(dropdown[0]);
+            return true;
+        }
         function ProductChanged(sender) {
+            if ($(sender).find('option:selected').length == 0) {
+                return;
+            }
             console.log($(sender).closest('.add-product').find("#ddlProductID option:selected").attr('sgst'));
             $(sender).closest('.add-product').find("#txtEMRP").val($(sender).closest('.add-product').find("#ddlProductID option:selected").attr('mrp'));
             $(sender).closest('.add-product').find("#txtEPrice").val($(sender).closest('.add-product').find("#ddlProductID option:selected").attr('cost'));
@@ -1085,28 +1132,19 @@
                 ShowNotification('Locked', "Paid transactions can only be cancelled.", "error");
                 return;
             }
-
-            var vendorState = @sBranchStateID;
-            if ($('#ddlTrType').val() == 0) {
-               vendorState= $("#ddlVendors option:selected").attr('stateid');
-            }
-            if (vendorState ==@sBranchStateID) {
-                var SGST = $("#ddlProductID option:selected").attr('sgst');
-                var CGST = $("#ddlProductID option:selected").attr('cgst');
-                var IGST = 0;
-            }
-            else {
-                var SGST = 0;
-                var CGST = 0;
-                var IGST = $("#ddlProductID option:selected").attr('igst');
+            if ($('#ddlTrType').val() == '0' && !IsPurchaseVendorSelected()) {
+                ShowNotification('Vendor', 'Kindly select vendor for purchase.', 'error');
+                $('#ddlVendors').focus();
+                return;
             }
 
-            var Qty = $("#ddlProductID option:selected").attr('qty');
-            var Available = $("#ddlProductID option:selected").attr('available');
-            var cQty=parseFloat(Qty) + parseFloat(Available)
-            $('#lblGSTDetails').html("SGST: (" + SGST + "%) CGST:(" + CGST + "%) IGST:(" + IGST + "%) Quantity:(" + Available + ")");
+            var popupContent = $('<div></div>').html($('#divAddProduct').html());
+            if (!RemoveUnavailableProductsFromPopup(popupContent.find('.add-product'))) {
+                ShowNotification('Stock not available', 'No product is available for sale.', 'error');
+                return;
+            }
             EditSessionForm = new PNotify({
-                text: $('#divAddProduct').html(),
+                text: popupContent.html(),
                 icon: false,
                 width: '40%',
                 hide: false,
@@ -1118,8 +1156,10 @@
                 },
                 insert_brs: false
             });
-            $('.ui-pnotify-text').find('#txtEPrice').val($("#ddlProductID option:selected").attr('cost'));
-            $('.ui-pnotify-text').find('#txtEMRP').val($("#ddlProductID option:selected").attr('mrp'));
+            ProductChanged($('.ui-pnotify-text').find('#ddlProductID')[0]);
+            var popupProduct = $('.ui-pnotify-text').find('#ddlProductID option:selected');
+            $('.ui-pnotify-text').find('#txtEPrice').val(popupProduct.attr('cost'));
+            $('.ui-pnotify-text').find('#txtEMRP').val(popupProduct.attr('mrp'));
 
             if ($('#ddlTrType').val() == 0) {
                 $('.ui-pnotify-text').find('#lblPrice').html('Purchase Price');
@@ -1134,9 +1174,6 @@
                 $('.ui-pnotify-text').find('.costfield').css('display', 'none');
             }
 
-             $('.ui-pnotify-text').find('#hdnESGST').val(SGST);
-             $('.ui-pnotify-text').find('#hdnECGST').val(CGST);
-             $('.ui-pnotify-text').find('#hdnEIGST').val(IGST);
             //$('.').css('margin-right', '100px');
         }
         function ImageChanged(fileBox, Type) {

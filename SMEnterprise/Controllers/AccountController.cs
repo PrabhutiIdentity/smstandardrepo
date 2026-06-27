@@ -171,6 +171,100 @@ namespace SMEnterprise.Controllers
             objModel = objAccountData.SearchStudents(objModel.SearchText, SBranchID, objModel.SessionID);
             return View(objModel);
         }
+        [PermissionFilter]
+        public ActionResult StudentFeePaymentSearch(StudentFeePaymentSearchPageModel objModel)
+        {
+            if (objModel == null)
+            {
+                objModel = new StudentFeePaymentSearchPageModel();
+            }
+
+            objModel.SearchText = objModel.SearchText == null ? null : objModel.SearchText.Trim();
+
+            int sBranchId = PermissionManager.GetLoggedInUser().SBranchID;
+
+            if (!string.IsNullOrWhiteSpace(objModel.SearchText))
+            {
+                try
+                {
+                    StudentSearchListModel searchData = objAccountData.SearchStudents(objModel.SearchText, sBranchId, objModel.SessionID);
+                    objModel.SearchResults = searchData == null ? new List<StudentSearchModel>() : (searchData.Students ?? new List<StudentSearchModel>());
+                    objModel.Sessions = searchData == null ? new List<NameIDModel>() : (searchData.Sessions ?? new List<NameIDModel>());
+                    if (objModel.SessionID == 0 && searchData != null)
+                    {
+                        objModel.SessionID = searchData.SessionID;
+                    }
+                    if (objModel.StudentID == 0 && objModel.SearchResults.Count == 1)
+                    {
+                        objModel.StudentID = objModel.SearchResults[0].StudentID;
+                    }
+                    if (objModel.SearchResults.Count == 0 && objModel.SearchText.Any(char.IsDigit))
+                    {
+                        objModel.SearchResults = objAccountData.SearchStudentsForFeePayment(objModel.SearchText, sBranchId, objModel.SessionID) ?? new List<StudentSearchModel>();
+                        if (objModel.StudentID == 0 && objModel.SearchResults.Count == 1)
+                        {
+                            objModel.StudentID = objModel.SearchResults[0].StudentID;
+                        }
+                    }
+                }
+                catch
+                {
+                    objModel.SearchResults = new List<StudentSearchModel>();
+                    objModel.StudentID = 0;
+                    objModel.SelectedStudent = null;
+                    objModel.FeeSummary = null;
+                }
+            }
+
+            bool selectedStudentExistsInResults = objModel.SearchResults != null && objModel.SearchResults.Any(c => c.StudentID == objModel.StudentID);
+            if (!string.IsNullOrWhiteSpace(objModel.SearchText) && !selectedStudentExistsInResults)
+            {
+                objModel.StudentID = 0;
+            }
+
+            if (objModel.StudentID > 0 && objModel.SearchResults != null)
+            {
+                objModel.SelectedSearchStudent = objModel.SearchResults.FirstOrDefault(c => c.StudentID == objModel.StudentID);
+            }
+
+            if (objModel.StudentID > 0 && objModel.SelectedSearchStudent == null)
+            {
+                objModel.StudentID = 0;
+                objModel.SelectedStudent = null;
+                objModel.FeeSummary = null;
+            }
+
+            if (objModel.SearchResults == null)
+            {
+                objModel.SearchResults = new List<StudentSearchModel>();
+            }
+
+            if (objModel.Sessions == null)
+            {
+                objModel.Sessions = new List<NameIDModel>();
+            }
+
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult StudentFeePaymentSummaryPartial(int studentId)
+        {
+            int sBranchId = PermissionManager.GetLoggedInUser().SBranchID;
+            try
+            {
+                StudentSessionFeeStatusPageModel model = new StudentSessionFeeStatusPageModel
+                {
+                    StudentID = studentId,
+                    SBranchID = sBranchId
+                };
+                objAccountData.GetStudentMonthWiseSessionFeeDetails(model);
+                return PartialView("_StudentFeePaymentSummarySearchPartial", model);
+            }
+            catch
+            {
+                return Content("<div class=\"empty-state\">Unable to load fee details right now. Please try again.</div>");
+            }
+        }
 
 
         [PermissionFilter]
@@ -507,15 +601,7 @@ namespace SMEnterprise.Controllers
             return PartialView("_SessionEditPartial", objModel);
         }
         [PermissionFilter]
-        /*  public ActionResult SaveStudentSession(SessionModel objData)
-          {
-              objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
 
-              objAccountData.UpdateStudentSession(objData);
-
-              return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
-          }
-        */
         private bool HasOverlappingStudentSession(SessionModel objData, int sBranchID)
         {
             var studentDetails = objAccountData.GetStudentDetailsNew(objData.StudentID, sBranchID);
@@ -530,8 +616,24 @@ namespace SMEnterprise.Controllers
         public ActionResult SaveStudentSession(SessionModel objData, int IsNewSessionRequest = 0)
         {
             objData.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-            objData.IsNewSessionRequest = IsNewSessionRequest;
-            if (IsNewSessionRequest == 1 && HasOverlappingStudentSession(objData, objData.SBranchID))
+            if (objData.Status == 0)
+            {
+                if (string.IsNullOrWhiteSpace(objData.ReasonforInactive))
+                {
+                    TempData["SessionSaveMessage"] = "Please enter inactive reason.";
+                    return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
+                }
+
+                DateTime currentDate = CommonUsage.GetCurrentDate().Date;
+                if (objData.ToDate.Year == 1 || objData.ToDate.Date > currentDate)
+                {
+                    objData.ToDate = currentDate;
+                }
+            }
+
+            bool isNewSessionRequest = objData.StudentSessionUID == 0;
+            objData.IsNewSessionRequest = isNewSessionRequest ? 1 : 0;
+            if (isNewSessionRequest && HasOverlappingStudentSession(objData, objData.SBranchID))
             {
                 TempData["SessionSaveMessage"] = "Same session/date range already exists for this student. New session was not added.";
                 return Redirect("~/Account/StudentDetails/" + objData.StudentID + "/" + 6);
@@ -605,6 +707,12 @@ namespace SMEnterprise.Controllers
             //}
             if (objData.OpType == -1)
             {
+                if (objAccountData.HasPaidTransportFeeForAllocation(objData.UserID, objData.THChangeID, objData.SBranchID))
+                {
+                    TempData["TransportSaveMessage"] = "Transport fee payment exists for this allocation. Please stop transport instead of removing it.";
+                    return Redirect("~/Account/StudentDetails/" + objData.UserID + "/" + 7);
+                }
+
                 objData.StartDate = CommonUsage.GetCurrentDate();
                 objData.EndDate = CommonUsage.GetCurrentDate();
             }
@@ -891,6 +999,9 @@ namespace SMEnterprise.Controllers
                 //}
                 objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
                 objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+                objModel.PaymentDate = CommonUsage.GetCurrentDate();
+                objModel.FeeDate = objModel.PaymentDate;
+                objModel.QDate = objModel.PaymentDate;
                 objModel.Day = objModel.QDate.Day;
                 FeePaymentRowModel objData = objAccountData.SaveStudentFeePayments(objModel);
 
@@ -1719,6 +1830,17 @@ namespace SMEnterprise.Controllers
 
             return PartialView("_SectionOptionsPartial", objModel);
         }
+        [PermissionFilter]
+        public ActionResult GetSessionSectionsOnClass(string id = null, string id2 = null)
+        {
+            int classID = CommonUsage.ConvertToInt(id);
+            int sessionID = CommonUsage.ConvertToInt(id2);
+            IEnumerable<SectionModel> objModel = sessionID > 0
+                ? objAdminData.GetClassSections(classID, -1, sessionID)
+                : objAdminData.GetSectionsOnClass(classID);
+
+            return PartialView("_SectionOptionsPartial", objModel);
+        }
         public ActionResult GetStudentOnSessionSection(string id = null, string id2 = null)
         {
             int ID = CommonUsage.ConvertToInt(id);
@@ -2467,6 +2589,8 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult UpdateTeacherResults(TeacherResultPageModel objModel)
         {
+            objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             int id = objTeacherData.UpdateStudentResults(objModel);
             objModel.ExamResults = null;
             return RedirectToAction("ExamResults", "Account", objModel);
@@ -2718,6 +2842,19 @@ namespace SMEnterprise.Controllers
             {
                 objModel.EndDate = CommonUsage.GetCurrentDate();
                 objModel.StartDate = objModel.EndDate.AddDays(-7);
+            }
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetStockTransfers(objModel);
+            return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult SalesPurchaseReport(StockManagementModel objModel)
+        {
+            if (objModel.StartDate.Year == 1)
+            {
+                objModel.EndDate = CommonUsage.GetCurrentDate();
+                objModel.StartDate = objModel.EndDate.AddDays(-6);
+                objModel.TrType = -1;
             }
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetStockTransfers(objModel);
