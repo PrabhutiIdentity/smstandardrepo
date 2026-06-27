@@ -434,6 +434,135 @@
             box-shadow: 0 10px 40px rgba(0,0,0,0.28);
         }
 
+        .payment-confirm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            padding: 20px;
+        }
+
+            .payment-confirm-overlay.active {
+                display: flex;
+            }
+
+        .payment-confirm-card {
+            width: 100%;
+            max-width: 480px;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+            overflow: hidden;
+            border: 1px solid #dbeafe;
+        }
+
+        .payment-confirm-head {
+            padding: 18px 22px;
+            background: linear-gradient(135deg, #1d4ed8, #2563eb);
+            color: #fff;
+        }
+
+        .payment-confirm-title {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .payment-confirm-subtitle {
+            margin-top: 6px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.88);
+        }
+
+        .payment-confirm-body {
+            padding: 22px;
+        }
+
+        .payment-confirm-amount {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, #ecfeff, #f0fdf4);
+            border: 1px solid #bae6fd;
+            margin-bottom: 18px;
+        }
+
+        .payment-confirm-amount-label {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #0f766e;
+        }
+
+        .payment-confirm-amount-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .payment-confirm-list-label {
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            margin-bottom: 10px;
+        }
+
+        .payment-confirm-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .payment-confirm-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e3a8a;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+            .payment-confirm-chip i {
+                color: #2563eb;
+            }
+
+        .payment-confirm-note {
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 13px;
+            color: #9a3412;
+        }
+
+        .payment-confirm-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 0 22px 22px;
+        }
+
+            .payment-confirm-actions .btn {
+                border-radius: 999px;
+                padding: 10px 18px;
+                font-weight: 800;
+                min-width: 112px;
+            }
+
         .spinner {
             border: 4px solid #f0f0f0;
             border-top: 4px solid #26B99A;
@@ -600,6 +729,14 @@
                 flex-direction: column;
                 gap: 6px;
             }
+
+            .payment-confirm-actions {
+                flex-direction: column-reverse;
+            }
+
+                .payment-confirm-actions .btn {
+                    width: 100%;
+                }
         }
     </style>
 }
@@ -613,6 +750,7 @@
                 {
                     <input type="hidden" name="SelectedMonthsJson" id="SelectedMonthsJson" />
                     <input type="hidden" name="StudentID" value="@Model.StudentID" />
+                    <input type="hidden" name="paymentOrigin" value="Parent" />
 
                     <!-- ═══ HEADER ═══ -->
                     <div class="x_title">
@@ -847,6 +985,36 @@
     </div>
 </div>
 
+<div class="payment-confirm-overlay" id="paymentConfirmOverlay">
+    <div class="payment-confirm-card" role="dialog" aria-modal="true" aria-labelledby="paymentConfirmTitle">
+        <div class="payment-confirm-head">
+            <h3 class="payment-confirm-title" id="paymentConfirmTitle">Confirm Fee Payment</h3>
+            <div class="payment-confirm-subtitle">Please review the selected months before continuing to the payment gateway.</div>
+        </div>
+        <div class="payment-confirm-body">
+            <div class="payment-confirm-amount">
+                <div>
+                    <div class="payment-confirm-amount-label">Total Payable</div>
+                    <div class="payment-confirm-subtitle" style="color:#0f766e; margin-top:4px;">Selected months will be paid for this student.</div>
+                </div>
+                <div class="payment-confirm-amount-value" id="paymentConfirmAmount">&#8377;0.00</div>
+            </div>
+
+            <div class="payment-confirm-list-label">Selected Months</div>
+            <div class="payment-confirm-list" id="paymentConfirmMonths"></div>
+
+            <div class="payment-confirm-note">
+                <i class="fa fa-shield"></i>
+                You will now continue to the secure payment page for the selected fee months.
+            </div>
+        </div>
+        <div class="payment-confirm-actions">
+            <button type="button" class="btn btn-default" id="btnCancelPaymentConfirm">Cancel</button>
+            <button type="button" class="btn btn-primary" id="btnProceedPaymentConfirm">Proceed to Pay</button>
+        </div>
+    </div>
+</div>
+
 @section scripts
 {
     <script src="@Url.Content("~/js/Admin/jquery.dataTables.min.js")"></script>
@@ -902,6 +1070,7 @@
                TOAST
             ──────────────────────────────────────────────── */
             var toastTimer;
+            var pendingPaymentPayload = null;
 
             function showToast(title, detail, missingChips, autoChips) {
                 clearTimeout(toastTimer);
@@ -924,6 +1093,23 @@
                 toastTimer = setTimeout(function () {
                     $('#toast-msg').removeClass('show');
                 }, 5500);
+            }
+
+            function openPaymentConfirm(selectedData, names, total) {
+                pendingPaymentPayload = selectedData;
+
+                var chipsHtml = names.map(function (name) {
+                    return '<span class="payment-confirm-chip"><i class="fa fa-calendar"></i>' + name + '</span>';
+                }).join('');
+
+                $('#paymentConfirmAmount').html('&#8377;' + total);
+                $('#paymentConfirmMonths').html(chipsHtml);
+                $('#paymentConfirmOverlay').addClass('active');
+            }
+
+            function closePaymentConfirm() {
+                $('#paymentConfirmOverlay').removeClass('active');
+                pendingPaymentPayload = null;
             }
 
             /* ────────────────────────────────────────────────
@@ -1050,16 +1236,29 @@
                 });
 
                 var total = $('#selected-total').text();
-                var msg = 'You are about to pay for:\n\n'
-                    + '• ' + names.join('\n• ')
-                    + '\n\nTotal Amount: ₹' + total
-                    + '\n\nProceed with payment?';
+                openPaymentConfirm(selectedData, names, total);
+            });
 
-                if (confirm(msg)) {
-                    $('#loadingOverlay').addClass('active');
-                    $('#SelectedMonthsJson').val(JSON.stringify(selectedData));
-                    $('#bulkPaymentForm').submit();
+            $('#btnCancelPaymentConfirm').on('click', function () {
+                closePaymentConfirm();
+            });
+
+            $('#paymentConfirmOverlay').on('click', function (e) {
+                if (e.target === this) {
+                    closePaymentConfirm();
                 }
+            });
+
+            $('#btnProceedPaymentConfirm').on('click', function () {
+                if (!pendingPaymentPayload || pendingPaymentPayload.length === 0) {
+                    closePaymentConfirm();
+                    return;
+                }
+
+                $('#SelectedMonthsJson').val(JSON.stringify(pendingPaymentPayload));
+                closePaymentConfirm();
+                $('#loadingOverlay').addClass('active');
+                $('#bulkPaymentForm').submit();
             });
 
             // Init

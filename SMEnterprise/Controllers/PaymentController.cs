@@ -98,12 +98,17 @@ namespace SMEnterprise.Controllers
             return gateway;
         }
       
-        public ActionResult Index(OrderModel oModel, string SelectedMonthsJson)
+        public ActionResult Index(OrderModel oModel, string SelectedMonthsJson, string paymentOrigin = null)
         {
             
             
 
             string transactionId = Guid.NewGuid().ToString();
+            var normalizedPaymentOrigin = string.Equals(paymentOrigin, "Account", StringComparison.OrdinalIgnoreCase)
+                ? "Account"
+                : "Parent";
+            Session["PaymentOrigin"] = normalizedPaymentOrigin;
+            ViewBag.PaymentOrigin = normalizedPaymentOrigin;
             //int StudentID = CommonUsage.ConvertToInt(Session["SChildID"].ToString());
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             int StudentID = oModel.StudentID;
@@ -582,6 +587,7 @@ namespace SMEnterprise.Controllers
         public ActionResult Success(string ID = null)
         {
             ViewBag.orderID = ID;
+            ViewBag.PaymentOrigin = Convert.ToString(Session["PaymentOrigin"]);
             return View();
         }
 
@@ -594,7 +600,7 @@ namespace SMEnterprise.Controllers
 
         public ActionResult Failed(FormCollection form)
         {
-
+            ViewBag.PaymentOrigin = Convert.ToString(Session["PaymentOrigin"]);
             return View("Failed");
         }
 

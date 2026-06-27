@@ -1,11 +1,17 @@
 ﻿@{
     ViewBag.Title = "Index";
-    Layout = "~/Views/Shared/_ParentLayout.cshtml";
+    var paymentOrigin = Convert.ToString(ViewBag.PaymentOrigin);
+    Layout = string.Equals(paymentOrigin, "Account", StringComparison.OrdinalIgnoreCase)
+        ? "~/Views/Shared/_AccountLayout.cshtml"
+        : "~/Views/Shared/_ParentLayout.cshtml";
+    var backUrl = string.Equals(paymentOrigin, "Account", StringComparison.OrdinalIgnoreCase)
+        ? Url.Action("StudentFeePaymentSearch", "Account")
+        : Url.Action("FeeSummery", "Parent");
 }
 
 <h3>
     <h2>Payment Failed</h2>
     <p>Unfortunately, your payment could not be processed. Please try again.</p>
-    <a href="/Parent/FeeSummery">Return to FeeSummery</a>
+    <a href="@backUrl">Return to FeeSummery</a>
 
 </h3>

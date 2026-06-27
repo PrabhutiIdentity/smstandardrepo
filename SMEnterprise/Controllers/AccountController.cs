@@ -185,36 +185,53 @@ namespace SMEnterprise.Controllers
 
             if (!string.IsNullOrWhiteSpace(objModel.SearchText))
             {
-                StudentSearchListModel searchData = objAccountData.SearchStudents(objModel.SearchText, sBranchId, objModel.SessionID);
-                objModel.SearchResults = searchData.Students;
-                objModel.Sessions = searchData.Sessions;
-                if (objModel.SessionID == 0)
+                try
                 {
-                    objModel.SessionID = searchData.SessionID;
-                }
-                if (objModel.StudentID == 0 && searchData.Students != null && searchData.Students.Count == 1)
-                {
-                    objModel.StudentID = searchData.Students[0].StudentID;
-                }
-                if ((objModel.SearchResults == null || objModel.SearchResults.Count == 0) && objModel.SearchText.Any(char.IsDigit))
-                {
-                    objModel.SearchResults = objAccountData.SearchStudentsForFeePayment(objModel.SearchText, sBranchId, objModel.SessionID);
-                    if (objModel.StudentID == 0 && objModel.SearchResults != null && objModel.SearchResults.Count == 1)
+                    StudentSearchListModel searchData = objAccountData.SearchStudents(objModel.SearchText, sBranchId, objModel.SessionID);
+                    objModel.SearchResults = searchData == null ? new List<StudentSearchModel>() : (searchData.Students ?? new List<StudentSearchModel>());
+                    objModel.Sessions = searchData == null ? new List<NameIDModel>() : (searchData.Sessions ?? new List<NameIDModel>());
+                    if (objModel.SessionID == 0 && searchData != null)
+                    {
+                        objModel.SessionID = searchData.SessionID;
+                    }
+                    if (objModel.StudentID == 0 && objModel.SearchResults.Count == 1)
                     {
                         objModel.StudentID = objModel.SearchResults[0].StudentID;
                     }
+                    if (objModel.SearchResults.Count == 0 && objModel.SearchText.Any(char.IsDigit))
+                    {
+                        objModel.SearchResults = objAccountData.SearchStudentsForFeePayment(objModel.SearchText, sBranchId, objModel.SessionID) ?? new List<StudentSearchModel>();
+                        if (objModel.StudentID == 0 && objModel.SearchResults.Count == 1)
+                        {
+                            objModel.StudentID = objModel.SearchResults[0].StudentID;
+                        }
+                    }
+                }
+                catch
+                {
+                    objModel.SearchResults = new List<StudentSearchModel>();
+                    objModel.StudentID = 0;
+                    objModel.SelectedStudent = null;
+                    objModel.FeeSummary = null;
                 }
             }
 
-            if (objModel.StudentID > 0)
+            bool selectedStudentExistsInResults = objModel.SearchResults != null && objModel.SearchResults.Any(c => c.StudentID == objModel.StudentID);
+            if (!string.IsNullOrWhiteSpace(objModel.SearchText) && !selectedStudentExistsInResults)
             {
-                objModel.SelectedStudent = objAccountData.GetStudentDetailsNew(objModel.StudentID, sBranchId);
-                objModel.FeeSummary = new StudentSessionFeeStatusPageModel
-                {
-                    StudentID = objModel.StudentID,
-                    SBranchID = sBranchId
-                };
-                objAccountData.GetStudentMonthWiseSessionFeeDetails(objModel.FeeSummary);
+                objModel.StudentID = 0;
+            }
+
+            if (objModel.StudentID > 0 && objModel.SearchResults != null)
+            {
+                objModel.SelectedSearchStudent = objModel.SearchResults.FirstOrDefault(c => c.StudentID == objModel.StudentID);
+            }
+
+            if (objModel.StudentID > 0 && objModel.SelectedSearchStudent == null)
+            {
+                objModel.StudentID = 0;
+                objModel.SelectedStudent = null;
+                objModel.FeeSummary = null;
             }
 
             if (objModel.SearchResults == null)
@@ -228,6 +245,25 @@ namespace SMEnterprise.Controllers
             }
 
             return View(objModel);
+        }
+        [PermissionFilter]
+        public ActionResult StudentFeePaymentSummaryPartial(int studentId)
+        {
+            int sBranchId = PermissionManager.GetLoggedInUser().SBranchID;
+            try
+            {
+                StudentSessionFeeStatusPageModel model = new StudentSessionFeeStatusPageModel
+                {
+                    StudentID = studentId,
+                    SBranchID = sBranchId
+                };
+                objAccountData.GetStudentMonthWiseSessionFeeDetails(model);
+                return PartialView("_StudentFeePaymentSummarySearchPartial", model);
+            }
+            catch
+            {
+                return Content("<div class=\"empty-state\">Unable to load fee details right now. Please try again.</div>");
+            }
         }
 
 

@@ -107,6 +107,7 @@ namespace SMEnterprise.Models
         public List<StudentSearchModel> SearchResults { get; set; }
         public List<NameIDModel> Sessions { get; set; }
         public StudentEditModel SelectedStudent { get; set; }
+        public StudentSearchModel SelectedSearchStudent { get; set; }
         public StudentSessionFeeStatusPageModel FeeSummary { get; set; }
     }
     public class ActiveInactiveStudentModel
