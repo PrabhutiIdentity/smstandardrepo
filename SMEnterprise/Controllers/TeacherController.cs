@@ -10,6 +10,8 @@ using System.IO;
 using System.Threading.Tasks;
 using BigBlueButtonAPI.Core;
 using BigBlueButtonAPI.Common;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace SMEnterprise.Controllers
 {
@@ -189,6 +191,71 @@ namespace SMEnterprise.Controllers
             IEnumerable<NameIDModel> model = objTeacherData.GetTeacherClassSections(TeacherID, ClassID);
 
             return PartialView("_SelectOptionsPartial", model);
+        }
+        #endregion
+        #region Student Photo Update
+        [PermissionFilter]
+        public ActionResult StudentPhotoUpdate(int ClassID = 0, int SectionID = 0)
+        {
+            UserModel user = PermissionManager.GetLoggedInUser();
+            StudentPhotoPageModel model = objTeacherData.GetClassTeacherStudentPhotos(user.UserID, user.SBranchID, ClassID, SectionID);
+            return View(model);
+        }
+        [HttpPost]
+        [PermissionFilter]
+        public ActionResult GetClassTeacherPhotoSections(int id)
+        {
+            UserModel user = PermissionManager.GetLoggedInUser();
+            StudentPhotoPageModel model = objTeacherData.GetClassTeacherStudentPhotos(user.UserID, user.SBranchID, id, 0);
+            return PartialView("_SelectOptionsPartial", model.Sections ?? new List<NameIDModel>());
+        }
+        [HttpPost]
+        [PermissionFilter]
+        public ActionResult SaveStudentPhoto(int studentID, int classID, int sectionID, HttpPostedFileBase photo)
+        {
+            const int maxBytes = 500 * 1024;
+            UserModel user = PermissionManager.GetLoggedInUser();
+            if (photo == null || photo.ContentLength <= 0)
+                return Json(new { success = false, message = "Photo is required." });
+            if (photo.ContentLength > maxBytes)
+                return Json(new { success = false, message = "Photo must not exceed 500 KB." });
+
+            try
+            {
+                photo.InputStream.Position = 0;
+                using (Image image = Image.FromStream(photo.InputStream, true, true))
+                {
+                    if (image.RawFormat.Guid != ImageFormat.Jpeg.Guid)
+                        return Json(new { success = false, message = "Only processed JPEG photos are allowed." });
+                    if (image.Width < 100 || image.Height < 100 || image.Width > 1600 || image.Height > 2000)
+                        return Json(new { success = false, message = "Invalid photo dimensions." });
+                }
+                photo.InputStream.Position = 0;
+                string fileName = "photo-" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8) + ".jpg";
+                string directory = Server.MapPath(CommonUsage.StudentImageBasePath);
+                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+                string newPath = Path.Combine(directory, studentID + "_" + fileName);
+                photo.SaveAs(newPath);
+                StudentPhotoUpdateResult updateResult = objTeacherData.UpdateClassTeacherStudentPhoto(
+                    user.UserID, user.SBranchID, classID, sectionID, studentID, fileName);
+                if (updateResult == null || !updateResult.Success)
+                {
+                    System.IO.File.Delete(newPath);
+                    return Json(new { success = false, message = "You are not authorized to update this student's photo." });
+                }
+                string oldPhoto = updateResult.OldPhoto;
+                if (!string.IsNullOrWhiteSpace(oldPhoto))
+                {
+                    string oldPath = Path.Combine(directory, studentID + "_" + Path.GetFileName(oldPhoto));
+                    if (!oldPath.Equals(newPath, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(oldPath))
+                        System.IO.File.Delete(oldPath);
+                }
+                return Json(new { success = true, message = "Photo saved.", photoUrl = Url.Content(CommonUsage.StudentImageBasePath + "/" + studentID + "_" + fileName) });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "The selected file is not a valid photo." });
+            }
         }
         #endregion
         #region Assignment

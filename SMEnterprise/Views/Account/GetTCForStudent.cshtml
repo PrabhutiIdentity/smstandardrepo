@@ -61,7 +61,7 @@
                 <div class="row">
                     <div class="col-md-12">
                         <div class="chm-head" style="margin:0 auto;">
-                            <div class="row" style="text-align:center; margin:0 0 35px 0;">
+                            <div class="row" style="text-align:center; margin:0 0 8px 0;">
                                 <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
                                     <tr style="width:100%">
                                         <td style="width:20%;text-align:left;">
@@ -73,9 +73,9 @@
                                                 <tr>
                                                     <td style="text-align: left;vertical-align: middle;">
 
-                                                        <p style="margin-top: 0;margin-bottom: 3px;text-align: center;font-size: 18px;line-height:1.2;">@Model.Branch.BranchSchoolName</p>
+                                                        <p style="margin-top: 0;margin-bottom: 3px;text-align: center;font-size: 18px;line-height:1.2;"><b>@Model.Branch.BranchSchoolName</b></p>
 
-
+                                                        <p style="margin-bottom: 1px;font-size: 13px;line-height:1.3;text-align: center;">@Model.Branch.AffiliatedTo</p>
                                                         <p style="margin-bottom: 2px;font-size: 12px;line-height:1.3;text-align: center;">
                                                             @Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))
                                                             @*@Model.Branch.Address*@
@@ -90,19 +90,28 @@
                                         </td>
 
                                     </tr>
-                                    <tr>
-                                        <td colspan="3" style="text-align: center;border-bottom: 0px solid #ddd;">
-
-                                            <p style="margin-top:0; margin-bottom: 0; line-height:1;">
-                                                <b style="font-size: 18px; line-height:1.1;">स्थानांतरण प्रमाण पत्र / Transfer Certificate</b>
-                                                <br />
-
-                                            </p>
-
-
-                                        </td>
-                                    </tr>
                                 </table>
+
+                                <div class="tc-header-meta">
+                                    <div class="tc-header-row tc-header-row-three">
+                                        <div><b>विद्यालय सं./</b>School Code/No. @Model.Branch.SchoolCode</div>
+                                        <div><b>यू-डाइस सं./</b>UDise No. @Model.Branch.UDISECode</div>
+                                        <div><b>सम्बद्धता सं./</b>Affiliation No. @Model.Branch.AffiliationNo</div>
+                                    </div>
+                                    <div class="tc-header-title">
+                                        <b>स्थानांतरण प्रमाण पत्र / Transfer Certificate</b>
+                                    </div>
+                                    <div class="tc-header-row tc-header-row-three">
+                                        <div><b>प्रवेश सं./</b>Admission No. @Model.StudentDetails.SchoolUID</div>
+                                        <div><b>विद्यार्थी क्र.सं./</b>Student ID @Model.StudentDetails.StudentSID</div>
+                                        <div><b>प्रमाण पत्र क्र.सं./</b>T.C. N0. @Model.TCDetails.TCSLNo</div>
+                                    </div>
+                                    <div class="tc-header-row tc-header-row-two">
+                                        <div><b>स्थायी शिक्षा सं./</b>Permanent Education No. @(Model.StudentDetails.PenNo == 0 ? "" : Model.StudentDetails.PenNo.ToString())</div>
+                                        <div><b>अपार आईडी/</b>APAAR ID @(Model.StudentDetails.ApaarID == 0 ? "" : Model.StudentDetails.ApaarID.ToString())</div>
+                                    </div>
+                                </div>
+                                <div class="tc-header-divider"></div>
 
 
 
@@ -136,155 +145,106 @@
                                     <div class="chm-form01">
                                         <form class="form-inline">
 
-                                            <div class="row" style="margin:0;">
-                                                <!--col-md-3 start--->
-                                                <div class="col-md-4 tcdisplay form-group">
-                                                    <label for="name"><b>प्रवेश सं./</b>Admission No.</label>
-                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.StudentDetails.SchoolUID">
-                                                </div>
-
-                                                <div class="col-md-4 tcdisplay form-group">
-                                                    <label for="name"><b>विद्यार्थी क्र.सं./</b>Student ID</label>
-                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.StudentDetails.StudentSID">
-                                                </div>
-                                                <div class="col-md-4 tcdisplay form-group">
-                                                    <label for="name"><b>प्रमाण पत्र क्र.सं./</b> T.C. N0.</label>
-                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.TCDetails.TCSLNo">
-                                                </div>
-                                                <!--col-md-3 end--->
-                                            </div>
-                                            <!--col-md-4 start-->
-                                            <div class="row" style="margin: 0;">
-                                                <div class="col-md-4 tcdisplay form-group">
-                                                    <label for="name"><b>विद्यालय सं./</b>School No.</label>
-                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.Branch.SchoolCode">
-                                                </div>
-                                                <div class="col-md-4 tcdisplay form-group" style="margin-left:-60px">
-                                                    <label for="name">Affiliation No.</label>
-                                                    <input type="text" class="form-control chm-input12" id="name" readonly value="@Model.Branch.AffiliationNo">
-                                                </div>
-                                                <div class="col-md-4 tcdisplay form-group" style="margin-left:-25px">
-                                                    <label for="name">Renewed upto</label>
-                                                    <input type="text" class="form-control chm-input13" id="name" readonly value="@Model.Branch.RenewedUpto">
-                                                </div>
-
+                                            @{ var tcQuestionNo = 1; }
+                                            <div class="row tc-compact-form" style="margin: 0;">
                                                 <div class="col-md-12 form-group">
-                                                    <label for="name"><b>विद्यार्थी का नाम/</b>Student Name</label>
+                                                    <label for="name"><span class="tc-question-no">@(tcQuestionNo++).</span><b>विद्यार्थी का नाम/</b>Student Name</label>
                                                     <input type="text" class="form-control chm-input03" id="name" readonly value="@Model.StudentDetails.Name">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="wopd"><b>माता का नाम/</b>Mother's Name</label>
+                                                    <label for="wopd"><span class="tc-question-no">@(tcQuestionNo++).</span><b>माता का नाम/</b>Mother's Name</label>
                                                     <input type="text" class="form-control chm-input03" id="wopd" readonly value="@Model.StudentDetails.MotherName">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="con"><b>पिता का नाम/</b>Father's Name</label>
+                                                    <label for="con"><span class="tc-question-no">@(tcQuestionNo++).</span><b>पिता का नाम/</b>Father's Name</label>
                                                     <input type="text" class="form-control chm-input03" id="con" readonly value="@Model.StudentDetails.FatherName">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="email"><b>राष्ट्रीयता/</b>Nationality</label>
+                                                    <label for="email"><span class="tc-question-no">@(tcQuestionNo++).</span><b>राष्ट्रीयता/</b>Nationality</label>
                                                     <input type="email" class="form-control chm-input03" id="name" readonly value="@Model.StudentDetails.NationalityText">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <p><b>क्या अनु.जाति/ज.जा./पिछङा वर्ग से संबन्धित है</b></p>
-
-
-                                                    <label for="add">Whether the pupil belongs to SC/ST/OBC Category</label>
+                                                    <label for="add" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>क्या अनु.जाति/ज.जा./पिछङा वर्ग से संबन्धित है</b></span><span>Whether the pupil belongs to SC/ST/OBC Category</span></span></label>
                                                     <input type="text" class="form-control chm-input11" id="add" readonly value="@Model.StudentDetails.CategoryName">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>प्रवेश पुस्तिका के अनुसार जन्मतिथि/</b>Date of birth according to the Admission Register</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>प्रवेश पुस्तिका के अनुसार जन्मतिथि/</b>Date of birth according to the Admission Register</label>
                                                     <input type="text" class="form-control chm-input03" id="pstcode" readonly value="@Model.StudentDetails.DOB.ToString("dd/MM/yyyy")">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode">(<b>शब्दों में/</b>in words)</label>
+                                                    <label for="pstcode"><span class="tc-question-no"></span>(<b>शब्दों में/</b>in words)</label>
                                                     <input type="text" class="form-control chm-input15" id="pstcode" readonly value="@SMEnterprise.Repository.CommonUsage.DateToText(Model.StudentDetails.DOB, false, true)">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>विद्यालय में प्रथम प्रवेश की तिथि/</b>Date of first admission in the school</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>विद्यालय में प्रथम प्रवेश की तिथि/</b>Date of first admission in the school</label>
                                                     <input type="text" class="form-control chm-input03" id="pstcode" readonly value="@Model.StudentDetails.DOJ.ToString("dd/MM/yyyy")">
                                                 </div>
                                                 <div class="col-md-12 form-group">
                                                     <!--<p><b></b></p>-->
-                                                    <label for="pstcode"><b>क्या विद्यार्थी का परीक्षा परिणाम अनुत्तीर्ण है?/</b>Whether the student is failed:</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>क्या विद्यार्थी का परीक्षा परिणाम अनुत्तीर्ण है?/</b>Whether the student is failed:</label>
                                                     <input type="text" class="form-control chm-input16" id="pstcode" value="@(Model.TCDetails.FailedCount==0 ? "NO" : "")">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>प्रस्तावित विषय/</b>Subjects offered</label>
-                                                    @{
-                                                        string Title;
-                                                        var sCounter = 1;
-                                                        foreach (var s in Model.Subjects)
-                                                        {
-                                                            Title = s.Split(',')[0];
-                                                            <input type="text" value="@Title" id="pstcode" />
-
-
-                                                            //sCounter++;
-                                                        }
-                                                    }
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>प्रस्तावित विषय/</b>Subjects offered</label>
+                                                    <div class="tc-subjects-offered">@offeredSubjects</div>
                                                 </div>
                                                 <div class="col-md-12 form-group">
                                                     <!--<p> </p>-->
-                                                    <label for="pstcode"><b>पिछली कक्षा जिसमे विद्यार्थी अध्ययनरत था: (अंको में)/</b>Class in which the pupil last studied (in words)</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>पिछली कक्षा जिसमे विद्यार्थी अध्ययनरत था: (अंको में)</b></span><span>Class in which the pupil last studied (in words)</span></span></label>
                                                     <input type="text" class="form-control chm-input23" id="pstcode" readonly value="@Model.StudentDetails.ClassName">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>पिछले विद्यालय /बोर्ड परीक्षा एवं परिणाम/</b>School/Board Annual examination last taken with result</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>पिछले विद्यालय /बोर्ड परीक्षा एवं परिणाम</b></span><span>School/Board Annual examination last taken with result</span></span></label>
                                                     <input type="text" class="form-control chm-input25" id="pstcode" readonly value="@Model.TCDetails.SCBLastExamName @Model.TCDetails.SCBLastExamResult">
                                                 </div>
                                                 <div class="col-md-12 form-group">
                                                     <!--<p></p>-->
-                                                    <label for="pstcode"><b>क्या उच्च कक्षा में पदोन्नति का अधिकारी है :/</b>Whether qualified for promotion to the next higher class:</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>क्या उच्च कक्षा में पदोन्नति का अधिकारी है :</b></span><span>Whether qualified for promotion to the next higher class:</span></span></label>
                                                     <input type="text" class="form-control chm-input26" id="pstcode" readonly value="@(Model.TCDetails.IsSCBLastExamPassed==0?"No":"Yes"+ "    " +Model.TCDetails.ClassName)">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <p><b>क्या विद्यार्थी ने विद्यालय की सभी देय राशि का भुगतान कर दिया है :</b></p>
-                                                    <label for="pstcode">Whether the pupil has paid all dues to the Vidyalaya</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>क्या विद्यार्थी ने विद्यालय की सभी देय राशि का भुगतान कर दिया है :</b></span><span>Whether the pupil has paid all dues to the Vidyalaya</span></span></label>
                                                     <input type="text" class="form-control chm-input27" id="pstcode" readonly value="@Model.TCDetails.DuePaidMonth">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <p><b>क्या विद्यार्थी का कोई शुल्क रियायत प्रदान की गई थी यदि हाँ, तो उसकी प्रकृति:</b></p>
-                                                    <label for="pstcode">Whether the pupil was in receipt of any fee concession if so the nature of such concession:</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>क्या विद्यार्थी का कोई शुल्क रियायत प्रदान की गई थी यदि हाँ, तो उसकी प्रकृति:</b></span><span>Whether the pupil was in receipt of any fee concession if so the nature of such concession:</span></span></label>
                                                     <input type="text" class="form-control chm-input03" id="pstcode" readonly value="@Model.TCDetails.Concession">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <p><b>क्या विद्यार्थी ऐन.सी.सी. कैडेट/स्काउट है ? विवरण दे</b></p>
-                                                    <label for="pstcode">Whether the pupil is NCC Cadet/Boy Scout/Girl Guide(give details)</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>क्या विद्यार्थी ऐन.सी.सी. कैडेट/स्काउट है ? विवरण दे</b></span><span>Whether the pupil is NCC Cadet/Boy Scout/Girl Guide(give details)</span></span></label>
                                                     <input type="text" class="form-control chm-input29" id="pstcode" readonly value="@(Model.TCDetails.IsNCC==0?"No":"Yes "+ "    " +Model.TCDetails.NCCDetails)">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <p><b>विद्यालय से विद्यार्थी के नाम काटे जाने की तिथि :</b></p>
-                                                    <label for="pstcode">Date on which pupils' name was struck off the rolls of the Vidyalaya</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>विद्यालय से विद्यार्थी के नाम काटे जाने की तिथि :</b></span><span>Date on which pupils' name was struck off the rolls of the Vidyalaya</span></span></label>
                                                     <input type="text" class="form-control chm-input30" id="pstcode" value="@Model.TCDetails.DateOfIssue.ToString("dd MMM yyyy")">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>विद्यालय छोड़ने का कारण/</b>Reason for leaving the School</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>विद्यालय छोड़ने का कारण/</b>Reason for leaving the School</label>
                                                     <input type="text" class="form-control chm-input31" id="pstcode" value="@Model.TCDetails.ReasonForLeaving">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>अंतिम तिथि तक उपस्थितियों की कुल संख्या/</b>No.of meetings upto date</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>अंतिम तिथि तक उपस्थितियों की कुल संख्या/</b>No.of meetings upto date</label>
                                                     <input type="text" class="form-control chm-input32" id="pstcode" value="@Model.TCDetails.WorkingDays">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>विद्यार्थी की विद्यालय दिवसों की कुल उपस्थितियाँ /</b>No.of school days the pupil attended</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>विद्यार्थी की विद्यालय दिवसों की कुल उपस्थितियाँ /</b>No.of school days the pupil attended</label>
                                                     <input type="text" class="form-control chm-input33" id="pstcode" value="@Model.TCDetails.PresentDays">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>सामान्य आचरण /</b>General Conduct</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>सामान्य आचरण /</b>General Conduct</label>
                                                     <input type="text" class="form-control chm-input34" id="pstcode" value="@Model.TCDetails.GeneralConduct">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <p><b>क्या विद्यालय सरकारी /अल्प संख्यक /स्वतंत्र श्रेणी में आता है :</b></p>
-                                                    <label for="pstcode">Whether school is under Govt./Minority/independent category:</label>
+                                                    <label for="pstcode" class="tc-two-line-label"><span class="tc-question-no">@(tcQuestionNo++).</span><span class="tc-label-lines"><span><b>क्या विद्यालय सरकारी /अल्प संख्यक /स्वतंत्र श्रेणी में आता है :</b></span><span>Whether school is under Govt./Minority/independent category:</span></span></label>
                                                     <input type="text" class="form-control chm-input35" id="schoolcategory">
                                                 </div>
 
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>कोई अन्य टिप्पणी/</b>Any other remarks:</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>कोई अन्य टिप्पणी/</b>Any other remarks:</label>
                                                     <input type="text" class="form-control chm-input36" id="remarks" value="@Model.TCDetails.Remarks">
                                                 </div>
                                                 <div class="col-md-12 form-group">
-                                                    <label for="pstcode"><b>प्रमाण-पत्र जारी करने की तिथि/</b>Date of issue of certificate</label>
+                                                    <label for="pstcode"><span class="tc-question-no">@(tcQuestionNo++).</span><b>प्रमाण-पत्र जारी करने की तिथि/</b>Date of issue of certificate</label>
                                                     <input type="text" class="form-control chm-input03" id="issuedate" value="@Model.TCDetails.DateOfIssue.ToString("dd MMM yyyy")">
                                                 </div>
 
@@ -292,24 +252,22 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="row" style="margin:0">
-                                <div class="col-md-3 tcdisplay">
-                                    Prepared By________________
+                            <div class="tc-sign-row">
+                                <div class="tc-sign-box">
+                                    <div class="tc-sign-line">Prepared By</div>
                                 </div>
-                                <div class="col-md-3 tcdisplay">
-                                    Checked By________________
+                                <div class="tc-sign-box">
+                                    <div class="tc-sign-line">Checked By</div>
                                 </div>
-                                <div class="col-md-3 tcdisplay">
+                                <div class="tc-sign-box">
                                     @if (Model.Branch.PrincipalSignature == null)
                                     {
-
-                                        <p> Principal________________</p>
-
+                                        <div class="tc-sign-line">Principal</div>
                                     }
                                     else
                                     {
-                                        <img onerror="return OnImageError(this,2);" style="width:200px;height:50px;" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
-                                        <br /><p>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  Principal</p>
+                                        <img onerror="return OnImageError(this,2);" class="tc-sign-image" alt="Signature" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_P_@(Model.Branch.PrincipalSignature)" />
+                                        <div class="tc-sign-line" style="margin-top:4px;">Principal</div>
                                     }
                                 </div>
                             </div>
@@ -327,45 +285,33 @@
                 <img onerror="return OnImageError(this,2);" class="tc-brand-logo" alt="Logo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
                 <div class="tc-brand-text">
                     <h2 class="tc-school-name">@Model.Branch.BranchSchoolName</h2>
+                    <p class="tc-sheet-subtitle">@Model.Branch.AffiliatedTo</p>
                     <p class="tc-sheet-subtitle">@Model.Branch.Address</p>
                     <p class="tc-sheet-subtitle"><b>Phone:</b> @Model.Branch.ContactNo  <b>Email:</b> @Model.Branch.EmailID</p>
                 </div>
             </div>
-            <h3 class="tc-sheet-title">Transfer Certificate</h3>
         </div>
 
-        <div class="tc-meta-panel tc-meta-panel-three">
-            <div class="tc-alt-topitem">
-                <label>Admission No.</label>
-                <div class="tc-alt-topvalue">@Model.StudentDetails.SchoolUID</div>
+        <div class="tc-header-meta">
+            <div class="tc-header-row tc-header-row-three">
+                <div><b>School Code/No.</b> @Model.Branch.SchoolCode</div>
+                <div><b>UDise No.</b> @Model.Branch.UDISECode</div>
+                <div><b>Affiliation No.</b> @Model.Branch.AffiliationNo</div>
             </div>
-            <div class="tc-alt-topitem">
-                <label>Student ID</label>
-                <div class="tc-alt-topvalue">@Model.StudentDetails.StudentSID</div>
+            <div class="tc-header-title">
+                <b>Transfer Certificate</b>
             </div>
-            <div class="tc-alt-topitem">
-                <label>T.C. No.</label>
-                <div class="tc-alt-topvalue">@Model.TCDetails.TCSLNo</div>
+            <div class="tc-header-row tc-header-row-three">
+                <div><b>Admission No.</b> @Model.StudentDetails.SchoolUID</div>
+                <div><b>Student ID</b> @Model.StudentDetails.StudentSID</div>
+                <div><b>T.C. No.</b> @Model.TCDetails.TCSLNo</div>
             </div>
-        </div>
-        <div class="tc-meta-panel tc-meta-panel-four">
-            <div class="tc-alt-topitem">
-                <label>Issue Date</label>
-                <div class="tc-alt-topvalue">@Model.TCDetails.DateOfIssue.ToString("dd MMM yyyy")</div>
-            </div>
-            <div class="tc-alt-topitem">
-                <label>School No.</label>
-                <div class="tc-alt-topvalue">@Model.Branch.SchoolCode</div>
-            </div>
-            <div class="tc-alt-topitem">
-                <label>Affiliation No.</label>
-                <div class="tc-alt-topvalue">@Model.Branch.AffiliationNo</div>
-            </div>
-            <div class="tc-alt-topitem">
-                <label>Renewed upto</label>
-                <div class="tc-alt-topvalue">@Model.Branch.RenewedUpto</div>
+            <div class="tc-header-row tc-header-row-two">
+                <div><b>Permanent Education No.</b> @(Model.StudentDetails.PenNo == 0 ? "" : Model.StudentDetails.PenNo.ToString())</div>
+                <div><b>APAAR ID</b> @(Model.StudentDetails.ApaarID == 0 ? "" : Model.StudentDetails.ApaarID.ToString())</div>
             </div>
         </div>
+        <div class="tc-header-divider"></div>
 
         <div class="tc-section-title">Student Profile</div>
         <table class="tc-english-grid">
@@ -427,45 +373,33 @@
                 <img onerror="return OnImageError(this,2);" class="tc-brand-logo" alt="Logo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
                 <div class="tc-brand-text">
                     <h2 class="tc-school-name">@Model.Branch.BranchSchoolName</h2>
+                    <p class="tc-sheet-subtitle">@Model.Branch.AffiliatedTo</p>
                     <p class="tc-sheet-subtitle">@Model.Branch.Address</p>
                     <p class="tc-sheet-subtitle"><b>फोन:</b> @Model.Branch.ContactNo  <b>ईमेल:</b> @Model.Branch.EmailID</p>
                 </div>
             </div>
-            <h3 class="tc-sheet-title">स्थानांतरण प्रमाण पत्र</h3>
         </div>
 
-        <div class="tc-meta-panel tc-meta-panel-three">
-            <div class="tc-alt-topitem">
-                <label>प्रवेश सं.</label>
-                <div class="tc-alt-topvalue">@Model.StudentDetails.SchoolUID</div>
+        <div class="tc-header-meta">
+            <div class="tc-header-row tc-header-row-three">
+                <div><b>विद्यालय सं.</b> @Model.Branch.SchoolCode</div>
+                <div><b>यू-डाइस सं.</b> @Model.Branch.UDISECode</div>
+                <div><b>सम्बद्धता सं.</b> @Model.Branch.AffiliationNo</div>
             </div>
-            <div class="tc-alt-topitem">
-                <label>विद्यार्थी क्र.सं.</label>
-                <div class="tc-alt-topvalue">@Model.StudentDetails.StudentSID</div>
+            <div class="tc-header-title">
+                <b>स्थानांतरण प्रमाण पत्र</b>
             </div>
-            <div class="tc-alt-topitem">
-                <label>प्रमाण पत्र क्र.सं.</label>
-                <div class="tc-alt-topvalue">@Model.TCDetails.TCSLNo</div>
+            <div class="tc-header-row tc-header-row-three">
+                <div><b>प्रवेश सं.</b> @Model.StudentDetails.SchoolUID</div>
+                <div><b>विद्यार्थी क्र.सं.</b> @Model.StudentDetails.StudentSID</div>
+                <div><b>प्रमाण पत्र क्र.सं.</b> @Model.TCDetails.TCSLNo</div>
             </div>
-        </div>
-        <div class="tc-meta-panel tc-meta-panel-four">
-            <div class="tc-alt-topitem">
-                <label>जारी तिथि</label>
-                <div class="tc-alt-topvalue">@Model.TCDetails.DateOfIssue.ToString("dd MMM yyyy")</div>
-            </div>
-            <div class="tc-alt-topitem">
-                <label>विद्यालय सं.</label>
-                <div class="tc-alt-topvalue">@Model.Branch.SchoolCode</div>
-            </div>
-            <div class="tc-alt-topitem">
-                <label>मान्यता सं.</label>
-                <div class="tc-alt-topvalue">@Model.Branch.AffiliationNo</div>
-            </div>
-            <div class="tc-alt-topitem">
-                <label>नवीनीकरण</label>
-                <div class="tc-alt-topvalue">@Model.Branch.RenewedUpto</div>
+            <div class="tc-header-row tc-header-row-two">
+                <div><b>स्थायी शिक्षा सं.</b> @(Model.StudentDetails.PenNo == 0 ? "" : Model.StudentDetails.PenNo.ToString())</div>
+                <div><b>अपार आईडी</b> @(Model.StudentDetails.ApaarID == 0 ? "" : Model.StudentDetails.ApaarID.ToString())</div>
             </div>
         </div>
+        <div class="tc-header-divider"></div>
 
         <div class="tc-section-title">विद्यार्थी विवरण</div>
         <table class="tc-hindi-grid">
@@ -556,23 +490,46 @@ else
         <table style="width: 100%;padding:10px;">
             <thead>
                 <tr>
-                    <td style="text-align:center;width:20%;">
-                        <img onerror="return OnImageError(this,2);" width="100" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
-                    </td>
-                    <td style="text-align:center;width:60%;">
-                        <h3> @Model.Branch.BranchSchoolName</h3>
-                        <h2 style="white-space: break-spaces;">@Model.Branch.Address </h2>
-                        <p>Affiliated To C.B.S.E.Board</p>
-                    </td>
-                    <td style="text-align:center;width:20%;">
-                        <img id="imgPhoto" onerror="return OnImageError(this,@(Model.StudentDetails.Gender));" style="width:100px;height:100px;" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetails.StudentID)_@Model.StudentDetails.Photo" />
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3" style="text-align:center">
-                        <h1 style="padding: 20px;margin-bottom: 10px;">
-                            * Character Certificate *
-                        </h1>
+                    <td colspan="3">
+                        <table class="table" style="border-bottom: 1px solid #ddd;padding-bottom: 0px;">
+                            <tr style="width:100%">
+                                <td style="width:20%;text-align:left;">
+                                    <img onerror="return OnImageError(this,2);" style="width:88px;height:88px;" class="ImageReportLogo" alt="Photo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.Branch.SBranchID)_@(Model.Branch.Logo)" />
+                                </td>
+                                <td style="width:60%;text-align:center;">
+                                    <p style="margin-top: 0;margin-bottom: 3px;text-align: center;font-size: 18px;line-height:1.2;"><b>@Model.Branch.BranchSchoolName</b></p>
+                                    <p style="margin-bottom: 1px;font-size: 13px;line-height:1.3;text-align: center;">@Model.Branch.AffiliatedTo</p>
+                                    <p style="margin-bottom: 2px;font-size: 12px;line-height:1.3;text-align: center;">
+                                        @Html.Raw(Html.Encode(Model.Branch.Address).Replace("\n", "<br />"))
+                                    </p>
+                                    <p style="margin-bottom: 2px;font-size:12px;line-height:1.2;text-align: center;"><b>Ph.</b> @Model.Branch.ContactNo, <b>Email :</b> @Model.Branch.EmailID</p>
+                                </td>
+                                <td style="width:20%;text-align:right;">
+                                    <img id="imgPhoto" onerror="return OnImageError(this,@(Model.StudentDetails.Gender));" class="tc-character-photo" alt="Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentDetails.StudentID)_@Model.StudentDetails.Photo" />
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div class="tc-header-meta">
+                            <div class="tc-header-row tc-header-row-three">
+                                <div><b>विद्यालय सं./</b>School Code/No. @Model.Branch.SchoolCode</div>
+                                <div><b>यू-डाइस सं./</b>UDise No. @Model.Branch.UDISECode</div>
+                                <div><b>सम्बद्धता सं./</b>Affiliation No. @Model.Branch.AffiliationNo</div>
+                            </div>
+                            <div class="tc-header-title">
+                                <b>* Character Certificate *</b>
+                            </div>
+                            <div class="tc-header-row tc-header-row-three">
+                                <div><b>प्रवेश सं./</b>Admission No. @Model.StudentDetails.SchoolUID</div>
+                                <div><b>विद्यार्थी क्र.सं./</b>Student ID @Model.StudentDetails.StudentSID</div>
+                              
+                            </div>
+                            <div class="tc-header-row tc-header-row-two">
+                                <div><b>स्थायी शिक्षा सं./</b>Permanent Education No. @(Model.StudentDetails.PenNo == 0 ? "" : Model.StudentDetails.PenNo.ToString())</div>
+                                <div><b>अपार आईडी/</b>APAAR ID @(Model.StudentDetails.ApaarID == 0 ? "" : Model.StudentDetails.ApaarID.ToString())</div>
+                            </div>
+                        </div>
+                        <div class="tc-header-divider"></div>
                     </td>
                 </tr>
                 <tr>
@@ -665,7 +622,7 @@ else
         function PrintTC(type) {
             var contents = '';
             if (type == 0) {
-                contents = $("#tcdiv").html();
+                contents = document.getElementById("tcwrapper").outerHTML;
             }
             else if (type == 2) {
                 contents = document.getElementById("englishTcDiv").outerHTML;
@@ -675,7 +632,7 @@ else
             }
 
             else {
-                contents = $(".charactercontainer").html();
+                contents = document.querySelector(".charactercontainer").outerHTML;
             }
             //var nDiv = $('#tcdiv').html();
             //var contents = nDiv;//"<div class='row'><div style='width:50%'>"+ $("#divRecipt").html()+"</div><div style='width:50%'>"+ $("#divRecipt").html()+"</div></div>";

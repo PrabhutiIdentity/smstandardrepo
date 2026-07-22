@@ -1,0 +1,87 @@
+@using SMEnterprise.Models;
+@model SMEnterprise.Models.StudentModel
+@{
+    var branch = ViewData["BranchDetails"] as SBranchModel;
+    var classSection = (ViewData["ClassSection"] as string) ?? "";
+    var sessionText = ((ViewData["SessionText"] as string) ?? "").Replace("(Active)", "").Trim();
+    var schoolName = branch == null ? "" : (branch.BranchSchoolName ?? "");
+    var schoolNameClass = schoolName.Length > 38 ? "new-id-extra-long-name" : (schoolName.Length > 28 ? "new-id-long-name" : "");
+    var qrTargetUrl = Request.Url.GetLeftPart(UriPartial.Authority) + Url.Content("~/Account/StudentIDCardQR/" + Model.StudentID + "/" + (branch == null ? 0 : branch.SBranchID));
+    var qrUrl = "https://quickchart.io/qr?size=180&margin=1&text=" + System.Web.HttpUtility.UrlEncode(qrTargetUrl);
+    var principalSignature = branch == null ? "" : (branch.PrincipalSignature ?? "");
+}
+<div class="new-id-card">
+    <div class="new-id-wave"></div>
+    <div class="new-id-side-title">Student Identity Card</div>
+
+    <div class="new-id-header">
+        <div class="new-id-logo">
+            @if (branch != null)
+            {
+                <img onerror="return OnImageError(this,0);" alt="School Logo" src="@Url.Content("~/Images/SBranchLogo/")@(branch.SBranchID)_@(branch.Logo)" />
+            }
+        </div>
+        <div class="new-id-school-name @schoolNameClass">
+            @schoolName
+            @if (branch != null && !string.IsNullOrWhiteSpace(branch.TagLine) && branch.TagLine.Trim().ToUpper() != "NULL")
+            {
+                <div class="new-id-school-subline">@branch.TagLine</div>
+            }
+        </div>
+    </div>
+
+    <div class="new-id-session">
+        <span class="new-id-session-label">Session</span>
+        <span class="new-id-session-year">@sessionText</span>
+    </div>
+
+    <div class="new-id-photo">
+        <img onerror="return OnImageError(this,@(Model.Gender));" alt="Student Photo" src="@Url.Content("~/Images/StudentImage/")@(Model.StudentID)_@Model.Photo" />
+    </div>
+
+    <div class="new-id-qr">
+        <img alt="Student QR Code" src="@qrUrl" />
+    </div>
+
+    <div class="new-id-student-name searchable">@Model.Name</div>
+
+    <div class="new-id-details">
+        <div>Adm. No.</div><div>:</div><div class="new-id-details-value searchable">@Model.SchoolUID</div>
+        <div>Student ID</div><div>:</div><div class="new-id-details-value searchable">@Model.StudentSID</div>
+        <div>Class/Sec.</div><div>:</div><div class="new-id-details-value">@classSection</div>
+        <div>DOB</div><div>:</div><div class="new-id-details-value">@Model.DOB.ToString("dd/MM/yyyy")</div>
+        <div>Father</div><div>:</div><div class="new-id-details-value searchable">@Model.FatherName</div>
+        <div>Mother</div><div>:</div><div class="new-id-details-value">@Model.MotherName</div>
+        <div>Mobile</div><div>:</div><div class="new-id-details-value searchable">@Model.FatherMobileNo</div>
+        <div>Blood</div><div>:</div><div class="new-id-details-value">@Model.BloodGroup</div>
+    </div>
+
+    <div class="new-id-principal">
+        @if (branch != null)
+        {
+            <img onerror="return OnImageError(this,2);" alt="Principal Signature" src="@Url.Content("~/Images/SBranchLogo/")@(branch.SBranchID)_P_@principalSignature" />
+        }
+        <div>Principal</div>
+    </div>
+
+    <div class="new-id-footer">
+        <span class="new-id-location-icon"><i class="fa fa-map-marker"></i></span>
+        <div class="new-id-footer-address">
+            @if (branch != null && branch.SBranchID == 17 && !string.IsNullOrWhiteSpace(Model.MiniAddress))
+            {
+                @Html.Raw(Model.MiniAddress.Replace("\n", "<br/>"))
+            }
+            else
+            {
+                if (branch != null && !string.IsNullOrWhiteSpace(branch.Address))
+                {
+                    @Html.Raw(branch.Address)
+                }
+                if (branch != null && !string.IsNullOrWhiteSpace(branch.ContactNo))
+                {
+                    <text> Phone: @branch.ContactNo</text>
+                }
+            }
+        </div>
+    </div>
+</div>

@@ -534,6 +534,33 @@ namespace SMEnterprise.Models
         public int IsExist { get; set; }
 
     }
+    public class StudentPhotoPageModel
+    {
+        public int ClassID { get; set; }
+        public int SectionID { get; set; }
+        public int TeacherID { get; set; }
+        public int SBranchID { get; set; }
+        public List<NameIDModel> Classes { get; set; }
+        public List<NameIDModel> Sections { get; set; }
+        public List<StudentPhotoModel> Students { get; set; }
+    }
+    public class StudentPhotoModel
+    {
+        public int Gender { get; set; }
+        public int StudentID { get; set; }
+        public string Name { get; set; }
+        public string Photo { get; set; }
+        public string StudentSID { get; set; }
+        public string SchoolUID { get; set; }
+        public string RollNo { get; set; }
+        public string FatherName { get; set; }
+        public string MotherName { get; set; }
+    }
+    public class StudentPhotoUpdateResult
+    {
+        public bool Success { get; set; }
+        public string OldPhoto { get; set; }
+    }
     public class StudentLeavePageModel
     {
         public int ClassID { get; set; }

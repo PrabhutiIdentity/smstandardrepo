@@ -1,0 +1,163 @@
+@using SMEnterprise.Models;
+@using System.Web.Mvc;
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+@model SMEnterprise.Models.StudentsPageModel
+@section IncludeCss
+{
+    <title>Student ID Cards</title>
+    <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
+    <link href="@Url.Content("~/css/StudentIDCardNew.css")" rel="stylesheet">
+}
+<div class="">
+    <div class="clearfix"></div>
+    <div class="row">
+        <div class="col-md-12">
+            @using (Html.BeginForm("StudentsIDCardsV", "Account", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetStudents" }))
+            {
+                <div class="row std-mng-head">
+                    <div class="col-md-12 class-section">
+                        <div class="row">
+                            <div class="col-md-2">
+                                <a href="javascript:void(0);" onclick="printList();"><i class="fa fa-print"></i></a>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Session :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="SessionID" id="ddlSessions" onchange="$('#frmGetStudents').submit();">
+                                        @foreach (NameIDModel el in Model.Sessions)
+                                        {
+                                            <option value="@el.ID" @(el.ID == Model.SessionID ? "selected" : "")>@el.Name @(el.Extra1 == "1" ? "(Active)" : "")</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3 padding">
+                                <label class="col-md-4 text-right">Class :</label>
+                                <div class="col-md-8">
+                                    <select class="form-control" name="ClassID" id="ddlClass" onchange="javascript:ClassChanged(this);">
+                                        <option value="0">--Select Class--</option>
+                                        @foreach (ClassModel el in Model.Classes)
+                                        {
+                                            <option value="@el.ClassID" @(el.ClassID == Model.ClassID ? "selected" : "")>@el.ClassName</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-4 padding">
+                                <div class="row">
+                                    <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Section : </label>
+                                    <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                        <select name="SectionID" class="form-control" id="ddlSection" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0">--Select Section--</option>
+                                            @foreach (SectionModel el in Model.Sections)
+                                            {
+                                                <option value="@el.ID" @(el.ID == Model.SectionID ? "selected" : "")>@el.Name</option>
+                                            }
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 padding">
+                                <div class="row">
+                                    <label class="col-md-3 text-right padding-R" style="padding-left: 10px;">Search List : </label>
+                                    <div class="col-md-7 padding-L" style="padding-left: 10px;">
+                                        <input type="text" class="form-control" id="txtsearch" placeholder="comma separated text for multiple" onkeyup="Search(this);" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="x_panel">
+                <div class="x_content">
+                    <div class="new-id-card-list">
+                        @foreach (var stu in Model.Students)
+                        {
+                            var classSection = (string.IsNullOrWhiteSpace(Model.ClassName) && string.IsNullOrWhiteSpace(Model.SectionName))
+                                ? (stu.ClassName + " / " + stu.SectionName)
+                                : (Model.ClassName + " / " + Model.SectionName);
+                            var sessionText = (string.IsNullOrWhiteSpace(Model.SessionName) ? stu.SessionName : Model.SessionName) ?? "";
+                            var viewData = new ViewDataDictionary(ViewData)
+                            {
+                                { "BranchDetails", Model.BranchDetails },
+                                { "ClassSection", classSection },
+                                { "SessionText", sessionText }
+                            };
+                            <div class="new-id-listitem">
+                                @Html.Partial("_StudentIDCardNew", stu, viewData)
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts
+{
+    <script>
+        function Search(sender) {
+            var sText = $(sender).val().split(',');
+            if (sText[0] == "") {
+                $('.new-id-listitem').css('display', '');
+            }
+            else {
+                $(".new-id-listitem").each(function () {
+                    var isExist = false;
+                    $(this).find(".searchable").each(function () {
+                        var $srch = $(this);
+                        $.each(sText, function (index, value) {
+                            if ($srch.html().toLowerCase().includes(value.toLowerCase()) == true) {
+                                isExist = true;
+                            }
+                        });
+                    });
+                    $(this).css('display', isExist == true ? '' : 'none');
+                });
+            }
+        }
+        function ClassChanged(sender) {
+            $('#ddlSection').html('<option value="0">Loading....</option>');
+            $.ajax({
+                type: "POST",
+                url: "/Admin/GetSectionOnClass/" + $(sender).val(),
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (html) {
+                    $('#ddlSection').html('');
+                    $('#ddlSection').html('<option value="0">--Select Section--</option>');
+                    $('#ddlSection').append(html);
+                },
+                error: function (e) {
+                    alert("errorn");
+                }
+            });
+        }
+        function printList() {
+            var contents = $(".x_content").html();
+            var frame1 = $('<iframe />');
+            frame1[0].name = "frame1";
+            frame1.css({ "position": "absolute", "top": "-1000000px" });
+            $("body").append(frame1);
+            var frameDoc = frame1[0].contentWindow ? frame1[0].contentWindow : frame1[0].contentDocument.document ? frame1[0].contentDocument.document : frame1[0].contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<link href="@Url.Content("~/css/font-awesome.min.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('<link href="@Url.Content("~/css/StudentIDCardNew.css")" rel="stylesheet" type="text/css" />');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                frame1.remove();
+            }, 500);
+        }
+    </script>
+}

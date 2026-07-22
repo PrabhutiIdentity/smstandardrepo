@@ -1720,7 +1720,7 @@ ORDER BY
                 paramater.Add("@PaymentID", PaymentID);
                 using (var multi = await con.QueryMultipleAsync("sp_FeePaymentRecieptData", paramater, null, 0, commandType: CommandType.StoredProcedure))
                 {
-                    objNew = multi.Read<FeePaymentModel>().SingleOrDefault();
+                    objNew = multi.Read<FeePaymentModel>().FirstOrDefault();
                     if (objNew != null)
                     {
                         objNew.PaymentDetails = multi.Read<FeeDetailsModel>().ToList();
@@ -3082,6 +3082,10 @@ ORDER BY
                     objModel.FeeListDetail = multi.Read<FeeDetailsModel>().ToList();
 
                 }
+
+                objModel.SessionStartDate = con.Query<DateTime>(
+                    "SELECT SessionStartDate FROM SessionMaster WHERE SessionID = @SessionID AND SBranchID = @SBranchID",
+                    new { SessionID, SBranchID }).SingleOrDefault();
             }
             return objModel;
         }

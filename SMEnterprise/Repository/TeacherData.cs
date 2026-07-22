@@ -134,6 +134,45 @@ namespace SMEnterprise.Repository
                 return con.Query<NameIDModel>("sp_GetSectionsByTeacher", paramater, null, true, 0, CommandType.StoredProcedure).ToList();
             }
         }
+        public StudentPhotoPageModel GetClassTeacherStudentPhotos(int teacherID, int sBranchID, int classID, int sectionID)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameter = new DynamicParameters();
+                parameter.Add("@TeacherID", teacherID);
+                parameter.Add("@SBranchID", sBranchID);
+                parameter.Add("@ClassID", classID);
+                parameter.Add("@SectionID", sectionID);
+                using (var multi = con.QueryMultiple("sp_GetClassTeacherStudentPhotos", parameter, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    return new StudentPhotoPageModel
+                    {
+                        Students = multi.Read<StudentPhotoModel>().ToList(),
+                        Classes = multi.Read<NameIDModel>().ToList(),
+                        Sections = multi.Read<NameIDModel>().ToList(),
+                        ClassID = multi.Read<int>().SingleOrDefault(),
+                        SectionID = multi.Read<int>().SingleOrDefault(),
+                        TeacherID = teacherID,
+                        SBranchID = sBranchID
+                    };
+                }
+            }
+        }
+        public StudentPhotoUpdateResult UpdateClassTeacherStudentPhoto(int teacherID, int sBranchID, int classID, int sectionID, int studentID, string photo)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var parameter = new DynamicParameters();
+                parameter.Add("@TeacherID", teacherID);
+                parameter.Add("@SBranchID", sBranchID);
+                parameter.Add("@ClassID", classID);
+                parameter.Add("@SectionID", sectionID);
+                parameter.Add("@StudentID", studentID);
+                parameter.Add("@Photo", photo);
+                return con.Query<StudentPhotoUpdateResult>("sp_UpdateClassTeacherStudentPhoto", parameter, null, true, 0,
+                    commandType: CommandType.StoredProcedure).SingleOrDefault();
+            }
+        }
         #endregion
         #region Assignment Management
         public AssignmentPageModel GetTeacherAssignments(AssignmentPageModel objModel)

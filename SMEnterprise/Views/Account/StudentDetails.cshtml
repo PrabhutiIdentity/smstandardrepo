@@ -2187,6 +2187,10 @@
 
              $('#mdlEditSession').find('.modal-body').find(".loader-container").css('display', 'none');
              $('#mdlEditSession').find('.modal-body').find(".container").html(html);
+             var classDropdown = $('#mdlEditSession').find('#ddlSessionEditClass');
+             if (classDropdown.val() && classDropdown.val() !== '0') {
+                 LoadSessionSections(classDropdown[0], $('#mdlEditSession').find('#ddlSections').attr('data-current-section'));
+             }
              //$('#mdlEditTransport').modal('toggle');
              //$('.se-pre-con').css('display', 'none');
              //EditSessionForm = new PNotify({
@@ -2227,6 +2231,10 @@
          $('#ddlSections').html('<option value="0">--Select--</option>');
          return;
      }
+     LoadSessionSections(sender, null);
+ }
+
+ function LoadSessionSections(sender, selectedSectionId) {
      $('#ddlSections').html('<option value="-1">Loading....</option>');
      var sessionId = $('#ddlSchoolSessions').val();
      $.ajax({
@@ -2239,6 +2247,9 @@
              $('#ddlSections').html('');
              $('#ddlSections').html('<option value="0">--Select--</option>');
              $('#ddlSections').append(html);
+             if (selectedSectionId) {
+                 $('#ddlSections').val(selectedSectionId);
+             }
          },
          error: function(e) {
              alert("errorn");

@@ -290,8 +290,19 @@
             <div class="col-md-3">
 
                 @*@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy")*@
+                @{
+                    var editablePaymentDateBranches = new[] { 0 };
+                    var allowPaymentDateChange = editablePaymentDateBranches.Contains(Model.SBranchID);
+                }
                 Fee Date
-                <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" disabled="disabled" />
+                @if (allowPaymentDateChange)
+                {
+                    <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" max="@Model.FeeDate.ToString("yyyy-MM-dd")" />
+                }
+                else
+                {
+                    <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" disabled="disabled" />
+                }
          
             </div>
                     <div class="col-md-3">
@@ -316,16 +327,3 @@
                 }
             </div>
         </div>
-<script>
-    (
-        function () {
-        var dt = document.getElementById("dtDate");
-        if (!dt) return;
-
-        var today = "@Model.FeeDate.ToString("yyyy-MM-dd")";
-        dt.value = today;
-        dt.setAttribute("min", today);
-        dt.setAttribute("max", today);
-        dt.setAttribute("disabled", "disabled");
-    })();
-</script>

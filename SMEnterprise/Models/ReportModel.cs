@@ -43,6 +43,7 @@ namespace SMEnterprise.Models
     }
     public class StopWiseStudentAmountModel
     {
+        public string BusName { get; set; }
         public string AreaName { get; set; }
         public int AreaID { get; set; }
         public int Students { get; set; }

@@ -441,6 +441,8 @@ namespace SMEnterprise.Models
         public HttpPostedFileBase PrincipalSignatureFile { get; set; }
         public string SchoolNo { get; set; }
         public string AffiliationNo { get; set; }
+        public string AffiliatedTo { get; set; }
+        public string WebsiteLink { get; set; }
         public string BookNo { get; set; }
         public string RenewedUpto { get; set; }
         public int OpType { get; set; }

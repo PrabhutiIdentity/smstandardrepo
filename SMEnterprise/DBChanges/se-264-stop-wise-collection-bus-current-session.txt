@@ -1,0 +1,121 @@
+CREATE OR ALTER PROCEDURE dbo.sp_GetStopWiseCollectionStudents
+    @SBranchID INT,
+    @MStartDate DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @ReportDate DATE = ISNULL(@MStartDate, CAST(GETDATE() AS DATE));
+    DECLARE @SessionID INT;
+
+    SELECT TOP 1 @SessionID = SM.SessionID
+    FROM dbo.SessionMaster SM
+    WHERE ISNULL(SM.SBranchID, 0) = @SBranchID
+      AND ISNULL(SM.SessionStatus, 0) = 1
+    ORDER BY SM.SessionStartDate DESC, SM.SessionID DESC;
+
+    ;WITH ActiveTransport AS
+    (
+        SELECT
+            THAD.UserID AS StudentID,
+            THAD.KeyID AS StopID,
+            ROW_NUMBER() OVER
+            (
+                PARTITION BY THAD.UserID
+                ORDER BY ISNULL(THAD.StartDate, '19000101') DESC, THAD.THChangeID DESC
+            ) AS RowNo
+        FROM dbo.TransportHostalAllocationDelocation THAD
+        WHERE ISNULL(THAD.UserType, 0) = 0
+          AND ISNULL(THAD.ChangeType, 0) = 0
+          AND ISNULL(THAD.KeyID, 0) <> 0
+          AND CAST(ISNULL(THAD.StartDate, @ReportDate) AS DATE) <= @ReportDate
+          AND (
+              THAD.EndDate IS NULL
+              OR YEAR(THAD.EndDate) = 1
+              OR CAST(THAD.EndDate AS DATE) >= @ReportDate
+          )
+    ),
+    StudentTransport AS
+    (
+        SELECT
+            SM.StudentID,
+            ISNULL(NULLIF(SM.VehicleRouteID, 0), 0) AS VehicleRouteID,
+            ISNULL(NULLIF(SM.StopID, 0), AT.StopID) AS StopID
+        FROM dbo.StudentMaster SM
+        LEFT JOIN ActiveTransport AT
+            ON AT.StudentID = SM.StudentID
+           AND AT.RowNo = 1
+        WHERE ISNULL(SM.SBranchID, 0) = @SBranchID
+    ),
+    ActiveStudents AS
+    (
+        SELECT DISTINCT
+            SM.StudentID,
+            ST.VehicleRouteID,
+            ST.StopID
+        FROM StudentTransport ST
+        INNER JOIN dbo.StudentMaster SM
+            ON SM.StudentID = ST.StudentID
+        INNER JOIN dbo.Student_Session SS
+            ON SS.StudentID = SM.StudentID
+           AND ISNULL(SS.SBranchID, 0) = @SBranchID
+           AND ISNULL(SS.Status, 0) = 1
+           AND SS.SessionID = @SessionID
+        WHERE ISNULL(SM.SBranchID, 0) = @SBranchID
+          AND (
+              ISNULL(ST.VehicleRouteID, 0) <> 0
+              OR ISNULL(ST.StopID, 0) <> 0
+          )
+    ),
+    StudentRouteStop AS
+    (
+        SELECT DISTINCT
+            AST.StudentID,
+            TVR.VehicleRouteID,
+            TVR.VehicleID,
+            VD.VehicleNumber AS BusName,
+            TRD.StopID,
+            AM.AreaID,
+            AM.AreaName,
+            ISNULL(TRD.Rate, 0) AS Rate
+        FROM ActiveStudents AST
+        LEFT JOIN dbo.Transport_Vehicle_Route_Details TVRD
+            ON TVRD.StopID = AST.StopID
+           AND ISNULL(AST.VehicleRouteID, 0) = 0
+        INNER JOIN dbo.Transport_Vehicle_Route TVR
+            ON TVR.VehicleRouteID = ISNULL(NULLIF(AST.VehicleRouteID, 0), TVRD.VehicleRouteID)
+        INNER JOIN dbo.VehicleDetails VD
+            ON VD.VehicleID = TVR.VehicleID
+           AND ISNULL(VD.SBranchID, 0) = @SBranchID
+        LEFT JOIN dbo.TransportRouteDetails TRD
+            ON TRD.StopID = ISNULL(NULLIF(AST.StopID, 0), TVRD.StopID)
+        LEFT JOIN dbo.AreaMaster AM
+            ON AM.AreaID = TRD.AreaID
+        WHERE ISNULL(TVR.SBranchID, 0) = @SBranchID
+    )
+    SELECT
+        ISNULL(BusName, '') + '||' + ISNULL(AreaName, '') AS AreaName,
+        ISNULL(AreaID, 0) AS AreaID,
+        COUNT(DISTINCT StudentID) AS Students,
+        ISNULL(Rate, 0) AS Rate,
+        COUNT(DISTINCT StudentID) * ISNULL(Rate, 0) AS Amount
+    FROM StudentRouteStop
+    GROUP BY BusName, AreaName, AreaID, Rate
+    ORDER BY BusName, AreaName;
+
+    SELECT
+        SBM.SBranchID,
+        SBM.BranchName,
+        SBM.Logo,
+        SBM.ContactNo,
+        SBM.EmailID,
+        SBM.Address,
+        SBM.PrincipalName,
+        SBM.PrincipalMobile,
+        SBM.PrincipalEmail,
+        SBM.BranchSchoolName,
+        SBM.TagLine
+    FROM dbo.SBranchMaster SBM
+    WHERE SBM.SBranchID = @SBranchID;
+END
+GO

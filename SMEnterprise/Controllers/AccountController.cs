@@ -999,7 +999,15 @@ namespace SMEnterprise.Controllers
                 //}
                 objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
                 objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-                objModel.PaymentDate = CommonUsage.GetCurrentDate();
+                DateTime currentDate = CommonUsage.GetCurrentDate();
+                if (objModel.PaymentDate != DateTime.MinValue && objModel.PaymentDate.Date <= currentDate.Date)
+                {
+                    objModel.PaymentDate = objModel.PaymentDate.Date;
+                }
+                else
+                {
+                    objModel.PaymentDate = currentDate;
+                }
                 objModel.FeeDate = objModel.PaymentDate;
                 objModel.QDate = objModel.PaymentDate;
                 objModel.Day = objModel.QDate.Day;
@@ -2324,13 +2332,25 @@ namespace SMEnterprise.Controllers
             }
             int SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetStudents(objModel.ClassID, objModel.SectionID, SBranchID, objModel.SessionID);
+            var branchProfile = objAccountData.GetBranchPaymentProfile(SBranchID);
+            if (branchProfile != null)
+            {
+                if (objModel.BranchDetails == null)
+                {
+                    objModel.BranchDetails = branchProfile;
+                }
+                else if (string.IsNullOrWhiteSpace(objModel.BranchDetails.PrincipalSignature))
+                {
+                    objModel.BranchDetails.PrincipalSignature = branchProfile.PrincipalSignature;
+                }
+            }
             if (objModel.ClassID != 0)
             {
                 objModel.ClassName = objModel.Classes.Where(c => c.ClassID == objModel.ClassID).SingleOrDefault().ClassName;
                 objModel.SectionName = objModel.Sections.Where(c => c.ID == objModel.SectionID).SingleOrDefault().Name;
                 objModel.SessionName = objModel.Sessions.Where(c => c.ID == objModel.SessionID).SingleOrDefault().Name;
             }
-            return View(objModel);
+            return View("StudentsIDCardsVNew", objModel);
         }
         [PermissionFilter]
         public ActionResult StudentsIDCardsHorizontal(StudentsPageModel objModel)
@@ -2348,6 +2368,43 @@ namespace SMEnterprise.Controllers
                 objModel.SessionName = objModel.Sessions.Where(c => c.ID == objModel.SessionID).SingleOrDefault().Name;
             }
             return View(objModel);
+        }
+        public ActionResult StudentIDCardQR(string id = null, string id2 = null)
+        {
+            int studentId = CommonUsage.ConvertToInt(id);
+            int sBranchId = CommonUsage.ConvertToInt(id2);
+            if (studentId == 0 || sBranchId == 0)
+            {
+                return Content("Invalid student QR.", "text/plain");
+            }
+
+            StudentEditModel objModel = objAccountData.GetStudentDetailsPrint(studentId, sBranchId);
+            if (objModel == null || objModel.Student == null)
+            {
+                return Content("Student details not found.", "text/plain");
+            }
+
+            var student = objModel.Student;
+            var parent = objModel.ParantDetails;
+            var branch = objModel.SBranchDetails;
+            Func<string, string> enc = x => Server.HtmlEncode(x ?? "");
+            string html = "<!doctype html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\" />" +
+                "<title>Student ID Details</title>" +
+                "<style>body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f3f6fb;color:#07142c}.box{max-width:430px;margin:18px auto;background:#fff;border:1px solid #d9e2ef;border-radius:8px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.08)}h2{margin:0 0 4px;color:#062b5f;font-size:20px}.school{margin:0 0 14px;color:#44576f;font-size:13px}.row{display:flex;border-bottom:1px solid #edf1f6;padding:8px 0;font-size:14px}.label{width:130px;font-weight:700}.value{flex:1;color:#063a7e;font-weight:700}</style>" +
+                "</head><body><div class=\"box\">" +
+                "<h2>" + enc(student.Name) + "</h2>" +
+                "<div class=\"school\">" + enc(branch == null ? "" : branch.BranchSchoolName) + "</div>" +
+                "<div class=\"row\"><div class=\"label\">Admission No.</div><div class=\"value\">" + enc(student.SchoolUID) + "</div></div>" +
+                "<div class=\"row\"><div class=\"label\">Student ID</div><div class=\"value\">" + enc(student.StudentSID) + "</div></div>" +
+                "<div class=\"row\"><div class=\"label\">Class</div><div class=\"value\">" + enc(student.ClassName + " / " + student.SectionName) + "</div></div>" +
+                "<div class=\"row\"><div class=\"label\">DOB</div><div class=\"value\">" + student.DOB.ToString("dd/MM/yyyy") + "</div></div>" +
+                "<div class=\"row\"><div class=\"label\">Father</div><div class=\"value\">" + enc(parent == null ? student.FatherName : parent.FatherName) + "</div></div>" +
+                "<div class=\"row\"><div class=\"label\">Mother</div><div class=\"value\">" + enc(parent == null ? student.MotherName : parent.MotherName) + "</div></div>" +
+                "<div class=\"row\"><div class=\"label\">Mobile</div><div class=\"value\">" + enc(student.FatherMobileNo) + "</div></div>" +
+                "<div class=\"row\"><div class=\"label\">Blood Group</div><div class=\"value\">" + enc(student.BloodGroup) + "</div></div>" +
+                "</div></body></html>";
+
+            return Content(html, "text/html");
         }
         public ActionResult StudentClassReport(StudentsPageModel objModel)
         {
@@ -3828,6 +3885,14 @@ namespace SMEnterprise.Controllers
             oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
 
             objAdminData.GetPromotedStudentsDetail(oModel);
+            return View(oModel);
+        }
+
+        [PermissionFilter]
+        public ActionResult NotPromotedStudentsReport(StudentAdmissionReportModel oModel)
+        {
+            oModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objAdminData.GetNotPromotedStudentsDetail(oModel);
             return View(oModel);
         }
         #endregion

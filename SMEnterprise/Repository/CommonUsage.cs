@@ -446,7 +446,50 @@ namespace SMEnterprise.Repository
         public static string ConnectionString;
         public static void SetConnectionString()
         {
-            ConnectionString = ConfigurationManager.ConnectionStrings["Mystring"].ToString().Replace("***********", "Smv2@prabhuti303");
+            string configuredConnectionString = ConfigurationManager.ConnectionStrings["Mystring"].ToString();
+            const string passwordPlaceholder = "***********";
+
+            if (!configuredConnectionString.Contains(passwordPlaceholder))
+            {
+                ConnectionString = configuredConnectionString;
+                return;
+            }
+
+            var builder = new System.Data.SqlClient.SqlConnectionStringBuilder(configuredConnectionString);
+            builder.Password = GetConnectionPassword(builder.InitialCatalog, builder.UserID);
+            ConnectionString = builder.ConnectionString;
+        }
+
+        private static string GetConnectionPassword(string initialCatalog, string userId)
+        {
+            const string smv2Password = "Smv2@prabhuti303";
+            const string identityPassword = "Identity@1040";
+
+            var passwordByDatabase = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                
+                { "Identity_ISchool1", identityPassword },
+                { "Prabhuti_ISchool1", identityPassword },                
+                 { "prabhuti_PSchool", smv2Password },
+                 { "prabhuti_SchoolNalandaBal", identityPassword },
+                { "prabhuti_SchoolSarvodaya", identityPassword },               
+                { "Prabhuti_SchoolNavyugHar", identityPassword },
+                 { "prabhuti_SchoolShine", identityPassword },
+                 { "Prabhuti_SchoolGoverdhan", identityPassword },
+                   { "prabhuti_SchoolHamdania", identityPassword },
+                 { "prabhuti_SchoolRbis", identityPassword },
+            };
+
+         
+
+            if (!string.IsNullOrWhiteSpace(initialCatalog) && passwordByDatabase.ContainsKey(initialCatalog))
+            {
+                return passwordByDatabase[initialCatalog];
+            }
+
+           
+
+            return smv2Password;
         }
         public static SMSParamsa SMSConfig;
         //public static string ConnectionString = ConfigurationManager.ConnectionStrings["Mystring"].ToString().Replace("***********", "password303");

@@ -1,0 +1,151 @@
+ALTER PROCEDURE [dbo].[sp_FeePaymentRecieptData]
+(
+    @PaymentID int
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @SessionID int;
+    DECLARE @SBranchID int;
+
+    SELECT
+        @SessionID = SessionID,
+        @SBranchID = SBranchID
+    FROM dbo.PaymentMaster
+    WHERE PaymentID = @PaymentID;
+
+    DECLARE @LastPayDay int;
+
+    SELECT @LastPayDay = Details
+    FROM dbo.MasterSettings
+    WHERE [Type] = 'FeePaymentReminderDate'
+      AND SBranchID = @SBranchID;
+
+    WITH UniqueStudentSession AS
+    (
+        SELECT
+            *,
+            ROW_NUMBER() OVER
+            (
+                PARTITION BY SessionID, StudentID
+                ORDER BY ISNULL([Status], 0) DESC, StudentSessionUID DESC
+            ) AS ROWNUMBER
+        FROM dbo.Student_Session
+    )
+    SELECT
+        PM.PaymentID,
+        RIGHT(REPLICATE('0', 6) + CAST(PM.PaymentID AS varchar(6)), 6) AS PaymentSID,
+        @LastPayDay AS LastPayDay,
+        SS.StudentID,
+        (SELECT Name FROM dbo.StudentMaster WHERE StudentID = SS.StudentID) AS Name,
+        (SELECT SchoolUID FROM dbo.StudentMaster WHERE StudentID = SS.StudentID) AS SchoolUID,
+        (
+            SELECT FatherName
+            FROM dbo.ParentMaster
+            WHERE ParentID =
+            (
+                SELECT ParentID
+                FROM dbo.StudentMaster SM
+                WHERE SM.StudentID = SS.StudentID
+            )
+        ) AS FatherName,
+        (
+            SELECT FeeAmount
+            FROM dbo.ClassFeeStructureMaster CFM
+            WHERE CFM.ClassID = SS.ClassID
+              AND CFM.SessionID = SS.SessionID
+              AND CFM.FeeTypeID = -2
+              AND CFM.GroupID = (SELECT GroupID FROM dbo.Class_Sections CS WHERE CS.ID = SS.SectionID)
+        ) AS LateFee,
+        'STUD' + RIGHT(REPLICATE('0', 6) + CAST(PM.PayeeID AS varchar(6)), 6) AS StudentSID,
+        SS.RollNo,
+        ISNULL
+        (
+            (
+                SELECT ISNULL(ClassName, 'NA') + ' \ ' + ISNULL(SectionName, 'NA')
+                FROM dbo.v_ClassSectionNames
+                WHERE SectionID = SS.SectionID
+            ),
+            'NA\NA'
+        ) AS ClassSection,
+        PM.PayeeID,
+        PM.ReferanceNumber,
+        (
+            SELECT PaymentModeName
+            FROM dbo.PaymentModeMaster
+            WHERE PaymentModeid = PM.PaymentMode
+        ) AS FeePayMode,
+        (
+            SELECT PaymentModeName
+            FROM dbo.PaymentModeMaster
+            WHERE PaymentModeid = PM.PaymentMode
+        ) AS PaymentModeName,
+        PM.PaymentMode,
+        PM.Remark,
+        PM.PaymentAmount,
+        PM.PaymentStatus,
+        PM.PaymentDate,
+        PM.PaymentRecieptNo,
+        PM.PayeeType,
+        PM.PaymentTitle,
+        PM.EnteredDate,
+        PM.CollectedBy,
+        dbo.GetPaymentMonthNames(PM.PaymentID) AS PayMonths,
+        (SELECT SessionName FROM dbo.SessionMaster WHERE SessionID = @SessionID) AS SessionName
+    FROM dbo.PaymentMaster PM
+    LEFT OUTER JOIN UniqueStudentSession SS
+        ON SS.StudentID = PM.PayeeID
+       AND SS.ROWNUMBER = 1
+       AND SS.SessionID = PM.SessionID
+    WHERE PM.PaymentID = @PaymentID;
+
+    DECLARE @PaymentDetails table
+    (
+        FeeTypeID int,
+        FeeTypeName nvarchar(50),
+        PaymentRecieved numeric(10, 2),
+        DiscAmt numeric(10, 2),
+        NetApplicablePayment numeric(10, 2)
+    );
+
+    INSERT INTO @PaymentDetails
+    SELECT
+        PD.FeeTypeID,
+        FTM.FeeTypeName,
+        PD.PaymentRecieved AS PaymentRecieved,
+        PD.DiscAmt AS DiscAmt,
+        CASE
+            WHEN DuesPaidCount > 0 THEN
+                PD.NetApplicablePayment -
+                (
+                    SELECT SUM(ISNULL(PaymentRecieved, 0) - ISNULL(DiscAmt, 0))
+                    FROM dbo.PaymentDetails PDt
+                    WHERE PDt.Month = PD.Month
+                      AND PDt.Year = PD.Year
+                      AND PDt.PayeeID = PD.PayeeID
+                      AND PDt.PaymentID < PD.PaymentID
+                      AND PDt.FeeTypeID = PD.FeeTypeID
+                )
+            ELSE PD.NetApplicablePayment
+        END AS NetApplicablePayment
+    FROM dbo.PaymentDetails PD
+    LEFT OUTER JOIN dbo.FeeTypeMaster FTM
+        ON FTM.FeeTypeID = PD.FeeTypeID
+       AND FTM.SBranchID = @SBranchID
+    WHERE PD.PaymentID = @PaymentID;
+
+    SELECT
+        FeeTypeID,
+        FeeTypeName,
+        SUM(PaymentRecieved) AS PaymentRecieved,
+        SUM(DiscAmt) AS DiscAmt,
+        SUM(NetApplicablePayment) AS NetApplicablePayment
+    FROM @PaymentDetails
+    GROUP BY FeeTypeID, FeeTypeName;
+
+    SELECT *
+    FROM dbo.SBranchMaster
+    WHERE SBranchID = @SBranchID;
+END;
+GO

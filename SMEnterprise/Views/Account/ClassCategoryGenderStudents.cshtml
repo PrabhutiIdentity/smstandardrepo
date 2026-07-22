@@ -4,6 +4,14 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
 }
 @model SMEnterprise.Models.ClassGenderCategoryCountPageModel
+@{
+    var categories = Model.Categories == null
+        ? new List<NameIDModel>()
+        : Model.Categories
+            .OrderBy(c => c.Name != null && c.Name.Equals("General", StringComparison.OrdinalIgnoreCase) ? 0 : 1)
+            .ThenBy(c => c.ID)
+            .ToList();
+}
 @section IncludeCss
 {
     <title>Class wise Student List based on Category and Gender</title>
@@ -123,7 +131,7 @@
                                         <td rowspan="2" style="text-align:center;padding-top: 27px;border:1px solid">
                                             Classes
                                         </td>
-                                        @foreach (var cat in Model.Categories)
+                                        @foreach (var cat in categories)
                                         {
                                             <td style="text-align:center;border:1px solid" colspan="3">
                                                 @cat.Name
@@ -137,7 +145,7 @@
                                         </td>
                                     </tr>
                                     <tr style="width:100%;padding-bottom: 1px;border:1px solid;text-align:center;">
-                                        @foreach (var cat in Model.Categories)
+                                        @foreach (var cat in categories)
                                         {
                                             <td style="border:1px solid">Boys</td>
                                             <td style="border:1px solid">Girls</td>
@@ -161,7 +169,7 @@
                                                     @c.ClassName
                                                 </td>
 
-                                                @foreach (var cat in Model.Categories)
+                                                @foreach (var cat in categories)
                                                 {
                                                     <td style="border: 1px solid; text-align: center;">@Model.Data.Where(r => r.Gender == 0 && r.ClassID == c.ClassID && r.Category == cat.ID).Sum(it => it.Students)</td>
                                                     <td style="border: 1px solid; text-align: center;">@Model.Data.Where(r => r.Gender == 1 && r.ClassID == c.ClassID && r.Category == cat.ID).Sum(it => it.Students)</td>
@@ -186,7 +194,7 @@
                                             <td style="border: 1px solid; text-align: center;">
                                                 Total
                                             </td>
-                                            @foreach (var cat in Model.Categories)
+                                            @foreach (var cat in categories)
                                             {
                                                 <td style="border: 1px solid; text-align: center;">@Model.Data.Where(r => r.Gender == 0 && r.Category == cat.ID).Sum(it => it.Students)</td>
                                                 <td style="border: 1px solid; text-align: center;">@Model.Data.Where(r => r.Gender == 1 && r.Category == cat.ID).Sum(it => it.Students)</td>

@@ -1,31 +1,64 @@
-CREATE PROCEDURE usp_GetActiveTransportFlags
+IF OBJECT_ID('dbo.usp_GetActiveTransportFlags', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_GetActiveTransportFlags;
+GO
+
+CREATE PROCEDURE dbo.usp_GetActiveTransportFlags
     @StudentIDsString NVARCHAR(MAX), -- Comma-separated string jaise '1,2,3'
     @CurrentDate DATE
 AS
 BEGIN
     SET NOCOUNT ON;
 
+    DECLARE @StudentIDs TABLE (StudentID INT NOT NULL PRIMARY KEY);
+    DECLARE @List NVARCHAR(MAX) = ISNULL(@StudentIDsString, '') + ',';
+    DECLARE @Pos INT;
+    DECLARE @Value NVARCHAR(50);
+    DECLARE @StudentID INT;
+
+    WHILE LEN(@List) > 0
+    BEGIN
+        SET @Pos = CHARINDEX(',', @List);
+        IF @Pos = 0 BREAK;
+
+        SET @Value = LTRIM(RTRIM(LEFT(@List, @Pos - 1)));
+
+        IF @Value <> '' AND ISNUMERIC(@Value) = 1
+        BEGIN
+            SET @StudentID = CAST(@Value AS INT);
+
+            IF NOT EXISTS (SELECT 1 FROM @StudentIDs WHERE StudentID = @StudentID)
+            BEGIN
+                INSERT INTO @StudentIDs (StudentID) VALUES (@StudentID);
+            END
+        END
+
+        SET @List = SUBSTRING(@List, @Pos + 1, LEN(@List));
+    END
+
     SELECT 
-        UserID AS StudentID, 
-        MAX(ISNULL(KeyID, 0)) AS StopID
-    FROM dbo.TransportHostalAllocationDelocation
-    WHERE UserType = 0
-      AND ISNULL(ChangeType, 0) = 0
-      -- STRING_SPLIT string ko rows me tod deta hai
-      AND UserID IN (SELECT CAST(value AS INT) FROM STRING_SPLIT(@StudentIDsString, ','))
-      AND ISNULL(KeyID, 0) <> 0
-      AND CAST(StartDate AS DATE) <= @CurrentDate
+        THAD.UserID AS StudentID,
+        MAX(ISNULL(THAD.KeyID, 0)) AS StopID
+    FROM dbo.TransportHostalAllocationDelocation THAD
+    INNER JOIN @StudentIDs SI ON SI.StudentID = THAD.UserID
+    WHERE THAD.UserType = 0
+      AND ISNULL(THAD.ChangeType, 0) = 0
+      AND ISNULL(THAD.KeyID, 0) <> 0
+      AND CAST(THAD.StartDate AS DATE) <= @CurrentDate
       AND (
-          EndDate IS NULL
-          OR YEAR(EndDate) = 1
-          OR CAST(EndDate AS DATE) >= @CurrentDate
+          THAD.EndDate IS NULL
+          OR YEAR(THAD.EndDate) = 1
+          OR CAST(THAD.EndDate AS DATE) >= @CurrentDate
       )
-    GROUP BY UserID;
+    GROUP BY THAD.UserID;
 END
 
-go
+GO
 
-CREATE PROCEDURE usp_HasPaidTransportFeeForAllocation
+IF OBJECT_ID('dbo.usp_HasPaidTransportFeeForAllocation', 'P') IS NOT NULL
+    DROP PROCEDURE dbo.usp_HasPaidTransportFeeForAllocation;
+GO
+
+CREATE PROCEDURE dbo.usp_HasPaidTransportFeeForAllocation
     @StudentID INT,
     @THChangeID INT,
     @SBranchID INT

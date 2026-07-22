@@ -3011,26 +3011,89 @@ namespace SMEnterprise.Repository
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
             {
-                var paramater = new DynamicParameters();
-                paramater.Add("@SBranchID", objData.SBranchID);
-                paramater.Add("@BranchName", objData.BranchName);
-                paramater.Add("@Logo", objData.Logo);
-                paramater.Add("@ContactNo", objData.ContactNo);
-                paramater.Add("@EmailID", objData.EmailID);
-                paramater.Add("@Address", objData.Address);
-                paramater.Add("@PrincipalName", objData.PrincipalName);
-                paramater.Add("@PrincipalMobile", objData.PrincipalMobile);
-                paramater.Add("@PrincipalEmail", objData.PrincipalEmail);
-                paramater.Add("@BranchSchoolName", objData.BranchSchoolName);
-                paramater.Add("@OpType", objData.OpType);
-                paramater.Add("@StateID", objData.StateID);
-                paramater.Add("@PrincipalSignature", objData.PrincipalSignature);
-                paramater.Add("@NotificationServerKey", objData.NotificationServerKey);
-                paramater.Add("@PlayStoreLink", objData.PlayStoreLink);
-                paramater.Add("@UDISECode", objData.UDISECode);
-                paramater.Add("@SchoolCode", objData.SchoolCode);
-                return con.Query<int>("spn_InsertUpdateSBranch", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                try
+                {
+                    var paramater = GetBranchParameters(objData, true);
+                    return con.Query<int>("spn_InsertUpdateSBranch", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+                catch (SqlException ex)
+                {
+                    if (ex.Number != 8144)
+                    {
+                        throw;
+                    }
+
+                    var paramater = GetBranchParameters(objData, false);
+                    int SBranchID = con.Query<int>("spn_InsertUpdateSBranch", paramater, null, true, 0, commandType: CommandType.StoredProcedure).SingleOrDefault();
+                    UpdateBranchAffiliationFields(con, SBranchID, objData);
+                    return SBranchID;
+                }
             }
+        }
+        private DynamicParameters GetBranchParameters(SBranchModel objData, bool includeAffiliationFields)
+        {
+            var paramater = new DynamicParameters();
+            paramater.Add("@SBranchID", objData.SBranchID);
+            paramater.Add("@BranchName", objData.BranchName);
+            paramater.Add("@Logo", objData.Logo);
+            paramater.Add("@ContactNo", objData.ContactNo);
+            paramater.Add("@EmailID", objData.EmailID);
+            paramater.Add("@Address", objData.Address);
+            paramater.Add("@PrincipalName", objData.PrincipalName);
+            paramater.Add("@PrincipalMobile", objData.PrincipalMobile);
+            paramater.Add("@PrincipalEmail", objData.PrincipalEmail);
+            paramater.Add("@BranchSchoolName", objData.BranchSchoolName);
+            paramater.Add("@OpType", objData.OpType);
+            paramater.Add("@StateID", objData.StateID);
+            paramater.Add("@PrincipalSignature", objData.PrincipalSignature);
+            paramater.Add("@NotificationServerKey", objData.NotificationServerKey);
+            paramater.Add("@PlayStoreLink", objData.PlayStoreLink);
+            paramater.Add("@UDISECode", objData.UDISECode);
+            paramater.Add("@SchoolCode", objData.SchoolCode);
+
+            if (includeAffiliationFields)
+            {
+                paramater.Add("@AffiliationNo", objData.AffiliationNo);
+                paramater.Add("@AffiliatedTo", objData.AffiliatedTo);
+                paramater.Add("@WebsiteLink", objData.WebsiteLink);
+            }
+
+            return paramater;
+        }
+        private void UpdateBranchAffiliationFields(SqlConnection con, int SBranchID, SBranchModel objData)
+        {
+            var columns = con.Query<string>(
+                @"SELECT name
+                  FROM sys.columns
+                  WHERE object_id = OBJECT_ID('dbo.SBranchMaster')
+                    AND name IN ('AffiliationNo', 'AffiliatedTo', 'WebsiteLink')").ToList();
+
+            if (!columns.Any())
+            {
+                return;
+            }
+
+            var setColumns = new List<string>();
+            var paramater = new DynamicParameters();
+            paramater.Add("@SBranchID", SBranchID);
+
+            if (columns.Contains("AffiliationNo"))
+            {
+                setColumns.Add("AffiliationNo = @AffiliationNo");
+                paramater.Add("@AffiliationNo", objData.AffiliationNo);
+            }
+            if (columns.Contains("AffiliatedTo"))
+            {
+                setColumns.Add("AffiliatedTo = @AffiliatedTo");
+                paramater.Add("@AffiliatedTo", objData.AffiliatedTo);
+            }
+            if (columns.Contains("WebsiteLink"))
+            {
+                setColumns.Add("WebsiteLink = @WebsiteLink");
+                paramater.Add("@WebsiteLink", objData.WebsiteLink);
+            }
+
+            con.Execute("UPDATE dbo.SBranchMaster SET " + string.Join(", ", setColumns) + " WHERE SBranchID = @SBranchID", paramater);
         }
         public int CheckUserNameExist(string UserName, int SBranchID)
         {
@@ -4452,6 +4515,23 @@ namespace SMEnterprise.Repository
                     oModel.Sessions = multi.Read<NameIDModel>().ToList();
                     oModel.Branches = multi.Read<SBranchModel>().SingleOrDefault();
                     //oModel.SessionID = multi.Read<int>().SingleOrDefault();
+                }
+            }
+            return oModel;
+        }
+        public StudentAdmissionReportModel GetNotPromotedStudentsDetail(StudentAdmissionReportModel oModel)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SessionID", oModel.SessionID);
+                paramater.Add("@SBranchID", oModel.SBranchID);
+                using (var multi = con.QueryMultiple("sp_GetSessionNotPromotedStudentDetail", paramater, null, 0, commandType: CommandType.StoredProcedure))
+                {
+                    oModel.StudentDetail = multi.Read<StudentAdmissionDetail>().ToList();
+                    oModel.Sessions = multi.Read<NameIDModel>().ToList();
+                    oModel.Branches = multi.Read<SBranchModel>().SingleOrDefault();
+                    oModel.SessionID = multi.Read<int>().SingleOrDefault();
                 }
             }
             return oModel;

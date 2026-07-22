@@ -1,0 +1,35 @@
+
+Create procedure [dbo].[sp_GetUserPermissions]  
+(  
+ @UserID int,  
+ @SBranchID int  
+)  
+AS  
+BEGIN  
+ declare @isPermissionsSet int  
+ select @isPermissionsSet=count(*) from EmployeePermissions where SBranchID=@SBranchID  
+ select P.ID,P.Module,P.Action,EP.Status from EmployeePermissions EP  
+ left outer join PermissionList P on P.ID=EP.PermissionID  
+ where EP.EmployeeID=@UserID  
+  
+ select @isPermissionsSet  
+END  
+
+
+
+CREATE TABLE [dbo].[EmployeePermissions](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[EmployeeID] [int] NULL,
+	[PermissionID] [int] NULL,
+	[Status] [int] NULL,
+	[SBranchID] [int] NULL
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[PermissionList](
+	[ID] [int] IDENTITY(1,1) NOT NULL,
+	[PermissionName] [nvarchar](50) NULL,
+	[Module] [int] NULL,
+	[Action] [int] NULL
+) ON [PRIMARY]
+GO

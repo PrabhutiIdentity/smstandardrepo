@@ -1,0 +1,257 @@
+@using SMEnterprise.Models
+@model StudentPhotoPageModel
+@{
+    Layout = "~/Views/Shared/_TeacherLayout.cshtml";
+}
+@section IncludeCss {
+    <title>Student Photo Update</title>
+}
+<style>
+    .sp-head { margin-bottom: 15px; }
+    .sp-card { border: 1px solid #ddd; border-radius: 6px; padding: 12px; margin-bottom: 15px; min-height: 285px; text-align: center; background: #fff; }
+    .sp-photo { width: 140px; height: 175px; object-fit: cover; border: 1px solid #ccc; border-radius: 5px; background: #f5f5f5; }
+    .sp-name { font-weight: 600; margin-top: 8px; min-height: 38px; }
+    .sp-meta { color: #777; min-height: 20px; font-size: 12px; }
+    .sp-parent { color: #555; min-height: 38px; margin-top: 4px; font-size: 12px; text-align: left; padding: 0 8px; }
+    .sp-actions { margin-top: 8px; }
+    .sp-actions .btn { margin: 2px; }
+    .sp-state { display: block; min-height: 18px; margin-top: 5px; font-size: 12px; }
+    .sp-pending { color: #d58512; } .sp-success { color: #3c763d; } .sp-error { color: #a94442; }
+    #cropCanvas { display: block; max-width: 100%; margin: 0 auto; background: #222; cursor: move; touch-action: none; }
+    #cameraVideo { width: 100%; max-height: 55vh; background: #111; }
+    .sp-progress { margin-top: 10px; display: none; }
+</style>
+
+<div class="row sp-head">
+    <div class="col-md-4"><h3>Student Photo Update</h3></div>
+    <div class="col-md-8">
+        @using (Html.BeginForm("StudentPhotoUpdate", "Teacher", FormMethod.Get, new { id = "photoFilter" }))
+        {
+            <div class="col-md-5">
+                <label>Class</label>
+                <select class="form-control" name="ClassID" id="ddlClass">
+                    <option value="0">--Select Class--</option>
+                    @foreach (NameIDModel item in Model.Classes) { <option value="@item.ID" @(item.ID == Model.ClassID ? "selected" : "")>@item.Name</option> }
+                </select>
+            </div>
+            <div class="col-md-5">
+                <label>Section</label>
+                <select class="form-control" name="SectionID" id="ddlSection">
+                    <option value="0">--Select Section--</option>
+                    @foreach (NameIDModel item in Model.Sections) { <option value="@item.ID" @(item.ID == Model.SectionID ? "selected" : "")>@item.Name</option> }
+                </select>
+            </div>
+            <div class="col-md-2"><label>&nbsp;</label><button type="submit" class="btn btn-primary form-control">Show</button></div>
+        }
+    </div>
+</div>
+
+<div class="x_panel">
+    <div class="x_content">
+        <div class="row" id="studentGrid">
+            @foreach (StudentPhotoModel student in Model.Students)
+            {
+                <div class="col-lg-3 col-md-4 col-sm-6 student-card" data-student-id="@student.StudentID">
+                    <div class="sp-card">
+                        <img class="sp-photo" onerror="return OnImageError(this,@student.Gender);" src="@Url.Content("~/Images/StudentImage/")@(student.StudentID)_@student.Photo" alt="@student.Name" />
+                        <div class="sp-name">@student.Name</div>
+                        <div class="sp-meta">@student.StudentSID @(!string.IsNullOrWhiteSpace(student.RollNo) ? " | Roll: " + student.RollNo : "")</div>
+                        <div class="sp-parent">
+                            <div><strong>Father:</strong> @(string.IsNullOrWhiteSpace(student.FatherName) ? "-" : student.FatherName)</div>
+                            <div><strong>Mother:</strong> @(string.IsNullOrWhiteSpace(student.MotherName) ? "-" : student.MotherName)</div>
+                        </div>
+                        <div class="sp-actions">
+                            <label class="btn btn-warning btn-xs">Upload<input type="file" accept="image/*" class="photo-file" style="display:none" /></label>
+                            <button type="button" class="btn btn-info btn-xs camera-btn"><i class="fa fa-camera"></i> Camera</button>
+                        </div>
+                        <span class="sp-state"></span>
+                    </div>
+                </div>
+            }
+        </div>
+        @if (Model.Classes.Count == 0)
+        {
+            <div class="alert alert-warning"><strong>Class/Section Not Assigned.</strong> Logged-in teacher ko is branch mein koi class/section assign nahi hai.</div>
+        }
+        else if (Model.Students.Count == 0)
+        {
+            <div class="alert alert-info">No students found for the selected class and section.</div>
+        }
+        else
+        {
+            <button type="button" id="saveAll" class="btn btn-success btn-block" disabled>Save All Changed Photos</button>
+            <div class="progress sp-progress"><div id="saveProgress" class="progress-bar progress-bar-success" style="width:0%">0%</div></div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="cropModal" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><button type="button" class="close crop-cancel">&times;</button><h4>Crop Student Photo</h4></div>
+        <div class="modal-body">
+            <canvas id="cropCanvas" width="500" height="500"></canvas>
+            <label style="margin-top:10px">Zoom</label><input id="zoomRange" type="range" min="30" max="300" value="100" class="form-control" />
+            <p class="help-block">Blue crop box ko move karein aur corner handle se chhota/bada karein. Sirf box ke andar ka photo save hoga.</p>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-default crop-cancel">Cancel</button><button type="button" id="applyCrop" class="btn btn-primary">Apply Crop</button></div>
+    </div></div>
+</div>
+
+<div class="modal fade" id="cameraModal" tabindex="-1" role="dialog" data-backdrop="static">
+    <div class="modal-dialog"><div class="modal-content">
+        <div class="modal-header"><button type="button" class="close camera-close">&times;</button><h4>Take Photo</h4></div>
+        <div class="modal-body"><video id="cameraVideo" autoplay playsinline></video><div id="cameraError" class="alert alert-danger" style="display:none"></div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-default camera-close">Cancel</button><button type="button" id="capturePhoto" class="btn btn-primary"><i class="fa fa-camera"></i> Capture</button></div>
+    </div></div>
+</div>
+
+@section scripts {
+<script>
+(function () {
+    'use strict';
+    var MAX_BYTES = 500 * 1024, OUT_W = 600, OUT_H = 750;
+    var pending = {}, activeCard = null, sourceImage = null, stream = null;
+    var canvas = document.getElementById('cropCanvas'), ctx = canvas.getContext('2d');
+    var baseScale = 1, zoom = 1, imageRect = null, crop = null, dragging = false, dragMode = '', lastX = 0, lastY = 0;
+
+    $('#ddlClass').change(function () {
+        $('#ddlSection').html('<option value="0">Loading...</option>');
+        $.ajax({ type: 'POST', url: '/Teacher/GetClassTeacherPhotoSections/' + this.value, processData: false, contentType: false })
+            .done(function (html) { $('#ddlSection').html('<option value="0">--Select Section--</option>' + html); });
+    });
+
+    $('.photo-file').change(function () {
+        if (!this.files || !this.files[0]) return;
+        activeCard = $(this).closest('.student-card');
+        openCropFromFile(this.files[0]);
+        this.value = '';
+    });
+
+    $('.camera-btn').click(function () {
+        activeCard = $(this).closest('.student-card');
+        $('#cameraError').hide(); $('#cameraModal').modal('show');
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            $('#cameraError').text('Camera is not supported in this browser or HTTPS is required.').show(); return;
+        }
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false })
+            .then(function (s) { stream = s; document.getElementById('cameraVideo').srcObject = s; })
+            .catch(function () { $('#cameraError').text('Camera permission nahi mili ya camera available nahi hai.').show(); });
+    });
+
+    function stopCamera() { if (stream) { stream.getTracks().forEach(function (t) { t.stop(); }); stream = null; } document.getElementById('cameraVideo').srcObject = null; }
+    $('.camera-close').click(function () { stopCamera(); $('#cameraModal').modal('hide'); });
+    $('#capturePhoto').click(function () {
+        var video = document.getElementById('cameraVideo');
+        if (!stream || !video.videoWidth) return;
+        var c = document.createElement('canvas'); c.width = video.videoWidth; c.height = video.videoHeight;
+        c.getContext('2d').drawImage(video, 0, 0); stopCamera(); $('#cameraModal').modal('hide');
+        c.toBlob(function (blob) { openCropFromFile(blob); }, 'image/jpeg', 0.95);
+    });
+
+    function openCropFromFile(file) {
+        if (!file || (file.type && file.type.indexOf('image/') !== 0)) { notify('Invalid Photo', 'Please select an image file.', 'error'); return; }
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = new Image();
+            img.onload = function () {
+                sourceImage = img; baseScale = Math.min(canvas.width / img.width, canvas.height / img.height);
+                zoom = 1; $('#zoomRange').val(100); setImageRect(); resetCropBox(); drawCrop(); $('#cropModal').modal('show');
+            };
+            img.onerror = function () { notify('Invalid Photo', 'Image could not be opened.', 'error'); };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function setImageRect() {
+        var scale=baseScale*zoom, w=sourceImage.width*scale, h=sourceImage.height*scale;
+        imageRect={x:(canvas.width-w)/2,y:(canvas.height-h)/2,w:w,h:h,scale:scale};
+    }
+    function resetCropBox() {
+        var maxW=Math.min(imageRect.w,imageRect.h*4/5)*0.88, maxH=maxW*5/4;
+        crop={x:imageRect.x+(imageRect.w-maxW)/2,y:imageRect.y+(imageRect.h-maxH)/2,w:maxW,h:maxH};
+    }
+    function constrainCrop() {
+        var minW=80, maxW=Math.min(canvas.width,canvas.height*4/5);
+        crop.w=Math.max(minW,Math.min(maxW,crop.w)); crop.h=crop.w*5/4;
+        crop.x=Math.max(0,Math.min(canvas.width-crop.w,crop.x));
+        crop.y=Math.max(0,Math.min(canvas.height-crop.h,crop.y));
+    }
+    function drawCrop() {
+        if (!sourceImage || !imageRect || !crop) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle='#222'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(sourceImage,imageRect.x,imageRect.y,imageRect.w,imageRect.h);
+        ctx.fillStyle='rgba(0,0,0,.58)';
+        ctx.fillRect(0,0,canvas.width,crop.y); ctx.fillRect(0,crop.y,crop.x,crop.h);
+        ctx.fillRect(crop.x+crop.w,crop.y,canvas.width-(crop.x+crop.w),crop.h);
+        ctx.fillRect(0,crop.y+crop.h,canvas.width,canvas.height-(crop.y+crop.h));
+        ctx.strokeStyle='#20a8ff'; ctx.lineWidth=3; ctx.strokeRect(crop.x,crop.y,crop.w,crop.h);
+        ctx.fillStyle='#20a8ff'; ctx.fillRect(crop.x+crop.w-9,crop.y+crop.h-9,18,18);
+    }
+    $('#zoomRange').on('input change', function () {
+        var old=imageRect; zoom=parseInt(this.value,10)/100; setImageRect();
+        if(old && crop){ var cx=(crop.x+crop.w/2-old.x)/old.w, cy=(crop.y+crop.h/2-old.y)/old.h; crop.x=imageRect.x+cx*imageRect.w-crop.w/2; crop.y=imageRect.y+cy*imageRect.h-crop.h/2; constrainCrop(); }
+        drawCrop();
+    });
+    function point(e) { var r = canvas.getBoundingClientRect(), p = e.touches ? e.touches[0] : e; return { x: (p.clientX-r.left)*canvas.width/r.width, y:(p.clientY-r.top)*canvas.height/r.height }; }
+    $(canvas).on('mousedown touchstart', function (e) {
+        e.preventDefault(); var p=point(e.originalEvent), hx=crop.x+crop.w, hy=crop.y+crop.h;
+        if(Math.abs(p.x-hx)<=25 && Math.abs(p.y-hy)<=25) dragMode='resize';
+        else if(p.x>=crop.x && p.x<=crop.x+crop.w && p.y>=crop.y && p.y<=crop.y+crop.h) dragMode='move';
+        else return;
+        dragging=true; lastX=p.x; lastY=p.y;
+    }).on('mousemove touchmove', function (e) {
+        if(!dragging)return; e.preventDefault(); var p=point(e.originalEvent), dx=p.x-lastX, dy=p.y-lastY;
+        if(dragMode==='move'){crop.x+=dx;crop.y+=dy;} else {crop.w+=Math.abs(dx)>Math.abs(dy)?dx:dy*4/5;}
+        constrainCrop(); lastX=p.x; lastY=p.y; drawCrop();
+    });
+    $(document).on('mouseup touchend', function () { dragging=false; });
+    $('.crop-cancel').click(function () { sourceImage=null; activeCard=null; $('#cropModal').modal('hide'); });
+
+    $('#applyCrop').click(function () {
+        if (!sourceImage || !activeCard) return;
+        var output = document.createElement('canvas'); output.width=OUT_W; output.height=OUT_H;
+        var ix=Math.max(crop.x,imageRect.x), iy=Math.max(crop.y,imageRect.y);
+        var ir=Math.min(crop.x+crop.w,imageRect.x+imageRect.w), ib=Math.min(crop.y+crop.h,imageRect.y+imageRect.h);
+        var outCtx=output.getContext('2d'); outCtx.fillStyle='#fff'; outCtx.fillRect(0,0,OUT_W,OUT_H);
+        if(ir>ix && ib>iy) {
+            var sx=(ix-imageRect.x)/imageRect.scale, sy=(iy-imageRect.y)/imageRect.scale;
+            var sw=(ir-ix)/imageRect.scale, sh=(ib-iy)/imageRect.scale;
+            var dx=(ix-crop.x)*OUT_W/crop.w, dy=(iy-crop.y)*OUT_H/crop.h;
+            var dw=(ir-ix)*OUT_W/crop.w, dh=(ib-iy)*OUT_H/crop.h;
+            outCtx.drawImage(sourceImage,sx,sy,sw,sh,dx,dy,dw,dh);
+        }
+        makeUnderLimit(output, 0.92, function (blob) {
+            if (!blob || blob.size > MAX_BYTES) { notify('Photo Too Large', 'Photo 500 KB se kam nahi ho saka.', 'error'); return; }
+            var id = activeCard.data('student-id'), old = pending[id]; if(old && old.url) URL.revokeObjectURL(old.url);
+            var url = URL.createObjectURL(blob); pending[id] = { blob:blob, url:url, card:activeCard };
+            activeCard.find('.sp-photo').attr('src',url); activeCard.find('.sp-state').removeClass().addClass('sp-state sp-pending').text('Ready - ' + Math.ceil(blob.size/1024) + ' KB');
+            $('#saveAll').prop('disabled', false).text('Save All Changed Photos (' + Object.keys(pending).length + ')');
+            sourceImage=null; activeCard=null; $('#cropModal').modal('hide');
+        });
+    });
+    function makeUnderLimit(c, quality, done) {
+        c.toBlob(function (blob) { if (blob && blob.size <= MAX_BYTES) done(blob); else if (quality > 0.45) makeUnderLimit(c, quality-0.08, done); else done(blob); }, 'image/jpeg', quality);
+    }
+
+    $('#saveAll').click(function () {
+        var ids=Object.keys(pending), index=0, success=0, failed=0; if(!ids.length)return;
+        $('#saveAll').prop('disabled',true); $('.sp-progress').show();
+        function next() {
+            if(index>=ids.length) {
+                $('#saveAll').prop('disabled',Object.keys(pending).length===0).text(Object.keys(pending).length ? 'Retry Failed Photos ('+Object.keys(pending).length+')' : 'All Changed Photos Saved');
+                notify(failed ? 'Save Completed' : 'Success', success+' photo(s) saved'+(failed ? ', '+failed+' failed.' : '.'), failed ? 'warning' : 'success'); return;
+            }
+            var id=ids[index++], item=pending[id], fd=new FormData(); fd.append('studentID',id); fd.append('classID','@Model.ClassID'); fd.append('sectionID','@Model.SectionID'); fd.append('photo',item.blob,'student-'+id+'.jpg');
+            item.card.find('.sp-state').removeClass().addClass('sp-state sp-pending').text('Saving...');
+            $.ajax({url:'/Teacher/SaveStudentPhoto',type:'POST',data:fd,processData:false,contentType:false})
+                .done(function(r){ if(r && r.success){ success++; item.card.find('.sp-photo').attr('src',r.photoUrl+'?v='+Date.now()); item.card.find('.sp-state').removeClass().addClass('sp-state sp-success').text('Saved'); URL.revokeObjectURL(item.url); delete pending[id]; } else { failed++; item.card.find('.sp-state').removeClass().addClass('sp-state sp-error').text((r&&r.message)||'Save failed'); } })
+                .fail(function(){ failed++; item.card.find('.sp-state').removeClass().addClass('sp-state sp-error').text('Network/server error'); })
+                .always(function(){ var pct=Math.round(index*100/ids.length); $('#saveProgress').css('width',pct+'%').text(pct+'%'); next(); });
+        } next();
+    });
+    function notify(title,text,type){ if(window.ShowNotification) ShowNotification(title,text,type); else alert(text); }
+})();
+</script>
+}

@@ -4,6 +4,20 @@
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
     string[] MonthNames = { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" };
     var feeTypeCount = Model.FeeTypeSummery.Count();
+    var studentSessionStartDate = Model.StudentList
+        .Where(student => student.SessionStartDate.Year > 1)
+        .Select(student => student.SessionStartDate)
+        .OrderBy(date => date)
+        .FirstOrDefault();
+    var effectiveSessionStartDate = Model.SessionStartDate.Year > 1
+        ? Model.SessionStartDate
+        : studentSessionStartDate;
+    var sessionStartMonth = effectiveSessionStartDate.Year > 1
+        ? effectiveSessionStartDate.Month
+        : 1;
+    var reportMonths = Enumerable.Range(0, 12)
+        .Select(offset => ((sessionStartMonth - 1 + offset) % 12) + 1)
+        .ToList();
 }
 @section IncludeCss
     {
@@ -11,6 +25,87 @@
     <link rel="stylesheet" href="@Url.Content("~/css/studentStyle.css")">
     <link href="@Url.Content("~/css/DemandRecipt.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/css/style.min.css")" rel="stylesheet" />
+    <style>
+        .monthly-due-table-wrap {
+            max-height: calc(100vh - 190px);
+            overflow: auto;
+        }
+
+        #tblCategory thead th {
+            position: sticky;
+            background: #fff;
+            z-index: 3;
+        }
+
+        #tblCategory thead tr:first-child th {
+            top: 0;
+        }
+
+        #tblCategory thead tr:nth-child(2) th {
+            top: 37px;
+        }
+
+        #tblCategory thead th[rowspan="2"] {
+            z-index: 4;
+        }
+
+        #tblCategory .sticky-number,
+        #tblCategory .sticky-student,
+        #tblCategory .sticky-fee-type {
+            position: sticky;
+            background: #fff;
+            background-clip: padding-box;
+        }
+
+        #tblCategory .sticky-number {
+            left: 0;
+            min-width: 44px;
+            width: 44px;
+            z-index: 5;
+        }
+
+        #tblCategory .sticky-student {
+            left: 44px;
+            min-width: 135px;
+            width: 135px;
+            z-index: 5;
+        }
+
+        #tblCategory .sticky-fee-type {
+            left: 179px;
+            min-width: 90px;
+            width: 90px;
+            z-index: 5;
+            box-shadow: 2px 0 2px rgba(0, 0, 0, .08);
+        }
+
+        #tblCategory thead .sticky-number,
+        #tblCategory thead .sticky-student,
+        #tblCategory thead .sticky-fee-type {
+            z-index: 7;
+        }
+
+        @@media print {
+            .monthly-due-table-wrap {
+                max-height: none;
+                overflow: visible;
+            }
+
+            #tblCategory thead {
+                display: table-header-group;
+            }
+
+            #tblCategory thead th {
+                position: static;
+            }
+
+            #tblCategory .sticky-number,
+            #tblCategory .sticky-student,
+            #tblCategory .sticky-fee-type {
+                position: static;
+            }
+        }
+    </style>
 }@using SMEnterprise.Models;
 @model SMEnterprise.Models.FeePaymentModel
 <div class="" style="background-color: white;">
@@ -79,27 +174,36 @@
     </div>
     <div class="row">
         <div class="col-md-2"></div>
-        <div class="col-md-10" style="text-align:right;">
+        <div class="col-md-5">
+            <div class="input-group">
+                <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                <input type="search"
+                       id="txtStudentFeeSearch"
+                       class="form-control"
+                       placeholder="Search student, SR, roll no, father or mother" />
+            </div>
+        </div>
+        <div class="col-md-5" style="text-align:right;">
             <button type="button" class="export-btn btn-primary" onclick="tableToExcel('tblCategory', 'Monthly Due Fee Report');"><i class="fa fa-file-excel-o"></i> Export To Excel</button>
         </div>
     </div>
 
-    <div class="x_panel" style=" overflow-x: auto;">
+    <div class="x_panel monthly-due-table-wrap">
         <table id="tblCategory" class="table table-bordered table-hover">
             <thead>
                 <tr>
-                    <th rowspan="2">#</th>
-                    <th rowspan="2">Student</th>
-                    <th rowspan="2">Fee Type</th>
-                    @for (int i = 1; i <= 12; i++)
+                    <th rowspan="2" class="sticky-number">#</th>
+                    <th rowspan="2" class="sticky-student">Student</th>
+                    <th rowspan="2" class="sticky-fee-type">Fee Type</th>
+                    @foreach (var monthNumber in reportMonths)
                     {
                         <th colspan="4">
-                            @MonthNames[i - 1]
+                            @MonthNames[monthNumber - 1]
                         </th>
                     }
                 </tr>
                 <tr>
-                    @for (int i = 1; i <= 12; i++)
+                    @foreach (var monthNumber in reportMonths)
                     {
                         <th>Amount </th>
                         <th>Discount</th>
@@ -114,9 +218,20 @@
                     var counter = 1;
                     foreach (var student in Model.StudentList)
                     {
-                        <tr>
-                            <td rowspan="@(feeTypeCount + 2)">@counter</td>
-                            <td rowspan="@(feeTypeCount + 2)">
+                        var studentSearchText = string.Join(" ", new[]
+                        {
+                            student.Name,
+                            student.StudentSID,
+                            student.SchoolUID,
+                            student.RollNo,
+                            student.FatherName,
+                            student.MotherName
+                        }.Where(value => !string.IsNullOrWhiteSpace(value))).ToLowerInvariant();
+                        <tr class="student-fee-group student-fee-summary"
+                            data-student-key="@student.StudentID"
+                            data-search="@studentSearchText">
+                            <td rowspan="@(feeTypeCount + 2)" class="sticky-number">@counter</td>
+                            <td rowspan="@(feeTypeCount + 2)" class="sticky-student">
                                 @student.Name<br />
                                 @student.StudentSID<br />
                                SR: @student.SchoolUID<br />
@@ -127,17 +242,17 @@
                         </tr>
                         foreach (var ft in Model.FeeTypeSummery)
                         {
-                            <tr>
-                                <td>@ft.FeeTypeName</td>
-                                @for (int i = 1; i <= 12; i++)
+                            <tr class="student-fee-group" data-student-key="@student.StudentID">
+                                <td class="sticky-fee-type">@ft.FeeTypeName</td>
+                                @foreach (var monthNumber in reportMonths)
                                 {
-                                    var feedetails = Model.FeeListDetail.Where(x => x.FeeTypeID == ft.FeeTypeID && x.StudentID == student.StudentID && x.FeeMonth == i).FirstOrDefault();
+                                    var feedetails = Model.FeeListDetail.FirstOrDefault(x => x.FeeTypeID == ft.FeeTypeID && x.StudentID == student.StudentID && x.FeeMonth == monthNumber);
                                     if (feedetails != null)
                                     {
-                                        <td>@feedetails.FeeAmount </td>
-                                        <td>@feedetails.RDiscount</td>
-                                        <td>@feedetails.PaidAmount</td>
-                                        <td>@(feedetails.FeeAmount-feedetails.PaidAmount)</td>
+                                        <td>@feedetails.FeeAmount.ToString("N2")</td>
+                                        <td>@feedetails.RDiscount.ToString("N2")</td>
+                                        <td>@feedetails.PaidAmount.ToString("N2")</td>
+                                        <td>@((feedetails.FeeAmount - feedetails.RDiscount - feedetails.PaidAmount).ToString("N2"))</td>
                                     }
                                     else
                                     {
@@ -149,17 +264,17 @@
                                 }
                             </tr>
                         }
-                        <tr style="font-weight: 800;">
-                            <td>Total</td>
-                            @for (int i = 1; i <= 12; i++)
+                        <tr class="student-fee-group" data-student-key="@student.StudentID" style="font-weight: 800;">
+                            <td class="sticky-fee-type">Total</td>
+                            @foreach (var monthNumber in reportMonths)
                             {
-                                var feedetails = Model.FeeListDetail.Where(x => x.StudentID == student.StudentID && x.FeeMonth == i).ToList();
-                                if (feedetails != null)
+                                var feedetails = Model.FeeListDetail.Where(x => x.StudentID == student.StudentID && x.FeeMonth == monthNumber).ToList();
+                                if (feedetails.Any())
                                 {
-                                    <td>@feedetails.Sum(x=>x.FeeAmount) </td>
-                                    <td>@feedetails.Sum(x=>x.RDiscount)</td>
-                                    <td>@feedetails.Sum(x=>x.PaidAmount)</td>
-                                    <td>@feedetails.Sum(x => x.FeeAmount- x.PaidAmount) </td>
+                                    <td>@feedetails.Sum(x => x.FeeAmount).ToString("N2")</td>
+                                    <td>@feedetails.Sum(x => x.RDiscount).ToString("N2")</td>
+                                    <td>@feedetails.Sum(x => x.PaidAmount).ToString("N2")</td>
+                                    <td>@feedetails.Sum(x => x.FeeAmount - x.RDiscount - x.PaidAmount).ToString("N2")</td>
                                 }
                                                         else
                                                         {
@@ -205,6 +320,19 @@
     </script>
     <script>
         $(document).ready(function () {
+            $('#txtStudentFeeSearch').on('input', function () {
+                var searchText = ($(this).val() || '').toLowerCase().trim();
+
+                $('.student-fee-summary').each(function () {
+                    var studentKey = $(this).attr('data-student-key');
+                    var studentText = ($(this).attr('data-search') || '').toLowerCase();
+                    var isMatch = searchText === '' || studentText.indexOf(searchText) !== -1;
+
+                    $('.student-fee-group[data-student-key="' + studentKey + '"]')
+                        .toggle(isMatch);
+                });
+            });
+
                                         var printdate='Print Date: @SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd/MM/yyyy")';
                                         //var repname =   + ' Class:' + $('#ddlClass option:selected').text() + ' / '+ $('#ddlSection option:selected').text()+' Due Fee Report'
                                         var handleDataTableButtons = function () {

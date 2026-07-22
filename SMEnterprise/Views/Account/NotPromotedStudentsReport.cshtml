@@ -1,0 +1,119 @@
+@using SMEnterprise.Models
+@model SMEnterprise.Models.StudentAdmissionReportModel
+@{
+    ViewBag.Title = "Not Promoted Students Report";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+@section IncludeCss {
+    <title>Not Promoted Students Report</title>
+    <link href="@Url.Content("~/css/Gent/dataTables.bootstrap.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/css/buttons.bootstrap.min.css")" rel="stylesheet" />
+}
+
+<section class="content-header">
+    <h1>Not Promoted Students Report</h1>
+    <ol class="breadcrumb">
+        <li><a href="/"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li class="active">Not Promoted Students Report</li>
+    </ol>
+</section>
+
+<div class="row">
+    <div class="col-md-12">
+        @using (Html.BeginForm("NotPromotedStudentsReport", "Account", FormMethod.Post, new { id = "frmGetStudents" }))
+        {
+            <div class="row std-mng-head">
+                <div class="col-md-12 class-section">
+                    <div class="row">
+                        <div class="col-md-1"></div>
+                        <div class="col-md-4 padding">
+                            <label class="col-md-5 text-right">New Session :</label>
+                            <div class="col-md-7">
+                                <select class="form-control" name="SessionID" id="ddlSessions">
+                                    @foreach (NameIDModel session in Model.Sessions)
+                                    {
+                                        <option value="@session.ID" @(session.ID == Model.SessionID ? "selected" : "")>
+                                            @session.Name @(session.Extra1 == "1" ? "(Active)" : "")
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="x_panel">
+            <div class="x_content">
+                <p><strong>Total students not promoted: @Model.StudentDetail.Count</strong></p>
+                <table id="tblNotPromoted" class="table table-bordered table-hover display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Seq</th>
+                            <th>Student Name</th>
+                            <th>Student ID</th>
+                            <th>SR.No.</th>
+                            <th>Gender</th>
+                            <th>Previous Class</th>
+                            <th>Previous Section</th>
+                            <th>Admission Date</th>
+                            <th>Date of Birth</th>
+                            <th>Father Name</th>
+                            <th>Father Contact No</th>
+                            <th>Mother Name</th>
+                            <th>Mother Contact No</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @for (int i = 0; i < Model.StudentDetail.Count; i++)
+                    {
+                        var student = Model.StudentDetail[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@student.Name</td>
+                            <td>@student.StudentSID</td>
+                            <td>@student.SchoolUID</td>
+                            <td>@(student.Gender == 0 ? "Male" : "Female")</td>
+                            <td>@student.ClassName</td>
+                            <td>@student.SectionName</td>
+                            <td>@student.DOJ.ToString("dd/MM/yyyy")</td>
+                            <td>@student.DOB.ToString("dd/MM/yyyy")</td>
+                            <td>@student.FatherName</td>
+                            <td>@student.FatherMobileNo</td>
+                            <td>@student.MotherName</td>
+                            <td>@student.MotherMobileNo</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.0/js/dataTables.buttons.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.html5.min.js")"></script>
+    <script src="@Url.Content("https://cdn.datatables.net/buttons/2.1.1/js/buttons.print.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/jszip/2.5.0/jszip.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js")"></script>
+    <script src="@Url.Content("https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js")"></script>
+    <script>
+        $(function () {
+            var session = document.getElementById("ddlSessions");
+            var sessionName = session.options[session.selectedIndex].text;
+            $("#tblNotPromoted").DataTable({
+                dom: "Bfrtip",
+                pageLength: 20,
+                scrollX: true,
+                buttons: ["copy", "csv", "excel", "pdfHtml5", "print"],
+                title: "Not Promoted Students Report - " + sessionName
+            });
+        });
+    </script>
+}

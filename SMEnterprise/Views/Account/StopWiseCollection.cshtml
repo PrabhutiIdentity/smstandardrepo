@@ -2,6 +2,15 @@
 @using System.Web.Mvc;
 @{
     Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var stopWiseReport = Model.StopWiseReport ?? new List<StopWiseStudentAmountModel>();
+    var totalStudents = 0;
+    var totalAmount = 0M;
+    foreach (var row in stopWiseReport)
+    {
+        totalStudents += row.Students;
+        totalAmount += row.Amount;
+    }
+    var branchSchoolName = Model.Branch == null ? "" : Model.Branch.BranchSchoolName;
 }
 @model SMEnterprise.Models.BusStudentListModel
 @section IncludeCss
@@ -68,26 +77,41 @@
                             <thead>
                                 <tr>
                                     <th>Sr.No</th>
-
-                                    <th>Stopage Name </th>
+                                    <th>Bus</th>
+                                    <th>Stopage Name</th>
                                     <th>Stopage Amount</th>
                                     <th>No. Of Student</th>
                                     <th>Total Amount</th>
-
-
                                 </tr>
                             </thead>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" style="text-align:right;">Total Student</th>
+                                    <th>@totalStudents</th>
+                                    <th></th>
+                                </tr>
+                                <tr>
+                                    <th colspan="5" style="text-align:right;">Total Amount</th>
+                                    <th>@totalAmount.ToString("0.00")</th>
+                                </tr>
+                            </tfoot>
                             @{
                                 int count = 0;
-                                foreach (StopWiseStudentAmountModel c in Model.StopWiseReport)
+                                foreach (StopWiseStudentAmountModel c in stopWiseReport)
                                 {
+                                    var busStop = (c.AreaName ?? "").Split(new[] { "||" }, StringSplitOptions.None);
+                                    var busName = busStop.Length > 1 ? busStop[0] : "";
+                                    var stopName = busStop.Length > 1 ? busStop[1] : c.AreaName;
                                                         <tr>
 
                                                             <td>
                                                                 @(count + 1)
                                                             </td>
                                                             <td>
-                                                                @c.AreaName
+                                                                @busName
+                                                            </td>
+                                                            <td>
+                                                                @stopName
                                                             </td>
                                                             <td>
                                                                 @c.Rate
@@ -176,7 +200,7 @@
                                 text: '<i class="fa fa- copy"></i> Copy',
 
                             message: printdate,
-                             messageTop: '@Model.Branch.BranchSchoolName',
+                             messageTop: '@branchSchoolName',
                             messageBottom: repname,
                             title: rpname
                             },
@@ -186,7 +210,7 @@
                                 text: '<i class="fas fa-file-csv"></i> CSV',
                                  footer: true,
                           message: printdate,
-                            messageTop: '@Model.Branch.BranchSchoolName',
+                            messageTop: '@branchSchoolName',
                             messageBottom: repname,
                             title: rpname
                             },
@@ -197,7 +221,7 @@
                                 footer: true,
                          messageTop: rpname,
                           messageBottom: repname,
-                          title: '@Model.Branch.BranchSchoolName'
+                          title: '@branchSchoolName'
                             },
                             {
                                 extend: "pdfHtml5",
@@ -216,7 +240,7 @@
                                           {
                                               alignment: 'left',
                                               italics: true,
-                                              text: '@Model.Branch.BranchSchoolName',
+                                              text: '@branchSchoolName',
                                               fontSize: 14,
                                               margin: [0, 0]
                                           }
@@ -237,7 +261,7 @@
                           message: printdate,
                           messageTop: rpname,
                           messageBottom: repname,
-                          title: '@Model.Branch.BranchSchoolName'
+                          title: '@branchSchoolName'
                             },
                         ],
                         responsive: true
