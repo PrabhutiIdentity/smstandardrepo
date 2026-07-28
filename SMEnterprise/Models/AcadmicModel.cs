@@ -817,6 +817,32 @@ namespace SMEnterprise.Models
             return dtAttandanceDetails;
         }
     }
+    public class BulkExamResultPageModel
+    {
+        public int ClassID { get; set; }
+        public int SectionID { get; set; }
+        public int EvaluationID { get; set; }
+        public int SessionID { get; set; }
+        public int TeacherID { get; set; }
+        public int SBranchID { get; set; }
+        public int IsLocked { get; set; }
+        public string Message { get; set; }
+        public List<SchoolSessionModel> Sessions { get; set; }
+        public List<NameIDModel> Classes { get; set; }
+        public List<NameIDModel> Sections { get; set; }
+        public List<NameIDModel> Evaluations { get; set; }
+        public List<BulkExamSubjectModel> Subjects { get; set; }
+        public List<ExamResultDetailModel> ExamResults { get; set; }
+    }
+    public class BulkExamSubjectModel
+    {
+        public int SubjectID { get; set; }
+        public string SubjectName { get; set; }
+        public int ExamID { get; set; }
+        public int MaxMarks { get; set; }
+        public int PassMarks { get; set; }
+        public int MarkingScheme { get; set; }
+    }
     public class ExamResultDetailModel
     {
         public int MasterID { get; set; }

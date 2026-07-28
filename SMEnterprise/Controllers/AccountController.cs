@@ -12,6 +12,8 @@ using Microsoft.AspNet.SignalR;
 using System.Data;
 using static SMEnterprise.Repository.CommonUsage;
 using ICSharpCode.SharpZipLib.Zip;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace SMEnterprise.Controllers
 {
@@ -322,6 +324,80 @@ namespace SMEnterprise.Controllers
             int cTab = CommonUsage.ConvertToInt(id2);
             objModel.CurrentTab = cTab == 0 ? 1 : cTab;
             return View(objModel);
+        }
+
+        [HttpPost]
+        [PermissionFilter]
+        public ActionResult SaveSinglePhoto(string personType, int personID, HttpPostedFileBase photo)
+        {
+            const int maxBytes = 50 * 1024;
+            UserModel user = PermissionManager.GetLoggedInUser();
+            if (personID <= 0 || photo == null || photo.ContentLength <= 0)
+                return Json(new { success = false, message = "Photo is required." });
+            if (photo.ContentLength > maxBytes)
+                return Json(new { success = false, message = "Processed photo must not exceed 50 KB." });
+
+            bool isStudent = string.Equals(personType, "student", StringComparison.OrdinalIgnoreCase);
+            if (!isStudent && !string.Equals(personType, "employee", StringComparison.OrdinalIgnoreCase))
+                return Json(new { success = false, message = "Invalid photo type." });
+
+            try
+            {
+                photo.InputStream.Position = 0;
+                using (Image image = Image.FromStream(photo.InputStream, true, true))
+                {
+                    if (image.RawFormat.Guid != ImageFormat.Jpeg.Guid || image.Width < 100 || image.Height < 100 ||
+                        image.Width > 1600 || image.Height > 2000)
+                        return Json(new { success = false, message = "Invalid processed JPEG photo." });
+                }
+                photo.InputStream.Position = 0;
+
+                string oldPhoto;
+                if (isStudent)
+                {
+                    StudentEditModel model = objAccountData.GetStudentDetailsNew(personID, user.SBranchID);
+                    if (model == null || model.Student == null || model.Student.StudentID != personID)
+                        return Json(new { success = false, message = "Student not found in this branch." });
+                    oldPhoto = model.Student.Photo;
+                }
+                else
+                {
+                    EmployeeEditModel model = objAccountData.GetEmployeeDetails(personID, user.SBranchID);
+                    if (model == null || model.EmployeeDetails == null || model.EmployeeDetails.EmployeeID != personID)
+                        return Json(new { success = false, message = "Employee not found in this branch." });
+                    oldPhoto = model.EmployeeDetails.Photo;
+                }
+
+                string fileName = "photo-" + DateTime.UtcNow.ToString("yyyyMMddHHmmssfff") + "-" +
+                    Guid.NewGuid().ToString("N").Substring(0, 8) + ".jpg";
+                string basePath = isStudent ? CommonUsage.StudentImageBasePath : CommonUsage.EmployeeImageBasePath;
+                string directory = Server.MapPath(basePath);
+                if (!Directory.Exists(directory)) Directory.CreateDirectory(directory);
+                string newPath = Path.Combine(directory, personID + "_" + fileName);
+                photo.SaveAs(newPath);
+
+                bool updated = isStudent
+                    ? objAccountData.UpdateStudentPhoto(personID, user.SBranchID, fileName)
+                    : objAccountData.UpdateEmployeePhoto(personID, user.SBranchID, fileName);
+                if (!updated)
+                {
+                    System.IO.File.Delete(newPath);
+                    return Json(new { success = false, message = "Photo could not be updated." });
+                }
+
+                if (!string.IsNullOrWhiteSpace(oldPhoto))
+                {
+                    string oldPath = Path.Combine(directory, personID + "_" + Path.GetFileName(oldPhoto));
+                    if (!oldPath.Equals(newPath, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(oldPath))
+                        System.IO.File.Delete(oldPath);
+                }
+                return Json(new { success = true, message = "Photo saved.", fileName = fileName,
+                    photoUrl = Url.Content(basePath + "/" + personID + "_" + fileName) });
+            }
+            catch
+            {
+                return Json(new { success = false, message = "The selected file is not a valid photo." });
+            }
         }
         [PermissionFilter]
         public ActionResult SaveStudentPersonal(StudentModel objData)
@@ -2614,6 +2690,87 @@ namespace SMEnterprise.Controllers
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objModel = objAccountData.GetMiniExamResults(objModel);
             return View(objModel);
+        }
+
+        [PermissionFilter]
+        public ActionResult BulkExamResults(BulkExamResultPageModel objModel)
+        {
+            objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel = objAccountData.GetBulkExamResults(objModel);
+            objModel.Message = Convert.ToString(TempData["BulkResultMessage"]);
+            return View(objModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [PermissionFilter]
+        public ActionResult UpdateBulkExamResults(BulkExamResultPageModel objModel)
+        {
+            objModel.TeacherID = PermissionManager.GetLoggedInUser().UserID;
+            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+
+            BulkExamResultPageModel allowedData = objAccountData.GetBulkExamResults(new BulkExamResultPageModel
+            {
+                ClassID = objModel.ClassID,
+                SectionID = objModel.SectionID,
+                EvaluationID = objModel.EvaluationID,
+                SessionID = objModel.SessionID,
+                TeacherID = objModel.TeacherID,
+                SBranchID = objModel.SBranchID
+            });
+
+            if (allowedData.IsLocked != 0)
+            {
+                TempData["BulkResultMessage"] = "Result is locked and cannot be updated.";
+                return RedirectToAction("BulkExamResults", new { objModel.SessionID, objModel.ClassID, objModel.SectionID, objModel.EvaluationID });
+            }
+
+            Dictionary<string, ExamResultDetailModel> allowedResults = allowedData.ExamResults
+                .ToDictionary(c => c.ExamID + "_" + c.StudentID);
+            List<ExamResultDetailModel> resultsToSave = new List<ExamResultDetailModel>();
+
+            foreach (ExamResultDetailModel postedResult in objModel.ExamResults ?? new List<ExamResultDetailModel>())
+            {
+                ExamResultDetailModel allowedResult;
+                if (!allowedResults.TryGetValue(postedResult.ExamID + "_" + postedResult.StudentID, out allowedResult))
+                {
+                    continue;
+                }
+
+                if (postedResult.MarksScored < 0 || postedResult.MarksScored > allowedResult.MaxMarks)
+                {
+                    TempData["BulkResultMessage"] = "Marks must be between 0 and maximum marks.";
+                    return RedirectToAction("BulkExamResults", new { objModel.SessionID, objModel.ClassID, objModel.SectionID, objModel.EvaluationID });
+                }
+
+                bool preserveExistingGrace = postedResult.Status == 2 && allowedResult.Status == 2
+                    && postedResult.MarksScored == allowedResult.MarksScored;
+                allowedResult.MarksScored = postedResult.MarksScored;
+                if (postedResult.Status == -1 || postedResult.Status == 0)
+                {
+                    allowedResult.Status = postedResult.Status;
+                }
+                else if (preserveExistingGrace)
+                {
+                    allowedResult.Status = 2;
+                }
+                else
+                {
+                    allowedResult.Status = postedResult.MarksScored >= allowedResult.PassMarks ? 1 : 3;
+                }
+                allowedResult.Grade = postedResult.Grade;
+                allowedResult.GradePoints = postedResult.GradePoints;
+                resultsToSave.Add(allowedResult);
+            }
+
+            if (resultsToSave.Count > 0)
+            {
+                objTeacherData.UpdateStudentResults(new TeacherResultPageModel { ExamResults = resultsToSave });
+                TempData["BulkResultMessage"] = "Marks saved successfully.";
+            }
+
+            return RedirectToAction("BulkExamResults", new { objModel.SessionID, objModel.ClassID, objModel.SectionID, objModel.EvaluationID });
         }
 
         public ActionResult GetSectionEvaluationsOnClass(string id = null, string id2 = null)

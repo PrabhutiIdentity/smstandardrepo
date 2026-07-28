@@ -109,7 +109,7 @@
 <script>
 (function () {
     'use strict';
-    var MAX_BYTES = 500 * 1024, OUT_W = 600, OUT_H = 750;
+    var MAX_BYTES = 50 * 1024, OUT_W = 350, OUT_H = 450, ASPECT = OUT_W / OUT_H;
     var pending = {}, activeCard = null, sourceImage = null, stream = null;
     var canvas = document.getElementById('cropCanvas'), ctx = canvas.getContext('2d');
     var baseScale = 1, zoom = 1, imageRect = null, crop = null, dragging = false, dragMode = '', lastX = 0, lastY = 0;
@@ -168,12 +168,12 @@
         imageRect={x:(canvas.width-w)/2,y:(canvas.height-h)/2,w:w,h:h,scale:scale};
     }
     function resetCropBox() {
-        var maxW=Math.min(imageRect.w,imageRect.h*4/5)*0.88, maxH=maxW*5/4;
+        var maxW=Math.min(imageRect.w,imageRect.h*ASPECT)*0.88, maxH=maxW/ASPECT;
         crop={x:imageRect.x+(imageRect.w-maxW)/2,y:imageRect.y+(imageRect.h-maxH)/2,w:maxW,h:maxH};
     }
     function constrainCrop() {
-        var minW=80, maxW=Math.min(canvas.width,canvas.height*4/5);
-        crop.w=Math.max(minW,Math.min(maxW,crop.w)); crop.h=crop.w*5/4;
+        var minW=80, maxW=Math.min(canvas.width,canvas.height*ASPECT);
+        crop.w=Math.max(minW,Math.min(maxW,crop.w)); crop.h=crop.w/ASPECT;
         crop.x=Math.max(0,Math.min(canvas.width-crop.w,crop.x));
         crop.y=Math.max(0,Math.min(canvas.height-crop.h,crop.y));
     }
@@ -203,7 +203,7 @@
         dragging=true; lastX=p.x; lastY=p.y;
     }).on('mousemove touchmove', function (e) {
         if(!dragging)return; e.preventDefault(); var p=point(e.originalEvent), dx=p.x-lastX, dy=p.y-lastY;
-        if(dragMode==='move'){crop.x+=dx;crop.y+=dy;} else {crop.w+=Math.abs(dx)>Math.abs(dy)?dx:dy*4/5;}
+        if(dragMode==='move'){crop.x+=dx;crop.y+=dy;} else {crop.w+=Math.abs(dx)>Math.abs(dy)?dx:dy*ASPECT;}
         constrainCrop(); lastX=p.x; lastY=p.y; drawCrop();
     });
     $(document).on('mouseup touchend', function () { dragging=false; });
@@ -223,7 +223,7 @@
             outCtx.drawImage(sourceImage,sx,sy,sw,sh,dx,dy,dw,dh);
         }
         makeUnderLimit(output, 0.92, function (blob) {
-            if (!blob || blob.size > MAX_BYTES) { notify('Photo Too Large', 'Photo 500 KB se kam nahi ho saka.', 'error'); return; }
+            if (!blob || blob.size > MAX_BYTES) { notify('Photo Too Large', 'Photo 50 KB se kam nahi ho saka.', 'error'); return; }
             var id = activeCard.data('student-id'), old = pending[id]; if(old && old.url) URL.revokeObjectURL(old.url);
             var url = URL.createObjectURL(blob); pending[id] = { blob:blob, url:url, card:activeCard };
             activeCard.find('.sp-photo').attr('src',url); activeCard.find('.sp-state').removeClass().addClass('sp-state sp-pending').text('Ready - ' + Math.ceil(blob.size/1024) + ' KB');
@@ -232,7 +232,16 @@
         });
     });
     function makeUnderLimit(c, quality, done) {
-        c.toBlob(function (blob) { if (blob && blob.size <= MAX_BYTES) done(blob); else if (quality > 0.45) makeUnderLimit(c, quality-0.08, done); else done(blob); }, 'image/jpeg', quality);
+        c.toBlob(function (blob) {
+            if (blob && blob.size <= MAX_BYTES) done(blob);
+            else if (quality > 0.36) makeUnderLimit(c, quality-0.08, done);
+            else if (c.width > 280) {
+                var smaller=document.createElement('canvas');
+                smaller.width=Math.round(c.width*0.82); smaller.height=Math.round(c.height*0.82);
+                smaller.getContext('2d').drawImage(c,0,0,smaller.width,smaller.height);
+                makeUnderLimit(smaller,0.82,done);
+            } else done(blob);
+        }, 'image/jpeg', quality);
     }
 
     $('#saveAll').click(function () {

@@ -159,9 +159,18 @@
                                                             <span class="switch-handle" id="shTranding"></span>
                                                             <input type="hidden" name="Gender" id="hdnEmployeeGender" value="@Model.EmployeeDetails.Gender">
                                                         </label>
-                                                        <div class="col-md-6">
-                                                            <input type="file" name="EmployeeImageUploader" onchange="ImageChanged(this, 'Employee');" />
-                                                        </div>
+                                                        @if (Model.EmployeeDetails.EmployeeID != 0)
+                                                        {
+                                                            <div class="col-md-6 single-photo-editor" data-type="employee" data-id="@Model.EmployeeDetails.EmployeeID" data-image="#imgEmployeeImage" data-url="@Url.Action("SaveSinglePhoto", "Account")">
+                                                                <label class="btn btn-warning btn-xs">Upload<input type="file" accept="image/*" class="single-photo-file" style="display:none" /></label>
+                                                                <button type="button" class="btn btn-info btn-xs single-photo-camera"><i class="fa fa-camera"></i> Camera</button>
+                                                                <span class="single-photo-state help-block"></span>
+                                                            </div>
+                                                        }
+                                                        else
+                                                        {
+                                                            <div class="col-md-6"><input type="file" name="EmployeeImageUploader" accept="image/*" onchange="ImageChanged(this, 'Employee');" /></div>
+                                                        }
                                                     </div>
                                                 </div>
 
@@ -1469,8 +1478,7 @@
 </div>
 @section scripts
 {
-
-
+    <script src="@Url.Content("~/Scripts/common-photo-editor.js")"></script>
     <script src="@Url.Content("~/js/moment.min.js")"></script>
     <script src="@Url.Content("~/js/daterangepicker.js")"></script>
     <!-- Select2 -->

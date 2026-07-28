@@ -213,12 +213,12 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult SaveStudentPhoto(int studentID, int classID, int sectionID, HttpPostedFileBase photo)
         {
-            const int maxBytes = 500 * 1024;
+            const int maxBytes = 50 * 1024;
             UserModel user = PermissionManager.GetLoggedInUser();
             if (photo == null || photo.ContentLength <= 0)
                 return Json(new { success = false, message = "Photo is required." });
             if (photo.ContentLength > maxBytes)
-                return Json(new { success = false, message = "Photo must not exceed 500 KB." });
+                return Json(new { success = false, message = "Photo must not exceed 50 KB." });
 
             try
             {

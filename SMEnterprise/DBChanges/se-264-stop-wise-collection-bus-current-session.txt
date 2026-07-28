@@ -6,6 +6,8 @@ BEGIN
     SET NOCOUNT ON;
 
     DECLARE @ReportDate DATE = ISNULL(@MStartDate, CAST(GETDATE() AS DATE));
+    DECLARE @MonthStart DATE = DATEADD(MONTH, DATEDIFF(MONTH, 0, ISNULL(@MStartDate, CAST(GETDATE() AS DATE))), 0);
+    DECLARE @MonthEnd DATE = DATEADD(DAY, -1, DATEADD(MONTH, 1, DATEADD(MONTH, DATEDIFF(MONTH, 0, ISNULL(@MStartDate, CAST(GETDATE() AS DATE))), 0)));
     DECLARE @SessionID INT;
 
     SELECT TOP 1 @SessionID = SM.SessionID
@@ -14,7 +16,15 @@ BEGIN
       AND ISNULL(SM.SessionStatus, 0) = 1
     ORDER BY SM.SessionStartDate DESC, SM.SessionID DESC;
 
-    ;WITH ActiveTransport AS
+    ;WITH TransportHistory AS
+    (
+        SELECT DISTINCT THAD.UserID AS StudentID
+        FROM dbo.TransportHostalAllocationDelocation THAD
+        WHERE ISNULL(THAD.UserType, 0) = 0
+          AND ISNULL(THAD.ChangeType, 0) = 0
+          AND ISNULL(THAD.KeyID, 0) <> 0
+    ),
+    ActiveTransport AS
     (
         SELECT
             THAD.UserID AS StudentID,
@@ -28,20 +38,29 @@ BEGIN
         WHERE ISNULL(THAD.UserType, 0) = 0
           AND ISNULL(THAD.ChangeType, 0) = 0
           AND ISNULL(THAD.KeyID, 0) <> 0
-          AND CAST(ISNULL(THAD.StartDate, @ReportDate) AS DATE) <= @ReportDate
+          AND CAST(ISNULL(THAD.StartDate, @MonthStart) AS DATE) <= @MonthEnd
           AND (
               THAD.EndDate IS NULL
               OR YEAR(THAD.EndDate) = 1
-              OR CAST(THAD.EndDate AS DATE) >= @ReportDate
+              OR CAST(THAD.EndDate AS DATE) >= @MonthStart
           )
     ),
     StudentTransport AS
     (
         SELECT
             SM.StudentID,
-            ISNULL(NULLIF(SM.VehicleRouteID, 0), 0) AS VehicleRouteID,
-            ISNULL(NULLIF(SM.StopID, 0), AT.StopID) AS StopID
+            CASE
+                WHEN TH.StudentID IS NULL THEN ISNULL(NULLIF(SM.VehicleRouteID, 0), 0)
+                WHEN AT.StudentID IS NOT NULL THEN ISNULL(NULLIF(SM.VehicleRouteID, 0), 0)
+                ELSE 0
+            END AS VehicleRouteID,
+            CASE
+                WHEN TH.StudentID IS NULL THEN ISNULL(NULLIF(SM.StopID, 0), 0)
+                ELSE AT.StopID
+            END AS StopID
         FROM dbo.StudentMaster SM
+        LEFT JOIN TransportHistory TH
+            ON TH.StudentID = SM.StudentID
         LEFT JOIN ActiveTransport AT
             ON AT.StudentID = SM.StudentID
            AND AT.RowNo = 1
@@ -69,7 +88,7 @@ BEGIN
     ),
     StudentRouteStop AS
     (
-        SELECT DISTINCT
+        SELECT
             AST.StudentID,
             TVR.VehicleRouteID,
             TVR.VehicleID,
@@ -77,7 +96,15 @@ BEGIN
             TRD.StopID,
             AM.AreaID,
             AM.AreaName,
-            ISNULL(TRD.Rate, 0) AS Rate
+            ISNULL(TRD.Rate, 0) AS Rate,
+            ROW_NUMBER() OVER
+            (
+                PARTITION BY AST.StudentID
+                ORDER BY
+                    CASE WHEN ISNULL(AST.VehicleRouteID, 0) = ISNULL(TVR.VehicleRouteID, 0) THEN 0 ELSE 1 END,
+                    ISNULL(TVR.VehicleRouteID, 0) DESC,
+                    ISNULL(TRD.StopID, 0) DESC
+            ) AS RowNo
         FROM ActiveStudents AST
         LEFT JOIN dbo.Transport_Vehicle_Route_Details TVRD
             ON TVRD.StopID = AST.StopID
@@ -100,6 +127,7 @@ BEGIN
         ISNULL(Rate, 0) AS Rate,
         COUNT(DISTINCT StudentID) * ISNULL(Rate, 0) AS Amount
     FROM StudentRouteStop
+    WHERE RowNo = 1
     GROUP BY BusName, AreaName, AreaID, Rate
     ORDER BY BusName, AreaName;
 

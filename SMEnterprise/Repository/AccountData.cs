@@ -618,6 +618,14 @@ ORDER BY
             // Stored procedure execute karke execution wahi wrap ho jayega
             con.Execute("usp_CopyOptionalSubjectsFromPreviousMatchingSession",parameters,commandType: CommandType.StoredProcedure);
         }
+        public bool UpdateStudentPhoto(int studentID, int sBranchID, string photo)
+        {
+            const string sql = @"UPDATE StudentMaster SET Photo = @Photo
+WHERE StudentID = @StudentID AND SBranchID = @SBranchID";
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                return con.Execute(sql, new { Photo = photo, StudentID = studentID, SBranchID = sBranchID }) == 1;
+        }
+
         public StudentEditModel GetStudentDetailsNew(int StudentID, int SBranchID)
         {
 
@@ -2029,6 +2037,14 @@ ORDER BY
 
             }
         }
+        public bool UpdateEmployeePhoto(int employeeID, int sBranchID, string photo)
+        {
+            const string sql = @"UPDATE EmployeeMaster SET Photo = @Photo
+WHERE EmployeeID = @EmployeeID AND SBranchID = @SBranchID";
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+                return con.Execute(sql, new { Photo = photo, EmployeeID = employeeID, SBranchID = sBranchID }) == 1;
+        }
+
         public EmployeeEditModel GetEmployeeDetails(int EmployeeID, int SBranchID)
         {
 
@@ -3998,6 +4014,75 @@ ORDER BY
                     }
                 }
             }
+            return objModel;
+        }
+        public BulkExamResultPageModel GetBulkExamResults(BulkExamResultPageModel objModel)
+        {
+            TeacherResultPageModel filterModel = new TeacherResultPageModel
+            {
+                EvaluationID = objModel.EvaluationID,
+                ClassID = objModel.ClassID,
+                SectionID = objModel.SectionID,
+                SubjectID = 0,
+                SBranchID = objModel.SBranchID,
+                SessionID = objModel.SessionID,
+                TeacherID = objModel.TeacherID
+            };
+
+            TeacherResultPageModel pageData = GetMiniExamResults(filterModel);
+            objModel.Classes = pageData.Classes ?? new List<NameIDModel>();
+            objModel.Sections = pageData.Sections ?? new List<NameIDModel>();
+            objModel.Evaluations = pageData.Evaluations ?? new List<NameIDModel>();
+            objModel.Sessions = pageData.Sessions ?? new List<SchoolSessionModel>();
+            objModel.ClassID = pageData.ClassID;
+            objModel.SectionID = pageData.SectionID;
+            objModel.EvaluationID = pageData.EvaluationID;
+            objModel.SessionID = pageData.SessionID;
+            objModel.IsLocked = pageData.IsLocked;
+            objModel.Subjects = new List<BulkExamSubjectModel>();
+            objModel.ExamResults = new List<ExamResultDetailModel>();
+
+            if (objModel.ClassID == 0 || objModel.SectionID == 0 || objModel.EvaluationID == 0 || objModel.SessionID == 0)
+            {
+                return objModel;
+            }
+
+            foreach (NameIDModel subject in pageData.Subjects ?? new List<NameIDModel>())
+            {
+                TeacherResultPageModel subjectData = GetMiniExamResults(new TeacherResultPageModel
+                {
+                    EvaluationID = objModel.EvaluationID,
+                    ClassID = objModel.ClassID,
+                    SectionID = objModel.SectionID,
+                    SubjectID = subject.ID,
+                    SBranchID = objModel.SBranchID,
+                    SessionID = objModel.SessionID,
+                    TeacherID = objModel.TeacherID
+                });
+
+                List<ExamResultDetailModel> results = subjectData.ExamResults ?? new List<ExamResultDetailModel>();
+                ExamResultDetailModel exam = results.FirstOrDefault();
+                if (exam == null)
+                {
+                    continue;
+                }
+
+                objModel.Subjects.Add(new BulkExamSubjectModel
+                {
+                    SubjectID = subject.ID,
+                    SubjectName = subject.Name,
+                    ExamID = exam.ExamID,
+                    MaxMarks = exam.MaxMarks,
+                    PassMarks = exam.PassMarks,
+                    MarkingScheme = exam.MarkingScheme
+                });
+                objModel.ExamResults.AddRange(results);
+                if (subjectData.IsLocked != 0)
+                {
+                    objModel.IsLocked = subjectData.IsLocked;
+                }
+            }
+
             return objModel;
         }
         public IEnumerable<NameIDModel> GetSubjectsForSection(int SectionID)

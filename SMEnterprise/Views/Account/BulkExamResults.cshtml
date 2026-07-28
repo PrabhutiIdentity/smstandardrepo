@@ -1,0 +1,278 @@
+@using SMEnterprise.Models
+@using System.Linq
+@model SMEnterprise.Models.BulkExamResultPageModel
+@{
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var students = (Model.ExamResults ?? new List<ExamResultDetailModel>())
+        .GroupBy(c => c.StudentID)
+        .Select(c => c.First())
+        .OrderBy(c => c.RollNo)
+        .ThenBy(c => c.StudentName)
+        .ToList();
+    var resultIndexes = (Model.ExamResults ?? new List<ExamResultDetailModel>())
+        .Select((result, index) => new { result, index })
+        .ToDictionary(c => c.result.StudentID + "_" + c.result.ExamID, c => c);
+}
+
+@section IncludeCss {
+    <title>Bulk Result Entry</title>
+    <style>
+        .bulk-filter { padding: 15px; margin-bottom: 15px; }
+        .bulk-filter .form-group { margin-bottom: 8px; }
+        .bulk-result-wrap { overflow-x: auto; max-width: 100%; }
+        .bulk-result-table { min-width: 1050px; margin-bottom: 0; }
+        .bulk-result-table th { vertical-align: middle !important; text-align: center; background: #f4f6f8; }
+        .bulk-result-table td { vertical-align: middle !important; }
+        .bulk-result-table .student-column { min-width: 205px; position: sticky; left: 0; background: #fff; z-index: 2; }
+        .bulk-result-table th.student-column { background: #f4f6f8; z-index: 3; }
+        .bulk-result-table .subject-column { min-width: 185px; }
+        .bulk-result-table .subject-meta { display: block; color: #73879c; font-size: 11px; font-weight: normal; margin-top: 3px; }
+        .result-entry { display: flex; gap: 5px; align-items: center; }
+        .result-entry .score-input { width: 78px; }
+        .result-entry .status-select { min-width: 92px; }
+        .result-badge { display: inline-block; margin-top: 4px; font-size: 11px; font-weight: bold; }
+        .result-badge.pass { color: #16864b; }
+        .result-badge.fail { color: #c0392b; }
+        .result-badge.special { color: #8a6d3b; }
+        .not-applicable { text-align: center; color: #999; }
+        .bulk-actions { margin-top: 12px; }
+        .bulk-message { margin-bottom: 12px; }
+    </style>
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="x_panel bulk-filter">
+            @using (Html.BeginForm("BulkExamResults", "Account", FormMethod.Get, new { id = "frmBulkFilter" }))
+            {
+                <div class="row">
+                    <div class="col-md-3 form-group">
+                        <label>Session</label>
+                        <select class="form-control" name="SessionID" id="ddlBulkSession">
+                            @foreach (SchoolSessionModel session in Model.Sessions ?? new List<SchoolSessionModel>())
+                            {
+                                <option value="@session.SessionID" @(session.SessionID == Model.SessionID ? "selected" : "")>@session.SessionName</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label>Class</label>
+                        <select class="form-control" name="ClassID" id="ddlBulkClass">
+                            @foreach (NameIDModel item in Model.Classes ?? new List<NameIDModel>())
+                            {
+                                <option value="@item.ID" @(item.ID == Model.ClassID ? "selected" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label>Section</label>
+                        <select class="form-control" name="SectionID" id="ddlBulkSection">
+                            @foreach (NameIDModel item in Model.Sections ?? new List<NameIDModel>())
+                            {
+                                <option value="@item.ID" @(item.ID == Model.SectionID ? "selected" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3 form-group">
+                        <label>Evaluation</label>
+                        <select class="form-control" name="EvaluationID" id="ddlBulkEvaluation">
+                            @foreach (NameIDModel item in Model.Evaluations ?? new List<NameIDModel>())
+                            {
+                                <option value="@item.ID" @(item.ID == Model.EvaluationID ? "selected" : "")>@item.Name</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2 form-group">
+                        <label>&nbsp;</label>
+                        <button type="submit" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Show Students</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!String.IsNullOrWhiteSpace(Model.Message))
+        {
+            <div class="alert alert-info bulk-message">@Model.Message</div>
+        }
+
+        <div class="x_panel">
+            <div class="x_title">
+                <h2>Bulk Result Entry</h2>
+                <div class="clearfix"></div>
+            </div>
+            <div class="x_content">
+                @if ((Model.Subjects ?? new List<BulkExamSubjectModel>()).Count == 0 || students.Count == 0)
+                {
+                    <div>No exam or students found for the selected filters.</div>
+                }
+                else
+                {
+                    using (Html.BeginForm("UpdateBulkExamResults", "Account", FormMethod.Post, new { id = "frmBulkResults" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="SessionID" value="@Model.SessionID" />
+                        <input type="hidden" name="ClassID" value="@Model.ClassID" />
+                        <input type="hidden" name="SectionID" value="@Model.SectionID" />
+                        <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
+
+                        <div class="bulk-result-wrap">
+                            <table class="table table-bordered table-hover bulk-result-table">
+                                <thead>
+                                    <tr>
+                                        <th class="student-column">Student</th>
+                                        @foreach (BulkExamSubjectModel subject in Model.Subjects)
+                                        {
+                                            <th class="subject-column">
+                                                @subject.SubjectName
+                                                <span class="subject-meta">Max @subject.MaxMarks &nbsp;|&nbsp; Pass @subject.PassMarks</span>
+                                            </th>
+                                        }
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (ExamResultDetailModel student in students)
+                                    {
+                                        <tr>
+                                            <td class="student-column">
+                                                <strong>@student.StudentName</strong><br />
+                                                <span class="text-muted">Roll No: @student.RollNo</span><br />
+                                                <span class="text-muted">@student.StudentSID</span>
+                                            </td>
+                                            @foreach (BulkExamSubjectModel subject in Model.Subjects)
+                                            {
+                                                var key = student.StudentID + "_" + subject.ExamID;
+                                                if (!resultIndexes.ContainsKey(key))
+                                                {
+                                                    <td class="not-applicable">N/A</td>
+                                                    continue;
+                                                }
+
+                                                var indexedResult = resultIndexes[key];
+                                                var result = indexedResult.result;
+                                                var index = indexedResult.index;
+                                                <td class="result-cell" data-pass="@subject.PassMarks" data-max="@subject.MaxMarks">
+                                                    <input type="hidden" name="ExamResults[@index].ResultID" value="@result.ResultID" />
+                                                    <input type="hidden" name="ExamResults[@index].ExamID" value="@result.ExamID" />
+                                                    <input type="hidden" name="ExamResults[@index].StudentID" value="@result.StudentID" />
+                                                    <input type="hidden" class="grade-input" name="ExamResults[@index].Grade" value="@result.Grade" />
+                                                    <input type="hidden" class="points-input" name="ExamResults[@index].GradePoints" value="@result.GradePoints" />
+                                                    <div class="result-entry">
+                                                        <input type="number" min="0" max="@subject.MaxMarks" step="0.01"
+                                                               class="form-control score-input"
+                                                               name="ExamResults[@index].MarksScored"
+                                                               value="@result.MarksScored"
+                                                               @(Model.IsLocked != 0 || result.Status == -1 || result.Status == 0 ? "disabled" : "") />
+                                                        <select class="form-control status-select" name="ExamResults[@index].Status" @(Model.IsLocked != 0 ? "disabled" : "")>
+                                                            <option value="1" @(result.Status == 1 || result.Status == 3 ? "selected" : "")>Normal</option>
+                                                            <option value="-1" @(result.Status == -1 ? "selected" : "")>M/L</option>
+                                                            <option value="0" @(result.Status == 0 ? "selected" : "")>Undeclared</option>
+                                                            @if (result.Status == 2)
+                                                            {
+                                                                <option value="2" selected>Grace</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <span class="result-badge"></span>
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+
+                        if (Model.IsLocked == 0)
+                        {
+                            <div class="bulk-actions text-right">
+                                <button type="submit" class="btn btn-info" id="btnBulkSave"><i class="fa fa-save"></i> Save Marks</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning bulk-actions">This result is locked. Marks cannot be edited.</div>
+                        }
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script>
+        (function () {
+            function setGrade(cell, marks, maxMarks) {
+                var percentage = maxMarks > 0 ? (marks * 100 / maxMarks) : 0;
+                var grade = 'E4', points = 0;
+                if (percentage > 90) { grade = 'A1'; points = 10; }
+                else if (percentage > 80) { grade = 'A2'; points = 9; }
+                else if (percentage > 70) { grade = 'B1'; points = 8; }
+                else if (percentage > 60) { grade = 'B2'; points = 7; }
+                else if (percentage > 50) { grade = 'C1'; points = 6; }
+                else if (percentage > 40) { grade = 'C2'; points = 5; }
+                else if (percentage > 32) { grade = 'D'; points = 4; }
+                else if (percentage > 20) { grade = 'E1'; points = 3; }
+                else if (percentage > 10) { grade = 'E2'; points = 2; }
+                else if (percentage > 1) { grade = 'E3'; points = 1; }
+                cell.find('.grade-input').val(grade);
+                cell.find('.points-input').val(points);
+            }
+
+            function updateCell(cell, scoreChanged) {
+                var status = parseInt(cell.find('.status-select').val(), 10);
+                var scoreInput = cell.find('.score-input');
+                var badge = cell.find('.result-badge');
+                var passMarks = parseFloat(cell.attr('data-pass'));
+                var maxMarks = parseFloat(cell.attr('data-max'));
+
+                badge.removeClass('pass fail special');
+                if (status === -1) {
+                    scoreInput.val(0).prop('disabled', true);
+                    badge.addClass('special').text('M/L');
+                    return;
+                }
+                if (status === 0) {
+                    scoreInput.val(0).prop('disabled', true);
+                    badge.addClass('special').text('Undeclared');
+                    return;
+                }
+                if (status === 2 && !scoreChanged) {
+                    scoreInput.prop('disabled', false);
+                    badge.addClass('special').text('Grace');
+                    return;
+                }
+
+                scoreInput.prop('disabled', false);
+                var marks = parseFloat(scoreInput.val());
+                if (isNaN(marks)) {
+                    cell.find('.status-select').val('0');
+                    scoreInput.val(0).prop('disabled', true);
+                    badge.addClass('special').text('Undeclared');
+                    return;
+                }
+                if (marks > maxMarks) {
+                    scoreInput.val(maxMarks);
+                    marks = maxMarks;
+                }
+                var calculatedStatus = marks >= passMarks ? 1 : 3;
+                cell.find('.status-select').val('1');
+                badge.addClass(calculatedStatus === 1 ? 'pass' : 'fail')
+                     .text(calculatedStatus === 1 ? 'Pass' : 'Fail');
+                setGrade(cell, marks, maxMarks);
+            }
+
+            $('.result-cell').each(function () { updateCell($(this), false); });
+            $('.score-input').on('input change', function () { updateCell($(this).closest('.result-cell'), true); });
+            $('.status-select').on('change', function () { updateCell($(this).closest('.result-cell'), false); });
+
+            $('#frmBulkResults').on('submit', function () {
+                $(this).find('.score-input:disabled, .status-select:disabled').prop('disabled', false);
+                $('#btnBulkSave').prop('disabled', true).text('Saving...');
+            });
+
+            $('#ddlBulkClass, #ddlBulkSession').on('change', function () {
+                $('#frmBulkFilter').submit();
+            });
+        })();
+    </script>
+}
