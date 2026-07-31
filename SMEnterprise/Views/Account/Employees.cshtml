@@ -234,7 +234,7 @@
 
                     <div class="box-footer">
 
-                        <button type="submit" id="btnSave" class="btn btn-success" onclick="return UpdateStudentPassword();">Submit</button>
+                        <button type="button" id="btnSave" class="btn btn-success">Submit</button>
                     </div>
                     @*</form>*@
                 </div>
@@ -259,7 +259,9 @@
         function EditPassword(employeeid, EmployeeType) {
             $('#hdnemployeeid').val(employeeid);
             $('#hdnemployeetype').val(EmployeeType);
-
+            $('#hdnPassword').val('');
+            $('#txtPassword').val('');
+            $('#txtConfirmPassword').val('');
         }
         function UpdateStudentPassword() {
             if ($('#txtPassword').val() == '' || $('#txtConfirmPassword').val() == '') {
@@ -277,8 +279,6 @@
                 var id = $("#txtPassword").val();
                 var id2 = hex_md5(String(id + 'd2f*jk#g&h'));
                 $("#hdnPassword").val(id2);
-                $("#txtPassword").val('******');
-                $("#txtConfirmPassword").val('******');
                 return true;
             }
         }
@@ -286,15 +286,19 @@
             $("input[type='search']").wrap("<form>");
             $("input[type='search']").closest("form").attr("autocomplete", "off");
             $("#btnSave").click(function () {
+                if (!UpdateStudentPassword()) {
+                    return;
+                }
 
                 var Password = $("#hdnPassword").val();
                 var pid = $("#hdnemployeeid").val();
                 var UType = $("#hdnemployeetype").val();
 
+                $("#btnSave").prop("disabled", true);
                 $.ajax(
                     {
                         type: "POST", //HTTP POST Method
-                        url: '/Account/UpdateEmployeePassword/"', // Controller/View
+                        url: '@Url.Action("UpdateEmployeePassword", "Account")', // Controller/View
                         contentType: 'application/json; charset=utf-8',
                         data: JSON.stringify({ id: Password, employeeid: pid, UType: UType }),
                         dataType: 'json',
@@ -302,14 +306,20 @@
                         // data: JSON.stringify(ai),
 
                         success: function (d) {
-                            // alert(d);
-                            $("#mdlEditPassword").modal('hide');
-
+                            if (d > 0) {
+                                $("#mdlEditPassword").modal('hide');
+                                alert("Password updated successfully.");
+                            }
+                            else {
+                                alert("Password could not be updated.");
+                            }
                         },
                         error: function () {
-                            alert("Employee ID Not Created");
+                            alert("Password could not be updated.");
                         },
-
+                        complete: function () {
+                            $("#btnSave").prop("disabled", false);
+                        }
                     });
 
             });

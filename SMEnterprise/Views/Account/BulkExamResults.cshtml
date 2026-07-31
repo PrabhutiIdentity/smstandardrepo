@@ -35,7 +35,8 @@
         .result-badge.fail { color: #c0392b; }
         .result-badge.special { color: #8a6d3b; }
         .not-applicable { text-align: center; color: #999; }
-        .bulk-actions { margin-top: 12px; }
+        .bulk-actions { margin: 0 0 12px; width: 100%; display: flex; justify-content: flex-end; }
+        .bulk-actions-bottom { margin: 12px 0 0; }
         .bulk-message { margin-bottom: 12px; }
     </style>
 }
@@ -115,6 +116,13 @@
                         <input type="hidden" name="SectionID" value="@Model.SectionID" />
                         <input type="hidden" name="EvaluationID" value="@Model.EvaluationID" />
 
+                        if (Model.IsLocked == 0)
+                        {
+                            <div class="bulk-actions">
+                                <button type="submit" class="btn btn-info bulk-save-button"><i class="fa fa-save"></i> Save Marks</button>
+                            </div>
+                        }
+
                         <div class="bulk-result-wrap">
                             <table class="table table-bordered table-hover bulk-result-table">
                                 <thead>
@@ -150,7 +158,7 @@
                                                 var indexedResult = resultIndexes[key];
                                                 var result = indexedResult.result;
                                                 var index = indexedResult.index;
-                                                <td class="result-cell" data-pass="@subject.PassMarks" data-max="@subject.MaxMarks">
+                                                <td class="result-cell" data-pass="@subject.PassMarks" data-max="@subject.MaxMarks" data-locked="@Model.IsLocked">
                                                     <input type="hidden" name="ExamResults[@index].ResultID" value="@result.ResultID" />
                                                     <input type="hidden" name="ExamResults[@index].ExamID" value="@result.ExamID" />
                                                     <input type="hidden" name="ExamResults[@index].StudentID" value="@result.StudentID" />
@@ -160,8 +168,8 @@
                                                         <input type="number" min="0" max="@subject.MaxMarks" step="0.01"
                                                                class="form-control score-input"
                                                                name="ExamResults[@index].MarksScored"
-                                                               value="@result.MarksScored"
-                                                               @(Model.IsLocked != 0 || result.Status == -1 || result.Status == 0 ? "disabled" : "") />
+                                                               value="@(result.Status == 0 ? "" : Convert.ToString(result.MarksScored))"
+                                                               @(Model.IsLocked != 0 || result.Status == -1 ? "disabled" : "") />
                                                         <select class="form-control status-select" name="ExamResults[@index].Status" @(Model.IsLocked != 0 ? "disabled" : "")>
                                                             <option value="1" @(result.Status == 1 || result.Status == 3 ? "selected" : "")>Normal</option>
                                                             <option value="-1" @(result.Status == -1 ? "selected" : "")>M/L</option>
@@ -183,8 +191,8 @@
 
                         if (Model.IsLocked == 0)
                         {
-                            <div class="bulk-actions text-right">
-                                <button type="submit" class="btn btn-info" id="btnBulkSave"><i class="fa fa-save"></i> Save Marks</button>
+                            <div class="bulk-actions bulk-actions-bottom">
+                                <button type="submit" class="btn btn-info bulk-save-button"><i class="fa fa-save"></i> Save Marks</button>
                             </div>
                         }
                         else
@@ -224,17 +232,25 @@
                 var badge = cell.find('.result-badge');
                 var passMarks = parseFloat(cell.attr('data-pass'));
                 var maxMarks = parseFloat(cell.attr('data-max'));
+                var isLocked = parseInt(cell.attr('data-locked'), 10) !== 0;
 
                 badge.removeClass('pass fail special');
+                if (isLocked) {
+                    scoreInput.prop('disabled', true);
+                }
                 if (status === -1) {
                     scoreInput.val(0).prop('disabled', true);
                     badge.addClass('special').text('M/L');
                     return;
                 }
                 if (status === 0) {
-                    scoreInput.val(0).prop('disabled', true);
-                    badge.addClass('special').text('Undeclared');
-                    return;
+                    if (!scoreChanged) {
+                        scoreInput.val('').prop('disabled', isLocked);
+                        badge.addClass('special').text('Undeclared');
+                        return;
+                    }
+                    cell.find('.status-select').val('1');
+                    status = 1;
                 }
                 if (status === 2 && !scoreChanged) {
                     scoreInput.prop('disabled', false);
@@ -242,7 +258,7 @@
                     return;
                 }
 
-                scoreInput.prop('disabled', false);
+                scoreInput.prop('disabled', isLocked);
                 var marks = parseFloat(scoreInput.val());
                 if (isNaN(marks)) {
                     cell.find('.status-select').val('0');
@@ -267,7 +283,7 @@
 
             $('#frmBulkResults').on('submit', function () {
                 $(this).find('.score-input:disabled, .status-select:disabled').prop('disabled', false);
-                $('#btnBulkSave').prop('disabled', true).text('Saving...');
+                $('.bulk-save-button').prop('disabled', true).text('Saving...');
             });
 
             $('#ddlBulkClass, #ddlBulkSession').on('change', function () {

@@ -1,0 +1,187 @@
+  sp_helptext sp_GetFeeForTransport
+
+IF OBJECT_ID(N'dbo.sp_GetFeeForTransport', N'P') IS NULL
+    EXEC('CREATE PROCEDURE dbo.sp_GetFeeForTransport AS BEGIN SET NOCOUNT ON; END');
+GO
+
+ALTER PROCEDURE [dbo].[sp_GetFeeForTransport]
+(
+    @RouteID INT = 0,
+    @SBranchID INT,
+    @SessionID INT = 0
+)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Session nahi di gayi ho to active/latest session select karega
+    IF ISNULL(@SessionID, 0) = 0
+    BEGIN
+        SELECT TOP 1
+            @SessionID = SessionID
+        FROM SessionMaster
+        WHERE SBranchID = @SBranchID
+        ORDER BY
+            SessionStatus DESC,
+            SessionStartDate DESC,
+            SessionID DESC;
+    END;
+
+    -- Route nahi diya gaya ho to branch ka first route select karega
+    IF ISNULL(@RouteID, 0) = 0
+    BEGIN
+        SELECT TOP 1
+            @RouteID = RouteID
+        FROM TransportRouteMaster
+        WHERE SBranchID = @SBranchID
+        ORDER BY RouteName, RouteID;
+    END;
+
+    DECLARE @SessionStartDate DATE;
+    DECLARE @PreviousSessionID INT;
+
+    SELECT
+        @SessionStartDate = SessionStartDate
+    FROM SessionMaster
+    WHERE SessionID = @SessionID
+      AND SBranchID = @SBranchID;
+
+    -- Selected session se turant previous session find karega
+    SELECT TOP 1
+        @PreviousSessionID = SessionID
+    FROM SessionMaster
+    WHERE SBranchID = @SBranchID
+      AND SessionID <> @SessionID
+      AND SessionEndDate < ISNULL(@SessionStartDate, '99991231')
+    ORDER BY SessionEndDate DESC, SessionID DESC;
+
+    /*
+        Current session me missing transport fee rows insert karega.
+
+        Amount priority:
+        1. Previous session ka same StopID
+        2. Previous session ka same Route/City/Area
+        3. TransportRouteDetails.Rate
+        4. Zero
+    */
+    INSERT INTO TransportFeeMaster
+    (
+        StopID,
+        RouteID,
+        CityID,
+        AreaID,
+        Amount,
+        SBranchID,
+        SessionID
+    )
+    SELECT
+        TRD.StopID,
+        TRD.RouteID,
+        TRD.CityID,
+        TRD.AreaID,
+        COALESCE(
+            PrevByStop.Amount,
+            PrevByArea.Amount,
+            TRD.Rate,
+            0
+        ),
+        @SBranchID,
+        @SessionID
+    FROM TransportRouteDetails TRD
+    INNER JOIN TransportRouteMaster TRM
+        ON TRM.RouteID = TRD.RouteID
+
+    OUTER APPLY
+    (
+        SELECT TOP 1
+            P.Amount
+        FROM TransportFeeMaster P
+        WHERE P.SBranchID = @SBranchID
+          AND P.SessionID = @PreviousSessionID
+          AND P.RouteID = TRD.RouteID
+          AND P.StopID = TRD.StopID
+        ORDER BY P.ID DESC
+    ) PrevByStop
+
+    OUTER APPLY
+    (
+        SELECT TOP 1
+            P.Amount
+        FROM TransportFeeMaster P
+        WHERE P.SBranchID = @SBranchID
+          AND P.SessionID = @PreviousSessionID
+          AND P.RouteID = TRD.RouteID
+          AND ISNULL(P.CityID, 0) = ISNULL(TRD.CityID, 0)
+          AND ISNULL(P.AreaID, 0) = ISNULL(TRD.AreaID, 0)
+        ORDER BY P.ID DESC
+    ) PrevByArea
+
+    WHERE TRM.SBranchID = @SBranchID
+      AND TRD.RouteID = @RouteID
+      AND NOT EXISTS
+      (
+          SELECT 1
+          FROM TransportFeeMaster TFM
+          WHERE TFM.SBranchID = @SBranchID
+            AND TFM.SessionID = @SessionID
+            AND TFM.RouteID = TRD.RouteID
+            AND TFM.StopID = TRD.StopID
+      );
+
+    -- Result set 1: Selected route ki transport fees
+    SELECT
+        TFM.ID,
+        TFM.StopID,
+        TFM.RouteID,
+        TRM.RouteName,
+        TFM.CityID,
+        CM.CityName,
+        TFM.AreaID,
+        AM.AreaName,
+        TFM.Amount,
+        TFM.SBranchID,
+        TFM.SessionID,
+        GETDATE() AS CreatedDate,
+        GETDATE() AS ModifiedDate
+    FROM TransportFeeMaster TFM
+    LEFT JOIN TransportRouteMaster TRM
+        ON TRM.RouteID = TFM.RouteID
+    LEFT JOIN CityMaster CM
+        ON CM.CityID = TFM.CityID
+    LEFT JOIN AreaMaster AM
+        ON AM.AreaID = TFM.AreaID
+    WHERE TFM.SBranchID = @SBranchID
+      AND TFM.SessionID = @SessionID
+      AND TFM.RouteID = @RouteID
+    ORDER BY TFM.ID, TFM.StopID;
+
+    -- Result set 2: Selected session
+    SELECT ISNULL(@SessionID, 0);
+
+    -- Result set 3: Branch sessions
+    SELECT
+        SessionID,
+        SessionStartDate,
+        SessionEndDate,
+        SessionStatus,
+        SessionName,
+        SBranchID
+    FROM SessionMaster
+    WHERE SBranchID = @SBranchID
+    ORDER BY SessionStartDate DESC, SessionID DESC;
+
+    -- Result set 4: Branch routes
+    SELECT
+        RouteID,
+        RouteName,
+        SBranchID
+    FROM TransportRouteMaster
+    WHERE SBranchID = @SBranchID
+    ORDER BY RouteName, RouteID;
+
+    -- Result set 5: Selected route
+    SELECT ISNULL(@RouteID, 0);
+
+    SET NOCOUNT OFF;
+END;
+GO

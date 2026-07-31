@@ -3714,6 +3714,8 @@ namespace SMEnterprise.Controllers
             //  return View(objModel);
             // return RedirectToAction("Students", "Account");
         }
+        [HttpPost]
+        [PermissionFilter]
         public ActionResult UpdateEmployeePassword(string ID = null, string employeeid = null, string UType= null)
         {
             string Password = ID;

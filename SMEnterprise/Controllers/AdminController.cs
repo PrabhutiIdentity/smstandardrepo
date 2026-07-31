@@ -1614,6 +1614,12 @@ namespace SMEnterprise.Controllers
         [PermissionFilter]
         public ActionResult ExamManagement(ExamPageModel Model = null)
         {
+            Model = Model ?? new ExamPageModel();
+            ViewBag.HasSearched = Model.SessionID > 0
+                && Model.ClassID > 0
+                && Model.EvaluationID > 0
+                && Model.GroupID > 0;
+
             if (Session["SBranchID"] == null)
             {
                 Session["SBranchID"] = 1;
