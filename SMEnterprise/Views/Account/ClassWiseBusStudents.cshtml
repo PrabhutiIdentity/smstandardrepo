@@ -61,6 +61,7 @@
                                     <label class="col-md-4 text-right">Class Section :</label>
                                     <div class="col-md-8">
                                         <select class="form-control" name="ID" id="ddlClassSections" onchange="$('#frmGetStudents').submit();">
+                                            <option value="0" @(Model.ID == 0 ? "selected" : "")>--All Class Section--</option>
                                             @foreach (ClassSectionModel el in Model.ClassSections)
                                             {
                                                 <option value="@el.SectionID" @(el.SectionID == Model.ID ? "selected" : "")>@el.ClassName @el.SectionName</option>
@@ -87,8 +88,8 @@
                                     <th>SR.No.</th>
                                     <th>Student Name </th>
                                     <th>StudentID</th>
-                                    @*<th>Class</th>
-        <th>Section</th>*@
+                                    <th>Class</th>
+                                    <th>Section</th>
                                     <th>Gender</th>
                                     <th>Father Name </th>
                                     <th>Mother Name </th>
@@ -116,13 +117,12 @@
                                                             <td>
                                                                 @c.StudentSID
                                                             </td>
-                                                            @*<td>
-            @c.ClassName
-        </td>
-        <td>
-
-            @c.SectionName
-        </td>*@
+                                                            <td>
+                                                                @c.ClassName
+                                                            </td>
+                                                            <td>
+                                                                @c.SectionName
+                                                            </td>
                                                             <td>
                                                                 @if (@c.Gender != 0)
                                                                 {
@@ -190,7 +190,8 @@
                 if ($("#tblCategory").length) {
                     $("#tblCategory").DataTable({
 
-                        bSort: false,
+                        "pageLength": 100,
+                        bSort: true,
                         dom: "Bfrtip",
                         buttons: [
                             {

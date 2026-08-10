@@ -1950,6 +1950,29 @@ WHERE StudentID = @StudentID AND SBranchID = @SBranchID";
                 return obj;
             }
         }
+
+        public bool IsFeeBackDateAllowed(int sBranchId)
+        {
+            using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
+            {
+                var paramater = new DynamicParameters();
+                paramater.Add("@SBranchID", sBranchId);
+
+                try
+                {
+                    return con.Query<bool>(
+                        "sp_IsFeeBackDateAllowed",
+                        paramater,
+                        commandType: CommandType.StoredProcedure).SingleOrDefault();
+                }
+                catch (SqlException ex) when (ex.Number == 2812)
+                {
+                    // Fail safely when the permission procedure is not deployed yet.
+                    return false;
+                }
+            }
+        }
+
         public List<FeePaymentModel> GetStudentFeePaymentsSessionwise(int StudentID, int SessionID)
         {
             using (SqlConnection con = new SqlConnection(CommonUsage.ConnectionString))
@@ -2022,6 +2045,62 @@ WHERE StudentID = @StudentID AND SBranchID = @SBranchID";
                     }
                     catch
                     { }
+                }
+
+                if (objModel.Employees != null && objModel.Employees.Count > 0)
+                {
+                    const string addressSql = @"SELECT EM.EmployeeID, EM.Padd_HouseNo, EM.Padd_Street, EM.Padd_Area,
+EM.Padd_Sector, EM.Padd_PinCode, EM.Padd_District, EM.Padd_State, EM.Padd_Country,
+EM.DesignationID, EM.MaritalStatus,
+COALESCE(
+    NULLIF(CONCAT_WS(', ', NULLIF(LTRIM(RTRIM(EM.Padd_HouseNo)), ''), NULLIF(LTRIM(RTRIM(EM.Padd_Street)), ''),
+        NULLIF(LTRIM(RTRIM(EM.Padd_Area)), ''), NULLIF(LTRIM(RTRIM(EM.Padd_Sector)), ''),
+        NULLIF(LTRIM(RTRIM(EM.Padd_District)), ''), NULLIF(LTRIM(RTRIM(EM.Padd_State)), ''),
+        NULLIF(LTRIM(RTRIM(EM.Padd_PinCode)), '')), ''),
+    NULLIF(CONCAT_WS(', ', NULLIF(LTRIM(RTRIM(EM.Cadd_HouseNo)), ''), NULLIF(LTRIM(RTRIM(EM.Cadd_Street)), ''),
+        NULLIF(LTRIM(RTRIM(AM.AreaName)), ''), NULLIF(LTRIM(RTRIM(EM.Cadd_Sector)), ''),
+        NULLIF(LTRIM(RTRIM(CM.CityName)), ''), NULLIF(LTRIM(RTRIM(SM.StateName)), ''),
+        NULLIF(LTRIM(RTRIM(EM.Cadd_PinCode)), '')), '')
+) AS CardAddress,
+COALESCE(NULLIF(LTRIM(RTRIM(EM.[Role])), ''), Designation.EmployeeTypeName, EmployeeType.EmployeeTypeName) AS [Role]
+FROM EmployeeMaster EM
+LEFT JOIN AreaMaster AM ON AM.AreaID = EM.Cadd_Area
+LEFT JOIN CityMaster CM ON CM.CityID = EM.Cadd_DistrictCode
+LEFT JOIN StateMaster SM ON SM.StateID = EM.Cadd_StateCode
+OUTER APPLY (SELECT TOP 1 ETM.EmployeeTypeName FROM EmployeeTypeMaster ETM
+             WHERE ETM.EmployeeTypeID = EM.DesignationID AND (ETM.SBranchID = 0 OR ETM.SBranchID = @SBranchID)
+             ORDER BY CASE WHEN ETM.SBranchID = @SBranchID THEN 0 ELSE 1 END) Designation
+OUTER APPLY (SELECT TOP 1 ETM.EmployeeTypeName FROM EmployeeTypeMaster ETM
+             WHERE ETM.EmployeeTypeID = EM.EmployeeType AND (ETM.SBranchID = 0 OR ETM.SBranchID = @SBranchID)
+             ORDER BY CASE WHEN ETM.SBranchID = @SBranchID THEN 0 ELSE 1 END) EmployeeType
+WHERE EM.SBranchID = @SBranchID AND EM.EmployeeID IN @EmployeeIDs";
+                    var employeeAddresses = con.Query<EmployeeModel>(addressSql, new
+                    {
+                        SBranchID = SBranchID,
+                        EmployeeIDs = objModel.Employees.Select(x => x.EmployeeID).ToArray()
+                    }).ToDictionary(x => x.EmployeeID);
+
+                    foreach (var employee in objModel.Employees)
+                    {
+                        EmployeeModel address;
+                        if (!employeeAddresses.TryGetValue(employee.EmployeeID, out address))
+                        {
+                            continue;
+                        }
+
+                        employee.Padd_HouseNo = address.Padd_HouseNo;
+                        employee.Padd_Street = address.Padd_Street;
+                        employee.Padd_Area = address.Padd_Area;
+                        employee.Padd_Sector = address.Padd_Sector;
+                        employee.Padd_PinCode = address.Padd_PinCode;
+                        employee.Padd_District = address.Padd_District;
+                        employee.Padd_State = address.Padd_State;
+                        employee.Padd_Country = address.Padd_Country;
+                        employee.CardAddress = address.CardAddress;
+                        employee.DesignationID = address.DesignationID;
+                        employee.MaritalStatus = address.MaritalStatus;
+                        employee.Role = address.Role;
+                    }
                 }
             }
             return objModel;
@@ -3651,6 +3730,7 @@ WHERE EmployeeID = @EmployeeID AND SBranchID = @SBranchID";
                     catch
                     { }
                 }
+
             }
             return objModel;
         }

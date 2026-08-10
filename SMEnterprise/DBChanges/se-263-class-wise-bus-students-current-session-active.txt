@@ -9,19 +9,6 @@ BEGIN
     DECLARE @CurrentDate DATE = CAST(GETDATE() AS DATE);
     DECLARE @SelectedSectionID INT = ISNULL(@SectionID, 0);
 
-    IF ISNULL(@SelectedSectionID, 0) = 0
-    BEGIN
-        SELECT TOP 1 @SelectedSectionID = CLS.ID
-        FROM dbo.ClassMaster CM
-        INNER JOIN dbo.Class_Sections CLS
-            ON CLS.ClassID = CM.ClassID
-        WHERE ISNULL(CM.SBranchID, 0) = @SBranchID
-          AND ISNULL(CM.Status, 0) = 1
-          AND ISNULL(CLS.Status, 0) = 1
-          AND (@ClassID = 0 OR ISNULL(CM.ClassID, 0) = @ClassID)
-        ORDER BY CM.SequenceNo, CM.ClassName, CLS.Name;
-    END
-
     ;WITH CurrentSession AS
     (
         SELECT TOP 1 SM.SessionID

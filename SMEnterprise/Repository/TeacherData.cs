@@ -367,18 +367,20 @@ namespace SMEnterprise.Repository
                     {
                         objModel.ClassID = multi.Read<int>().SingleOrDefault();
                         objModel.SectionID = multi.Read<int>().SingleOrDefault();
-                    objModel.SubjectID = multi.Read<int>().SingleOrDefault();
-                    objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
-                        objModel.IsLocked = multi.Read<int>().SingleOrDefault();
+                        objModel.SubjectID = multi.Read<int>().SingleOrDefault();
+                        objModel.EvaluationID = multi.Read<int>().SingleOrDefault();
+
+                        // Some deployed versions of the procedure end after EvaluationID.
+                        // Dapper disposes the GridReader as soon as the last result set is read.
+                        if (!multi.IsConsumed)
+                        {
+                            objModel.IsLocked = multi.Read<int>().SingleOrDefault();
+                        }
                     }
-                    try
+
+                    if (!multi.IsConsumed)
                     {
                         objModel.MarkingScheme = multi.Read<int>().SingleOrDefault();
-
-                    }
-                    catch
-                    {
-
                     }
                 }
             }

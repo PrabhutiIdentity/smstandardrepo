@@ -30,6 +30,7 @@
 	width: 53.98mm !important;
 	height: 85.6mm !important;
 	max-height: 85.6mm !important;
+	box-sizing: border-box;
 	float: left;
 	border: 1px solid #cfdbe3;
 	border-radius: 8px;
@@ -40,11 +41,13 @@
 	-webkit-print-color-adjust: exact;
 	print-color-adjust: exact;
 	overflow: hidden;
+	position: relative;
 }
 
 .eiv-card-table {
 	width: 100%;
-	height: 100%;
+	height: auto;
+	table-layout: fixed;
 	border-collapse: separate;
 	border-spacing: 0;
 }
@@ -96,8 +99,12 @@
 }
 
 .eiv-photo {
-	max-width: 15.5mm;
-	max-height: 17.5mm;
+	display: block;
+	width: 15mm !important;
+	height: 15mm !important;
+	max-width: 15mm;
+	max-height: 15mm;
+	object-fit: cover;
 	border-radius: 6px;
 	border: 1.5px solid #fff;
 	background: #fff;
@@ -122,11 +129,14 @@
 
 .eiv-sub-cell {
 	padding-top: 2px;
+	padding-bottom: 1px;
 	text-align: center;
-	font-size: 1.65mm;
-	letter-spacing: 0.45mm;
+	font-size: 1.9mm;
+	font-weight: 800;
+	line-height: 1.2;
+	letter-spacing: 0.35mm;
 	text-transform: uppercase;
-	color: #667f90;
+	color: #284f66;
 }
 
 .eiv-name-cell {
@@ -143,22 +153,22 @@
 }
 
 .eiv-session-inline {
-	margin-top: 2px;
-	font-size: 2.05mm;
-	font-weight: 700;
+	margin-top: 1px;
+	font-size: 2.25mm;
+	font-weight: 800;
 	letter-spacing: 0.04mm;
 	color: #5b7280;
 }
 
 .eiv-pill {
 	display: inline-block;
-	margin-top: 1px;
-	padding: 0.4mm 1.8mm;
+	margin-top: 1.5px;
+	padding: 0.5mm 2mm;
 	border-radius: 999px;
 	background-color: #eef6fb;
 	color: #0f5e8a;
-	font-size: 2.05mm;
-	font-weight: 700;
+	font-size: 2.2mm;
+	font-weight: 800;
 }
 
 .eiv-detail-row td {
@@ -184,6 +194,76 @@
 	text-align: left;
 }
 
+.eiv-details-qr-cell {
+	padding: 0.8mm 3.5mm 0.3mm;
+	vertical-align: top;
+}
+
+.eiv-details-qr-layout {
+	position: relative;
+	height: 17mm;
+	min-height: 17mm;
+	padding-right: 13mm;
+}
+
+.eiv-details-list {
+	position: relative;
+	width: 100%;
+	height: 17mm;
+}
+
+.eiv-detail-line {
+	display: grid !important;
+	grid-template-columns: 17mm minmax(0, 1fr);
+	column-gap: 1mm;
+	align-items: baseline;
+	position: absolute;
+	left: 0;
+	right: 0;
+	font-size: 2.35mm;
+	line-height: 1.15;
+	height: auto !important;
+	min-height: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	color: #35515f;
+}
+
+.eiv-detail-line:nth-child(1) { top: 0; }
+.eiv-detail-line:nth-child(2) { top: 3.7mm; }
+.eiv-detail-line:nth-child(3) { top: 7.4mm; }
+.eiv-detail-line:nth-child(4) { top: 11.1mm; }
+
+.eiv-detail-line span {
+	display: block;
+	margin: 0;
+	padding: 0;
+	font-size: inherit;
+	line-height: inherit;
+	color: #0f5e8a;
+	font-weight: 800;
+}
+
+.eiv-detail-line strong {
+	display: block;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	font-size: inherit;
+	line-height: inherit;
+	font-weight: 500;
+	text-align: left;
+	word-break: break-word;
+}
+
+.eiv-address-line {
+	font-size: 2.05mm;
+	line-height: 1.15;
+	margin-bottom: 0 !important;
+	max-height: 5.2mm;
+	overflow: hidden;
+}
+
 .eiv-qr-cell {
 	width: 34%;
 	padding-top: 2.5mm;
@@ -193,11 +273,18 @@
 }
 
 .eiv-sign-cell {
-	width: 66%;
-	padding-top: 2mm;
-	padding-right: 3.5mm;
-	padding-bottom: 1.5mm;
-	vertical-align: bottom;
+	display: none !important;
+}
+
+.eiv-card-table tfoot {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: table;
+	width: 100%;
+	height: 10mm;
+	table-layout: fixed;
 }
 
 .eiv-qr {
@@ -207,6 +294,13 @@
 	background: #fff;
 	border: 1px solid #d4dde4;
 	border-radius: 5px;
+}
+
+.eiv-details-qr-layout > .eiv-qr {
+	position: absolute;
+	top: 0;
+	right: 0;
+	margin: 0;
 }
 
 .eiv-sign-box {
@@ -234,7 +328,9 @@
 }
 
 .eiv-foot-meta {
-	padding: 2.3mm 1.8mm;
+	height: 10mm;
+	box-sizing: border-box;
+	padding: 1.5mm 1.8mm;
 	text-align: center;
 	font-size: 2.1mm;
 	line-height: 1.28;
@@ -291,16 +387,21 @@
 .sidv-photo-wrap {
 	position: relative;
 	display: inline-block;
+	width: 15mm;
+	height: 19mm;
 	padding-bottom: 4.5mm;
+	box-sizing: border-box;
 }
 
 .sidv-photo-logo {
 	position: absolute;
 	left: 50%;
 	bottom: 0;
-	transform: translate(-50%, 42%);
-	width: 8.8mm;
-	height: 8.8mm;
+	transform: translate(-50%, 38%);
+	width: 10mm !important;
+	height: 10mm !important;
+	max-width: 10mm;
+	max-height: 10mm;
 	object-fit: contain;
 	border-radius: 50%;
 	border: 2px solid #ffffff;

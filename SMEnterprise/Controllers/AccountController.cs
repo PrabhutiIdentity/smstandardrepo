@@ -1012,8 +1012,12 @@ namespace SMEnterprise.Controllers
                 objModel.Month = objModel.QDate.Month;
                 objModel.Year = objModel.QDate.Year;
             }
-            objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
+            int loggedInBranchId = PermissionManager.GetLoggedInUser().SBranchID;
+            objModel.SBranchID = loggedInBranchId;
             objModel = await objAccountData.GetFeePaymentDetailsNew2(objModel);
+            // The permission is read from the current school's database; no branch ID is hard-coded.
+            objModel.SBranchID = loggedInBranchId;
+            objModel.AllowFeeBackDate = objAccountData.IsFeeBackDateAllowed(loggedInBranchId);
             objModel.FeeDate = CommonUsage.GetCurrentDate();
             return PartialView("_FeePaymentDetailsPartialNew2", objModel);
         }
@@ -1059,31 +1063,23 @@ namespace SMEnterprise.Controllers
         {
             try
             {
-                objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-                //  objModel.QDate = CommonUsage.GetCurrentDate();
-                //   objModel.QDate = CommonUsage.ConvertToDateTime(objModel.PaymentDate.ToString());
+                UserModel loggedInUser = PermissionManager.GetLoggedInUser();
+                objModel.UserID = loggedInUser.UserID;
+                objModel.SBranchID = loggedInUser.SBranchID;
 
+                DateTime currentDate = CommonUsage.GetCurrentDate().Date;
+                bool allowFeeBackDate = objAccountData.IsFeeBackDateAllowed(objModel.SBranchID);
 
-                //string FeeDate= objModel.FeeDate.ToShortDateString();
-                //if (FeeDate.Length>0)
-                //{
-                //    objModel.FeeDate = objModel.FeeDate;
-                //}
-                //else
-                //{
-                //    objModel.FeeDate = CommonUsage.GetCurrentDate();
-                //}
-                objModel.UserID = PermissionManager.GetLoggedInUser().UserID;
-                objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
-                DateTime currentDate = CommonUsage.GetCurrentDate();
-                if (objModel.PaymentDate != DateTime.MinValue && objModel.PaymentDate.Date <= currentDate.Date)
-                {
-                    objModel.PaymentDate = objModel.PaymentDate.Date;
-                }
-                else
-                {
-                    objModel.PaymentDate = currentDate;
-                }
+                // Backdating is intentionally limited to enabled branches and cash payments.
+                // Always validate here even when the date field is disabled in the browser.
+                bool isValidBackDate = allowFeeBackDate
+                    && objModel.PaymentMode == 0
+                    && objModel.PaymentDate != DateTime.MinValue
+                    && objModel.PaymentDate.Date <= currentDate;
+
+                objModel.PaymentDate = isValidBackDate
+                    ? objModel.PaymentDate.Date
+                    : currentDate;
                 objModel.FeeDate = objModel.PaymentDate;
                 objModel.QDate = objModel.PaymentDate;
                 objModel.Day = objModel.QDate.Day;
@@ -3410,7 +3406,7 @@ namespace SMEnterprise.Controllers
         {
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
             List<SMSSendTaskModel> Model = objAccountData.GetSMSSendingHistory(SBranchID);
-            return View(Model);
+            return View("~/Views/Admin/SMSHistory.cshtml", Model);
         }
         [PermissionFilter]
         public ActionResult InsertSMSTemplate(SMSTemplateModel objData)
@@ -3450,8 +3446,7 @@ namespace SMEnterprise.Controllers
             SMSConfigirationModel SMSConfigiration = (SMSConfigirationModel)Session["SMSConfiguration"];
             DeligateTasks objDT = new DeligateTasks();
             objDT.StartSending(objModel, SMSConfigiration);
-            //return Redirect("/Account/SendSMS/"+ objModel.SMSSendingID);
-            return Json(1, JsonRequestBehavior.AllowGet);
+            return RedirectToAction("SMSHistory", "Account");
         }
         [PermissionFilter]
         public ActionResult CreateSMS(SMSCreateModel objModel)
@@ -3474,14 +3469,14 @@ namespace SMEnterprise.Controllers
             objModel.SBranchID = PermissionManager.GetLoggedInUser().SBranchID;
             objAccountData.GetCreateSMSPageData(objModel);
 
-            return View(objModel);
+            return View("~/Views/Admin/CreateSMS.cshtml", objModel);
         }
         [PermissionFilter]
         public ActionResult SendSMS(string id = null)
         {
             int SMSSendingID = CommonUsage.ConvertToInt(id);
             SMSSendTaskModel data = objAccountData.GetSMSSendingDetails(SMSSendingID);
-            return View(data);
+            return View("~/Views/Admin/SendSMS.cshtml", data);
         }
         [PermissionFilter]
         public ActionResult GetRecieverList(SMSCreateModel objData)

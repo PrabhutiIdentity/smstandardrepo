@@ -150,6 +150,7 @@ namespace SMEnterprise.Models
         public string Padd_District { get; set; }
         public string Padd_State { get; set; }
         public string Padd_Country { get; set; }
+        public string CardAddress { get; set; }
         public string Cadd_HouseNo { get; set; }
         public string Cadd_Street { get; set; }
         public int Cadd_Area { get; set; }

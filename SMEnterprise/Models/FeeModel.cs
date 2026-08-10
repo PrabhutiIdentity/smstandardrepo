@@ -580,6 +580,8 @@ namespace SMEnterprise.Models
         public int SectionID { get; set; }
         public int GroupID { get; set; }
         public int SBranchID { get; set; }
+        // Controlled from the branch's Master Setup setting; no branch ID is hard-coded.
+        public bool AllowFeeBackDate { get; set; }
         public int PayeeType { get; set; }
         public int PaymentType { get; set; }
         public string StudentSID { get; set; }

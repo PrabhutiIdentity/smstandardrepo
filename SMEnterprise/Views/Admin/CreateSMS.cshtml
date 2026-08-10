@@ -1,7 +1,10 @@
 ﻿﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var smsController = ViewContext.RouteData.Values["controller"].ToString();
+    Layout = smsController.Equals("Account", StringComparison.OrdinalIgnoreCase)
+        ? "~/Views/Shared/_AccountLayout.cshtml"
+        : "~/Views/Shared/_AdminLayout.cshtml";
 }
 @section IncludeCss
 {
@@ -10,6 +13,21 @@
     <link rel="stylesheet" href="@Url.Content("~/Content/select2/select2.min.css")">
     <link href="@Url.Content("~/css/newStyle.min.css")" rel="stylesheet" />
     <link href="@Url.Content("~/Content/iCheck/skins/flat/green.css")" rel="stylesheet">
+    @if (smsController.Equals("Account", StringComparison.OrdinalIgnoreCase))
+    {
+        <style>
+            /* Gentelella's global div.box rule is intended for small table widgets.
+               The SMS form is a full page panel, so undo that rule in Account only. */
+            .sms-config-page div.box {
+                height: auto;
+                min-height: 0;
+                padding: 10px;
+                overflow: visible;
+                border: 0;
+                background-color: #fff;
+            }
+        </style>
+    }
 
 }
 @model SMEnterprise.Models.SMSCreateModel
@@ -85,7 +103,7 @@
         content: '';
     }
 </style>
-<section class="content">
+<section class="content sms-config-page">
     <!-- Small boxes (Stat box) -->
     <div class="row">
         <div class="col-xs-12">
@@ -97,7 +115,7 @@
                 </div>
                 <div class="box-body">
 
-                    @using (Html.BeginForm("CreateSMS", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetRecieverList", @class = "form-horizontal" }))
+                    @using (Html.BeginForm("CreateSMS", smsController, FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmGetRecieverList", @class = "form-horizontal" }))
                     {
 
                         <div class="row">
@@ -190,7 +208,7 @@
                         </div>
                     }
 
-                    @using (Html.BeginForm("SendSMSList", "Admin", FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSendSMS", @class = "form-horizontal" }))
+                    @using (Html.BeginForm("SendSMSList", smsController, FormMethod.Post, new { role = "form", enctype = "multipart/form-data", @ID = "frmSendSMS", @class = "form-horizontal" }))
                     {
 
                         <div class="row" style="text-align: center;">
@@ -293,7 +311,7 @@
             //}
             //$('#ddlClasses').val(selectedCats);
             $.ajax({
-                url: "@Url.Action("GetRecieverList", "Account")",
+                url: "@Url.Action("GetRecieverList", smsController)",
                 type: 'POST',
                 data: JSON.stringify({
                     SelectedSMSType: $('#ddlSelectedSMSType').val(),
@@ -420,31 +438,6 @@
                 ShowClosingNotification('SMS Template', 'Please select an SMS Template First!!!!', 'error');
                 return false;
             }
-        }
-        var IsSendByMe = 0;
-        $('#frmSendSMS').submit(function (e) {
-
-            IsSendByMe = 1;
-            e.preventDefault();
-            ShowClosingNotification('Adding....', 'Please wait the Task is being added', 'info');
-            //do some verification
-            $.ajax({
-                url: '/api/SMSApi/SendSMSList',
-                type: 'POST',
-                dataType: 'json',
-                data: $(this).serialize(),
-                success: function (data, textStatus, xhr) {
-                    console.log(data);
-                    SuccessAddingTask(0);
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    console.log(textStatus);
-                }
-            });
-        });
-        function SuccessAddingTask(id) {
-
-            window.location = "/Admin/SMSHistory";
         }
     </script>
 }

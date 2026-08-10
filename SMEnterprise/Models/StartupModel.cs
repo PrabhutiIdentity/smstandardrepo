@@ -21,6 +21,7 @@ namespace SMEnterprise.Models
         public int SMSForAbsentStudents { get; set; }
         public int FeePaymentReminderDate { get; set; }
         public int FeePaymentReminderSMS { get; set; }
+        public int AllowFeeBackDate { get; set; }
         public int MapServerKeyToken { get; set; }
 
         public string FeePaymentReminderSMSTemplate { get; set; }

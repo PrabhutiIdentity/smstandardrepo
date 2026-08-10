@@ -290,14 +290,12 @@
             <div class="col-md-3">
 
                 @*@SMEnterprise.Repository.CommonUsage.GetCurrentDate().ToString("dd MMM, yyyy")*@
-                @{
-                    var editablePaymentDateBranches = new[] { 0 };
-                    var allowPaymentDateChange = editablePaymentDateBranches.Contains(Model.SBranchID);
-                }
                 Fee Date
-                @if (allowPaymentDateChange)
+                @if (Model.AllowFeeBackDate)
                 {
                     <input type="date" value="@Model.FeeDate.ToString("yyyy-MM-dd")" name="FeeDate" id="dtDate" class="form-control" max="@Model.FeeDate.ToString("yyyy-MM-dd")" />
+                    @* The server also verifies this permission and limits backdating to cash payments. *@
+                    <small class="text-muted">Back date is available for cash payment only.</small>
                 }
                 else
                 {

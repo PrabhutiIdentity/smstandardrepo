@@ -7,7 +7,7 @@
 @section IncludeCss
 {
     <title>Employee ID Cards Vertical</title>
-    <link rel="stylesheet" href="@Url.Content("~/css/employeecards.css?v=20260521-3")">
+    <link rel="stylesheet" href="@Url.Content("~/css/employeecards.css?v=20260809-10")">
 }
 
 <div class="">
@@ -55,7 +55,16 @@
                             var role = string.IsNullOrWhiteSpace(emp.Role) ? employeeTypeName : emp.Role;
                             var prefix = emp.Gender == 0 ? "Mr." : (emp.MaritalStatus == 1 ? "Mrs." : "Miss");
                             var displayName = prefix + " " + emp.EmployeeName;
-                            var qrPayload = "EMP ID: " + emp.EmployeeSID + "\nName: " + displayName + "\nRole: " + role + "\nContact: " + contact + "\nSchool: " + (Model.SBranchDetails != null ? Model.SBranchDetails.BranchSchoolName : "");
+                            var addressParts = new List<string>();
+                            if (!string.IsNullOrWhiteSpace(emp.Padd_HouseNo)) { addressParts.Add(emp.Padd_HouseNo); }
+                            if (!string.IsNullOrWhiteSpace(emp.Padd_Street)) { addressParts.Add(emp.Padd_Street); }
+                            if (!string.IsNullOrWhiteSpace(emp.Padd_Area)) { addressParts.Add(emp.Padd_Area); }
+                            if (!string.IsNullOrWhiteSpace(emp.Padd_Sector)) { addressParts.Add(emp.Padd_Sector); }
+                            if (!string.IsNullOrWhiteSpace(emp.Padd_District)) { addressParts.Add(emp.Padd_District); }
+                            if (!string.IsNullOrWhiteSpace(emp.Padd_State)) { addressParts.Add(emp.Padd_State); }
+                            if (!string.IsNullOrWhiteSpace(emp.Padd_PinCode)) { addressParts.Add(emp.Padd_PinCode); }
+                            var employeeAddress = !string.IsNullOrWhiteSpace(emp.CardAddress) ? emp.CardAddress : (addressParts.Count == 0 ? "-" : string.Join(", ", addressParts));
+                            var qrPayload = "EMP ID: " + emp.EmployeeSID + "\nName: " + displayName + "\nRole: " + role + "\nContact: " + contact + "\nAddress: " + employeeAddress + "\nSchool: " + (Model.SBranchDetails != null ? Model.SBranchDetails.BranchSchoolName : "");
                             var qrUrl = "https://quickchart.io/qr?size=160&text=" + HttpUtility.UrlEncode(qrPayload);
                             var schoolName = Model.SBranchDetails != null ? Model.SBranchDetails.BranchSchoolName : "School Name";
                             var logoFile = Model.SBranchDetails != null ? Model.SBranchDetails.Logo : "";
@@ -63,7 +72,7 @@
                             var branchAddress = Model.SBranchDetails != null ? Model.SBranchDetails.Address : "";
                             var branchContact = Model.SBranchDetails != null ? Model.SBranchDetails.ContactNo : "";
                             var branchEmail = Model.SBranchDetails != null ? Model.SBranchDetails.EmailID : "";
-                            <div class="eiv-searchable" data-search="@((emp.EmployeeName + " " + emp.EmployeeSID + " " + employeeTypeName + " " + role + " " + contact).ToLowerInvariant())">
+                            <div class="eiv-searchable" data-search="@((emp.EmployeeName + " " + emp.EmployeeSID + " " + employeeTypeName + " " + role + " " + contact + " " + employeeAddress).ToLowerInvariant())">
                                 <div class="eiv-card">
                                         <table class="eiv-card-table">
                                             <thead>
@@ -77,7 +86,7 @@
                                                 <tr>
                                                     <td colspan="2" class="eiv-photo-cell">
                                                         <div class="sidv-photo-wrap">
-                                                            <img class="eiv-photo" style="width:52px;height:50px;" onerror="return OnImageError(this,@(emp.Gender));" alt="Employee Photo" src="@Url.Content("~/Images/EmployeeImage/")@(emp.EmployeeID)_@emp.Photo" />
+                                                            <img class="eiv-photo" onerror="return OnImageError(this,@(emp.Gender));" alt="Employee Photo" src="@Url.Content("~/Images/EmployeeImage/")@(emp.EmployeeID)_@emp.Photo" />
                                                             @if (!string.IsNullOrWhiteSpace(logoFile))
                                                             {
                                                                 <img class="sidv-photo-logo" alt="School Logo" src="@Url.Content("~/Images/SBranchLogo/")@(Model.SBranchDetails != null ? Model.SBranchDetails.SBranchID : 0)_@logoFile" />
@@ -99,26 +108,27 @@
                                                 <td colspan="2" class="eiv-name-cell">
                                                     <div class="eiv-name">@displayName</div>
                                                     <div class="eiv-session-inline">@(!string.IsNullOrWhiteSpace(ViewBag.CurrentSessionName as string) ? (string)ViewBag.CurrentSessionName : "-")</div>
-                                                    <div class="eiv-pill">@employeeTypeName</div>
+                                                    <div class="eiv-pill">@role</div>
                                                 </td>
-                                            </tr>
-                                            <tr class="eiv-detail-row">
-                                                <td class="eiv-label-cell">Employee ID</td>
-                                                <td class="eiv-value-cell">@emp.EmployeeSID</td>
-                                            </tr>
-                                            <tr class="eiv-detail-row">
-                                                <td class="eiv-label-cell">Contact No</td>
-                                                <td class="eiv-value-cell">@contact</td>
-                                            </tr>
-                                            <tr class="eiv-detail-row">
-                                                <td class="eiv-label-cell">Blood Group</td>
-                                                <td class="eiv-value-cell">@(string.IsNullOrWhiteSpace(emp.BloodGroup) ? "-" : emp.BloodGroup)</td>
                                             </tr>
                                             <tr>
-                                                <td class="eiv-qr-cell">
-                                                    <img class="eiv-qr" alt="QR Code" src="@qrUrl" />
+                                                <td colspan="2" class="eiv-details-qr-cell">
+                                                    <div class="eiv-details-qr-layout">
+                                                        <div class="eiv-details-list">
+                                                            <div class="eiv-detail-line"><span>Employee ID</span><strong>@emp.EmployeeSID</strong></div>
+                                                            <div class="eiv-detail-line"><span>Contact No</span><strong>@contact</strong></div>
+                                                            <div class="eiv-detail-line"><span>Blood Group</span><strong>@(string.IsNullOrWhiteSpace(emp.BloodGroup) ? "-" : emp.BloodGroup)</strong></div>
+                                                            @if (employeeAddress != "-")
+                                                            {
+                                                                <div class="eiv-detail-line eiv-address-line"><span>Address</span><strong>@employeeAddress</strong></div>
+                                                            }
+                                                        </div>
+                                                        <img class="eiv-qr" alt="QR Code" src="@qrUrl" />
+                                                    </div>
                                                 </td>
-                                                <td class="eiv-sign-cell">
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" class="eiv-sign-cell">
                                                     <div class="eiv-sign-box">
                                                         @if (!string.IsNullOrWhiteSpace(signFile))
                                                         {

@@ -1,0 +1,35 @@
+/*
+    Reads the branch-specific AllowFeeBackDate value saved from Admin > Master Setup.
+    Safe default: missing settings and values other than 1 are treated as disabled.
+*/
+IF OBJECT_ID('dbo.sp_IsFeeBackDateAllowed', 'P') IS NULL
+BEGIN
+    EXEC('CREATE PROCEDURE dbo.sp_IsFeeBackDateAllowed AS BEGIN SET NOCOUNT ON; END');
+END;
+GO
+
+ALTER PROCEDURE dbo.sp_IsFeeBackDateAllowed
+    @SBranchID int
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @AllowFeeBackDate nvarchar(10) = '0';
+
+    -- Use the latest row if an older database contains duplicate setting records.
+    SELECT TOP 1 @AllowFeeBackDate = ISNULL(Details, '0')
+    FROM dbo.MasterSettings
+    WHERE SBranchID = @SBranchID
+      AND Type = 'AllowFeeBackDate'
+    ORDER BY ID DESC;
+
+    -- Missing setting and values other than 1 default to No/false.
+    SELECT CAST(CASE WHEN @AllowFeeBackDate = '1' THEN 1 ELSE 0 END AS bit) AS AllowFeeBackDate;
+END;
+GO
+
+/*
+    After deploying this procedure, use Admin > Master Setup for the selected branch.
+    The existing sp_UpdateMasterSettingList procedure saves the AllowFeeBackDate Type/Value.
+    If no setting exists, backdating remains disabled by default.
+*/

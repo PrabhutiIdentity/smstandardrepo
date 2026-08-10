@@ -1,7 +1,10 @@
 ﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var smsController = ViewContext.RouteData.Values["controller"].ToString();
+    Layout = smsController.Equals("Account", StringComparison.OrdinalIgnoreCase)
+        ? "~/Views/Shared/_AccountLayout.cshtml"
+        : "~/Views/Shared/_AdminLayout.cshtml";
 }
 @section IncludeCss
 {
@@ -149,7 +152,7 @@
         <small>Control panel</small>
     </h1>
     <ol class="breadcrumb">
-        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li><a href="@Url.Action("Dashboard", smsController)"><i class="fa fa-dashboard"></i> Dashboard</a></li>
         <li class="active">Session / Class Strength Matrix</li>
     </ol>
 </section>

@@ -139,6 +139,9 @@ namespace SMEnterprise.Controllers
         public ActionResult MasterSetup()
         {
             StartupModel objModel = (StartupModel)Session["StartupModel"];
+            int sBranchId = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
+            // Load this branch-specific switch from MasterSettings instead of hard-coding a branch ID.
+            objModel.AllowFeeBackDate = objAccountData.IsFeeBackDateAllowed(sBranchId) ? 1 : 0;
             return View(objModel);
         }
         [PermissionFilter]
@@ -218,6 +221,11 @@ namespace SMEnterprise.Controllers
                 else if (m.Type == "FeePaymentNotificationSMSTemplate")
                 {
                     objStartupModel.FeePaymentNotificationSMSTemplate = m.Value;
+                }
+                else if (m.Type == "AllowFeeBackDate")
+                {
+                    // Keep the in-session Master Setup model in sync with the selected Yes/No value.
+                    objStartupModel.AllowFeeBackDate = CommonUsage.ConvertToInt(m.Value);
                 }
             }
             int SBranchID = CommonUsage.ConvertToInt(Session["SBranchID"].ToString());
@@ -3071,8 +3079,7 @@ namespace SMEnterprise.Controllers
             SMSConfigirationModel SMSConfigiration = (SMSConfigirationModel)Session["SMSConfiguration"];
             DeligateTasks objDT = new DeligateTasks();
             objDT.StartSending(objModel, SMSConfigiration);
-            //return Redirect("/Account/SendSMS/"+ objModel.SMSSendingID);
-            return Json(1, JsonRequestBehavior.AllowGet);
+            return RedirectToAction("SMSHistory", "Admin");
         }
         [PermissionFilter]
         public ActionResult CreateSMS(SMSCreateModel objModel)

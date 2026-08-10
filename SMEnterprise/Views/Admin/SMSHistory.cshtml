@@ -1,7 +1,10 @@
 ﻿@using SMEnterprise.Models;
 @using System.Web.Mvc;
 @{
-    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var smsController = ViewContext.RouteData.Values["controller"].ToString();
+    Layout = smsController.Equals("Account", StringComparison.OrdinalIgnoreCase)
+        ? "~/Views/Shared/_AccountLayout.cshtml"
+        : "~/Views/Shared/_AdminLayout.cshtml";
 }
 @section IncludeCss
 {
@@ -13,6 +16,26 @@
             $('#tr_' + SMSSendingID).find('.tdPer').html((CompletedCount * 100 / TotalCount).toFixed(0) + '%');
         }
     </script>
+    @if (smsController.Equals("Account", StringComparison.OrdinalIgnoreCase))
+    {
+        <style>
+            /* Account layout defines div.box as a 100px scrolling table widget.
+               SMS History needs a full-height page container. */
+            .sms-history-page div.box {
+                height: auto;
+                min-height: 0;
+                padding: 10px;
+                overflow: visible;
+                border: 0;
+                background-color: #fff;
+            }
+
+            .sms-history-page .fixed-th-table-wrapper {
+                overflow-x: auto;
+                overflow-y: visible;
+            }
+        </style>
+    }
 }
 <style>
     .btn {
@@ -53,13 +76,13 @@
         <small>SMS panel</small>
     </h1>
     <ol class="breadcrumb">
-        <li><a href="/Admin/Dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
+        <li><a href="@Url.Action("Dashboard", smsController)"><i class="fa fa-dashboard"></i> Dashboard</a></li>
         <li class="active">SMS History</li>
     </ol>
 </section>
 
 <!-- Main content -->
-<section class="content">
+<section class="content sms-history-page">
     <!-- Small boxes (Stat box) -->
     <div class="row">
         <div class="col-xs-12">
@@ -131,7 +154,7 @@
                                             </table>
                                         </td>
                                         <td>
-                                            <a class="btn btn-success" href="/Admin/SendSMS/@c.SMSSendingID">Details</a>
+                                            <a class="btn btn-success" href="@Url.Action("SendSMS", smsController, new { id = c.SMSSendingID })">Details</a>
                                         </td>
                                     </tr>
                                 }
